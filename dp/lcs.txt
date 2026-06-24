@@ -1,0 +1,240 @@
+LCS / STRING DP VARIANTS FOR INTERVIEWS
+=======================================
+
+1. Longest Common Subsequence (LCS)
+-----------------------------------
+Problem:
+Given two strings, find the length of the longest common subsequence.
+
+Examples:
+- LeetCode 1143
+- Print LCS
+
+Concept:
+dp[i][j] = LCS of prefixes ending at i and j
+
+--------------------------------------------------
+
+2. Print / Reconstruct LCS
+--------------------------
+Problem:
+Return the actual LCS string instead of only its length.
+
+Examples:
+- Print one LCS
+- Print all LCS (rare)
+
+Concept:
+Backtrack through the DP table.
+
+--------------------------------------------------
+
+3. Longest Common Substring
+---------------------------
+Problem:
+Find the longest common contiguous substring.
+
+Examples:
+- Longest Common Substring
+
+Concept:
+If characters mismatch:
+dp[i][j] = 0
+
+Difference from LCS:
+Characters must be contiguous.
+
+--------------------------------------------------
+
+4. Shortest Common Supersequence (SCS)
+--------------------------------------
+Problem:
+Find the shortest string containing both strings as subsequences.
+
+Examples:
+- LeetCode 1092
+
+Formula:
+SCS Length = n + m - LCS
+
+Often asks to print the actual SCS.
+
+--------------------------------------------------
+
+5. Minimum Insertions & Deletions to Convert A -> B
+---------------------------------------------------
+Problem:
+Convert string A into B using only insertions and deletions.
+
+Formula:
+deletions = n - LCS
+insertions = m - LCS
+
+Very common interview problem.
+
+--------------------------------------------------
+
+6. Longest Palindromic Subsequence (LPS)
+----------------------------------------
+Problem:
+Find the longest palindromic subsequence.
+
+Examples:
+- LeetCode 516
+
+Trick:
+LPS = LCS(s, reverse(s))
+
+--------------------------------------------------
+
+7. Minimum Insertions to Make Palindrome
+----------------------------------------
+Problem:
+Minimum insertions required to make a string palindrome.
+
+Examples:
+- LeetCode 1312
+
+Formula:
+answer = n - LPS
+
+--------------------------------------------------
+
+8. Delete Operations for Two Strings
+-------------------------------------
+Problem:
+Minimum deletions needed to make two strings equal.
+
+Examples:
+- LeetCode 583
+
+Formula:
+(n - LCS) + (m - LCS)
+
+--------------------------------------------------
+
+9. Distinct Subsequences
+------------------------
+Problem:
+Count ways string A can form string B.
+
+Examples:
+- LeetCode 115
+
+Concept:
+2D DP on strings.
+Similar structure to LCS but different transitions.
+
+Very important.
+
+--------------------------------------------------
+
+10. Edit Distance
+-----------------
+Problem:
+Convert string A to B using:
+- Insert
+- Delete
+- Replace
+
+Examples:
+- LeetCode 72
+
+Concept:
+Classic 2D String DP.
+
+Must know.
+
+--------------------------------------------------
+
+11. Sequence Pattern Matching
+-----------------------------
+Problem:
+Check whether one string is a subsequence of another.
+
+Examples:
+- Is A a subsequence of B?
+
+Solutions:
+- Two pointers
+- LCS
+
+Easy interview question.
+
+--------------------------------------------------
+
+12. Longest Repeating Subsequence
+---------------------------------
+Problem:
+Find longest subsequence appearing twice.
+
+Trick:
+LCS(s, s)
+
+Condition:
+i != j
+
+Classic interview problem.
+
+--------------------------------------------------
+
+13. Interleaving String
+-----------------------
+Problem:
+Can strings A and B form string C?
+
+Examples:
+- LeetCode 97
+
+Concept:
+2D DP on two strings.
+
+Frequently asked.
+
+--------------------------------------------------
+
+14. Wildcard / Regex Matching
+-----------------------------
+Problems:
+- LeetCode 44 (Wildcard Matching)
+- LeetCode 10 (Regex Matching)
+
+Concept:
+DP on two strings.
+
+Patterns:
+*  -> any sequence
+?  -> single character
+
+--------------------------------------------------
+
+INTERVIEW PRIORITY
+==================
+
+Tier 1 (Must Master)
+--------------------
+1. LCS
+2. Print LCS
+3. Longest Common Substring
+4. Edit Distance
+5. Distinct Subsequences
+6. Longest Palindromic Subsequence
+7. Minimum Insertions to Make Palindrome
+8. Shortest Common Supersequence
+
+Tier 2 (Good to Know)
+---------------------
+9. Longest Repeating Subsequence
+10. Interleaving String
+11. Wildcard Matching
+
+Tier 3 (Rare)
+-------------
+12. Print All LCS
+13. K-String LCS
+14. Weighted LCS Variants
+
+Rule of Thumb:
+Master the first 8 problems and you'll cover the vast majority
+of LCS-based string DP questions asked in internships and
+software engineering interviews.
