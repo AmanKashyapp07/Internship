@@ -37,6 +37,15 @@ void dfs(int u, int p, int d) {
     }
 }
 
+int kthAncestor(int u, int k) {
+    for (int j = 0; j < LOG; j++) {
+        if ((k >> j) & 1) {
+            u = up[u][j];
+        }
+    }
+    return u;
+}
+
 int get_lca(int u, int v) {
     if (depth[u] < depth[v]) {
         swap(u, v);

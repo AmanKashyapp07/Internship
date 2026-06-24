@@ -14,6 +14,7 @@
 #include <numeric>
 #include <queue>
 #include <set>
+#include <numeric>
 #include <stack>
 #include <string>
 #include <tuple>
@@ -120,10 +121,17 @@ vector<int> rotateVectorLeft(const vector<int>& v, int k) {
     return rotated;
 }
 
-int maxInVector = *max_element(all(v));
-int minInVector = *min_element(all(v));
-int sumOfVector = accumulate(all(v), 0);
+int maxInVector(const vector<int>& v) {
+    return *max_element(all(v));
+}
 
+int minInVector(const vector<int>& v) {
+    return *min_element(all(v));
+}
+
+int sumOfVector(const vector<int>& v) {
+    return accumulate(all(v), 0);
+}
 
 /*-------------------------------------------------------------*/
 /* PRIME CHECK */
