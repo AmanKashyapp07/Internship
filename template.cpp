@@ -49,7 +49,6 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
 int main()
 {
     ios_base::sync_with_stdio(false);

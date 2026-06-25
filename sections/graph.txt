@@ -110,7 +110,7 @@ Leetcode
 • 787. Cheapest Flights Within K Stops
 • 1976. Number of Ways to Arrive at Destination
 • 1928. Minimum Cost to Reach Destination in Time
-• 505. The Maze II - Pending
+• 505. The Maze II - 
 • 1334. Find the City With the Smallest Number of Neighbors
 
 CSES
@@ -259,71 +259,12 @@ CSES
 13. ADVANCED GRAPH
 ==========================================================
 
-Euler Path
-----------
-Leetcode
-• 332. Reconstruct Itinerary
-
-CSES
-• Mail Delivery
-• Teleporters Path
-
------------------------
-
-Maximum Flow
-------------
-
-Leetcode
-• 1820. Maximum Number of Accepted Invitations (matching)
-• 1947. Maximum Compatibility Score Sum (bitmask alternative)
-
-CSES
-• Download Speed
-• School Dance
-• Police Chase
-
------------------------
-
-Hamiltonian / Bitmask
+Hamiltonian / Bitmask - Pending
 ---------------------
 
 Leetcode
-• 847. Shortest Path Visiting All Nodes
+• 847. Shortest Path Visiting All Nodes - PENDING
 
 CSES
 • Hamiltonian Flights
 
-==========================================================
-MOST IMPORTANT CSES GRAPH PROBLEMS
-==========================================================
-
-1. Counting Rooms
-2. Labyrinth
-3. Monsters
-4. Message Route
-5. Building Roads
-6. Building Teams
-7. Round Trip
-8. Round Trip II
-9. Course Schedule
-10. Shortest Routes I
-11. Shortest Routes II
-12. High Score
-13. Flight Discount
-14. Flight Routes
-15. Investigation
-16. Road Reparation
-17. Road Construction
-18. Longest Flight Route
-19. Game Routes
-20. Planets and Kingdoms
-21. Coin Collector
-22. Necessary Roads
-23. Necessary Cities
-24. Tree Diameter
-25. Company Queries I
-26. Company Queries II
-27. Distance Queries
-28. Hamiltonian Flights
-29. Mail Delivery
-30. Download Speed
