@@ -48,7 +48,7 @@ Leetcode
 • 207. Course Schedule
 • 210. Course Schedule II
 • 684. Redundant Connection
-• 685. Redundant Connection II
+• 685. Redundant Connection II - Pending
 • 802. Find Eventual Safe States
 
 CSES
@@ -66,7 +66,7 @@ Leetcode
 • 210. Course Schedule II
 • 1136. Parallel Courses
 • 2050. Parallel Courses III
-• 1203. Sort Items by Groups Respecting Dependencies
+• 1203. Sort Items by Groups Respecting Dependencies - Pending
 
 CSES
 -----
@@ -110,7 +110,7 @@ Leetcode
 • 787. Cheapest Flights Within K Stops
 • 1976. Number of Ways to Arrive at Destination
 • 1928. Minimum Cost to Reach Destination in Time
-• 505. The Maze II
+• 505. The Maze II - Pending
 • 1334. Find the City With the Smallest Number of Neighbors
 
 CSES
