@@ -5,6 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
+            "forcedInclude": [
+                "${workspaceFolder}/.vscode/forced_include.h"
+            ],
             "defines": [],
             "compilerPath": "/opt/homebrew/bin/g++-15",
             "cStandard": "gnu17",

@@ -8,6 +8,8 @@
             "args": [
                 "-std=c++17",
                 "-g",
+                "-include",
+                "${workspaceFolder}/.vscode/forced_include.h",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
