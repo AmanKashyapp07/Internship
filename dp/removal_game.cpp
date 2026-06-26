@@ -1,8 +1,19 @@
 /**
- * Problem: Removal Game (https://cses.fi/problemset/task/1097)
- * Find the maximum score of player 1 in a game where elements are removed from ends.
- * Time: O(N^2) time, O(N^2) space.
+ * CSES 1097 - Removal Game
+ *
+ * Description:
+ * Find the maximum score player 1 can achieve from an array `a` if players take turns removing numbers from ends.
+ *
+ * Approach:
+ * - Interval Dynamic Programming.
+ * - Let `dp[i][j]` be the maximum score difference (player1 - player2) for subarray `a[i...j]`.
+ * - Transition: `dp[i][j] = max(a[i] - dp[i+1][j], a[j] - dp[i][j-1])`.
+ * - Player 1 score = `(sum + dp[0][n-1]) / 2`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

@@ -1,8 +1,17 @@
 /**
- * Problem: Longest String Chain (https://leetcode.com/problems/longest-string-chain/)
- * Find the length of the longest string chain where deleting a character from a word forms the previous word.
- * Time: O(N * L^2) time where L is maximum word length, O(N * L) space.
+ * LeetCode 1048 - Longest String Chain
+ *
+ * Description:
+ * Return the length of the longest possible word chain where deleting exactly one character from wordA makes it equal to wordB.
+ *
+ * Approach:
+ * - Sort the words by length.
+ * - Dynamic programming using a hash map: `dp[word] = max(dp[word], dp[predecessor] + 1)`.
+ *
+ * Time Complexity: O(n * L^2) where L is max word length.
+ * Space Complexity: O(n * L)
  */
+
 #include <vector>
 #include <string>
 #include <unordered_map>

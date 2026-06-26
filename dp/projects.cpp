@@ -1,8 +1,20 @@
 /**
- * Problem: Projects (https://cses.fi/problemset/task/1140)
- * Find the maximum reward from non-overlapping projects.
- * Time: O(N log N) time, O(N) space.
+ * CSES 1140 - Projects
+ *
+ * Description:
+ * There are n projects, each with start/end days and reward. Find the maximum reward from non-overlapping projects.
+ *
+ * Approach:
+ * - Sort the projects by start day.
+ * - Use Dynamic Programming with Memoization + Binary Search (`upper_bound`).
+ * - For each project `idx`:
+ *   - Option 1 (Skip): `solve(idx+1)`.
+ *   - Option 2 (Take): `reward + solve(next_available_idx)` where `next_available_idx` is found using binary search on start days > current project end day.
+ *
+ * Time Complexity: O(n log n)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

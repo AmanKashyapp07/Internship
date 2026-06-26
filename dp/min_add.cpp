@@ -1,8 +1,22 @@
 /**
- * Problem: Minimum Add to Make Parentheses Valid (https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/)
- * Find the minimum number of parentheses to add to make the string valid.
- * Time: O(N) time, O(1) space.
+ * LeetCode 921 - Minimum Add to Make Parentheses Valid
+ *
+ * Description:
+ * A parentheses string is valid if it is empty, can be written as AB, or is of the form (A).
+ * Given a string s, return the minimum number of parentheses we must add to make s valid.
+ *
+ * Approach:
+ * - Greedy approach tracking balance.
+ * - Maintain `balanced` (count of unmatched open parentheses) and `count` (number of insertions needed).
+ * - For each character:
+ *   - If `(`, increment `balanced`.
+ *   - If `)`, decrement `balanced`. If it drops below 0, increment `count` and reset `balanced = 0`.
+ * - Total additions needed = `count + balanced`.
+ *
+ * Time Complexity: O(n)
+ * Space Complexity: O(1)
  */
+
 #include <iostream>
 #include <string>
 using namespace std;

@@ -1,8 +1,21 @@
 /**
- * Problem: Counting Numbers (Digit DP Variant) (https://cses.fi/problemset/task/2220)
- * Count numbers in range [a, b] where no two adjacent digits are equal.
- * Time: O(log10(B) * 10 * 2 * 2) time, O(log10(B)) space.
+ * CSES 2220 - Counting Numbers (Digit DP Variant)
+ *
+ * Description:
+ * Count the number of integers in the range [a, b] where no two adjacent digits are equal.
+ *
+ * Approach:
+ * - Digit Dynamic Programming with Memoization.
+ * - Solve for `[0, x]` using state `(idx, tight, last, started)`:
+ *   - `idx`: current position in string representation.
+ *   - `tight`: tight constraint flag.
+ *   - `last`: value of the last digit.
+ *   - `started`: flag indicating if number construction has started (non-zero digit placed).
+ *
+ * Time Complexity: O(log10(b) * 10)
+ * Space Complexity: O(log10(b))
  */
+
 #include <iostream>
 #include <string>
 #include <cstring>

@@ -1,8 +1,19 @@
 /**
- * Problem: Longest Common Substring (https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1)
- * Find the length of the longest common substring of two strings.
- * Time: O(N * M) time, O(N * M) space.
+ * GeeksforGeeks - Longest Common Substring
+ *
+ * Description:
+ * Given two strings S1 and S2, find the length of the longest common substring.
+ *
+ * Approach:
+ * - 2D dynamic programming.
+ * - Let `dp[i][j]` be the length of the longest common suffix of `S1[0...i-1]` and `S2[0...j-1]`.
+ * - Transition: `dp[i][j] = dp[i-1][j-1] + 1` if `S1[i-1] == S2[j-1]`, else `0`.
+ * - The answer is the maximum value in the DP table.
+ *
+ * Time Complexity: O(n * m) where n = len(S1) and m = len(S2).
+ * Space Complexity: O(n * m)
  */
+
 #include <string>
 #include <vector>
 #include <algorithm>

@@ -1,8 +1,19 @@
 /**
- * Problem: Money Sums (https://cses.fi/problemset/task/1745)
- * Find all possible sums that can be formed using a given set of coins.
- * Time: O(N * Sum) time, O(Sum) space.
+ * CSES 1745 - Money Sums
+ *
+ * Description:
+ * Given n coins with positive values, find all possible sums that can be formed using the coins.
+ *
+ * Approach:
+ * - 0/1 Knapsack style dynamic programming / tabulation.
+ * - Let `dp[x]` be a boolean indicating if sum `x` is possible.
+ * - Initialize `dp[0] = true` and all other sums as `false`.
+ * - Iterate through each coin, and update the DP table backwards (from `totalSum` down to `coin`) to prevent reusing the same coin.
+ *
+ * Time Complexity: O(n * sum)
+ * Space Complexity: O(sum)
  */
+
 #include <iostream>
 #include <vector>
 using namespace std;

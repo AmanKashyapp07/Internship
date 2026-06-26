@@ -1,8 +1,20 @@
 /**
- * Problem: Largest Divisible Subset (https://leetcode.com/problems/largest-divisible-subset/)
- * Find the largest subset of numbers such that every pair of elements satisfies divisibility.
- * Time: O(N^2) time, O(N) space.
+ * LeetCode 368 - Largest Divisible Subset
+ *
+ * Description:
+ * Given a set of distinct positive integers nums, return the largest subset such that every pair (si, sj)
+ * in this subset satisfies: si % sj == 0 or sj % si == 0.
+ *
+ * Approach:
+ * - Sort the array first so we only need to check one-way divisibility.
+ * - Let `dp[i]` denote the size of the largest divisible subset ending at index `i`.
+ * - Transition: `dp[i] = max(dp[j] + 1)` for all `j < i` where `nums[i] % nums[j] == 0`.
+ * - Maintain a parent pointer array to reconstruct the actual subset.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n)
  */
+
 #include <vector>
 #include <algorithm>
 using namespace std;

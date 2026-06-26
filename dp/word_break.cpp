@@ -1,8 +1,19 @@
 /**
- * Problem: Word Break (https://leetcode.com/problems/word-break/)
- * Determine if a string can be segmented into space-separated dictionary words.
- * Time: O(N^2) time, O(N + D) space.
+ * LeetCode 139 - Word Break
+ *
+ * Description:
+ * Given a string s and a dictionary of strings wordDict, return true if s can be segmented
+ * into a space-separated sequence of one or more dictionary words.
+ *
+ * Approach:
+ * - Dynamic Programming with Memoization.
+ * - Let `solve(idx)` check if suffix `s[idx...]` can be segmented.
+ * - Iterate `j` from `idx` to `n-1`, check if substring `s[idx...j]` exists in `wordDict` and recursively check `solve(j+1)`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n + d) where d is total size of wordDict.
  */
+
 #include <vector>
 #include <string>
 #include <unordered_set>

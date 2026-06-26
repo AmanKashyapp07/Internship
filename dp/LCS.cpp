@@ -1,8 +1,20 @@
 /**
- * Problem: Longest Common Subsequence (https://leetcode.com/problems/longest-common-subsequence/)
- * Compute LCS length and reconstruct the LCS string.
- * Time: O(N * M) time, O(N * M) space.
+ * LeetCode 1143 - Longest Common Subsequence
+ *
+ * Description:
+ * Given two strings text1 and text2, return the length of their longest common subsequence.
+ *
+ * Approach:
+ * - Dynamic programming using both Tabulation and Memoization styles.
+ * - In Tabulation:
+ *   - Let `dp[i][j]` represent the LCS length of `text1[0...i-1]` and `text2[0...j-1]`.
+ *   - Transition: `dp[i][j] = dp[i-1][j-1] + 1` if characters match, else `max(dp[i-1][j], dp[i][j-1])`.
+ *   - Reconstruct the LCS string by backtracking from `(n, m)`.
+ *
+ * Time Complexity: O(n * m)
+ * Space Complexity: O(n * m)
  */
+
 #include <iostream>
 #include <vector>
 #include <string>

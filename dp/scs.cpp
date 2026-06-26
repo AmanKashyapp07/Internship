@@ -1,8 +1,20 @@
 /**
- * Problem: Shortest Common Supersequence (https://leetcode.com/problems/shortest-common-supersequence/)
- * Return the shortest string that has both str1 and str2 as subsequences.
- * Time: O(N * M) time, O(N * M) space.
+ * LeetCode 1092 - Shortest Common Supersequence
+ *
+ * Description:
+ * Given two strings str1 and str2, return the shortest string that has both str1 and str2 as subsequences.
+ *
+ * Approach:
+ * - Solve using Longest Common Subsequence (LCS).
+ * - First build the LCS DP table.
+ * - Backtrack from `(n, m)` to reconstruct the SCS string:
+ *   - If characters match, add to SCS once and move diagonally.
+ *   - Else, add the character that corresponds to the larger DP value direction and move.
+ *
+ * Time Complexity: O(n * m)
+ * Space Complexity: O(n * m)
  */
+
 #include <string>
 #include <vector>
 #include <algorithm>

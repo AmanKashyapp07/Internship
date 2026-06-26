@@ -1,8 +1,19 @@
 /**
- * Problem: Partition to K Equal Sum Subsets (Bitmask DP) (https://leetcode.com/problems/partition-to-k-equal-sum-subsets/)
- * Partition an array into k subsets with equal sum.
- * Time: O(2^N * N) time, O(2^N) space.
+ * LeetCode 698 - Partition to K Equal Sum Subsets (Bitmask DP)
+ *
+ * Description:
+ * Given an integer array nums and an integer k, return true if it is possible to partition this array
+ * into k subsets whose sums are all equal.
+ *
+ * Approach:
+ * - Solve using Bitmask Dynamic Programming.
+ * - State `dp[mask]` stores a boolean indicating if subset `mask` can be partitioned into subsets of sum `target`.
+ * - Transition: From subset `mask`, try adding an unvisited element `nums[i]` such that the current sum modulo `target` plus `nums[i]` does not exceed `target`.
+ *
+ * Time Complexity: O(2^n * n)
+ * Space Complexity: O(2^n)
  */
+
 #include <vector>
 #include <numeric>
 #include <algorithm>

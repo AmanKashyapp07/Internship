@@ -1,8 +1,21 @@
 /**
- * Problem: Best Time to Buy and Sell Stock III (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/)
- * Find the maximum profit from at most 2 transactions on stock prices.
- * Time: O(N) time, O(N) space.
+ * LeetCode 123 - Best Time to Buy and Sell Stock III
+ *
+ * Description:
+ * Find the maximum profit you can achieve from at most two transactions on stock prices.
+ *
+ * Approach:
+ * - 3D Dynamic Programming with Memoization.
+ * - State `(idx, count, hold)`:
+ *   - `idx`: current price index.
+ *   - `count`: number of transactions remaining (up to 2).
+ *   - `hold`: boolean (0 or 1) indicating if we currently hold a stock.
+ * - Transition: buy, sell, or skip.
+ *
+ * Time Complexity: O(n)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

@@ -1,8 +1,20 @@
 /**
- * Problem: Partition to K Equal Sum Subsets (Backtracking) (https://leetcode.com/problems/partition-to-k-equal-sum-subsets/)
- * Partition an array into k subsets with equal sum.
- * Time: O(K^N) worst-case, O(N) space.
+ * LeetCode 698 - Partition to K Equal Sum Subsets (Backtracking)
+ *
+ * Description:
+ * Given an integer array nums and an integer k, return true if it is possible to partition this array
+ * into k subsets whose sums are all equal.
+ *
+ * Approach:
+ * - Solve using recursive backtracking.
+ * - Sort `nums` in descending order to optimize pruning.
+ * - Maintain an array of bucket sums. Try placing the current element in each of the k buckets.
+ * - Prune redundant searches (e.g. skip duplicate empty buckets).
+ *
+ * Time Complexity: O(k^n) worst-case.
+ * Space Complexity: O(n) recursion stack.
  */
+
 #include <vector>
 #include <numeric>
 #include <algorithm>

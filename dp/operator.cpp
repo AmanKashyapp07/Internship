@@ -1,8 +1,19 @@
 /**
- * Problem: Expression Add Operators (https://leetcode.com/problems/expression-add-operators/)
- * Add operators (+, -, *) to digits string to evaluate to target.
- * Time: O(4^N) worst-case time, O(N) space.
+ * LeetCode 282 - Expression Add Operators
+ *
+ * Description:
+ * Given a string num containing only digits and an integer target, return all possibilities to insert
+ * the binary operators '+', '-', and/or '*' between the digits of num so that the value evaluates to target.
+ *
+ * Approach:
+ * - Backtracking / depth-first search.
+ * - Traverse the digit string, selecting numeric prefixes.
+ * - Keep track of: current evaluated value, last operand value (to handle multiplication precedence correctly), and the constructed expression.
+ *
+ * Time Complexity: O(4^n)
+ * Space Complexity: O(n) recursion stack.
  */
+
 #include <vector>
 #include <string>
 using namespace std;

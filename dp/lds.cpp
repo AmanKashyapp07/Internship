@@ -1,8 +1,19 @@
 /**
  * Problem: Longest Decreasing Subsequence (LDS)
- * Find the length of the longest decreasing subsequence in an array.
- * Time: O(N^2) time, O(N) space.
+ *
+ * Description:
+ * Given an array of integers, find the length of the longest decreasing subsequence.
+ *
+ * Approach:
+ * - 1D dynamic programming.
+ * - Let `dp[i]` represent the length of the LDS ending at index `i`.
+ * - Transition: `dp[i] = max(dp[j] + 1)` for all `j < i` where `arr[j] > arr[i]`.
+ * - Initialize all `dp[i] = 1`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

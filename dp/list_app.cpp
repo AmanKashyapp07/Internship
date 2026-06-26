@@ -1,8 +1,18 @@
 /**
- * Problem: Maximum Sum Increasing Subsequence (MSIS)
- * Find the maximum sum of an increasing subsequence of a given array.
- * Time: O(N^2) time, O(N) space.
+ * GeeksforGeeks - Maximum Sum Increasing Subsequence (MSIS)
+ *
+ * Description:
+ * Given an array of n positive integers, find the sum of maximum sum increasing subsequence of the given array.
+ *
+ * Approach:
+ * - Dynamic programming using Memoization or Tabulation.
+ * - Let `dp[i]` be the maximum sum of an increasing subsequence ending at index `i`.
+ * - Transition: `dp[i] = max(dp[j] + arr[i])` for all `j < i` where `arr[j] < arr[i]`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

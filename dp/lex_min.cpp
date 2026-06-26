@@ -1,8 +1,19 @@
 /**
  * Problem: Lexicographically Minimal Grid Path
- * Find the lexicographically smallest path in a grid from top-left to bottom-right.
- * Time: O(N^2) time, O(N^2) space.
+ *
+ * Description:
+ * Find the lexicographically smallest path from top-left to bottom-right in an n x n grid of characters.
+ *
+ * Approach:
+ * - Use a BFS/layer-by-layer traversal.
+ * - At step `d` (from `0` to `2*n-2`), maintain a list of valid reachable cells.
+ * - Find the minimum character among all neighbors to the right and down.
+ * - Filter the next queue layer to only include cells containing this minimal character.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
  */
+
 #include <iostream>
 #include <vector>
 #include <string>

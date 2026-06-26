@@ -1,8 +1,19 @@
 /**
- * Problem: Delete Operation for Two Strings (https://leetcode.com/problems/delete-operation-for-two-strings/)
- * Find the minimum number of deletions required to make both strings equal.
- * Time: O(N * M) time, O(N * M) space.
+ * LeetCode 583 - Delete Operation for Two Strings
+ *
+ * Description:
+ * Given two strings word1 and word2, return the minimum number of steps required to make word1 and word2 the same,
+ * where in each step you can delete one character in either string.
+ *
+ * Approach:
+ * - Solve using Longest Common Subsequence (LCS).
+ * - Let `lcs_len` be the length of the LCS of word1 and word2.
+ * - The answer is `len(word1) + len(word2) - 2 * lcs_len`.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
  */
+
 #include <string>
 #include <vector>
 #include <algorithm>

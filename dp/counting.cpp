@@ -1,8 +1,21 @@
 /**
- * Problem: Counting Numbers (https://cses.fi/problemset/task/2220)
- * Count numbers in range [a, b] where no two adjacent digits are equal.
- * Time: O(log10(B) * 10 * 2 * 2) time, O(log10(B)) space.
+ * CSES 2220 - Counting Numbers
+ *
+ * Description:
+ * Count the number of integers in the range [a, b] where no two adjacent digits are equal.
+ *
+ * Approach:
+ * - Digit Dynamic Programming with Memoization.
+ * - Solve for `[0, x]` using state `(idx, last, tight, leading)`:
+ *   - `idx`: current digit index.
+ *   - `last`: value of the previous digit.
+ *   - `tight`: boolean indicating if current digits are restricted by string boundary.
+ *   - `leading`: boolean indicating if we are still processing leading zeros.
+ *
+ * Time Complexity: O(log10(b) * 10)
+ * Space Complexity: O(log10(b))
  */
+
 #include <iostream>
 #include <string>
 #include <cstring>

@@ -1,8 +1,22 @@
 /**
- * Problem: Elevator Rides (https://cses.fi/problemset/task/1653)
- * Find the minimum number of elevator rides to move n people with weight limit x.
- * Time: O(2^N * N) time, O(2^N) space.
+ * CSES 1653 - Elevator Rides
+ *
+ * Description:
+ * There are n people who want to get to the top of a building using an elevator with weight limit x.
+ * Find the minimum number of elevator rides.
+ *
+ * Approach:
+ * - Bitmask Dynamic Programming.
+ * - Let `dp[mask]` be a pair `{rides, last_ride_weight}` representing the optimal state when subset `mask` of people have been moved.
+ * - Transition: For each person `i` not in `mask`:
+ *   - If `last_ride_weight + weight[i] <= x`, we can add them to the last ride: `{rides, last_ride_weight + weight[i]}`.
+ *   - Else, we start a new ride: `{rides + 1, weight[i]}`.
+ *   - Take the lexicographical minimum of the pairs.
+ *
+ * Time Complexity: O(2^n * n)
+ * Space Complexity: O(2^n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

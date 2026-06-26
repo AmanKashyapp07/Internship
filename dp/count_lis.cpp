@@ -1,8 +1,22 @@
 /**
- * Problem: Number of Longest Increasing Subsequences (https://leetcode.com/problems/number-of-longest-increasing-subsequence/)
- * Find the total number of longest increasing subsequences in an array.
- * Time: O(N^2) time, O(N) space.
+ * LeetCode 673 - Number of Longest Increasing Subsequence
+ *
+ * Description:
+ * Given an integer array nums, return the number of longest increasing subsequences.
+ *
+ * Approach:
+ * - Dynamic programming with two arrays:
+ *   - `len[i]` stores the length of LIS ending at index `i`.
+ *   - `count[i]` stores the number of LIS of length `len[i]` ending at index `i`.
+ * - For each element `nums[i]`, iterate through predecessors `nums[j]`:
+ *   - If `nums[j] < nums[i]`:
+ *     - If `len[j] + 1 > len[i]`, update `len[i] = len[j] + 1` and reset `count[i] = count[j]`.
+ *     - If `len[j] + 1 == len[i]`, add `count[j]` to `count[i]`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

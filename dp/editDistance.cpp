@@ -1,8 +1,21 @@
 /**
- * Problem: Edit Distance (https://leetcode.com/problems/edit-distance/)
- * Find the minimum number of operations to convert word1 to word2.
- * Time: O(N * M) time, O(N * M) space.
+ * LeetCode 72 - Edit Distance
+ *
+ * Description:
+ * Given two strings word1 and word2, return the minimum number of operations required to convert word1 to word2.
+ * You have three operations: insert, delete, or replace a character.
+ *
+ * Approach:
+ * - Dynamic programming with Memoization.
+ * - Let `solve(i, j)` be the minimum operations to convert `s[i...]` to `t[j...]`.
+ * - Transition:
+ *   - If `s[i] == t[j]`, cost is `solve(i+1, j+1)`.
+ *   - Else, take `1 + min({solve(i, j+1), solve(i+1, j), solve(i+1, j+1)})` (insert, delete, replace).
+ *
+ * Time Complexity: O(m * n) where m = len(word1) and n = len(word2).
+ * Space Complexity: O(m * n)
  */
+
 #include <string>
 #include <vector>
 #include <algorithm>

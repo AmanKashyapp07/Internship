@@ -1,8 +1,19 @@
 /**
- * Problem: Longest Increasing Subsequence (https://cses.fi/problemset/task/1145)
- * Find the length of the longest increasing subsequence.
- * Time: O(N log N) time, O(N) space.
+ * CSES 1145 - Longest Increasing Subsequence
+ *
+ * Description:
+ * Given an array of n integers, find the length of the longest increasing subsequence.
+ *
+ * Approach:
+ * - O(n log n) dynamic programming using binary search.
+ * - Maintain a `tails` array where `tails[i]` stores the smallest tail of all increasing subsequences of length `i+1` found so far.
+ * - For each element `x`, use `lower_bound` to find its placement in `tails` and update or append it.
+ * - The LIS length is the size of the `tails` array.
+ *
+ * Time Complexity: O(n log n)
+ * Space Complexity: O(n)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

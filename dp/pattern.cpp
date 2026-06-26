@@ -1,8 +1,20 @@
 /**
- * Problem: Wildcard Matching (https://leetcode.com/problems/wildcard-matching/)
- * Implement wildcard pattern matching with support for '?' and '*'.
- * Time: O(N * M) time, O(N * M) space.
+ * LeetCode 44 - Wildcard Matching
+ *
+ * Description:
+ * Given an input string s and a pattern p, implement wildcard pattern matching with support for '?' and '*'.
+ *
+ * Approach:
+ * - Dynamic programming with Memoization.
+ * - Let `helper(i, j)` return if `s[i...]` matches `p[j...]`.
+ * - Transition:
+ *   - If `p[j] == '*'`, we can match 0 characters (`helper(i, j+1)`) or 1+ characters (`helper(i+1, j)`).
+ *   - If `p[j] == '?'` or `p[j] == s[i]`, match character: `helper(i+1, j+1)`.
+ *
+ * Time Complexity: O(len(s) * len(p))
+ * Space Complexity: O(len(s) * len(p))
  */
+
 #include <vector>
 #include <string>
 using namespace std;

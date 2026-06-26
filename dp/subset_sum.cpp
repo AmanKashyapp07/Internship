@@ -1,8 +1,20 @@
 /**
- * Problem: Two Sets II (https://cses.fi/problemset/task/1093)
- * Count the number of ways to partition numbers 1..n into two sets of equal sum.
- * Time: O(N * Target) time, O(Target) space.
+ * CSES 1093 - Two Sets II
+ *
+ * Description:
+ * Find the number of ways to partition numbers 1..n into two sets of equal sum.
+ *
+ * Approach:
+ * - Let `target = sum / 2`. If sum is odd, answer is 0.
+ * - Unbounded/0-1 Knapsack style DP.
+ * - Let `dp[w]` be the number of ways to form sum `w` using subsets of `1..n-1`.
+ * - Transition: `dp[w] = (dp[w] + dp[w - x]) % MOD`.
+ * - We fix the last element `n` in one of the sets to avoid double counting, hence only iterating up to `n-1`.
+ *
+ * Time Complexity: O(n * target)
+ * Space Complexity: O(target)
  */
+
 #include <iostream>
 #include <vector>
 using namespace std;

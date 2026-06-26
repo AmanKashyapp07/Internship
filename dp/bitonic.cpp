@@ -1,8 +1,21 @@
 /**
- * Problem: Longest Bitonic Sequence (https://practice.geeksforgeeks.org/problems/longest-bitonic-subsequence0824/1)
- * Find the length of the longest subsequence that first increases then decreases.
- * Time: O(N^2) time, O(N^2) space.
+ * GeeksforGeeks - Longest Bitonic Subsequence
+ *
+ * Description:
+ * Given an array of positive integers, find the length of the longest subsequence
+ * that is first increasing, then decreasing (bitonic).
+ *
+ * Approach:
+ * - Use dynamic programming / memoization.
+ * - `solve(idx, prev, turned)` computes LBS from `idx` with predecessor index `prev` and `turned` boolean flag (0 if still increasing, 1 if decreasing).
+ * - Transition:
+ *   - If not turned, we can transition to turned = 1 (start decreasing) or stay turned = 0 (continue increasing) if `nums[idx] > nums[prev]`.
+ *   - If turned, we can only append if `nums[idx] < nums[prev]`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
  */
+
 #include <vector>
 #include <algorithm>
 using namespace std;

@@ -1,8 +1,20 @@
 /**
- * Problem: Distinct Subsequences (https://leetcode.com/problems/distinct-subsequences/)
- * Find the number of distinct subsequences of s which equals t.
- * Time: O(M * N) time, O(M * N) space.
+ * LeetCode 115 - Distinct Subsequences
+ *
+ * Description:
+ * Given two strings s and t, return the number of distinct subsequences of s which equals t.
+ *
+ * Approach:
+ * - Dynamic programming with Memoization.
+ * - Let `solve(i, j)` return the number of distinct subsequences of `s[i...]` matching `t[j...]`.
+ * - Transition:
+ *   - If `s[i] == t[j]`, we can either match them: `solve(i+1, j+1)` or skip `s[i]`: `solve(i+1, j)`.
+ *   - If `s[i] != t[j]`, we must skip `s[i]`: `solve(i+1, j)`.
+ *
+ * Time Complexity: O(m * n) where m = len(s) and n = len(t).
+ * Space Complexity: O(m * n)
  */
+
 #include <vector>
 #include <string>
 using namespace std;
