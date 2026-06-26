@@ -1,15 +1,17 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 834 - Sum of Distances in Tree
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * There is an undirected tree with n nodes. Return an array answer of length n where
+ * answer[i] is the sum of the distances between the i-th node and all other nodes.
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Use a post-order DFS to compute subtree sizes and initial sum of distances for the root node (node 0).
+ * - Use a pre-order DFS to calculate the distance sums for all other nodes in O(1) time per node:
+ *   `ans[child] = ans[parent] - subtree_size[child] + (n - subtree_size[child])`.
+ *
+ * Time Complexity: O(n)
+ * Space Complexity: O(n)
  */
 
 #include <algorithm>

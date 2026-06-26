@@ -1,24 +1,20 @@
 /**
- * Hamiltonian Path (Bitmask DP)
+ * CSES 1690 - Hamiltonian Flights
  *
- * State:
- * dp[mask][u] = number of ways to reach node u
- *               after visiting exactly the nodes in mask.
+ * Description:
+ * Find the number of paths from city 1 to city n in a directed graph that visit
+ * every city exactly once. Return the count modulo 10^9 + 7.
  *
- * Transition:
- * For every edge u -> v,
- * if v is not visited,
- *     dp[mask | (1 << v)][v] += dp[mask][u]
+ * Approach:
+ * - Solve using Bitmask Dynamic Programming.
+ * - Let `dp[mask][u]` denote the number of paths ending at node `u` visiting the subset of nodes in `mask`.
+ * - Initialize `dp[1][0] = 1` (starting at node 0).
+ * - Transition: For each mask and node `u`, if `dp[mask][u] > 0`, transition to all unvisited neighbors `v` by updating the mask.
  *
- * Base:
- * dp[1 << start][start] = 1
- *
- * Answer:
- * dp[(1 << n) - 1][end]
- *
- * Time:  O((V + E) * 2^V)
- * Space: O(V * 2^V)
+ * Time Complexity: O(n^2 * 2^n)
+ * Space Complexity: O(n * 2^n)
  */
+
 #include <algorithm>
 #include <array>
 #include <climits>

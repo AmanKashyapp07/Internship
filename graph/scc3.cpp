@@ -1,10 +1,20 @@
 /**
- * Problem: Coin Collector (https://cses.fi/problemset/task/1686)
- * Condense directed graph into a DAG of SCC components, then find the maximum weight path.
- * It means we can use Kosaraju's algorithm to find the strongly connected components (SCCs) of the graph, then we can build a new graph where each SCC is a single node, and there is an edge from one SCC to another if there is an edge in the original graph from any node in the first SCC to any node in the second SCC. This new graph will be a Directed Acyclic Graph (DAG). We can then perform a topological sort on this DAG and use dynamic programming to find the maximum weight path.
- * Time: O(V + E) time, O(V + E) space.
-
+ * CSES 1686 - Coin Collector
+ *
+ * Description:
+ * Each room has some coins. Find the maximum coins you can collect by traversing rooms.
+ * You can choose where to start and end.
+ *
+ * Approach:
+ * - Condense the directed graph into a DAG of Strongly Connected Components (SCC) using Kosaraju's algorithm.
+ * - The sum of coins of all nodes in an SCC forms the weight of the SCC node.
+ * - Build the condensed DAG where edges exist between different SCC components.
+ * - Compute the maximum weight path on the DAG using DP and Topological Sort.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

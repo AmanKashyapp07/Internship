@@ -1,3 +1,20 @@
+/**
+ * CSES - Functional Graph Cycle Detection
+ *
+ * Description:
+ * Given a functional graph where each node has exactly one outgoing edge,
+ * detect a cycle and print the cycle vertices.
+ *
+ * Approach:
+ * - Perform Depth First Search (DFS) on the graph.
+ * - Keep track of visiting states: 0 (unvisited), 1 (visiting), 2 (visited).
+ * - When we follow a transition to a node with state 1, a cycle is detected.
+ * - Follow the next pointers to reconstruct the cycle.
+ *
+ * Time Complexity: O(V)
+ * Space Complexity: O(V)
+ */
+
 #include <bits/stdc++.h>
 using namespace std;
 

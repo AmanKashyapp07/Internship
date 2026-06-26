@@ -1,3 +1,19 @@
+/**
+ * LeetCode 505 - The Maze II
+ *
+ * Description:
+ * Find the shortest distance for a ball to travel from start to destination in a maze grid.
+ * The ball can go through empty spaces but won't stop until hitting a wall.
+ *
+ * Approach:
+ * - Dijkstra's algorithm.
+ * - State represents the coordinate `(r, c)`.
+ * - Relax distances by sliding the ball in all 4 directions as far as possible before hitting a wall.
+ * - Maintain distances in a 2D array and a min-heap priority queue.
+ *
+ * Time Complexity: O(m * n * max(m, n))
+ * Space Complexity: O(m * n)
+ */
 
 #include <algorithm>
 #include <array>

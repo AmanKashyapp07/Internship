@@ -1,3 +1,22 @@
+/**
+ * LeetCode 1101 - The Earliest Moment When Everyone Become Friends
+ *
+ * Description:
+ * There are n people and a list of logs containing `[timestamp, personA, personB]`.
+ * Friends relationship is transitive. Return the earliest timestamp when everyone is connected.
+ *
+ * Approach:
+ * - Sort the logs chronologically by timestamp.
+ * - Initialize a Disjoint Set Union (DSU) of size n.
+ * - Keep a counter of connected components, starting at n.
+ * - Iterate through logs, unioning the two people.
+ * - If a union succeeds, decrement the components count.
+ * - Return the timestamp when components count becomes 1.
+ *
+ * Time Complexity: O(L * log(L) + L * alpha(V)) where L is the number of logs.
+ * Space Complexity: O(n)
+ */
+
 class DSU
 {
     vector<int> parent, rank;

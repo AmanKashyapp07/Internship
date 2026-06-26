@@ -1,8 +1,20 @@
 /**
- * Problem: Round Trip (https://cses.fi/problemset/task/1669)
- * Find a cycle of length at least 3 (4 vertices in path) in an undirected graph.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1669 - Round Trip
+ *
+ * Description:
+ * Find a cycle of length at least 3 (having at least 4 vertices in the path) in an undirected graph.
+ * Print the sequence of vertices in the cycle.
+ *
+ * Approach:
+ * - Use Depth First Search (DFS) on the undirected graph.
+ * - Keep track of parent pointers.
+ * - If we encounter a visited neighbor that is not the immediate parent, we have detected a cycle.
+ * - Trace back using the parent pointers to reconstruct the cycle path.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

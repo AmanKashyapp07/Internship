@@ -1,3 +1,19 @@
+/**
+ * LeetCode 140 - Word Break II
+ *
+ * Description:
+ * Given a string s and a dictionary of strings wordDict, add spaces in s to construct a sentence
+ * where each word is a valid dictionary word. Return all such possible sentences.
+ *
+ * Approach:
+ * - Use Polynomial Rolling Hash (FastHash) to represent words.
+ * - Perform Depth-First Search (DFS) with memoization.
+ * - For each index, check all valid word lengths. If the prefix matches a dictionary word, recursively find all matching sentences for the suffix.
+ *
+ * Time Complexity: O(2^N) in the worst case (e.g. s = "aaaa", dict = {"a", "aa", "aaa", "aaaa"}).
+ * Space Complexity: O(2^N)
+ */
+
 class Solution {
     using ll = long long;
 

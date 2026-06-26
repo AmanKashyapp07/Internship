@@ -1,8 +1,22 @@
 /**
- * Problem: Pacific Atlantic Water Flow (https://leetcode.com/problems/pacific-atlantic-water-flow/)
- * Find grid cells from which water can flow to both Pacific and Atlantic oceans.
- * Time: O(R * C) time, O(R * C) space.
+ * LeetCode 417 - Pacific Atlantic Water Flow
+ *
+ * Description:
+ * There is an m x n rectangular island that borders both the Pacific Ocean (top and left)
+ * and Atlantic Ocean (bottom and right). Water can flow in 4 directions to neighboring cells
+ * of equal or lower height. Return a list of grid coordinates where water can flow to both oceans.
+ *
+ * Approach:
+ * - Perform Multi-source BFS/DFS starting from the boundaries.
+ * - Run one traversal starting from the Pacific boundaries (row 0, col 0) to find all cells that can flow into the Pacific.
+ * - Run another traversal starting from the Atlantic boundaries (row m-1, col n-1) to find all cells that can flow into the Atlantic.
+ * - Water flows "uphill" from the oceans (neighbor height >= current height).
+ * - The intersection of reachable cells from both oceans is the answer.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
  */
+
 #include <queue>
 #include <vector>
 using namespace std;

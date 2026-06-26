@@ -1,15 +1,20 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 1368 - Minimum Cost to Make at Least One Valid Path in a Grid
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * Given an m x n grid, each cell has a sign pointing right (1), left (2), down (3), or up (4).
+ * You can modify the sign on a cell with cost 1.
+ * Return the minimum cost to make at least one valid path from (0,0) to (m-1,n-1).
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Solve using 0-1 Breadth-First Search (BFS) / Dijkstra's algorithm.
+ * - Moving in the preferred direction of the current cell has cost 0.
+ * - Moving in any other of the 3 directions has cost 1.
+ * - Use a double-ended queue (deque): push 0-cost moves to the front, and 1-cost moves to the back.
+ * - Keep track of minimum costs in a 2D distance array.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
  */
 
 #include <algorithm>

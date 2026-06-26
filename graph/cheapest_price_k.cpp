@@ -1,3 +1,20 @@
+/**
+ * LeetCode 787 - Cheapest Flights Within K Stops
+ *
+ * Description:
+ * There are n cities connected by flights. Return the cheapest price from src to dst
+ * with at most k stops. If there is no such route, return -1.
+ *
+ * Approach:
+ * - Use a modified Dijkstra's algorithm.
+ * - Maintain a 2D distance array `dist[node][stops]` to store the minimum cost to reach `node` with a certain number of stops.
+ * - Alternatively, use a min-heap priority queue storing `{cost, node, stops_taken}`.
+ * - Do not relax edges if the number of stops exceeds k.
+ *
+ * Time Complexity: O(E * log(V))
+ * Space Complexity: O(V * K)
+ */
+
 #include <bits/stdc++.h>
 using namespace std;
 

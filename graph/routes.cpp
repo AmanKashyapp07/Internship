@@ -1,9 +1,18 @@
 /**
- * Problem: Investigation (https://cses.fi/problemset/task/1202)
- * Find shortest path cost, ways, and min/max edge counts from node 1 to n in a weighted graph.
- * Logic: initiate ways, min_edges, max_edges arrays and update them during Dijkstra's algorithm. Dijkstra will be normal except that when we find a new shortest path to a node, we update the ways, min_edges, and max_edges arrays accordingly. If we find an alternative path with the same cost, we update the ways, min_edges, and max_edges arrays accordingly.
- * Time: O(E log V) time, O(V + E) space.
+ * CSES 1202 - Investigation
+ *
+ * Description:
+ * Find the minimum cost, the number of minimum-cost paths, and the min/max number of edges in a minimum-cost path from node 1 to node n.
+ *
+ * Approach:
+ * - Use Dijkstra's algorithm.
+ * - Maintain arrays: `dist` (min cost), `ways` (count of min cost paths), `min_edges` (min edges on a min cost path), and `max_edges` (max edges on a min cost path).
+ * - During edge relaxation, if a shorter path is found, reset all values. If a path of equal cost is found, add to `ways` and update the min/max edges.
+ *
+ * Time Complexity: O(E * log(V))
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

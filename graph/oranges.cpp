@@ -1,8 +1,19 @@
 /**
- * Problem: Rotting Oranges (https://leetcode.com/problems/rotting-oranges/)
- * Find the minimum time required to rot all fresh oranges in a grid.
- * Time: O(R * C) time, O(R * C) space.
+ * LeetCode 994 - Rotting Oranges
+ *
+ * Description:
+ * Given a grid containing fresh, rotten, or empty cells, return the minimum number of minutes
+ * until all fresh oranges rot. If impossible, return -1.
+ *
+ * Approach:
+ * - Multi-source BFS starting from all rotten orange coordinates.
+ * - Keep track of fresh orange counts.
+ * - Rot adjacent fresh oranges level-by-level and decrement the fresh orange counter.
+ *
+ * Time Complexity: O(R * C)
+ * Space Complexity: O(R * C)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

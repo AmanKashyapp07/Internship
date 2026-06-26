@@ -1,15 +1,16 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 2290 - Minimum Obstacle Removal to Reach Corner
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * Given a 2D grid, return the minimum number of obstacles to remove to reach the bottom-right corner.
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Dijkstra's algorithm.
+ * - Use a min-priority queue storing `{distance, {row, col}}` to find the shortest path.
+ * - Distance is incremented by 1 when entering an obstacle cell.
+ *
+ * Time Complexity: O(m * n * log(m * n))
+ * Space Complexity: O(m * n)
  */
 
 #include <algorithm>

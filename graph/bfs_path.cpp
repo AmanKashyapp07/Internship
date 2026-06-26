@@ -1,8 +1,19 @@
 /**
- * Problem: Labyrinth (https://cses.fi/problemset/task/1193)
- * Find a path from start 'A' to end 'B' in a grid and print its length and steps.
- * Time: O(R * C) time, O(R * C) space.
+ * CSES 1193 - Labyrinth
+ *
+ * Description:
+ * You are given a map of a labyrinth with start 'A' and end 'B'.
+ * Find a path from start to end. If a path exists, print the path length and step directions ('L', 'R', 'U', 'D').
+ *
+ * Approach:
+ * - Perform a Breadth-First Search (BFS) on the grid from 'A'.
+ * - Store the step direction taken to reach each cell.
+ * - Backtrack from 'B' to 'A' using the recorded moves to reconstruct the exact path.
+ *
+ * Time Complexity: O(R * C)
+ * Space Complexity: O(R * C)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

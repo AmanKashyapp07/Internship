@@ -1,13 +1,18 @@
 /**
- * Problem: Priority Queue Custom Comparator Demo
- * Link: N/A
- * Category: Data Structures
- * 
+ * CSES 1750 - Planets Queries I
+ *
  * Description:
- * Demonstrates min-heap priority queue with custom pair sorting.
- * 
- * Logic/Approach:
- * Uses standard std::priority_queue with greater comparator.
+ * You are given a functional graph (each planet has one teleporter). Respond to queries:
+ * starting from planet x, where will you be after k teleportations?
+ *
+ * Approach:
+ * - Solve using Binary Lifting.
+ * - Compute `up[i][j]`, which stores the planet reached from planet `i` after `2^j` steps.
+ * - Transition: `up[i][j] = up[up[i][j-1]][j-1]`.
+ * - Answer each query in O(log(k)) by decomposing k into powers of 2.
+ *
+ * Time Complexity: O((N + Q) * log(K))
+ * Space Complexity: O(N * log(K))
  */
 
 #include <iostream>

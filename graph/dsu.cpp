@@ -1,8 +1,20 @@
 /**
- * Problem: Road Construction (https://cses.fi/problemset/task/1676)
- * Track the number of components and the size of the largest component as edges are added.
- * Time: O(E * alpha(V)) time, O(V) space.
+ * CSES 1676 - Road Construction
+ *
+ * Description:
+ * Track the number of connected components and the size of the largest component
+ * as edges are added dynamically to the graph.
+ *
+ * Approach:
+ * - Use the Disjoint Set Union (DSU) data structure.
+ * - Implement path compression and union-by-size.
+ * - Initialize n components of size 1.
+ * - For each added edge, merge sets, decrement the component count if they were disjoint, and update the maximum size.
+ *
+ * Time Complexity: O(E * alpha(V)) where alpha is the inverse Ackermann function.
+ * Space Complexity: O(V)
  */
+
 #include <iostream>
 #include <vector>
 #include <numeric>

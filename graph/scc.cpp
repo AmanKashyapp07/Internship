@@ -1,8 +1,21 @@
 /**
- * Problem: Flight Routes Check (https://cses.fi/problemset/task/1682)
- * Check if the directed graph is strongly connected; if not, output a pair of disconnected nodes.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1682 - Flight Routes Check
+ *
+ * Description:
+ * Check if a directed graph is strongly connected. If not, output a pair of cities `u` and `v`
+ * such that it is not possible to travel from `u` to `v`.
+ *
+ * Approach:
+ * - Run Kosaraju's algorithm or perform 2 DFS traversals:
+ *   1. DFS from node 1 on the original graph.
+ *   2. DFS from node 1 on the reversed graph.
+ * - If any node is unvisited in the first DFS, we cannot reach it from 1.
+ * - If any node is unvisited in the second DFS, it cannot reach 1.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <stack>

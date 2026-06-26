@@ -1,9 +1,18 @@
 /**
- * Problem: Tree Distances I (https://cses.fi/problemset/task/1132)
+ * CSES 1132 - Tree Distances I
+ *
+ * Description:
  * For each node in a tree, find the maximum distance to any other node.
- * Trick is to find the two endpoints of the tree diameter using two BFS traversals, then compute distances from both endpoints.
- * Time: O(V) time, O(V) space.
+ *
+ * Approach:
+ * - Find the two endpoints of the tree diameter (say node A and node B) using two BFS traversals.
+ * - Compute distances from node A (`distA`) and node B (`distB`) to all other nodes.
+ * - The maximum distance for each node `u` is `max(distA[u], distB[u])`.
+ *
+ * Time Complexity: O(V)
+ * Space Complexity: O(V)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

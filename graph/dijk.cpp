@@ -1,9 +1,20 @@
 /**
- * Problem: Flight Discount (https://cses.fi/problemset/task/1195)
- * Find the cheapest flight route from 1 to n with the option to discount one flight to half price.
- * Time: O(E log V) time, O(V + E) space.
- * Trick is to run Dijkstra's algorithm twice: once from the source and once from the destination on the reversed graph, then check all edges for the minimum cost using the discount.
+ * CSES 1195 - Flight Discount
+ *
+ * Description:
+ * Find the cheapest flight route from city 1 to city n with the option to discount exactly one flight to half price.
+ *
+ * Approach:
+ * - Run Dijkstra's algorithm twice:
+ *      1. From city 1 on the original graph to get shortest distances `dist1`.
+ *      2. From city n on the reversed graph to get shortest distances `dist2`.
+ * - For every flight edge u -> v with cost w, the minimum cost with discount applied is `dist1[u] + w/2 + dist2[v]`.
+ * - Iterate over all edges to find the global minimum.
+ *
+ * Time Complexity: O(E * log(V))
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

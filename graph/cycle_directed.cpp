@@ -1,8 +1,19 @@
 /**
- * Problem: Round Trip II (https://cses.fi/problemset/task/1678)
- * Find any directed cycle in a directed graph.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1678 - Round Trip II
+ *
+ * Description:
+ * Find any directed cycle in a directed graph. If a cycle exists, print the sequence of vertices.
+ *
+ * Approach:
+ * - Depth-first search (DFS) with node coloring/states.
+ * - Nodes can be: unvisited (0), visiting (1), or visited (2).
+ * - If during DFS we encounter a node in the "visiting" state (a back edge), we have found a cycle.
+ * - Use parent pointers to reconstruct the cycle nodes.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

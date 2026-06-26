@@ -1,3 +1,17 @@
+/**
+ * LeetCode 2050 - Parallel Courses III
+ *
+ * Description:
+ * Find the minimum time required to complete all courses given relationships and course completion durations.
+ *
+ * Approach:
+ * - Topological sort with Kahn's algorithm.
+ * - DP on DAG: `dp[u]` tracks the completion time of task `u`.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
+ */
+
 class Solution {
 public:
     int minimumTime(int n, vector<vector<int>>& relations, vector<int>& time) {

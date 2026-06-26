@@ -1,8 +1,19 @@
 /**
- * Problem: Word Ladder I (https://leetcode.com/problems/word-ladder/)
- * Find the length of the shortest transformation sequence from beginWord to endWord.
- * Time: O(N * L * 26) time, O(N * L) space (N = words, L = length of word).
+ * LeetCode 127 - Word Ladder
+ *
+ * Description:
+ * Given beginWord, endWord, and wordList, return the number of words in the shortest transformation
+ * sequence from beginWord to endWord, or 0 if no such sequence exists.
+ *
+ * Approach:
+ * - Breadth-First Search (BFS) to find the shortest path in an unweighted state-space graph.
+ * - State is the word. Two words are connected if they differ by exactly one character.
+ * - Use a hash set for quick word lookups.
+ *
+ * Time Complexity: O(N * L * 26) where N is the number of words and L is word length.
+ * Space Complexity: O(N * L)
  */
+
 #include <string>
 #include <vector>
 #include <queue>

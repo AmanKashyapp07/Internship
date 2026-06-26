@@ -1,8 +1,17 @@
 /**
- * Problem: Word Ladder II (https://leetcode.com/problems/word-ladder-ii/)
+ * LeetCode 126 - Word Ladder II
+ *
+ * Description:
  * Find all shortest transformation sequences from beginWord to endWord.
- * Time: O(N * L * 26 + V_path) time, O(N * L) space.
+ *
+ * Approach:
+ * - Perform BFS from `beginWord` to build a graph of shortest paths and compute levels.
+ * - Use Backtracking/DFS starting from `endWord` or `beginWord` to trace all paths that strictly follow the levels.
+ *
+ * Time Complexity: O(N * L * 26 + Paths)
+ * Space Complexity: O(N * L + Paths)
  */
+
 #include <string>
 #include <vector>
 #include <queue>

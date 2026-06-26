@@ -1,8 +1,18 @@
 /**
- * Problem: Network Renovation (Tree 2-Edge-Connected via Leaf Pairing)
- * Add minimum edges to make a tree 2-edge-connected (bridge-free).
- * Time: O(V) time, O(V) space.
+ * CSES 1704 - Network Renovation
+ *
+ * Description:
+ * Add the minimum number of edges to a tree to make it 2-edge-connected (bridge-free).
+ *
+ * Approach:
+ * - Find all leaves in the tree.
+ * - Pair the leaves appropriately: pair leaf `i` with leaf `i + L/2` where `L` is the total number of leaves.
+ * - Adding edges between these pairs ensures that all tree edges are covered by at least one cycle.
+ *
+ * Time Complexity: O(V)
+ * Space Complexity: O(V)
  */
+
 #include <iostream>
 #include <vector>
 using namespace std;

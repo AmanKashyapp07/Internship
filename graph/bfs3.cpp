@@ -1,8 +1,21 @@
 /**
- * Problem: High Score (https://cses.fi/problemset/task/1673)
- * Find the maximum score (longest path) from node 1 to node n, detecting positive cycles that affect the path.
- * Time: O(V * E) time, O(V + E) space.
+ * CSES 1673 - High Score
+ *
+ * Description:
+ * You are playing a game with n rooms and m tunnels. Each tunnel has a score modifier.
+ * Find the maximum score you can get from room 1 to room n, detecting positive-weight cycles
+ * that can reach the destination and be reached from the source.
+ *
+ * Approach:
+ * - Negate the edge weights and run the Bellman-Ford algorithm to find the minimum cost (which corresponds to maximum score).
+ * - Relax edges n times.
+ * - Run a reachability check (e.g. via DFS/BFS) to verify if any nodes updated during the n-th iteration lie on a path from 1 to n.
+ * - If yes, the maximum score is infinite (represented as -1).
+ *
+ * Time Complexity: O(V * E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

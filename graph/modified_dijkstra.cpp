@@ -1,14 +1,16 @@
 /**
- * Problem: Shortest Routes I (Modified Dijkstra)
- * Link: https://cses.fi/problemset/task/1671
- * Question is to find the k shortest paths from node 1 to node n in a weighted directed graph. The approach is to use a modified version of Dijkstra's algorithm that allows for multiple paths to be considered. We maintain a priority queue of (distance, node) pairs and a count of how many times each node has been processed. When we pop a node from the priority queue, if it is the destination node n, we record its distance as one of the k shortest paths. If we have already recorded k paths, we stop processing further. Otherwise, we continue to explore the neighbors of the current node and push them onto the priority queue with their updated distances.
- * Category: Graph / Shortest Paths
- * 
+ * CSES 1671 - Shortest Routes I
+ *
  * Description:
- * Find shortest path lengths from root to all nodes in a weighted graph.
- * 
- * Logic/Approach:
- * Dijkstra's algorithm using priority queue (min-heap).
+ * Find the shortest path lengths from city 1 to all other cities in a weighted directed graph.
+ *
+ * Approach:
+ * - Standard implementation of Dijkstra's algorithm.
+ * - Maintain a min-heap priority queue storing `{distance, node}`.
+ * - Relax adjacent nodes and update the distance array.
+ *
+ * Time Complexity: O(E * log(V))
+ * Space Complexity: O(V + E)
  */
 
 #include <algorithm>

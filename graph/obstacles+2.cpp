@@ -1,3 +1,19 @@
+/**
+ * LeetCode 2290 - Minimum Obstacle Removal to Reach Corner
+ *
+ * Description:
+ * Given a 0-indexed 2D integer array grid, return the minimum number of obstacles to remove to reach the bottom-right corner.
+ *
+ * Approach:
+ * - Solve using 0-1 BFS.
+ * - Moving to an empty cell (0) has cost 0.
+ * - Moving to an obstacle cell (1) has cost 1.
+ * - Use a double-ended queue (deque): push 0-cost moves to the front, and 1-cost moves to the back.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
+ */
+
 #include <vector>
 #include <queue> // for std::deque
 

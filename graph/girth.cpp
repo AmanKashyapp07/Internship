@@ -1,10 +1,21 @@
 /**
- * Problem: Graph Girth (https://cses.fi/problemset/task/1707)
- * Find the length of the shortest cycle in an undirected unweighted graph.
- * Logic - Run BFS from every node to find the shortest cycle (girth).
- * Running from every node is necessary because the shortest cycle may not include the starting node of the BFS.
- * Time: O(V * (V + E)) time, O(V + E) space.
+ * CSES 1707 - Graph Girth
+ *
+ * Description:
+ * Find the length of the shortest cycle (girth) in an undirected unweighted graph.
+ *
+ * Approach:
+ * - Run Breadth-First Search (BFS) from every node.
+ * - For a starting node, maintain distances from it.
+ * - If we encounter an edge between two visited nodes that is not a back-edge to the parent,
+ *   a cycle is found.
+ * - The cycle length is `dist[u] + dist[v] + 1`.
+ * - Keep the minimum cycle length found across all BFS traversals.
+ *
+ * Time Complexity: O(V * (V + E))
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

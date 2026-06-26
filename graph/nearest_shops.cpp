@@ -1,14 +1,16 @@
 /**
  * Problem: Multi-Source BFS (Nearest Shops)
- * Link: N/A
- * Category: Graph / BFS
- * 
+ *
  * Description:
- * Find the shortest distance from each node to the nearest shop node.
- * This is tricky because we need to find nearest shop for shop also, if we do normal BFS, dist[shop] = 0, but we need to find the second nearest shop for shop also. So we need to do multi-source BFS from all shops simultaneously.
- * 
- * Logic/Approach:
- * Multi-source BFS pushing all shop nodes into queue initially.
+ * Find the shortest distance from each node to the nearest shop node in an unweighted graph.
+ *
+ * Approach:
+ * - Standard Multi-Source BFS.
+ * - Push all shop nodes into the BFS queue with distance 0.
+ * - Traverse neighbors and update their distances level-by-level.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V)
  */
 
 #include <iostream>

@@ -1,8 +1,17 @@
 /**
- * Problem: High Score (https://cses.fi/problemset/task/1673)
- * Find the maximum score (longest path) from node 1 to node n, detecting positive cycles that affect the path.
- * Time: O(V * E) time, O(V + E) space.
+ * CSES 1673 - High Score
+ *
+ * Description:
+ * Find the maximum score possible from room 1 to room n, detecting positive-weight cycles.
+ *
+ * Approach:
+ * - Negate weights and run the Bellman-Ford algorithm.
+ * - Reachability checking to confirm cycle-to-destination paths.
+ *
+ * Time Complexity: O(V * E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

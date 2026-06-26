@@ -1,8 +1,20 @@
 /**
- * Problem: Game Routes (https://cses.fi/problemset/task/1681)
- * Count the number of paths from node 1 to node n in a DAG.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1681 - Game Routes
+ *
+ * Description:
+ * Count the number of ways to play the game from room 1 to room n in a Directed Acyclic Graph (DAG).
+ * Return the result modulo 10^9 + 7.
+ *
+ * Approach:
+ * - Find a topological order of the DAG.
+ * - Maintain a DP array `dp[u]` representing the number of paths from 1 to u.
+ * - Initialize `dp[1] = 1`.
+ * - Traverse nodes in topological order, propagating values to neighbors: `dp[v] = (dp[v] + dp[u]) % MOD`.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

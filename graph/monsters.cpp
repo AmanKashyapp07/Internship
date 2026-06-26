@@ -1,4 +1,19 @@
-
+/**
+ * CSES 1194 - Monsters
+ *
+ * Description:
+ * You are in a grid with monsters and must escape to the boundary.
+ * Monsters move simultaneously. Find if you can escape, and if so, print the path.
+ *
+ * Approach:
+ * - Perform Multi-source BFS starting from all monster locations to compute the minimum time `monster_dist[r][c]` at which a monster can reach each cell.
+ * - Perform a single BFS from your starting point 'A' to calculate your distance `my_dist[r][c]`.
+ * - You can only move to a cell if `my_dist[r][c] < monster_dist[r][c]`.
+ * - If you reach the boundary, backtrack using parent pointers to output the path.
+ *
+ * Time Complexity: O(R * C)
+ * Space Complexity: O(R * C)
+ */
 
 #include <algorithm>
 #include <array>

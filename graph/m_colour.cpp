@@ -1,8 +1,20 @@
 /**
- * Problem: M-Coloring Problem
- * Check if a graph can be colored with at most m colors such that no adjacent vertices share a color.
- * Time: O(M^V) worst-case time, O(V) space (recursion stack).
+ * GeeksforGeeks - M-Coloring Problem
+ *
+ * Description:
+ * Given an undirected graph and an integer m, determine if the graph can be colored
+ * with at most m colors such that no two adjacent vertices share the same color.
+ *
+ * Approach:
+ * - Backtracking approach.
+ * - Attempt to assign each color from 1 to m to the current vertex.
+ * - Check if the color assignment is safe (no adjacent vertex has the same color).
+ * - Recursively color the remaining vertices.
+ *
+ * Time Complexity: O(m^V)
+ * Space Complexity: O(V) recursion stack.
  */
+
 #include <iostream>
 #include <vector>
 using namespace std;

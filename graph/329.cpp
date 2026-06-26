@@ -1,3 +1,20 @@
+/**
+ * LeetCode 329 - Longest Increasing Path in a Matrix
+ *
+ * Description:
+ * Given an m x n integers matrix, return the length of the longest increasing path in matrix.
+ * From each cell, you can either move in four directions: left, right, up, or down.
+ * You may not move diagonally or move outside the boundary.
+ *
+ * Approach:
+ * - Use Depth First Search (DFS) with Memoization.
+ * - For each cell, explore all four directions recursively if the neighbor has a strictly larger value.
+ * - Cache the longest path length starting from each cell in a DP table to avoid redundant calculations.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
+ */
+
 class Solution {
 public:
     int m, n;

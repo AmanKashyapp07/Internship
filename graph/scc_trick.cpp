@@ -1,8 +1,19 @@
 /**
- * Problem: Component Cycle Trick (Weakly Connected Component Cycles)
- * Find component sizes and check if they contain cycles to compute the reachable vertices score.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES - Component Cycle Trick
+ *
+ * Description:
+ * Given a directed graph, partition it into weakly connected components.
+ * Check if components contain cycles to compute the reachable vertices score.
+ *
+ * Approach:
+ * - Find weakly connected components (treating edges as undirected).
+ * - Run DFS on each component on the directed graph to detect any cycles.
+ * - Sum component sizes: add `size` if it has a cycle, else `size - 1`.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 using namespace std;

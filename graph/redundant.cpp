@@ -1,3 +1,21 @@
+/**
+ * LeetCode 684 - Redundant Connection
+ *
+ * Description:
+ * Given a graph that started as a tree with n nodes but one additional edge added,
+ * return the edge that can be removed so that the resulting graph is a tree.
+ *
+ * Approach:
+ * - Use Disjoint Set Union (DSU) / Union-Find.
+ * - Process edges one by one.
+ * - For each edge `(u, v)`, check if they are already in the same component.
+ * - If yes, this edge forms a cycle and is the redundant connection.
+ * - If not, union the components of `u` and `v`.
+ *
+ * Time Complexity: O(N * alpha(N))
+ * Space Complexity: O(N)
+ */
+
 class DisjointSet {
 public:
     vector<int> rank, parent, size;

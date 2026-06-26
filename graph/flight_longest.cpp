@@ -1,9 +1,20 @@
 /**
- * Problem: Longest Flight Route (https://cses.fi/problemset/task/1680)
- * Find the longest route from city 1 to city n in a directed acyclic graph.
- * Algorithm: Topological sort + DP on DAG.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1680 - Longest Flight Route
+ *
+ * Description:
+ * Find the longest route from city 1 to city n in a directed acyclic graph (DAG).
+ * If no route exists, print "IMPOSSIBLE".
+ *
+ * Approach:
+ * - Perform a Topological Sort on the DAG using Kahn's algorithm or DFS.
+ * - Maintain a DP array `dist[u]` representing the longest distance from city 1 to city u.
+ * - Process nodes in topological order, relaxing outgoing edges: `dist[v] = max(dist[v], dist[u] + 1)`.
+ * - Use a parent array to reconstruct the path from 1 to n.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

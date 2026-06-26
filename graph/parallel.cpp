@@ -1,15 +1,17 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 2050 - Parallel Courses III
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * Given n courses with relations and time required for each course, return the minimum number of months
+ * to complete all courses satisfying the relations.
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Topologically sort courses using Kahn's algorithm.
+ * - Maintain a DP array `dp[i]` representing the minimum time to complete task i (including prerequisite times).
+ * - Transition: `dp[neighbor] = max(dp[neighbor], dp[curr] + time[neighbor])`.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
 
 #include <algorithm>

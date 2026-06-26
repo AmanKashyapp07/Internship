@@ -1,8 +1,18 @@
 /**
- * Problem: Cheapest Flights Within K Stops (https://leetcode.com/problems/cheapest-flights-within-k-stops/)
+ * LeetCode 787 - Cheapest Flights Within K Stops
+ *
+ * Description:
  * Find the cheapest price from src to dst with at most k stops.
- * Time: O(E log V) time, O(V * K) space.
+ *
+ * Approach:
+ * - Dijkstra's algorithm modified to track the stops/flights count.
+ * - Store the minimum distance and stop count in a min-heap priority queue.
+ * - Keep a tracking array for minimum stops to prune sub-optimal paths.
+ *
+ * Time Complexity: O(E * log(V))
+ * Space Complexity: O(V * K)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

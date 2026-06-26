@@ -1,3 +1,20 @@
+/**
+ * LeetCode 472 - Concatenated Words
+ *
+ * Description:
+ * Given an array of strings words (without duplicates), return all the concatenated words in the given list of words.
+ * A concatenated word is defined as a string that is comprised entirely of at least two shorter words in the given array.
+ *
+ * Approach:
+ * - Use a polynomial rolling hash (FastHash) to store and check word existence in O(1) expected time.
+ * - Sort or insert all word hashes into a hash set.
+ * - For each word, temporarily remove its hash from the dictionary to avoid self-matching.
+ * - Perform a depth-first search (DFS) with memoization: check if prefixes of the word exist in the dictionary, and recursively check if the remaining suffix can also be formed.
+ *
+ * Time Complexity: O(N * L^2) where N is the number of words and L is the maximum length of a word.
+ * Space Complexity: O(N * L) for storing hashes and recursion stack.
+ */
+
 class Solution {
 public:
     using ll = long long;

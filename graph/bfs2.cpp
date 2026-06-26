@@ -1,8 +1,18 @@
 /**
- * Problem: Message Route (https://cses.fi/problemset/task/1667)
- * Find the shortest path from node 1 to node n in an undirected graph.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1667 - Message Route
+ *
+ * Description:
+ * Find the shortest path (minimum number of computers) from node 1 to node n in an undirected graph.
+ * If a path exists, print the number of computers and the path itself.
+ *
+ * Approach:
+ * - Use Breadth-First Search (BFS) to find the shortest path in an unweighted graph.
+ * - Maintain a parent array to reconstruct the path after reaching the destination node n.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

@@ -1,22 +1,19 @@
 /**
- * LeetCode 847. Shortest Path Visiting All Nodes
+ * LeetCode 847 - Shortest Path Visiting All Nodes
  *
- * Idea:
- * BFS on state = (current node, visited mask).
+ * Description:
+ * You have an undirected, connected graph of n nodes. Return the length of the shortest path
+ * that visits every node. You may start and stop at any node, and repeat nodes and edges.
  *
- * State:
- *   node -> current position
- *   mask -> bitmask of visited nodes
+ * Approach:
+ * - Perform Multi-Source BFS on the state space.
+ * - State is represented as a pair: (current_node, visited_nodes_mask).
+ * - Start the BFS from every node with its initial mask (1 << node).
+ * - Process neighbors by updating the bitmask.
+ * - The first state popped from the queue with a full mask (all bits set to 1) represents the shortest path.
  *
- * Start BFS from every node (multi-source BFS).
- * Each move updates:
- *   newMask = mask | (1 << neighbor)
- *
- * The first time we reach mask == (1<<n)-1,
- * we have visited every node in the shortest possible path.
- *
- * Time:  O((V + E) * 2^V)
- * Space: O(V * 2^V)
+ * Time Complexity: O(n * 2^n)
+ * Space Complexity: O(n * 2^n)
  */
 
 class Solution {

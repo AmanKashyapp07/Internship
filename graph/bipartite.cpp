@@ -1,8 +1,19 @@
 /**
- * Problem: Building Teams (https://cses.fi/problemset/task/1668)
- * Divide nodes into 2 teams such that no two adjacent nodes have the same team.
- * Time: O(V + E) time, O(V + E) space.
+ * CSES 1668 - Building Teams
+ *
+ * Description:
+ * There are n pupils. Divide them into two teams such that no two friends are in the same team.
+ *
+ * Approach:
+ * - Graph bipartiteness check using 2-coloring.
+ * - Traverse the graph using BFS or DFS.
+ * - Assign alternating colors (1 and 2) to adjacent nodes.
+ * - If we find an edge between two nodes of the same color, it is impossible to bipartition the graph.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>

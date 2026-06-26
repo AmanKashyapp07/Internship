@@ -1,8 +1,20 @@
 /**
- * Problem: Cycle Finding (https://cses.fi/problemset/task/1197)
- * Find if there exists a negative cycle in a directed graph and print it.
- * Time: O(V * E) time, O(V) space.
+ * CSES 1197 - Cycle Finding
+ *
+ * Description:
+ * You are given a directed graph. Your task is to find if there exists a negative cycle
+ * in the graph, and if there is, print one such cycle.
+ *
+ * Approach:
+ * - Use the Bellman-Ford algorithm to find shortest paths and detect negative cycles.
+ * - Relax all edges n times.
+ * - If a distance update occurs during the n-th relaxation, a negative cycle exists.
+ * - Trace back using the parent pointers of the updated node to reconstruct the negative cycle.
+ *
+ * Time Complexity: O(V * E)
+ * Space Complexity: O(V)
  */
+
 #include <iostream>
 #include <vector>
 #include <algorithm>

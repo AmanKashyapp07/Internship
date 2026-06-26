@@ -1,8 +1,18 @@
 /**
- * Problem: Course Schedule (Lexicographically Smallest / Reverse Graph Kahn's)
- * Find a valid topological order using a max-heap priority queue on the reversed graph.
- * Time: O(V + E log V) time, O(V + E) space.
+ * LeetCode 210 - Course Schedule II
+ *
+ * Description:
+ * Given n courses and their prerequisites, return the ordering of courses to take.
+ * If there are multiple answers, return any of them. If impossible, return an empty array.
+ *
+ * Approach:
+ * - Topological Sort using Kahn's algorithm or DFS.
+ * - Store the result in a topological order list.
+ *
+ * Time Complexity: O(V + E)
+ * Space Complexity: O(V + E)
  */
+
 #include <iostream>
 #include <vector>
 #include <queue>
