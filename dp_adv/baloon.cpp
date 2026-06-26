@@ -1,15 +1,19 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 312 - Burst Balloons
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * You are given n balloons, indexed from 0 to n - 1. Each balloon is painted with a number on it.
+ * You are asked to burst all the balloons. If you burst the i-th balloon, you will get nums[i - 1] * nums[i] * nums[i + 1] coins.
+ * Return the maximum coins you can collect by bursting the balloons wisely.
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Interval Dynamic Programming (Matrix Chain Multiplication style) with Memoization.
+ * - Let `maxCoins(i, j)` return the maximum coins collected by bursting all balloons in the range `[i, j]`.
+ * - Transition: Try bursting balloon `k` (where `i <= k <= j`) last in this range.
+ *   - The coins obtained: `balloon[i-1] * balloon[k] * balloon[j+1] + maxCoins(i, k-1) + maxCoins(k+1, j)`.
+ *
+ * Time Complexity: O(n^3)
+ * Space Complexity: O(n^2)
  */
 
 #include <algorithm>

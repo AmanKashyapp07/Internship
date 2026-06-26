@@ -1,3 +1,20 @@
+/**
+ * LeetCode 132 - Palindrome Partitioning II (Memoization)
+ *
+ * Description:
+ * Given a string s, partition s such that every substring of the partition is a palindrome.
+ * Return the minimum cuts needed for a palindrome partitioning of s.
+ *
+ * Approach:
+ * - Dynamic Programming with Memoization.
+ * - First precompute a 2D table `isPalindrome[i][j]` representing whether `s[i...j]` is a palindrome.
+ * - Let `solve(i)` return the minimum cuts for suffix `s[0...i]`.
+ * - Transition: Try matching any palindrome ending at `i`: `1 + solve(j - 1)` for all `j <= i` where `s[j...i]` is a palindrome.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>

@@ -1,8 +1,17 @@
 /**
- * Matrix Chain Multiplication
- * Bottom-Up Tabulation
+ * Problem: Matrix Chain Multiplication (Tabulation)
  *
- * dp[i][j] = Minimum cost to multiply matrices from i to j
+ * Description:
+ * Given a sequence of matrices, find the most efficient way to multiply these matrices together.
+ *
+ * Approach:
+ * - Interval Dynamic Programming with Bottom-Up Tabulation.
+ * - Fill the DP table `dp[i][j]` (minimum multiplications for matrix range `i` to `j`) by increasing subproblem lengths.
+ * - Transition: Try all split points `k` between `i` and `j-1`.
+ *   - `dp[i][j] = min(dp[i][k] + dp[k+1][j] + arr[i-1] * arr[k] * arr[j])`.
+ *
+ * Time Complexity: O(n^3)
+ * Space Complexity: O(n^2)
  */
 
 #include <algorithm>

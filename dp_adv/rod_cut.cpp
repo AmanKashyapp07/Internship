@@ -1,11 +1,18 @@
 /**
- * CSES Problem Set
- *
  * Problem: Rod Cutting
  *
- * Given a rod of length N and price[i] representing
- * the price of a rod piece of length (i + 1),
- * find the maximum obtainable value.
+ * Description:
+ * Given a rod of length n and prices price[i] for pieces of length i + 1,
+ * find the maximum value obtainable by cutting up the rod and selling the pieces.
+ *
+ * Approach:
+ * - Dynamic Programming (both Memoization and Tabulation).
+ * - Equivalent to Unbounded Knapsack problem where elements are lengths `1..n` and capacities are `n`.
+ * - Let `dp[ind][len]` be the max value considering pieces up to length `ind+1` with total rod length limit `len`.
+ * - Transition: `dp[ind][len] = max(dp[ind-1][len], price[ind] + dp[ind][len - rodLength])`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
  */
 
 #include <algorithm>

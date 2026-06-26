@@ -1,3 +1,22 @@
+/**
+ * CSES 1140 / LeetCode 1235 - Projects / Job Scheduling
+ *
+ * Description:
+ * There are n projects. Each project has a start day, end day, and a reward.
+ * Choose projects such that no two projects overlap and the total reward is maximized.
+ *
+ * Approach:
+ * - Dynamic Programming with Memoization and Binary Search.
+ * - Sort projects by start day.
+ * - Let `maxProfit(i)` be the maximum reward from projects in suffix `[i...]`.
+ * - Transition:
+ *   - Option 1 (exclude): `maxProfit(i + 1)`
+ *   - Option 2 (include): `reward[i] + maxProfit(nextIndex)` where `nextIndex` is the first project starting after project `i` ends (found using `lower_bound`).
+ *
+ * Time Complexity: O(n log n)
+ * Space Complexity: O(n)
+ */
+
 #include <algorithm>
 #include <climits>
 #include <iostream>

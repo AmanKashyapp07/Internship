@@ -1,15 +1,18 @@
 /**
- * Matrix Chain Multiplication
- * Recursive + Memoization
+ * Problem: Matrix Chain Multiplication (Memoization)
  *
- * dp[i][j] = Minimum cost to multiply matrices from i to j
+ * Description:
+ * Given a sequence of matrices, find the most efficient way to multiply these matrices together.
+ * The problem is not actually to perform the multiplications, but merely to decide in which order to perform the multiplications.
  *
- * Transition:
- * dp[i][j] = min(
- *      dp[i][k] +
- *      dp[k+1][j] +
- *      arr[i-1] * arr[k] * arr[j]
- * )
+ * Approach:
+ * - Interval Dynamic Programming with Memoization.
+ * - Let `solve(i, j)` return the minimum scalar multiplications to multiply matrices from index `i` to `j`.
+ * - Transition: Try splitting the product at position `k` (where `i <= k < j`).
+ *   - `solve(i, j) = min(solve(i, k) + solve(k+1, j) + arr[i-1] * arr[k] * arr[j])`.
+ *
+ * Time Complexity: O(n^3)
+ * Space Complexity: O(n^2)
  */
 
 #include <algorithm>

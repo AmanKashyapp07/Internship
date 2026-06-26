@@ -1,39 +1,19 @@
 /**
- * Minimum Cost to Cut a Stick
+ * LeetCode 1547 - Minimum Cost to Cut a Stick
  *
- * Problem:
- * Given a stick of length n and an array cuts[] where each element
- * represents a position at which the stick must be cut.
- *
- * Cost of making a cut = Current length of the stick being cut.
- *
- * Return the minimum total cost required to perform all cuts.
- *
- * Example:
- * n = 7
- * cuts = {1, 3, 4, 5}
- *
- * Answer = 16
+ * Description:
+ * Given a wooden stick of length n and an array cuts where cuts[i] represents a position you must perform a cut at.
+ * The cost of one cut is the length of the stick to be cut. Return the minimum total cost of the cuts.
  *
  * Approach:
- * Add boundaries 0 and n to cuts.
+ * - Interval Dynamic Programming (both Tabulation and Memoization).
+ * - Add boundaries 0 and n to `cuts` array, then sort it.
+ * - Let `dp[i][j]` represent the minimum cost to perform all cuts between `cuts[i]` and `cuts[j]`.
+ * - Transition: Try making the first cut at position `k` (where `i < k < j`).
+ *   - `dp[i][j] = min(dp[i][k] + dp[k][j] + (cuts[j] - cuts[i]))`.
  *
- * Let dp[i][j] = Minimum cost to perform all cuts between
- * cuts[i] and cuts[j].
- *
- * Try every possible first cut k inside (i, j):
- *
- * dp[i][j] =
- * min(
- *     dp[i][k]
- *     + dp[k][j]
- *     + (cuts[j] - cuts[i])
- * )
- *
- * Time Complexity: O(m³)
- * Space Complexity: O(m²)
- *
- * where m = cuts.size() + 2
+ * Time Complexity: O(m^3) where m = cuts.size()
+ * Space Complexity: O(m^2)
  */
 
 #include <algorithm>

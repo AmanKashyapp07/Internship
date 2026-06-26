@@ -1,3 +1,19 @@
+/**
+ * LeetCode 131 - Palindrome Partitioning
+ *
+ * Description:
+ * Given a string s, partition s such that every substring of the partition is a palindrome.
+ * Return all possible palindrome partitioning of s.
+ *
+ * Approach:
+ * - Backtracking with precomputed palindrome table.
+ * - Precompute `isPal[i][j]` in O(n^2) time.
+ * - Perform DFS backtracking: at state `start`, try all possible substrings `s[start...end]` that are palindromes, add to current path, and recurse to `end + 1`.
+ *
+ * Time Complexity: O(n * 2^n)
+ * Space Complexity: O(n^2) for palindrome table, and O(n) recursion stack.
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>

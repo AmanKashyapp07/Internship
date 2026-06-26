@@ -1,3 +1,19 @@
+/**
+ * LeetCode 127 - Word Ladder
+ *
+ * Description:
+ * Given two words, beginWord and endWord, and a dictionary wordList, return the number of words
+ * in the shortest transformation sequence from beginWord to endWord.
+ * Only one letter can be changed at a time, and each transformed word must exist in the word list.
+ *
+ * Approach:
+ * - Breadth-First Search (BFS) and Bidirectional BFS.
+ * - Treat words as nodes and single-letter transformations as edges.
+ * - Bidirectional BFS starts queue searches from both `beginWord` and `endWord` simultaneously, matching when their levels meet.
+ *
+ * Time Complexity: O(N * M^2) where N is number of words in wordList, M is length of each word.
+ * Space Complexity: O(N)
+ */
 
 #include <algorithm>
 #include <array>

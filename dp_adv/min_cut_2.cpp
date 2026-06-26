@@ -1,4 +1,25 @@
-#include <bits/stdc++.h>
+/**
+ * LeetCode 132 - Palindrome Partitioning II (Tabulation)
+ *
+ * Description:
+ * Given a string s, partition s such that every substring of the partition is a palindrome.
+ * Return the minimum cuts needed for a palindrome partitioning of s.
+ *
+ * Approach:
+ * - Dynamic Programming with Bottom-Up Tabulation.
+ * - Precompute the `isPalindrome` 2D table.
+ * - Let `dp[i]` be the minimum cuts to partition the prefix `s[0...i]`.
+ * - Transition: If `s[j...i]` is a palindrome, `dp[i] = min(dp[i], 1 + dp[j - 1])`.
+ *
+ * Time Complexity: O(n^2)
+ * Space Complexity: O(n^2)
+ */
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
 using namespace std;
 
 int main() {

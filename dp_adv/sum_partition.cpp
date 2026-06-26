@@ -1,15 +1,19 @@
 /**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
+ * LeetCode 1043 - Partition Array for Maximum Sum
  *
  * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ * Given an integer array arr, partition the array into (contiguous) subarrays of length at most k.
+ * After partitioning, each subarray has their values changed to become the maximum value of that subarray.
+ * Return the largest sum of the given array after partitioning.
  *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ * Approach:
+ * - Dynamic Programming with Memoization.
+ * - Let `solve(i)` represent the maximum partition sum for suffix `[0...i]`.
+ * - Transition: For each length `len` from 1 to `k`, partition the last subarray ending at `i`.
+ *   - `solve(i) = max(solve(j - 1) + max_ele * (i - j + 1))` where `j` ranges from `i` down to `i - k + 1`.
+ *
+ * Time Complexity: O(n * k)
+ * Space Complexity: O(n)
  */
 
 #include <algorithm>
