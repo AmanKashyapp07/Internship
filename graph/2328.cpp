@@ -1,46 +1,76 @@
-#include <bits/stdc++.h>
-using namespace std;
+/**
+ * LeetCode 2328 - Number of Increasing Paths in a Grid
+ *
+ * Description:
+ * Given an m x n grid, count the total number of strictly increasing paths.
+ * A path may start and end at any cell and moves are allowed in the four
+ * adjacent directions.
+ *
+ * Return the answer modulo 1e9 + 7.
+ *
+ * Approach:
+ * - Let dp[r][c] denote the number of increasing paths starting from cell (r, c).
+ * - Every cell itself forms one valid path.
+ * - Use DFS + Memoization.
+ * - From the current cell, recursively visit all neighbors having a larger value.
+ * - Since values must strictly increase, cycles are impossible.
+ *
+ * Time Complexity: O(m * n)
+ * Space Complexity: O(m * n)
+ */
 
 class Solution {
 public:
-    int MOD = 1e9 + 7;
-    int m, n;
+    static constexpr int MOD = 1e9 + 7;
+
+    int rows, cols;
 
     vector<vector<int>> dp;
-    vector<vector<int>> grid;
 
-    vector<pair<int,int>> dirs = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+    int dr[4] = {-1, 0, 1, 0};
+    int dc[4] = {0, 1, 0, -1};
 
-    int dfs(int i, int j) {
-        if (dp[i][j] != -1) return dp[i][j];
+    // Returns the number of increasing paths starting from (r, c)
+    int dfs(int r, int c, vector<vector<int>>& grid) {
 
-        long long res = 1; // path consisting of only this cell
+        // Already computed
+        if (dp[r][c] != -1)
+            return dp[r][c];
 
-        for (auto &d : dirs) {
-            int ni = i + d.first;
-            int nj = j + d.second;
+        // Path containing only the current cell
+        long long paths = 1;
 
-            if (ni >= 0 && ni < m && nj >= 0 && nj < n &&
-                grid[ni][nj] > grid[i][j]) {
-                res = (res + dfs(ni, nj)) % MOD;
-            }
+        // Try moving to all larger neighboring cells
+        for (int k = 0; k < 4; k++) {
+
+            int nr = r + dr[k];
+            int nc = c + dc[k];
+
+            if (nr < 0 || nr >= rows || nc < 0 || nc >= cols)
+                continue;
+
+            if (grid[nr][nc] <= grid[r][c])
+                continue;
+
+            paths = (paths + dfs(nr, nc, grid)) % MOD;
         }
 
-        return dp[i][j] = res;
+        return dp[r][c] = paths;
     }
 
-    int countPaths(vector<vector<int>>& input) {
-        grid = input;
-        m = grid.size();
-        n = grid[0].size();
+    int countPaths(vector<vector<int>>& grid) {
 
-        dp.assign(m, vector<int>(n, -1));
+        rows = grid.size();
+        cols = grid[0].size();
+
+        dp.assign(rows, vector<int>(cols, -1)); // dp[i][j] = number of increasing paths starting from cell (i, j)
 
         long long ans = 0;
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                ans = (ans + dfs(i, j)) % MOD;
+        // Count increasing paths starting from every cell
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                ans = (ans + dfs(r, c, grid)) % MOD;
             }
         }
 
