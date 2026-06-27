@@ -27,7 +27,7 @@ public:
             cnt++;
         }
 
-        if(s.find(b) != string::npos) return cnt;
+        if(s.find(b) != string::npos) return cnt; // s.find(b) returns the index of the first occurrence of b in s, or string::npos if not found. If found, return cnt.
 
         s += a;
 

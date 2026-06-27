@@ -1,60 +1,74 @@
-/**
- * CSES Problem Set
- * 
- * Problem: Sliding Median
- * Link: https://cses.fi/problemset/task/1076
- * Category: Sorting and Searching
- * 
- * Description:
- * Find the median in each sliding window of size k.
- * 
- * Logic/Approach:
- * Two multisets (lo and hi) maintaining lower and upper halves of the window elements.
- */
-
-#include <algorithm>
-#include <iostream>
-#include <set>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
+/**
+ * TWO-MULTISET STRATEGY FOR RUNNING MEDIAN
+ * * We split the numbers inside the current window into two halves:
+ * 1. 'lo' (Lower Half): Stores the smaller half of the elements. 
+ * The largest element here (*lo.rbegin()) is the candidate median.
+ * 2. 'hi' (Upper Half): Stores the larger half of the elements. 
+ * The smallest element here (*hi.begin()) is right above the median.
+ * * Invariant Maintained: 
+ * lo.size() == hi.size()      (for even window sizes) OR
+ * lo.size() == hi.size() + 1  (for odd window sizes)
+ */
 multiset<int> lo, hi;
 
+/**
+ * @brief Restores the size invariant between the two multisets.
+ * Ensures 'lo' contains exactly the same number of elements as 'hi', 
+ * or at most 1 extra element.
+ */
 void balance() {
-    // If lo has more than 1 extra element compared to hi, move the max of lo to hi
-    while (lo.size() > hi.size() + 1) {
+    // Case 1: 'lo' has accumulated too many elements. 
+    // Shift the largest element of 'lo' over to 'hi'.
+    if (lo.size() > hi.size() + 1) {
         hi.insert(*lo.rbegin());
-        lo.erase(prev(lo.end()));
+        lo.erase(prev(lo.end())); // prev(lo.end()) points to the largest element
     }
-
-    // If hi has more elements than lo, move the min of hi to lo
-    while (lo.size() < hi.size()) {
+    // Case 2: 'hi' has more elements than 'lo'.
+    // Shift the smallest element of 'hi' over to 'lo'.
+    else if (lo.size() < hi.size()) {
         lo.insert(*hi.begin());
-        hi.erase(hi.begin());
+        hi.erase(high.begin());
     }
 }
 
+/**
+ * @brief Inserts a new element into the sliding window data structure.
+ * @param x The element to inject.
+ */
 void add(int x) {
-    if (lo.empty() || x <= *lo.rbegin()) 
-        lo.insert(x);
-    else 
-        hi.insert(x);
-
-    balance(); // Maintains relative size dynamically
+    // Ternary Routing: If 'lo' is empty or x is smaller than/equal to the 
+    // maximum element in 'lo', it belongs in the lower half. Otherwise, upper half.
+    (lo.empty() || x <= *lo.rbegin() ? lo : hi).insert(x);
+    
+    // Insertion may break the size invariant; re-balance containers
+    balance();
 }
 
+/**
+ * @brief Removes an expired element that is sliding out of the window.
+ * @param x The element to eject.
+ */
 void remove(int x) {
+    // CRITICAL: Use lo.find(x) instead of lo.erase(x). 
+    // lo.erase(x) deletes ALL duplicate instances of x. 
+    // lo.find(x) returns an iterator to just ONE instance, allowing targeted removal.
     auto it = lo.find(x);
-
-    if (it != lo.end())
-        lo.erase(it);
-    else 
-        hi.erase(hi.find(x)); // We are guaranteed x is in the window, so it must be in hi
-
-    balance(); // Rebalances after the total size temporarily drops
+    
+    if (it != lo.end()) {
+        lo.erase(it); // Element was tracking inside the lower half
+    } else {
+        hi.erase(hi.find(x)); // Element must exist inside the upper half
+    }
+    
+    // Removal may break the size invariant; re-balance containers
+    balance();
 }
 
 int main() {
+    // Fast I/O optimize
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -62,22 +76,25 @@ int main() {
     if (!(cin >> n >> k)) return 0;
 
     vector<int> a(n);
-    for (int &x : a)
-        cin >> x;
+    for (int &x : a) cin >> x;
 
-    for (int i = 0; i < k; i++)
+    // Step 1: Initialize the very first window of size 'k'
+    for (int i = 0; i < k; i++) {
         add(a[i]);
-
-    // Use .rbegin() which is slightly cleaner than prev(lo.end()) for grabbing the max value
-    cout << *lo.rbegin(); 
-
-    for (int i = k; i < n; i++) {
-        remove(a[i - k]);
-        add(a[i]);
-
-        cout << ' ' << *lo.rbegin(); 
     }
+    
+    // The largest element in the lower half is always the median for 
+    // odd 'k', and the lower-bound median for even 'k'.
+    cout << *lo.rbegin();
 
+    // Step 2: Slide the window across the rest of the array
+    for (int i = k; i < n; i++) {
+        remove(a[i - k]); // Eject the element leaving the window trailing edge
+        add(a[i]);       // Inject the new element entering the window leading edge
+        
+        cout << ' ' << *lo.rbegin(); // Print the updated window's median
+    }
     cout << '\n';
+    
     return 0;
 }
