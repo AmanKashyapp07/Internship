@@ -1,124 +1,102 @@
 /**
- * C++ STL Stack Cheat Sheet for Online Assessments & Interviews
+ * ==========================================================
+ *                 C++ Stack Cheat Sheet (OAs)
+ * ==========================================================
  *
- * Description:
- *  A container adaptor that provides LIFO (Last-In, First-Out) access.
- *  It restricts insertion and deletion to only one end (the top).
+ * stack
+ * -----
+ * • Last-In First-Out (LIFO)
+ * • Container adaptor (default deque-backed)
+ * • Restricts access to top only
  *
- * Time & Space Complexity:
- * ┌──────────────────┬──────────────────┬──────────────────────────────────────────┐
- * │ Operation        │ Time Complexity  │ Notes                                    │
- * ├──────────────────┼──────────────────┼──────────────────────────────────────────┤
- * │ push()           │ O(1)             │ Inserts element at the top               │
- * │ pop()            │ O(1)             │ Removes element from the top             │
- * │ top()            │ O(1)             │ Accesses the top element                 │
- * │ size()           │ O(1)             │ Returns number of elements               │
- * │ empty()          │ O(1)             │ Checks if the container is empty         │
- * └──────────────────┴──────────────────┴──────────────────────────────────────────┘
- * Space Complexity: O(N)
+ * ==========================================================
  *
- * Typical Interview Usage:
- *  - Monotonic Stack (to find next greater/smaller element in O(N))
- *  - Nested structures (valid parentheses, parsing expressions, Shunting-Yard)
- *  - Iterative DFS (simulating the recursion stack to avoid depth limits)
+ * Time Complexities
+ * -----------------
  *
- * Interview Tricks & Pitfalls:
- *  - Undefined Behavior: Always check `!s.empty()` before calling `s.top()` or `s.pop()`.
- *    Calling these on an empty stack is a common cause of segmentation faults.
- *  - Performance Tuning: By default, `std::stack` is backed by `std::deque`. You can back it with
- *    a `std::vector` for contiguous memory and better cache performance:
- *    `std::stack<int, std::vector<int>> s;`
- *  - No Clear Method: `std::stack` does not have a `.clear()` member function. To clear it:
- *    `s = std::stack<int>();` or `while (!s.empty()) s.pop();`
+ * stack
+ * -----
+ * push        O(1)
+ * pop         O(1)
+ * top         O(1)
+ * size        O(1)
+ * empty       O(1)
+ *
+ * ==========================================================
  */
 
 #include <iostream>
 #include <stack>
 #include <vector>
 #include <algorithm>
-#include <string>
-
 using namespace std;
-
-/*==========================================================
-=            1. CONSTRUCTION & BASIC OPERATIONS
-==========================================================*/
-
-void basicOperations() {
-    cout << "--- 1. BASIC OPERATIONS ---\n";
-
-    // 1. Default stack (backed by deque)
-    stack<int> s;
-
-    // 2. Custom container stack (backed by vector)
-    stack<int, vector<int>> s_vec;
-
-    s.push(10);
-    s.push(20);
-    s.emplace(30); // Construct in-place
-
-    cout << "Stack size: " << s.size() << "\n"; // 3
-    cout << "Top element: " << s.top() << "\n";  // 30
-
-    s.pop(); // Removes 30
-    cout << "Top after pop: " << s.top() << "\n"; // 20
-
-    // Clear stack
-    s = stack<int>(); // Quick re-initialization
-    cout << "Is empty after clearing: " << (s.empty() ? "Yes" : "No") << "\n\n";
-}
-
-/*==========================================================
-=            2. MONOTONIC STACK (NEXT GREATER ELEMENT)
-==========================================================*/
-
-// Problem: Given an array, find the next greater element for each element.
-// If none exists, output -1.
-vector<int> nextGreaterElement(const vector<int>& nums) {
-    int n = nums.size();
-    vector<int> nge(n, -1);
-    stack<int> s; // Stores indices of elements
-
-    for (int i = 0; i < n; i++) {
-        // While current element is greater than the element at the index on top of stack,
-        // we found the next greater element for that index.
-        while (!s.empty() && nums[i] > nums[s.top()]) {
-            nge[s.top()] = nums[i];
-            s.pop();
-        }
-        s.push(i);
-    }
-    return nge;
-}
-
-void monotonicStackDemo() {
-    cout << "--- 2. MONOTONIC STACK DEMO ---\n";
-    vector<int> nums = {4, 5, 2, 25, 7, 8};
-    vector<int> nge = nextGreaterElement(nums);
-
-    cout << "Next Greater Elements:\n";
-    for (size_t i = 0; i < nums.size(); i++) {
-        cout << nums[i] << " -> " << nge[i] << "\n";
-    }
-    cout << "\n";
-}
-
-/*==========================================================
-=            3. ITERATIVE DFS
-==========================================================*/
 
 struct Node {
     int id;
     vector<int> neighbors;
 };
 
-// Simulates recursive DFS using an explicit stack
-void iterativeDFS(const vector<Node>& graph, int startNode, int numNodes) {
+/*==========================================================
+=            1. BASIC OPERATIONS
+==========================================================*/
+
+void basicOperations() {
+
+    stack<int> s;
+
+    // Vector backed stack for slightly better performance
+    stack<int, vector<int>> s_vec;
+
+    s.push(10);
+    s.push(20);
+    s.emplace(30);
+
+    cout << s.top() << '\n';     // 30
+    s.pop();
+    cout << s.top() << '\n';     // 20
+}
+
+/*==========================================================
+=            2. MONOTONIC STACK (NGE)
+==========================================================*/
+
+void monotonicStackExample() {
+
+    vector<int> nums = {4, 5, 2, 25, 7, 8};
+    int n = nums.size();
+    vector<int> nge(n, -1);
+    stack<int> s;
+
+    for (int i = 0; i < n; i++) {
+        while (!s.empty() && nums[i] > nums[s.top()]) {
+            nge[s.top()] = nums[i];
+            s.pop();
+        }
+        s.push(i);
+    }
+
+    for (int i = 0; i < n; i++) {
+        cout << nums[i] << " -> " << nge[i] << '\n';
+    }
+}
+
+/*==========================================================
+=            3. ITERATIVE DFS
+==========================================================*/
+
+void iterativeDFSDemo() {
+
+    int numNodes = 4;
+    vector<Node> graph(numNodes);
+    graph[0] = {0, {1, 2}};
+    graph[1] = {1, {3}};
+    graph[2] = {2, {3}};
+    graph[3] = {3, {}};
+
     vector<bool> visited(numNodes, false);
     stack<int> s;
 
-    s.push(startNode);
-    cout << "Iterative DFS Traversal path: ";
+    s.push(0);
 
     while (!s.empty()) {
         int curr = s.top();
@@ -128,7 +106,6 @@ void iterativeDFS(const vector<Node>& graph, int startNode, int numNodes) {
             visited[curr] = true;
             cout << curr << " ";
 
-            // Push neighbors to stack in reverse to visit in order
             for (auto it = graph[curr].neighbors.rbegin(); it != graph[curr].neighbors.rend(); ++it) {
                 if (!visited[*it]) {
                     s.push(*it);
@@ -136,50 +113,34 @@ void iterativeDFS(const vector<Node>& graph, int startNode, int numNodes) {
             }
         }
     }
-    cout << "\n\n";
-}
-
-void iterativeDFSDemo() {
-    cout << "--- 3. ITERATIVE DFS DEMO ---\n";
-    // Construct simple graph: 
-    // 0 -> 1, 2
-    // 1 -> 3
-    // 2 -> 3
-    // 3 -> (none)
-    vector<Node> graph(4);
-    graph[0] = {0, {1, 2}};
-    graph[1] = {1, {3}};
-    graph[2] = {2, {3}};
-    graph[3] = {3, {}};
-    
-    iterativeDFS(graph, 0, 4);
+    cout << '\n';
 }
 
 /*==========================================================
-=            COMMON OPERATIONS REFERENCE
+=            4. COMMON OPERATIONS
 ==========================================================*/
 
-/**
- * Common Member Functions:
- * ┌──────────────────┬────────────────────────────┬─────────────────────────────┐
- * │ Function         │ Description                │ Complexity                  │
- * ├──────────────────┼────────────────────────────┼─────────────────────────────┤
- * │ s.push(x)        │ Push element to top        │ O(1)                        │
- * │ s.emplace(args)  │ Construct element on top   │ O(1)                        │
- * │ s.pop()          │ Remove top element         │ O(1)                        │
- * │ s.top()          │ Access top element         │ O(1)                        │
- * │ s.size()         │ Get number of elements     │ O(1)                        │
- * │ s.empty()        │ Check if stack is empty    │ O(1)                        │
- * └──────────────────┴────────────────────────────┴─────────────────────────────┘
- */
+void operations() {
+
+    stack<int> s;
+
+    s.push(10);
+    s.pop();
+
+    cout << s.size() << '\n';
+    cout << s.empty() << '\n';
+    
+    // Clear
+    s = stack<int>();
+}
 
 /*==========================================================
 =            MOST IMPORTANT TEMPLATES FOR OAs
 ==========================================================*/
 
-// 1. Monotonic Stack (Next Greater Element Template)
-// stack<int> s; // stores indices
-// for(int i=0; i<n; ++i) {
+// Monotonic Stack (Next Greater Element)
+// stack<int> s;
+// for(int i=0; i<n; i++) {
 //     while(!s.empty() && arr[s.top()] < arr[i]) {
 //         nge[s.top()] = arr[i];
 //         s.pop();
@@ -187,41 +148,39 @@ void iterativeDFSDemo() {
 //     s.push(i);
 // }
 
-// 2. Performance Optimized Stack
+// Vector Backed Stack
 // stack<int, vector<int>> s;
 
-/*==========================================================
-=            REMEMBER THESE (INTERVIEW SYNTAX)
-==========================================================*/
-
 /*
+==========================================================
+Remember These
+==========================================================
+
 // Initialization
 stack<int> s;
 
-// Basic Operations
+// Operations
 s.push(val);
-s.pop();     // void return, does not return the top value!
-s.top();     // Returns reference to top element
+s.pop();
+s.top();
 
-// Safe access pattern
+// Safe top and pop
 if (!s.empty()) {
     int val = s.top();
     s.pop();
 }
 
-// Clearing stack
-s = stack<int>();
+==========================================================
 */
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
 
-    // Uncomment to test:
+    // Uncomment to test
+
     // basicOperations();
-    // monotonicStackDemo();
+    // monotonicStackExample();
     // iterativeDFSDemo();
+    // operations();
 
     return 0;
 }

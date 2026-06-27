@@ -1,233 +1,201 @@
 /**
- * C++ STL Multiset Cheat Sheet for Online Assessments & Interviews
+ * ==========================================================
+ *               C++ Multiset Cheat Sheet (OAs)
+ * ==========================================================
  *
- * Description:
- *  An associative container that stores elements in sorted order, allowing duplicate values.
- *  Implemented internally as a self-balancing Binary Search Tree (typically a Red-Black Tree).
+ * multiset
+ * --------
+ * • Ordered (sorted ascending by default)
+ * • Implemented using Red-Black Tree
+ * • Duplicate elements allowed
  *
- * Time & Space Complexity:
- * ┌──────────────────┬──────────────────┬──────────────────────────────────────────┐
- * │ Operation        │ Time Complexity  │ Notes                                    │
- * ├──────────────────┼──────────────────┼──────────────────────────────────────────┤
- * │ insert()         │ O(log N)         │ Inserts element                          │
- * │ erase(val)       │ O(log N + K)     │ Erases ALL K copies of val (DANGER!)     │
- * │ erase(iterator)  │ O(1) amortized   │ Erases ONLY the single pointed element   │
- * │ find(val)        │ O(log N)         │ Returns iterator to the FIRST instance   │
- * │ count(val)       │ O(log N + K)     │ Can be LINEAR in duplicates (avoid!)     │
- * │ lower_bound()    │ O(log N)         │ Iterator to first element >= target      │
- * │ upper_bound()    │ O(log N)         │ Iterator to first element > target       │
- * └──────────────────┴──────────────────┴──────────────────────────────────────────┘
- * Space Complexity: O(N)
+ * ==========================================================
  *
- * Typical Interview Usage:
- *  - Sliding Window Median (using iterator tracking or double heaps)
- *  - Range query problems with duplicates (e.g. interval booking/matching)
+ * Time Complexities
+ * -----------------
  *
- * Interview Tricks & Pitfalls:
- *  - THE ERASE BUG (EXTREMELY IMPORTANT): Calling `ms.erase(val)` removes *all* occurrences of `val`.
- *    To remove only a single occurrence, find its iterator first and erase that iterator:
- *    `auto it = ms.find(val); if (it != ms.end()) ms.erase(it);`
- *  - THE COUNT BUG: Calling `ms.count(val)` is NOT O(log N). It is O(log N + K) where K is the number
- *    of duplicate occurrences. If all elements in the multiset are equal, this degrades to O(N).
- *    To check if `val` exists, always use `ms.find(val) != ms.end()` which is strictly O(log N).
+ * multiset
+ * --------
+ * insert      O(log n)
+ * erase(val)  O(log n + k)  // erases all k copies of val
+ * erase(it)   O(1) amortized
+ * find        O(log n)      // returns iterator to first copy
+ * count       O(log n + k)  // can be linear, avoid!
+ * lower_bound O(log n)
+ * upper_bound O(log n)
+ *
+ * ==========================================================
  */
 
 #include <iostream>
 #include <set>
 #include <vector>
 #include <algorithm>
-#include <iterator>
-
 using namespace std;
 
 /*==========================================================
-=            1. CONSTRUCTION & BASIC OPERATIONS
+=            1. DECLARATION & INSERTION
 ==========================================================*/
 
-void basicOperations() {
-    cout << "--- 1. BASIC OPERATIONS ---\n";
-    multiset<int> ms = {5, 2, 8, 5, 2, 5}; // Initializer list
+void declarationExample() {
 
-    cout << "Multiset size: " << ms.size() << "\n"; // 6
-    cout << "Sorted elements: ";
-    for (int x : ms) {
+    multiset<int> ms;
+
+    ms.insert(5);
+    ms.insert(2);
+    ms.insert(5);
+    ms.insert(8);
+    ms.insert(5);
+
+    // Elements are sorted: 2 5 5 5 8
+
+    for (int x : ms)
         cout << x << " ";
-    }
-    // Output: 2 2 5 5 5 8
-    cout << "\n\n";
+    cout << '\n';
 }
 
 /*==========================================================
-=            2. SAFE SEARCH & THE ERASE PITFALL
+=            2. CHECK MEMBERSHIP SAFELY
 ==========================================================*/
 
-void safeSearchAndErase() {
-    cout << "--- 2. SAFE SEARCH & THE ERASE PITFALL ---\n";
+void checkMembership() {
+
     multiset<int> ms = {2, 5, 5, 5, 8};
 
-    // 1. SAFE SEARCH (Avoid ms.count(x))
-    auto find_it = ms.find(5);
-    if (find_it != ms.end()) {
-        cout << "Found 5 in multiset (first occurrence pointer)\n";
+    // ALWAYS use find instead of count to check existence (O(log n))
+    if (ms.find(5) != ms.end()) {
+        cout << "5 exists\n";
     }
-
-    // 2. THE ERASE PITFALL
-    multiset<int> ms_copy1 = ms;
-    multiset<int> ms_copy2 = ms;
-
-    // Erase by value: Erases ALL copies of 5!
-    ms_copy1.erase(5);
-    cout << "After ms_copy1.erase(5) (by value), size: " << ms_copy1.size() << "\n"; // size is 2 (contains 2, 8)
-
-    // Erase by iterator: Erases ONLY ONE copy of 5!
-    auto it = ms_copy2.find(5);
-    if (it != ms_copy2.end()) {
-        ms_copy2.erase(it);
-    }
-    cout << "After iterator erase on ms_copy2, size: " << ms_copy2.size() << "\n"; // size is 4 (contains 2, 5, 5, 8)
-    cout << "\n";
 }
 
 /*==========================================================
-=            3. RANGE QUERIES & BOUNDS
+=            3. THE ERASE PITFALL (CRITICAL)
 ==========================================================*/
 
-void rangeAndBounds() {
-    cout << "--- 3. RANGE QUERIES & BOUNDS ---\n";
+void erasePitfallDemo() {
+
     multiset<int> ms = {2, 5, 5, 5, 8};
 
-    // equal_range returns pair of iterators {lower_bound, upper_bound}
+    multiset<int> ms1 = ms;
+    multiset<int> ms2 = ms;
+
+    // A: Erase by VALUE (erases all copies!)
+    ms1.erase(5); // ms1 becomes {2, 8}
+    cout << "Erase by value size: " << ms1.size() << '\n'; // 2
+
+    // B: Erase by ITERATOR (erases only one copy!)
+    auto it = ms2.find(5);
+    if (it != ms2.end()) {
+        ms2.erase(it); // ms2 becomes {2, 5, 5, 8}
+    }
+    cout << "Erase by iterator size: " << ms2.size() << '\n'; // 4
+}
+
+/*==========================================================
+=            4. RANGE & BOUND QUERIES
+==========================================================*/
+
+void rangeQueriesDemo() {
+
+    multiset<int> ms = {2, 5, 5, 5, 8};
+
+    // equal_range: returns pair of iterators {lower_bound, upper_bound}
     auto [lower, upper] = ms.equal_range(5);
-    int count_fives = 0;
+    int cnt = 0;
     for (auto it = lower; it != upper; ++it) {
-        count_fives++;
+        cnt++;
     }
-    cout << "Number of 5s using equal_range: " << count_fives << "\n"; // 3
+    cout << "Count of 5s: " << cnt << '\n'; // 3
 
     // bounds
-    auto lb = ms.lower_bound(5); // points to first 5
-    auto ub = ms.upper_bound(5); // points to 8 (first element > 5)
-    cout << "First 5: " << *lb << "\n";
-    cout << "Element after last 5: " << *ub << "\n";
+    auto lb = ms.lower_bound(5); // Points to first 5
+    auto ub = ms.upper_bound(5); // Points to 8 (first element > 5)
 
-    // Min and Max elements in O(1)
-    cout << "Min element: " << *ms.begin() << "\n";
-    cout << "Max element: " << *ms.rbegin() << "\n\n";
+    cout << "Min: " << *ms.begin() << '\n';  // 2
+    cout << "Max: " << *ms.rbegin() << '\n'; // 8
 }
 
 /*==========================================================
-=            4. SLIDING WINDOW MEDIAN PATTERN
+=            5. SLIDING WINDOW MEDIAN PATTERN
 ==========================================================*/
 
-// Demonstration of maintaining a median iterator dynamically in a multiset
-vector<double> slidingWindowMedian(const vector<int>& nums, int k) {
-    vector<double> medians;
+void slidingWindowMedianDemo() {
+
+    vector<int> nums = {1, 3, -1, -3, 5, 3, 6, 7};
+    int k = 3;
     multiset<int> window;
 
     for (int i = 0; i < (int)nums.size(); i++) {
-        // Insert new element
         window.insert(nums[i]);
-
-        // Remove element that slid out of window
         if (i >= k) {
-            // Find iterator of the element to erase (using find to erase ONLY ONE)
-            window.erase(window.find(nums[i - k]));
+            window.erase(window.find(nums[i - k])); // Erase one copy!
         }
-
-        // Output median once window is full
         if (i >= k - 1) {
             auto it = window.begin();
-            // Advance to the middle
             advance(it, (k - 1) / 2);
-            if (k % 2 != 0) {
-                medians.push_back((double)*it);
-            } else {
-                auto next_it = next(it);
-                medians.push_back((*it + *next_it) / 2.0);
-            }
+            cout << *it << " "; // Medians: 1 3 -1 3 5 6
         }
     }
-    return medians;
-}
-
-void slidingWindowMedianDemo() {
-    cout << "--- 4. SLIDING WINDOW MEDIAN DEMO ---\n";
-    vector<int> nums = {1, 3, -1, -3, 5, 3, 6, 7};
-    int k = 3;
-    vector<double> medians = slidingWindowMedian(nums, k);
-
-    cout << "Sliding window medians (k=3):\n";
-    for (double val : medians) {
-        cout << val << " ";
-    }
-    cout << "\n\n";
+    cout << '\n';
 }
 
 /*==========================================================
-=            COMMON OPERATIONS REFERENCE
+=            6. COMMON OPERATIONS
 ==========================================================*/
 
-/**
- * Common Member Functions:
- * ┌──────────────────┬────────────────────────────┬─────────────────────────────┐
- * │ Function         │ Description                │ Complexity                  │
- * ├──────────────────┼────────────────────────────┼─────────────────────────────┤
- * │ ms.insert(x)     │ Insert element             │ O(log N)                    │
- * │ ms.erase(x)      │ Erases ALL copies of x     │ O(log N + K)                │
- * │ ms.erase(iterator)│ Erases single copy at it   │ O(1) amortized              │
- * │ ms.find(x)       │ Iterator to first copy     │ O(log N)                    │
- * │ ms.equal_range(x)│ Pair of {first, last + 1}  │ O(log N)                    │
- * │ ms.lower_bound(x)│ Iterator to first >= x     │ O(log N)                    │
- * │ ms.upper_bound(x)│ Iterator to first > x      │ O(log N)                    │
- * └──────────────────┴────────────────────────────┴─────────────────────────────┘
- */
+void operations() {
+
+    multiset<int> ms;
+
+    ms.insert(10);
+    ms.erase(ms.find(10)); // Safe single erase
+
+    cout << ms.size() << '\n';
+    cout << ms.empty() << '\n';
+    ms.clear();
+}
 
 /*==========================================================
 =            MOST IMPORTANT TEMPLATES FOR OAs
 ==========================================================*/
 
-// 1. Safe Single Element Deletion Template
+// Safe single occurrence erase
 // auto it = ms.find(val);
-// if (it != ms.end()) {
-//     ms.erase(it);
-// }
+// if(it != ms.end()) ms.erase(it);
 
-// 2. Safe Element Existence Check (Strictly O(log N))
+// Exists check
 // bool exists = (ms.find(val) != ms.end());
 
-// 3. Count occurrences safely (O(log N + K)) without ms.count()
-// auto [lower, upper] = ms.equal_range(val);
-// int count = distance(lower, upper);
-
-/*==========================================================
-=            REMEMBER THESE (INTERVIEW SYNTAX)
-==========================================================*/
-
 /*
+==========================================================
+Remember These
+==========================================================
+
 // Initialization
 multiset<int> ms;
 
-// Erase Single Occurrence (Crucial!)
+// Erase ALL copies
+ms.erase(val);
+
+// Erase ONE copy
 ms.erase(ms.find(val));
 
 // Check existence
 if (ms.find(val) != ms.end())
 
-// Min & Max
-int min_val = *ms.begin();
-int max_val = *ms.rbegin();
+==========================================================
 */
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
 
-    // Uncomment to test:
-    // basicOperations();
-    // safeSearchAndErase();
-    // rangeAndBounds();
+    // Uncomment to test
+
+    // declarationExample();
+    // checkMembership();
+    // erasePitfallDemo();
+    // rangeQueriesDemo();
     // slidingWindowMedianDemo();
+    // operations();
 
     return 0;
 }
