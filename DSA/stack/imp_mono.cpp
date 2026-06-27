@@ -9,9 +9,7 @@ public:
         for (int i = 0; i <= n; i++) {
 
             while (!st.empty() &&
-                   (i == n || arr[st.top()] >= arr[i])) { // when you want previous smaller element, you need to use >= because we want to pop the elements which are greater than or equal to the current element, so that we can find the previous smaller element for the current element, if we use >, then we will not pop the elements which are equal to the current element, and we will not be able to find the previous smaller element for the current element, so we need to use >=
-                // use >= when you want previous smaller element, use > when you want previous smaller or equal element, use < when you want next smaller element, use <= when you want next smaller or equal element
-
+                   (i == n || arr[st.top()] >= arr[i])) { 
                 int mid = st.top();
                 st.pop();
 
@@ -39,3 +37,6 @@ public:
         return res;
     }
 };
+
+// when you want previous smaller element, you need to use >= because we want to pop the elements which are greater than or equal to the current element, so that we can find the previous smaller element for the current element, if we use >, then we will not pop the elements which are equal to the current element, and we will not be able to find the previous smaller element for the current element, so we need to use >=
+                // use >= when you want previous smaller element, use > when you want previous smaller or equal element, use < when you want next smaller element, use <= when you want next smaller or equal element
