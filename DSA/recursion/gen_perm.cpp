@@ -2,14 +2,14 @@
  * LeetCode 46 - Permutations
  *
  * Description:
- * Given an array of distinct integers, return all the possible permutations. You can return 
+ * Given an array of distinct integers, return all the possible permutations. You can return
  * the answer in any order.
  *
  * Approach:
  * - Backtracking using two methods:
- *   1. Bitmask-based Backtracking (`solve`): Uses a bitmask to track which elements are currently 
+ *   1. Bitmask-based Backtracking (`solve`): Uses a bitmask to track which elements are currently
  *      present in the permutation.
- *   2. Swap-based Backtracking (`solve2`): Swaps elements in place starting from index `idx` to 
+ *   2. Swap-based Backtracking (`solve2`): Swaps elements in place starting from index `idx` to
  *      generate permutations.
  *
  * Time Complexity: O(N! * N) to generate all N! permutations, where N is the size of the array.
@@ -24,7 +24,6 @@ vector<int> arr = {1, 2, 3};
 vector<int> perm;
 vector<vector<int>> ans1;
 vector<vector<int>> ans2;
-
 
 void solve(int mask) {
     if (perm.size() == arr.size()) {

@@ -2,15 +2,15 @@
  * LeetCode 90 - Subsets II
  *
  * Description:
- * Given an integer array nums that may contain duplicates, return all possible subsets (the power set). 
+ * Given an integer array nums that may contain duplicates, return all possible subsets (the power set).
  * The solution set must not contain duplicate subsets.
  *
  * Approach:
  * - Sort the array first to group duplicate elements.
  * - DFS / Backtracking.
- * - At the start of each recursive call, add the current subset `ds` to the results because every 
+ * - At the start of each recursive call, add the current subset `ds` to the results because every
  *   intermediate state is a valid subset.
- * - Iterate through elements starting from `idx`. Avoid duplicate subsets by skipping identical elements 
+ * - Iterate through elements starting from `idx`. Avoid duplicate subsets by skipping identical elements
  *   at the same recursion level using: `if (i > idx && nums[i] == nums[i - 1]) continue;`.
  *
  * Time Complexity: O(2^N * N) where N is the number of elements.
@@ -60,7 +60,6 @@ void generateSubsets(int idx, vi& nums, vi& ds, vector<vi>& ans) {
     ans.pb(ds);
 
     for (int i = idx; i < nums.size(); i++) {
-
         // Skip duplicates at the same level
         if (i > idx && nums[i] == nums[i - 1])
             continue;
@@ -70,7 +69,7 @@ void generateSubsets(int idx, vi& nums, vi& ds, vector<vi>& ans) {
         generateSubsets(i + 1, nums, ds, ans);
 
         ds.pop_back(); // backtrack
-    } // here there is for loop because we are iterating over the array and generating subsets, so we need to backtrack after each recursive call to explore other possibilities, it;s not simple pick 
+    } // here there is for loop because we are iterating over the array and generating subsets, so we need to backtrack after each recursive call to explore other possibilities, it;s not simple pick
 }
 
 int main() {

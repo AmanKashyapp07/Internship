@@ -2,8 +2,8 @@
  * Rat in a Maze - Backtracking
  *
  * Description:
- * Given an N x N grid where 1 represents an open path and 0 represents a blocked path, find all 
- * possible paths from top-left (0, 0) to bottom-right (N-1, N-1). The rat can move Up (U), Down (D), 
+ * Given an N x N grid where 1 represents an open path and 0 represents a blocked path, find all
+ * possible paths from top-left (0, 0) to bottom-right (N-1, N-1). The rat can move Up (U), Down (D),
  * Left (L), and Right (R).
  *
  * Approach:

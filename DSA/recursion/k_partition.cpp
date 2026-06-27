@@ -60,7 +60,7 @@ public:
         int sum = accumulate(nums.begin(), nums.end(), 0);
         if (sum % k != 0) return false;
         target = sum / k;
-        
+
         // Sorting in descending order optimizes search space pruning
         sort(nums.rbegin(), nums.rend());
         if (nums[0] > target) return false;

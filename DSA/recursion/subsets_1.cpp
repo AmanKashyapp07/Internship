@@ -8,7 +8,7 @@
  * Approach:
  * - Backtracking / DFS.
  * - At each step, add the current subset (`current`) to the result.
- * - Iterate `i` from `start` to `nums.size() - 1`, include `nums[i]` in the subset, recurse to `i + 1`, 
+ * - Iterate `i` from `start` to `nums.size() - 1`, include `nums[i]` in the subset, recurse to `i + 1`,
  *   and then backtrack by popping `nums[i]` out of the subset.
  *
  * Time Complexity: O(2^N * N) because there are 2^N subsets and copying each takes O(N) time.

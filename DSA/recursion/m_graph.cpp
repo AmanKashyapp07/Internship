@@ -2,7 +2,7 @@
  * M-Coloring Problem
  *
  * Description:
- * Given an undirected graph represented as an adjacency list and an integer m, determine if the graph 
+ * Given an undirected graph represented as an adjacency list and an integer m, determine if the graph
  * can be colored with at most m colors such that no two adjacent vertices share the same color.
  *
  * Approach:
@@ -42,7 +42,7 @@ private:
             if (isSafe(node, color, colors, graph)) {
                 colors[node] = color; // Choose
                 if (dfs(node + 1, m, n, colors, graph)) return true;
-                
+
                 colors[node] = 0; // Backtrack
             }
         }

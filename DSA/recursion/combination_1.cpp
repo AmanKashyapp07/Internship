@@ -2,8 +2,8 @@
  * LeetCode 39 - Combination Sum
  *
  * Description:
- * Given an array of distinct integers candidates and a target integer target, return a list of all 
- * unique combinations of candidates where the chosen numbers sum to target. The same number may be 
+ * Given an array of distinct integers candidates and a target integer target, return a list of all
+ * unique combinations of candidates where the chosen numbers sum to target. The same number may be
  * chosen from candidates an unlimited number of times.
  *
  * Approach:

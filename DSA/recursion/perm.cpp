@@ -55,7 +55,6 @@ const ll  MOD  = 1e9 + 7;
 // ─────────────────────────────────────────────────────────────────────────────
 
 string kthPermutation(int n, int k) {
-
     vector<int> nums;
 
     // (n-1)!
@@ -72,7 +71,6 @@ string kthPermutation(int n, int k) {
     string ans;
 
     while (!nums.empty()) {
-
         int idx = k / fact;
 
         // Pick outer number
