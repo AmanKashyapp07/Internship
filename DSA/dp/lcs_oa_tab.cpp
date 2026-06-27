@@ -1,24 +1,17 @@
-#include <vector>
-#include <string>
-#include <algorithm>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
 
-/*
-================================================================================
-LCS (Longest Common Subsequence) Tabulation (Bottom-up 2D) Variants
-================================================================================
-*/
-
 // =============================================================================
-// LCS Tabulation Interface Functions
+// 1. Longest Common Subsequence (LCS) - Length & String Reconstruction
 // =============================================================================
 
-int longestCommonSubsequenceTab(string text1, string text2) {
-    int m = text1.length();
-    int n = text2.length();
+int longestCommonSubsequence(string text1, string text2) {
+    int m = text1.length(), n = text2.length();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
     
     for (int i = 1; i <= m; ++i) {
@@ -33,9 +26,8 @@ int longestCommonSubsequenceTab(string text1, string text2) {
     return dp[m][n];
 }
 
-string getLCSTab(string text1, string text2) {
-    int m = text1.length();
-    int n = text2.length();
+string getLCS(string text1, string text2) {
+    int m = text1.length(), n = text2.length();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
     
     for (int i = 1; i <= m; ++i) {
@@ -53,8 +45,7 @@ string getLCSTab(string text1, string text2) {
     while (i > 0 && j > 0) {
         if (text1[i - 1] == text2[j - 1]) {
             lcs.push_back(text1[i - 1]);
-            i--;
-            j--;
+            i--; j--;
         } else if (dp[i - 1][j] > dp[i][j - 1]) {
             i--;
         } else {
@@ -65,9 +56,12 @@ string getLCSTab(string text1, string text2) {
     return lcs;
 }
 
-int longestCommonSubstringTab(string text1, string text2) {
-    int m = text1.length();
-    int n = text2.length();
+// =============================================================================
+// 2. Longest Common Substring (Contiguous Match)
+// =============================================================================
+
+int longestCommonSubstring(string text1, string text2) {
+    int m = text1.length(), n = text2.length();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
     int maxLen = 0;
     
@@ -84,9 +78,12 @@ int longestCommonSubstringTab(string text1, string text2) {
     return maxLen;
 }
 
-string shortestCommonSupersequenceTab(string str1, string str2) {
-    int m = str1.length();
-    int n = str2.length();
+// =============================================================================
+// 3. Shortest Common Supersequence (SCS) - String Reconstruction
+// =============================================================================
+
+string shortestCommonSupersequence(string str1, string str2) {
+    int m = str1.length(), n = str2.length();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
     
     for (int i = 1; i <= m; ++i) {
@@ -104,8 +101,7 @@ string shortestCommonSupersequenceTab(string str1, string str2) {
     while (i > 0 && j > 0) {
         if (str1[i - 1] == str2[j - 1]) {
             scs.push_back(str1[i - 1]);
-            i--;
-            j--;
+            i--; j--;
         } else if (dp[i - 1][j] > dp[i][j - 1]) {
             scs.push_back(str1[i - 1]);
             i--;
@@ -114,44 +110,53 @@ string shortestCommonSupersequenceTab(string str1, string str2) {
             j--;
         }
     }
-    while (i > 0) {
-        scs.push_back(str1[i - 1]);
-        i--;
-    }
-    while (j > 0) {
-        scs.push_back(str2[j - 1]);
-        j--;
-    }
+    
+    while (i > 0) scs.push_back(str1[--i]);
+    while (j > 0) scs.push_back(str2[--j]);
+    
     reverse(scs.begin(), scs.end());
     return scs;
 }
 
-int longestPalindromeSubseqTab(string s) {
+// =============================================================================
+// 4. Longest Palindromic Subsequence (LPS)
+// =============================================================================
+
+int longestPalindromeSubseq(string s) {
     string t = s;
     reverse(t.begin(), t.end());
-    return longestCommonSubsequenceTab(s, t);
+    return longestCommonSubsequence(s, t);
 }
 
-pair<int, int> minOperationsTab(string s1, string s2) {
-    int m = s1.length();
-    int n = s2.length();
-    int lcsLen = longestCommonSubsequenceTab(s1, s2);
-    return {m - lcsLen, n - lcsLen};
+// =============================================================================
+// 5. Minimum Operations to Convert String A to B (Insertions & Deletions)
+// =============================================================================
+
+pair<int, int> minOperations(string s1, string s2) {
+    int m = s1.length(), n = s2.length();
+    int lcsLen = longestCommonSubsequence(s1, s2);
+    return {m - lcsLen, n - lcsLen}; // {deletions, insertions}
 }
 
-int minInsertionsTab(string s) {
-    int n = s.length();
-    int lpsLen = longestPalindromeSubseqTab(s);
-    return n - lpsLen;
+// =============================================================================
+// 6. Minimum Insertions to Make a String Palindrome
+// =============================================================================
+
+int minInsertions(string s) {
+    return s.length() - longestPalindromeSubseq(s);
 }
 
-int longestRepeatingSubseqTab(string s) {
-    int n = s.length();
+// =============================================================================
+// 7. Longest Repeating Subsequence
+// =============================================================================
+
+int longestRepeatingSubsequence(string str) {
+    int n = str.length();
     vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
     
     for (int i = 1; i <= n; ++i) {
         for (int j = 1; j <= n; ++j) {
-            if (s[i - 1] == s[j - 1] && i != j) {
+            if (str[i - 1] == str[j - 1] && i != j) {
                 dp[i][j] = 1 + dp[i - 1][j - 1];
             } else {
                 dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
@@ -161,9 +166,12 @@ int longestRepeatingSubseqTab(string s) {
     return dp[n][n];
 }
 
-int minDistanceTab(string word1, string word2) {
-    int m = word1.length();
-    int n = word2.length();
+// =============================================================================
+// 8. Edit Distance
+// =============================================================================
+
+int minDistance(string word1, string word2) {
+    int m = word1.length(), n = word2.length();
     vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
     
     for (int i = 0; i <= m; ++i) dp[i][0] = i;
@@ -175,9 +183,9 @@ int minDistanceTab(string word1, string word2) {
                 dp[i][j] = dp[i - 1][j - 1];
             } else {
                 dp[i][j] = 1 + min({
-                    dp[i - 1][j],
-                    dp[i][j - 1],
-                    dp[i - 1][j - 1]
+                    dp[i - 1][j],     // Delete
+                    dp[i][j - 1],     // Insert
+                    dp[i - 1][j - 1]  // Replace
                 });
             }
         }
@@ -185,10 +193,14 @@ int minDistanceTab(string word1, string word2) {
     return dp[m][n];
 }
 
-int numDistinctTab(string s, string t) {
-    int m = s.length();
-    int n = t.length();
-    vector<vector<double>> dp(m + 1, vector<vector<double>::value_type>(n + 1, 0));
+// =============================================================================
+// 9. Distinct Subsequences
+// =============================================================================
+
+int numDistinct(string s, string t) {
+    int m = s.length(), n = t.length();
+    // Using unsigned long long to elegantly prevent runtime overflow profiles on LeetCode tests
+    vector<vector<unsigned long long>> dp(m + 1, vector<unsigned long long>(n + 1, 0));
     
     for (int i = 0; i <= m; ++i) {
         dp[i][0] = 1;
@@ -203,30 +215,30 @@ int numDistinctTab(string s, string t) {
             }
         }
     }
-    return (int)dp[m][n];
+    return static_cast<int>(dp[m][n]);
 }
 
 // =============================================================================
-// Local Verification for Tabulation
+// Verification Execution Block
 // =============================================================================
 int main() {
     string s1 = "abcde";
     string s2 = "ace";
     
-    assert(longestCommonSubsequenceTab(s1, s2) == 3);
-    assert(getLCSTab(s1, s2) == "ace");
-    assert(longestCommonSubstringTab("abcde", "abfce") == 2);
-    assert(shortestCommonSupersequenceTab("abac", "cab") == "cabac");
-    assert(longestPalindromeSubseqTab("bbbab") == 4);
+    assert(longestCommonSubsequence(s1, s2) == 3);
+    assert(getLCS(s1, s2) == "ace");
+    assert(longestCommonSubstring("abcde", "abfce") == 2);
+    assert(shortestCommonSupersequence("abac", "cab") == "cabac");
+    assert(longestPalindromeSubseq("bbbab") == 4);
     
-    pair<int, int> opsTab = minOperationsTab("sea", "eat");
-    assert(opsTab.first == 1 && opsTab.second == 1);
+    pair<int, int> ops = minOperations("sea", "eat");
+    assert(ops.first == 1 && ops.second == 1);
     
-    assert(minInsertionsTab("mbadm") == 2);
-    assert(longestRepeatingSubseqTab("aabebcdd") == 3);
-    assert(minDistanceTab("horse", "ros") == 3);
-    assert(numDistinctTab("rabbbit", "rabbit") == 3);
+    assert(minInsertions("mbadm") == 2);
+    assert(longestRepeatingSubsequence("aabebcdd") == 3);
+    assert(minDistance("horse", "ros") == 3);
+    assert(numDistinct("rabbbit", "rabbit") == 3);
     
-    cout << "All LCS Tabulation tests passed successfully!" << endl;
+    cout << "All clean Tabulation tests passed successfully!" << endl;
     return 0;
 }

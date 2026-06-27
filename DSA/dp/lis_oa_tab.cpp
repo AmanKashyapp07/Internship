@@ -1,116 +1,136 @@
+#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 #include <climits>
 #include <cassert>
 
 using namespace std;
 
-/*
-================================================================================
-LIS (Longest Increasing Subsequence) Tabulation (Bottom-up 2D) Variants
-================================================================================
-*/
-
 // =============================================================================
-// LIS Tabulation Interface Functions
+// 1. Classic LIS - Length & String/Array Reconstruction
 // =============================================================================
 
-int lengthOfLISTab(vector<int>& nums) {
+int lengthOfLIS(const vector<int>& nums) {
     int n = nums.size();
-    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
+    if (n == 0) return 0;
     
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            int exclude = dp[idx + 1][prev_idx + 1];
-            int include = 0;
-            if (prev_idx == -1 || nums[idx] > nums[prev_idx]) {
-                include = 1 + dp[idx + 1][idx + 1];
+    vector<int> dp(n, 1);
+    int maxLen = 1;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i]) {
+                dp[i] = max(dp[i], dp[j] + 1);
             }
-            dp[idx][prev_idx + 1] = max(exclude, include);
         }
+        maxLen = max(maxLen, dp[i]);
     }
-    return dp[0][0];
+    return maxLen;
 }
 
-vector<int> getLISTab(vector<int>& nums) {
+vector<int> getLIS(const vector<int>& nums) {
     int n = nums.size();
-    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
-    
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            int exclude = dp[idx + 1][prev_idx + 1];
-            int include = 0;
-            if (prev_idx == -1 || nums[idx] > nums[prev_idx]) {
-                include = 1 + dp[idx + 1][idx + 1];
+    if (n == 0) return {};
+
+    vector<int> dp(n, 1);
+    vector<int> parent(n);
+    for (int i = 0; i < n; ++i) parent[i] = i;
+
+    int lastIdx = 0;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i] && dp[j] + 1 > dp[i]) {
+                dp[i] = dp[j] + 1;
+                parent[i] = j;
             }
-            dp[idx][prev_idx + 1] = max(exclude, include);
+        }
+        if (dp[i] > dp[lastIdx]) {
+            lastIdx = i;
         }
     }
-    
+
     vector<int> lis;
-    int idx = 0, prev_idx = -1;
-    while (idx < n) {
-        int exclude = dp[idx + 1][prev_idx + 1];
-        int include = 0;
-        if (prev_idx == -1 || nums[idx] > nums[prev_idx]) {
-            include = 1 + dp[idx + 1][idx + 1];
-        }
-        
-        if (include >= exclude && (prev_idx == -1 || nums[idx] > nums[prev_idx])) {
-            lis.push_back(nums[idx]);
-            prev_idx = idx;
-        }
-        idx++;
+    while (parent[lastIdx] != lastIdx) {
+        lis.push_back(nums[lastIdx]);
+        lastIdx = parent[lastIdx];
     }
+    lis.push_back(nums[lastIdx]);
+
+    reverse(lis.begin(), lis.end());
     return lis;
 }
 
-int maxEnvelopesTab(vector<vector<int>>& envelopes) {
+// =============================================================================
+// 2. Russian Doll Envelopes (2D LIS Variant)
+// =============================================================================
+
+int maxEnvelopes(vector<vector<int>>& envelopes) {
+    if (envelopes.empty()) return 0;
+    
+    // Sort width ascending, and height descending if widths match
     sort(envelopes.begin(), envelopes.end(), [](const vector<int>& a, const vector<int>& b) {
         if (a[0] == b[0]) return a[1] > b[1];
         return a[0] < b[0];
     });
     
     int n = envelopes.size();
-    vector<int> heights(n);
-    for (int i = 0; i < n; ++i) heights[i] = envelopes[i][1];
+    vector<int> dp(n, 1);
+    int maxEnvs = 1;
     
-    return lengthOfLISTab(heights);
-}
-
-int maxSumISTab(vector<int>& nums) {
-    int n = nums.size();
-    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
-    
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            int exclude = dp[idx + 1][prev_idx + 1];
-            int include = 0;
-            if (prev_idx == -1 || nums[idx] > nums[prev_idx]) {
-                include = nums[idx] + dp[idx + 1][idx + 1];
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (envelopes[j][1] < envelopes[i][1]) {
+                dp[i] = max(dp[i], dp[j] + 1);
             }
-            dp[idx][prev_idx + 1] = max(exclude, include);
         }
+        maxEnvs = max(maxEnvs, dp[i]);
     }
-    return dp[0][0];
+    return maxEnvs;
 }
 
-int longestBitonicSequenceTab(vector<int>& nums) {
+// =============================================================================
+// 3. Maximum Sum Increasing Subsequence (MSIS)
+// =============================================================================
+
+int maxSumIS(const vector<int>& nums) {
+    int n = nums.size();
+    if (n == 0) return 0;
+    
+    vector<int> dp(nums.begin(), nums.end());
+    int maxSum = dp[0];
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i]) {
+                dp[i] = max(dp[i], dp[j] + nums[i]);
+            }
+        }
+        maxSum = max(maxSum, dp[i]);
+    }
+    return maxSum;
+}
+
+// =============================================================================
+// 4. Longest Bitonic Subsequence (Optimized Pass)
+// =============================================================================
+
+int longestBitonicSequence(const vector<int>& nums) {
     int n = nums.size();
     if (n == 0) return 0;
     
     vector<int> lis(n, 1);
     for (int i = 0; i < n; ++i) {
-        vector<int> sub(nums.begin(), nums.begin() + i + 1);
-        lis[i] = lengthOfLISTab(sub);
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i]) lis[i] = max(lis[i], lis[j] + 1);
+        }
     }
     
     vector<int> lds(n, 1);
-    for (int i = 0; i < n; ++i) {
-        vector<int> sub(nums.begin() + i, nums.end());
-        reverse(sub.begin(), sub.end());
-        lds[i] = lengthOfLISTab(sub);
+    for (int i = n - 1; i >= 0; --i) {
+        for (int j = n - 1; j > i; --j) {
+            if (nums[j] < nums[i]) lds[i] = max(lds[i], lds[j] + 1);
+        }
     }
     
     int maxBitonic = 0;
@@ -120,24 +140,30 @@ int longestBitonicSequenceTab(vector<int>& nums) {
     return maxBitonic;
 }
 
-int minimumMountainRemovalsTab(vector<int>& nums) {
+// =============================================================================
+// 5. Minimum Number of Removals to Make Mountain Array (Optimized Pass)
+// =============================================================================
+
+int minimumMountainRemovals(const vector<int>& nums) {
     int n = nums.size();
     
     vector<int> lis(n, 1);
     for (int i = 0; i < n; ++i) {
-        vector<int> sub(nums.begin(), nums.begin() + i + 1);
-        lis[i] = lengthOfLISTab(sub);
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i]) lis[i] = max(lis[i], lis[j] + 1);
+        }
     }
     
     vector<int> lds(n, 1);
-    for (int i = 0; i < n; ++i) {
-        vector<int> sub(nums.begin() + i, nums.end());
-        reverse(sub.begin(), sub.end());
-        lds[i] = lengthOfLISTab(sub);
+    for (int i = n - 1; i >= 0; --i) {
+        for (int j = n - 1; j > i; --j) {
+            if (nums[j] < nums[i]) lds[i] = max(lds[i], lds[j] + 1);
+        }
     }
     
     int maxMountainLen = 0;
     for (int i = 0; i < n; ++i) {
+        // A mountain peak requires both a strictly increasing and decreasing side
         if (lis[i] > 1 && lds[i] > 1) {
             maxMountainLen = max(maxMountainLen, lis[i] + lds[i] - 1);
         }
@@ -145,111 +171,136 @@ int minimumMountainRemovalsTab(vector<int>& nums) {
     return n - maxMountainLen;
 }
 
-int findNumberOfLISTab(vector<int>& nums) {
+// =============================================================================
+// 6. Number of Longest Increasing Subsequences
+// =============================================================================
+
+int findNumberOfLIS(const vector<int>& nums) {
     int n = nums.size();
-    vector<vector<pair<int, int>>> dp(n + 1, vector<pair<int, int>>(n + 1, {0, 0}));
-    
-    for (int prev_idx = 0; prev_idx <= n; ++prev_idx) {
-        dp[n][prev_idx] = {0, 1};
-    }
-    
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            pair<int, int> exclude = dp[idx + 1][prev_idx + 1];
-            
-            pair<int, int> include = {0, 0};
-            if (prev_idx == -1 || nums[idx] > nums[prev_idx]) {
-                pair<int, int> nextRes = dp[idx + 1][idx + 1];
-                include = {1 + nextRes.first, nextRes.second};
+    if (n == 0) return 0;
+
+    vector<int> len(n, 1), count(n, 1);
+    int maxLen = 1;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] < nums[i]) {
+                if (len[j] + 1 > len[i]) {
+                    len[i] = len[j] + 1;
+                    count[i] = count[j];
+                } else if (len[j] + 1 == len[i]) {
+                    count[i] += count[j];
+                }
             }
-            
-            int maxLen = max(exclude.first, include.first);
-            int ways = 0;
-            if (exclude.first == maxLen) ways += exclude.second;
-            if (include.first == maxLen) ways += include.second;
-            
-            dp[idx][prev_idx + 1] = {maxLen, ways};
+        }
+        maxLen = max(maxLen, len[i]);
+    }
+
+    int totalLIS = 0;
+    for (int i = 0; i < n; ++i) {
+        if (len[i] == maxLen) {
+            totalLIS += count[i];
         }
     }
-    return dp[0][0].second;
-}
-
-int lengthOfLNDSTab(vector<int>& nums) {
-    int n = nums.size();
-    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
-    
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            int exclude = dp[idx + 1][prev_idx + 1];
-            int include = 0;
-            if (prev_idx == -1 || nums[idx] >= nums[prev_idx]) {
-                include = 1 + dp[idx + 1][idx + 1];
-            }
-            dp[idx][prev_idx + 1] = max(exclude, include);
-        }
-    }
-    return dp[0][0];
-}
-
-bool increasingTripletTab(vector<int>& nums) {
-    return lengthOfLISTab(nums) >= 3;
-}
-
-int findLongestChainTab(vector<vector<int>>& pairs) {
-    sort(pairs.begin(), pairs.end(), [](const vector<int>& a, const vector<int>& b) {
-        return a[0] < b[0];
-    });
-    int n = pairs.size();
-    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
-    
-    for (int idx = n - 1; idx >= 0; --idx) {
-        for (int prev_idx = idx - 1; prev_idx >= -1; --prev_idx) {
-            int exclude = dp[idx + 1][prev_idx + 1];
-            int include = 0;
-            if (prev_idx == -1 || pairs[idx][0] > pairs[prev_idx][1]) {
-                include = 1 + dp[idx + 1][idx + 1];
-            }
-            dp[idx][prev_idx + 1] = max(exclude, include);
-        }
-    }
-    return dp[0][0];
+    return totalLIS;
 }
 
 // =============================================================================
-// Local Verification for Tabulation
+// 7. Longest Non-Decreasing Subsequence (a_i <= a_j)
+// =============================================================================
+
+int lengthOfLNDS(const vector<int>& nums) {
+    int n = nums.size();
+    if (n == 0) return 0;
+    
+    vector<int> dp(n, 1);
+    int maxLen = 1;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (nums[j] <= nums[i]) {
+                dp[i] = max(dp[i], dp[j] + 1);
+            }
+        }
+        maxLen = max(maxLen, dp[i]);
+    }
+    return maxLen;
+}
+
+// =============================================================================
+// 8. Increasing Triplet Subsequence (Optimal O(N) Time, O(1) Space Approach)
+// =============================================================================
+
+bool increasingTriplet(const vector<int>& nums) {
+    int first = INT_MAX, second = INT_MAX;
+    for (int num : nums) {
+        if (num <= first) {
+            first = num;
+        } else if (num <= second) {
+            second = num;
+        } else {
+            return true; // Found an element greater than both first and second
+        }
+    }
+    return false;
+}
+
+// =============================================================================
+// 9. Longest Chain of Pairs
+// =============================================================================
+
+int findLongestChain(vector<vector<int>>& pairs) {
+    if (pairs.empty()) return 0;
+    sort(pairs.begin(), pairs.end());
+
+    int n = pairs.size();
+    vector<int> dp(n, 1);
+    int maxChain = 1;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (pairs[j][1] < pairs[i][0]) {
+                dp[i] = max(dp[i], dp[j] + 1);
+            }
+        }
+        maxChain = max(maxChain, dp[i]);
+    }
+    return maxChain;
+}
+
+// =============================================================================
+// Local Verification Execution Block
 // =============================================================================
 int main() {
     vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
+    assert(lengthOfLIS(nums) == 4);
     
-    assert(lengthOfLISTab(nums) == 4);
-    
-    vector<int> lisTab = getLISTab(nums);
-    assert(lisTab.size() == 4);
+    vector<int> expectedLIS = {2, 3, 7, 18};
+    assert(getLIS(nums) == expectedLIS);
     
     vector<vector<int>> envs = {{5, 4}, {6, 4}, {6, 7}, {2, 3}};
-    assert(maxEnvelopesTab(envs) == 3);
+    assert(maxEnvelopes(envs) == 3);
     
-    vector<int> numsMSIS = {1, 101, 2, 3, 100, 4, 5};
-    assert(maxSumISTab(numsMSIS) == 106);
+    vector<int> msisNums = {1, 101, 2, 3, 100, 4, 5};
+    assert(maxSumIS(msisNums) == 106);
     
     vector<int> bitonicNums = {1, 11, 2, 10, 4, 5, 2, 1};
-    assert(longestBitonicSequenceTab(bitonicNums) == 6);
+    assert(longestBitonicSequence(bitonicNums) == 6);
     
     vector<int> mountainNums = {2, 1, 1, 5, 6, 2, 3, 1};
-    assert(minimumMountainRemovalsTab(mountainNums) == 3);
+    assert(minimumMountainRemovals(mountainNums) == 3);
     
-    vector<int> numLISNums = {1, 3, 5, 4, 7};
-    assert(findNumberOfLISTab(numLISNums) == 2);
+    vector<int> countLISNums = {1, 3, 5, 4, 7};
+    assert(findNumberOfLIS(countLISNums) == 2);
     
-    vector<int> lndsNums = {1, 2, 2, 3};
-    assert(lengthOfLNDSTab(lndsNums) == 4);
+    vector<int> lndsNums = {1, 4, 2, 2, 3};
+    assert(lengthOfLNDS(lndsNums) == 4);
     
-    vector<int> tripletNums = {2, 1, 5, 0, 4, 6};
-    assert(increasingTripletTab(tripletNums) == true);
+    assert(increasingTriplet(countLISNums) == true);
     
-    vector<vector<int>> pairs = {{1, 2}, {7, 8}, {4, 5}};
-    assert(findLongestChainTab(pairs) == 3);
+    vector<vector<int>> pairs = {{1, 2}, {2, 3}, {3, 4}};
+    assert(findLongestChain(pairs) == 2);
     
-    cout << "All LIS Tabulation tests passed successfully!" << endl;
+    cout << "All clean LIS Tabulation and optimized tests passed successfully!" << endl;
     return 0;
 }
