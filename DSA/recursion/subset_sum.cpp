@@ -1,8 +1,21 @@
 /**
- * Subset Sum : Sum of all Subsets
- * Two Approaches:
- * 1. Recursion / Backtracking
- * 2. Bit Manipulation
+ * Subset Sums
+ *
+ * Description:
+ * Given a list of N integers, return the sums of all subsets. Output should be sorted.
+ *
+ * Approach:
+ * - Two alternative approaches are implemented:
+ *   1. Recursion / Backtracking (`generateSubsetSums` and `generateSubsetSumsBacktracking`): 
+ *      For each element, we have two choices: either include it in the sum or exclude it. 
+ *      Recursion is done for both branches.
+ *   2. Bit Manipulation (`subsetSumBitmask`): 
+ *      Each subset is represented by a bitmask from 0 to (2^N - 1). For each mask, we sum up 
+ *      elements whose corresponding bit is set.
+ * - Finally, the resulting sums are sorted.
+ *
+ * Time Complexity: O(2^N * log(2^N)) where N is the size of the array, dominated by sorting the 2^N subset sums.
+ * Space Complexity: O(2^N) to store all subset sums and O(N) for the recursion stack.
  */
 
 #include <algorithm>

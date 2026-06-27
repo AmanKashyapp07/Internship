@@ -1,13 +1,20 @@
 /**
- * Subset II | Print all Unique Subsets
+ * LeetCode 90 - Subsets II
  *
- * Given an integer array that may contain duplicates,
- * print all unique subsets.
+ * Description:
+ * Given an integer array nums that may contain duplicates, return all possible subsets (the power set). 
+ * The solution set must not contain duplicate subsets.
  *
  * Approach:
- * 1. Sort the array.
- * 2. Generate subsets using backtracking.
- * 3. Skip duplicate elements at the same recursion level.
+ * - Sort the array first to group duplicate elements.
+ * - DFS / Backtracking.
+ * - At the start of each recursive call, add the current subset `ds` to the results because every 
+ *   intermediate state is a valid subset.
+ * - Iterate through elements starting from `idx`. Avoid duplicate subsets by skipping identical elements 
+ *   at the same recursion level using: `if (i > idx && nums[i] == nums[i - 1]) continue;`.
+ *
+ * Time Complexity: O(2^N * N) where N is the number of elements.
+ * Space Complexity: O(N) for the recursion stack and current path.
  */
 
 #include <algorithm>

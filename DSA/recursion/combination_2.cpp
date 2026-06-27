@@ -1,3 +1,22 @@
+/**
+ * LeetCode 40 - Combination Sum II
+ *
+ * Description:
+ * Given a collection of candidate numbers (candidates) and a target number (target), find all 
+ * unique combinations in candidates where the candidate numbers sum to target. Each number in 
+ * candidates may only be used once in the combination.
+ *
+ * Approach:
+ * - Sort candidates to group duplicate elements and enable pruning.
+ * - Backtracking / DFS traversal.
+ * - To prevent duplicate combinations, skip identical elements at the same recursion depth 
+ *   using: `if (i > start && a[i] == a[i - 1]) continue;`.
+ * - Pruning: Stop exploring if the current element exceeds the remaining target (`if (a[i] > target) break;`).
+ *
+ * Time Complexity: O(2^N) in the worst case.
+ * Space Complexity: O(N) for the recursion stack and current path.
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>

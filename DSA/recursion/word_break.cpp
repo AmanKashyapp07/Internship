@@ -1,3 +1,24 @@
+/**
+ * LeetCode 139 - Word Break
+ *
+ * Description:
+ * Given a string s and a dictionary of strings wordDict, return true if s can be segmented into 
+ * a space-separated sequence of one or more dictionary words.
+ *
+ * Approach:
+ * - Dynamic Programming (Memoization) + Rolling Hash optimization.
+ * - `FastHash` class uses polynomial rolling hash to precompute prefix hashes of string s, enabling 
+ *   O(1) lookup of any substring hash.
+ * - Hash all dictionary words into `dictHash` and collect unique word lengths in `lengths`.
+ * - Recursive function `solve(i)` checks if a prefix of length `len` starting at index `i` matches 
+ *   any dictionary word hash. If a match is found and `solve(i + len)` returns true, memoize 
+ *   and return true.
+ *
+ * Time Complexity: O(N * L) where N is the length of string s and L is the number of unique word lengths 
+ *                  in the dictionary (L <= N).
+ * Space Complexity: O(N + M) where M is the number of words in wordDict, for storing DP array and word hashes.
+ */
+
 #include <vector>
 #include <string>
 #include <unordered_set>

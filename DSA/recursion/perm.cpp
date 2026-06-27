@@ -1,16 +1,18 @@
 /**
- * CSES Problem Set
+ * LeetCode 60 - Permutation Sequence
  *
- * Problem: K-th Permutation Sequence
+ * Description:
+ * Given n and k, return the kth permutation sequence of numbers from 1 to n.
  *
  * Approach:
- * - Use factorial number system.
- * - Each digit belongs to a block of size (n-1)!.
- * - Find block index = k / blockSize.
- * - Pick that number, remove it, and recurse/iterate on remaining numbers.
+ * - Mathematical approach using the Factorial Number System.
+ * - With n elements, there are n! total permutations. The first digit has blocks of size (n-1)!.
+ * - Determine the index of the digit to pick: `idx = k / fact`.
+ * - Add `nums[idx]` to the output, erase it from the available list, and update k: `k %= fact`.
+ * - Reduce block size: `fact /= remaining_count`.
  *
- * Time Complexity: O(N²)
- * Space Complexity: O(N)
+ * Time Complexity: O(N^2) due to vector element erasure in each step.
+ * Space Complexity: O(N) to store the list of available numbers.
  */
 
 #include <algorithm>

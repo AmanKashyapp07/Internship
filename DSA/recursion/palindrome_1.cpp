@@ -1,3 +1,20 @@
+/**
+ * LeetCode 131 - Palindrome Partitioning
+ *
+ * Description:
+ * Given a string s, partition s such that every substring of the partition is a palindrome. 
+ * Return all possible palindrome partitionings of s.
+ *
+ * Approach:
+ * - Precompute palindrome flags using Dynamic Programming (`pal[i][j]` stores whether `s[i...j]` is a palindrome).
+ * - DFS / Backtracking.
+ * - From current index `idx`, try to form a palindromic substring ending at `j`. If `pal[idx][j]` is true, 
+ *   add `s[idx...j]` to the current path, recurse to `dfs(j + 1)`, and then backtrack.
+ * - Base Case: When `idx == n`, the entire string has been successfully partitioned.
+ *
+ * Time Complexity: O(N * 2^N) where N is the length of the string. There are 2^(N-1) possible partition splits.
+ * Space Complexity: O(N^2) for the palindrome table and O(N) for recursion depth.
+ */
 
 #include <algorithm>
 #include <array>
