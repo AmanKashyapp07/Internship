@@ -1,13 +1,13 @@
 /**
  * CSES Problem Set
- * 
+ *
  * Problem: Prime Multiples
  * Link: https://cses.fi/problemset/task/2185
  * Category: Mathematics
- * 
+ *
  * Description:
  * Count integers up to n divisible by at least one of the k primes.
- * 
+ *
  * Logic/Approach:
  * Principle of Inclusion-Exclusion (PIE) generated recursively.
  */
@@ -15,25 +15,22 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-void generateSubsets(int idx,
-                     vector<long long>& primes,
-                     vector<pair<long long, int>>& subsets,
-                     long long product,
-                     int cnt,
-                     long long n) {
+vector<long long> primes;
+vector<pair<long long, int>> subsets;
+
+void generateSubsets(int idx, long long product, int cnt, long long n) {
     if (idx == primes.size()) {
-        if (cnt > 0)
+        if (cnt > 0) {
             subsets.push_back({product, cnt});
+        }
         return;
     }
 
     if (product <= n / primes[idx]) {
-        generateSubsets(idx + 1, primes, subsets,
-                        product * primes[idx], cnt + 1, n);
+        generateSubsets(idx + 1, product * primes[idx], cnt + 1, n);
     }
 
-    generateSubsets(idx + 1, primes, subsets,
-                    product, cnt, n);
+    generateSubsets(idx + 1, product, cnt, n);
 }
 
 int main() {
@@ -44,23 +41,21 @@ int main() {
     int k;
     cin >> n >> k;
 
-    vector<long long> primes(k);
+    primes.resize(k);
     for (int i = 0; i < k; i++) {
         cin >> primes[i];
     }
 
-    vector<pair<long long, int>> subsets;
-    generateSubsets(0, primes, subsets, 1, 0, n);
+    generateSubsets(0, 1, 0, n);
 
     long long answer = 0;
-
     for (auto [product, cnt] : subsets) {
         long long cur = n / product;
-
-        if (cnt & 1)
+        if (cnt & 1) {
             answer += cur;
-        else
+        } else {
             answer -= cur;
+        }
     }
 
     cout << answer << '\n';

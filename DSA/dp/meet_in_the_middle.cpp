@@ -63,11 +63,14 @@ signed main() {
     vector<int> left, right;
     left=generateSums(vector<int>(a.begin(), a.begin() + n / 2));
     right=generateSums(vector<int>(a.begin() + n / 2, a.end()));
+
     sort(right.begin(), right.end());
+    map<int,int> rightCount;
+    for (int sum : right) rightCount[sum]++;
     int count = 0;
     for (int sum : left) {
         int target = x - sum;
-        count += upper_bound(right.begin(), right.end(), target) - lower_bound(right.begin(), right.end(), target);
+        count += rightCount[target];
     }
     cout << count << "\n";
     return 0;
