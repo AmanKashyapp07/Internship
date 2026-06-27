@@ -6,10 +6,10 @@
  *
  * Approach:
  * - Sort the projects by start day.
- * - Use Dynamic Programming with Memoization + Binary Search (`upper_bound`).
+ * - Use Dynamic Programming with Memoization + Binary Search (`lower_bound`).
  * - For each project `idx`:
  *   - Option 1 (Skip): `solve(idx+1)`.
- *   - Option 2 (Take): `reward + solve(next_available_idx)` where `next_available_idx` is found using binary search on start days > current project end day.
+ *   - Option 2 (Take): `reward + solve(nextIdx)` where `nextIdx` is found using binary search on start days > current project end day.
  *
  * Time Complexity: O(n log n)
  * Space Complexity: O(n)
@@ -27,26 +27,26 @@ struct Project {
 
 class Solution {
 public:
-    int n_;
-    vector<Project> a_;
-    vector<long long> dp_;
+    int size;
+    vector<Project> input;
+    vector<long long> memo;
 
     long long solve(int idx) {
-        if (idx == n_) return 0;
-        if (dp_[idx] != -1) return dp_[idx];
+        if (idx == size) return 0;
+        if (memo[idx] != -1) return memo[idx];
         long long exclude = solve(idx + 1);
-        // Binary search for the first project starting after the current project ends (a_[idx].r)
-        Project target = {a_[idx].r + 1, 0, 0};
-        int next_idx = lower_bound(a_.begin() + idx + 1, a_.end(), target) - a_.begin();
-        long long include = a_[idx].val + solve(next_idx);
-        return dp_[idx] = max(exclude, include);
+        // Binary search for the first project starting after the current project ends (input[idx].r)
+        Project target = {input[idx].r + 1, 0, 0};
+        int nextIdx = lower_bound(input.begin() + idx + 1, input.end(), target) - input.begin();
+        long long include = input[idx].val + solve(nextIdx);
+        return memo[idx] = max(exclude, include);
     }
 
     long long getMaxReward(int n, vector<Project>& a) {
-        n_ = n;
-        a_ = a;
-        sort(a_.begin(), a_.end());
-        dp_.assign(n_, -1);
+        size = n;
+        input = a;
+        sort(input.begin(), input.end());
+        memo.assign(size, -1);
         return solve(0);
     }
 };

@@ -22,51 +22,59 @@
 
 using namespace std;
 
-/* ---------------- Memoization ---------------- */
+class Solution {
+public:
+    vector<int> coinValues;
+    vector<vector<int>> memo;
 
-int solveMemo(int ind, int len, vector<int> &price, vector<vector<int>> &dp) {
-    if (ind == 0) return len * price[0];
-    if (dp[ind][len] != -1) return dp[ind][len];
+    /* ---------------- Memoization ---------------- */
 
-    int notTake = solveMemo(ind - 1, len, price, dp);
-    int take = 0;
-    int rodLength = ind + 1;
+    int solve(int ind, int lengthVal) {
+        if (ind == 0) return lengthVal * coinValues[0];
+        if (memo[ind][lengthVal] != -1) return memo[ind][lengthVal];
 
-    if (rodLength <= len) {
-        take = price[ind] + solveMemo(ind, len - rodLength, price, dp);
-    }
-
-    return dp[ind][len] = max(take, notTake);
-}
-
-int rodCuttingMemo(vector<int> &price, int n) {
-    vector<vector<int>> dp(n, vector<int>(n + 1, -1));
-    return solveMemo(n - 1, n, price, dp);
-}
-
-/* ---------------- Tabulation ---------------- */
-
-int rodCuttingTab(vector<int> &price, int n) {
-    vector<vector<int>> dp(n, vector<int>(n + 1, 0));
-
-    for (int len = 0; len <= n; len++) {
-        dp[0][len] = len * price[0];
-    }
-
-    for (int ind = 1; ind < n; ind++) {
+        int notTake = solve(ind - 1, lengthVal);
+        int take = 0;
         int rodLength = ind + 1;
-        for (int len = 0; len <= n; len++) {
-            int notTake = dp[ind - 1][len];
-            int take = 0;
-            if (rodLength <= len) {
-                take = price[ind] + dp[ind][len - rodLength];
-            }
-            dp[ind][len] = max(take, notTake);
+
+        if (rodLength <= lengthVal) {
+            take = coinValues[ind] + solve(ind, lengthVal - rodLength);
         }
+
+        return memo[ind][lengthVal] = max(take, notTake);
     }
 
-    return dp[n - 1][n];
-}
+    int rodCuttingMemo(vector<int> &price, int n) {
+        coinValues = price;
+        memo.assign(n, vector<int>(n + 1, -1));
+        return solve(n - 1, n);
+    }
+
+    /* ---------------- Tabulation ---------------- */
+
+    int rodCuttingTab(vector<int> &price, int n) {
+        coinValues = price;
+        memo.assign(n, vector<int>(n + 1, 0));
+
+        for (int lengthVal = 0; lengthVal <= n; lengthVal++) {
+            memo[0][lengthVal] = lengthVal * coinValues[0];
+        }
+
+        for (int ind = 1; ind < n; ind++) {
+            int rodLength = ind + 1;
+            for (int lengthVal = 0; lengthVal <= n; lengthVal++) {
+                int notTake = memo[ind - 1][lengthVal];
+                int take = 0;
+                if (rodLength <= lengthVal) {
+                    take = coinValues[ind] + memo[ind][lengthVal - rodLength];
+                }
+                memo[ind][lengthVal] = max(take, notTake);
+            }
+        }
+
+        return memo[n - 1][n];
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -80,8 +88,10 @@ int main() {
         cin >> price[i];
     }
 
-    cout << "Memoization: " << rodCuttingMemo(price, n) << '\n';
-    cout << "Tabulation: " << rodCuttingTab(price, n) << '\n';
+    Solution solver;
+    vector<int> priceCopy = price;
+    cout << "Memoization: " << solver.rodCuttingMemo(price, n) << '\n';
+    cout << "Tabulation: " << solver.rodCuttingTab(priceCopy, n) << '\n';
 
     return 0;
 }

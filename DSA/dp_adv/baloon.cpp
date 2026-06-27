@@ -23,22 +23,35 @@
 
 using namespace std;
 
-int maxCoins(int i, int j, vector<int>& balloon, vector<vector<int>>& dp) {
-    // base case: we will also allow single balloon, then cost will be balloon[i-1]*balloon[i]*balloon[i+1]
-    if (i > j) return 0; 
-    if (dp[i][j] != -1) return dp[i][j];
+class Solution {
+public:
+    vector<int> input;
+    vector<vector<int>> memo;
 
-    int ans = INT_MIN;
-    for (int k = i; k <= j; k++) {
-        int coins = balloon[k];
-        if (i > 0) coins *= balloon[i - 1];
-        if (j < (int)balloon.size() - 1) coins *= balloon[j + 1];
+    int solve(int i, int j) {
+        // base case: we will also allow single balloon, then cost will be balloon[i-1]*balloon[i]*balloon[i+1]
+        if (i > j) return 0; 
+        if (memo[i][j] != -1) return memo[i][j];
 
-        ans = max(ans, coins + maxCoins(i, k - 1, balloon, dp) + maxCoins(k + 1, j, balloon, dp));
+        int ans = INT_MIN;
+        for (int k = i; k <= j; k++) {
+            int coins = input[k];
+            if (i > 0) coins *= input[i - 1];
+            if (j < (int)input.size() - 1) coins *= input[j + 1];
+
+            ans = max(ans, coins + solve(i, k - 1) + solve(k + 1, j));
+        }
+
+        return memo[i][j] = ans;
     }
 
-    return dp[i][j] = ans;
-}
+    int maxCoins(vector<int>& balloon) {
+        input = balloon;
+        int n = balloon.size();
+        memo.assign(n, vector<int>(n, -1));
+        return solve(0, n - 1);
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -52,7 +65,7 @@ int main() {
         cin >> balloon[i];
     }
 
-    vector<vector<int>> dp(n, vector<int>(n, -1));
-    cout << maxCoins(0, n - 1, balloon, dp) << "\n";
+    Solution solver;
+    cout << solver.maxCoins(balloon) << "\n";
     return 0;
 }

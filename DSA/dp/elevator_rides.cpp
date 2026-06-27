@@ -23,26 +23,26 @@ using namespace std;
 
 class Solution {
 public:
-    int n_;
-    int x_;
-    vector<int> w_;
-    vector<pair<int, int>> dp_;
+    int size;
+    int limit;
+    vector<int> input;
+    vector<pair<int, int>> memo;
 
     int getMinElevatorRides(int n, int x, vector<int>& w) {
-        n_ = n;
-        x_ = x;
-        w_ = w;
+        size = n;
+        limit = x;
+        input = w;
 
-        int N = 1 << n_;
-        dp_.assign(N, {n_ + 1, 0}); // dp stores (number of rides, weight in last ride)
+        int N = 1 << size;
+        memo.assign(N, {size + 1, 0}); // dp stores (number of rides, weight in last ride)
 
         // No person selected
-        dp_[0] = {1, 0};
+        memo[0] = {1, 0};
 
         for (int mask = 0; mask < N; mask++) {
-            auto [rides, lastWeight] = dp_[mask];
+            auto [rides, lastWeight] = memo[mask];
 
-            for (int i = 0; i < n_; i++) {
+            for (int i = 0; i < size; i++) {
                 // Person already selected
                 if (mask & (1 << i))
                     continue;
@@ -51,19 +51,19 @@ public:
                 pair<int, int> cur; // cur is the new state after adding person i
 
                 // Put person i in current ride, because it doesn't exceed the weight limit
-                if (lastWeight + w_[i] <= x_) {
-                    cur = {rides, lastWeight + w_[i]};
+                if (lastWeight + input[i] <= limit) {
+                    cur = {rides, lastWeight + input[i]};
                 }
                 // Start a new ride, because adding person i exceeds the weight limit
                 else {
-                    cur = {rides + 1, w_[i]};
+                    cur = {rides + 1, input[i]};
                 }
 
-                dp_[newMask] = min(dp_[newMask], cur);
+                memo[newMask] = min(memo[newMask], cur);
             }
         }
 
-        return dp_[N - 1].first;
+        return memo[N - 1].first;
     }
 };
 

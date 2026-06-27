@@ -22,21 +22,21 @@ using namespace std;
 
 class Solution {
 public:
-    int n_;
-    vector<int> memo_;
+    int size;
+    vector<int> memo;
 
     int solve(int mask) {
         int i = __builtin_popcount(mask);   // current position (0-based)
 
-        if (i == n_)
+        if (i == size)
             return 1;
 
-        if (memo_[mask] != -1)
-            return memo_[mask];
+        if (memo[mask] != -1)
+            return memo[mask];
 
         int ans = 0;
 
-        for (int num = 0; num < n_; num++) {   // numbers are 0-based
+        for (int num = 0; num < size; num++) {   // numbers are 0-based
             if ((mask & (1 << num)) == 0) {
 
                 // actual number = num + 1
@@ -47,12 +47,12 @@ public:
             }
         }
 
-        return memo_[mask] = ans;
+        return memo[mask] = ans;
     }
 
     int countArrangement(int n) {
-        n_ = n;
-        memo_.assign(1 << n, -1);
+        size = n;
+        memo.assign(1 << n, -1);
         return solve(0);
     }
 };

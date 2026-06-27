@@ -58,38 +58,38 @@ const ll MOD = 1e9 + 7;
 class Solution
 {
 public:
-    vector<vector<vector<int>>> dp_;
-    vector<int> group_;
-    vector<int> profit_;
-    int minProfit_;
+    vector<vector<vector<int>>> memo;
+    vector<int> groupMembers;
+    vector<int> profitValues;
+    int minProfitRequired;
 
     int helper(int idx, int members, int currProfit)
     {
-        if (idx == group_.size())
-            return currProfit >= minProfit_;
+        if (idx == groupMembers.size())
+            return currProfit >= minProfitRequired;
 
-        if (dp_[idx][members][currProfit] != -1)
-            return dp_[idx][members][currProfit];
+        if (memo[idx][members][currProfit] != -1)
+            return memo[idx][members][currProfit];
 
         long long ans = helper(idx + 1, members, currProfit);
 
-        if (group_[idx] <= members)
+        if (groupMembers[idx] <= members)
         {
             ans += helper(
                 idx + 1,
-                members - group_[idx],
-                min(currProfit + profit_[idx], minProfit_));
+                members - groupMembers[idx],
+                min(currProfit + profitValues[idx], minProfitRequired));
         }
 
-        return dp_[idx][members][currProfit] = ans % MOD;
+        return memo[idx][members][currProfit] = ans % MOD;
     }
 
     int profitableSchemes(int n, int minProfit, vector<int> &group, vector<int> &profit)
     {
-        group_ = group;
-        profit_ = profit;
-        minProfit_ = minProfit;
-        dp_.assign(group.size(), vector<vector<int>>(n + 1, vector<int>(minProfit + 1, -1)));
+        groupMembers = group;
+        profitValues = profit;
+        minProfitRequired = minProfit;
+        memo.assign(group.size(), vector<vector<int>>(n + 1, vector<int>(minProfit + 1, -1)));
         return helper(0, n, 0);
     }
 };

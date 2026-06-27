@@ -23,6 +23,52 @@
 
 using namespace std;
 
+class Solution {
+public:
+    vector<int> memo;
+    vector<vector<bool>> isPal;
+    string str;
+    int size;
+
+    int minCut(string s) {
+        str = s;
+        size = s.size();
+        isPal.assign(size, vector<bool>(size, false));
+
+        for (int i = 0; i < size; i++) {
+            isPal[i][i] = true;
+        }
+
+        for (int lengthVal = 2; lengthVal <= size; lengthVal++) {
+            for (int i = 0; i + lengthVal - 1 < size; i++) {
+                int j = i + lengthVal - 1;
+                if (lengthVal == 2) {
+                    isPal[i][j] = (str[i] == str[j]);
+                } else {
+                    isPal[i][j] = (str[i] == str[j]) && isPal[i + 1][j - 1];
+                }
+            }
+        }
+
+        memo.assign(size, INT_MAX);
+
+        for (int i = 0; i < size; i++) {
+            if (isPal[0][i]) {
+                memo[i] = 0;
+                continue;
+            }
+
+            for (int j = 1; j <= i; j++) {
+                if (isPal[j][i]) {
+                    memo[i] = min(memo[i], 1 + memo[j - 1]);
+                }
+            }
+        }
+
+        return memo[size - 1];
+    }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -30,40 +76,8 @@ int main() {
     string s;
     if (!(cin >> s)) return 0;
 
-    int n = s.size();
-    vector<vector<bool>> isPalindrome(n, vector<bool>(n, false));
-
-    for (int i = 0; i < n; i++) {
-        isPalindrome[i][i] = true;
-    }
-
-    for (int len = 2; len <= n; len++) {
-        for (int i = 0; i + len - 1 < n; i++) {
-            int j = i + len - 1;
-            if (len == 2) {
-                isPalindrome[i][j] = (s[i] == s[j]);
-            } else {
-                isPalindrome[i][j] = (s[i] == s[j]) && isPalindrome[i + 1][j - 1];
-            }
-        }
-    }
-
-    vector<int> dp(n, INT_MAX);
-
-    for (int i = 0; i < n; i++) {
-        if (isPalindrome[0][i]) {
-            dp[i] = 0;
-            continue;
-        }
-
-        for (int j = 1; j <= i; j++) {
-            if (isPalindrome[j][i]) {
-                dp[i] = min(dp[i], 1 + dp[j - 1]);
-            }
-        }
-    }
-
-    cout << dp[n - 1] << '\n';
+    Solution solver;
+    cout << solver.minCut(s) << '\n';
 
     return 0;
 }

@@ -51,52 +51,52 @@ const ll MOD = 1e9 + 7;
 
 class Solution {
 public:
-    int n_;
-    int m_;
-    vector<int> a_;
-    vector<vector<int>> dp_;
+    int size;
+    int cols;
+    vector<int> input;
+    vector<vector<int>> memo;
 
     int solve(int i, int prev)
     {
-        if (i == n_)
+        if (i == size)
             return 1;
 
-        if (dp_[i][prev + 1] != -1)
-            return dp_[i][prev + 1];
+        if (memo[i][prev + 1] != -1)
+            return memo[i][prev + 1];
 
         long long ans = 0;
 
-        if (a_[i] != 0)
+        if (input[i] != 0)
         {
-            if (prev == -1 || abs(a_[i] - prev) <= 1)
-                ans = solve(i + 1, a_[i]);
+            if (prev == -1 || abs(input[i] - prev) <= 1)
+                ans = solve(i + 1, input[i]);
         }
         else
         {
             if (prev == -1)
             {
-                for (int cur = 1; cur <= m_; cur++)
+                for (int cur = 1; cur <= cols; cur++)
                 {
                     ans = (ans + solve(i + 1, cur)) % MOD;
                 }
             }
             else
             {
-                for (int cur = max(1, prev - 1); cur <= min(m_, prev + 1); cur++)
+                for (int cur = max(1, prev - 1); cur <= min(cols, prev + 1); cur++)
                 {
                     ans = (ans + solve(i + 1, cur)) % MOD;
                 }
             }
         }
 
-        return dp_[i][prev + 1] = ans;
+        return memo[i][prev + 1] = ans;
     }
 
     int getArrayDescription(int n, int m, vector<int>& a) {
-        n_ = n;
-        m_ = m;
-        a_ = a;
-        dp_.assign(n, vector<int>(m + 2, -1));
+        size = n;
+        cols = m;
+        input = a;
+        memo.assign(size, vector<int>(cols + 2, -1));
         return solve(0, -1);
     }
 };

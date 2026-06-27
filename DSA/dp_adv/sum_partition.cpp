@@ -23,20 +23,35 @@
 
 using namespace std;
 
-int solve(int i, vector<int>& arr, int k, vector<int>& dp) {
-    if (i < 0) return 0;
-    if (dp[i] != -1) return dp[i];
+class Solution {
+public:
+    vector<int> input;
+    int limit;
+    vector<int> memo;
 
-    int ans = 0;
-    int max_ele = 0;
-    int count = k;
-    for (int j = i; j >= 0 && count > 0; j--) {
-        max_ele = max(max_ele, arr[j]);
-        ans = max(ans, solve(j - 1, arr, k, dp) + max_ele * (i - j + 1));
-        count--;
+    int solve(int i) {
+        if (i < 0) return 0;
+        if (memo[i] != -1) return memo[i];
+
+        int ans = 0;
+        int maxEle = 0;
+        int cnt = limit;
+        for (int j = i; j >= 0 && cnt > 0; j--) {
+            maxEle = max(maxEle, input[j]);
+            ans = max(ans, solve(j - 1) + maxEle * (i - j + 1));
+            cnt--;
+        }
+        return memo[i] = ans;
     }
-    return dp[i] = ans;
-}
+
+    int maxSumAfterPartitioning(vector<int>& arr, int k) {
+        input = arr;
+        limit = k;
+        int n = arr.size();
+        memo.assign(n, -1);
+        return solve(n - 1);
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -50,8 +65,8 @@ int main() {
         cin >> arr[i];
     }
 
-    vector<int> dp(n, -1);
-    cout << solve(n - 1, arr, k, dp) << "\n";
+    Solution solver;
+    cout << solver.maxSumAfterPartitioning(arr, k) << "\n";
 
     return 0;
 }

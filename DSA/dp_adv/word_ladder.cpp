@@ -26,76 +26,90 @@
 
 using namespace std;
 
-int numberOfSteps(string beginWord, string endWord, vector<string> &wordList, map<string, int> &wordIndex) {
-    queue<pair<string, int>> q;
-    q.push({beginWord, 1});
-    set<string> visited;
-    visited.insert(beginWord);
-
-    while (!q.empty()) {
-        auto [currentWord, steps] = q.front();
-        q.pop();
-
-        if (currentWord == endWord) {
-            return steps;
-        }
-
-        for (int i = 0; i < (int)currentWord.size(); i++) {
-            char originalChar = currentWord[i];
-            for (char c = 'a'; c <= 'z'; c++) {
-                if (c == originalChar) continue;
-                currentWord[i] = c;
-                if (wordIndex.find(currentWord) != wordIndex.end() && visited.find(currentWord) == visited.end()) {
-                    visited.insert(currentWord);
-                    q.push({currentWord, steps + 1});
-                }
-            }
-            currentWord[i] = originalChar;
-        }
-    }
-    return 0;
-}
-
-int numberOfStepsBothSidesBFS(string beginWord, string endWord, vector<string>& wordList) {
+class Solution {
+public:
+    vector<string> dictionary;
     map<string, int> wordIndex;
-    for (int i = 0; i < (int)wordList.size(); i++) {
-        wordIndex[wordList[i]] = i;
-    }
+    set<string> visited;
 
-    unordered_set<string> beginSet, endSet, visited;
-    beginSet.insert(beginWord);
-    endSet.insert(endWord);
-    int steps = 1;
-
-    while (!beginSet.empty() && !endSet.empty()) {
-        if (beginSet.size() > endSet.size()) {
-            swap(beginSet, endSet); // always expand the smaller set
+    int numberOfSteps(string beginWord, string endWord, vector<string>& wordList) {
+        dictionary = wordList;
+        wordIndex.clear();
+        for (int i = 0; i < (int)dictionary.size(); i++) {
+            wordIndex[dictionary[i]] = i;
         }
 
-        unordered_set<string> nextLevel;
-        for (const string& word : beginSet) {
-            string currentWord = word;
+        queue<pair<string, int>> q;
+        q.push({beginWord, 1});
+        visited.clear();
+        visited.insert(beginWord);
+
+        while (!q.empty()) {
+            auto [currentWord, steps] = q.front();
+            q.pop();
+
+            if (currentWord == endWord) {
+                return steps;
+            }
+
             for (int i = 0; i < (int)currentWord.size(); i++) {
                 char originalChar = currentWord[i];
                 for (char c = 'a'; c <= 'z'; c++) {
                     if (c == originalChar) continue;
                     currentWord[i] = c;
-                    if (endSet.find(currentWord) != endSet.end()) {
-                        return steps + 1;
-                    }
                     if (wordIndex.find(currentWord) != wordIndex.end() && visited.find(currentWord) == visited.end()) {
                         visited.insert(currentWord);
-                        nextLevel.insert(currentWord);
+                        q.push({currentWord, steps + 1});
                     }
-                    currentWord[i] = originalChar;
                 }
+                currentWord[i] = originalChar;
             }
         }
-        beginSet = nextLevel;
-        steps++;
+        return 0;
     }
-    return 0;
-}
+
+    int numberOfStepsBothSidesBFS(string beginWord, string endWord, vector<string>& wordList) {
+        dictionary = wordList;
+        wordIndex.clear();
+        for (int i = 0; i < (int)dictionary.size(); i++) {
+            wordIndex[dictionary[i]] = i;
+        }
+
+        unordered_set<string> beginSet, endSet, visitedSet;
+        beginSet.insert(beginWord);
+        endSet.insert(endWord);
+        int steps = 1;
+
+        while (!beginSet.empty() && !endSet.empty()) {
+            if (beginSet.size() > endSet.size()) {
+                swap(beginSet, endSet); // always expand the smaller set
+            }
+
+            unordered_set<string> nextLevel;
+            for (const string& word : beginSet) {
+                string currentWord = word;
+                for (int i = 0; i < (int)currentWord.size(); i++) {
+                    char originalChar = currentWord[i];
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        if (c == originalChar) continue;
+                        currentWord[i] = c;
+                        if (endSet.find(currentWord) != endSet.end()) {
+                            return steps + 1;
+                        }
+                        if (wordIndex.find(currentWord) != wordIndex.end() && visitedSet.find(currentWord) == visitedSet.end()) {
+                            visitedSet.insert(currentWord);
+                            nextLevel.insert(currentWord);
+                        }
+                        currentWord[i] = originalChar;
+                    }
+                }
+            }
+            beginSet = nextLevel;
+            steps++;
+        }
+        return 0;
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -114,15 +128,16 @@ int main() {
         wordList.push_back(word);
     }
 
-    map<string, int> wordIndex;
+    Solution solver;
+    map<string, int> wordIndexMap;
     for (int i = 0; i < (int)wordList.size(); i++) {
-        wordIndex[wordList[i]] = i;
+        wordIndexMap[wordList[i]] = i;
     }
 
-    if (wordIndex.find(endWord) == wordIndex.end()) {
+    if (wordIndexMap.find(endWord) == wordIndexMap.end()) {
         cout << 0 << "\n";
     } else {
-        cout << numberOfSteps(beginWord, endWord, wordList, wordIndex) << "\n";
+        cout << solver.numberOfSteps(beginWord, endWord, wordList) << "\n";
     }
 
     return 0;

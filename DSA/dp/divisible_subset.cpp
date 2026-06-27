@@ -21,37 +21,37 @@ using namespace std;
 
 class Solution {
 public:
-    vector<int> dp_;
-    vector<int> parent_;
-    vector<int> nums_;
+    vector<int> memo;
+    vector<int> par;
+    vector<int> arr;
 
     vector<int> largestDivisibleSubset(vector<int>& nums) {
         int n = nums.size(); 
         if (n == 0) return {};
-        nums_ = nums;
-        sort(nums_.begin(), nums_.end()); // Sort to simplify divisibility checking
+        arr = nums;
+        sort(arr.begin(), arr.end()); // Sort to simplify divisibility checking
         
-        dp_.assign(n, 1);
-        parent_.assign(n, -1);
+        memo.assign(n, 1);
+        par.assign(n, -1);
         int maxLen = 1, lastIdx = 0;
         
         // DP state: dp[i] is the size of the largest divisible subset ending at index i
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < i; j++) {
-                if (nums_[i] % nums_[j] == 0 && dp_[j] + 1 > dp_[i]) {
-                    dp_[i] = dp_[j] + 1; 
-                    parent_[i] = j;
+                if (arr[i] % arr[j] == 0 && memo[j] + 1 > memo[i]) {
+                    memo[i] = memo[j] + 1; 
+                    par[i] = j;
                 }
             }
-            if (dp_[i] > maxLen) { 
-                maxLen = dp_[i]; 
+            if (memo[i] > maxLen) { 
+                maxLen = memo[i]; 
                 lastIdx = i; 
             }
         }
         
         vector<int> ans;
-        for (int curr = lastIdx; curr != -1; curr = parent_[curr]) {
-            ans.push_back(nums_[curr]); // Reconstruct path
+        for (int curr = lastIdx; curr != -1; curr = par[curr]) {
+            ans.push_back(arr[curr]); // Reconstruct path
         }
         reverse(ans.begin(), ans.end());
         return ans;

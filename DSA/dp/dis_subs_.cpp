@@ -52,43 +52,41 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
 class Solution {
 public:
-
-    string s_, t_;
-    int m_, n_;
-    vector<vector<long long>> dp_;
+    string str;
+    string pattern;
+    int size;
+    int cols;
+    vector<vector<long long>> memo;
 
     int solve(int i, int j) {
-
         if (j < 0)
             return 1;
 
         if (i < 0)
             return 0;
 
-        if (dp_[i][j] != -1)
-            return dp_[i][j];
+        if (memo[i][j] != -1)
+            return memo[i][j];
 
         long long ans = solve(i - 1, j);
 
-        if (s_[i] == t_[j])
+        if (str[i] == pattern[j])
             ans += solve(i - 1, j - 1);
 
-        return dp_[i][j] = ans;
+        return memo[i][j] = ans;
     }
 
     int numDistinct(string str1, string str2) {
+        str = str1;
+        pattern = str2;
 
-        s_ = str1;
-        t_ = str2;
+        size = str.size();
+        cols = pattern.size();
 
-        m_ = s_.size();
-        n_ = t_.size();
+        memo.assign(size, vector<long long>(cols, -1));
 
-        dp_.assign(m_, vector<long long>(n_, -1));
-
-        return solve(m_ - 1, n_ - 1);
+        return solve(size - 1, cols - 1);
     }
 };

@@ -24,23 +24,28 @@ using namespace std;
 
 class Solution {
 public:
-  int findLongestChain(vector<vector<int>> &pairs) {
-    // Sort pairs by their SECOND element (right endpoint)
-    sort(
-        pairs.begin(), pairs.end(),
-        [](const vector<int> &a, const vector<int> &b) { return a[1] < b[1]; });
+    vector<vector<int>> pairList;
+    int chainCount;
+    long long curEnd;
 
-    int chainCount = 0;
-    long long curEnd = -1e18; // Use a tiny number as initial boundary
-
-    for (const auto &pair : pairs) {
-      // If the current pair starts after the previous one ends
-      if (pair[0] > curEnd) {
-        chainCount++;
-        curEnd = pair[1]; // Move the boundary to this pair's end
-      }
+    int findLongestChain(vector<vector<int>>& pairs) {
+        pairList = pairs;
+        // Sort pairs by their SECOND element (right endpoint)
+        sort(pairList.begin(), pairList.end(), [](const vector<int>& a, const vector<int>& b) {
+            return a[1] < b[1];
+        });
+        
+        chainCount = 0;
+        curEnd = -1e18; // Use a tiny number as initial boundary
+        
+        for (const auto& pair : pairList) {
+            // If the current pair starts after the previous one ends
+            if (pair[0] > curEnd) {
+                chainCount++;
+                curEnd = pair[1]; // Move the boundary to this pair's end
+            }
+        }
+        
+        return chainCount;
     }
-
-    return chainCount;
-  }
 };

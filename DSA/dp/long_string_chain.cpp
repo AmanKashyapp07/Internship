@@ -25,23 +25,27 @@ using namespace std;
 
 class Solution {
 public:
-  int longestStrChain(vector<string> &words) {
-    // Sort words by length to process smaller words first
-    sort(words.begin(), words.end(), [](const string &a, const string &b) {
-      return a.length() < b.length();
-    });
-    unordered_map<string, int> dp;
-    int ans = 1;
-    // DP state: dp[w] stores the longest chain ending at word w
-    for (const string &w : words) {
-      dp[w] = 1;
-      for (size_t i = 0; i < w.length(); i++) {
-        string prev = w.substr(0, i) + w.substr(i + 1); // Delete i-th character
-        if (dp.count(prev))
-          dp[w] = max(dp[w], dp[prev] + 1); // Transition
-      }
-      ans = max(ans, dp[w]);
+    vector<string> dictionary;
+    unordered_map<string, int> memo;
+
+    int longestStrChain(vector<string> &words) {
+        dictionary = words;
+        // Sort words by length to process smaller words first
+        sort(dictionary.begin(), dictionary.end(), [](const string &a, const string &b) {
+            return a.length() < b.length();
+        });
+        memo.clear();
+        int ans = 1;
+        // DP state: memo[w] stores the longest chain ending at word w
+        for (const string &w : dictionary) {
+            memo[w] = 1;
+            for (size_t i = 0; i < w.length(); i++) {
+                string prev = w.substr(0, i) + w.substr(i + 1); // Delete i-th character
+                if (memo.count(prev))
+                    memo[w] = max(memo[w], memo[prev] + 1); // Transition
+            }
+            ans = max(ans, memo[w]);
+        }
+        return ans;
     }
-    return ans;
-  }
 };

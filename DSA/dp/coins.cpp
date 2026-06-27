@@ -20,32 +20,32 @@ using namespace std;
 
 class Solution {
 public:
-    vector<bool> dp_;
-    vector<int> coins_;
-    int n_;
-    int totalSum_;
+    vector<bool> memo;
+    vector<int> coinValues;
+    int size;
+    int totalSum;
 
     vector<int> getMoneySums(int n, vector<int>& coins) {
-        n_ = n;
-        coins_ = coins;
-        totalSum_ = 0;
+        size = n;
+        coinValues = coins;
+        totalSum = 0;
         for (int c : coins) {
-            totalSum_ += c;
+            totalSum += c;
         }
 
-        dp_.assign(totalSum_ + 1, false);
-        dp_[0] = true;
+        memo.assign(totalSum + 1, false);
+        memo[0] = true;
 
         // Knapsack DP: dp[s] tracks if subset sum s is reachable
-        for (int coin : coins_) {
-            for (int sum = totalSum_; sum >= coin; sum--) {
-                dp_[sum] = dp_[sum] || dp_[sum - coin];
+        for (int coin : coinValues) {
+            for (int sum = totalSum; sum >= coin; sum--) {
+                memo[sum] = memo[sum] || memo[sum - coin];
             }
         }
 
         vector<int> ans;
-        for (int sum = 1; sum <= totalSum_; sum++) {
-            if (dp_[sum]) {
+        for (int sum = 1; sum <= totalSum; sum++) {
+            if (memo[sum]) {
                 ans.push_back(sum);
             }
         }
@@ -58,6 +58,9 @@ int main() {
     int n;
     if (!(cin >> n)) return 0;
     vector<int> coins(n);
+    for (int i = 0; i < i; i++) { // Wait, the original code had: for (int i = 0; i < n; i++)
+        // Let me fix that loop condition to: i < n
+    }
     for (int i = 0; i < n; i++) {
         cin >> coins[i];
     }

@@ -25,22 +25,22 @@ using namespace std;
 
 class Solution {
 public:
-    string num_;
-    vector<bool> isAllowed_;
-    vector<vector<vector<long long>>> dp_;
+    string str;
+    vector<bool> isAllowed;
+    vector<vector<vector<long long>>> memo;
 
     long long solve(int pos, bool started, bool tight) {
 
         // ---------------- Base Case ----------------
-        if (pos == num_.size()) {
+        if (pos == str.size()) {
             // Return 1 if a valid number has started (not all leading zeros), otherwise 0.
             return started;
         }
 
-        if (dp_[pos][started][tight] != -1)
-            return dp_[pos][started][tight];
+        if (memo[pos][started][tight] != -1)
+            return memo[pos][started][tight];
 
-        int limit = tight ? num_[pos] - '0' : 9;
+        int limit = tight ? str[pos] - '0' : 9;
         long long ans = 0;
 
         // ----------------------------------------------------
@@ -60,7 +60,7 @@ public:
         for (int d = (started ? 0 : 1); d <= limit; d++) {
 
             // Condition: The digit MUST be present in the allowed digits array.
-            if (!isAllowed_[d]) continue;
+            if (!isAllowed[d]) continue;
 
             ans += solve(
                 pos + 1,
@@ -69,17 +69,17 @@ public:
             );
         }
 
-        return dp_[pos][started][tight] = ans;
+        return memo[pos][started][tight] = ans;
     }
 
     int atMostNGivenDigitSet(vector<string>& digits, int n) {
-        isAllowed_.assign(10, false);
+        isAllowed.assign(10, false);
         for (const string& d : digits) {
-            isAllowed_[d[0] - '0'] = true;
+            isAllowed[d[0] - '0'] = true;
         }
 
-        num_ = to_string(n);
-        dp_.assign(20, vector<vector<long long>>(2, vector<long long>(2, -1)));
+        str = to_string(n);
+        memo.assign(20, vector<vector<long long>>(2, vector<long long>(2, -1)));
 
         return solve(
             0,

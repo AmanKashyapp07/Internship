@@ -1,110 +1,117 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
-// ============================================================================
-// 1. Longest Increasing Subsequence (LIS)
-// ============================================================================
+class Solution {
+public:
+    vector<int> input;
+    vector<vector<int>> pairList;
+    vector<vector<int>> memo;
 
-int solve(int idx, int prev, vector<int> &arr, vector<vector<int>> &dp) {
-  if (idx == arr.size())
-    return 0;
+    // ============================================================================
+    // 1. Longest Increasing Subsequence (LIS)
+    // ============================================================================
 
-  if (dp[idx][prev + 1] != -1)
-    return dp[idx][prev + 1];
+    int solveLIS(int idx, int prev) {
+        if (idx == input.size()) return 0;
 
-  int skip = solve(idx + 1, prev, arr, dp);
+        if (memo[idx][prev + 1] != -1)
+            return memo[idx][prev + 1];
 
-  int take = 0;
-  if (prev == -1 || arr[idx] > arr[prev])
-    take = 1 + solve(idx + 1, idx, arr, dp);
+        int skip = solveLIS(idx + 1, prev);
 
-  return dp[idx][prev + 1] = max(take, skip);
-}
+        int take = 0;
+        if (prev == -1 || input[idx] > input[prev])
+            take = 1 + solveLIS(idx + 1, idx);
 
-int lengthOfLISMemo(vector<int> &arr) {
-  int n = arr.size();
-  vector<vector<int>> dp(n, vector<int>(n + 1, -1));
-  return solve(0, -1, arr, dp);
-}
+        return memo[idx][prev + 1] = max(take, skip);
+    }
 
-// ============================================================================
-// 2. Maximum Sum Increasing Subsequence
-// ============================================================================
+    int lengthOfLISMemo(vector<int>& arr) {
+        input = arr;
+        int n = arr.size();
+        memo.assign(n, vector<int>(n + 1, -1));
+        return solveLIS(0, -1);
+    }
 
-int solve(int idx, int prev, vector<int> &arr, vector<vector<int>> &dp) {
-  if (idx == arr.size())
-    return 0;
+    // ============================================================================
+    // 2. Maximum Sum Increasing Subsequence
+    // ============================================================================
 
-  if (dp[idx][prev + 1] != -1)
-    return dp[idx][prev + 1];
+    int solveMaxSum(int idx, int prev) {
+        if (idx == input.size()) return 0;
 
-  int skip = solve(idx + 1, prev, arr, dp);
+        if (memo[idx][prev + 1] != -1)
+            return memo[idx][prev + 1];
 
-  int take = 0;
-  if (prev == -1 || arr[idx] > arr[prev])
-    take = arr[idx] + solve(idx + 1, idx, arr, dp);
+        int skip = solveMaxSum(idx + 1, prev);
 
-  return dp[idx][prev + 1] = max(take, skip);
-}
+        int take = 0;
+        if (prev == -1 || input[idx] > input[prev])
+            take = input[idx] + solveMaxSum(idx + 1, idx);
 
-int maxSumISMemo(vector<int> &arr) {
-  int n = arr.size();
-  vector<vector<int>> dp(n, vector<int>(n + 1, -1));
-  return solve(0, -1, arr, dp);
-}
+        return memo[idx][prev + 1] = max(take, skip);
+    }
 
-// ============================================================================
-// 3. Longest Non-Decreasing Subsequence
-// ============================================================================
+    int maxSumISMemo(vector<int>& arr) {
+        input = arr;
+        int n = arr.size();
+        memo.assign(n, vector<int>(n + 1, -1));
+        return solveMaxSum(0, -1);
+    }
 
-int solve(int idx, int prev, vector<int> &arr, vector<vector<int>> &dp) {
-  if (idx == arr.size())
-    return 0;
+    // ============================================================================
+    // 3. Longest Non-Decreasing Subsequence
+    // ============================================================================
 
-  if (dp[idx][prev + 1] != -1)
-    return dp[idx][prev + 1];
+    int solveLNDS(int idx, int prev) {
+        if (idx == input.size()) return 0;
 
-  int skip = solve(idx + 1, prev, arr, dp);
+        if (memo[idx][prev + 1] != -1)
+            return memo[idx][prev + 1];
 
-  int take = 0;
-  if (prev == -1 || arr[idx] >= arr[prev])
-    take = 1 + solve(idx + 1, idx, arr, dp);
+        int skip = solveLNDS(idx + 1, prev);
 
-  return dp[idx][prev + 1] = max(take, skip);
-}
+        int take = 0;
+        if (prev == -1 || input[idx] >= input[prev])
+            take = 1 + solveLNDS(idx + 1, idx);
 
-int lengthOfLNDSMemo(vector<int> &arr) {
-  int n = arr.size();
-  vector<vector<int>> dp(n, vector<int>(n + 1, -1));
-  return solve(0, -1, arr, dp);
-}
+        return memo[idx][prev + 1] = max(take, skip);
+    }
 
-// ============================================================================
-// 4. Longest Chain of Pairs
-// ============================================================================
+    int lengthOfLNDSMemo(vector<int>& arr) {
+        input = arr;
+        int n = arr.size();
+        memo.assign(n, vector<int>(n + 1, -1));
+        return solveLNDS(0, -1);
+    }
 
-int solve(int idx, int prev, vector<vector<int>> &arr,
-          vector<vector<int>> &dp) {
-  if (idx == arr.size())
-    return 0;
+    // ============================================================================
+    // 4. Longest Chain of Pairs
+    // ============================================================================
 
-  if (dp[idx][prev + 1] != -1)
-    return dp[idx][prev + 1];
+    int solveChain(int idx, int prev) {
+        if (idx == pairList.size()) return 0;
 
-  int skip = solve(idx + 1, prev, arr, dp);
+        if (memo[idx][prev + 1] != -1)
+            return memo[idx][prev + 1];
 
-  int take = 0;
-  if (prev == -1 || arr[idx][0] > arr[prev][1])
-    take = 1 + solve(idx + 1, idx, arr, dp);
+        int skip = solveChain(idx + 1, prev);
 
-  return dp[idx][prev + 1] = max(take, skip);
-}
+        int take = 0;
+        if (prev == -1 || pairList[idx][0] > pairList[prev][1])
+            take = 1 + solveChain(idx + 1, idx);
 
-int findLongestChainMemo(vector<vector<int>> &arr) {
-  sort(arr.begin(), arr.end());
+        return memo[idx][prev + 1] = max(take, skip);
+    }
 
-  int n = arr.size();
-  vector<vector<int>> dp(n, vector<int>(n + 1, -1));
-
-  return solve(0, -1, arr, dp);
-}
+    int findLongestChainMemo(vector<vector<int>>& arr) {
+        pairList = arr;
+        sort(pairList.begin(), pairList.end());
+        int n = pairList.size();
+        memo.assign(n, vector<int>(n + 1, -1));
+        return solveChain(0, -1);
+    }
+};

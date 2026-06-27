@@ -21,28 +21,28 @@ using namespace std;
 
 class Solution {
 public:
-    vector<vector<int>> dp_;
-    vector<vector<int>> matrix_;
-    int m_;
-    int n_;
+    vector<vector<int>> memo;
+    vector<vector<int>> mat;
+    int cols;
+    int size;
 
     int countSquares(int m, int n, vector<vector<int>>& matrix) {
-        m_ = m;
-        n_ = n;
-        matrix_ = matrix;
-        dp_.assign(m, vector<int>(n, 0));
-        int count = 0;
+        cols = m;
+        size = n;
+        mat = matrix;
+        memo.assign(m, vector<int>(n, 0));
+        int cnt = 0;
         // DP state: dp[i][j] is the size of the largest square submatrix with bottom-right corner at (i, j)
-        for (int i = 0; i < m_; i++) {
-            for (int j = 0; j < n_; j++) {
-                if (matrix_[i][j] == 1) {
-                    if (i == 0 || j == 0) dp_[i][j] = 1;
-                    else dp_[i][j] = min({dp_[i - 1][j], dp_[i][j - 1], dp_[i - 1][j - 1]}) + 1; // Transition
-                    count += dp_[i][j];
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < size; j++) {
+                if (mat[i][j] == 1) {
+                    if (i == 0 || j == 0) memo[i][j] = 1;
+                    else memo[i][j] = min({memo[i - 1][j], memo[i][j - 1], memo[i - 1][j - 1]}) + 1; // Transition
+                    cnt += memo[i][j];
                 }
             }
         }
-        return count;
+        return cnt;
     }
 };
 

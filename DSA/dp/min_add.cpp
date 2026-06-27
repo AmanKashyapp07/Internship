@@ -24,21 +24,31 @@
 #include <string>
 using namespace std;
 
-int main() {
-  ios::sync_with_stdio(0);
-  cin.tie(0);
-  string s;
-  cin >> s;
-  int balanced = 0, count = 0;
-  // Greedy tracking: balanced maintains open paren count, count tracks
-  // unmatched close parens
-  for (char c : s) {
-    if (c == '(')
-      balanced++;
-    else if (--balanced < 0) {
-      count++;
-      balanced = 0;
+class Solution {
+public:
+    string str;
+    int balanced;
+    int cnt;
+
+    int minAddToMakeValid(string s) {
+        str = s;
+        balanced = 0;
+        cnt = 0;
+        // Greedy tracking: balanced maintains open paren count, count tracks unmatched close parens
+        for (char c : str) {
+            if (c == '(') balanced++;
+            else if (--balanced < 0) { cnt++; balanced = 0; }
+        }
+        return cnt + balanced;
     }
-  }
-  cout << count + balanced << "\n";
+};
+
+int main() {
+    ios::sync_with_stdio(0); cin.tie(0);
+    string s;
+    if (!(cin >> s)) return 0;
+    
+    Solution solver;
+    cout << solver.minAddToMakeValid(s) << "\n";
+    return 0;
 }

@@ -25,31 +25,31 @@ using namespace std;
 
 class Solution {
 public:
-    vector<vector<int>> dp_;
-    string s1_, s2_;
+    vector<vector<int>> memo;
+    string str1, str2;
 
     int solve(int i, int j) {
-        if (i == s1_.size() || j == s2_.size())
+        if (i == str1.size() || j == str2.size())
             return 0;
 
-        if (dp_[i][j] != -1)
-            return dp_[i][j];
+        if (memo[i][j] != -1)
+            return memo[i][j];
 
-        if (s1_[i] == s2_[j])
-            return dp_[i][j] = s1_[i] + solve(i + 1, j + 1);
+        if (str1[i] == str2[j])
+            return memo[i][j] = str1[i] + solve(i + 1, j + 1);
 
-        return dp_[i][j] = max(solve(i + 1, j),
+        return memo[i][j] = max(solve(i + 1, j),
                               solve(i, j + 1));
     }
 
     int minimumDeleteSum(string s1, string s2) {
-        s1_ = s1;
-        s2_ = s2;
+        str1 = s1;
+        str2 = s2;
         int total = 0;
         for (char c : s1) total += c;
         for (char c : s2) total += c;
 
-        dp_.assign(s1.size(), vector<int>(s2.size(), -1));
+        memo.assign(s1.size(), vector<int>(s2.size(), -1));
 
         int keep = solve(0, 0);
         return total - 2 * keep;

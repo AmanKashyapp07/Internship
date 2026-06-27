@@ -7,9 +7,9 @@
  * Approach:
  * - Digit Dynamic Programming.
  * - Compute `countUpTo(b) - countUpTo(a - 1)`.
- * - State `(pos, prev_digit, started, tight)` tracks:
- *   - `prev_digit` (range 0..9, with 10 representing no previous digit).
- *   - Check that the current digit `d != prev_digit` if the number has already started.
+ * - State `(pos, prevDigit, started, tight)` tracks:
+ *   - `prevDigit` (range 0..9, with 10 representing no previous digit).
+ *   - Check that the current digit `d != prevDigit` if the number has already started.
  *
  * Time Complexity: O(log10(b) * 10 * 10)
  * Space Complexity: O(log10(b) * 10)
@@ -24,22 +24,22 @@ using namespace std;
 
 class Solution {
 public:
-    string num_;
-    vector<vector<vector<vector<long long>>>> dp_;
+    string str;
+    vector<vector<vector<vector<long long>>>> memo;
 
-    long long solve(int pos, int prev_digit, bool started, bool tight) {
+    long long solve(int pos, int prevDigit, bool started, bool tight) {
 
         // ---------------- Base Case ----------------
-        if (pos == num_.size()) {
+        if (pos == str.size()) {
             // A valid sequence has been formed. 
             // (Even if it's all zeros, we count it as the number 0).
             return 1;
         }
 
-        if (dp_[pos][prev_digit][started][tight] != -1)
-            return dp_[pos][prev_digit][started][tight];
+        if (memo[pos][prevDigit][started][tight] != -1)
+            return memo[pos][prevDigit][started][tight];
 
-        int limit = tight ? num_[pos] - '0' : 9;
+        int limit = tight ? str[pos] - '0' : 9;
         long long ans = 0;
 
         // ----------------------------------------------------
@@ -60,24 +60,24 @@ public:
         for (int d = (started ? 0 : 1); d <= limit; d++) {
 
             // Condition: The current digit cannot be the same as the adjacent previous digit.
-            if (started && d == prev_digit) continue;
+            if (started && d == prevDigit) continue;
 
             ans += solve(
                 pos + 1,
-                d, // The current digit becomes the prev_digit for the next position
+                d, // The current digit becomes the prevDigit for the next position
                 true,
                 tight && (d == limit)
             );
         }
 
-        return dp_[pos][prev_digit][started][tight] = ans;
+        return memo[pos][prevDigit][started][tight] = ans;
     }
 
     // Helper to calculate total valid integers from 0 up to string x
     long long countUpTo(long long x) {
         if (x < 0) return 0;
-        num_ = to_string(x);
-        dp_.assign(20, vector<vector<vector<long long>>>(11, vector<vector<long long>>(2, vector<long long>(2, -1))));
+        str = to_string(x);
+        memo.assign(20, vector<vector<vector<long long>>>(11, vector<vector<long long>>(2, vector<long long>(2, -1))));
         return solve(0, 10, false, true);
     }
 

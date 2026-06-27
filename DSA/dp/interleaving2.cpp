@@ -48,42 +48,38 @@ using vll = vector<ll>;
 #define ff first
 #define ss second
 
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-
 class Solution {
 public:
-    string s1_, s2_, s3_;
-    vector<vector<int>> dp_;
+    string str1, str2, str3;
+    vector<vector<int>> memo;
 
     bool solve(int i, int j) {
-        if (i == s1_.size() && j == s2_.size())
+        if (i == str1.size() && j == str2.size())
             return true;
 
-        if (dp_[i][j] != -1)
-            return dp_[i][j];
+        if (memo[i][j] != -1)
+            return memo[i][j];
 
         bool ans = false;
 
-        if (i < s1_.size() && s1_[i] == s3_[i + j])
+        if (i < str1.size() && str1[i] == str3[i + j])
             ans |= solve(i + 1, j);
 
-        if (j < s2_.size() && s2_[j] == s3_[i + j])
+        if (j < str2.size() && str2[j] == str3[i + j])
             ans |= solve(i, j + 1);
 
-        return dp_[i][j] = ans;
+        return memo[i][j] = ans;
     }
 
-    bool isInterleave(string str1, string str2, string str3) {
-        s1_ = str1;
-        s2_ = str2;
-        s3_ = str3;
+    bool isInterleave(string str1_param, string str2_param, string str3_param) {
+        str1 = str1_param;
+        str2 = str2_param;
+        str3 = str3_param;
 
-        if (s1_.size() + s2_.size() != s3_.size())
+        if (str1.size() + str2.size() != str3.size())
             return false;
 
-        dp_.assign(s1_.size() + 1, vector<int>(s2_.size() + 1, -1));
+        memo.assign(str1.size() + 1, vector<int>(str2.size() + 1, -1));
 
         return solve(0, 0);
     }

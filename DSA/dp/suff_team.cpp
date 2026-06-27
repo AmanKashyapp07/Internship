@@ -48,35 +48,31 @@ using vll = vector<ll>;
 #define ff first
 #define ss second
 
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-
 class Solution {
 public:
-    int n_;
-    int m_;
-    int FULL_;
-    vector<int> personMask_;
-    vector<vector<int>> dp_;
-    vector<bool> vis_;
+    int size;
+    int cols;
+    int fullMask;
+    vector<int> personMasks;
+    vector<vector<int>> memo;
+    vector<bool> visited;
 
     vector<int> solve(int mask) {
         // All skills covered
-        if (mask == FULL_)
+        if (mask == fullMask)
             return {};
 
-        if (vis_[mask])
-            return dp_[mask];
+        if (visited[mask])
+            return memo[mask];
 
-        vis_[mask] = true;
+        visited[mask] = true;
 
         // Initialize with an impossible large team
         vector<int> best(100);
 
         // Try taking every person
-        for (int i = 0; i < n_; i++) {
-            int newMask = mask | personMask_[i];
+        for (int i = 0; i < size; i++) {
+            int newMask = mask | personMasks[i];
 
             // Person adds no new skill
             if (newMask == mask)
@@ -89,37 +85,36 @@ public:
                 best = team;
         }
 
-        return dp_[mask] = best;
+        return memo[mask] = best;
     }
 
     vector<int> smallestSufficientTeam(vector<string>& req_skills,
                                        vector<vector<string>>& people) {
-        m_ = req_skills.size();
-        n_ = people.size();
-        FULL_ = (1 << m_) - 1;
+        cols = req_skills.size();
+        size = people.size();
+        fullMask = (1 << cols) - 1;
 
         unordered_map<string, int> skillId;
 
-        for (int i = 0; i < m_; i++)
+        for (int i = 0; i < cols; i++)
             skillId[req_skills[i]] = i; // mapping skills to a unique id
 
-        personMask_.assign(n_, 0);
+        personMasks.assign(size, 0);
 
-        for (int i = 0; i < n_; i++) {
+        for (int i = 0; i < size; i++) {
             int mask = 0;
             for (string &skill : people[i])
                 mask |= (1 << skillId[skill]);
-            personMask_[i] = mask;
+            personMasks[i] = mask;
         }
 
-        dp_.assign(1 << m_, vector<int>());
-        vis_.assign(1 << m_, false);
+        memo.assign(1 << cols, vector<int>());
+        visited.assign(1 << cols, false);
 
         return solve(0);
     }
 };
 
 int main() {
-    Solution sol;
     return 0;
 }

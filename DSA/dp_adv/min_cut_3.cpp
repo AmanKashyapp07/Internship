@@ -20,55 +20,67 @@
 
 using namespace std;
 
-vector<vector<string>> ans;
-vector<string> path;
+class Solution {
+public:
+    vector<vector<string>> ans;
+    vector<string> path;
+    vector<vector<bool>> isPal;
+    string str;
+    int size;
 
-void dfs(int start, string& s, vector<vector<bool>>& isPal) {
-    int n = s.size();
-    if (start == n) {
-        ans.push_back(path);
-        return;
-    }
+    void dfs(int start) {
+        if (start == size) {
+            ans.push_back(path);
+            return;
+        }
 
-    for (int end = start; end < n; end++) {
-        if (isPal[start][end]) {
-            path.push_back(s.substr(start, end - start + 1));
-            dfs(end + 1, s, isPal);
-            path.pop_back();
+        for (int endVal = start; endVal < size; endVal++) {
+            if (isPal[start][endVal]) {
+                path.push_back(str.substr(start, endVal - start + 1));
+                dfs(endVal + 1);
+                path.pop_back();
+            }
         }
     }
-}
+
+    vector<vector<string>> partition(string s) {
+        str = s;
+        size = s.size();
+        isPal.assign(size, vector<bool>(size, false));
+        for (int i = 0; i < size; i++) {
+            isPal[i][i] = true;
+        }
+
+        for (int lengthVal = 2; lengthVal <= size; lengthVal++) {
+            for (int i = 0; i + lengthVal - 1 < size; i++) {
+                int j = i + lengthVal - 1;
+                if (lengthVal == 2) {
+                    isPal[i][j] = (str[i] == str[j]);
+                } else {
+                    isPal[i][j] = (str[i] == str[j]) && isPal[i + 1][j - 1];
+                }
+            }
+        }
+
+        ans.clear();
+        path.clear();
+        dfs(0);
+        return ans;
+    }
+};
 
 int main() {
-    ios::sync_with_stdio(false);
+    ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
     string s;
     if (!(cin >> s)) return 0;
 
-    int n = s.size();
-
-    // Precompute palindrome table
-    vector<vector<bool>> isPal(n, vector<bool>(n, false));
-    for (int i = 0; i < n; i++) {
-        isPal[i][i] = true;
-    }
-
-    for (int len = 2; len <= n; len++) {
-        for (int i = 0; i + len - 1 < n; i++) {
-            int j = i + len - 1;
-            if (len == 2) {
-                isPal[i][j] = (s[i] == s[j]);
-            } else {
-                isPal[i][j] = (s[i] == s[j]) && isPal[i + 1][j - 1];
-            }
-        }
-    }
-
-    dfs(0, s, isPal);
+    Solution solver;
+    vector<vector<string>> partitions = solver.partition(s);
 
     // Print all partitions
-    for (auto& partition : ans) {
+    for (auto& partition : partitions) {
         cout << "[ ";
         for (auto& str : partition) {
             cout << "\"" << str << "\" ";

@@ -23,51 +23,59 @@ using namespace std;
 
 const int INF = INT_MAX;
 
-/* ---------------- Memoization ---------------- */
+class Solution {
+public:
+    vector<vector<int>> matrix;
+    vector<vector<int>> memo;
 
-int solveMemo(int i, int j, vector<vector<int>> &grid, vector<vector<int>> &dp) {
-    if (i == 0 && j == 0) return grid[0][0];
-    if (i < 0 || j < 0) return INF;
-    if (dp[i][j] != -1) return dp[i][j];
+    /* ---------------- Memoization ---------------- */
 
-    int up = solveMemo(i - 1, j, grid, dp);
-    int left = solveMemo(i, j - 1, grid, dp);
+    int solve(int i, int j) {
+        if (i == 0 && j == 0) return matrix[0][0];
+        if (i < 0 || j < 0) return INF;
+        if (memo[i][j] != -1) return memo[i][j];
 
-    return dp[i][j] = grid[i][j] + min(up, left);
-}
+        int up = solve(i - 1, j);
+        int left = solve(i, j - 1);
 
-int minPathSumMemo(vector<vector<int>> &grid) {
-    int m = grid.size();
-    int n = grid[0].size();
-    vector<vector<int>> dp(m, vector<int>(n, -1));
-    return solveMemo(m - 1, n - 1, grid, dp);
-}
-
-/* ---------------- Tabulation ---------------- */
-
-int minPathSumTab(vector<vector<int>> &grid) {
-    int m = grid.size();
-    int n = grid[0].size();
-    vector<vector<int>> dp(m, vector<int>(n, 0));
-
-    dp[0][0] = grid[0][0];
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            if (i == 0 && j == 0) continue;
-
-            int up = INF;
-            int left = INF;
-
-            if (i > 0) up = dp[i - 1][j];
-            if (j > 0) left = dp[i][j - 1];
-
-            dp[i][j] = grid[i][j] + min(up, left);
-        }
+        return memo[i][j] = matrix[i][j] + min(up, left);
     }
 
-    return dp[m - 1][n - 1];
-}
+    int minPathSumMemo(vector<vector<int>> &grid) {
+        matrix = grid;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        memo.assign(m, vector<int>(n, -1));
+        return solve(m - 1, n - 1);
+    }
+
+    /* ---------------- Tabulation ---------------- */
+
+    int minPathSumTab(vector<vector<int>> &grid) {
+        matrix = grid;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        memo.assign(m, vector<int>(n, 0));
+
+        memo[0][0] = matrix[0][0];
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == 0 && j == 0) continue;
+
+                int up = INF;
+                int left = INF;
+
+                if (i > 0) up = memo[i - 1][j];
+                if (j > 0) left = memo[i][j - 1];
+
+                memo[i][j] = matrix[i][j] + min(up, left);
+            }
+        }
+
+        return memo[m - 1][n - 1];
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -79,8 +87,9 @@ int main() {
         {4, 2, 1}
     };
 
-    cout << "Memoization: " << minPathSumMemo(grid) << '\n';
-    cout << "Tabulation: " << minPathSumTab(grid) << '\n';
+    Solution solver;
+    cout << "Memoization: " << solver.minPathSumMemo(grid) << '\n';
+    cout << "Tabulation: " << solver.minPathSumTab(grid) << '\n';
 
     return 0;
 }

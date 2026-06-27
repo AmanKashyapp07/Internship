@@ -46,49 +46,45 @@ using vll = vector<ll>;
 #define ff first
 #define ss second
 
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-
 class Solution {
 public:
-    string s1_, s2_, s3_;
-    vector<vector<vector<int>>> dp_;
+    string str1, str2, str3;
+    vector<vector<vector<int>>> memo;
 
     bool solve(int turn, int i, int j, int k) {
-        if (k == s3_.size()) return true; // if we have matched all characters of s3
-        if (i == s1_.size() && j == s2_.size()) return false; // if we have exhausted both s1 and s2 but not matched all of s3
+        if (k == str3.size()) return true; // if we have matched all characters of s3
+        if (i == str1.size() && j == str2.size()) return false; // if we have exhausted both s1 and s2 but not matched all of s3
 
-        if (dp_[turn][i][j] != -1) return dp_[turn][i][j];
+        if (memo[turn][i][j] != -1) return memo[turn][i][j];
 
         bool ans = false;
         if (turn == 0) { // turn of s1
-            if (i < s1_.size() && s1_[i] == s3_[k]) {
+            if (i < str1.size() && str1[i] == str3[k]) {
                 ans = ans || solve(0, i + 1, j, k + 1);
                 // also switch to s2
                 ans = ans || solve(1, i + 1, j, k + 1);
             }
         } else { // turn of s2
-            if (j < s2_.size() && s2_[j] == s3_[k]) {
+            if (j < str2.size() && str2[j] == str3[k]) {
                 ans = ans || solve(1, i, j + 1, k + 1);
                 ans = ans || solve(0, i, j + 1, k + 1);
             }
         }
 
-        return dp_[turn][i][j] = ans;
+        return memo[turn][i][j] = ans;
     }
 
     bool isInterleave(string s1, string s2, string s3) {
         if (s1.size() + s2.size() != s3.size()) return false;
 
-        s1_ = s1;
-        s2_ = s2;
-        s3_ = s3;
+        str1 = s1;
+        str2 = s2;
+        str3 = s3;
 
         int m = s1.size();
         int n = s2.size();
 
-        dp_.assign(2, vector<vector<int>>(m + 1, vector<int>(n + 1, -1)));
+        memo.assign(2, vector<vector<int>>(m + 1, vector<int>(n + 1, -1)));
 
         // We can start with either s1's turn or s2's turn
         return solve(0, 0, 0, 0) || solve(1, 0, 0, 0);

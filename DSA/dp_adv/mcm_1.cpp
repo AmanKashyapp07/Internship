@@ -23,20 +23,31 @@
 using namespace std;
 using ll = long long;
 
-vector<vector<ll>> dp;
+class Solution {
+public:
+    vector<int> input;
+    vector<vector<ll>> memo;
 
-ll solve(int i, int j, vector<int>& arr) {
-    if (i == j) return 0; // base case: one matrix needs 0 multiplications
-    if (dp[i][j] != -1) return dp[i][j];
+    ll solve(int i, int j) {
+        if (i == j) return 0; // base case: one matrix needs 0 multiplications
+        if (memo[i][j] != -1) return memo[i][j];
 
-    ll ans = LLONG_MAX;
-    for (int k = i; k < j; k++) {
-        ll cost = solve(i, k, arr) + solve(k + 1, j, arr) + 1LL * arr[i - 1] * arr[k] * arr[j];
-        ans = min(ans, cost);
+        ll ans = LLONG_MAX;
+        for (int k = i; k < j; k++) {
+            ll cost = solve(i, k) + solve(k + 1, j) + 1LL * input[i - 1] * input[k] * input[j];
+            ans = min(ans, cost);
+        }
+
+        return memo[i][j] = ans;
     }
 
-    return dp[i][j] = ans;
-}
+    ll matrixMultiplication(vector<int>& arr) {
+        input = arr;
+        int n = arr.size();
+        memo.assign(n, vector<ll>(n, -1));
+        return solve(1, n - 1);
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -50,8 +61,8 @@ int main() {
         cin >> arr[i];
     }
 
-    dp.assign(n, vector<ll>(n, -1));
-    cout << solve(1, n - 1, arr) << '\n';
+    Solution solver;
+    cout << solver.matrixMultiplication(arr) << '\n';
 
     return 0;
 }

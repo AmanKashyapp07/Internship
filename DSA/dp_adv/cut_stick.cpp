@@ -23,27 +23,69 @@
 
 using namespace std;
 
-#define all(x) (x).begin(), (x).end()
+class Solution {
+public:
+    vector<int> input;
+    vector<vector<int>> memo;
 
-int memoized_solution(int i, int j, vector<int>& cuts, vector<vector<int>>& dp) {
-    if (j - i == 1) return 0; // no cuts to be made between i and j
+    int solve(int i, int j) {
+        if (j - i == 1) return 0; // no cuts to be made between i and j
 
-    if (dp[i][j] != -1) return dp[i][j];
+        if (memo[i][j] != -1) return memo[i][j];
 
-    int ans = INT_MAX;
-    // cut can be only be between i+1 inclusive and j-1 inclusive, because we cannot cut at the boundaries
-    for (int k = i + 1; k < j; k++) {
-        ans = min(
-            ans,
-            memoized_solution(i, k, cuts, dp) +
-            memoized_solution(k, j, cuts, dp) +
-            (cuts[j] - cuts[i]) // cost of making the cut at position k
-        );
+        int ans = INT_MAX;
+        // cut can be only be between i+1 inclusive and j-1 inclusive, because we cannot cut at the boundaries
+        for (int k = i + 1; k < j; k++) {
+            ans = min(
+                ans,
+                solve(i, k) +
+                solve(k, j) +
+                (input[j] - input[i]) // cost of making the cut at position k
+            );
+        }
+
+        if (ans == INT_MAX) ans = 0;
+        return memo[i][j] = ans;
     }
 
-    if (ans == INT_MAX) ans = 0;
-    return dp[i][j] = ans;
-}
+    int minCostMemo(int n, vector<int>& cuts) {
+        input = cuts;
+        input.push_back(0);
+        input.push_back(n);
+        sort(input.begin(), input.end());
+
+        int m = input.size();
+        memo.assign(m, vector<int>(m, -1));
+        return solve(0, m - 1);
+    }
+
+    int minCostTab(int n, vector<int>& cuts) {
+        input = cuts;
+        input.push_back(0);
+        input.push_back(n);
+        sort(input.begin(), input.end());
+
+        int m = input.size();
+        memo.assign(m, vector<int>(m, 0));
+
+        for (int lengthVal = 2; lengthVal < m; lengthVal++) {
+            for (int i = 0; i + lengthVal < m; i++) {
+                int j = i + lengthVal;
+                memo[i][j] = INT_MAX;
+
+                for (int k = i + 1; k < j; k++) { // cut can only be between i+1 and j-1
+                    memo[i][j] = min(
+                        memo[i][j],
+                        memo[i][k] + memo[k][j] + (input[j] - input[i])
+                    );
+                }
+
+                if (memo[i][j] == INT_MAX) memo[i][j] = 0;
+            }
+        }
+        return memo[0][m - 1];
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -57,31 +99,10 @@ int main() {
         cin >> cuts[i];
     }
 
-    cuts.push_back(0);
-    cuts.push_back(n);
-    sort(all(cuts));
-
-    int m = cuts.size();
-    vector<vector<int>> dp(m, vector<int>(m, 0));
-
-    for (int len = 2; len < m; len++) {
-        for (int i = 0; i + len < m; i++) {
-            int j = i + len;
-            dp[i][j] = INT_MAX;
-
-            for (int k = i + 1; k < j; k++) { // cut can only be between i+1 and j-1
-                dp[i][j] = min(
-                    dp[i][j],
-                    dp[i][k] + dp[k][j] + (cuts[j] - cuts[i])
-                );
-            }
-
-            if (dp[i][j] == INT_MAX) dp[i][j] = 0;
-        }
-    }
-
-    cout << dp[0][m - 1] << '\n';
-    cout << memoized_solution(0, m - 1, cuts, dp) << '\n';
+    Solution solver;
+    vector<int> cutsCopy = cuts;
+    cout << solver.minCostTab(n, cuts) << '\n';
+    cout << solver.minCostMemo(n, cutsCopy) << '\n';
 
     return 0;
 }

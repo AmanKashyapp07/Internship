@@ -24,18 +24,32 @@
 using namespace std;
 using ll = long long;
 
-ll maxProfit(int i, vector<pair<pair<int, int>, int>>& jobs, vector<ll>& dp) {
-    if (i >= (int)jobs.size()) return 0;
-    if (dp[i] != -1) return dp[i];
+class Solution {
+public:
+    vector<pair<pair<int, int>, int>> pairList;
+    vector<ll> memo;
 
-    auto target = make_pair(make_pair(jobs[i].first.second, 0), 0);
-    int nextIndex = lower_bound(jobs.begin() + i + 1, jobs.end(), target) - jobs.begin();
+    ll solve(int i) {
+        if (i >= (int)pairList.size()) return 0;
+        if (memo[i] != -1) return memo[i];
 
-    ll includeProfit = jobs[i].second + maxProfit(nextIndex, jobs, dp);
-    ll excludeProfit = maxProfit(i + 1, jobs, dp);
+        auto target = make_pair(make_pair(pairList[i].first.second, 0), 0);
+        int nextIndex = lower_bound(pairList.begin() + i + 1, pairList.end(), target) - pairList.begin();
 
-    return dp[i] = max(includeProfit, excludeProfit);
-}
+        ll includeProfit = pairList[i].second + solve(nextIndex);
+        ll excludeProfit = solve(i + 1);
+
+        return memo[i] = max(includeProfit, excludeProfit);
+    }
+
+    ll getMaxProfit(vector<pair<pair<int, int>, int>>& jobs) {
+        pairList = jobs;
+        sort(pairList.begin(), pairList.end());
+        int n = pairList.size();
+        memo.assign(n, -1);
+        return solve(0);
+    }
+};
 
 int main() {
     ios::sync_with_stdio(false);
@@ -51,10 +65,8 @@ int main() {
         jobs.push_back({{s, e}, p});
     }
 
-    sort(jobs.begin(), jobs.end());
-
-    vector<ll> dp(n, -1);
-    cout << maxProfit(0, jobs, dp) << '\n';
+    Solution solver;
+    cout << solver.getMaxProfit(jobs) << '\n';
 
     return 0;
 }

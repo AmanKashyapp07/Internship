@@ -9,8 +9,8 @@
  * Approach:
  * - Bitmask Dynamic Programming with Memoization.
  * - Let `solve(mask)` return if we can partition the remaining elements (defined by `mask`) into subsets of size `target`.
- * - Track current subset sum as `current_sum = (sum of elements in mask) % target`.
- * - Transition: For each unused element `j`, if `current_sum + nums[j] <= target`, transition to `mask | (1 << j)`.
+ * - Track current subset sum as `currentSum = (sum of elements in mask) % target`.
+ * - Transition: For each unused element `j`, if `currentSum + nums[j] <= target`, transition to `mask | (1 << j)`.
  *
  * Time Complexity: O(2^n * n)
  * Space Complexity: O(2^n)
@@ -24,37 +24,37 @@ using namespace std;
 
 class Solution {
 public:
-    vector<int> nums_;
-    vector<int> memo_;
-    int target_;
-    int n_;
+    vector<int> arr;
+    vector<int> memo;
+    int targetSum;
+    int size;
 
     bool solve(int mask) {
-        if (mask == (1 << n_) - 1) {
+        if (mask == (1 << size) - 1) {
             return true;
         }
-        if (memo_[mask] != -1) {
-            return memo_[mask] == 1;
+        if (memo[mask] != -1) {
+            return memo[mask] == 1;
         }
-        int current_sum = 0;
-        for (int i = 0; i < n_; ++i) {
+        int currentSum = 0;
+        for (int i = 0; i < size; ++i) {
             if (mask & (1 << i)) {
-                current_sum += nums_[i];
+                currentSum += arr[i];
             }
         }
-        current_sum %= target_; 
+        currentSum %= targetSum; 
         
         // Try to add an unused number to the current bucket
-        for (int j = 0; j < n_; ++j) {
+        for (int j = 0; j < size; ++j) {
             // Check if the j-th bit is NOT set (nums[j] is free)
             if ((mask & (1 << j)) == 0) {
-                if (current_sum + nums_[j] <= target_) {
+                if (currentSum + arr[j] <= targetSum) {
                     
-                    int next_mask = mask | (1 << j); // Set the j-th bit
+                    int nextMask = mask | (1 << j); // Set the j-th bit
                     
                     // Recursively check if taking this path leads to a solution
-                    if (solve(next_mask)) {
-                        memo_[mask] = 1; // Cache as true
+                    if (solve(nextMask)) {
+                        memo[mask] = 1; // Cache as true
                         return true;
                     }
                 }
@@ -62,23 +62,23 @@ public:
         }
         
         // If we tried all available numbers and none worked, cache as false
-        memo_[mask] = 0;
+        memo[mask] = 0;
         return false;
     }
 
     bool canPartitionKSubsets(vector<int>& nums, int k) {
-        int total_sum = 0;
+        int totalSum = 0;
         for (int num : nums) {
-            total_sum += num;
+            totalSum += num;
         }
-        if (total_sum % k != 0) {
+        if (totalSum % k != 0) {
             return false;
         }
         
-        target_ = total_sum / k;
-        nums_ = nums;
-        n_ = nums.size();
-        memo_.assign(1 << n_, -1);
+        targetSum = totalSum / k;
+        arr = nums;
+        size = nums.size();
+        memo.assign(1 << size, -1);
         return solve(0);
     }
 };

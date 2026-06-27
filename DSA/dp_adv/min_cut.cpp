@@ -23,20 +23,52 @@
 
 using namespace std;
 
-int solve(int i, vector<int>& memo, vector<vector<bool>>& isPal) {
-    if (i < 0) return 0;
-    if (memo[i] != -1) return memo[i];
-    if (isPal[0][i]) return memo[i] = 0;
+class Solution {
+public:
+    vector<int> memo;
+    vector<vector<bool>> isPal;
+    string str;
+    int size;
 
-    int ans = i; // worst case
-    for (int j = i; j >= 0; j--) {
-        if (isPal[j][i]) {
-            ans = min(ans, 1 + solve(j - 1, memo, isPal));
+    int solve(int i) {
+        if (i < 0) return 0;
+        if (memo[i] != -1) return memo[i];
+        if (isPal[0][i]) return memo[i] = 0;
+
+        int ans = i; // worst case
+        for (int j = i; j >= 0; j--) {
+            if (isPal[j][i]) {
+                ans = min(ans, 1 + solve(j - 1));
+            }
         }
+
+        return memo[i] = ans;
     }
 
-    return memo[i] = ans;
-}
+    int minCut(string s) {
+        str = s;
+        size = s.size();
+        isPal.assign(size, vector<bool>(size, false));
+
+        for (int i = 0; i < size; i++) {
+            isPal[i][i] = true;
+        }
+
+        for (int lengthVal = 2; lengthVal <= size; lengthVal++) {
+            for (int i = 0; i + lengthVal - 1 < size; i++) {
+                int j = i + lengthVal - 1;
+                if (lengthVal == 2) {
+                    isPal[i][j] = (str[i] == str[j]);
+                } else {
+                    isPal[i][j] = (str[i] == str[j]) && isPal[i + 1][j - 1];
+                }
+            }
+        }
+
+        memo.assign(size, -1);
+        return solve(size - 1);
+    }
+};
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -45,26 +77,8 @@ int main() {
     string s;
     if (!(cin >> s)) return 0;
 
-    int n = s.size();
-    vector<vector<bool>> isPalindrome(n, vector<bool>(n, false));
-
-    for (int i = 0; i < n; i++) {
-        isPalindrome[i][i] = true;
-    }
-
-    for (int len = 2; len <= n; len++) {
-        for (int i = 0; i + len - 1 < n; i++) {
-            int j = i + len - 1;
-            if (len == 2) {
-                isPalindrome[i][j] = (s[i] == s[j]);
-            } else {
-                isPalindrome[i][j] = (s[i] == s[j]) && isPalindrome[i + 1][j - 1];
-            }
-        }
-    }
-
-    vector<int> memo(n, -1);
-    cout << solve(n - 1, memo, isPalindrome) << '\n';
+    Solution solver;
+    cout << solver.minCut(s) << '\n';
 
     return 0;
 }

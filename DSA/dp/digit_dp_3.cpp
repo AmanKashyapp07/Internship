@@ -10,7 +10,7 @@
  * Approach:
  * - Digit Dynamic Programming with Memoization.
  * - Calculate `countUpTo(num2) - countUpTo(num1)` using Digit DP.
- * - The state `(pos, current_sum, started, tight)` accumulates the digit sum. If `current_sum > maxSum`, we prune the search.
+ * - The state `(pos, currentSum, started, tight)` accumulates the digit sum. If `currentSum > maxSum`, we prune the search.
  * - Safely adjust MOD arithmetic and check if `num1` itself is good to add it back.
  *
  * Time Complexity: O(log10(num2) * max_sum * 10)
@@ -29,24 +29,24 @@ const int MOD = 1e9 + 7;
 
 class Solution {
 public:
-    string num_;
-    int minSum_, maxSum_;
-    vector<vector<vector<vector<long long>>>> dp_;
+    string str;
+    int minSum, maxSum;
+    vector<vector<vector<vector<long long>>>> memo;
 
-    long long solve(int pos, int current_sum, bool started, bool tight) {
+    long long solve(int pos, int currentSum, bool started, bool tight) {
         // Pruning: If the sum already exceeds maxSum, this path is invalid
-        if (current_sum > maxSum_) return 0;
+        if (currentSum > maxSum) return 0;
 
         // ---------------- Base Case ----------------
-        if (pos == num_.size()) {
+        if (pos == str.size()) {
             // Return 1 if the accumulated digit sum falls within the valid range
-            return (current_sum >= minSum_ && current_sum <= maxSum_) ? 1 : 0;
+            return (currentSum >= minSum && currentSum <= maxSum) ? 1 : 0;
         }
 
-        if (dp_[pos][current_sum][started][tight] != -1)
-            return dp_[pos][current_sum][started][tight];
+        if (memo[pos][currentSum][started][tight] != -1)
+            return memo[pos][currentSum][started][tight];
 
-        int limit = tight ? num_[pos] - '0' : 9;
+        int limit = tight ? str[pos] - '0' : 9;
         long long ans = 0;
 
         // ----------------------------------------------------
@@ -55,7 +55,7 @@ public:
         if (!started) {
             ans = (ans + solve(
                 pos + 1,
-                current_sum, // sum remains 0
+                currentSum, // sum remains 0
                 false,
                 tight && (0 == limit)
             )) % MOD;
@@ -68,19 +68,19 @@ public:
             
             ans = (ans + solve(
                 pos + 1,
-                current_sum + d, // Add current digit to our running sum
+                currentSum + d, // Add current digit to our running sum
                 true,
                 tight && (d == limit)
             )) % MOD;
         }
 
-        return dp_[pos][current_sum][started][tight] = ans;
+        return memo[pos][currentSum][started][tight] = ans;
     }
 
     // Helper to calculate total good integers from 0 up to string x
     long long countUpTo(string x) {
-        num_ = x;
-        dp_.assign(25, vector<vector<vector<long long>>>(210, vector<vector<long long>>(2, vector<long long>(2, -1))));
+        str = x;
+        memo.assign(25, vector<vector<vector<long long>>>(210, vector<vector<long long>>(2, vector<long long>(2, -1))));
         return solve(0, 0, false, true);
     }
 
@@ -90,12 +90,12 @@ public:
         for (char c : x) {
             sum += (c - '0');
         }
-        return sum >= minSum_ && sum <= maxSum_;
+        return sum >= minSum && sum <= maxSum;
     }
 
     int countStrings(string num1, string num2, int min_sum, int max_sum) {
-        minSum_ = min_sum;
-        maxSum_ = max_sum;
+        minSum = min_sum;
+        maxSum = max_sum;
 
         long long ans2 = countUpTo(num2);
         long long ans1 = countUpTo(num1);

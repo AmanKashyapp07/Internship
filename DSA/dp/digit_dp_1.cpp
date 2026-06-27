@@ -24,21 +24,21 @@ using namespace std;
 
 class Solution {
 public:
-    string num_;
-    vector<vector<vector<vector<long long>>>> dp_;
+    string str;
+    vector<vector<vector<vector<long long>>>> memo;
 
     long long solve(int pos, int count1, bool started, bool tight) {
 
         // ---------------- Base Case ----------------
-        if (pos == num_.size()) {
+        if (pos == str.size()) {
             // Return the total number of '1's accumulated in this valid number
             return count1;
         }
 
-        if (dp_[pos][count1][started][tight] != -1)
-            return dp_[pos][count1][started][tight];
+        if (memo[pos][count1][started][tight] != -1)
+            return memo[pos][count1][started][tight];
 
-        int limit = tight ? num_[pos] - '0' : 9;
+        int limit = tight ? str[pos] - '0' : 9;
         long long ans = 0;
 
         // ----------------------------------------------------
@@ -66,14 +66,14 @@ public:
             );
         }
 
-        return dp_[pos][count1][started][tight] = ans;
+        return memo[pos][count1][started][tight] = ans;
     }
 
     long long countDigitOne(long long n) {
         if (n < 0) return 0;
         
-        num_ = to_string(n);
-        dp_.assign(20, vector<vector<vector<long long>>>(20, vector<vector<long long>>(2, vector<long long>(2, -1))));
+        str = to_string(n);
+        memo.assign(20, vector<vector<vector<long long>>>(20, vector<vector<long long>>(2, vector<long long>(2, -1))));
 
         return solve(
             0,

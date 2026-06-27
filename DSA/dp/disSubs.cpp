@@ -23,32 +23,32 @@ const int MOD = 1e9 + 7;
 
 class Solution {
 public:
-    string s_;
-    int n_;
-    vector<long long> dp_;
-    vector<int> last_;
+    string str;
+    int size;
+    vector<long long> memo;
+    vector<int> last;
 
     long long countDistinctSubsequences(string s) {
-        s_ = s;
-        n_ = s.size();
+        str = s;
+        size = s.size();
 
-        dp_.assign(n_ + 1, 0); // dp[i] will store the count of distinct subsequences for the first i characters of the string s
-        last_.assign(26, -1); // last[c] will store the last index where character 'c' appeared in the string s. Initialized to -1 for all characters.
+        memo.assign(size + 1, 0); // dp[i] will store the count of distinct subsequences for the first i characters of the string s
+        last.assign(26, -1); // last[c] will store the last index where character 'c' appeared in the string s. Initialized to -1 for all characters.
 
-        dp_[0] = 1;
+        memo[0] = 1;
 
-        for (int i = 0; i < n_; i++) {
-            dp_[i + 1] = (2 * dp_[i]) % MOD;
+        for (int i = 0; i < size; i++) {
+            memo[i + 1] = (2 * memo[i]) % MOD;
 
-            int c = s_[i] - 'a';
-            if (last_[c] != -1) {
-                dp_[i + 1] = (dp_[i + 1] - dp_[last_[c]] + MOD) % MOD;
+            int c = str[i] - 'a';
+            if (last[c] != -1) {
+                memo[i + 1] = (memo[i + 1] - memo[last[c]] + MOD) % MOD;
             }
 
-            last_[c] = i;
+            last[c] = i;
         }
 
-        return (dp_[n_] - 1 + MOD) % MOD;
+        return (memo[size] - 1 + MOD) % MOD;
     }
 };
 

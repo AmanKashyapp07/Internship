@@ -8,32 +8,35 @@
  * Approach:
  * - Bottom-up 1D dynamic programming.
  * - Initialize the DP state with the bottom row of the triangle.
- * - Traverse rows upwards: `dp[col] = triangle[row][col] + min(dp[col],
- * dp[col+1])`.
+ * - Traverse rows upwards: `dp[col] = triangle[row][col] + min(dp[col], dp[col+1])`.
  * - The answer will accumulate at `dp[0]`.
  *
  * Time Complexity: O(n^2) where n is the number of rows.
  * Space Complexity: O(n)
  */
 
-#include <algorithm>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 class Solution {
 public:
-  int minimumTotal(vector<vector<int>> &triangle) {
-    int n = triangle.size();
+    vector<int> memo;
+    vector<vector<int>> tri;
 
-    vector<int> dp = triangle[n - 1];
+    int minimumTotal(vector<vector<int>>& triangle) {
+        tri = triangle;
+        int n = tri.size();
 
-    for (int row = n - 2; row >= 0; row--) {
-      for (int col = 0; col <= row; col++) {
-        dp[col] = triangle[row][col] + min(dp[col], dp[col + 1]);
-      }
+        memo = tri[n - 1];
+
+        for (int row = n - 2; row >= 0; row--) {
+            for (int col = 0; col <= row; col++) {
+                memo[col] = tri[row][col] + min(memo[col], memo[col + 1]);
+            }
+        }
+
+        return memo[0];
     }
-
-    return dp[0];
-  }
 };

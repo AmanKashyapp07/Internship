@@ -20,18 +20,18 @@ using namespace std;
 
 class Solution {
 public:
-    vector<string> result_;
-    string num_;
-    int target_;
+    vector<string> result;
+    string str;
+    int targetSum;
 
     void helper(int pos, long long currentValue, long long lastValue, string expression) {
-        if (pos == num_.size()) {
-            if (currentValue == target_) result_.push_back(expression);
+        if (pos == str.size()) {
+            if (currentValue == targetSum) result.push_back(expression);
             return;
         }
-        for (size_t i = pos; i < num_.size(); ++i) {
-            if (i != pos && num_[pos] == '0') break; // Prevent leading zeros
-            string currentStr = num_.substr(pos, i - pos + 1);
+        for (size_t i = pos; i < str.size(); ++i) {
+            if (i != pos && str[pos] == '0') break; // Prevent leading zeros
+            string currentStr = str.substr(pos, i - pos + 1);
             long long currentNum = stoll(currentStr);
             if (pos == 0) {
                 helper(i + 1, currentNum, currentNum, currentStr);
@@ -45,12 +45,12 @@ public:
     }
 
     vector<string> addOperators(string num, int target) {
-        num_ = num;
-        target_ = target;
-        result_.clear();
-        if (!num_.empty()) {
+        str = num;
+        targetSum = target;
+        result.clear();
+        if (!str.empty()) {
             helper(0, 0, 0, "");
         }
-        return result_;
+        return result;
     }
 };

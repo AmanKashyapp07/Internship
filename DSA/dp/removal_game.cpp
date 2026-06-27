@@ -21,24 +21,24 @@ using namespace std;
 
 class Solution {
 public:
-    vector<int> a_;
-    vector<vector<long long>> dp_;
+    vector<int> input;
+    vector<vector<long long>> memo;
 
     long long solve(int i, int j) {
-        if (i == j) return a_[i];
-        if (dp_[i][j] != -1e18) return dp_[i][j];
-        long long take_left = a_[i] - solve(i + 1, j);
-        long long take_right = a_[j] - solve(i, j - 1);
-        return dp_[i][j] = max(take_left, take_right); // Transition
+        if (i == j) return input[i];
+        if (memo[i][j] != -1e18) return memo[i][j];
+        long long takeLeft = input[i] - solve(i + 1, j);
+        long long takeRight = input[j] - solve(i, j - 1);
+        return memo[i][j] = max(takeLeft, takeRight); // Transition
     }
 
     long long getMaxScore(int n, vector<int>& a) {
-        a_ = a;
+        input = a;
         long long sum = 0;
-        for (int x : a_) {
+        for (int x : input) {
             sum += x;
         }
-        dp_.assign(n, vector<long long>(n, -1e18)); // dp[i][j] tracks max score difference
+        memo.assign(n, vector<long long>(n, -1e18)); // dp[i][j] tracks max score difference
         long long diff = solve(0, n - 1);
         return (sum + diff) / 2; // P1_score + P2_score = sum, P1_score - P2_score = diff
     }
