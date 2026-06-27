@@ -25,7 +25,6 @@ vector<string> path;
 
 void dfs(int start, string& s, vector<vector<bool>>& isPal) {
     int n = s.size();
-
     if (start == n) {
         ans.push_back(path);
         return;
@@ -33,11 +32,8 @@ void dfs(int start, string& s, vector<vector<bool>>& isPal) {
 
     for (int end = start; end < n; end++) {
         if (isPal[start][end]) {
-
             path.push_back(s.substr(start, end - start + 1));
-
             dfs(end + 1, s, isPal);
-
             path.pop_back();
         }
     }
@@ -48,27 +44,23 @@ int main() {
     cin.tie(nullptr);
 
     string s;
-    cin >> s;
+    if (!(cin >> s)) return 0;
 
     int n = s.size();
 
     // Precompute palindrome table
     vector<vector<bool>> isPal(n, vector<bool>(n, false));
-
     for (int i = 0; i < n; i++) {
         isPal[i][i] = true;
     }
 
     for (int len = 2; len <= n; len++) {
         for (int i = 0; i + len - 1 < n; i++) {
-
             int j = i + len - 1;
-
             if (len == 2) {
                 isPal[i][j] = (s[i] == s[j]);
             } else {
-                isPal[i][j] =
-                    (s[i] == s[j]) && isPal[i + 1][j - 1];
+                isPal[i][j] = (s[i] == s[j]) && isPal[i + 1][j - 1];
             }
         }
     }

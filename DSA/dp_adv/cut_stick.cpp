@@ -17,97 +17,71 @@
  */
 
 #include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
 #include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include <vector>
+#include <climits>
 
 using namespace std;
-using ll = long long;
 
 #define all(x) (x).begin(), (x).end()
 
 int memoized_solution(int i, int j, vector<int>& cuts, vector<vector<int>>& dp) {
-    if (j-i == 1) return 0; // no cuts to be made between i and j
+    if (j - i == 1) return 0; // no cuts to be made between i and j
 
     if (dp[i][j] != -1) return dp[i][j];
 
     int ans = INT_MAX;
-
-    for (int k = i + 1; k < j; k++) { // cut can be only be between i+1 inclusive and j-1 inclusive, because we cannot cut at the boundaries
+    // cut can be only be between i+1 inclusive and j-1 inclusive, because we cannot cut at the boundaries
+    for (int k = i + 1; k < j; k++) {
         ans = min(
             ans,
             memoized_solution(i, k, cuts, dp) +
             memoized_solution(k, j, cuts, dp) +
-            (cuts[j] - cuts[i]) // dp[i][k] represents the cost of cutting the left part, dp[k][j] represents the cost of cutting the right part, and (cuts[j] - cuts[i]) represents the cost of making the cut at position k
+            (cuts[j] - cuts[i]) // cost of making the cut at position k
         );
     }
 
-    if (ans == INT_MAX)
-        ans = 0;
-
+    if (ans == INT_MAX) ans = 0;
     return dp[i][j] = ans;
 }
-int main()
-{
+
+int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
     int n, c;
-    cin >> n >> c;
+    if (!(cin >> n >> c)) return 0;
 
     vector<int> cuts(c);
-
-    for (int i = 0; i < c; i++)
+    for (int i = 0; i < c; i++) {
         cin >> cuts[i];
+    }
 
     cuts.push_back(0);
     cuts.push_back(n);
-
     sort(all(cuts));
 
     int m = cuts.size();
-
     vector<vector<int>> dp(m, vector<int>(m, 0));
 
-    for (int len = 2; len < m; len++) 
-    {
-        for (int i = 0; i + len < m; i++)
-        {
+    for (int len = 2; len < m; len++) {
+        for (int i = 0; i + len < m; i++) {
             int j = i + len;
-
             dp[i][j] = INT_MAX;
 
-            for (int k = i + 1; k < j; k++) // cut can be only be between i+1 inclusive and j-1 inclusive, because we cannot cut at the boundaries
-            {
+            for (int k = i + 1; k < j; k++) { // cut can only be between i+1 and j-1
                 dp[i][j] = min(
                     dp[i][j],
-                    dp[i][k] +
-                    dp[k][j] +
-                    (cuts[j] - cuts[i]) // dp[i][k] represents the cost of cutting the left part, dp[k][j] represents the cost of cutting the right part, and (cuts[j] - cuts[i]) represents the cost of making the cut at position k
+                    dp[i][k] + dp[k][j] + (cuts[j] - cuts[i])
                 );
             }
 
-            if (dp[i][j] == INT_MAX)
-                dp[i][j] = 0;
+            if (dp[i][j] == INT_MAX) dp[i][j] = 0;
         }
     }
 
     cout << dp[0][m - 1] << '\n';
-    cout<< memoized_solution(0, m - 1, cuts, dp) << '\n';
+    cout << memoized_solution(0, m - 1, cuts, dp) << '\n';
 
     return 0;
 }

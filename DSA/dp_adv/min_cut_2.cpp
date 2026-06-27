@@ -20,6 +20,7 @@
 #include <string>
 #include <algorithm>
 #include <climits>
+
 using namespace std;
 
 int main() {
@@ -27,10 +28,9 @@ int main() {
     cin.tie(nullptr);
 
     string s;
-    cin >> s;
+    if (!(cin >> s)) return 0;
 
     int n = s.size();
-
     vector<vector<bool>> isPalindrome(n, vector<bool>(n, false));
 
     for (int i = 0; i < n; i++) {
@@ -40,12 +40,10 @@ int main() {
     for (int len = 2; len <= n; len++) {
         for (int i = 0; i + len - 1 < n; i++) {
             int j = i + len - 1;
-
             if (len == 2) {
                 isPalindrome[i][j] = (s[i] == s[j]);
             } else {
-                isPalindrome[i][j] =
-                    (s[i] == s[j]) && isPalindrome[i + 1][j - 1];
+                isPalindrome[i][j] = (s[i] == s[j]) && isPalindrome[i + 1][j - 1];
             }
         }
     }
@@ -53,7 +51,6 @@ int main() {
     vector<int> dp(n, INT_MAX);
 
     for (int i = 0; i < n; i++) {
-
         if (isPalindrome[0][i]) {
             dp[i] = 0;
             continue;
