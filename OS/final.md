@@ -8,12 +8,11 @@
 | [l1.md](l1.md) | OS types, kernel types, system calls, boot process, 32/64-bit |
 | [l2.md](l2.md) | Memory layout, PCB, state diagram, context switching, zombie/orphan, IPC |
 | [l3.md](l3.md) | FCFS, SJF, SRTF, Priority, Round Robin, MLQ, MLFQ, Gantt charts |
-| [l4.md](l4.md) | Race conditions, mutex, semaphore, CV, classic problems, C++ code |
+| [l4.md](l4.md) | Race conditions, mutex, semaphore, CV, classic problems |
 | [l5.md](l5.md) | Coffman conditions, prevention/avoidance/detection, Banker's Algorithm |
 | [l6.md](l6.md) | Paging, TLB, fragmentation, multi-level paging, segmentation |
-| [l7.md](l7.md) | Demand paging, page fault, FIFO/OPT/LRU, Belady's, thrashing, LRU cache |
+| [l7.md](l7.md) | Demand paging, page fault, FIFO/OPT/LRU, Belady's, thrashing |
 | [l8.md](l8.md) | Inodes, file allocation, journaling, DMA, disk scheduling algorithms |
-| [l9.md](l9.md) | 8 coding problems: BoundedQueue, RW lock, LRU, Singleton, Semaphore, Pool |
 
 ---
 
@@ -239,42 +238,3 @@ Path resolution: / → inode 2 → directory entry → next inode → ...
 | C-LOOK | Best | No |
 
 > **Use C-LOOK** in practice for best balance of performance and fairness.
-
----
-
-## 💻 Concurrency Coding Patterns (Quick Reference)
-
-```cpp
-// Pattern 1: Protect shared data
-std::mutex mtx;
-std::lock_guard<std::mutex> lock(mtx);  // auto-releases
-
-// Pattern 2: Wait for a condition
-std::unique_lock<std::mutex> lock(mtx);
-cv.wait(lock, []{ return condition; }); // always use predicate (spurious wakeup)
-
-// Pattern 3: Signal one vs. all
-cv.notify_one();   // wake one waiter (e.g. producer wakes one consumer)
-cv.notify_all();   // wake all waiters (e.g. barrier, shutdown)
-
-// Pattern 4: Lock multiple mutexes safely (no deadlock)
-std::lock(m1, m2);
-std::lock_guard<std::mutex> g1(m1, std::adopt_lock);
-std::lock_guard<std::mutex> g2(m2, std::adopt_lock);
-
-// Pattern 5: Thread-safe singleton (C++11)
-static Singleton& instance() {
-    static Singleton obj;  // guaranteed initialized once
-    return obj;
-}
-```
-
-### Concurrency Problem Patterns
-| Problem | Key Insight |
-|---------|------------|
-| Bounded Queue | Two CVs: `not_full` + `not_empty` |
-| Read-Write Lock | Reader count + `writing` flag + single CV |
-| LRU Cache | `std::list` (MRU front, LRU back) + `unordered_map` to iterator |
-| Singleton | Static local variable in C++11 is thread-safe |
-| Dining Philosophers | `std::lock(m1, m2)` acquires both atomically |
-| Thread Pool | Task queue + `stop` flag + `notify_all` on shutdown |
