@@ -36,13 +36,15 @@ int main() {
         
         // Each full cycle has 2^i ones
         long long ones_per_cycle = 1LL << i;
+        long long zeroes_per_cycle = 1LL << i; // same as ones_per_cycle
         
         total_ones += full_cycles * ones_per_cycle;
         
         // Handle the remainder
         long long remainder = (n + 1) % cycle_length;
+        // in the last block 
         if (remainder > ones_per_cycle) {
-            total_ones += (remainder - ones_per_cycle);
+            total_ones += (remainder - zeroes_per_cycle);
         }
     }
 
