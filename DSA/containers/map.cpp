@@ -1,139 +1,287 @@
 /**
- * C++ STL Map (Ordered Map) Cheat Sheet for Online Assessments
+ * C++ STL Map (Ordered Map) Cheat Sheet for Online Assessments & Interviews
  *
  * Description:
- *  An associative container that stores key-value pairs sorted by keys.
- *  Implemented internally as a self-balancing Binary Search Tree (typically a Red-Black Tree).
+ *  An associative container that stores key-value pairs sorted by key.
+ *  Implemented internally as a self-balancing Binary Search Tree (Red-Black Tree).
  *
- * ────────────────────────────────────────────────────────────────────────────────
- * TIME & SPACE COMPLEXITY
- * ────────────────────────────────────────────────────────────────────────────────
- * - insert / emplace : O(log N)
- * - erase(key)       : O(log N)
- * - find(key)        : O(log N)
- * - count(key)       : O(log N)
- * - operator[key]    : O(log N)
- * - lower_bound(key) : O(log N) — returns iterator to first key >= target
- * - upper_bound(key) : O(log N) — returns iterator to first key > target
- * - traversal        : O(N) in sorted order of keys
- * - Space            : O(N)
+ * Time & Space Complexity:
+ * ┌──────────────────┬──────────────────┬──────────────────────────────────────────┐
+ * │ Operation        │ Time Complexity  │ Notes                                    │
+ * ├──────────────────┼──────────────────┼──────────────────────────────────────────┤
+ * │ insert()         │ O(log N)         │ Inserts a key-value pair                 │
+ * │ emplace()        │ O(log N)         │ Inserts in-place                         │
+ * │ erase(key)       │ O(log N)         │ Removes key-value pair                   │
+ * │ find(key)        │ O(log N)         │ Search for key                           │
+ * │ count(key)       │ O(log N)         │ Returns 1 if present, 0 otherwise        │
+ * │ lower_bound()    │ O(log N)         │ First key-value pair with key >= target  │
+ * │ upper_bound()    │ O(log N)         │ First key-value pair with key > target   │
+ * │ operator[key]    │ O(log N)         │ Access/insert key                        │
+ * └──────────────────┴──────────────────┴──────────────────────────────────────────┘
+ * Space Complexity: O(N)
  *
- * ────────────────────────────────────────────────────────────────────────────────
- * WHEN TO USE IN OAs
- * ────────────────────────────────────────────────────────────────────────────────
- * 1. Coordinate Compression
- *    - Maps large coordinate values (e.g. -10^9 to 10^9) to indices (0 to M-1)
- *      while preserving their sorted ordering.
- * 2. Range Queries / Nearest Key Lookups
- *    - When you need to answer queries like "find the smallest active timestamp >= T".
- * 3. Dynamic Sorted State
- *    - To maintain keys dynamically (insert/delete) while needing access to minimum
- *      key (`mp.begin()`) or maximum key (`mp.rbegin()`).
+ * Typical Interview Usage:
+ *  - Frequency mapping in sorted order
+ *  - Coordinate compression (assigning ranks to sparse values)
+ *  - Sweep-line algorithms where events are processed at sorted event coordinates
  *
- * ────────────────────────────────────────────────────────────────────────────────
- * OA TIPS & TRICKS
- * ────────────────────────────────────────────────────────────────────────────────
- * - CRITICAL PERFORMANCE TRAP: Never use the global std::lower_bound(mp.begin(), mp.end(), k)
- *   on a map. Because map iterators are Bidirectional (not RandomAccess), it runs in O(N).
- *   ALWAYS use the member function: mp.lower_bound(k) which runs in O(log N).
- * - Default Insertion Trap: Referencing a key using `mp[key]` inserts it into the map
- *   with its default value (e.g. 0 for integers) if it doesn't already exist.
- *   Use `mp.count(key)` or `mp.find(key)` to check existence safely without adding elements.
- * - Custom Sort Keys: Pass a custom comparator as a template argument to sort keys differently,
- *   e.g. `map<int, string, greater<int>>` to keep keys in descending order.
+ * Interview Tricks & Pitfalls:
+ *  - The Autocreation Trap: Checking if a key exists via `if (mp[key] == 0)` will *automatically insert*
+ *    the key with a default value of `0` if it does not exist. This inflates map size and memory consumption.
+ *    To search without modifying the map, ALWAYS use `mp.count(key)` or `mp.find(key)`.
+ *  - Member Bounds: Like `std::set`, never use the global `std::lower_bound` on maps. Always use
+ *    `mp.lower_bound(key)` for O(log N) performance.
  */
 
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <vector>
+#include <string>
 #include <algorithm>
 
 using namespace std;
 
-// Custom Key Comparator for custom sorting of keys
-struct CompareLength {
-    bool operator()(const string& a, const string& b) const {
-        if (a.length() != b.length()) {
-            return a.length() < b.length(); // Sort shorter strings first
-        }
-        return a < b; // Alphabetical tie-breaker
+/*==========================================================
+=            1. CONSTRUCTION & INSERTION
+==========================================================*/
+
+void insertionExample() {
+    cout << "--- 1. CONSTRUCTION & INSERTION ---\n";
+    
+    // Ordered map: sorted by key ascending
+    map<int, string> mp;
+
+    // Insertion Method A: Operator[]
+    mp[3] = "Three";
+    mp[1] = "One";
+
+    // Insertion Method B: std::insert
+    mp.insert({2, "Two"});
+
+    // Insertion Method C: std::emplace (In-place construction)
+    mp.emplace(5, "Five");
+
+    // Keys are sorted automatically: 1, 2, 3, 5
+    cout << "Map elements after insertion:\n";
+    for (auto [key, val] : mp) {
+        cout << "  " << key << " -> " << val << "\n";
     }
-};
+    cout << "\n";
+}
+
+/*==========================================================
+=            2. ELEMENT ACCESS & SEARCH (THE TRAP)
+==========================================================*/
+
+void accessAndSearch() {
+    cout << "--- 2. ELEMENT ACCESS & SEARCH TRAPS ---\n";
+    map<int, int> mp;
+    mp[10] = 100;
+
+    // THE AUTOCREATION TRAP DEMO
+    cout << "Map size before trap check: " << mp.size() << "\n"; // Size is 1
+    if (mp[42] == 0) {
+        cout << "  Key 42 accessed via operator[].\n";
+    }
+    cout << "Map size after trap check: " << mp.size() << "\n"; // Size is now 2! Key 42 was inserted.
+
+    // Safe Search Method A: mp.count(key)
+    if (mp.count(10)) {
+        cout << "Key 10 exists (checked safely via count)\n";
+    }
+
+    // Safe Search Method B: mp.find(key)
+    auto it = mp.find(10);
+    if (it != mp.end()) {
+        cout << "Key 10 exists, Value = " << it->second << " (checked safely via find)\n";
+    }
+
+    // Erase keys
+    mp.erase(42); // Remove by key
+    cout << "Map size after erasing key 42: " << mp.size() << "\n\n";
+}
+
+/*==========================================================
+=            3. ITERATION (FORWARD & REVERSE)
+==========================================================*/
+
+void iterationExample() {
+    cout << "--- 3. ITERATION (FORWARD & REVERSE) ---\n";
+    map<int, int> mp = {{1, 10}, {2, 20}, {3, 30}};
+
+    // C++17 Structured Bindings (Forward)
+    cout << "Forward iteration: ";
+    for (auto [key, val] : mp) {
+        cout << "[" << key << ":" << val << "] ";
+    }
+    cout << "\n";
+
+    // Reverse iteration
+    cout << "Reverse iteration: ";
+    for (auto it = mp.rbegin(); it != mp.rend(); ++it) {
+        cout << "[" << it->first << ":" << it->second << "] ";
+    }
+    cout << "\n\n";
+}
+
+/*==========================================================
+=            4. BOUNDS & MULTIMAP
+==========================================================*/
+
+void boundsAndMultimap() {
+    cout << "--- 4. BOUNDS & MULTIMAP ---\n";
+    map<int, int> mp = {{2, 20}, {5, 50}, {8, 80}};
+
+    // Member lower_bound (first key >= target)
+    auto lb = mp.lower_bound(4); // Points to {5, 50}
+    if (lb != mp.end()) {
+        cout << "Lower bound of 4: " << lb->first << " -> " << lb->second << "\n";
+    }
+
+    // Member upper_bound (first key > target)
+    auto ub = mp.upper_bound(5); // Points to {8, 80}
+    if (ub != mp.end()) {
+        cout << "Upper bound of 5: " << ub->first << " -> " << ub->second << "\n";
+    }
+
+    // Multimap: allows duplicate keys
+    multimap<int, string> mmp;
+    mmp.insert({1, "A"});
+    mmp.insert({1, "B"});
+    mmp.insert({1, "C"});
+    cout << "Multimap contents for key 1:\n";
+    auto [range_start, range_end] = mmp.equal_range(1);
+    for (auto it = range_start; it != range_end; ++it) {
+        cout << "  " << it->first << " -> " << it->second << "\n";
+    }
+    cout << "\n";
+}
+
+/*==========================================================
+=            5. COMMON INTERVIEW PATTERNS
+==========================================================*/
+
+// Pattern A: Frequency count mapping
+void frequencyCountDemo() {
+    vector<int> nums = {1, 2, 2, 3, 3, 3};
+    map<int, int> freq;
+    for (int x : nums) {
+        freq[x]++;
+    }
+    cout << "Frequency count in sorted order:\n";
+    for (auto [num, cnt] : freq) {
+        cout << "  " << num << " occurs " << cnt << " times\n";
+    }
+}
+
+// Pattern B: Coordinate Compression (mapping sparse values to ranks 0..N-1)
+void coordinateCompressionDemo() {
+    vector<int> coords = {1000, 50, 1000, 200, 50};
+    map<int, int> compressed;
+    
+    // Insert unique coordinates in sorted order
+    for (int x : coords) {
+        compressed[x] = 0;
+    }
+
+    // Assign ranks
+    int rank = 0;
+    for (auto& [val, rank_val] : compressed) {
+        rank_val = rank++;
+    }
+
+    cout << "Coordinate compression mapping:\n";
+    for (int x : coords) {
+        cout << "  Original: " << x << " -> Compressed Rank: " << compressed[x] << "\n";
+    }
+}
+
+void interviewPatterns() {
+    cout << "--- 5. COMMON INTERVIEW PATTERNS ---\n";
+    frequencyCountDemo();
+    coordinateCompressionDemo();
+    cout << "\n";
+}
+
+/*==========================================================
+=            COMMON OPERATIONS REFERENCE
+==========================================================*/
+
+/**
+ * Common Member Functions:
+ * ┌──────────────────┬────────────────────────────┬─────────────────────────────┐
+ * │ Function         │ Description                │ Complexity                  │
+ * ├──────────────────┼────────────────────────────┼─────────────────────────────┤
+ * │ mp[key] = value  │ Insert or update key       │ O(log N)                    │
+ * │ mp.insert(pair)  │ Insert pair if key absent  │ O(log N)                    │
+ * │ mp.erase(key)    │ Erases key-value pair      │ O(log N)                    │
+ * │ mp.find(key)     │ Iterator to key if exists  │ O(log N)                    │
+ * │ mp.count(key)    │ Returns 1 if key exists    │ O(log N)                    │
+ * │ mp.lower_bound(k)│ First iterator with key>=k │ O(log N)                    │
+ * │ mp.upper_bound(k)│ First iterator with key>k  │ O(log N)                    │
+ * │ mp.size()        │ Get element count          │ O(1)                        │
+ * │ mp.empty()       │ Check if map is empty      │ O(1)                        │
+ * │ mp.clear()       │ Remove all elements        │ O(N)                        │
+ * └──────────────────┴────────────────────────────┴─────────────────────────────┘
+ */
+
+/*==========================================================
+=            MOST IMPORTANT TEMPLATES FOR OAs
+==========================================================*/
+
+// 1. Coordinate Compression Template
+// map<int, int> ranks;
+// for (int x : arr) ranks[x] = 0;
+// int r = 0;
+// for (auto& [val, rank_val] : ranks) rank_val = r++;
+
+// 2. Map of Vectors (Adjacency List / Grouping)
+// map<int, vector<int>> groups;
+// groups[key].push_back(val);
+
+/*==========================================================
+=            REMEMBER THESE (INTERVIEW SYNTAX)
+==========================================================*/
+
+/*
+// Initialization
+map<int, int> mp;
+
+// Access safely (Avoid [] autocreation)
+if (mp.count(key)) {
+    int val = mp[key];
+}
+
+// Searching
+auto it = mp.find(key);
+if (it != mp.end()) {
+    int val = it->second;
+}
+
+// Insertion & Deletion
+mp[key] = val;
+mp.erase(key);
+
+// Bounds
+auto it_lb = mp.lower_bound(k);
+auto it_ub = mp.upper_bound(k);
+
+// Structured Binding Iteration
+for (auto [k, v] : mp) { ... }
+*/
 
 int main() {
     // Fast I/O
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    // 1. DECLARATION & INSERTION
-    map<string, int> age_map;
-    age_map["Alice"] = 25;                  // operator[] syntax (inserts if not present)
-    age_map.insert({"Bob", 30});            // insert pair
-    age_map.emplace("Charlie", 35);         // emplace (more efficient)
-
-    // 2. CHECK EXISTENCE WITHOUT INSERTION
-    // Trap warning: if we did age_map["Diana"] == 0, "Diana" gets added with value 0!
-    if (age_map.count("Diana") == 0) {
-        // "Diana" is confirmed not in the map
-    }
-    
-    auto it_find = age_map.find("Bob");
-    if (it_find != age_map.end()) {
-        cout << "Bob's age: " << it_find->second << "\n"; // Outputs 30
-    }
-
-    // 3. MEMBER BOUNDS VS GLOBAL BOUNDS (Crucial OA Speed Tip)
-    map<int, string> event_map;
-    event_map[10] = "Start";
-    event_map[20] = "Processing";
-    event_map[30] = "End";
-
-    // Fast: O(log N)
-    auto it_fast = event_map.lower_bound(15); 
-    cout << "Lower bound of 15: {" << it_fast->first << ", " << it_fast->second << "}\n"; // Outputs {20, Processing}
-
-    // SLOW: O(N) — DO NOT USE IN OAs!
-    // auto it_slow = lower_bound(event_map.begin(), event_map.end(), 15);
-
-    // 4. COORDINATE COMPRESSION PATTERN
-    // Given arbitrary large values, compress them to range [0, unique_count - 1]
-    vector<int> large_coords = {1000000000, -500, 200, 1000000000, 200};
-    
-    // Step a: Add elements to map to unique-ify and sort them
-    map<int, int> compress_map;
-    for (int val : large_coords) {
-        compress_map[val] = 0; // Temp value
-    }
-    
-    // Step b: Assign rank index
-    int rank = 0;
-    for (auto& pair : compress_map) {
-        pair.second = rank++;
-    }
-    
-    // Step c: Retrieve compressed coordinates
-    // -500 -> rank 0, 200 -> rank 1, 1000000000 -> rank 2
-    cout << "Compressed -500: " << compress_map[-500] << "\n"; // Outputs 0
-    cout << "Compressed 200: " << compress_map[200] << "\n";   // Outputs 1
-
-    // 5. REVERSE ITERATION & MIN/MAX KEYS
-    // Min Key: map.begin()
-    cout << "Min key in event_map: " << event_map.begin()->first << "\n"; // Outputs 10
-    // Max Key: map.rbegin()
-    cout << "Max key in event_map: " << event_map.rbegin()->first << "\n"; // Outputs 30
-
-    // Iterating in reverse order
-    for (auto rit = event_map.rbegin(); rit != event_map.rend(); ++rit) {
-        cout << rit->first << " -> " << rit->second << "\n";
-    }
-
-    // 6. CUSTOM KEY SORTING
-    map<string, int, CompareLength> len_map;
-    len_map["aaa"] = 3;
-    len_map["z"] = 1;
-    len_map["bb"] = 2;
-    // Keys will be sorted as: "z" (len 1), "bb" (len 2), "aaa" (len 3)
-    cout << "First key in length-sorted map: " << len_map.begin()->first << "\n"; // Outputs "z"
+    // Uncomment to test:
+    // insertionExample();
+    // accessAndSearch();
+    // iterationExample();
+    // boundsAndMultimap();
+    // interviewPatterns();
 
     return 0;
 }
