@@ -2,8 +2,9 @@
  * LeetCode 698 - Partition to K Equal Sum Subsets
  *
  * Description:
- * Given an integer array nums and an integer k, return true if it is possible to partition this array
- * into k subsets whose sums are all equal.
+ * Given an integer array nums, you can perform operations to delete an element and earn points.
+ * When you delete an element, you must also delete all elements equal to nums[i] - 1 and nums[i] + 1.
+ * Return the maximum points you can earn.
  *
  * Approach:
  * - Bitmask Dynamic Programming with Memoization.
@@ -22,35 +23,38 @@
 using namespace std;
 
 class Solution {
-private:
+public:
+    vector<int> nums_;
+    vector<int> memo_;
+    int target_;
+    int n_;
 
-    bool solve(int mask, const vector<int>& nums, vector<int>& memo, int target) {
-        int n = nums.size();
-        if (mask == (1 << n) - 1) {
+    bool solve(int mask) {
+        if (mask == (1 << n_) - 1) {
             return true;
         }
-        if (memo[mask] != -1) {
-            return memo[mask] == 1;
+        if (memo_[mask] != -1) {
+            return memo_[mask] == 1;
         }
         int current_sum = 0;
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < n_; ++i) {
             if (mask & (1 << i)) {
-                current_sum += nums[i];
+                current_sum += nums_[i];
             }
         }
-        current_sum %= target; 
+        current_sum %= target_; 
         
         // Try to add an unused number to the current bucket
-        for (int j = 0; j < n; ++j) {
+        for (int j = 0; j < n_; ++j) {
             // Check if the j-th bit is NOT set (nums[j] is free)
             if ((mask & (1 << j)) == 0) {
-                if (current_sum + nums[j] <= target) {
+                if (current_sum + nums_[j] <= target_) {
                     
                     int next_mask = mask | (1 << j); // Set the j-th bit
                     
                     // Recursively check if taking this path leads to a solution
-                    if (solve(next_mask, nums, memo, target)) {
-                        memo[mask] = 1; // Cache as true
+                    if (solve(next_mask)) {
+                        memo_[mask] = 1; // Cache as true
                         return true;
                     }
                 }
@@ -58,11 +62,10 @@ private:
         }
         
         // If we tried all available numbers and none worked, cache as false
-        memo[mask] = 0;
+        memo_[mask] = 0;
         return false;
     }
 
-public:
     bool canPartitionKSubsets(vector<int>& nums, int k) {
         int total_sum = 0;
         for (int num : nums) {
@@ -72,9 +75,10 @@ public:
             return false;
         }
         
-        int target = total_sum / k;
-        int n = nums.size();
-        vector<int> memo(1 << n, -1);
-        return solve(0, nums, memo, target);
+        target_ = total_sum / k;
+        nums_ = nums;
+        n_ = nums.size();
+        memo_.assign(1 << n_, -1);
+        return solve(0);
     }
 };

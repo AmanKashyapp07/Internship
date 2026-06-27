@@ -58,43 +58,38 @@ const ll MOD = 1e9 + 7;
 class Solution
 {
 public:
-    vector<vector<vector<int>>> dp;
-    int helper(int idx,
-               int members,
-               int currProfit,
-               vector<int> &group,
-               vector<int> &profit,
-               int minProfit, vector<vector<vector<int>>> &dp)
+    vector<vector<vector<int>>> dp_;
+    vector<int> group_;
+    vector<int> profit_;
+    int minProfit_;
+
+    int helper(int idx, int members, int currProfit)
     {
-        if (idx == group.size())
-            return currProfit >= minProfit;
+        if (idx == group_.size())
+            return currProfit >= minProfit_;
 
-        if (dp[idx][members][currProfit] != -1)
-            return dp[idx][members][currProfit];
+        if (dp_[idx][members][currProfit] != -1)
+            return dp_[idx][members][currProfit];
 
-        long long ans = helper(idx + 1,
-                               members,
-                               currProfit,
-                               group,
-                               profit,
-                               minProfit, dp);
+        long long ans = helper(idx + 1, members, currProfit);
 
-        if (group[idx] <= members)
+        if (group_[idx] <= members)
         {
             ans += helper(
                 idx + 1,
-                members - group[idx],
-                min(currProfit + profit[idx], minProfit),
-                group,
-                profit,
-                minProfit, dp);
+                members - group_[idx],
+                min(currProfit + profit_[idx], minProfit_));
         }
 
-        return dp[idx][members][currProfit] = ans % MOD;
+        return dp_[idx][members][currProfit] = ans % MOD;
     }
+
     int profitableSchemes(int n, int minProfit, vector<int> &group, vector<int> &profit)
     {
-        dp.resize(group.size(), vector<vector<int>>(n + 1, vector<int>(minProfit + 1, -1)));
-        return helper(0, n, 0, group, profit, minProfit, dp);
+        group_ = group;
+        profit_ = profit;
+        minProfit_ = minProfit;
+        dp_.assign(group.size(), vector<vector<int>>(n + 1, vector<int>(minProfit + 1, -1)));
+        return helper(0, n, 0);
     }
 };

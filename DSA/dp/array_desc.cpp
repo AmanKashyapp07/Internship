@@ -49,59 +49,73 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-int n, m;
-vector<int> a;
-vector<vector<int>> dp;
-int solve(int i, int prev)
-{
-    if (i == n)
-        return 1;
+class Solution {
+public:
+    int n_;
+    int m_;
+    vector<int> a_;
+    vector<vector<int>> dp_;
 
-    if (dp[i][prev + 1] != -1)
-        return dp[i][prev + 1];
-
-    long long ans = 0;
-
-    if (a[i] != 0)
+    int solve(int i, int prev)
     {
-        if (prev == -1 || abs(a[i] - prev) <= 1)
-            ans = solve(i + 1, a[i]);
-    }
-    else
-    {
-        if (prev == -1)
+        if (i == n_)
+            return 1;
+
+        if (dp_[i][prev + 1] != -1)
+            return dp_[i][prev + 1];
+
+        long long ans = 0;
+
+        if (a_[i] != 0)
         {
-            for (int cur = 1; cur <= m; cur++)
-            {
-                ans = (ans + solve(i + 1, cur)) % MOD; // trying each possible value for the current position and recursively solving for the next position.
-            }
+            if (prev == -1 || abs(a_[i] - prev) <= 1)
+                ans = solve(i + 1, a_[i]);
         }
         else
         {
-            for (int cur = max(1, prev - 1); cur <= min(m, prev + 1); cur++)
+            if (prev == -1)
             {
-                ans = (ans + solve(i + 1, cur)) % MOD;
+                for (int cur = 1; cur <= m_; cur++)
+                {
+                    ans = (ans + solve(i + 1, cur)) % MOD;
+                }
+            }
+            else
+            {
+                for (int cur = max(1, prev - 1); cur <= min(m_, prev + 1); cur++)
+                {
+                    ans = (ans + solve(i + 1, cur)) % MOD;
+                }
             }
         }
+
+        return dp_[i][prev + 1] = ans;
     }
 
-    return dp[i][prev + 1] = ans;
-}
+    int getArrayDescription(int n, int m, vector<int>& a) {
+        n_ = n;
+        m_ = m;
+        a_ = a;
+        dp_.assign(n, vector<int>(m + 2, -1));
+        return solve(0, -1);
+    }
+};
 
 int main()
 {
-
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    cin >> n >> m;
+    int n, m;
+    if (!(cin >> n >> m)) return 0;
 
-    a.resize(n);
+    vector<int> a(n);
     for (int &x : a)
         cin >> x;
 
-    dp.assign(n, vector<int>(m + 2, -1));
-
-    long long ans1 = solve(0, -1);
+    Solution solver;
+    long long ans1 = solver.getArrayDescription(n, m, a);
     cout << ans1 << "\n";
+
+    return 0;
 }

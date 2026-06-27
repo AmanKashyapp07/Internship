@@ -54,30 +54,29 @@ const ll MOD = 1e9 + 7;
 
 class Solution {
 public:
-    int n, m, FULL;
-    vector<int> personMask;
-
-    vector<vector<int>> dp;
-    vector<bool> vis;
+    int n_;
+    int m_;
+    int FULL_;
+    vector<int> personMask_;
+    vector<vector<int>> dp_;
+    vector<bool> vis_;
 
     vector<int> solve(int mask) {
-
         // All skills covered
-        if (mask == FULL)
+        if (mask == FULL_)
             return {};
 
-        if (vis[mask])
-            return dp[mask];
+        if (vis_[mask])
+            return dp_[mask];
 
-        vis[mask] = true;
+        vis_[mask] = true;
 
         // Initialize with an impossible large team
         vector<int> best(100);
 
         // Try taking every person
-        for (int i = 0; i < n; i++) {
-
-            int newMask = mask | personMask[i];
+        for (int i = 0; i < n_; i++) {
+            int newMask = mask | personMask_[i];
 
             // Person adds no new skill
             if (newMask == mask)
@@ -90,39 +89,37 @@ public:
                 best = team;
         }
 
-        return dp[mask] = best;
+        return dp_[mask] = best;
     }
-
 
     vector<int> smallestSufficientTeam(vector<string>& req_skills,
                                        vector<vector<string>>& people) {
-
-        m = req_skills.size();
-        n = people.size();
-        FULL = (1 << m) - 1;
+        m_ = req_skills.size();
+        n_ = people.size();
+        FULL_ = (1 << m_) - 1;
 
         unordered_map<string, int> skillId;
 
-        for (int i = 0; i < m; i++)
+        for (int i = 0; i < m_; i++)
             skillId[req_skills[i]] = i; // mapping skills to a unique id
 
-        personMask.resize(n);
+        personMask_.assign(n_, 0);
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n_; i++) {
             int mask = 0;
             for (string &skill : people[i])
                 mask |= (1 << skillId[skill]);
-            personMask[i] = mask;
+            personMask_[i] = mask;
         }
 
-        dp.resize(1 << m);
-        vis.assign(1 << m, false);
+        dp_.assign(1 << m_, vector<int>());
+        vis_.assign(1 << m_, false);
 
         return solve(0);
     }
 };
 
-int main(){
+int main() {
     Solution sol;
     return 0;
 }

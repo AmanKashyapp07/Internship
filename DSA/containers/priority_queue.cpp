@@ -55,6 +55,10 @@ void maxHeapExample() {
 void minHeapExample() {
 
     priority_queue<int, vector<int>, greater<int>> pq;
+    // for any type, just replace int with that type, e.g., string, pair<int,int>, etc.
+    // for max heap, there is only one template parameter: priority_queue<Type>
+    // for min heap, there are three template parameters: priority_queue<Type, Container, Comparator> which is usually priority_queue<Type, vector<Type>, greater<Type>> for most cases.
+    // very rarely you would need to use a custom comparator, in which case you would define a struct with operator() and use that as the third template parameter.
 
     pq.push(5);
     pq.push(2);
@@ -107,7 +111,7 @@ struct cmpInt {
     bool operator()(int a, int b) {
         return a > b;       // Min Heap
     }
-};
+}; // after creating this struct, you can use it as the third template parameter in priority_queue, e.g., priority_queue<int, vector<int>, cmpInt> pq;
 
 void customComparatorInt() {
 
@@ -129,7 +133,7 @@ struct cmpPair {
         // Smaller second value gets higher priority
         return a.second > b.second;
     }
-};
+}; // after creating this struct, you can use it as the third template parameter in priority_queue, e.g., priority_queue<pair<int,int>, vector<pair<int,int>>, cmpPair> pq;
 
 void customComparatorPair() {
 
@@ -288,3 +292,12 @@ int main() {
 
     return 0;
 }
+
+// for sorting comparator -
+// syntax is 
+// struct cmp {
+//     bool operator()(const Type& a, const Type& b) {
+//         // define your comparison logic here
+//     }
+// };
+// where

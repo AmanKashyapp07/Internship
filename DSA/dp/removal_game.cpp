@@ -19,22 +19,41 @@
 #include <algorithm>
 using namespace std;
 
-long long solve(int i, int j, const vector<int>& a, vector<vector<long long>>& dp) {
-    if (i == j) return a[i];
-    if (dp[i][j] != -1e18) return dp[i][j];
-    long long take_left = a[i] - solve(i + 1, j, a, dp);
-    long long take_right = a[j] - solve(i, j - 1, a, dp);
-    return dp[i][j] = max(take_left, take_right); // Transition
-}
+class Solution {
+public:
+    vector<int> a_;
+    vector<vector<long long>> dp_;
+
+    long long solve(int i, int j) {
+        if (i == j) return a_[i];
+        if (dp_[i][j] != -1e18) return dp_[i][j];
+        long long take_left = a_[i] - solve(i + 1, j);
+        long long take_right = a_[j] - solve(i, j - 1);
+        return dp_[i][j] = max(take_left, take_right); // Transition
+    }
+
+    long long getMaxScore(int n, vector<int>& a) {
+        a_ = a;
+        long long sum = 0;
+        for (int x : a_) {
+            sum += x;
+        }
+        dp_.assign(n, vector<long long>(n, -1e18)); // dp[i][j] tracks max score difference
+        long long diff = solve(0, n - 1);
+        return (sum + diff) / 2; // P1_score + P2_score = sum, P1_score - P2_score = diff
+    }
+};
 
 int main() {
     ios::sync_with_stdio(0); cin.tie(0);
     int n;
     if (cin >> n) {
-        vector<int> a(n); long long sum = 0;
-        for (int &x : a) { cin >> x; sum += x; }
-        vector<vector<long long>> dp(n, vector<long long>(n, -1e18)); // dp[i][j] tracks max score difference
-        long long diff = solve(0, n - 1, a, dp);
-        cout << (sum + diff) / 2 << '\n'; // P1_score + P2_score = sum, P1_score - P2_score = diff
+        vector<int> a(n); 
+        for (int &x : a) { 
+            cin >> x; 
+        }
+        Solution solver;
+        cout << solver.getMaxScore(n, a) << '\n';
     }
+    return 0;
 }

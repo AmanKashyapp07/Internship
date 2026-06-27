@@ -234,6 +234,7 @@ void lowerBoundExample() {
     mp[8]=80;
 
     auto it = mp.lower_bound(4);
+    // lower_bound only works on ordered containers like map, multimap, set, multiset. It returns an iterator to the first element that is not less than the given key.
 
     if (it != mp.end())
         cout << it->first << '\n';

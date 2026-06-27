@@ -54,36 +54,36 @@ const ll MOD = 1e9 + 7;
 
 class Solution {
 public:
-    string s1, s2, s3;
-    vector<vector<int>> dp;
+    string s1_, s2_, s3_;
+    vector<vector<int>> dp_;
 
     bool solve(int i, int j) {
-        if (i == s1.size() && j == s2.size())
+        if (i == s1_.size() && j == s2_.size())
             return true;
 
-        if (dp[i][j] != -1)
-            return dp[i][j];
+        if (dp_[i][j] != -1)
+            return dp_[i][j];
 
         bool ans = false;
 
-        if (i < s1.size() && s1[i] == s3[i + j])
+        if (i < s1_.size() && s1_[i] == s3_[i + j])
             ans |= solve(i + 1, j);
 
-        if (j < s2.size() && s2[j] == s3[i + j])
+        if (j < s2_.size() && s2_[j] == s3_[i + j])
             ans |= solve(i, j + 1);
 
-        return dp[i][j] = ans;
+        return dp_[i][j] = ans;
     }
 
     bool isInterleave(string str1, string str2, string str3) {
-        s1 = str1;
-        s2 = str2;
-        s3 = str3;
+        s1_ = str1;
+        s2_ = str2;
+        s3_ = str3;
 
-        if (s1.size() + s2.size() != s3.size())
+        if (s1_.size() + s2_.size() != s3_.size())
             return false;
 
-        dp.assign(s1.size() + 1, vector<int>(s2.size() + 1, -1));
+        dp_.assign(s1_.size() + 1, vector<int>(s2_.size() + 1, -1));
 
         return solve(0, 0);
     }

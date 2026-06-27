@@ -19,26 +19,44 @@
 #include <algorithm>
 using namespace std;
 
-int countSquares(int m, int n, vector<vector<int>>& matrix) {
-    vector<vector<int>> dp(m, vector<int>(n, 0));
-    int count = 0;
-    // DP state: dp[i][j] is the size of the largest square submatrix with bottom-right corner at (i, j)
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            if (matrix[i][j] == 1) {
-                if (i == 0 || j == 0) dp[i][j] = 1;
-                else dp[i][j] = min({dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]}) + 1; // Transition
-                count += dp[i][j];
+class Solution {
+public:
+    vector<vector<int>> dp_;
+    vector<vector<int>> matrix_;
+    int m_;
+    int n_;
+
+    int countSquares(int m, int n, vector<vector<int>>& matrix) {
+        m_ = m;
+        n_ = n;
+        matrix_ = matrix;
+        dp_.assign(m, vector<int>(n, 0));
+        int count = 0;
+        // DP state: dp[i][j] is the size of the largest square submatrix with bottom-right corner at (i, j)
+        for (int i = 0; i < m_; i++) {
+            for (int j = 0; j < n_; j++) {
+                if (matrix_[i][j] == 1) {
+                    if (i == 0 || j == 0) dp_[i][j] = 1;
+                    else dp_[i][j] = min({dp_[i - 1][j], dp_[i][j - 1], dp_[i - 1][j - 1]}) + 1; // Transition
+                    count += dp_[i][j];
+                }
             }
         }
+        return count;
     }
-    return count;
-}
+};
 
 int main() {
     ios::sync_with_stdio(0); cin.tie(0);
-    int m, n; cin >> m >> n;
+    int m, n; 
+    if (!(cin >> m >> n)) return 0;
     vector<vector<int>> matrix(m, vector<int>(n));
-    for (int i = 0; i < m; i++) for (int j = 0; j < n; j++) cin >> matrix[i][j];
-    cout << countSquares(m, n, matrix) << '\n';
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> matrix[i][j];
+        }
+    }
+    Solution solver;
+    cout << solver.countSquares(m, n, matrix) << '\n';
+    return 0;
 }

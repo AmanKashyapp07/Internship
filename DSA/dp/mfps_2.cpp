@@ -24,25 +24,29 @@ using namespace std;
 
 class Solution {
 public:
-    int minFallingPathSum(vector<vector<int>>& grid) {
-        int n = grid.size();
+    vector<vector<int>> dp_;
+    vector<vector<int>> grid_;
 
-        vector<vector<int>> dp(n, vector<int>(n));
+    int minFallingPathSum(vector<vector<int>>& grid) {
+        grid_ = grid;
+        int n = grid_.size();
+
+        dp_.assign(n, vector<int>(n, 0));
 
         // Base case
         for (int col = 0; col < n; col++)
-            dp[n - 1][col] = grid[n - 1][col];
+            dp_[n - 1][col] = grid_[n - 1][col];
 
         // Build DP
         for (int row = n - 2; row >= 0; row--) {
 
             // Find minimum value
-            int min1 = *min_element(dp[row + 1].begin(), dp[row + 1].end());
+            int min1 = *min_element(dp_[row + 1].begin(), dp_[row + 1].end());
 
             // Find column of minimum value
             int col1 = -1;
             for (int col = 0; col < n; col++) {
-                if (dp[row + 1][col] == min1) {
+                if (dp_[row + 1][col] == min1) {
                     col1 = col;
                     break;
                 }
@@ -52,18 +56,18 @@ public:
             int min2 = INT_MAX;
             for (int col = 0; col < n; col++) {
                 if (col != col1)
-                    min2 = min(min2, dp[row + 1][col]);
+                    min2 = min(min2, dp_[row + 1][col]);
             }
 
             // Fill current row
             for (int col = 0; col < n; col++) {
                 if (col == col1)
-                    dp[row][col] = grid[row][col] + min2;
+                    dp_[row][col] = grid_[row][col] + min2;
                 else
-                    dp[row][col] = grid[row][col] + min1;
+                    dp_[row][col] = grid_[row][col] + min1;
             }
         }
 
-        return *min_element(dp[0].begin(), dp[0].end());
+        return *min_element(dp_[0].begin(), dp_[0].end());
     }
 };

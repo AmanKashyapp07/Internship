@@ -25,28 +25,41 @@ struct Project {
     bool operator<(const Project& o) const { return l < o.l; }
 };
 
-int n;
-vector<Project> a;
-vector<long long> dp;
+class Solution {
+public:
+    int n_;
+    vector<Project> a_;
+    vector<long long> dp_;
 
-long long solve(int idx) {
-    if (idx == n) return 0;
-    if (dp[idx] != -1) return dp[idx];
-    long long exclude = solve(idx + 1);
-    // Binary search for the first project starting after the current project ends (a[idx].r)
-    Project target = {a[idx].r + 1, 0, 0};
-    int next_idx = lower_bound(a.begin() + idx + 1, a.end(), target) - a.begin();
-    long long include = a[idx].val + solve(next_idx);
-    return dp[idx] = max(exclude, include);
-}
+    long long solve(int idx) {
+        if (idx == n_) return 0;
+        if (dp_[idx] != -1) return dp_[idx];
+        long long exclude = solve(idx + 1);
+        // Binary search for the first project starting after the current project ends (a_[idx].r)
+        Project target = {a_[idx].r + 1, 0, 0};
+        int next_idx = lower_bound(a_.begin() + idx + 1, a_.end(), target) - a_.begin();
+        long long include = a_[idx].val + solve(next_idx);
+        return dp_[idx] = max(exclude, include);
+    }
+
+    long long getMaxReward(int n, vector<Project>& a) {
+        n_ = n;
+        a_ = a;
+        sort(a_.begin(), a_.end());
+        dp_.assign(n_, -1);
+        return solve(0);
+    }
+};
 
 int main() {
     ios::sync_with_stdio(0); cin.tie(0);
+    int n;
     if (cin >> n) {
-        a.resize(n);
+        vector<Project> a(n);
         for (int i = 0; i < n; i++) cin >> a[i].l >> a[i].r >> a[i].val;
-        sort(a.begin(), a.end());
-        dp.assign(n, -1);
-        cout << solve(0) << '\n';
+        
+        Solution solver;
+        cout << solver.getMaxReward(n, a) << '\n';
     }
+    return 0;
 }

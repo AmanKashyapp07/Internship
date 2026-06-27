@@ -80,41 +80,6 @@ void monotonicStackExample() {
     }
 }
 
-/*==========================================================
-=            3. ITERATIVE DFS
-==========================================================*/
-
-void iterativeDFSDemo() {
-
-    int numNodes = 4;
-    vector<Node> graph(numNodes);
-    graph[0] = {0, {1, 2}};
-    graph[1] = {1, {3}};
-    graph[2] = {2, {3}};
-    graph[3] = {3, {}};
-
-    vector<bool> visited(numNodes, false);
-    stack<int> s;
-
-    s.push(0);
-
-    while (!s.empty()) {
-        int curr = s.top();
-        s.pop();
-
-        if (!visited[curr]) {
-            visited[curr] = true;
-            cout << curr << " ";
-
-            for (auto it = graph[curr].neighbors.rbegin(); it != graph[curr].neighbors.rend(); ++it) {
-                if (!visited[*it]) {
-                    s.push(*it);
-                }
-            }
-        }
-    }
-    cout << '\n';
-}
 
 /*==========================================================
 =            4. COMMON OPERATIONS
@@ -169,7 +134,7 @@ if (!s.empty()) {
     int val = s.top();
     s.pop();
 }
-
+// if we pop on empty stack it will throw an exception, so always check if the stack is empty before popping or accessing the top element.
 ==========================================================
 */
 

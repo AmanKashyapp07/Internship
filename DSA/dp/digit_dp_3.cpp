@@ -19,102 +19,104 @@
 
 #include <iostream>
 #include <string>
-#include <cstring>
+#include <vector>
+#include <algorithm>
 #include <numeric>
 
 using namespace std;
 
 const int MOD = 1e9 + 7;
-string num;
-int minSum, maxSum;
 
-// dp[pos][current_sum][started][tight]
-// Max length of string is 23 digits. 
-// Max possible digit sum is 23 * 9 = 207.
-long long dp[25][210][2][2];
+class Solution {
+public:
+    string num_;
+    int minSum_, maxSum_;
+    vector<vector<vector<vector<long long>>>> dp_;
 
-long long solve(int pos, int current_sum, bool started, bool tight) {
-    // Pruning: If the sum already exceeds maxSum, this path is invalid
-    if (current_sum > maxSum) return 0;
+    long long solve(int pos, int current_sum, bool started, bool tight) {
+        // Pruning: If the sum already exceeds maxSum, this path is invalid
+        if (current_sum > maxSum_) return 0;
 
-    // ---------------- Base Case ----------------
-    if (pos == num.size()) {
-        // Return 1 if the accumulated digit sum falls within the valid range
-        return (current_sum >= minSum && current_sum <= maxSum) ? 1 : 0;
+        // ---------------- Base Case ----------------
+        if (pos == num_.size()) {
+            // Return 1 if the accumulated digit sum falls within the valid range
+            return (current_sum >= minSum_ && current_sum <= maxSum_) ? 1 : 0;
+        }
+
+        if (dp_[pos][current_sum][started][tight] != -1)
+            return dp_[pos][current_sum][started][tight];
+
+        int limit = tight ? num_[pos] - '0' : 9;
+        long long ans = 0;
+
+        // ----------------------------------------------------
+        // Option 1 : Skip this position (still leading zeros)
+        // ----------------------------------------------------
+        if (!started) {
+            ans = (ans + solve(
+                pos + 1,
+                current_sum, // sum remains 0
+                false,
+                tight && (0 == limit)
+            )) % MOD;
+        }
+
+        // ----------------------------------------------------
+        // Option 2 : Start / Continue the number
+        // ----------------------------------------------------
+        for (int d = (started ? 0 : 1); d <= limit; d++) {
+            
+            ans = (ans + solve(
+                pos + 1,
+                current_sum + d, // Add current digit to our running sum
+                true,
+                tight && (d == limit)
+            )) % MOD;
+        }
+
+        return dp_[pos][current_sum][started][tight] = ans;
     }
 
-    if (dp[pos][current_sum][started][tight] != -1)
-        return dp[pos][current_sum][started][tight];
-
-    int limit = tight ? num[pos] - '0' : 9;
-    long long ans = 0;
-
-    // ----------------------------------------------------
-    // Option 1 : Skip this position (still leading zeros)
-    // ----------------------------------------------------
-    if (!started) {
-        ans = (ans + solve(
-            pos + 1,
-            current_sum, // sum remains 0
-            false,
-            tight && (0 == limit)
-        )) % MOD;
+    // Helper to calculate total good integers from 0 up to string x
+    long long countUpTo(string x) {
+        num_ = x;
+        dp_.assign(25, vector<vector<vector<long long>>>(210, vector<vector<long long>>(2, vector<long long>(2, -1))));
+        return solve(0, 0, false, true);
     }
 
-    // ----------------------------------------------------
-    // Option 2 : Start / Continue the number
-    // ----------------------------------------------------
-    for (int d = (started ? 0 : 1); d <= limit; d++) {
-        
-        ans = (ans + solve(
-            pos + 1,
-            current_sum + d, // Add current digit to our running sum
-            true,
-            tight && (d == limit)
-        )) % MOD;
+    // Helper to check if num1 itself is a valid "good" integer
+    bool isGood(string x) {
+        int sum = 0;
+        for (char c : x) {
+            sum += (c - '0');
+        }
+        return sum >= minSum_ && sum <= maxSum_;
     }
 
-    return dp[pos][current_sum][started][tight] = ans;
-}
+    int countStrings(string num1, string num2, int min_sum, int max_sum) {
+        minSum_ = min_sum;
+        maxSum_ = max_sum;
 
-// Helper to calculate total good integers from 0 up to string x
-long long countUpTo(string x) {
-    num = x;
-    memset(dp, -1, sizeof(dp));
-    return solve(0, 0, false, true);
-}
+        long long ans2 = countUpTo(num2);
+        long long ans1 = countUpTo(num1);
 
-// Helper to check if num1 itself is a valid "good" integer
-bool isGood(string x) {
-    int sum = 0;
-    for (char c : x) {
-        sum += (c - '0');
+        // Calculate (ans2 - ans1) % MOD safely
+        long long result = (ans2 - ans1 + MOD) % MOD;
+
+        // If num1 itself matches the condition, add it back since we excluded it
+        if (isGood(num1)) {
+            result = (result + 1) % MOD;
+        }
+
+        return result;
     }
-    return sum >= minSum && sum <= maxSum;
-}
-
-int countStrings(string num1, string num2, int min_sum, int max_sum) {
-    minSum = min_sum;
-    maxSum = max_sum;
-
-    long long ans2 = countUpTo(num2);
-    long long ans1 = countUpTo(num1);
-
-    // Calculate (ans2 - ans1) % MOD safely
-    long long result = (ans2 - ans1 + MOD) % MOD;
-
-    // If num1 itself matches the condition, add it back since we excluded it
-    if (isGood(num1)) {
-        result = (result + 1) % MOD;
-    }
-
-    return result;
-}
+};
 
 int main() {
     string num1 = "1", num2 = "12";
     int min_sum = 1, max_sum = 8;
-    cout << "Total good integers: " << countStrings(num1, num2, min_sum, max_sum) << endl;
+    Solution solver;
+    cout << "Total good integers: " << solver.countStrings(num1, num2, min_sum, max_sum) << endl;
     // Output: 11 (Numbers: 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12)
     return 0;
 }

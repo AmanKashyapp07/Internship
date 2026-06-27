@@ -8,6 +8,11 @@
  * • Unordered key-value pairs
  * • Hash Table implementation
  * • Average O(1) complexity
+ * 
+ * Note: Many competitive programming platforms exploit the default
+ * hash function, which can lead to O(n) performance due to collisions.
+ * In cases where keys are complex (like pairs), std::map is preferred
+ * to avoid writing complex custom hash functions.
  *
  * ==========================================================
  *
@@ -26,37 +31,11 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
-#include <chrono>
 #include <algorithm>
 using namespace std;
-
-// Custom Safe Hash to prevent anti-hash tests (O(N^2) TLE)
-struct SafeHash {
-    static uint64_t splitmix64(uint64_t x) {
-        x += 0x9e3779b97f4a7c15;
-        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-        return x ^ (x >> 31);
-    }
-
-    size_t operator()(uint64_t x) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
-        return splitmix64(x + FIXED_RANDOM);
-    }
-};
-
-// Custom Hash for std::pair
-struct PairHash {
-    template <class T1, class T2>
-    size_t operator()(const pair<T1, T2>& p) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
-        uint64_t h1 = SafeHash::splitmix64(p.first + FIXED_RANDOM);
-        uint64_t h2 = SafeHash::splitmix64(p.second + FIXED_RANDOM);
-        return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
-    }
-};
 
 /*==========================================================
 =            1. BASIC OPERATIONS
@@ -64,50 +43,33 @@ struct PairHash {
 
 void basicOperations() {
 
-    unordered_map<int, string> um;
+    unordered_map<int, string> hashmap;
 
-    um[10] = "Ten";
-    um[20] = "Twenty";
-    um.emplace(30, "Thirty");
+    hashmap[10] = "Ten";
+    hashmap[20] = "Twenty";
+    hashmap.emplace(30, "Thirty");
 
-    cout << um.size() << '\n';
-    cout << um[10] << '\n';
+    cout << hashmap.size() << '\n';
+    cout << hashmap[10] << '\n';
 
-    if (um.count(20))
+    if (hashmap.count(20))
         cout << "20 exists\n";
 
-    auto it = um.find(40);
-    if (it == um.end())
-        cout << "40 not found\n";
+    auto it = hashmap.find(40);
+    if (it == hashmap.end()) cout << "40 not found\n";
+    else cout << "40 found with value: " << it->second << '\n'; 
 
-    um.erase(20);
+    hashmap.erase(20);
 }
 
 /*==========================================================
-=            2. SAFE HASH UNORDERED MAP (Anti-TLE)
-==========================================================*/
-
-void safeMapExample() {
-
-    unordered_map<int, int, SafeHash> safe_map;
-
-    // Sizing optimizations
-    safe_map.reserve(1024);
-    safe_map.max_load_factor(0.25);
-
-    safe_map[42] = 100;
-    safe_map[13] = 200;
-
-    cout << safe_map[42] << '\n';
-}
-
-/*==========================================================
-=            3. PAIR HASH UNORDERED MAP
+=            2. PAIR KEY MAP (USING MAP TO AVOID CUSTOM HASH)
 ==========================================================*/
 
 void pairMapExample() {
 
-    unordered_map<pair<int, int>, string, PairHash> grid_map;
+    // Using std::map instead of std::unordered_map because key is a pair
+    map<pair<int, int>, string> grid_map;
 
     grid_map[{0, 0}] = "Origin";
     grid_map[{3, 4}] = "Target";
@@ -116,10 +78,11 @@ void pairMapExample() {
 }
 
 /*==========================================================
-=            4. STATE MEMOIZATION PATTERN
+=            3. STATE MEMOIZATION PATTERN
 ==========================================================*/
 
-unordered_map<pair<int, int>, int, PairHash> memo;
+// Using std::map instead of std::unordered_map because key is a pair
+map<pair<int, int>, int> memo;
 
 int solveMemoizedDP(int r, int c, const vector<vector<int>>& grid) {
     if (r >= (int)grid.size() || c >= (int)grid[0].size()) return 0;
@@ -150,32 +113,27 @@ void memoizationDemo() {
 }
 
 /*==========================================================
-=            5. COMMON OPERATIONS
+=            4. COMMON OPERATIONS
 ==========================================================*/
 
 void operations() {
 
-    unordered_map<int, int> um;
+    unordered_map<int, int> hashmap;
 
-    um[1] = 100;
-    um.erase(1);
+    hashmap[1] = 100;
+    hashmap.erase(1); // removes key 1 from the map
 
-    cout << um.size() << '\n';
-    cout << um.empty() << '\n';
-    um.clear();
+    cout << hashmap.size() << '\n'; // output : 0
+    cout << hashmap.empty() << '\n'; // output : 1 (true)
+    hashmap.clear();
 }
 
 /*==========================================================
 =            MOST IMPORTANT TEMPLATES FOR OAs
 ==========================================================*/
 
-// Safe Unordered Map declaration
-// unordered_map<int, int, SafeHash> umap;
-// umap.reserve(2048);
-// umap.max_load_factor(0.25);
-
-// Pair Key Unordered Map (visited coordinates / grid DP cache)
-// unordered_map<pair<int,int>, int, PairHash> cache;
+// Pair Key Map (visited coordinates / grid DP cache using std::map)
+// map<pair<int,int>, int> cache;
 
 /*
 ==========================================================
@@ -185,11 +143,8 @@ Remember These
 // Initialization
 unordered_map<int, int> ump;
 
-// Safe Custom Hash Map
-unordered_map<int, int, SafeHash> ump;
-
 // Pair Key Map
-unordered_map<pair<int,int>, int, PairHash> ump;
+map<pair<int,int>, int> ump;
 
 // Operations
 ump[key] = val;
@@ -204,10 +159,47 @@ int main() {
     // Uncomment to test
 
     // basicOperations();
-    // safeMapExample();
     // pairMapExample();
     // memoizationDemo();
     // operations();
 
     return 0;
+}
+
+/*==========================================================
+=            LOOKUP OPERATIONS
+==========================================================*/
+
+void lookupExample() {
+
+    map<int, string> mp;
+    // unordered_map<int, string> mp;
+
+    mp[1] = "One";
+    mp[2] = "Two";
+    mp[3] = "Three";
+
+    // Find
+    auto it = mp.find(2);
+
+    if (it != mp.end()) {
+        cout << it->first << " " << it->second << '\n';
+    }
+
+    // Count (returns 0 or 1)
+    if (mp.count(3)) {
+        cout << "3 exists\n";
+    }
+
+    // Access
+    cout << mp.at(1) << '\n'; 
+
+    // operator[] creates key if absent
+    if(mp[100] == "") {
+        cout << "100 was not present, now created with default value\n";
+    }
+    else {
+        cout << "100 exists with value: " << mp[100] << '\n';
+    }
+    
 }

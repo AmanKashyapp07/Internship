@@ -52,39 +52,52 @@ const ll MOD = 1e9 + 7;
 
 class Solution {
 public:
-    bool solve(int turn, int i, int j, int k, string &s1, string &s2, string &s3, vector<vector<vector<int>>> &dp) {
-        if (k == s3.size()) return true; // if we have matched all characters of s3
-        if (i == s1.size() && j == s2.size()) return false; // if we have exhausted both s1 and s2 but not matched all of s3
+    string s1_, s2_, s3_;
+    vector<vector<vector<int>>> dp_;
 
-        if (dp[turn][i][j] != -1) return dp[turn][i][j];
+    bool solve(int turn, int i, int j, int k) {
+        if (k == s3_.size()) return true; // if we have matched all characters of s3
+        if (i == s1_.size() && j == s2_.size()) return false; // if we have exhausted both s1 and s2 but not matched all of s3
+
+        if (dp_[turn][i][j] != -1) return dp_[turn][i][j];
 
         bool ans = false;
         if (turn == 0) { // turn of s1
-            if (i < s1.size() && s1[i] == s3[k]) {
-                ans = ans || solve(0, i + 1, j, k + 1, s1, s2, s3, dp);
-                //also switch to s2
-                ans=ans || solve(1, i+1, j, k + 1, s1, s2, s3, dp);
+            if (i < s1_.size() && s1_[i] == s3_[k]) {
+                ans = ans || solve(0, i + 1, j, k + 1);
+                // also switch to s2
+                ans = ans || solve(1, i + 1, j, k + 1);
             }
         } else { // turn of s2
-            if (j < s2.size() && s2[j] == s3[k]) {
-                ans = ans || solve(1, i, j + 1, k + 1, s1, s2, s3, dp);
-                ans = ans || solve(0, i, j + 1, k + 1, s1, s2, s3, dp);
+            if (j < s2_.size() && s2_[j] == s3_[k]) {
+                ans = ans || solve(1, i, j + 1, k + 1);
+                ans = ans || solve(0, i, j + 1, k + 1);
             }
         }
 
-        return dp[turn][i][j] = ans;
+        return dp_[turn][i][j] = ans;
     }
 
     bool isInterleave(string s1, string s2, string s3) {
-        
+        if (s1.size() + s2.size() != s3.size()) return false;
+
+        s1_ = s1;
+        s2_ = s2;
+        s3_ = s3;
+
+        int m = s1.size();
+        int n = s2.size();
+
+        dp_.assign(2, vector<vector<int>>(m + 1, vector<int>(n + 1, -1)));
+
+        // We can start with either s1's turn or s2's turn
+        return solve(0, 0, 0, 0) || solve(1, 0, 0, 0);
     }
 };
-
 
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-
     return 0;
 }

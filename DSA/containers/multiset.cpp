@@ -5,7 +5,8 @@
  *
  * multiset
  * --------
- * • Ordered (sorted ascending by default)
+ * • Ordered (sorted ascending by default) , almost like set, but allows duplicate elements
+ * lower_bound() works on multiset, set, map, multimap, but not on unordered_set or unordered_map
  * • Implemented using Red-Black Tree
  * • Duplicate elements allowed
  *

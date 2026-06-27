@@ -19,29 +19,48 @@
 
 using namespace std;
 
+const int MOD = 1e9 + 7;
+
+class Solution {
+public:
+    string s_;
+    int n_;
+    vector<long long> dp_;
+    vector<int> last_;
+
+    long long countDistinctSubsequences(string s) {
+        s_ = s;
+        n_ = s.size();
+
+        dp_.assign(n_ + 1, 0); // dp[i] will store the count of distinct subsequences for the first i characters of the string s
+        last_.assign(26, -1); // last[c] will store the last index where character 'c' appeared in the string s. Initialized to -1 for all characters.
+
+        dp_[0] = 1;
+
+        for (int i = 0; i < n_; i++) {
+            dp_[i + 1] = (2 * dp_[i]) % MOD;
+
+            int c = s_[i] - 'a';
+            if (last_[c] != -1) {
+                dp_[i + 1] = (dp_[i + 1] - dp_[last_[c]] + MOD) % MOD;
+            }
+
+            last_[c] = i;
+        }
+
+        return (dp_[n_] - 1 + MOD) % MOD;
+    }
+};
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     string s;
-    cin >> s;
+    if (!(cin >> s)) return 0;
 
-    const int MOD = 1e9 + 7;
-    int n = s.size();
+    Solution solver;
+    cout << solver.countDistinctSubsequences(s) << '\n';
 
-    vector<long long> dp(n + 1); // dp[i] will store the count of distinct subsequences for the first i characters of the string s
-    vector<int> last(26, -1); // last[c] will store the last index where character 'c' appeared in the string s. Initialized to -1 for all characters.
-
-    dp[0] = 1;
-
-    for (int i = 0; i < n; i++) {
-        dp[i + 1] = (2 * dp[i]) % MOD;
-
-        int c = s[i] - 'a';
-        if (last[c] != -1) dp[i + 1] = (dp[i + 1] - dp[last[c]] + MOD) % MOD;
-
-        last[c] = i;
-    }
-
-    cout << (dp[n] - 1 + MOD) % MOD << '\n';
+    return 0;
 }

@@ -15,8 +15,6 @@
  * Space Complexity: O(maxVal)
  */
 
-
-
 #include <vector>
 #include <algorithm>
 
@@ -24,6 +22,8 @@ using namespace std;
 
 class Solution {
 public:
+    vector<int> points_;
+
     int deleteAndEarn(vector<int>& nums) {
         if (nums.empty()) return 0;
         
@@ -31,9 +31,9 @@ public:
         int maxVal = *max_element(nums.begin(), nums.end());
         
         // Accumulate total points possible for each number
-        vector<int> points(maxVal + 1, 0);
+        points_.assign(maxVal + 1, 0);
         for (int num : nums) {
-            points[num] += num;
+            points_[num] += num;
         }
         
         // Standard House Robber space-optimized DP
@@ -41,7 +41,7 @@ public:
         int prev1 = 0; // Represents dp[i-1]
         
         for (int i = 0; i <= maxVal; ++i) {
-            int current = max(prev1, prev2 + points[i]);
+            int current = max(prev1, prev2 + points_[i]);
             prev2 = prev1;
             prev1 = current;
         }

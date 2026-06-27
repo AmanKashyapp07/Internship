@@ -64,32 +64,32 @@ struct TreeNode
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
+
 class Solution
 {
 public:
-    int dfs(TreeNode *node, int count, vector<int> &dp)
+    vector<int> dp_;
+
+    int dfs(TreeNode *node)
     {   
         if(!node) return 0;
-        if(dp[node->val]!=-1) return dp[node->val];
-        int take=0;
+        if(dp_[node->val] != -1) return dp_[node->val];
+        int take = 0;
         // take
-        take+=node->val;
-        int L = node->left ? dfs(node->left->left, count, dp) + dfs(node->left->right, count, dp) : 0;
-        int R = node->right ? dfs(node->right->left, count, dp) + dfs(node->right->right, count, dp) : 0;
-        take+=L+R;
+        take += node->val;
+        int L = node->left ? dfs(node->left->left) + dfs(node->left->right) : 0;
+        int R = node->right ? dfs(node->right->left) + dfs(node->right->right) : 0;
+        take += L + R;
 
         // not take
-        int notTake = dfs(node->left, count, dp) + dfs(node->right, count, dp);
+        int notTake = dfs(node->left) + dfs(node->right);
 
-        return dp[node->val]= max(take, notTake);
-
+        return dp_[node->val] = max(take, notTake);
     }
+
     int rob(TreeNode *root)
     {
-        int count=0;
-        vector<int> dp(1000, -1);
-        
-        return dfs(root,count, dp);
-        
+        dp_.assign(1000, -1);
+        return dfs(root);
     }
 };

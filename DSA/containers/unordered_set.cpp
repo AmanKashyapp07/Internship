@@ -8,6 +8,10 @@
  * • Unordered elements
  * • Hash Table implementation
  * • Average O(1) complexity
+ * 
+ * Note: Since std::unordered_set does not have a default hash
+ * function for std::pair, std::set is preferred for coordinate/pair
+ * tracking in OAs to avoid writing custom hash functions.
  *
  * ==========================================================
  *
@@ -26,36 +30,10 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <set>
 #include <vector>
-#include <chrono>
 #include <algorithm>
 using namespace std;
-
-// Custom Safe Hash to prevent anti-hash tests (O(N^2) TLE)
-struct SafeHash {
-    static uint64_t splitmix64(uint64_t x) {
-        x += 0x9e3779b97f4a7c15;
-        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-        return x ^ (x >> 31);
-    }
-
-    size_t operator()(uint64_t x) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
-        return splitmix64(x + FIXED_RANDOM);
-    }
-};
-
-// Custom Hash for std::pair
-struct PairHash {
-    template <class T1, class T2>
-    size_t operator()(const pair<T1, T2>& p) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
-        uint64_t h1 = SafeHash::splitmix64(p.first + FIXED_RANDOM);
-        uint64_t h2 = SafeHash::splitmix64(p.second + FIXED_RANDOM);
-        return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
-    }
-};
 
 /*==========================================================
 =            1. BASIC OPERATIONS
@@ -82,30 +60,13 @@ void basicOperations() {
 }
 
 /*==========================================================
-=            2. SAFE HASH UNORDERED SET (Anti-TLE)
-==========================================================*/
-
-void safeSetExample() {
-
-    unordered_set<int, SafeHash> safe_set;
-
-    // Sizing optimizations to prevent rehash overhead
-    safe_set.reserve(1024);
-    safe_set.max_load_factor(0.25);
-
-    safe_set.insert(100);
-    safe_set.insert(200);
-
-    cout << safe_set.count(100) << '\n';
-}
-
-/*==========================================================
-=            3. PAIR HASH UNORDERED SET
+=            2. PAIR KEY SET (USING SET TO AVOID CUSTOM HASH)
 ==========================================================*/
 
 void pairSetExample() {
 
-    unordered_set<pair<int, int>, PairHash> visited;
+    // Using std::set instead of std::unordered_set because key is a pair
+    set<pair<int, int>> visited;
 
     visited.insert({0, 1});
     visited.insert({2, 3});
@@ -114,12 +75,13 @@ void pairSetExample() {
 }
 
 /*==========================================================
-=            4. GRID BFS VISITED PATTERN
+=            3. GRID BFS VISITED PATTERN
 ==========================================================*/
 
 void gridVisitedDemo() {
 
-    unordered_set<pair<int, int>, PairHash> visited;
+    // Using std::set instead of std::unordered_set because key is a pair
+    set<pair<int, int>> visited;
     vector<pair<int, int>> path = {{0, 0}, {0, 1}, {1, 1}, {2, 1}};
 
     for (auto cell : path) {
@@ -131,7 +93,7 @@ void gridVisitedDemo() {
 }
 
 /*==========================================================
-=            5. COMMON OPERATIONS
+=            4. COMMON OPERATIONS
 ==========================================================*/
 
 void operations() {
@@ -150,13 +112,8 @@ void operations() {
 =            MOST IMPORTANT TEMPLATES FOR OAs
 ==========================================================*/
 
-// Safe set instantiation
-// unordered_set<int, SafeHash> us;
-// us.reserve(2048);
-// us.max_load_factor(0.25);
-
-// Grid visited set
-// unordered_set<pair<int,int>, PairHash> visited;
+// Pair Grid Visited Set (uses std::set to avoid writing a custom hash)
+// set<pair<int,int>> visited;
 
 /*
 ==========================================================
@@ -166,11 +123,8 @@ Remember These
 // Initialization
 unordered_set<int> us;
 
-// Safe custom hash set
-unordered_set<int, SafeHash> us;
-
-// Pair visited set
-unordered_set<pair<int,int>, PairHash> visited;
+// Pair Visited Set
+set<pair<int,int>> visited;
 
 // Operations
 us.insert(val);
@@ -185,10 +139,17 @@ int main() {
     // Uncomment to test
 
     // basicOperations();
-    // safeSetExample();
     // pairSetExample();
     // gridVisitedDemo();
     // operations();
 
     return 0;
 }
+
+// diff between unordered_set and set:
+// 1. unordered_set is implemented using a hash table, while set is implemented using a balanced binary search tree (usually a red-black tree).
+// 2. unordered_set provides average O(1) time complexity for insert, erase, and find operations, while set provides O(log n) time complexity for these operations.
+// 3. unordered_set does not maintain any order of elements, while set maintains elements in sorted order.
+// 4. unordered_set does not allow duplicate elements, while set also does not allow duplicates, but it maintains a strict order of elements.
+// 5. unordered_set requires a hash function for custom types, while set requires a comparison function for custom types.
+// For OAs, you should prefer unordered_set for faster average performance, but if you need ordered elements or are using pairs as keys, set is often more convenient to avoid writing custom hash functions.

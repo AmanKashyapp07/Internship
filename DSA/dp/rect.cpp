@@ -20,19 +20,37 @@
 #include <algorithm>
 using namespace std;
 
-int main() {
-    ios::sync_with_stdio(0); cin.tie(0);
-    int a, b; if (!(cin >> a >> b)) return 0;
-    vector<vector<int>> dp(a + 1, vector<int>(b + 1, 1e9));
-    // DP state: dp[i][j] stores the min cuts needed for an i x j rectangle
-    for (int i = 1; i <= a; i++) {
-        for (int j = 1; j <= b; j++) {
-            if (i == j) dp[i][j] = 0; // Base case: already a square
-            else {
-                for (int k = 1; k < i; k++) dp[i][j] = min(dp[i][j], dp[k][j] + dp[i - k][j] + 1); // Horizontal cuts
-                for (int k = 1; k < j; k++) dp[i][j] = min(dp[i][j], dp[i][k] + dp[i][j - k] + 1); // Vertical cuts
+class Solution {
+public:
+    int a_;
+    int b_;
+    vector<vector<int>> dp_;
+
+    int minCuts(int a, int b) {
+        a_ = a;
+        b_ = b;
+        dp_.assign(a_ + 1, vector<int>(b_ + 1, 1e9));
+
+        // DP state: dp[i][j] stores the min cuts needed for an i x j rectangle
+        for (int i = 1; i <= a_; i++) {
+            for (int j = 1; j <= b_; j++) {
+                if (i == j) dp_[i][j] = 0; // Base case: already a square
+                else {
+                    for (int k = 1; k < i; k++) dp_[i][j] = min(dp_[i][j], dp_[k][j] + dp_[i - k][j] + 1); // Horizontal cuts
+                    for (int k = 1; k < j; k++) dp_[i][j] = min(dp_[i][j], dp_[i][k] + dp_[i][j - k] + 1); // Vertical cuts
+                }
             }
         }
+        return dp_[a_][b_];
     }
-    cout << dp[a][b] << "\n";
+};
+
+int main() {
+    ios::sync_with_stdio(0); cin.tie(0);
+    int a, b;
+    if (!(cin >> a >> b)) return 0;
+    
+    Solution solver;
+    cout << solver.minCuts(a, b) << "\n";
+    return 0;
 }

@@ -24,28 +24,32 @@ using namespace std;
 
 class Solution {
 public:
-    int minFallingPathSum(vector<vector<int>>& matrix) {
-        int n = matrix.size();
+    vector<vector<int>> dp_;
+    vector<vector<int>> matrix_;
 
-        vector<vector<int>> dp(n, vector<int>(n));
+    int minFallingPathSum(vector<vector<int>>& matrix) {
+        matrix_ = matrix;
+        int n = matrix_.size();
+
+        dp_.assign(n, vector<int>(n, 0));
 
         // Base case
         for (int col = 0; col < n; col++)
-            dp[n - 1][col] = matrix[n - 1][col];
+            dp_[n - 1][col] = matrix_[n - 1][col];
 
         // Fill from bottom to top
         for (int row = n - 2; row >= 0; row--) {
             for (int col = 0; col < n; col++) {
 
-                int leftDiag = (col > 0) ? dp[row + 1][col - 1] : INT_MAX;
-                int down = dp[row + 1][col];
-                int rightDiag = (col < n - 1) ? dp[row + 1][col + 1] : INT_MAX;
+                int leftDiag = (col > 0) ? dp_[row + 1][col - 1] : INT_MAX;
+                int down = dp_[row + 1][col];
+                int rightDiag = (col < n - 1) ? dp_[row + 1][col + 1] : INT_MAX;
 
-                dp[row][col] = matrix[row][col] +
+                dp_[row][col] = matrix_[row][col] +
                                min({leftDiag, down, rightDiag});
             }
         }
 
-        return *min_element(dp[0].begin(), dp[0].end());
+        return *min_element(dp_[0].begin(), dp_[0].end());
     }
 };

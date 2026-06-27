@@ -19,29 +19,38 @@
 using namespace std;
 
 class Solution {
-    void helper(vector<string> &result, const string &num, int target, int pos, long long currentValue, long long lastValue, string expression) {
-        if (pos == num.size()) {
-            if (currentValue == target) result.push_back(expression);
+public:
+    vector<string> result_;
+    string num_;
+    int target_;
+
+    void helper(int pos, long long currentValue, long long lastValue, string expression) {
+        if (pos == num_.size()) {
+            if (currentValue == target_) result_.push_back(expression);
             return;
         }
-        for (size_t i = pos; i < num.size(); ++i) {
-            if (i != pos && num[pos] == '0') break; // Prevent leading zeros
-            string currentStr = num.substr(pos, i - pos + 1);
+        for (size_t i = pos; i < num_.size(); ++i) {
+            if (i != pos && num_[pos] == '0') break; // Prevent leading zeros
+            string currentStr = num_.substr(pos, i - pos + 1);
             long long currentNum = stoll(currentStr);
             if (pos == 0) {
-                helper(result, num, target, i + 1, currentNum, currentNum, currentStr);
+                helper(i + 1, currentNum, currentNum, currentStr);
             } else {
-                helper(result, num, target, i + 1, currentValue + currentNum, currentNum, expression + "+" + currentStr);
-                helper(result, num, target, i + 1, currentValue - currentNum, -currentNum, expression + "-" + currentStr);
+                helper(i + 1, currentValue + currentNum, currentNum, expression + "+" + currentStr);
+                helper(i + 1, currentValue - currentNum, -currentNum, expression + "-" + currentStr);
                 // Adjust for operator precedence: subtract lastValue and add lastValue * currentNum
-                helper(result, num, target, i + 1, currentValue - lastValue + lastValue * currentNum, lastValue * currentNum, expression + "*" + currentStr);
+                helper(i + 1, currentValue - lastValue + lastValue * currentNum, lastValue * currentNum, expression + "*" + currentStr);
             }
         }
     }
-public:
+
     vector<string> addOperators(string num, int target) {
-        vector<string> result;
-        if (!num.empty()) helper(result, num, target, 0, 0, 0, "");
-        return result;
+        num_ = num;
+        target_ = target;
+        result_.clear();
+        if (!num_.empty()) {
+            helper(0, 0, 0, "");
+        }
+        return result_;
     }
 };

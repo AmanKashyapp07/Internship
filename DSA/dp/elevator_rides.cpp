@@ -21,48 +21,62 @@
 
 using namespace std;
 
+class Solution {
+public:
+    int n_;
+    int x_;
+    vector<int> w_;
+    vector<pair<int, int>> dp_;
+
+    int getMinElevatorRides(int n, int x, vector<int>& w) {
+        n_ = n;
+        x_ = x;
+        w_ = w;
+
+        int N = 1 << n_;
+        dp_.assign(N, {n_ + 1, 0}); // dp stores (number of rides, weight in last ride)
+
+        // No person selected
+        dp_[0] = {1, 0};
+
+        for (int mask = 0; mask < N; mask++) {
+            auto [rides, lastWeight] = dp_[mask];
+
+            for (int i = 0; i < n_; i++) {
+                // Person already selected
+                if (mask & (1 << i))
+                    continue;
+
+                int newMask = mask | (1 << i); // Add person i to the current mask
+                pair<int, int> cur; // cur is the new state after adding person i
+
+                // Put person i in current ride, because it doesn't exceed the weight limit
+                if (lastWeight + w_[i] <= x_) {
+                    cur = {rides, lastWeight + w_[i]};
+                }
+                // Start a new ride, because adding person i exceeds the weight limit
+                else {
+                    cur = {rides + 1, w_[i]};
+                }
+
+                dp_[newMask] = min(dp_[newMask], cur);
+            }
+        }
+
+        return dp_[N - 1].first;
+    }
+};
+
 int main() {
+    ios::sync_with_stdio(0); cin.tie(0);
     int n, x;
-    cin >> n >> x;
+    if (!(cin >> n >> x)) return 0;
 
     vector<int> w(n);
     for (int i = 0; i < n; i++)
         cin >> w[i];
 
-    int N = 1 << n;
-
-    // dp[mask] = {minimum rides, weight in last ride}
-    vector<pair<int,int>> dp(N, {n + 1, 0}); // dp stores (number of rides, weight in last ride)
-
-    // No person selected
-    dp[0] = {1, 0};
-
-    for (int mask = 0; mask < N; mask++) {
-
-        auto [rides, lastWeight] = dp[mask];
-
-        for (int i = 0; i < n; i++) {
-
-            // Person already selected
-            if (mask & (1 << i))
-                continue;
-
-            int newMask = mask | (1 << i); // Add person i to the current mask
-
-            pair<int,int> cur; // cur is the new state after adding person i
-
-            // Put person i in current ride, because it doesn't exceed the weight limit, In cur, it wasn't updated yet, because cur represents the new state after adding person i, so we need to check if adding person i to the current ride exceeds the weight limit
-            if (lastWeight + w[i] <= x) {
-                cur = {rides, lastWeight + w[i]};
-            }
-            // Start a new ride, because adding person i exceeds the weight limit
-            else {
-                cur = {rides + 1, w[i]};
-            }
-
-            dp[newMask] = min(dp[newMask], cur);
-        }
-    }
-
-    cout << dp[N - 1].first << '\n';
+    Solution solver;
+    cout << solver.getMinElevatorRides(n, x, w) << '\n';
+    return 0;
 }
