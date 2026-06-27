@@ -15,7 +15,6 @@
 #include <queue>
 #include <algorithm>
 #include <climits>
-#include <memory>
 
 using namespace std;
 
@@ -27,12 +26,17 @@ namespace TreeMatching {
     vector<bool> matched;
     int max_matching_count = 0;
 
-    // Greedily match leaves up to root via bottom-up DFS traversal
+    /**
+     * @brief Bottom-up DFS traversal to greedily pair adjacent unmatched vertices.
+     * @note Leaves can never be a optimal parent matching choice, so we prioritize 
+     * matching nodes from the bottom up.
+     */
     void dfs(int u, int p) {
         for (int v : adj[u]) {
             if (v != p) {
-                dfs(v, u);
-                // If neither current node nor its child is matched, pair them up
+                dfs(v, u); // Run bottom-up first
+                
+                // If neither node u nor its child v has been taken yet, match them
                 if (!matched[u] && !matched[v]) {
                     matched[u] = true;
                     matched[v] = true;
@@ -66,21 +70,25 @@ namespace TreeMatching {
 // 3. TREE DIAMETER (CSES 1131)
 // =========================================================================
 namespace TreeDiameter {
-
     vector<vector<int>> adj;
-
-    // ---------------- Method 1: Tree DP ----------------
-
     int diameterDP = 0;
+    int farthestNode, maxDist;
 
-    int dfs(int u, int p) {
-        int mx1 = 0, mx2 = 0;
+    // ---------------- METHOD 1: TREE DP ----------------
+    
+    /**
+     * @brief Computes maximum subtree depths to calculate diameter in a single pass.
+     * @return Max depth extending downward from node u.
+     */
+    int dfsDP(int u, int p) {
+        int mx1 = 0, mx2 = 0; // Tracks the top 2 deepest child branches
 
         for (int v : adj[u]) {
             if (v == p) continue;
 
-            int depth = dfs(v, u);
+            int depth = dfsDP(v, u);
 
+            // Update the top two longest branches downward
             if (depth >= mx1) {
                 mx2 = mx1;
                 mx1 = depth;
@@ -89,15 +97,16 @@ namespace TreeDiameter {
             }
         }
 
+        // The longest path passing through u as the highest peak node
         diameterDP = max(diameterDP, mx1 + mx2);
         return mx1 + 1;
     }
 
-    // ---------------- Method 2: Two DFS ----------------
-
-    int farthestNode;
-    int maxDist;
-
+    // ---------------- METHOD 2: TWO DFS ----------------
+    
+    /**
+     * @brief Simple path tracer to track the absolute furthest vertex distance.
+     */
     void dfs2(int u, int p, int dist) {
         if (dist > maxDist) {
             maxDist = dist;
@@ -105,14 +114,19 @@ namespace TreeDiameter {
         }
 
         for (int v : adj[u]) {
-            if (v != p)
+            if (v != p) {
                 dfs2(v, u, dist + 1);
+            }
         }
     }
 
     void run() {
         int n;
-        cin >> n;
+        if (!(cin >> n)) return;
+        if (n <= 1) {
+            cout << 0 << "\n";
+            return;
+        }
 
         adj.assign(n + 1, {});
 
@@ -123,33 +137,36 @@ namespace TreeDiameter {
             adj[v].push_back(u);
         }
 
-        // Method 1: Tree DP
+        // Method 1 Execution: Tree Dynamic Programming
         diameterDP = 0;
-        dfs(1, 0);
+        dfsDP(1, 0);
 
-        // Method 2: Two DFS
+        // Method 2 Execution: Two-Pass Distant DFS Scaling
+        // Pass A: Find one definitive endpoint of the tree diameter
         maxDist = -1;
         dfs2(1, 0, 0);
+        int startNode = farthestNode;
 
-        int start = farthestNode;
-
+        // Pass B: From that endpoint, measure distance to the other furthest side
         maxDist = -1;
-        dfs2(start, 0, 0);
-
+        dfs2(startNode, 0, 0);
         int diameterTwoDFS = maxDist;
 
-        cout << "DP Diameter      : " << diameterDP << '\n';
-        cout << "Two DFS Diameter : " << diameterTwoDFS << '\n';
+        // Output results natively based on preference
+        cout << diameterTwoDFS << "\n";
     }
 }
+
 // =========================================================================
 // 4. TREE DISTANCES I (CSES 1132)
 // =========================================================================
 namespace TreeDistancesI {
-
     vector<vector<int>> adj;
     int farthestNode, maxDist;
 
+    /**
+     * @brief Utility scan that registers distances from a root node into an array map.
+     */
     void dfs(int u, int p, int dist, vector<int> &d) {
         d[u] = dist;
 
@@ -159,14 +176,15 @@ namespace TreeDistancesI {
         }
 
         for (int v : adj[u]) {
-            if (v != p)
+            if (v != p) {
                 dfs(v, u, dist + 1, d);
+            }
         }
     }
 
     void run() {
         int n;
-        cin >> n;
+        if (!(cin >> n)) return;
 
         adj.assign(n + 1, {});
 
@@ -177,30 +195,28 @@ namespace TreeDistancesI {
             adj[v].push_back(u);
         }
 
-        // First DFS: find one endpoint of the diameter
-        vector<int> dist1(n + 1);
+        vector<int> dist1(n + 1, 0);
+        vector<int> distA(n + 1, 0);
+        vector<int> distB(n + 1, 0);
 
+        // Step 1: Execute arbitrary search from Node 1 to capture Diameter Endpoint A
         maxDist = -1;
         dfs(1, 0, 0, dist1);
-
         int nodeA = farthestNode;
 
-        // Second DFS: distances from nodeA and find the other endpoint
-        vector<int> distA(n + 1);
-
+        // Step 2: Run a precise search from NodeA to map all distances and locate Endpoint B
         maxDist = -1;
         dfs(nodeA, 0, 0, distA);
-
         int nodeB = farthestNode;
 
-        // Third DFS: distances from nodeB
-        vector<int> distB(n + 1);
-
+        // Step 3: Run a precise search from NodeB to map opposite distances across diameter boundary
         maxDist = -1;
         dfs(nodeB, 0, 0, distB);
 
+        // KEY INSIGHT: The absolute maximum distance from any arbitrary node to another node
+        // inside a tree structure must always terminate at one of the two diameter endpoints.
         for (int i = 1; i <= n; i++) {
-            cout << max(distA[i], distB[i]) << " ";
+            cout << max(distA[i], distB[i]) << (i == n ? "" : " ");
         }
         cout << '\n';
     }
@@ -210,41 +226,51 @@ namespace TreeDistancesI {
 // 10. DISTINCT COLORS (CSES 1139)
 // =========================================================================
 namespace DistinctColors {
-
     vector<vector<int>> adj;
     vector<int> color, ans;
-    vector<set<int>> st;
+    // Optimized: Using unordered_set ensures O(1) average hash lookups instead of O(log N) trees
+    vector<unordered_set<int>> st;
 
+    /**
+     * @brief Aggregates sets bottom-up using the Small-to-Large merging technique.
+     * Time Complexity: O(N log N) average execution runtime
+     */
     void dfs(int u, int p) {
-        st[u].insert(color[u]);
+        st[u].insert(color[u]); // Seed node's internal native color properties
 
         for (int v : adj[u]) {
             if (v == p) continue;
 
-            dfs(v, u);
+            dfs(v, u); // Process children subtrees completely first
 
-            // Small-to-large merging
-            if (st[u].size() < st[v].size())
+            // Optimization Rule: Swap set buffers if child container outgrows parent container.
+            // This guarantees each node's element is re-inserted at most O(log N) times.
+            if (st[u].size() < st[v].size()) {
                 swap(st[u], st[v]);
+            }
 
-            for (int x : st[v])
+            // Merge items out of the smaller child bucket into the dominant parent bucket
+            for (int x : st[v]) {
                 st[u].insert(x);
+            }
+            
+            // Memory Optimization: Flush child records early once merged to drop peak memory footprint
+            st[v].clear();
         }
 
-        ans[u] = st[u].size();
+        ans[u] = st[u].size(); // Set tracking capacity yields accurate unique colors metric
     }
 
     void run() {
         int n;
-        cin >> n;
+        if (!(cin >> n)) return;
 
         adj.assign(n + 1, {});
         color.resize(n + 1);
         ans.resize(n + 1);
         st.assign(n + 1, {});
 
-        for (int i = 1; i <= n; i++)
-            cin >> color[i];
+        for (int i = 1; i <= n; i++) cin >> color[i];
 
         for (int i = 0; i < n - 1; i++) {
             int u, v;
@@ -255,8 +281,26 @@ namespace DistinctColors {
 
         dfs(1, 0);
 
-        for (int i = 1; i <= n; i++)
-            cout << ans[i] << " ";
+        for (int i = 1; i <= n; i++) {
+            cout << ans[i] << (i == n ? "" : " ");
+        }
         cout << '\n';
     }
+}
+
+// =========================================================================
+// EXECUTIVE ENVIRONMENT
+// =========================================================================
+int main() {
+    // Speed optimization profiles for standard C++ I/O pipelines
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // Uncomment target procedure block pipeline execution:
+    // TreeMatching::run();
+    // TreeDiameter::run();
+    // TreeDistancesI::run();
+    // DistinctColors::run();
+
+    return 0;
 }
