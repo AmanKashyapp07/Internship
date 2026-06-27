@@ -44,6 +44,7 @@
 | Priority | Both | Yes | No | Priority systems |
 | Round Robin | Yes | No | No | Interactive / time-sharing |
 | MLFQ | Yes | No (aging) | No | General purpose OS |
+| Linux CFS | Yes | No (fair share) | No | Modern Linux OS (Red-Black tree) |
 
 ### Page Replacement Algorithms
 | Algorithm | Rule | Belady's Anomaly | Optimal? |
@@ -99,6 +100,10 @@
 | **Copy-on-Write** | Parent and child share pages; copy only on write (makes fork fast) |
 | **TLB ASID** | Address Space ID tag — avoids full TLB flush on context switch |
 | **MMU** | Memory Management Unit — hardware that translates logical to physical addresses |
+| **Linux CFS** | Completely Fair Scheduler — schedules processes using virtual runtime (`vruntime`) and a Red-Black tree |
+| **ASLR** | Address Space Layout Randomization — randomizes memory locations to prevent buffer overflows |
+| **NX Bit** | No-Execute — marks memory pages (like stack/heap) as non-executable to prevent code injection |
+| **RAID** | Redundant Array of Independent Disks — combines multiple physical drives for speed/redundancy |
 
 ---
 
@@ -184,8 +189,10 @@ Need[i] = Max[i] - Allocation[i]    [Banker's Algorithm]
 36. What is Belady's Anomaly? Which algorithms are immune to it?
 37. What is thrashing? What causes it?
 38. What is the Working-Set Model?
-39. Implement an LRU Cache in O(1) time.
-40. What is Copy-on-Write? How does it make `fork()` efficient?
+39. What is Copy-on-Write? How does it make `fork()` efficient?
+40. What is ASLR and how does it secure process memory layout?
+41. Explain the NX bit and the W^X (Write XOR Execute) principle.
+42. What role do R/W and U/S bits play in a Page Table Entry?
 
 ---
 
@@ -227,6 +234,7 @@ Path resolution: / → inode 2 → directory entry → next inode → ...
 | Contiguous | Yes | ✅ Fast | CDs, some DBs |
 | Linked (FAT) | No | ❌ Slow | USB drives |
 | Indexed (inode) | No | ✅ Moderate | ext4, APFS |
+| **RAID 0 / 1 / 5 / 10** | — | — | Speed (RAID 0), Redundancy (RAID 1), Distributed Parity (RAID 5), Mirrored Stripes (RAID 10) |
 
 ### Disk Scheduling (Head at 53, requests: 98 183 37 122 14 124 65 67)
 | Algorithm | Total Movement | Starvation? |
