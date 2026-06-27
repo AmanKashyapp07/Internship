@@ -1,1 +1,6 @@
 sections/
+.DS_Store
+*.out
+*.exe
+*.o
+*.dSYM/
