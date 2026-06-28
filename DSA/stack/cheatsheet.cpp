@@ -59,7 +59,7 @@ void templateIncreasing(const vi& nums) {
     for (int i = 0; i <= (int)nums.size(); i++) {
         int curVal = (i == (int)nums.size()) ? INT_MIN : nums[i]; // Sentinel to flush
 
-        while (!stk.empty() && curVal < nums[stk.top()]) {
+        while (!stk.empty() && curVal <= nums[stk.top()]) {
             int j = stk.top();
             stk.pop();
 
@@ -90,7 +90,7 @@ void templateDecreasing(const vi& nums) {
     for (int i = 0; i <= (int)nums.size(); i++) {
         int curVal = (i == (int)nums.size()) ? INT_MAX : nums[i]; // Sentinel to flush
 
-        while (!stk.empty() && curVal > nums[stk.top()]) {
+        while (!stk.empty() && curVal >= nums[stk.top()]) {
             int j = stk.top();
             stk.pop();
 

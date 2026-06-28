@@ -52,6 +52,8 @@ vi nextGreaterElement(const vi& nums) {
     for (int i = 0; i < n; i++) {
         // Current element breaks the decreasing order: it's the NGE for all smaller tops
         while (!s.empty() && nums[i] > nums[s.top()]) {
+            // Keep equals (do not pop on equal): equal values are not strictly greater than
+            // nums[s.top()], so they cannot resolve the Next Greater query for it.
             result[s.top()] = nums[i];
             s.pop();
         }
@@ -79,6 +81,8 @@ vi nextSmallerElement(const vi& nums) {
 
     for (int i = 0; i < n; i++) {
         while (!s.empty() && nums[i] < nums[s.top()]) {
+            // Keep equals (do not pop on equal): equal values are not strictly smaller than
+            // nums[s.top()], so they cannot resolve the Next Smaller query for it.
             result[s.top()] = nums[i];
             s.pop();
         }
@@ -110,6 +114,8 @@ vi previousGreaterElement(const vi& nums) {
     for (int i = 0; i < n; i++) {
         // Pop elements that are <= current (they can never be PGE for future elements either)
         while (!s.empty() && nums[s.top()] <= nums[i]) {
+            // Pop equals (avoid duplicates in stack): equal values are not strictly greater than
+            // nums[i] and keeping them would block nums[i] from seeing a strictly greater element further left.
             s.pop();
         }
         // The remaining top (if any) is the PGE for i
@@ -154,6 +160,8 @@ vi previousSmallerElement(const vi& nums) {
 
     for (int i = 0; i < n; i++) {
         while (!s.empty() && nums[s.top()] >= nums[i]) {
+            // Pop equals (avoid duplicates in stack): equal values are not strictly smaller than
+            // nums[i] and keeping them would block nums[i] from seeing a strictly smaller element further left.
             s.pop();
         }
         if (!s.empty()) {
@@ -185,6 +193,8 @@ vi nextGreaterCircular(const vi& nums) {
     for (int i = 0; i < 2 * n; i++) {
         int cur = nums[i % n];
         while (!s.empty() && cur > nums[s.top()]) {
+            // Keep equals (do not pop on equal): equal values are not strictly greater than
+            // nums[s.top()], so they cannot resolve the Next Greater query for it.
             result[s.top()] = cur;
             s.pop();
         }

@@ -54,15 +54,14 @@ Monotonic stacks are used to solve the "next greater/smaller element" problem in
 
 ## 2. Decision Tree & Golden Rules
 
-```
-If you POP equal values (>= or <=):
-  - Previous boundary becomes Strict
-  - Next boundary becomes Non-strict
+### 🌟 The Core Relationship: Pop vs. Keep Equals
 
-If you KEEP equal values (> or <):
-  - Previous boundary becomes Non-strict
-  - Next boundary becomes Strict
-```
+* **If you POP equal values (`>=` or `<=`)**:
+  - **Previous boundary** becomes **Strict** (`<` or `>`)
+  - **Next boundary** becomes **Non-strict** (`<=` or `>=`)
+* **If you KEEP equal values (`>` or `<`)**:
+  - **Previous boundary** becomes **Non-strict** (`<=` or `>=`)
+  - **Next boundary** becomes **Strict** (`<` or `>`)
 
 ```mermaid
 graph TD
@@ -72,19 +71,38 @@ graph TD
     Q1 -- No: > or < --> A2[Previous = Non-strict <br> Next = Strict]
 ```
 
-### Golden Rule 1: POP Equals (`>=` or `<=`)
-* **Previous boundary** becomes **Strict** (`<` or `>`)
-* **Next boundary** becomes **Non-strict** (`<=` or `>=`)
+---
 
-#### Examples
+### 🏆 The Golden Rule: When to use which?
+
+#### Category 1: Default to Popping Equals (`>=` and `<=`)
+For **90% of monotonic stack problems**, default to popping equal values (**`>=`** for min-stack, **`<=`** for max-stack).
+
+1. **Contribution / Subarray / Histogram Problems** (e.g., *Sum of Subarray Minimums*, *Largest Rectangle in Histogram*):
+   - **Goal**: Partition the array uniquely to handle duplicate values without double-counting.
+   - **Rule**: Pop equals (**`>=`** or **`<=`**). This ensures that the previous boundary is strict and the next boundary is non-strict, counting each duplicate element exactly once.
+2. **Previous Greater/Smaller Element Queries** (traversing Left $\rightarrow$ Right):
+   - **Goal**: Find the first element to the left that is **strictly** greater/smaller.
+   - **Rule**: You **must** pop equals (**`>=`** or **`<=`**) so that equal values do not block the stack and hide the correct boundary further left.
+
+#### Category 2: Use Strict Comparisons (`>` and `<`) in Two Scenarios
+
+1. **Greedy Lexicographical Optimization** (e.g., *Remove K Digits*, *Remove Duplicate Letters*):
+   - **Goal**: Build the smallest/largest sequence possible.
+   - **Rule**: Use **`>`** and **`<`** (Keep Equals). Swapping an element with its equal counterpart does not change the lexicographical order, so you should only pop when the incoming element is **strictly** better.
+2. **Left-to-Right "Next Greater/Smaller" Queries** (e.g., *Daily Temperatures*):
+   - **Goal**: Find the first element to the right that is strictly warmer/greater.
+   - **Rule**: Use **`>`** and **`<`** (Keep Equals). An equal incoming element does not satisfy "strictly greater", so it shouldn't pop elements from the stack.
+
+---
+
+### Examples
+
+#### POP Equals (`>=` or `<=`)
 * `arr[stk.top()] >= arr[i]` $\rightarrow$ Previous Smaller (`<`) & Next Smaller or Equal (`<=`)
 * `arr[stk.top()] <= arr[i]` $\rightarrow$ Previous Greater (`>`) & Next Greater or Equal (`>=`)
 
-### Golden Rule 2: KEEP Equals (`>` or `<`)
-* **Previous boundary** becomes **Non-strict** (`<=` or `>=`)
-* **Next boundary** becomes **Strict** (`<` or `>`)
-
-#### Examples
+#### KEEP Equals (`>` or `<`)
 * `arr[stk.top()] > arr[i]` $\rightarrow$ Previous Smaller or Equal (`<=`) & Next Smaller (`<`)
 * `arr[stk.top()] < arr[i]` $\rightarrow$ Previous Greater or Equal (`>=`) & Next Greater (`>`)
 
@@ -132,20 +150,43 @@ $$\text{totalSubarrays} = \text{leftChoices} \times \text{rightChoices}$$
 
 ---
 
-## 4. Tie-Breaking Rule (Duplicates)
+## 4. Tie-Breaking Decision Guide: Pop vs. Keep Equals
 
-To avoid double-counting or under-counting duplicates when calculating contribution, **exactly one side must be strict**.
+Choosing whether to **POP** or **KEEP** equal values depends on the type of problem you are solving.
 
-### Valid Combinations for Minimums:
-* $\text{PSE } (<) + \text{NSE } (\le)$  *(Recommended: standard standard logic)*
+### A. Next/Previous Greater/Smaller Element Queries
+
+When the problem asks you to find the next/previous boundary value for each element:
+
+| Query Type | Goal | Pop Condition | Equal Value Action | Why? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Strictly Next Greater** | Find first element $> x$ | `arr[stk.top()] < arr[i]` | **Keep Equals** | Equal values do not satisfy strictly greater; they must remain in the stack. |
+| **Next Greater or Equal** | Find first element $\ge x$ | `arr[stk.top()] <= arr[i]` | **Pop Equals** | Equal values satisfy the condition and should pop the top of the stack. |
+| **Strictly Next Smaller** | Find first element $< x$ | `arr[stk.top()] > arr[i]` | **Keep Equals** | Equal values do not satisfy strictly smaller; they must remain in the stack. |
+| **Next Smaller or Equal** | Find first element $\le x$ | `arr[stk.top()] >= arr[i]` | **Pop Equals** | Equal values satisfy the condition and should pop the top of the stack. |
+
+---
+
+### B. Subarray Contribution / Counting Problems (with Duplicates)
+
+When calculating the contribution of elements to subarrays (e.g., sum of subarray minimums/maximums), duplicate elements in the array will lead to double-counting if not handled.
+
+* **Rule**: To avoid this, **exactly one side must be strict and the other non-strict**.
+* **Recommended Practice**: Use **Pop Equals** (`>=` or `<=`).
+  - This automatically assigns:
+    - **Previous Boundary** $\rightarrow$ **Strict** (`<` or `>`)
+    - **Next Boundary** $\rightarrow$ **Non-strict** (`<=` or `>=`)
+
+#### Valid Combinations for Minimums:
+* $\text{PSE } (<) + \text{NSE } (\le)$  *(Recommended: standard logic, achieved by POP equals)*
 * $\text{PSE } (\le) + \text{NSE } (<)$
 
-### Valid Combinations for Maximums:
-* $\text{PGE } (>) + \text{NGE } (\ge)$
+#### Valid Combinations for Maximums:
+* $\text{PGE } (>) + \text{NGE } (\ge)$  *(Recommended: standard logic, achieved by POP equals)*
 * $\text{PGE } (\ge) + \text{NGE } (>)$
 
 > [!WARNING]
-> Never use **Strict + Strict** or **Non-strict + Non-strict**. Otherwise, duplicate values are either counted twice or not counted at all.
+> Never use **Strict + Strict** or **Non-strict + Non-strict** for contribution problems. Otherwise, duplicate values are either counted twice or completely omitted.
 
 ---
 

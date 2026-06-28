@@ -40,6 +40,8 @@ int trap(vi &height) {
 
         for (ll i = 0; i < n; i++) {
             while (!stk.empty() && height[stk.top()] < height[i]) { 
+                // Keep equals (do not pop on equal): water is trapped between strictly taller boundary
+                // walls. Equal heights form a flat bottom rather than a container wall.
                 ll bottom = stk.top();
                 stk.pop();
 

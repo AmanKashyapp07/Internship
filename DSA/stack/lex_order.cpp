@@ -48,6 +48,8 @@ string removeKDigits(string num, int k) {
     stack<char> stk;
     for(char c : num) {
         while (!stk.empty() && k > 0 && stk.top() > c) {
+            // Keep equals (do not pop on equal): replacing a digit with an identical copy
+            // does not lexicographically improve the number.
             stk.pop();
             k--;
         }
@@ -57,16 +59,17 @@ string removeKDigits(string num, int k) {
         stk.pop();
         k--;
     }
-    int i=0;
-    while (i < stk.size() && stk[i] == '0') i++; // Skip leading zeros
-    if (i == stk.size()) return "0"; // All zeros
+
     string res;
     while (!stk.empty()) {
         res += stk.top();
         stk.pop();
     }
-    return res;
-    
+    reverse(res.begin(), res.end());
+    int i = 0;
+    while (i < (int)res.size() && res[i] == '0') i++; // Skip leading zeros
+    if (i == (int)res.size()) return "0"; // All zeros
+    return res.substr(i);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,6 +108,8 @@ string removeDuplicateLetters(const string& s) {
 
         // Pop characters that are larger AND will appear again later
         while (!stk.empty() && stk.top() > s[i] && lastIndex[stk.top() - 'a'] > i) {
+            // Keep equals (do not pop on equal): replacing a character with an identical copy
+            // does not lexicographically improve the prefix.
             inStack[stk.top() - 'a'] = false;
             stk.pop();
         }
@@ -141,6 +146,8 @@ vi maxNumberFromArray(const vi& nums, int k) {
     for (int i = 0; i < n; i++) {
         // Pop smaller elements from stack if we still have drops left
         while (drop > 0 && !stk.empty() && stk.top() < nums[i]) {
+            // Keep equals (do not pop on equal): replacing a digit with an identical copy
+            // does not lexicographically improve the number.
             stk.pop();
             drop--;
         }
@@ -177,6 +184,8 @@ vi dailyTemperatures(const vi& temps) {
 
     for (int i = 0; i < n; i++) {
         while (!stk.empty() && temps[stk.top()] < temps[i]) {
+            // Keep equals (do not pop on equal): an equal temperature is not strictly warmer
+            // than the stack top, so it cannot resolve the Next Greater query for it.
             int j = stk.top(); // for jth index, i is the next warmer day
             stk.pop();
             result[j] = i - j; // Days to wait for a warmer temperature

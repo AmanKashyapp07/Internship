@@ -10,6 +10,8 @@ public:
 
             while (!st.empty() &&
                    (i == n || arr[st.top()] >= arr[i])) { 
+                // Pop equals (avoid duplicates in stack) to ensure that the contribution range 
+                // of equal elements is uniquely partitioned and not counted twice.
                 int mid = st.top();
                 st.pop();
 

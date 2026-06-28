@@ -52,12 +52,14 @@ int largestRectangle(const vi& heights) {
     for (int i = 0; i <= n; i++) {
        
 
-        while (!stk.empty() && (i==n || heights[i] < heights[stk.top()])) {
+        while (!stk.empty() && (i==n || heights[i] <= heights[stk.top()])) {
+            // Pop equals (avoid duplicates in stack) to cleanly partition duplicate bar boundaries
+            // and prevent calculating duplicate rect spans during contribution processing.
             int h = heights[stk.top()];
             stk.pop();
-            int leftBoundary = stk.empty() ? -1 : stk.top(); // New left boundary after pop
-            int rightBoundary = i; // Current index is the right boundary
-            int width = rightBoundary - leftBoundary - 1; //(both boundaries are exclusive)
+            int leftBoundary = stk.empty() ? -1 : stk.top(); // New left boundary after pop (strictly smaller)
+            int rightBoundary = i; // Current index is the right boundary (smaller or equal)
+            int width = rightBoundary - leftBoundary - 1; // (both boundaries are exclusive)
             // Left boundary: index of new top (element still in stack)
             // Right boundary: i (current element that caused the pop)
             

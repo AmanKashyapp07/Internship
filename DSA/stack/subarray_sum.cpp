@@ -62,7 +62,9 @@ ll sumSubarrayMins(const vi& arr) {
     // Sentinel value: process remaining stack at the end with i = n
     for (int i = 0; i <= n; i++) {
 
-        while (!stk.empty() && (i==n || arr[stk.top()] >= arr[i])) { // if using >=, left boundary becomes strictly smaller, right boundary becomes smaller or equal
+        while (!stk.empty() && (i==n || arr[stk.top()] >= arr[i])) { 
+            // Pop equals (avoid duplicates in stack) to ensure PSE is strict (<) and NSE is non-strict (<=).
+            // This prevents duplicate values in subarrays from being counted twice.
             int j = stk.top();
             stk.pop();
 
@@ -87,8 +89,8 @@ ll sumSubarrayMins(const vi& arr) {
 // Symmetric to Sum of Subarray Minimums — use a decreasing stack instead.
 //
 // For each index i, nums[i] is the maximum in subarrays bounded by:
-//   PSE = Previous Greater or Equal (left boundary)
-//   NSE = Next Strictly Greater (right boundary)
+//   PGE = Previous Strictly Greater (left boundary)
+//   NGE = Next Greater or Equal (right boundary)
 //
 // Time: O(N) | Space: O(N)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -100,11 +102,13 @@ ll sumSubarrayMaxs(const vi& arr) {
 
     for (int i = 0; i <= n; i++) {
 
-        while (!stk.empty() && (i==n || arr[stk.top()] <= arr[i])) { // if using <=, left boundary becomes strictly greater, right boundary becomes greater or equal
+        while (!stk.empty() && (i==n || arr[stk.top()] <= arr[i])) { 
+            // Pop equals (avoid duplicates in stack) to ensure PGE is strict (>) and NGE is non-strict (>=).
+            // This prevents duplicate values in subarrays from being counted twice.
             int j = stk.top();
             stk.pop();
 
-            // PGE index (greater or equal on left, use >= for tie breaking)
+            // PGE index (strictly greater on the left)
             int left = stk.empty() ? -1 : stk.top();
             int right = i;
             // keep in mind, both boundaries are exclusive, so the number of subarrays where arr[j] is the maximum is (j - left) * (right - j)
@@ -147,6 +151,7 @@ ll sumSubarrayMinsLengthAtLeast2(const vi& arr) {
     for (int i = 0; i <= n; i++) {
 
         while (!stk.empty() && (i==n || arr[stk.top()] >= arr[i])) {
+            // Pop equals (avoid duplicates in stack) to prevent double-counting of duplicate elements.
             int j = stk.top();
             stk.pop();
 
