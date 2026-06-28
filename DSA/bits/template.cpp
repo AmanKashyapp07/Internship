@@ -1,210 +1,311 @@
-/*
-==============================================================================
-BIT MANIPULATION TEMPLATE (INTERVIEWS + OA)
-==============================================================================
+/**
+ * Problem: Bit Manipulation Master Template
+ * Category: Bits & Binary Representations
+ *
+ * Description:
+ * A comprehensive reference covering basic operations, built-ins, standard mathematical tricks, 
+ * subset/submask enumeration, and genuine bitwise interview questions asked in OAs.
+ */
 
-Most Important:
-1. Check / Set / Clear / Toggle Bit
-2. Count Set Bits
-3. Lowest Set Bit
-4. Remove Lowest Set Bit
-5. Power of Two
-6. XOR Tricks
-7. Subset Enumeration
-8. Submask Enumeration
-9. Builtins
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <utility>
 
-==============================================================================
-*/
-
-#include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long;
+// =========================================================================
+// 1. BASIC BIT-WISE OPERATIONS
+// =========================================================================
 
-// ============================================================================
-// BASIC OPERATIONS
-// ============================================================================
-
-// Check ith bit (0-indexed)
-inline bool isSet(int mask, int i) {
+// Check if the i-th bit (0-indexed) is set
+bool isSet(int mask, int i) {
     return mask & (1 << i);
 }
 
-// Set ith bit
-inline int setBit(int mask, int i) {
+// Set the i-th bit
+int setBit(int mask, int i) {
     return mask | (1 << i);
 }
 
-// Clear ith bit
-inline int clearBit(int mask, int i) {
+// Clear the i-th bit
+int clearBit(int mask, int i) {
     return mask & ~(1 << i);
 }
 
-// Toggle ith bit
-inline int toggleBit(int mask, int i) {
+// Toggle the i-th bit
+int toggleBit(int mask, int i) {
     return mask ^ (1 << i);
 }
 
-// Extract ith bit (0 or 1)
-inline int getBit(int mask, int i) {
+// Extract the value of the i-th bit (0 or 1), i is 0-indexed
+int getBit(int mask, int i) {
     return (mask >> i) & 1;
 }
 
-// ============================================================================
-// COMMON TRICKS
-// ============================================================================
+// =========================================================================
+// 2. STANDARD MATHEMETICAL TRICKS
+// =========================================================================
 
-// Remove lowest set bit
-inline int removeLSB(int x) {
+// Remove the lowest set bit (e.g. 1100 -> 1000)
+int removeLSB(int x) {
     return x & (x - 1);
 }
 
-// Value of lowest set bit
-inline int lowestSetBit(int x) {
+// Extract the value of the lowest set bit (e.g. 1100 -> 0100)
+int lowestSetBit(int x) {
     return x & -x;
 }
 
-// Check power of 2
-inline bool isPowerOfTwo(int x) {
+// Check if a number is a power of two
+bool isPowerOfTwo(int x) {
     return x > 0 && !(x & (x - 1));
 }
 
-// ============================================================================
-// BUILTINS
-// ============================================================================
-
-// Number of set bits
-inline int popcount(int x) {
-    return __builtin_popcount(x);
+vector<int> convertToBinary(int n) {
+    vector<int> binary(32, 0);
+    for(int i = 0; i < 32; i++) {
+        binary[i] = (n >> i) & 1;
+    }
+    reverse(binary.begin(), binary.end());
+    return binary;
 }
 
-inline int popcountll(long long x) {
-    return __builtin_popcountll(x);
+int convertFromBinary(const vector<int>& binary) {
+    int n = 0;
+    for(int i = 0; i < binary.size(); i++) {
+        n = (n << 1) | binary[i]; // n<<1 will become 00 , then it will be 01 or 00 depending on the binary[i] value, then it will be 010 or 000 depending on the binary[i] value, and so on.
+    }
+    return n;
 }
 
-// Position of MSB (0-indexed)
-inline int msb(int x) {
-    return 31 - __builtin_clz(x);
-}
 
-// Position of LSB (0-indexed)
-inline int lsb(int x) {
-    return __builtin_ctz(x);
-}
+// =========================================================================
+// 3. GCC BUILT-INS (FAST ASSEMBLER METRICS)
+// =========================================================================
 
-// ============================================================================
-// XOR PATTERNS
-// ============================================================================
+// Number of set bits (popcount)
+int popcount(int x) { return __builtin_popcount(x); }
+int popcountll(long long x) { return __builtin_popcountll(x); }
 
-// Unique element (others appear twice)
-int singleNumber(const vector<int>& nums) {
+// Index of the Most Significant Bit (0-indexed)
+// __builtin_clz counts leading zeros; 31 - clz yields MSB index
+int msb(int x) { return x == 0 ? -1 : 31 - __builtin_clz(x); }
+
+// Index of the Least Significant Bit (0-indexed)
+// __builtin_ctz counts trailing zeros
+int lsb(int x) { return x == 0 ? -1 : __builtin_ctz(x); }
+
+// =========================================================================
+// 4. GENUINE INTERVIEW & OA PROBLEMS
+// =========================================================================
+
+
+/**
+ * LeetCode 137: Single Number II
+ * Goal: Find the unique element where all other elements appear exactly thrice.
+ * Strategy: Count set bits at each of the 32 positions. Sum % 3 yields the bit of the answer.
+ * Time: O(32 * N) = O(N) | Space: O(1)
+ * 
+ */
+int singleNumberII(const vector<int>& nums) {
     int ans = 0;
-    for (int x : nums) ans ^= x;
+    for (int i = 0; i < 32; ++i) {
+        int sum = 0;
+        for (int x : nums) {
+            if ((x >> i) & 1) sum++; // (x>>i) & 1 extracts the i-th bit of x
+        }
+        if (sum % 3 != 0) {
+            ans |= (1 << i);
+        }
+    }
     return ans;
 }
 
-// Missing number from [0..n]
-int missingNumber(const vector<int>& nums) {
-    int n = nums.size();
-    int ans = 0;
+/**
+ * LeetCode 260: Single Number III
+ * Goal: Find the TWO unique elements where all other elements appear exactly twice.
+ * Strategy: Find xorSum of all numbers. Pick the lowest set bit where they differ, and
+ * partition elements into two groups to find each single number.
+ * Time: O(N) | Space: O(1)
+ */
+pair<int, int> singleNumberIII(const vector<int>& nums) {
+    int xorSum = 0;
+    for (int x : nums)
+        xorSum ^= x;
 
-    for (int i = 0; i <= n; i++) ans ^= i;
-    for (int x : nums) ans ^= x;
+    int diff = xorSum & -xorSum;
 
-    return ans;
+    int a = 0, b = 0;
+    for (int x : nums) {
+        if (x & diff)
+            a ^= x;
+        else
+            b ^= x;
+    }
+
+    return {a, b};
+}
+/**
+ * LeetCode 201: Bitwise AND of Numbers Range
+ * Goal: Find bitwise AND of all numbers in [left, right] inclusive.
+ * Strategy: Find the common prefix of left and right by shifting right until they are equal.
+ * Time: O(log R) | Space: O(1)
+ * Trick is : AND of range [left, right] is equivalent to AND of all numbers from left to right, which means common prefix of left and right will be the result, all other bits will be zeroed out due to the presence of both 0 and 1 in that range.
+ */
+int rangeBitwiseAnd(int left, int right) {
+    int shift = 0;
+    while (left < right) {
+        left >>= 1; // both are shifted right until they are equal, which means we are finding the common prefix
+        right >>= 1;
+        shift++; // count how many bits we have shifted, which will be the number of zeros in the result
+    }
+    return left << shift;
 }
 
-int xorinRange(int l, int r) {
-    auto xorTo = [](int x) {
-        if (x % 4 == 0) return x;
-        if (x % 4 == 1) return 1;
-        if (x % 4 == 2) return x + 1;
-        return 0; // x % 4 == 3
-    };
-    return xorTo(r) ^ xorTo(l - 1);
+int rangeBitwiseAndOptimized(int left, int right) {
+    vector<int> a = convertToBinary(left);
+    vector<int> b = convertToBinary(right);
+    int flag = 0;
+    for(int i = 0; i < 32; i++) {
+        if(a[i] != b[i]) {
+            flag = i;
+            break;
+        }
+    }
+    for(int i = flag; i < 32; i++) {
+        a[i] = 0;
+    }
+    return convertFromBinary(a);
 }
-// ============================================================================
-// SUBSET ENUMERATION
-// O(n * 2^n)
-// ============================================================================
 
+
+/**
+ * LeetCode 338: Counting Bits
+ * Goal: Return array where ans[i] is the number of 1-bits in i.
+ * Strategy: DP relationship using dp[i] = dp[i >> 1] + (i & 1).
+ * Time: O(N) | Space: O(N)
+ */
+vector<int> countBits(int n) {
+    vector<int> dp(n + 1, 0);
+    for (int i = 1; i <= n; ++i) {
+        dp[i] = __builtin_popcount(i);
+    }
+    return dp;
+}
+
+// XOR sum of numbers from 1 to x
+int xorToX(int x) {
+    if (x % 4 == 0) return x;
+    if (x % 4 == 1) return 1;
+    if (x % 4 == 2) return x + 1;
+    if (x%4 == 3) return 0;
+}
+
+// XOR sum of numbers in range [l, r]
+int xorInRange(int l, int r) {
+    return xorToX(r) ^ xorToX(l - 1);
+}
+
+// =========================================================================
+// 5. ENUMERATION LOOPS (BITMASK PARADIGMS)
+// =========================================================================
+
+// Enumerate all subsets of size n: O(n * 2^n)
 void enumerateSubsets(int n) {
-
     for (int mask = 0; mask < (1 << n); mask++) {
-
-        // elements present in mask
         for (int i = 0; i < n; i++) {
-
             if (mask & (1 << i)) {
-
+                // Element i is present in subset 'mask'
             }
         }
     }
 }
 
-// ============================================================================
-// SUBMASK ENUMERATION
-// Visits every submask of mask
-// Total over all masks = O(3^n)
-// ============================================================================
-
+// Enumerate all submasks of a specific mask: O(3^n) total over all masks
 void enumerateSubmasks(int mask) {
-
     for (int sub = mask; sub; sub = (sub - 1) & mask) {
-
+        // 'sub' is a valid submask of 'mask'
     }
-
-    // include empty submask if needed
-    // sub = 0
+    // Note: the loop terminates before processing the empty submask (sub = 0)
 }
 
-// ============================================================================
-// BITMASK DP LOOP
-// ============================================================================
+int maxConsecutiveOnes(const vector<int>& v) {
+    int best = 0, cur = 0;
 
-void bitmaskDP(int n) {
-
-    vector<int> dp(1 << n);
-
-    for (int mask = 0; mask < (1 << n); mask++) {
-
-        for (int bit = 0; bit < n; bit++) {
-
-            if (!(mask & (1 << bit))) {
-
-                int nextMask = mask | (1 << bit);
-
-                // transition
-            }
+    for (int x : v) {
+        if (x == 1) {
+            cur++;
+            best = max(best, cur);
+        } else {
+            cur = 0;
         }
     }
+
+    return best;
 }
 
-/*
-==============================================================================
-MUST REMEMBER
-==============================================================================
+int longestSubarrayWithMaxBitwiseAnd(const vector<int>& nums) {
+    int maxi = *max_element(nums.begin(), nums.end());
+    int n = nums.size();
+    vector<int>temp(n, 0);
 
-Odd / Even          : x & 1
-Multiply by 2       : x << 1
-Divide by 2         : x >> 1
+    for(int i = 0; i < n; i++) {
+        if(nums[i] == maxi) {
+            temp[i] = 1;
+        }
+    }
 
-Check ith bit       : x & (1 << i)
-Set ith bit         : x | (1 << i)
-Clear ith bit       : x & ~(1 << i)
-Toggle ith bit      : x ^ (1 << i)
+    return maxConsecutiveOnes(temp);
+}
 
-Power of Two        : x > 0 && !(x & (x - 1))
-Remove LSB          : x & (x - 1)
-Lowest Set Bit      : x & (-x)
+int longestNiceSubarray(const vector<int>& nums) {
+    int n = nums.size();
+    int left = 0, maxLength = 0;
+    int mask = 0;
+    for(int i=0; i<n; i++) {
+        while((mask & nums[i]) != 0) { // While the current number shares any set bits with the accumulated mask, we need to shrink the window from the left to maintain the "nice" property (no overlapping bits).
+            mask ^= nums[left];
+            left++;
+        }
+        mask |= nums[i];
+        maxLength = max(maxLength, i - left + 1);
+    }
+    return maxLength;
+}
 
-Count Set Bits      : __builtin_popcount(x)
-MSB Position        : 31 - __builtin_clz(x)
-LSB Position        : __builtin_ctz(x)
+int subarrayBitwiseORs(vector<int>& arr) {
+        unordered_set<int>s1;
+        unordered_set<int>s2;
+        for(auto c:arr){
+            unordered_set<int>s3;
+            s3.insert(c);
+            for(auto v:s2) s3.insert(c|v);
+            for(auto x:s3) s1.insert(x);
+            s2=s3;
+        }
+        return s1.size();
+}
 
-Subset Count        : 2^n
-Submask Count       : 3^n (all masks)
-
-==============================================================================
-*/
+int totalHammingDistance(vector<int>& nums) {
+    int n = nums.size();
+    long long total = 0;
+    for (int i = 0; i < 32; ++i) {
+        long long countOnes = 0;
+        for (int num : nums) {
+            if ((num >> i) & 1) {
+                countOnes++;
+            }
+        } // countOnes is number of elements with the i-th bit set to 1
+        long long countZeros = n - countOnes;
+        total += countOnes * countZeros; // Each pair contributes to the Hamming distance
+    }
+    return total;
+}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    return 0;
+}

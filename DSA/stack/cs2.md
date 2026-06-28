@@ -219,3 +219,74 @@ Keep Equals => Previous Non-strict, Next Strict
 * **Bug**: Using a sentinel value that can appear in the input array.
 * **Consequence**: The dummy value does not act as a true sentinel, leading to incorrect boundaries.
 * **Fix**: Ensure the sentinel is strictly smaller (for min-stack) or strictly larger (for max-stack) than any possible element in `arr`.
+
+---
+
+## 6. Advanced OA Patterns & Tricks
+
+### A. Complexity Invariant
+* **Time Complexity**: $\mathcal{O}(N)$
+  - *Why*: Although there is a nested `while` loop inside the `for` loop, each element is pushed onto the stack exactly once and popped at most once. The total number of stack operations across the entire execution is at most $2N$.
+* **Space Complexity**: $\mathcal{O}(N)$ (to store stack indices).
+
+---
+
+### B. Circular Array Wrapping Trick (LC 503)
+When finding boundaries in a circular array (wraps around at the end):
+* **The Trick**: Iterate up to `2 * n` to simulate a doubled array.
+* **Stack Push Condition**: Only push indices to the stack during the first pass (`i < n`), but allow checking and popping elements on both passes.
+* **Code Snippet**:
+```cpp
+vector<int> result(n, -1);
+stack<int> stk;
+for (int i = 0; i < 2 * n; ++i) {
+    int curVal = arr[i % n];
+    while (!stk.empty() && curVal > arr[stk.top()]) {
+        result[stk.top()] = curVal;
+        stk.pop();
+    }
+    if (i < n) stk.push(i);
+}
+```
+
+---
+
+### C. Monotonic Deque: Sliding Window Min/Max (LC 239)
+When finding the minimum or maximum element in every sliding window of size $K$:
+* **Structure**: Use `std::deque` because you need to pop from both the front (expired elements) and the back (smaller elements).
+* **Code Snippet (Sliding Window Maximum)**:
+```cpp
+vector<int> maxSlidingWindow(vector<int>& arr, int k) {
+    deque<int> dq; // Stores indices of monotonic decreasing values
+    vector<int> result;
+    for (int i = 0; i < arr.size(); ++i) {
+        // 1. Remove expired elements outside the window bounds [i - k + 1, i]
+        if (!dq.empty() && dq.front() == i - k) {
+            dq.pop_front();
+        }
+        // 2. Maintain decreasing order: pop indices with values <= incoming value
+        while (!dq.empty() && arr[dq.back()] <= arr[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        // 3. Add to result once first window is complete
+        if (i >= k - 1) {
+            result.push_back(arr[dq.front()]);
+        }
+    }
+    return result;
+}
+```
+
+---
+
+### D. 2D Grid Extension: Maximal Rectangle (LC 85)
+When finding the largest rectangular submatrix of `1`s in a 2D binary grid:
+* **The Trick**: Convert the 2D grid into consecutive 1D histogram problems.
+* **Procedure**:
+  1. Maintain a 1D `heights` array of size `cols`.
+  2. Iterate row by row. For each cell in row `r`:
+     - If `grid[r][c] == '1'`, `heights[c] += 1`.
+     - If `grid[r][c] == '0'`, reset `heights[c] = 0`.
+  3. At the end of each row, run the 1D **Largest Rectangle in Histogram** algorithm on the `heights` array.
+  4. The maximum area found across all rows is the answer.

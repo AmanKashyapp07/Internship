@@ -36,7 +36,7 @@ int main() {
         
         // Each full cycle has 2^i ones
         long long ones_per_cycle = 1LL << i;
-        long long zeroes_per_cycle = 1LL << i; // same as ones_per_cycle
+        long long zeroes_per_cycle = 1LL << i; 
         
         total_ones += full_cycles * ones_per_cycle;
         
