@@ -9,14 +9,46 @@ Monotonic stacks are used to solve the "next greater/smaller element" problem in
 
 ---
 
+## Monotonic Increasing vs. Monotonic Decreasing Stack
+
+### 📈 Monotonic Increasing Stack
+* **Stack State**: Elements are sorted in **increasing** order from bottom to top (e.g., `[1, 3, 5, 8]`). We pop elements larger than or equal to the current element.
+* **Core Query**: Finds the **Next / Previous Smaller** element.
+* **When to Use**:
+  - **Subarray Minimums**: Find the range where the current element is the minimum (e.g., *Sum of Subarray Minimums*).
+  - **Boundary Limiter (Min-Height)**: Find the largest rectangle in a histogram (where the height of the rectangle is limited by the smallest bar).
+  - **Stock Span / Boundaries**: Finding previous smaller elements.
+* **Standard Problems**:
+  - [84. Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/)
+  - [907. Sum of Subarray Minimums](https://leetcode.com/problems/sum-of-subarray-minimums/)
+  - [85. Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/)
+
+---
+
+### 📉 Monotonic Decreasing Stack
+* **Stack State**: Elements are sorted in **decreasing** order from bottom to top (e.g., `[8, 5, 3, 1]`). We pop elements smaller than or equal to the current element.
+* **Core Query**: Finds the **Next / Previous Greater** element.
+* **When to Use**:
+  - **Subarray Maximums**: Find the range where the current element is the maximum (e.g., *Sum of Subarray Maximums*).
+  - **Trapping Water (Boundary Walls)**: Water is trapped between two taller bars, so we look for greater boundaries.
+  - **Next Greater Queries**: Finding when a value is exceeded (e.g., daily temperatures).
+* **Standard Problems**:
+  - [496. Next Greater Element I](https://leetcode.com/problems/next-greater-element-i/)
+  - [503. Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/)
+  - [739. Daily Temperatures](https://leetcode.com/problems/daily-temperatures/)
+  - [42. Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/)
+  - [2104. Sum of Subarray Ranges](https://leetcode.com/problems/sum-of-subarray-ranges/) (uses both min and max stacks)
+
+---
+
 ## 1. Complexity & Operator Cheat Sheet
 
 | While Condition | Equal Values | Stack after Popping | Previous Boundary | Next Boundary |
 | :--- | :--- | :--- | :--- | :--- |
-| `arr[top] >= cur` | **Pop** | Strictly Increasing (`<`) | Previous Smaller (`<`) | Next Smaller or Equal (`<=`) |
-| `arr[top] > cur` | **Keep** | Non-decreasing (`<=`) | Previous Smaller or Equal (`<=`) | Next Smaller (`<`) |
-| `arr[top] <= cur` | **Pop** | Strictly Decreasing (`>`) | Previous Greater (`>`) | Next Greater or Equal (`>=`) |
-| `arr[top] < cur` | **Keep** | Non-increasing (`>=`) | Previous Greater or Equal (`>=`) | Next Greater (`>`) |
+| `arr[stk.top()] >= arr[i]` | **Pop** | Strictly Increasing (`<`) | Previous Smaller (`<`) | Next Smaller or Equal (`<=`) |
+| `arr[stk.top()] > arr[i]` | **Keep** | Non-decreasing (`<=`) | Previous Smaller or Equal (`<=`) | Next Smaller (`<`) |
+| `arr[stk.top()] <= arr[i]` | **Pop** | Strictly Decreasing (`>`) | Previous Greater (`>`) | Next Greater or Equal (`>=`) |
+| `arr[stk.top()] < arr[i]` | **Keep** | Non-increasing (`>=`) | Previous Greater or Equal (`>=`) | Next Greater (`>`) |
 
 ---
 
@@ -45,16 +77,16 @@ graph TD
 * **Next boundary** becomes **Non-strict** (`<=` or `>=`)
 
 #### Examples
-* `arr[top] >= cur` $\rightarrow$ Previous Smaller (`<`) & Next Smaller or Equal (`<=`)
-* `arr[top] <= cur` $\rightarrow$ Previous Greater (`>`) & Next Greater or Equal (`>=`)
+* `arr[stk.top()] >= arr[i]` $\rightarrow$ Previous Smaller (`<`) & Next Smaller or Equal (`<=`)
+* `arr[stk.top()] <= arr[i]` $\rightarrow$ Previous Greater (`>`) & Next Greater or Equal (`>=`)
 
 ### Golden Rule 2: KEEP Equals (`>` or `<`)
 * **Previous boundary** becomes **Non-strict** (`<=` or `>=`)
 * **Next boundary** becomes **Strict** (`<` or `>`)
 
 #### Examples
-* `arr[top] > cur` $\rightarrow$ Previous Smaller or Equal (`<=`) & Next Smaller (`<`)
-* `arr[top] < cur` $\rightarrow$ Previous Greater or Equal (`>=`) & Next Greater (`>`)
+* `arr[stk.top()] > arr[i]` $\rightarrow$ Previous Smaller or Equal (`<=`) & Next Smaller (`<`)
+* `arr[stk.top()] < arr[i]` $\rightarrow$ Previous Greater or Equal (`>=`) & Next Greater (`>`)
 
 ---
 
@@ -120,8 +152,8 @@ To avoid double-counting or under-counting duplicates when calculating contribut
 ## 5. OA Memory Trick & Pitfalls
 
 ### OA Memory Trick:
-* **POP** $\rightarrow$ Previous gets **stricter** (e.g., `arr[top] >= cur` $\rightarrow$ Previous Smaller `<`).
-* **KEEP** $\rightarrow$ Previous gets **looser** (e.g., `arr[top] > cur` $\rightarrow$ Previous Smaller or Equal `<=`).
+* **POP** $\rightarrow$ Previous gets **stricter** (e.g., `arr[stk.top()] >= arr[i]` $\rightarrow$ Previous Smaller `<`).
+* **KEEP** $\rightarrow$ Previous gets **looser** (e.g., `arr[stk.top()] > arr[i]` $\rightarrow$ Previous Smaller or Equal `<=`).
 
 ```
 Pop Equals  => Previous Strict, Next Non-strict

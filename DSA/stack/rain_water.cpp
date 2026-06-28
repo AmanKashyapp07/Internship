@@ -39,7 +39,7 @@ int trap(vi &height) {
         ll water = 0;
 
         for (ll i = 0; i < n; i++) {
-            while (!stk.empty() && height[stk.top()] < height[i]) {
+            while (!stk.empty() && height[stk.top()] < height[i]) { 
                 ll bottom = stk.top();
                 stk.pop();
 

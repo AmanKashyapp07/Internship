@@ -45,27 +45,28 @@ using vi = vector<int>;
 // ─────────────────────────────────────────────────────────────────────────────
 
 string removeKDigits(string num, int k) {
-    string stk; // Acts as our monotonic stack (string = efficient char stack)
-
-    for (char c : num) {
-        // Pop digits larger than current while we still have removals left
-        while (k > 0 && !stk.empty() && stk.back() > c) {
-            stk.pop_back();
+    stack<char> stk;
+    for(char c : num) {
+        while (!stk.empty() && k > 0 && stk.top() > c) {
+            stk.pop();
             k--;
         }
-        stk.push_back(c);
+        stk.push(c);
     }
-
-    // If removals remain, cut from the end (number is now non-decreasing)
-    stk.resize(stk.size() - k);
-
-    // Remove leading zeros
-    int start = 0;
-    while (start < (int)stk.size() - 1 && stk[start] == '0') {
-        start++;
+    while (k > 0 && !stk.empty()) {
+        stk.pop();
+        k--;
     }
-
-    return stk.substr(start);
+    int i=0;
+    while (i < stk.size() && stk[i] == '0') i++; // Skip leading zeros
+    if (i == stk.size()) return "0"; // All zeros
+    string res;
+    while (!stk.empty()) {
+        res += stk.top();
+        stk.pop();
+    }
+    return res;
+    
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +90,7 @@ string removeKDigits(string num, int k) {
 string removeDuplicateLetters(const string& s) {
     vector<int> lastIndex(26, -1);
     vector<bool> inStack(26, false);
-    string stk;
+    stack<char> stk;
 
     // Record the last occurrence index of each character
     for (int i = 0; i < (int)s.size(); i++) {
@@ -103,16 +104,21 @@ string removeDuplicateLetters(const string& s) {
         if (inStack[c]) continue;
 
         // Pop characters that are larger AND will appear again later
-        while (!stk.empty() && stk.back() > s[i] && lastIndex[stk.back() - 'a'] > i) {
-            inStack[stk.back() - 'a'] = false;
-            stk.pop_back();
+        while (!stk.empty() && stk.top() > s[i] && lastIndex[stk.top() - 'a'] > i) {
+            inStack[stk.top() - 'a'] = false;
+            stk.pop();
         }
 
-        stk.push_back(s[i]);
+        stk.push(s[i]);
         inStack[c] = true;
     }
 
-    return stk;
+    string result;
+    while (!stk.empty()) {
+        result += stk.top();
+        stk.pop();
+    }
+    return string(result.rbegin(), result.rend()); // Reverse to get correct order
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -128,61 +134,30 @@ string removeDuplicateLetters(const string& s) {
 
 vi maxNumberFromArray(const vi& nums, int k) {
     int n = nums.size();
-    vi stk;
+    stack<int> stk; // Monotonic decreasing stack of digits
     int drop = n - k; // How many elements we're allowed to skip/drop
+    // we will keep monotonic decreasing stack of size k, so we can drop n-k elements
 
     for (int i = 0; i < n; i++) {
         // Pop smaller elements from stack if we still have drops left
-        while (drop > 0 && !stk.empty() && stk.back() < nums[i]) {
-            stk.pop_back();
+        while (drop > 0 && !stk.empty() && stk.top() < nums[i]) {
+            stk.pop();
             drop--;
         }
-        stk.push_back(nums[i]);
-    }
-
-    // Take only the first k elements
-    return vi(stk.begin(), stk.begin() + k);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. 132 PATTERN
-// LC 456
-//
-// Return true if there exist indices i < j < k such that nums[i] < nums[k] < nums[j].
-// (i.e., the "132" pattern: a small number, then a large number, then a medium number.)
-//
-// Idea:
-// - Process from RIGHT to LEFT.
-// - Maintain a monotonic decreasing stack.
-// - Track `third` = the largest value popped so far (this is the "2" in 132 pattern —
-//   it was previously a valid "peak" that something smaller came after).
-// - For each element from the right:
-//     - Pop all stack elements smaller than current (they become candidates for "2").
-//     - Update third = max popped.
-//     - If current element < third, we found: current = "1", stack_top = "3", third = "2".
-//
-// Time: O(N) | Space: O(N)
-// ─────────────────────────────────────────────────────────────────────────────
-
-bool find132Pattern(const vi& nums) {
-    stack<int> stk;        // Monotonic decreasing stack (candidates for "3" in 132)
-    int third = INT_MIN;   // The "2" in 132 — largest element that was once a peak
-
-    // Traverse right to left
-    for (int i = nums.size() - 1; i >= 0; i--) {
-        // If current < third, we found the "1" — pattern exists
-        if (nums[i] < third) return true;
-
-        // Pop all elements smaller than current into `third`
-        // They were previously "peaks" (the "3"), current now surpasses them
-        while (!stk.empty() && nums[i] > stk.top()) {
-            third = stk.top(); // Best candidate for "2" seen so far from the right
-            stk.pop();
-        }
-
         stk.push(nums[i]);
     }
-    return false;
+
+    vi result;
+    while (!stk.empty()) {
+        result.push_back(stk.top());
+        stk.pop();
+    }
+    reverse(result.begin(), result.end());
+    // If we have extra elements (more than k), trim from right (they are the smallest due to monotonic stack)
+    if (result.size() > k) {
+        result.erase(result.begin(), result.begin() + (result.size() - k));
+    }
+    return result;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -201,60 +176,12 @@ vi dailyTemperatures(const vi& temps) {
     stack<int> stk;  // Monotonic decreasing stack of indices
 
     for (int i = 0; i < n; i++) {
-        while (!stk.empty() && temps[i] > temps[stk.top()]) {
-            int j = stk.top();
+        while (!stk.empty() && temps[stk.top()] < temps[i]) {
+            int j = stk.top(); // for jth index, i is the next warmer day
             stk.pop();
             result[j] = i - j; // Days to wait for a warmer temperature
         }
         stk.push(i);
     }
     return result;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    /*
-        // Remove K Digits
-        string num; int k;
-        cin >> num >> k;
-        cout << removeKDigits(num, k) << '\n';
-    */
-
-    /*
-        // Remove Duplicate Letters
-        string s; cin >> s;
-        cout << removeDuplicateLetters(s) << '\n';
-    */
-
-    /*
-        // Max Number From Array (pick k elements in order)
-        int n, k; cin >> n >> k;
-        vi nums(n);
-        for (int& x : nums) cin >> x;
-        vi res = maxNumberFromArray(nums, k);
-        for (int x : res) cout << x << ' '; cout << '\n';
-    */
-
-    /*
-        // 132 Pattern
-        int n; cin >> n;
-        vi nums(n);
-        for (int& x : nums) cin >> x;
-        cout << (find132Pattern(nums) ? "true" : "false") << '\n';
-    */
-
-    /*
-        // Daily Temperatures
-        int n; cin >> n;
-        vi temps(n);
-        for (int& x : temps) cin >> x;
-        vi ans = dailyTemperatures(temps);
-        for (int x : ans) cout << x << ' '; cout << '\n';
-    */
-
-    return 0;
 }
