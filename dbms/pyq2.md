@@ -50,119 +50,121 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
 
 ---
 
-### Q55. Explain single-leader, multi-leader, and leaderless database replication.
-* **Asked by:** Meta, Uber, Netflix (System Design)
+### Q55. What is the difference between Shared Locks (S), Exclusive Locks (X), and Intent Locks (IS, IX)?
+* **Asked by:** Oracle, Microsoft, Stripe
 * **Answer:**
-  * **Single-Leader (Master-Slave):** All write requests are sent to a single leader node. The leader applies the write and propagates data updates to followers (slaves) as a replication stream. Reads can go to any node.
-    * *Pros:* Simple to design; prevents write conflicts.
-    * *Cons:* Single point of failure for writes; scaling writes is difficult.
-  * **Multi-Leader:** Multiple nodes act as leaders, accepting write requests. They sync modifications asynchronously.
-    * *Pros:* Better write throughput; fault tolerance across geographical regions.
-    * *Cons:* Requires complex conflict resolution rules (e.g., Last-Write-Wins, CRDTs).
-  * **Leaderless (Dynamo-style):** Clients write to and read from multiple nodes in parallel. Relies on **quorum writes and reads** ($W + R > N$) to ensure consistency. Used by Cassandra and DynamoDB.
+  * **Shared Lock (S):** Acquired for read operations. Multiple transactions can hold a Shared lock on the same row concurrently, but no transaction can write.
+  * **Exclusive Lock (X):** Acquired for write operations (`UPDATE`, `DELETE`). Only one transaction can hold an Exclusive lock on a resource. No other read or write locks are allowed.
+  * **Intent Locks (IS / IX):** Enforced at higher levels of the table hierarchy (e.g., table level) to indicate that a transaction holds or intends to acquire shared/exclusive locks on individual rows.
+    * **Intent Shared (IS):** Indicates a transaction plans to acquire S locks on rows in the table.
+    * **Intent Exclusive (IX):** Indicates a transaction plans to acquire X locks on rows in the table.
+    * **Why needed:** Without intent locks, if a transaction wants to lock the *entire table*, it would have to scan every row to check if there are individual row locks. With intent locks, the engine checks the table-level intent lock in $O(1)$ time.
 
 ---
 
-### Q56. What is Replication Lag? Name two anomalies it causes and how to prevent them.
-* **Asked by:** Netflix, Meta, Uber
+### Q56. What is 2-Phase Locking (2PL)? How does it guarantee Serializability, and how does it differ from Strict 2PL?
+* **Asked by:** Amazon, Google, Core engines
 * **Answer:**
-  **Replication Lag** is the delay between a write committing on the leader node and it being applied to replica follower nodes in asynchronous replication.
-  * **Anomalies Caused:**
-    1. **Stale Reads (Read-Your-Own-Writes violation):** A user submits a post (write goes to leader), refreshes the page, and the read hits a lagging replica. The user's post appears to have vanished.
-    2. **Monotonic Reads Violation:** A user reads from replica A (which is up-to-date), then refreshes and hits lagging replica B. The user sees data go back in time.
-  * **Mitigation:**
-    * Route reads of a user's own profile page strictly to the leader.
-    * Track client write timestamps and reject reads on replicas that have not reached that timestamp yet.
+  **2-Phase Locking (2PL)** is a concurrency control protocol that guarantees conflict serializability of transaction schedules. It operates in two distinct phases:
+  1. **Growing Phase:** The transaction can acquire locks but cannot release any lock.
+  2. **Shrinking Phase:** The transaction can release locks but cannot acquire any new lock.
+  * **Strict 2PL (S-2PL):** Modifies 2PL by requiring that all **Exclusive (write) locks** held by a transaction must be kept until the transaction completes (Commit or Abort).
+  * **Rigorous 2PL:** Requires *all* locks (both S and X) to be held until Commit/Abort.
+  * **Key Difference:** Standard 2PL can suffer from **cascading aborts** (if transaction A releases a lock early and aborts, transaction B which read that data must also abort). Strict 2PL prevents cascading aborts by holding write locks until final validation.
 
 ---
 
-### Q57. Explain Synchronous vs. Asynchronous Replication.
-* **Asked by:** Stripe, AWS RDS, Goldman Sachs
+### Q57. What is the Phantom Read anomaly, and how does Next-Key Locking prevent it in InnoDB?
+* **Asked by:** Uber, Stripe, MySQL specialists
 * **Answer:**
-  * **Synchronous Replication:** The leader writes to disk and waits for confirmations from replicas before returning a "success" response to the client.
-    * *Pros:* Zero data loss if the leader dies (High Consistency).
-    * *Cons:* High write latency (client waits for network round-trips); writes block if a replica node crashes.
-  * **Asynchronous Replication:** The leader writes to disk, immediately returns success to the client, and propagates the update to replicas in the background.
-    * *Pros:* Low write latency; writes succeed even if all replicas crash.
-    * *Cons:* Data loss occurs if the leader dies before replicating commits to followers.
+  * **Phantom Read:** Occurs when transaction A runs a query to read a range of rows (e.g., `WHERE age > 30`), transaction B inserts a *new* row in that range (e.g., `age = 35`) and commits, and transaction A runs the range query again, seeing the "phantom" row.
+  * **Next-Key Locking:** InnoDB prevents phantoms under Repeatable Read using Next-Key Locks. A Next-Key lock is a combination of:
+    1. An **Index-Record lock** on the matching index records.
+    2. A **Gap lock** on the empty spaces (gaps) in the index structure between, before, and after those records.
+  * **Mechanism:** By locking the gaps, other transactions are blocked from inserting any values into the gap, preventing phantoms from being created.
 
 ---
 
-### Q58. What is the "Split-Brain" problem? How is it resolved using Quorums?
-* **Asked by:** Google, Meta, Distributed systems teams
+### Q58. Explain the anatomy of a database page/disk block.
+* **Asked by:** Snowflake, Oracle, Apple
 * **Answer:**
-  * **Split-Brain** occurs when a network partition cuts off leader election nodes from one another. Two separate sub-networks might both assume the active leader is dead, elect their own leaders, and begin accepting concurrent writes, leading to irreconcilable data conflicts.
-  * **Resolution (Quorum Consensus):** Replicas use consensus algorithms (Raft, Paxos) requiring a strict **majority quorum** (e.g., $\lfloor N/2 \rfloor + 1$ nodes) to elect a leader or commit writes. A partitioned minority sub-network cannot form a quorum, preventing it from electing a rogue leader or accepting updates.
+  A database page (typically 8KB in Postgres, 16KB in InnoDB) is the unit of disk I/O. Its structure contains:
+  1. **Page Header:** Metadata about the page (LSN log identifier, free space pointers, page flags).
+  2. **Line Pointer Array (Slot Directory):** An array of offsets pointing to the start of each actual row on the page. Sorted from left-to-right.
+  3. **Free Space:** Unallocated bytes. The directory grows forward, and rows are written backward from the end of the page to meet in the middle.
+  4. **Data Tuples (Row Data):** Actual row values, headers, and column bytes written from the bottom of the page upward.
+  * **Benefits:** Slot directories let the engine move rows around on a page (defragmentation) without changing row pointers in indexes; only the directory offset needs update.
 
 ---
 
-## Section 8: NoSQL & Distributed Storage Internals (Q59–Q65)
+## Section 8: Storage Engine Internals & Indexing (Q59–Q65)
 
-### Q59. How does MongoDB store data? Explain BSON.
-* **Asked by:** Meta, Walmart, Flipkart
+### Q59. What is Row Overflow? How does a database store columns larger than a single page?
+* **Asked by:** Oracle, PostgreSQL core teams
 * **Answer:**
-  * MongoDB is a **Document Store** NoSQL database. It organizes data into collections containing flexible, schema-less documents.
-  * **BSON (Binary JSON):** MongoDB stores data internally and transmits it as BSON.
-  * **JSON vs BSON:** JSON is text-based (slow parsing, limited types). BSON is a binary representation of JSON that adds data types (e.g., `Date`, `Int32`, `Double`, binary raw data) and prefix-length descriptors, allowing the engine to skip fields during scans without parsing the entire document.
+  Since databases read and write data in fixed-size pages (e.g., 8KB), a row containing large text or blob values (like `user_bio` or `pdf_file`) cannot fit in a standard page.
+  * **Row Overflow / TOAST (The Oversized-Attribute Storage Technique):**
+    * If a row exceeds a page limit, the database splits the large column out of the row page.
+    * The main row stores a small 24-byte **pointer (descriptor)** referencing the large attribute.
+    * The actual data is compressed, split into chunks, and stored in a separate, dedicated overflow storage table (e.g., TOAST table in Postgres) across multiple pages.
+  * **Benefit:** Keeps the primary table pages narrow and clean, ensuring fast scans when queries don't select the large column.
 
 ---
 
-### Q60. What is Redis and how does it achieve high performance? Explain its persistence.
-* **Asked by:** Uber, Stripe, Zepto
+### Q60. Why do MVCC database engines need Vacuuming / Compaction?
+* **Asked by:** PostgreSQL, MySQL DBAs, Heroku
 * **Answer:**
-  * **Redis** is an in-memory, key-value data structure store used as a database, cache, and message broker.
-  * **Performance:** Achieves sub-millisecond latency because it stores data in RAM (avoiding disk I/O) and operates on a highly optimized **single-threaded event loop** utilizing multiplexed I/O (epoll/kqueue), which eliminates locking and thread-switching overhead.
-  * **Persistence Mechanisms:**
-    1. **RDB (Redis Database File):** Performs point-in-time snapshots of the dataset at specified intervals. Fast startup, but potential data loss between snapshots.
-    2. **AOF (Append Only File):** Logs every write operation received by the server. Highly durable, but generates larger files and slower startup times.
+  Under Multi-Version Concurrency Control (MVCC), when a row is `UPDATED`, the database does not overwrite it; it writes a new version of the row and marks the old version as dead. When a row is `DELETED`, it is simply flagged as deleted.
+  * **The Problem (Bloat):** Dead rows (tuples) continue to occupy physical space on disk and in memory pages, slowing down table scans.
+  * **Vacuuming / Compaction:**
+    * A background system process (e.g., `VACUUM` in PostgreSQL) scans pages, identifies dead tuples that are no longer visible to any active transaction, and marks their space as free for reuse by new inserts.
+    * **VACUUM FULL:** Rewrites the entire table to a new physical file on disk to shrink the database size, but locks the table exclusively.
 
 ---
 
-### Q61. Compare SQL databases with NoSQL databases. When would you choose NoSQL?
-* **Asked by:** Meta, Google, Uber
+### Q61. What is the difference between a Lock and a Latch in database internals?
+* **Asked by:** Google, Core engines, Systems roles
 * **Answer:**
-
-| Feature | SQL (RDBMS) | NoSQL (Non-Relational) |
-| :--- | :--- | :--- |
-| **Data Model** | Tabular, structured (rows/columns). | Document, Key-Value, Column-family, Graph. |
-| **Schema** | Rigid, predefined. | Dynamic, schema-less. |
-| **Scaling** | Vertical (scale up CPU/RAM). | Horizontal (scale out across machines). |
-| **Transactions** | Strong ACID compliance. | Focus on BASE (eventual consistency). |
-
-* **When to choose NoSQL:**
-  * Data has low/no relational structure (e.g., unstructured document logs).
-  * High-throughput scaling requirement beyond a single machine's write capability.
-  * Rapidly evolving schemas where schema migrations are costly.
+  Both are synchronization mechanisms, but they operate at different layers:
+  * **Locks:** High-level logical constructs used to manage concurrency and transaction isolation (ACID). They protect database *user data* (tables, rows).
+    * *Scope:* Visible to users; held for the duration of a transaction (long-lived).
+    * *Modes:* Shared, Exclusive, Intent.
+  * **Latches:** Low-level physical locks used to protect internal *memory structures* (e.g., buffer pool frames, B+ Tree page pointers) from concurrent thread access.
+    * *Scope:* Internal (invisible to users); held only for microseconds while modifying pointers (short-lived).
+    * *Modes:* Read, Write.
 
 ---
 
-### Q62. What is a Column-Family Store (e.g., Cassandra)? How does it store data?
-* **Asked by:** Uber, Netflix, Cassandra Teams
+### Q62. Explain the difference between a Clustered Index and a Primary Key Constraint.
+* **Asked by:** Microsoft, Oracle, SQL Server developers
 * **Answer:**
-  * Instead of storing table rows together on disk, a **Column-Family Store** groups columns of a row together, storing values key-by-key on disk.
-  * **Cassandra Storage:** Uses a partitioning key to route a row to a node, then stores columns sorted by a clustering key inside SSTables (Sorted String Tables).
-  * **Why it's used:** Extremely fast writes, horizontal write scalability, and efficient sparse columns (missing column values use zero disk space).
+  * **Primary Key (Logical):** A constraint that guarantees uniqueness and nullability rules for a column. It is a logical model definition.
+  * **Clustered Index (Physical):** Dictates how the actual data rows of the table are physically sorted and stored on disk.
+  * **Differences:**
+    * You can define a primary key, and the database will automatically back it with an index, but that index doesn't *have* to be clustered.
+    * A table can have only **one clustered index** (since data can only be physically sorted in one way).
+    * You can create a clustered index on a non-primary key column if range queries on that column are very common.
 
 ---
 
-### Q63. Explain the LSM Tree (Log-Structured Merge-Tree) storage engine.
-* **Asked by:** Uber, Snowflake, Meta, RocksDB teams
+### Q63. How does a Cost-Based Optimizer (CBO) work? What is the role of Database Statistics?
+* **Asked by:** Google, Snowflake, AWS Aurora
 * **Answer:**
-  An **LSM Tree** is a write-optimized storage engine used in databases like Cassandra and RocksDB instead of traditional B+ Trees.
-  * **How it works:**
-    1. Writes are appended to an in-memory sorted structure called a **MemTable** and a sequential WAL log.
-    2. When the MemTable is full, it is flushed to disk as an immutable **SSTable** (Sorted String Table).
-    3. A background process runs **Compaction** to merge SSTables, discard updates, and remove deleted rows (tombstones).
-  * **Why it's preferred for writes:** Turns random write operations into sequential disk writes, eliminating random I/O write penalties of in-place B+ Tree updates.
+  * The **CBO** evaluates multiple physical execution plans for a parsed SQL query and assigns an estimated "cost" (CPU cycles and disk page I/Os) to each. It selects the plan with the lowest cost.
+  * **Role of Statistics:** To estimate cost, the optimizer needs to know the distribution of data. It stores:
+    * Row count of tables.
+    * **Data density / selectivity** of indexes.
+    * **Histograms** showing the distribution of values in columns.
+  * **The Gotcha:** If statistics are stale (e.g., table recently grew from 1,000 to 1,000,000 rows without `ANALYZE` updating statistics), the optimizer may choose a full table scan instead of an index seek, causing a massive performance collapse.
 
 ---
 
-### Q64. What is a Graph Database? When is it preferred over a relational database?
-* **Asked by:** LinkedIn, Meta, Neo4j
+### Q64. Compare Index Scan, Index Seek, and Table Scan.
+* **Asked by:** Microsoft, Walmart, Adobe
 * **Answer:**
-  * A **Graph Database** (e.g., Neo4j) stores data in terms of **Nodes** (entities), **Edges** (relationships), and **Properties**.
-  * **When preferred:** When relationships are dense, deeply nested, or dynamic (e.g., social networks, recommendation engines, fraud detection, dependency graphs).
-  * **Why:** To find a "friend-of-a-friend" up to 5 degrees of separation in a relational database, you need 5 expensive joins ($O(N^K)$ complexity). Graph databases use index-free adjacency (direct memory pointers to adjacent nodes), traversing connections in $O(1)$ constant time per step.
+  * **Table Scan:** The engine scans the entire heap or clustered table page-by-page. It reads every row. Used when no index fits, or when the query retrieves a large fraction of the table ($>20\%$).
+  * **Index Scan:** The engine scans the entire index tree (usually leaf nodes) from start to finish. Useful when a query only requests indexed columns (index-only scan) but needs to inspect all rows.
+  * **Index Seek:** The engine utilizes the index key to traverse the B+ Tree from root to leaf, navigating directly to the specific starting row matching the query filter (`O(log N)` complexity). This is the most optimal execution operation.
 
 ---
 
@@ -359,35 +361,40 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
     * *Example:* If an employee has multiple phone numbers and multiple skills, storing them in a single table causes Cartesian duplicates. 4NF splits them into `EmployeePhone` and `EmployeeSkill` tables.
   * **5NF (Project-Join Normal Form):** Handles join dependencies. A relation is in 5NF if it cannot be decomposed into smaller tables without losing information when re-joined.
 
----
-
-### Q83. What is a Distributed Hash Table (DHT)?
-* **Asked by:** Cassandra / Peer-to-Peer systems roles
+### Q83. What is the difference between a Natural Join and an Inner Join?
+* **Asked by:** Oracle, IBM, Goldman Sachs
 * **Answer:**
-  * A **DHT** is a decentralized, distributed system that provides a lookup service similar to a hash table: `(key, value)` pairs are stored in the DHT, and any participating node can retrieve the value associated with a key.
-  * **Architecture:** Uses consistent hashing to partition the keyspace across nodes on a ring. Nodes maintain routing tables (e.g., Chord finger tables) to route queries to the correct target node in $O(\log N)$ network hops.
+  * **Inner Join:** Joins tables based on an explicit join predicate specified in the `ON` or `USING` clause. You can join columns even if they have different names (e.g., `JOIN Orders o ON c.customer_id = o.buyer_id`).
+  * **Natural Join:** An implicit inner join that automatically joins tables based on **all columns that share the same name** in both tables.
+  * **Why it's avoided in production:**
+    * If someone adds a column to one of the tables in the future (e.g., adding `created_at` to both `Customer` and `Orders`), the natural join will implicitly begin joining on `created_at` too, breaking the application's query output.
+    * It is not self-documenting; developers cannot see the join condition without inspecting both table schemas.
 
 ---
 
-### Q84. What is a Vector Database? How does it differ from a relational database?
-* **Asked by:** AI/ML Engineering roles (Pinecone, Milvus, Qdrant)
+### Q84. How do databases handle NULL values in conditional expressions, sorting, and aggregate functions (Three-Valued Logic)?
+* **Asked by:** Google, Amazon, Stripe
 * **Answer:**
-  * **Vector Databases** are designed to store, index, and query high-dimensional vector embeddings (mathematical representations of unstructured data like text, images, or audio generated by AI models).
-  * **Difference:** Relational databases index scalar values (strings, integers) and perform exact matches. Vector databases index multi-dimensional floats and perform **Approximate Nearest Neighbor (ANN)** searches using distance metrics (Cosine Similarity, Euclidean Distance) over specialized index structures (e.g., HNSW - Hierarchical Navigable Small World graphs).
+  * **Three-Valued Logic (3VL):** Boolean logic in SQL can evaluate to `TRUE`, `FALSE`, or `UNKNOWN`. Any comparison involving `NULL` (e.g., `age = NULL`, `age != NULL`, or `NULL = NULL`) evaluates to `UNKNOWN`.
+  * **Sorting:** In SQL standard, `NULL` values are grouped together. PostgreSQL sorts `NULL` as highest (placed at the end in `ASC` sorting), whereas MySQL/SQL Server sort `NULL` as lowest.
+  * **Aggregate Functions:** Functions like `SUM`, `AVG`, `MIN`, `MAX`, and `COUNT(column)` **ignore NULL values**. Only `COUNT(*)` counts rows regardless of nullability.
+  * **Conditional Checks:** To check for NULL, you must use `IS NULL` or `IS NOT NULL`. E.g., `WHERE age IS NULL`.
 
 ---
 
-### Q85. How do you scale a database for a celebrity "hotspot" write pattern?
-* **Asked by:** Meta, Twitter/X, ByteDance
+### Q85. What is the difference between a Clustered and a Non-Clustered index under the hood in terms of physical traversal?
+* **Asked by:** Microsoft, Oracle, Amazon
 * **Answer:**
-  When a celebrity with millions of followers posts (high write fan-out), updating the timeline feeds of all followers instantly (Push model) overwhelms the database with millions of concurrent writes.
-  * **Hybrid Architecture Solution:**
-    * **Standard Users (Pull model):** Write posts to a home timeline cache. Followers fetch the feed when logging in.
-    * **Celebrity Users (Push-Pull hybrid):** Do not fan-out writes for celebrity posts. Instead, store the celebrity post once. When a follower logs in, merge their personal timeline feed with the celebrity's recent post stream at query time (read-side fan-out).
+  * **Clustered Index Traversal:**
+    * The leaf nodes of the clustered index B+ Tree contain the **actual physical row data pages**.
+    * Once the engine traverses the tree and finds the matching key, it reads the row immediately from the leaf page.
+  * **Non-Clustered Index Traversal:**
+    * The leaf nodes of a non-clustered index contain **pointers** to the physical rows (either physical Row IDs (RIDs) in a heap table, or the primary key values in an index-organized table).
+    * Traversal requires a two-step process: (1) traverse the non-clustered B+ Tree to find the pointer, (2) use that pointer to fetch the row from the data table (often called a RID Lookup or Key Lookup).
 
 ---
 
-## Section 11: Real-World Architecture & Distributed Trade-Offs (Q86–Q100)
+## Section 11: Core Schema Design, Joins & Execution Internals (Q86–Q100)
 
 ### Q86. What is Database Migration? How do you perform zero-downtime migrations?
 * **Asked by:** Stripe, Uber, Backend roles
@@ -400,48 +407,59 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
 
 ---
 
-### Q87. What is Change Data Capture (CDC)?
-* **Asked by:** Stripe, Netflix, Data Platform roles
+### Q87. Explain the three physical join algorithms: Nested Loop Join, Hash Join, and Sort-Merge Join. Compare their execution time and memory complexity.
+* **Asked by:** Google, Snowflake, AWS Aurora
 * **Answer:**
-  * **CDC** is a design pattern that detects changes made to a database (Inserts, Updates, Deletes) and streams those changes as events to other systems (e.g., Elasticsearch, caches, or data lakes) in real time.
-  * **Implementation (Log-based):** Read changes directly from the database's transactional commit logs (e.g., PostgreSQL WAL, MySQL binlog) using tools like Debezium or Kafka Connect.
-  * **Benefit:** Zero impact on database query performance (unlike SQL triggers) because it reads logs asynchronously.
+  The database engine compiles logical Joins into one of three physical join algorithms:
+  1. **Nested Loop Join:** For each row in the outer table, scan the inner table for a match.
+    * *Complexity:* $O(M \times N)$ time, $O(1)$ memory. Optimal if one table is very small and the join column on the other table has a B+ Tree index (making it $O(M \log N)$).
+  2. **Hash Join:** Builds an in-memory hash table on the join key of the smaller table (build input), then scans the larger table (probe input) to find matches.
+    * *Complexity:* $O(M + N)$ time, $O(M)$ memory. Optimal for large, unsorted tables without indexes.
+  3. **Sort-Merge Join:** Sorts both tables by the join key, then merges them in a single parallel scan.
+    * *Complexity:* $O(M \log M + N \log N)$ time, $O(1)$ memory (or $O(M+N)$ if sorting in memory). Optimal if tables are already sorted (e.g., via indexes) or for inequality joins (`>`, `<`).
 
 ---
 
-### Q88. Compare Database Federation vs. Data Warehousing.
-* **Asked by:** Stripe, AWS
+### Q88. What is a Sargable query? How do you rewrite a query to make it sargable?
+* **Asked by:** Microsoft, Walmart, Adobe
 * **Answer:**
-  * **Database Federation (Query Virtualization):** A query engine queries data across multiple distinct databases dynamically at runtime, combining results without moving the data physically.
-    * *Pros:* Real-time data access; no storage overhead.
-    * *Cons:* Poor performance on large aggregates; queries are restricted by the slowest database network link.
-  * **Data Warehousing (ETL):** Data is periodically extracted, transformed, and loaded (ETL) from operational databases into a centralized warehouse (OLAP).
-    * *Pros:* Excellent analytical performance; consolidated history.
-    * *Cons:* Data is stale (delayed by the ETL pipeline frequency).
+  * **Sargable (Search Argument Able):** A query is sargable if the database engine can utilize an index to speed up execution (Index Seek).
+  * **Non-Sargable:** Occurs when you wrap index columns in functions or operations, forcing the engine to evaluate the function for every single row (Table/Index Scan).
+  * **Rewriting Examples:**
+    * ❌ *Non-Sargable:* `WHERE YEAR(order_date) = 2026`
+    *  *Sargable:* `WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01'`
+    * ❌ *Non-Sargable:* `WHERE SUBSTRING(name, 1, 3) = 'Rob'`
+    *  *Sargable:* `WHERE name LIKE 'Rob%'`
 
 ---
 
-### Q89. What is a Distributed Transaction? Why is it avoided in microservices?
-* **Asked by:** Uber, Stripe, Netflix
+### Q89. Compare the performance and execution plan impact of UNION vs. UNION ALL.
+* **Asked by:** Oracle, Amazon, Stripe
 * **Answer:**
-  * A transaction that updates data across multiple physical databases or distinct microservices.
-  * **Why avoided:**
-    * Requires blocking protocols like **2-Phase Commit (2PC)**, which increase write latency.
-    * If one microservice is down, the entire transaction blocks, violating availability (violates CAP).
-    * Binds services together, breaking the fundamental rule of independent microservice deployment.
+  * **UNION ALL:** Simply concatenates the result sets of two queries.
+    * *Performance:* Extremely fast ($O(N)$). It requires no memory sorting or hashing because it returns duplicate rows.
+  * **UNION:** Concatenates result sets, then removes duplicate rows.
+    * *Performance:* Slow ($O(N \log N)$ or $O(N)$ with hash). Under the hood, the engine must perform a duplicate-elimination step using sorting or hashing.
+  * **Interview Rule:** Always use `UNION ALL` unless you explicitly require duplicate rows to be filtered out.
 
 ---
 
-### Q90. What is the Saga Pattern?
-* **Asked by:** Uber, Stripe, Backend architects
+### Q90. What is a database transaction Savepoint? How is it used?
+* **Asked by:** Stripe, Oracle, Finance dev teams
 * **Answer:**
-  The **Saga Pattern** is an alternative to distributed transactions in microservices.
-  * **How it works:** A saga is a sequence of local transactions. Each service performs its local database transaction and publishes an event. The next service receives the event and executes its local transaction.
-  * **Handling Failures (Compensating Transactions):** If a step fails, the saga orchestrator triggers a series of **compensating transactions** backward to undo the changes made by the previous steps (e.g., if a flight booking fails after payment succeeded, trigger a refund transaction).
+  * **Savepoint** is a transaction control language (TCL) primitive that allows a transaction to be rolled back partially without aborting the entire transaction.
+  * **Mechanism:**
+    1. Start a transaction (`BEGIN`).
+    2. Execute some statements.
+    3. Declare a savepoint: `SAVEPOINT my_savepoint;`
+    4. Execute more statements.
+    5. If an error occurs, roll back only to that savepoint: `ROLLBACK TO my_savepoint;`
+    6. Continue other work and `COMMIT`.
+  * **Use Case:** Nested transaction blocks in application servers where a minor failure (e.g., logging statement failure) shouldn't abort the core payment transaction.
 
 ---
 
-### Q91. What is the role of the Database Buffer Pool?
+### Q91. What is the role of the Database Buffer Pool? Explain LRU scan pollution and the Clock sweep replacement algorithm.
 * **Asked by:** Google, Amazon, Snowflake
 * **Answer:**
   * The **Buffer Pool** is a portion of database RAM used to cache table data pages and index pages read from disk.
@@ -460,11 +478,15 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
 
 ---
 
-### Q93. What is Database Federation vs. Data Lake?
-* **Asked by:** Data Platform engineers
+### Q93. What is Referential Integrity? Explain CASCADE, SET NULL, RESTRICT, and NO ACTION referential actions.
+* **Asked by:** Oracle, SQL Server, MySQL Developers
 * **Answer:**
-  * **Database Federation:** A query layer that federates queries to operational databases on the fly.
-  * **Data Lake:** A centralized repository designed to store vast amounts of raw, unstructured, semi-structured, and structured data (e.g., AWS S3 files, Parquet) at very low cost, which is analyzed using engines like Apache Spark or Presto.
+  * **Referential Integrity:** A database design rule requiring that foreign key columns must always reference a valid, existing primary key in the parent table.
+  * **Referential Actions (On Delete/On Update):** Defines what happens to the child table when a parent row is deleted or updated:
+    * `CASCADE`: Automatically deletes or updates matching rows in the child table.
+    * `SET NULL`: Sets the child table's foreign key columns to `NULL`.
+    * `RESTRICT`: Rejects the delete or update on the parent table immediately (fails the transaction).
+    * `NO ACTION`: Similar to RESTRICT, but the check is deferred until the end of the statement or transaction.
 
 ---
 
@@ -477,56 +499,67 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
 
 ---
 
-### Q95. How does a database resolve conflict updates under multi-leader replication?
-* **Asked by:** AWS DynamoDB, Cassandra, System Design
+### Q95. What are Functional Dependencies and Armstrong's Axioms in database theory?
+* **Asked by:** Academic/DBMS internals interviews
 * **Answer:**
-  1. **Last-Write-Wins (LWW):** Uses physical wall-clock timestamps. The write with the latest timestamp overwrites others. (Cons: clock skew can cause data loss).
-  2. **Conflict-Free Replicated Data Types (CRDTs):** Data structures (like grow-only counters or sets) that can be merged concurrently on different replicas without conflict resolution logic.
-  3. **Operational Transformation (OT):** Used in collaborative editing (like Google Docs).
-  4. **Custom Conflict Resolution:** Triggering application code to prompt the user to resolve the conflict (e.g., Git merge conflicts).
+  * **Functional Dependency (FD):** A constraint between two sets of attributes. $A \rightarrow B$ means the value of attribute set $A$ uniquely determines the value of attribute set $B$.
+  * **Armstrong's Axioms:** A set of rules used to find all functional dependencies of a relation:
+    1. **Reflexivity:** If $B \subseteq A$, then $A \rightarrow B$.
+    2. **Augmentation:** If $A \rightarrow B$, then $AC \rightarrow BC$ for any attribute set $C$.
+    3. **Transitivity:** If $A \rightarrow B$ and $B \rightarrow C$, then $A \rightarrow C$.
+  * **Secondary rules derived from axioms:** Union (if $A \rightarrow B$ and $A \rightarrow C$, then $A \rightarrow BC$) and Decomposition (if $A \rightarrow BC$, then $A \rightarrow B$ and $A \rightarrow C$).
 
 ---
 
-### Q96. What is a "Hotspot" in partition keys? How do you prevent it?
-* **Asked by:** AWS DynamoDB, Cassandra, Google Spanner
+### Q96. What is Lossless-Join Decomposition and Dependency Preservation in database normalization?
+* **Asked by:** High-end database architects, DB Designers
 * **Answer:**
-  * A **Hotspot** occurs when a partition key routes a disproportionate volume of write requests to a single database node (e.g., sharding by `country` where $90\%$ of customers are in `US`).
-  * **Prevention:**
-    * **Salting the key:** Append a random suffix (e.g., `US_1`, `US_2`, `US_3`) to the partition key, distributing the data evenly across nodes.
-    * **Composite Keys:** Combine the partition key with another column (e.g., `country + registration_date`).
+  When decomposing a table into smaller tables during normalization, two properties must be preserved:
+  1. **Lossless-Join Decomposition:** Guarantees that when the split tables are joined back together, the result is identical to the original table without introducing "spurious" or fake rows. (This holds true if the common column is a key of at least one of the decomposed tables).
+  2. **Dependency Preservation:** Enforces that all functional dependencies of the original table can be checked using only individual tables in the decomposition, without executing expensive join operations.
 
 ---
 
-### Q97. Explain Consistent Hashing vs. Rendezvous Hashing.
-* **Asked by:** Advanced distributed systems roles
+### Q97. What is Lock Escalation? How does the database engine decide when to escalate locks?
+* **Asked by:** Microsoft SQL Server, DB2 Specialists
 * **Answer:**
-  * **Consistent Hashing:** Maps nodes and keys to a ring structure. remaps $K/N$ keys on node addition/removal.
-  * **Rendezvous Hashing (HRW):** The client computes a hash of the key combined with each active node ID: $weight = hash(key + node\_id)$. The key is assigned to the node that yields the highest weight.
-  * **Benefit of Rendezvous:** Does not require maintaining a ring structure; highly effective for distributed caching routing (e.g., proxy caches).
+  * **Lock Escalation:** The process of converting multiple fine-grained locks (e.g., locking 10,000 individual rows) into a single, coarse-grained lock (e.g., locking the entire table) to free up database lock manager memory.
+  * **How the engine decides:**
+    * Locks consume memory pages. If a single transaction exceeds a lock threshold (e.g., holds $>5,000$ row locks on a single table) or if the database-wide lock memory consumption exceeds a safety threshold ($10-20\%$ of memory), the engine escalates locks.
+  * **Drawback:** Drastically reduces concurrency, as other transactions are now blocked from accessing unrelated rows in that table.
 
 ---
 
 ### Q98. What is the role of the Database Transaction Log (redo log)?
 * **Asked by:** AWS Aurora, Snowflake, Oracle
 * **Answer:**
-  * The **Redo Log** records all changes made to the database. Its primary role is to support the durability of transactions.
+  * **Redo Log** records all changes made to the database. Its primary role is to support the durability of transactions.
   * It allows the database to cache dirty pages in memory and delay writing them to disk. If a crash occurs, the redo log is parsed to re-apply committed modifications that were not yet flushed to disk.
 
 ---
 
-### Q99. What are Vector Search Indexing algorithms? (HNSW vs. IVF)
-* **Asked by:** AI database roles
+### Q99. What is a Database Cursor? Explain its overhead and compare Forward-Only vs. Scrollable cursors.
+* **Asked by:** SQL Developer roles, Oracle/SQL Server interviews
 * **Answer:**
-  * **HNSW (Hierarchical Navigable Small World):** Builds a multi-layer graph where the top layers have sparse connections (for fast routing across the graph) and the bottom layers have dense connections (for precise nearest-neighbor search). Extremely fast, but high memory footprint.
-  * **IVF (Inverted File Index):** Uses clustering (K-Means) to partition the vector space into voronoi cells. The query only searches vectors in the closest centroids, saving memory at the expense of slight search accuracy.
+  * **Cursor** is a database object used to retrieve and process query result rows one-by-one sequentially, rather than in bulk (set-based processing).
+  * **Overhead:** Cursors are notoriously slow because they violate SQL's set-based design, forcing high row-by-row CPU context switching and maintaining locks on database resources for long periods.
+  * **Types:**
+    * **Forward-Only (Default):** Rows can only be read sequentially from the first row to the last row. Highly efficient compared to scrollable.
+    * **Scrollable:** Allows the developer to navigate backward, skip rows, or jump directly to specific row offsets. Requires keeping the result set in tempdb memory, creating high resource overhead.
 
 ---
 
-### Q100. What is replication lag, and what is its business impact?
-* **Asked by:** Netflix, Uber, Zepto
+### Q100. What is the difference between a B+ Tree index and a Hash index? When is a Hash index preferred?
+* **Asked by:** Meta, Google, Postgres internals
 * **Answer:**
-  * **Replication Lag** is the delay in propagating writes from the leader to follower nodes.
-  * **Business Impact:**
-    * A customer pays for an item, but the checkout screen redirects to a lagging read replica, showing the cart is still full, causing duplicate orders.
-    * A user changes their privacy settings, but a lagging replica exposes their private data to the public feed for several seconds.
-    * **Mitigation:** Enforce strong consistency reads (route checkout transactions strictly to the leader node).
+  * **B+ Tree Index:**
+    * Stores keys in a balanced tree structure where leaf nodes are sorted and linked.
+    * Supports range scans (`WHERE age BETWEEN 20 AND 30`), inequality searches (`<`, `>`), and prefix matches (`LIKE 'Rob%'`).
+    * *Complexity:* $O(\log N)$ lookup.
+  * **Hash Index:**
+    * Maps keys to data page locations using a hash function.
+    * Supports only exact equality checks (`WHERE id = 101`). Cannot perform range scans or sorting because hashing destroys sort order.
+    * *Complexity:* $O(1)$ constant time lookup.
+  * **When Preferred:** When the query workload is strictly exact equality checks and the database requires the fastest possible single-record retrieval (e.g., key-value lookups in caching engines or memory tables).
+
+

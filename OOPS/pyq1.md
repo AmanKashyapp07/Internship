@@ -1,6 +1,6 @@
 # Object-Oriented Programming (OOP) Master Interview Q&A — Part 1 (Q1–Q50) 🚀
 
-This document compiles the first 50 of the 100 most-asked theoretical and practical Object-Oriented Programming (OOP) and Design interview questions. These questions are tailored to the style of top-tier companies (Google, Meta, Microsoft, Amazon, Uber, Stripe, etc.), focusing on core pillars, memory management, compile-time/run-time polymorphism internals, SOLID principles, and design patterns.
+This document compiles the first 50 of the 100 most-asked theoretical and practical Object-Oriented Programming (OOP) and Design interview questions. These questions are tailored to the style of top-tier companies (Google, Meta, Microsoft, Amazon, Uber, Stripe, etc.), focusing on core pillars, memory management, compile-time/run-time polymorphism internals, and SOLID principles. Design patterns and LLD coding problems are excluded.
 
 ---
 
@@ -437,7 +437,7 @@ class Base { virtual ~Base(); }; // Correct
 
 ---
 
-## Section 6: Memory Management & OOP Design Patterns (Q37–Q50)
+## Section 6: Memory Management & Language Internals (Q37–Q50)
 
 ### Q37. What is Object Cloning? How does it work in Java?
 * **Asked by:** Java roles
@@ -469,71 +469,74 @@ class Base { virtual ~Base(); }; // Correct
 
 ---
 
-### Q40. Explain the Singleton Design Pattern and how to implement it safely.
-* **Asked by:** High frequency (Uber, Stripe, Amazon)
+### Q40. Explain the string pool (string interning) in Java. How does it optimize memory at the JVM level?
+* **Asked by:** Amazon, Adobe, Oracle
 * **Answer:**
-  * **Singleton:** Restricts a class to a **single instance** and provides a global access point.
-  * **Thread-Safe Implementation (Double-Checked Locking in C++):**
-```cpp
-class Singleton {
-private:
-    static Singleton* instance;
-    static std::mutex mtx;
-    Singleton() {} // Private constructor
-public:
-    static Singleton* getInstance() {
-        if (instance == nullptr) { // Check 1
-            std::lock_guard<std::mutex> lock(mtx);
-            if (instance == nullptr) { // Check 2
-                instance = new Singleton();
-            }
-        }
-        return instance;
-    }
-};
-```
+  * **String Pool:** A special storage region in the JVM heap memory. When a string literal is created (e.g., `String s = "hello"`), the JVM checks the pool first. If the string already exists, it returns a reference to the pooled instance; otherwise, it creates a new string in the pool.
+  * **Memory Optimization:** Prevents duplicate string objects from occupying duplicate heap addresses.
+  * **String Interning:** The method `s.intern()` can be called on a dynamically created string (e.g., via `new String("hello")`) to force the JVM to put it in the string pool and return the pool reference.
+  * **Immutability requirement:** This memory sharing is only safe because string objects in Java are immutable. If strings were mutable, changing the value of `s` would silently modify all other string variables referencing that pooled address.
 
 ---
 
-### Q41. Explain the Factory Design Pattern vs. Abstract Factory.
-* **Asked by:** Uber, Stripe, Netflix
+### Q41. What is the difference between Upcasting and Downcasting in OOP? What are the compile-time and runtime behaviors?
+* **Asked by:** Microsoft, Goldman Sachs
 * **Answer:**
-  * **Factory Method Pattern:** Defines an interface for creating a single object, deferring instantiation subclasses.
-    * *Example:* `PizzaFactory` creates `CheesePizza` or `VeggiePizza` based on an input string.
-  * **Abstract Factory Pattern:** Provides an interface for creating **families of related or dependent objects** without specifying their concrete classes.
-    * *Example:* `UIFactory` creates an entire theme (e.g., `MacButton` AND `MacCheckbox`, or `WindowsButton` AND `WindowsCheckbox`).
+  * **Upcasting:** Casting a subclass reference/pointer to a superclass type (e.g., `Parent* p = new Child()`).
+    * *Behavior:* Always safe and performed **implicitly** by the compiler. It promotes code generalizability (e.g., storing different shapes in a `List<Shape>`).
+  * **Downcasting:** Casting a superclass reference/pointer back to a subclass type (e.g., `Child* c = (Child*)p`).
+    * *Behavior:* Inherently unsafe because the compiler cannot guarantee at compile-time that the parent pointer actually points to that specific child type. Must be done **explicitly**.
+    * *Safety check:* In C++, we use `dynamic_cast<Child*>(p)` (which uses RTTI to check types at runtime and returns `nullptr` if invalid). In Java, we use `instanceof` before casting to avoid `ClassCastException`.
 
 ---
 
-### Q42. What is the Observer Design Pattern? Give a real-world example.
-* **Asked by:** Uber, Stripe, frontend roles
+### Q42. How does C++ handle member initialization order in a constructor initializer list? Why does the order of declaration in the class matter?
+* **Asked by:** Google, Bloomberg, Apple
 * **Answer:**
-  * **Observer Pattern:** Defines a one-to-many dependency. When one object (the Subject) changes state, all its dependents (Observers) are notified automatically.
-  * **Real-World Example:** Pub-Sub messaging queue systems, or Excel spreadsheets (when a cell value changes, the charts observing it update automatically).
+  * **Rule:** In C++, class members are initialized **in the order they are declared in the class definition**, not the order they appear in the constructor's initializer list.
+  * **Why it matters:** If member `B` is initialized using member `A` inside the initializer list, but `B` is declared *before* `A` in the class body, the compiler will initialize `B` first with garbage data before `A` is set, causing subtle bugs.
+  * **Example:**
+    ```cpp
+    class Widget {
+        int x; // Declared first
+        int y; // Declared second
+    public:
+        // x is initialized first (with 5), then y is initialized (with 5 * 2 = 10). Correct!
+        Widget(int val) : y(val * 2), x(val) {} 
+    };
+    ```
 
 ---
 
-### Q43. What is the Strategy Design Pattern?
-* **Asked by:** Uber, Stripe, Netflix
+### Q43. Explain constructor delegation in C++11 and Java. What is its primary use case?
+* **Asked by:** Adobe, Microsoft
 * **Answer:**
-  * **Strategy Pattern:** Defines a family of algorithms, encapsulates each one, and makes them interchangeable. It lets the algorithm vary independently of the clients that use it.
-  * **Use Case:** A checkout system where you can swap out the sorting algorithm (Credit Card vs. PayPal vs. Crypto) dynamically at runtime.
+  * **Constructor Delegation:** Allows a constructor to call another constructor of the same class to reuse initialization code, preventing code duplication.
+  * **Syntax:**
+    * **Java:** Uses `this(...)` and must be the very first statement in the constructor body.
+    * **C++11:** Uses the constructor initializer list: `Widget(int x) : Widget(x, 0) {}`
+  * **Rule:** A constructor cannot delegate to another constructor and initialize class members at the same time in the C++ initializer list; delegation must be the sole initializer action.
 
 ---
 
-### Q44. What is the Adapter Design Pattern?
-* **Asked by:** Uber, Stripe, Salesforce
+### Q44. What are strong, soft, weak, and phantom references in Java memory management? When is each type used?
+* **Asked by:** Google, Uber, Android developer roles
 * **Answer:**
-  * **Adapter Pattern:** Converts the interface of a class into another interface that the client expects, acting as a translator between incompatible classes.
-  * **Example:** Using a third-party billing library that expects XML inputs inside a modern system designed to use JSON. You build a `JsonToXmlAdapter` to sit in-between.
+  * **Strong Reference (Default):** (e.g., `Object obj = new Object()`). The GC will never collect this object as long as a strong reference exists, even if JVM runs out of memory (throws `OutOfMemoryError`).
+  * **Soft Reference:** (`SoftReference<T>`). GC only collects these objects if the JVM actively runs out of memory (useful for building memory-sensitive caches).
+  * **Weak Reference:** (`WeakReference<T>`). GC collects these objects on its next garbage collection cycle, regardless of JVM memory levels. Used to prevent memory leaks (e.g., `WeakHashMap`, observer lists).
+  * **Phantom Reference:** (`PhantomReference<T>`). Used to track when an object has been finalized and is about to be swept from memory, enabling custom post-mortem cleanups.
 
 ---
 
-### Q45. What is the Decorator Design Pattern?
-* **Asked by:** Stripe, Google, Walmart
+### Q45. How does Python resolve method inheritance paths in multiple inheritance? Explain Method Resolution Order (MRO) and C3 Linearization.
+* **Asked by:** Python backend roles, Django/Flask systems
 * **Answer:**
-  * **Decorator Pattern:** Attaches additional responsibilities to an object dynamically at runtime without modifying the class codebase, offering a flexible alternative to subclassing.
-  * **Example:** Coffee ordering system. Start with a base `SimpleCoffee` object, then wrap it with `MilkDecorator`, and wrap that with `SugarDecorator`.
+  * **MRO:** The order in which Python searches for a method or attribute in a class hierarchy when multiple inheritance is used.
+  * **Algorithm (C3 Linearization):** Python uses the C3 Linearization algorithm to construct a deterministic resolution order. It guarantees:
+    1. **Local Precedence Order:** Subclasses are checked before their parent classes.
+    2. **Monotonicity:** The relative order of parent classes is preserved across all subclasses.
+  * **Usage:** You can check a class's resolution order by calling `ClassName.__mro__` or `ClassName.mro()`.
 
 ---
 

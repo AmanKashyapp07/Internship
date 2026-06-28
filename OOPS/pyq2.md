@@ -411,11 +411,13 @@ This document compiles the remaining 50 of the 100 most-asked Object-Oriented Pr
 
 ---
 
-### Q91. What is the Active Object design pattern?
-* **Asked by:** Multi-threaded systems roles
+### Q91. What is the difference between Virtual Method invocation in C++ and Dynamic Method Dispatch in Java?
+* **Asked by:** Oracle, Google, systems dev roles
 * **Answer:**
-  * The **Active Object** pattern decouples method execution from method invocation.
-  * **How:** The client calls a method on a proxy. The proxy packages the call into a request object and places it in an activation queue. A scheduler thread reads from the queue and executes the task asynchronously. This prevents the client thread from blocking.
+  * **C++ (Vtables & Vptrs):** Done via the Virtual Table (vtable) mechanism. Every class with virtual functions gets a compiler-generated table of function pointers. Every object contains a pointer (`vptr`) to this table. Method resolution requires two pointer lookups at runtime: `obj -> vptr -> vtable -> function_pointer`.
+  * **Java (Dynamic Method Dispatch):** Resolved by the JVM using bytecode instructions like `invokevirtual` and `invokeinterface`.
+    * **Constant Pool:** Bytecode references methods by symbolic links in the constant pool.
+    * **Execution:** On the first execution, the JVM resolves the symbolic link to a direct reference (vtable index). Java vtables work similarly to C++ vtables, but the JVM maintains additional metadata tables to handle dynamic interface binding (`itable`) and class reloading.
 
 ---
 
@@ -459,21 +461,38 @@ This document compiles the remaining 50 of the 100 most-asked Object-Oriented Pr
   }
   ```
 
+### Q96. How do Default Methods and Static Methods in modern interfaces alter the traditional interface vs. abstract class distinction?
+* **Asked by:** Java (8+) roles, Android Engineers
+* **Answer:**
+  * **Traditional distinction:** Interfaces declared pure contracts (no implementation, no state), whereas abstract classes could declare both state and partial implementations.
+  * **Modern Interfaces (Java 8+ / C# 8+):** Now allow **default methods** (methods with bodies) and **static helper methods** directly in the interface.
+  * **Remaining distinctions:**
+    * **State (Variables):** Abstract classes can maintain instance variables (state). Interfaces can only declare public static final constants; they cannot hold instance state.
+    * **Multiple Inheritance:** A class can implement multiple interfaces containing default methods (resolving diamond conflicts using specific compiler rules), but can only extend one abstract class.
+    * **Constructors:** Abstract classes can have constructors; interfaces cannot.
+
 ---
 
-### Q96. What is the Object Pool Pattern? When is it used?
-* **Asked by:** Game systems (Rockstar, EA), High-Scale engines
+### Q97. Explain the `mutable` keyword in C++. How does it interact with const member functions?
+* **Asked by:** Core C++ roles, Google, Bloomberg
 * **Answer:**
-  * **Object Pool:** Maintains a set of initialized objects in memory. When needed, the client "borrows" an object, uses it, and returns it to the pool instead of destroying it.
-  * **When used:** When object instantiation overhead is extremely high (e.g., DB connections, threads, graphics particles) and garbage collection overhead from constant creation/destruction causes latency spikes.
-
----
-
-### Q97. Explain Double Dispatch (Visitor Pattern context).
-* **Asked by:** Google, Microsoft
-* **Answer:**
-  * Standard OOP languages support **Single Dispatch**: the method executed is determined by the runtime type of a single object (the caller).
-  * **Double Dispatch** resolves method calls based on the runtime types of **two objects** (the caller and the argument). It is implemented by using a double virtual call hook (e.g., caller calls `accept(visitor)`, which in turn calls `visitor->visit(this)`), ensuring both types are resolved dynamically.
+  * **`mutable`:** A keyword applied to non-static class data members. It allows the member to be modified even if it is part of a `const` object or modified within a `const` member function.
+  * **Use Case (Bitwise vs. Logical Constness):**
+    * **Bitwise Constness:** The object's memory is completely read-only.
+    * **Logical Constness:** The object appears constant to the public interface, but needs to modify internal helper state (e.g., caching, mutex locking, or access counter tracking).
+  * **Example:**
+    ```cpp
+    class Database {
+        mutable std::mutex mtx; // Needs to be locked/unlocked even in const queries
+        mutable int queryCount = 0;
+    public:
+        std::string queryData() const {
+            std::lock_guard<std::mutex> lock(mtx); // Mutex changes state, ok due to mutable
+            queryCount++; // Allowed even in const method
+            return "data";
+        }
+    };
+    ```
 
 ---
 

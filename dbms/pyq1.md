@@ -404,7 +404,7 @@ This document compiles the first 50 of the 100 most-asked theoretical and practi
 
 ---
 
-## Section 6: Recovery, Sharding & Distributed Systems (Q37–Q50)
+## Section 6: Transaction Recovery & Advanced Schema Design (Q37–Q50)
 
 ### Q37. What is Write-Ahead Logging (WAL)? How does it guarantee durability?
 * **Asked by:** Uber, Stripe, AWS
@@ -432,54 +432,63 @@ This document compiles the first 50 of the 100 most-asked theoretical and practi
 
 ---
 
-### Q40. What is database sharding? Compare Horizontal vs. Vertical Partitioning.
-* **Asked by:** Meta, Google, Uber, Zepto (System Design + DBMS)
+### Q40. What is a Database Trigger? Compare Row-level vs. Statement-level triggers and explain their performance implications.
+* **Asked by:** Oracle, Salesforce, Microsoft
 * **Answer:**
-  Sharding is a method of scaling databases horizontally by distributing data across multiple physical machines.
-  * **Horizontal Partitioning (Sharding):** Splitting rows of a single table across multiple databases based on a shard key (e.g., users 1–1M on Shard A, users 1M–2M on Shard B). Table schema remains identical.
-  * **Vertical Partitioning:** Splitting columns of a table into separate tables (e.g., putting large text/blob columns like `user_bio` in a separate database table to keep the core `User` table narrow and fast).
+  * A **Trigger** is a procedural database object that automatically executes in response to specific events (`INSERT`, `UPDATE`, `DELETE`) on a table.
+  * **Row-Level Trigger (FOR EACH ROW):** Fires once for *every individual row* modified by the transaction.
+    * *Use Case:* Enforcing data validation constraints or maintaining audit history logs per record.
+    * *Performance:* Slow for bulk operations (updating 100,000 rows executes the trigger code 100,000 times, causing high CPU/lock overhead).
+  * **Statement-Level Trigger:** Fires exactly *once per SQL statement*, regardless of how many rows are modified.
+    * *Use Case:* Verifying security permissions before a transaction begins, or logging statement execution events.
+    * *Performance:* Highly efficient since it runs once per operation.
 
 ---
 
-### Q41. What is Consistent Hashing? Why is it critical for distributed databases?
-* **Asked by:** Meta, Netflix, AWS, Cassandra teams
+### Q41. What is the difference between a Heap-Organized Table and an Index-Organized Table (Clustered Table)?
+* **Asked by:** Google, Microsoft, Oracle
 * **Answer:**
-  * In classic hashing (`shard = hash(key) % N`), adding or removing a shard machine ($N$) invalidates all mappings, requiring moving nearly $100\%$ of the data.
-  * **Consistent Hashing** maps both keys and servers to a circular ring. A key is assigned to the first server it encounters clockwise on the ring.
-  * **Benefit:** When a node is added or removed, only a small fraction of keys ($K/N$) must be remapped. This makes distributed databases (Cassandra, DynamoDB) horizontally scale with minimal data movement overhead.
+  * **Heap-Organized Table (Default in Postgres/Oracle):** Data rows are stored on disk in an unordered structure (a "heap"). Newly inserted rows are placed in any page with available space. The primary index pointer (RID) references the physical location on disk.
+  * **Index-Organized Table (IOT, default in MySQL InnoDB):** Data rows are stored physically sorted and organized inside the primary key's B+ Tree leaf nodes. The index *is* the table.
+  * **Trade-offs:**
+    * **IOT Pros:** Extremely fast primary key lookups and range scans (row data is co-located inside the index node, avoiding extra disk lookups).
+    * **IOT Cons:** Slower inserts/updates (triggers page splits and node relocations). Secondary indexes are larger and slower because they point to the primary key value rather than physical row IDs.
 
 ---
 
-### Q42. What are the challenges of distributed transactions? Explain 2-Phase Commit (2PC).
-* **Asked by:** Uber, Stripe, Meta
+### Q42. What is a Correlated Subquery? Compare it with a standard Nested Subquery.
+* **Asked by:** Amazon, Walmart, Adobe
 * **Answer:**
-  Managing transactions across multiple database servers requires a consensus protocol to ensure atomic commits.
-  * **2-Phase Commit (2PC):**
-    1. **Prepare Phase:** A coordinator asks all participant shards if they are ready to commit. Shards write changes to WAL and reply with "VOTE_COMMIT" or "VOTE_ABORT".
-    2. **Commit Phase:** If all shards voted commit, the coordinator sends a "GLOBAL_COMMIT" signal. Otherwise, it sends a "GLOBAL_ROLLBACK" to abort.
-  * **Drawback:** 2PC is a **blocking protocol**. If the coordinator fails mid-phase, shards are left holding locks indefinitely, hurting system throughput.
+  * **Standard Nested Subquery:** Independent of the outer query. It is executed once, returns a result set, and the outer query evaluates against that static set.
+  * **Correlated Subquery:** References one or more columns from the outer query. It is evaluated **iteratively once for every candidate row** processed by the outer query.
+  * **Performance:**
+    * Standard subqueries can be optimized easily by the database using cache lookups.
+    * Correlated subqueries have $O(N)$ execution complexity, which can severely degrade performance on large tables unless the query compiler can rewrite (decorrelate) the query into a Join operation.
 
 ---
 
-### Q43. What is the CAP Theorem?
-* **Asked by:** Meta, Stripe, Netflix (System Design)
+### Q43. Compare Primary Key and Unique Key constraints. How are NULL values handled in both?
+* **Asked by:** Uber, Stripe, Goldman Sachs
 * **Answer:**
-  In a distributed data store, you can only guarantee at most two out of the three properties:
-  1. **Consistency (C):** Every read receives the most recent write or an error.
-  2. **Availability (A):** Every non-failing node returns a non-error response.
-  3. **Partition Tolerance (P):** The system continues to operate despite network partitions/failures.
-  * **Real-world constraint:** Network partitions are inevitable ($P$ is mandatory). Thus, distributed systems must choose between being **CP** (Consistent but Unavailable under partition) or **AP** (Available but Temporarily Inconsistent).
+  * **Primary Key:**
+    * Uniquely identifies each row in a table.
+    * Automatically enforces a `NOT NULL` constraint (no column in the primary key can contain `NULL`).
+    * A table can have at most **one** primary key.
+  * **Unique Key:**
+    * Enforces uniqueness across a column or group of columns.
+    * **Allows NULL values** (except in SQL Server, which only allows one NULL). In databases like PostgreSQL and MySQL, multiple rows can contain `NULL` in a unique column because `NULL != NULL` in SQL logic, so duplicate NULLs do not violate the constraint.
+    * A table can have **multiple** unique key constraints.
 
 ---
 
-### Q44. Compare ACID vs. BASE transaction models.
-* **Asked by:** Uber, Amazon, NoSQL projects
+### Q44. What is a Self-Referential Foreign Key? Explain how it is used to design hierarchical schemas.
+* **Asked by:** Meta, Stripe, Netflix
 * **Answer:**
-  * **ACID (SQL/RDBMS):** Focuses on strict consistency. Data is guaranteed to be correct and isolated at all times. Best for financial ledgers and order tables.
-  * **BASE (NoSQL/Distributed):** Focuses on availability and scaling.
-    * **B**asically **A**vailable (reads/writes are fast and always respond)
-    * **S**oft state (data can change without user interaction due to background syncs)
-    * **E**ventual consistency (replicas will synchronize and align given time). Best for social feeds, chat logs.
+  * A **Self-Referential Foreign Key** is a column in a table that references the primary key of the **same table**.
+  * **Use Case:** Representing recursive or hierarchical relationships (e.g., employee-manager structures, category-subcategory trees).
+  * **Example:**
+    `Employee(id INT PRIMARY KEY, name VARCHAR, manager_id INT FOREIGN KEY REFERENCES Employee(id))`
+    Here, the `manager_id` column contains values matching other valid employee `id`s, allowing traversal up and down the organizational hierarchy.
 
 ---
 

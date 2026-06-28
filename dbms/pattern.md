@@ -2,7 +2,7 @@
 
 In interviews for data and backend engineering roles at top-tier tech companies (like Meta, Amazon, Google, Uber, Stripe, Netflix, and Zepto), the focus shifts away from basic `SELECT` and `JOIN` statements. Interviewers want to see how you handle real-world business analytics, complex edge cases, and massive datasets.
 
-This document compiles the **8 core architectural patterns** that cover almost all top-tier SQL questions, complete with explanations, interview scenarios, code templates, and high-value performance tips.
+This document compiles the **8 core architectural patterns** that cover almost all top-tier SQL questions, complete with explanations, interview scenarios, code templates, step-by-step CTE execution visualizations, and high-value performance tips.
 
 ---
 
@@ -34,6 +34,32 @@ SELECT Department, Employee, Salary
 FROM RankedEmployees
 WHERE RankNum <= 3;
 ```
+
+### 🔍 CTE Execution Visualization
+
+#### Input Data (Joined Employee & Department)
+| Department | Employee | Salary |
+| :--- | :--- | :--- |
+| Sales | Alice | 90000 |
+| Sales | Bob | 90000 |
+| Sales | Charlie | 80000 |
+| Sales | David | 70000 |
+| Engineering | Eve | 120000 |
+| Engineering | Frank | 110000 |
+
+#### Step 1: `RankedEmployees` CTE Output
+`DENSE_RANK()` creates ranks within each department partition:
+| Department | Employee | Salary | RankNum | Note |
+| :--- | :--- | :--- | :--- | :--- |
+| Sales | Alice | 90000 | **1** | Top earner (tied) |
+| Sales | Bob | 90000 | **1** | Top earner (tied) |
+| Sales | Charlie | 80000 | **2** | 2nd highest salary |
+| Sales | David | 70000 | **3** | 3rd highest salary |
+| Engineering | Eve | 120000 | **1** | Top earner |
+| Engineering | Frank | 110000 | **2** | 2nd highest salary |
+
+#### Step 2: Outer Query Filtering (`WHERE RankNum <= 3`)
+Filters out rows where rank is greater than 3. In this example, all 6 rows are returned because they all rank $\le 3$. (If there were a 4th-ranked sales employee, they would be filtered out).
 
 ---
 
@@ -68,8 +94,6 @@ GroupedDates AS (
         login_date,
         -- PostgreSQL/standard SQL date arithmetic:
         login_date - INTERVAL '1 day' * ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY login_date) AS streak_group
-        -- Dialect variation (MySQL): 
-        -- DATE_SUB(login_date, INTERVAL ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY login_date) DAY) AS streak_group
     FROM DistinctLogins
 )
 -- Step 3: Count how many times a user appears in the same streak group
@@ -83,6 +107,33 @@ GROUP BY user_id, streak_group
 HAVING COUNT(login_date) >= 3;
 ```
 
+### 🔍 CTE Execution Visualization
+
+#### Step 1: `DistinctLogins` CTE Output
+Ensures a user has at most one record per calendar date:
+| user_id | login_date |
+| :--- | :--- |
+| 1 | 2026-06-01 |
+| 1 | 2026-06-02 |
+| 1 | 2026-06-03 |
+| 1 | 2026-06-05 |
+| 1 | 2026-06-06 |
+
+#### Step 2: `GroupedDates` CTE Output
+Generates sequential row numbers (`rn`) per user and subtracts them from the date to identify "islands":
+| user_id | login_date | rn | login_date - rn days (`streak_group`) | Note |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | 2026-06-01 | 1 | **2026-05-31** | Island A (Day 1) |
+| 1 | 2026-06-02 | 2 | **2026-05-31** | Island A (Day 2) |
+| 1 | 2026-06-03 | 3 | **2026-05-31** | Island A (Day 3) |
+| 1 | 2026-06-05 | 4 | **2026-06-01** | Island B (Day 1) |
+| 1 | 2026-06-06 | 5 | **2026-06-01** | Island B (Day 2) |
+
+#### Step 3: Final Aggregation & Filtering (`HAVING COUNT(*) >= 3`)
+Groups by `user_id` and `streak_group`:
+* **Group 2026-05-31:** count is **3** (Streak from `2026-06-01` to `2026-06-03`) $\rightarrow$ **Kept**
+* **Group 2026-06-01:** count is **2** (Streak from `2026-06-05` to `2026-06-06`) $\rightarrow$ **Discarded**
+
 ---
 
 ## 3. User Retention & Next Event Analysis (Time Deltas) 📈
@@ -92,7 +143,7 @@ Calculating how fast users churn, customer lifetime patterns, or how quickly the
 > **Common Question (Amazon/Netflix):** *Find the IDs of users who made a second purchase within 7 days of their first purchase.*
 
 ### Why they ask it
-To see if you know how to compare a row to previous/future rows using `LAG()`, `LEAD()`, or Self-Joins.
+To see if you know how to compare a row to previous/future rows using `LAG()` or `LEAD()`. Using these functions avoids costly self-joins, scanning the table only once.
 
 ### Code Implementation
 ```sql
@@ -100,32 +151,45 @@ WITH RankedPurchases AS (
     SELECT 
         user_id, 
         purchase_date,
-        ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY purchase_date ASC) as purchase_order
+        -- Fetch the date of the very next purchase
+        LEAD(purchase_date) OVER(PARTITION BY user_id ORDER BY purchase_date ASC) as next_purchase_date,
+        -- Identify the first purchase (rn = 1)
+        ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY purchase_date ASC) as rn
     FROM purchases
 )
--- Join the 1st purchase with the 2nd purchase for the same user
-SELECT p1.user_id
-FROM RankedPurchases p1
-JOIN RankedPurchases p2 
-  ON p1.user_id = p2.user_id AND p2.purchase_order = 2
-WHERE p1.purchase_order = 1 
-  -- Handle date differences (syntax depends on dialect; DATEDIFF works in MySQL/SQL Server)
-  -- PostgreSQL: p2.purchase_date - p1.purchase_date <= 7
-  AND DATEDIFF(p2.purchase_date, p1.purchase_date) <= 7;
+SELECT user_id
+FROM RankedPurchases
+WHERE rn = 1 
+  -- Compare first purchase date to the second purchase date (next_purchase_date)
+  -- PostgreSQL: next_purchase_date - purchase_date <= 7
+  AND DATEDIFF(next_purchase_date, purchase_date) <= 7;
 ```
 
-> [!TIP]
-> **Alternative (LAG/LEAD Method):** If the interviewer asks to find *any* consecutive purchases within 7 days (not just the 1st and 2nd), use `LAG()`:
-> ```sql
-> WITH SalesDelta AS (
->     SELECT user_id, purchase_date,
->            LAG(purchase_date) OVER (PARTITION BY user_id ORDER BY purchase_date) as prev_purchase
->     FROM purchases
-> )
-> SELECT DISTINCT user_id 
-> FROM SalesDelta 
-> WHERE DATEDIFF(purchase_date, prev_purchase) <= 7;
-> ```
+### 🔍 CTE Execution Visualization
+
+#### Input Data (Raw Purchases)
+| user_id | purchase_date |
+| :--- | :--- |
+| 101 | 2026-06-01 |
+| 101 | 2026-06-05 |
+| 101 | 2026-06-20 |
+| 102 | 2026-06-10 |
+| 102 | 2026-06-25 |
+
+#### Step 1: `RankedPurchases` CTE Output
+`LEAD()` retrieves the next purchase date, and `ROW_NUMBER()` identifies the sequence:
+| user_id | purchase_date | next_purchase_date | rn | Note |
+| :--- | :--- | :--- | :--- | :--- |
+| 101 | 2026-06-01 | **2026-06-05** | **1** | First purchase (next is 2nd purchase) |
+| 101 | 2026-06-05 | 2026-06-20 | 2 | Second purchase |
+| 101 | 2026-06-20 | NULL | 3 | Last purchase (no next purchase) |
+| 102 | 2026-06-10 | **2026-06-25** | **1** | First purchase (next is 2nd purchase) |
+| 102 | 2026-06-25 | NULL | 2 | Last purchase |
+
+#### Step 2: Outer Query Filtering (`WHERE rn = 1 AND DATEDIFF(...) <= 7`)
+Evaluates only the first purchase rows (`rn = 1`):
+* **User 101:** `purchase_date = '2026-06-01'`, `next_purchase_date = '2026-06-05'`. Delta is **4 days** ($\le 7$) $\rightarrow$ **Kept**
+* **User 102:** `purchase_date = '2026-06-10'`, `next_purchase_date = '2026-06-25'`. Delta is **15 days** ($> 7$) $\rightarrow$ **Filtered Out**
 
 ---
 
@@ -153,6 +217,27 @@ FROM AdEvents
 WHERE EXTRACT(YEAR FROM event_timestamp) = 2026
 GROUP BY campaign_id;
 ```
+
+### 🔍 Execution Visualization
+
+#### Input Data (Raw AdEvents)
+| campaign_id | event_type |
+| :--- | :--- |
+| A | 'impression' |
+| A | 'impression' |
+| A | 'click' |
+| B | 'impression' |
+
+#### Grouping Step
+For each campaign, rows are evaluated by the `CASE WHEN` statements:
+* **Campaign A:** 
+  * Clicks = `CASE WHEN event_type = 'click' THEN 1.0 ELSE 0.0 END` $\rightarrow$ Sum: **1.0**
+  * Impressions = `CASE WHEN event_type = 'impression' THEN 1.0 ELSE 0.0 END` $\rightarrow$ Sum: **2.0**
+  * Ratio = $1.0 / 2.0 \times 100 = 50.00\%$
+* **Campaign B:** 
+  * Clicks = Sum: **0.0**
+  * Impressions = Sum: **1.0**
+  * Ratio = $0.0 / 1.0 \times 100 = 0.00\%$
 
 ---
 
@@ -186,8 +271,22 @@ SELECT
 FROM MonthlyRevenue;
 ```
 
-> [!IMPORTANT]
-> Be sure to distinguish between `ROWS` (evaluates exactly physical rows offset) and `RANGE` (evaluates values/dates offset). In interviews, aggregating to the time unit first (like the CTE above) makes `ROWS` safe and highly performant.
+### 🔍 CTE Execution Visualization
+
+#### Step 1: `MonthlyRevenue` CTE Output
+Collapses raw transaction lines to get monthly totals:
+| transaction_month | total_revenue |
+| :--- | :--- |
+| 2026-01-01 | 300 |
+| 2026-02-01 | 150 |
+| 2026-03-01 | 300 |
+| 2026-04-01 | 600 |
+
+#### Step 2: Outer Query Window Frame Processing (`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`)
+* **Month 2026-01-01:** No preceding rows. Frame: [300]. Avg: $300 / 1 =$ **300.00**
+* **Month 2026-02-01:** One preceding row. Frame: [300, 150]. Avg: $(300 + 150) / 2 =$ **225.00**
+* **Month 2026-03-01:** Two preceding rows. Frame: [300, 150, 300]. Avg: $(300 + 150 + 300) / 3 =$ **250.00**
+* **Month 2026-04-01:** Two preceding rows. Frame: [150, 300, 600]. Avg: $(150 + 300 + 600) / 3 =$ **350.00**
 
 ---
 
@@ -240,6 +339,47 @@ SELECT
 FROM SessionGroups
 GROUP BY user_id;
 ```
+
+### 🔍 CTE Execution Visualization
+
+#### Input Data (User Logins)
+| user_id | login_date |
+| :--- | :--- |
+| 1 | 10:00:00 |
+| 1 | 10:15:00 |
+| 1 | 10:20:00 |
+| 1 | 11:00:00 |
+| 1 | 11:10:00 |
+
+#### Step 1: `TimeDifferences` CTE Output
+Pulls previous timestamps using `LAG()`:
+| user_id | login_date | prev_login |
+| :--- | :--- | :--- |
+| 1 | 10:00:00 | NULL |
+| 1 | 10:15:00 | 10:00:00 |
+| 1 | 10:20:00 | 10:15:00 |
+| 1 | 11:00:00 | 10:20:00 |
+| 1 | 11:10:00 | 11:00:00 |
+
+#### Step 2: `SessionFlags` CTE Output
+Flags the beginning of new sessions (gap $>30$ mins):
+| user_id | login_date | prev_login | Time Gap | `is_new_session` | Note |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 10:00:00 | NULL | - | **1** | First row starts Session 1 |
+| 1 | 10:15:00 | 10:00:00 | 15 mins | **0** | Within Session 1 |
+| 1 | 10:20:00 | 10:15:00 | 5 mins | **0** | Within Session 1 |
+| 1 | 11:00:00 | 10:20:00 | 40 mins | **1** | Gap $>30$ mins, starts Session 2 |
+| 1 | 11:10:00 | 11:00:00 | 10 mins | **0** | Within Session 2 |
+
+#### Step 3: `SessionGroups` CTE Output
+Running sum of flags assigns unique group IDs to rows:
+| user_id | login_date | `is_new_session` | Cumulative sum (`session_id`) |
+| :--- | :--- | :--- | :--- |
+| 1 | 10:00:00 | 1 | **1** |
+| 1 | 10:15:00 | 0 | **1** |
+| 1 | 10:20:00 | 0 | **1** |
+| 1 | 11:00:00 | 1 | **2** |
+| 1 | 11:10:00 | 0 | **2** |
 
 ---
 
