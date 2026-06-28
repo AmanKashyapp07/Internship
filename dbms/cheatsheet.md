@@ -62,45 +62,9 @@ WHERE o.order_date > '2026-01-01'; -- filter forces non-null check
 
 ---
 
-## 3. Window Functions: The Game Changer 🏆
+## 3. Window Functions 🏆
 
-Window functions perform calculations across a set of table rows that are related to the current row, without collapsing them into a single row.
-
-**Template:** `<function> OVER (PARTITION BY <cols> ORDER BY <cols> [ROWS/RANGE <frame>])`
-
-### Ranking Functions Compared
-For rows with values: `100, 100, 200, 300`
-
-* **`ROW_NUMBER()`**: Generates consecutive integers.
-  * Result: `1, 2, 3, 4`
-* **`RANK()`**: Assigns ranks with gaps for duplicates.
-  * Result: `1, 1, 3, 4`
-* **`DENSE_RANK()`**: Assigns ranks without gaps.
-  * Result: `1, 1, 2, 3`
-
-```sql
-SELECT 
-    name, department, salary,
-    ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as row_num,
-    RANK()       OVER (PARTITION BY department ORDER BY salary DESC) as rnk,
-    DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) as dense_rnk
-FROM Employee;
-```
-
-### Value & Analytical Functions
-* **`LAG(col, offset)`**: Accesses data from a previous row.
-* **`LEAD(col, offset)`**: Accesses data from a subsequent row.
-* **`FIRST_VALUE(col)`**: Returns the first value in the window frame.
-* **`LAST_VALUE(col)`**: Returns the last value in the window frame.
-
-### Cumulative Aggregations (Running Total)
-Using an explicit or implicit window frame:
-```sql
-SELECT 
-    sale_date, amount,
-    SUM(amount) OVER (ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as running_total
-FROM Sales;
-```
+Refer to the dedicated guide [window.md](file:///Users/amankashyap/Documents/internship/DBMS/window.md) for a comprehensive, deep-dive breakdown of Window Functions, including ranking variations, value/analytical access, running aggregates, frame specifications (`ROWS` vs `RANGE`), and advanced interview recipes.
 
 ---
 
@@ -322,75 +286,7 @@ If the interviewer asks: *"How would you optimize this query?"* run through this
 
 ---
 
-## 8. Window Frame Clauses: ROWS vs RANGE 🪟
-
-The frame clause controls which rows are included in the window relative to the current row.
-
-**Syntax:** `ROWS|RANGE BETWEEN <start> AND <end>`
-
-| Keyword | Meaning |
-| :--- | :--- |
-| `UNBOUNDED PRECEDING` | Start from the very first row of the partition |
-| `CURRENT ROW` | The current row being evaluated |
-| `UNBOUNDED FOLLOWING` | Extend to the very last row of the partition |
-| `N PRECEDING` | N rows before the current row |
-| `N FOLLOWING` | N rows after the current row |
-
-**`ROWS` vs `RANGE` — the critical difference:**
-* **`ROWS`**: Counts physical rows (by offset). Exact and predictable.
-* **`RANGE`**: Groups rows with the same `ORDER BY` value into the same frame range. Can pull in more rows than expected when there are ties.
-
-```sql
--- 3-day moving average (always exactly 3 physical rows)
-AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
-
--- Running total up to and including all rows with same date as current (range-based)
-SUM(amount) OVER (ORDER BY sale_date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
-```
-
-> ⚠️ **Interview Tip:** When interviewers ask about moving averages, always use `ROWS BETWEEN` — not `RANGE` — to avoid unintended tie-grouping behavior.
-
----
-
-## 9. Extended Window Functions 📊
-
-### NTILE — Distributing Rows into Buckets
-Divides rows in a partition into `N` ranked groups (buckets). Useful for quartiles, deciles, percentile bands.
-```sql
--- Group employees into 4 salary quartiles per department
-SELECT name, salary,
-    NTILE(4) OVER (PARTITION BY department ORDER BY salary DESC) AS salary_quartile
-FROM Employee;
-```
-
-### PERCENT_RANK — Relative Standing
-Returns the relative rank of a row as a value between `0` and `1`. The lowest row is `0.0`, highest is `1.0`.
-```sql
--- What percentage of employees earn less than this employee (within department)?
-SELECT name, salary,
-    ROUND(PERCENT_RANK() OVER (PARTITION BY department ORDER BY salary), 2) AS pct_rank
-FROM Employee;
-```
-
-### CUME_DIST — Cumulative Distribution
-Returns the fraction of rows that have a value **≤ current row's value**. Unlike `PERCENT_RANK`, the maximum is always `1.0`.
-```sql
-SELECT name, salary,
-    ROUND(CUME_DIST() OVER (ORDER BY salary), 2) AS cumulative_dist
-FROM Employee;
-```
-
-**Quick Comparison:**
-
-| Function | Range | Interpretation |
-| :--- | :--- | :--- |
-| `PERCENT_RANK()` | `[0.0, 1.0]` | Fraction of rows *strictly below* current row |
-| `CUME_DIST()` | `(0.0, 1.0]` | Fraction of rows *≤* current row |
-| `NTILE(N)` | `[1, N]` | Bucket number; rows evenly split into N groups |
-
----
-
-## 10. Set Operators: UNION, INTERSECT, EXCEPT 🔗
+## 8. Set Operators: UNION, INTERSECT, EXCEPT 🔗
 
 Combine results from two or more `SELECT` queries. Both queries must return the same number of columns with compatible data types.
 
@@ -422,7 +318,7 @@ SELECT customer_id FROM Orders;
 
 ---
 
-## 11. CASE WHEN — Conditional Aggregation (Pivot Pattern) 🎛️
+## 9. CASE WHEN — Conditional Aggregation (Pivot Pattern) 🎛️
 
 `CASE WHEN` inside aggregate functions is the standard SQL technique to compute conditional metrics (CTR, approval rates, quarterly pivots) without subqueries.
 
@@ -456,7 +352,7 @@ GROUP BY customer_id;
 
 ---
 
-## 12. GROUP BY Extensions: ROLLUP, CUBE, GROUPING SETS 📦
+## 10. GROUP BY Extensions: ROLLUP, CUBE, GROUPING SETS 📦
 
 These extensions compute multiple levels of aggregation in a single query, replacing the need for multiple `UNION ALL` blocks.
 
@@ -494,7 +390,7 @@ GROUP BY GROUPING SETS(
 
 ---
 
-## 13. Essential Date & String Functions 📅
+## 11. Essential Date & String Functions 📅
 
 ### Date Functions (PostgreSQL syntax — most standard)
 
@@ -541,7 +437,7 @@ SELECT * FROM Employee WHERE name ILIKE '%john%';
 
 ---
 
-## 14. Correlated Subqueries vs IN / ANY / ALL 🔄
+## 12. Correlated Subqueries vs IN / ANY / ALL 🔄
 
 ### Correlated Subquery
 A subquery that references a column from the **outer query**. It executes once per row of the outer query (O(N) subquery executions). Useful but can be slow on large tables.
@@ -576,7 +472,7 @@ WHERE salary > ALL (SELECT salary FROM Employee WHERE department = 'Engineering'
 
 ---
 
-## 15. TRUNCATE vs DELETE vs DROP 🗑️
+## 13. TRUNCATE vs DELETE vs DROP 🗑️
 
 A very common interview question that tests precision on SQL DDL vs DML distinctions.
 
