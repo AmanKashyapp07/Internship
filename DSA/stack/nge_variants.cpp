@@ -47,15 +47,15 @@ using vi = vector<int>;
 vi nextGreaterElement(const vi& nums) {
     int n = nums.size();
     vi result(n, -1); // Default: no greater element found
-    stack<int> stk;   // Monotonic decreasing stack of indices
+    stack<int> s;   // Monotonic decreasing stack of indices
 
     for (int i = 0; i < n; i++) {
         // Current element breaks the decreasing order: it's the NGE for all smaller tops
-        while (!stk.empty() && nums[i] > nums[stk.top()]) {
-            result[stk.top()] = nums[i];
-            stk.pop();
+        while (!s.empty() && nums[i] > nums[s.top()]) {
+            result[s.top()] = nums[i];
+            s.pop();
         }
-        stk.push(i);
+        s.push(i);
     }
     // Remaining elements in stack have no NGE (already initialized to -1)
     return result;
@@ -75,14 +75,14 @@ vi nextGreaterElement(const vi& nums) {
 vi nextSmallerElement(const vi& nums) {
     int n = nums.size();
     vi result(n, -1);
-    stack<int> stk; // Monotonic increasing stack of indices
+    stack<int> s; // Monotonic increasing stack of indices
 
     for (int i = 0; i < n; i++) {
-        while (!stk.empty() && nums[i] < nums[stk.top()]) {
-            result[stk.top()] = nums[i];
-            stk.pop();
+        while (!s.empty() && nums[i] < nums[s.top()]) {
+            result[s.top()] = nums[i];
+            s.pop();
         }
-        stk.push(i);
+        s.push(i);
     }
     return result;
 }
@@ -105,18 +105,18 @@ vi nextSmallerElement(const vi& nums) {
 vi previousGreaterElement(const vi& nums) {
     int n = nums.size();
     vi result(n, -1);
-    stack<int> stk; // Monotonic decreasing stack of indices
+    stack<int> s; // Monotonic decreasing stack of indices
 
     for (int i = 0; i < n; i++) {
         // Pop elements that are <= current (they can never be PGE for future elements either)
-        while (!stk.empty() && nums[stk.top()] <= nums[i]) {
-            stk.pop();
+        while (!s.empty() && nums[s.top()] <= nums[i]) {
+            s.pop();
         }
         // The remaining top (if any) is the PGE for i
-        if (!stk.empty()) {
-            result[i] = nums[stk.top()];
+        if (!s.empty()) {
+            result[i] = nums[s.top()];
         }
-        stk.push(i);
+        s.push(i);
     }
     return result;
 }
@@ -125,15 +125,15 @@ vi previousGreaterElement(const vi& nums) {
 vi stockSpan(const vi& prices) {
     int n = prices.size();
     vi span(n, 1);
-    stack<int> stk; // Stores indices of previous elements with no solution yet
+    stack<int> s; // Stores indices of previous elements with no solution yet
 
     for (int i = 0; i < n; i++) {
-        while (!stk.empty() && prices[stk.top()] <= prices[i]) {
-            stk.pop();
+        while (!s.empty() && prices[s.top()] <= prices[i]) {
+            s.pop();
         }
         // If stack is empty, all previous elements are <= prices[i]
-        span[i] = stk.empty() ? (i + 1) : (i - stk.top());
-        stk.push(i);
+        span[i] = s.empty() ? (i + 1) : (i - s.top());
+        s.push(i);
     }
     return span;
 }
@@ -150,16 +150,16 @@ vi stockSpan(const vi& prices) {
 vi previousSmallerElement(const vi& nums) {
     int n = nums.size();
     vi result(n, -1);
-    stack<int> stk; // Monotonic increasing stack of indices
+    stack<int> s; // Monotonic increasing stack of indices
 
     for (int i = 0; i < n; i++) {
-        while (!stk.empty() && nums[stk.top()] >= nums[i]) {
-            stk.pop();
+        while (!s.empty() && nums[s.top()] >= nums[i]) {
+            s.pop();
         }
-        if (!stk.empty()) {
-            result[i] = nums[stk.top()];
+        if (!s.empty()) {
+            result[i] = nums[s.top()];
         }
-        stk.push(i);
+        s.push(i);
     }
     return result;
 }
@@ -179,17 +179,17 @@ vi previousSmallerElement(const vi& nums) {
 vi nextGreaterCircular(const vi& nums) {
     int n = nums.size();
     vi result(n, -1);
-    stack<int> stk;
+    stack<int> s;
 
     // Loop twice to simulate circular behavior
     for (int i = 0; i < 2 * n; i++) {
         int cur = nums[i % n];
-        while (!stk.empty() && cur > nums[stk.top()]) {
-            result[stk.top()] = cur;
-            stk.pop();
+        while (!s.empty() && cur > nums[s.top()]) {
+            result[s.top()] = cur;
+            s.pop();
         }
         // Only push actual indices (first pass)
-        if (i < n) stk.push(i);
+        if (i < n) s.push(i);
     }
     return result;
 }

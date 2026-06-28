@@ -5,7 +5,7 @@ public:
 
         vector<int> ans(n + 1, INT_MIN);
         stack<int> st;
-
+        // strictly increasing monotonic stack by value.
         for (int i = 0; i <= n; i++) {
 
             while (!st.empty() &&
@@ -16,12 +16,14 @@ public:
                 int left = st.empty() ? -1 : st.top();
                 int right = i;
 
-                int len = right - left - 1;
-
+                int len = right - left - 1; // exlusive boundary
+                // mid will be the minimum of the subarray from left+1 to right-1, which has length len
                 ans[len] = max(ans[len], arr[mid]);
             }
 
-            st.push(i);
+            if (i < n) {
+                st.push(i);
+            }
         }
 
         // suffix maximum
@@ -38,5 +40,23 @@ public:
     }
 };
 
-// when you want previous smaller element, you need to use >= because we want to pop the elements which are greater than or equal to the current element, so that we can find the previous smaller element for the current element, if we use >, then we will not pop the elements which are equal to the current element, and we will not be able to find the previous smaller element for the current element, so we need to use >=
-                // use >= when you want previous smaller element, use > when you want previous smaller or equal element, use < when you want next smaller element, use <= when you want next smaller or equal element
+// Monotonic Stack Cheat Sheet
+//
+// Pop While | Stack Order      | Previous          | Next
+// ----------|------------------|-------------------|-------------------
+// >=        | Strictly Inc (<) | Previous Smaller  | Next Smaller/Equal
+// >         | Non-decreasing   | Previous <=       | Next Smaller
+// <=        | Strictly Dec (>) | Previous Greater  | Next Greater/Equal
+// <         | Non-increasing   | Previous >=       | Next Greater
+
+// Pop equal (=) if you want STRICT previous.
+// Keep equal if you want NON-STRICT previous.
+
+// Previous Smaller      -> >=
+// Previous Greater      -> <=
+
+//>=  -> remove duplicates
+//      Stack becomes strictly increasing
+
+//>   -> keep duplicates
+//      Stack becomes non-decreasing

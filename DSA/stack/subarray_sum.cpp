@@ -61,23 +61,23 @@ ll sumSubarrayMins(const vi& arr) {
 
     // Sentinel value: process remaining stack at the end with i = n
     for (int i = 0; i <= n; i++) {
-        int curVal = (i == n) ? INT_MIN : arr[i];
 
-        while (!stk.empty() && arr[stk.top()] >= curVal) {
+        while (!stk.empty() && (i==n || arr[stk.top()] >= arr[i])) { // if using >=, left boundary becomes strictly smaller, right boundary becomes smaller or equal
             int j = stk.top();
             stk.pop();
 
-            // PSE index (strictly smaller on the left)
+            // PSE index (strictly smaller on the left), that's why left is stk.top(), not stk.top() + 1
             int left = stk.empty() ? -1 : stk.top();
-            // NSE index (smaller or equal on the right) = i
+            // NSE index (smaller or equal on the right) = i, that's why right is i, not i - 1
             int right = i;
+            // keep in mind, both boundaries are exclusive, so the number of subarrays where arr[j] is the minimum is (j - left) * (right - j)
 
             ll leftCount = j - left;   // Subarrays starting between (left, j]
             ll rightCount = right - j; // Subarrays ending between [j, right)
 
-            total = (total + (ll)arr[j] % MOD * leftCount % MOD * rightCount) % MOD;
+            total = (total + (ll)arr[j] % MOD * leftCount % MOD * rightCount) % MOD; // (ll) cast to avoid overflow, use this always in OAs 
         }
-        stk.push(i);
+        if(i < n) stk.push(i); // Push current index onto stack
     }
     return total;
 }
@@ -99,22 +99,21 @@ ll sumSubarrayMaxs(const vi& arr) {
     ll total = 0;
 
     for (int i = 0; i <= n; i++) {
-        int curVal = (i == n) ? INT_MAX : arr[i];
 
-        while (!stk.empty() && arr[stk.top()] <= curVal) {
+        while (!stk.empty() && (i==n || arr[stk.top()] <= arr[i])) { // if using <=, left boundary becomes strictly greater, right boundary becomes greater or equal
             int j = stk.top();
             stk.pop();
 
             // PGE index (greater or equal on left, use >= for tie breaking)
             int left = stk.empty() ? -1 : stk.top();
             int right = i;
-
+            // keep in mind, both boundaries are exclusive, so the number of subarrays where arr[j] is the maximum is (j - left) * (right - j)
             ll leftCount = j - left;
             ll rightCount = right - j;
 
             total = (total + (ll)arr[j] % MOD * leftCount % MOD * rightCount) % MOD;
         }
-        stk.push(i);
+        if(i < n) stk.push(i);
     }
     return total;
 }
@@ -146,9 +145,8 @@ ll sumSubarrayMinsLengthAtLeast2(const vi& arr) {
     ll total = 0;
 
     for (int i = 0; i <= n; i++) {
-        int curVal = (i == n) ? INT_MIN : arr[i];
 
-        while (!stk.empty() && arr[stk.top()] >= curVal) {
+        while (!stk.empty() && (i==n || arr[stk.top()] >= arr[i])) {
             int j = stk.top();
             stk.pop();
 
@@ -166,7 +164,7 @@ ll sumSubarrayMinsLengthAtLeast2(const vi& arr) {
 
             total = (total + (ll)arr[j] % MOD * validCount) % MOD;
         }
-        stk.push(i);
+        if(i < n) stk.push(i);
     }
     return (total + MOD) % MOD;
 }

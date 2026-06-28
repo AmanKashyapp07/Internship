@@ -28,110 +28,39 @@ using vi = vector<int>;
 // Idea:
 // - Water trapped above position i = min(maxLeft[i], maxRight[i]) - height[i]
 // - Two pointer: track maxLeft and maxRight as we move inward.
-// - If maxLeft <= maxRight, the water at `left` is determined by maxLeft (move left++).
-// - Else, the water at `right` is determined by maxRight (move right--).
+// - If maxLeft <= maxRight, the water at `i` is determined by maxLeft (move i++).
+// - Else, the water at `j` is determined by maxRight (move j--).
 //
 // Time: O(N) | Space: O(1)
 // ─────────────────────────────────────────────────────────────────────────────
+int trap(vi &height) {
+        ll n = height.size();
+        stack<ll> stk;
+        ll water = 0;
 
-int trapTwoPointer(const vi& height) {
-    int left = 0, right = height.size() - 1;
-    int maxLeft = 0, maxRight = 0;
-    int water = 0;
+        for (ll i = 0; i < n; i++) {
+            while (!stk.empty() && height[stk.top()] < height[i]) {
+                ll bottom = stk.top();
+                stk.pop();
 
-    while (left < right) {
-        if (height[left] <= height[right]) {
-            // Right side is taller; left side determines water level
-            if (height[left] >= maxLeft) {
-                maxLeft = height[left]; // Update left max boundary
-            } else {
-                water += maxLeft - height[left]; // Water trapped above left
+                if (stk.empty())
+                    break;
+
+                // for each height, we are finding PGE (Previous Greater Element) and NGE (Next Greater Element)
+                ll leftWall = stk.top();
+                ll rightWall = i;
+                ll width = rightWall - leftWall - 1;
+                ll boundedHeight = min((ll)height[leftWall], (ll)height[rightWall]) - (ll)height[bottom];
+                water += width * boundedHeight;
             }
-            left++;
-        } else {
-            // Left side is taller; right side determines water level
-            if (height[right] >= maxRight) {
-                maxRight = height[right]; // Update right max boundary
-            } else {
-                water += maxRight - height[right]; // Water trapped above right
-            }
-            right--;
+
+            stk.push(i);
         }
-    }
-    return water;
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 1b. TRAPPING RAIN WATER — MONOTONIC STACK APPROACH
-// LC 42
-//
-// Idea:
-// - Maintain a monotonic decreasing stack of indices (left walls).
-// - When we find a bar taller than the stack top, we found a "valley":
-//     - Bottom of valley: the just-popped element (lowest point).
-//     - Left wall: the new stack top after popping.
-//     - Right wall: the current element i.
-//   Width  = i - left_wall_index - 1
-//   Height = min(height[left_wall], height[i]) - height[bottom]
-//   Water  += width * height
-//
-// Time: O(N) | Space: O(N)
-// ─────────────────────────────────────────────────────────────────────────────
-
-int trapStack(const vi& height) {
-    int n = height.size();
-    stack<int> stk; // Monotonic decreasing stack of indices
-    int water = 0;
-
-    for (int i = 0; i < n; i++) {
-        while (!stk.empty() && height[i] > height[stk.top()]) {
-            int bottom = stk.top();
-            stk.pop();
-
-            if (stk.empty()) break; // No left wall, skip
-
-            int leftWall = stk.top();
-            int width = i - leftWall - 1;
-            int boundedHeight = min(height[leftWall], height[i]) - height[bottom];
-            water += width * boundedHeight;
-        }
-        stk.push(i);
-    }
-    return water;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 1c. TRAPPING RAIN WATER — PREFIX/SUFFIX MAX APPROACH
-// LC 42
-//
-// Idea:
-// - Precompute prefixMax[i] = max height from 0..i
-// - Precompute suffixMax[i] = max height from i..n-1
-// - Water at i = min(prefixMax[i], suffixMax[i]) - height[i]
-//
-// Time: O(N) | Space: O(N)
-// ─────────────────────────────────────────────────────────────────────────────
-
-int trapPrefixSuffix(const vi& height) {
-    int n = height.size();
-    vi prefixMax(n), suffixMax(n);
-
-    prefixMax[0] = height[0];
-    for (int i = 1; i < n; i++) {
-        prefixMax[i] = max(prefixMax[i - 1], height[i]);
+        return (int)water;
     }
 
-    suffixMax[n - 1] = height[n - 1];
-    for (int i = n - 2; i >= 0; i--) {
-        suffixMax[i] = max(suffixMax[i + 1], height[i]);
-    }
 
-    int water = 0;
-    for (int i = 0; i < n; i++) {
-        water += min(prefixMax[i], suffixMax[i]) - height[i];
-    }
-    return water;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. TRAPPING RAIN WATER II (3D version)
@@ -150,19 +79,25 @@ int trapPrefixSuffix(const vi& height) {
 // Time: O(M * N * log(M * N)) | Space: O(M * N)
 // ─────────────────────────────────────────────────────────────────────────────
 
-int trapRainWater2D(vector<vector<int>>& heightMap) {
-    if (heightMap.empty() || heightMap[0].empty()) return 0;
+int trapRainWater2D(vector<vector<int>> &heightMap)
+{
+    if (heightMap.empty() || heightMap[0].empty())
+        return 0;
     int m = heightMap.size(), n = heightMap[0].size();
-    if (m < 3 || n < 3) return 0;
+    if (m < 3 || n < 3)
+        return 0;
 
     // Min-heap: {height, row, col}
-    priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, greater<>> pq;
+    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
     vector<vector<bool>> visited(m, vector<bool>(n, false));
 
     // Push all boundary cells
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            if (i == 0 || i == m-1 || j == 0 || j == n-1) {
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (i == 0 || i == m - 1 || j == 0 || j == n - 1)
+            {
                 pq.push({heightMap[i][j], i, j});
                 visited[i][j] = true;
             }
@@ -173,13 +108,16 @@ int trapRainWater2D(vector<vector<int>>& heightMap) {
     int dx[] = {0, 0, 1, -1};
     int dy[] = {1, -1, 0, 0};
 
-    while (!pq.empty()) {
+    while (!pq.empty())
+    {
         auto [h, x, y] = pq.top();
         pq.pop();
 
-        for (int d = 0; d < 4; d++) {
+        for (int d = 0; d < 4; d++)
+        {
             int nx = x + dx[d], ny = y + dy[d];
-            if (nx < 0 || nx >= m || ny < 0 || ny >= n || visited[nx][ny]) continue;
+            if (nx < 0 || nx >= m || ny < 0 || ny >= n || visited[nx][ny])
+                continue;
 
             visited[nx][ny] = true;
             // Water trapped above this cell is bounded by current minimum boundary h
@@ -199,55 +137,33 @@ int trapRainWater2D(vector<vector<int>>& heightMap) {
 // that holds the most water.
 //
 // Idea (Two Pointer):
-// - Area = (right - left) * min(height[left], height[right])
+// - Area = (j - i) * min(height[i], height[j])
 // - Always move the pointer with the smaller height inward.
 //   Moving the taller pointer would only decrease width without gaining height.
 //
 // Time: O(N) | Space: O(1)
 // ─────────────────────────────────────────────────────────────────────────────
 
-int maxWater(const vi& height) {
-    int left = 0, right = height.size() - 1;
+int maxWater(const vi &height)
+{
+    int i = 0, j = height.size() - 1;
     int maxArea = 0;
 
-    while (left < right) {
-        int area = (right - left) * min(height[left], height[right]);
+    while (i < j)
+    {
+        int area = (j - i) * min(height[i], height[j]);
         maxArea = max(maxArea, area);
 
         // Move the shorter wall inward (can only improve by finding a taller wall)
-        if (height[left] < height[right]) {
-            left++;
-        } else {
-            right--;
+        if (height[i] < height[j])
+        {
+            i++;
+        }
+        else
+        {
+            j--;
         }
     }
     return maxArea;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    /*
-        int n; cin >> n;
-        vi height(n);
-        for (int& x : height) cin >> x;
-
-        cout << trapTwoPointer(height) << '\n';   // Two pointer O(1) space
-        cout << trapStack(height) << '\n';         // Monotonic stack approach
-        cout << trapPrefixSuffix(height) << '\n';  // Prefix/suffix max approach
-        cout << maxWater(height) << '\n';          // Container with most water
-    */
-
-    /*
-        int m, n; cin >> m >> n;
-        vector<vector<int>> hmap(m, vector<int>(n));
-        for (auto& row : hmap)
-            for (int& x : row) cin >> x;
-        cout << trapRainWater2D(hmap) << '\n';
-    */
-
-    return 0;
-}

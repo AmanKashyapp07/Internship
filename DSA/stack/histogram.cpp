@@ -50,53 +50,20 @@ int largestRectangle(const vi& heights) {
     int maxArea = 0;
 
     for (int i = 0; i <= n; i++) {
-        // Use 0 as sentinel height at position n to flush remaining stack
-        int curHeight = (i == n) ? 0 : heights[i];
+       
 
-        while (!stk.empty() && curHeight < heights[stk.top()]) {
+        while (!stk.empty() && (i==n || heights[i] < heights[stk.top()])) {
             int h = heights[stk.top()];
             stk.pop();
-
+            int leftBoundary = stk.empty() ? -1 : stk.top(); // New left boundary after pop
+            int rightBoundary = i; // Current index is the right boundary
+            int width = rightBoundary - leftBoundary - 1; //(both boundaries are exclusive)
             // Left boundary: index of new top (element still in stack)
             // Right boundary: i (current element that caused the pop)
-            int width = stk.empty() ? i : (i - stk.top() - 1);
+            
             maxArea = max(maxArea, h * width);
         }
-        stk.push(i);
-    }
-    return maxArea;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. MAXIMAL RECTANGLE IN BINARY MATRIX
-// LC 85
-//
-// Given a binary matrix, find the area of the largest rectangle containing only 1s.
-//
-// Idea:
-// - Process the matrix row by row.
-// - For each row, build a histogram where heights[j] = consecutive 1s ending at this row.
-//   If matrix[row][j] == '0', reset heights[j] = 0.
-//   If matrix[row][j] == '1', increment heights[j].
-// - Run Largest Rectangle in Histogram on the current heights.
-// - Answer is the max over all rows.
-//
-// Time: O(M * N) | Space: O(N)
-// ─────────────────────────────────────────────────────────────────────────────
-
-int maximalRectangle(vector<vector<char>>& matrix) {
-    if (matrix.empty()) return 0;
-    int m = matrix.size(), n = matrix[0].size();
-    vi heights(n, 0); // Running histogram heights
-    int maxArea = 0;
-
-    for (int row = 0; row < m; row++) {
-        // Update histogram: extend if 1, reset if 0
-        for (int col = 0; col < n; col++) {
-            heights[col] = (matrix[row][col] == '1') ? heights[col] + 1 : 0;
-        }
-        // Find the largest rectangle in this row's histogram
-        maxArea = max(maxArea, largestRectangle(heights));
+        if(i < n) stk.push(i); // Push current index onto stack
     }
     return maxArea;
 }
@@ -130,11 +97,11 @@ int maxWidthRamp(const vi& nums) {
         if (stk.empty() || nums[i] < nums[stk.top()]) {
             stk.push(i);
         }
-    }
+    } // holds indices of decreasing values from left to right
 
     int maxWidth = 0;
 
-    // Scan right to left, greedily match with the largest left index possible
+    // Scan right to left, greedily match with the largest left index possible, when we start from the right, we are guaranteed to find the largest j for each i, because we are scanning from the rightmost end of the array. This ensures that for each left index i, we find the farthest right index j that satisfies the ramp condition.
     for (int j = n - 1; j >= 0; j--) {
         while (!stk.empty() && nums[stk.top()] <= nums[j]) {
             maxWidth = max(maxWidth, j - stk.top());
@@ -144,36 +111,3 @@ int maxWidthRamp(const vi& nums) {
     return maxWidth;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    /*
-        // Largest Rectangle in Histogram
-        int n; cin >> n;
-        vi h(n);
-        for (int& x : h) cin >> x;
-        cout << largestRectangle(h) << '\n';
-    */
-
-    /*
-        // Maximal Rectangle in Binary Matrix
-        int m, n; cin >> m >> n;
-        vector<vector<char>> mat(m, vector<char>(n));
-        for (auto& row : mat)
-            for (char& c : row) cin >> c;
-        cout << maximalRectangle(mat) << '\n';
-    */
-
-    /*
-        // Maximum Width Ramp
-        int n; cin >> n;
-        vi nums(n);
-        for (int& x : nums) cin >> x;
-        cout << maxWidthRamp(nums) << '\n';
-    */
-
-    return 0;
-}

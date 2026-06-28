@@ -60,37 +60,6 @@ public:
     }
 };
 
-// =========================================================================
-// 3. DECODE STRING
-// =========================================================================
-// Decode strings of the form "k[encoded_string]" (e.g. 3[a2[c]] -> accaccacc).
-// Time Complexity: O(N * max_k) | Space Complexity: O(N)
-string decodeString(const string& s) {
-    stack<int> countStk;
-    stack<string> strStk;
-    string current = "";
-    int k = 0;
-
-    for (char c : s) {
-        if (isdigit(c)) {
-            k = k * 10 + (c - '0');
-        } else if (c == '[') {
-            countStk.push(k);
-            strStk.push(current);
-            current = "";
-            k = 0;
-        } else if (c == ']') {
-            int repeat = countStk.top(); countStk.pop();
-            string prev = strStk.top(); strStk.pop();
-            string repeated = "";
-            for (int i = 0; i < repeat; i++) repeated += current;
-            current = prev + repeated;
-        } else {
-            current += c;
-        }
-    }
-    return current;
-}
 
 
 
@@ -100,31 +69,35 @@ string decodeString(const string& s) {
 // Simulate collisions of asteroids moving right (+) and left (-).
 // Time Complexity: O(N) | Space Complexity: O(N)
 vi asteroidCollision(const vi& asteroids) {
-    stack<int> stk;
+    vi st;
 
     for (int a : asteroids) {
-        bool destroyed = false;
-        while (!stk.empty() && a < 0 && stk.top() > 0) {
-            if (stk.top() < -a) {
-                stk.pop(); // The right-moving asteroid on the stack explodes
-            } else if (stk.top() == -a) {
-                stk.pop(); // Both asteroids explode
-                destroyed = true;
-                break;
-            } else {
-                destroyed = true; // The incoming asteroid explodes
-                break;
-            }
-        }
-        if (!destroyed) stk.push(a);
+
+        // Keep destroying smaller right-moving asteroids.
+        // Collision is possible only when:
+        // - stack top is moving right (st.back() > 0)
+        // - current asteroid is moving left (a < 0)
+        // - current asteroid is larger (st.back() < -a)
+        while (!st.empty() && st.back() > 0 && a < 0 && st.back() < -a)
+            st.pop_back();
+
+        // No collision is possible if:
+        // 1. stack is empty
+        // 2. top is moving left
+        // 3. current asteroid is moving right
+        if (st.empty() || st.back() < 0 || a > 0)
+            st.push_back(a);
+
+        // Same size -> both explode.
+        else if (st.back() == -a)
+            st.pop_back();
+
+        // Otherwise:
+        // st.back() > -a, so the current asteroid explodes.
+        // Do nothing.
     }
 
-    vi result(stk.size());
-    for (int i = result.size() - 1; i >= 0; i--) {
-        result[i] = stk.top();
-        stk.pop();
-    }
-    return result;
+    return st;
 }
 
 
@@ -141,9 +114,9 @@ int scoreOfParentheses(const string& s) {
         if (c == '(') {
             stk.push(0); // Open nested context
         } else {
-            int v = stk.top(); stk.pop();
-            int score = (v == 0) ? 1 : 2 * v;
-            stk.top() += score;
+            int v = stk.top(); stk.pop(); // popping out the inner score
+            int score = (v == 0) ? 1 : 2 * v; // if inner score is 0, it's a simple '()', else double the inner score
+            stk.top() += score; // Add to the score of the outer context
         }
     }
     return stk.top();
