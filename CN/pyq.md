@@ -1,6 +1,6 @@
-# Computer Networks Interview Q&A (Top 50) 🚀
+# Computer Networks Interview Q&A (Top 75) 🚀
 
-A compilation of the 50 most-asked Computer Networks interview questions for software engineering and backend developer roles.
+A compilation of the 75 most-asked Computer Networks interview questions for software engineering and backend developer roles.
 
 ---
 
@@ -408,3 +408,231 @@ A compilation of the 50 most-asked Computer Networks interview questions for sof
 * **Answer:**
   * **BGP Hijacking:** An attack where a malicious Autonomous System (AS) falsely advertises IP prefix blocks that it does not own.
   * **Impact:** Global routers accept the route announcement and update their routing tables. Traffic meant for the legitimate IP address ranges is redirected to the attacker's AS, enabling them to eavesdrop, drop traffic, or serve spoofed clone sites.
+
+---
+
+### Q51. What is the difference between a Gateway and a Router?
+* **Answer:**
+  * **Router (Layer 3):** Connects two or more logically distinct subnets using the same protocol stack (e.g., routing traffic between local IP subnet `192.168.1.0/24` and WAN IP `203.0.113.1`).
+  * **Gateway (Cross-Layer):** Acts as a protocol translator. It connects systems that use completely incompatible protocol stacks or data formats (e.g., converting legacy cellular voice protocols to VoIP packets, or translating data link protocols between Ethernet and Token Ring).
+
+---
+
+### Q52. Explain standard MTU size. What is a Jumbo Frame? When is it used?
+* **Answer:**
+  * **Standard MTU (Maximum Transmission Unit):** The default limit on Ethernet networks is **1500 bytes**.
+  * **Jumbo Frame:** Any Ethernet frame containing a payload larger than 1500 bytes, typically scaled up to **9000 bytes**.
+  * **When used:** Used inside closed high-speed local data center networks (like SAN storage networks or database replication clusters).
+  * **Benefit:** Sending 9000-byte packets instead of 1500-byte packets reduces the packet count by 6x for the same volume of data, significantly lowering the CPU interrupt overhead required to parse headers on networking cards.
+
+---
+
+### Q53. Explain the TCP Window Scaling option. Why is it necessary for Long Fat Networks (LFNs)?
+* **Answer:**
+  * **Limit:** The standard TCP header allocates only 16 bits for the window size, limiting the maximum receiver window to $2^{16} - 1 = 65,535$ bytes (64 KB).
+  * **Long Fat Networks (LFNs):** Networks with high bandwidth and high latency (e.g., transatlantic fiber or satellite links). To maximize throughput, the network path's **Bandwidth-Delay Product (BDP)** ($BDP = Bandwidth \times RTT$) must be filled with packets. If the BDP is 5 MB, but the TCP window limit is only 64 KB, the sender stops transmitting, waiting for ACKs, wasting $98\%$ of the link capacity.
+  * **Window Scaling (WS):** An option negotiated during the 3-way handshake that shifts the 16-bit window field left by up to 14 bits (a scale factor of up to $2^{14} = 16,384$), allowing maximum windows of up to $1\text{ GB}$.
+
+---
+
+### Q54. What is the difference between Go-Back-N (GBN) and Selective Repeat (SR) sliding window protocols?
+* **Answer:**
+  * **Go-Back-N:**
+    * The receiver maintains a window of size 1. It only accepts packets in strict sequential order.
+    * If packet 3 is lost, but packets 4 and 5 arrive, the receiver discards 4 and 5.
+    * The sender's timer for packet 3 expires, forcing the sender to retransmit packet 3 and **all subsequent packets** (Go Back N).
+  * **Selective Repeat:**
+    * The receiver maintains a buffer window larger than 1. It accepts and buffers out-of-order packets (e.g., storing 4 and 5 while waiting for 3).
+    * The sender retransmits **only** the specific packet that was lost (packet 3) once its timer expires or a NACK is received.
+    * More memory efficient on the wire, but requires receiver-side buffer memory.
+
+---
+
+### Q55. Explain the "Count to Infinity" problem in Distance-Vector routing. How does Split Horizon resolve it?
+* **Answer:**
+  * **Count to Infinity:** Occurs when a link fails, and two adjacent routers exchange updates based on stale routing information. Router A thinks Router B has a route, and Router B thinks Router A has a route, creating a loop where the metric (hop count) increments indefinitely (up to RIP's infinity limit of 16).
+  * **Split Horizon:** A routing rule stating that a router must **not** advertise a route back out of the same interface from which it learned that route.
+    * *Example:* If Router A learns a route to subnet X from Router B, Split Horizon prevents A from advertising route X back to B, stopping routing loops.
+
+---
+
+### Q56. Explain core BGP Path Attributes and how they determine route selection.
+* **Answer:**
+  * BGP uses attributes to select the best path across Autonomous Systems (AS):
+    1. **AS-Path:** A list of all AS numbers the route has traversed. BGP prefers the route with the shortest AS-Path.
+    2. **Next-Hop:** Specifies the IP address of the border router to reach the next AS.
+    3. **Local Preference:** Used to configure outbound routing policies within an AS (higher values preferred).
+    4. **MED (Multi-Exit Discriminator):** Used to suggest preferred ingress points to external neighbors (lower values preferred).
+
+---
+
+### Q57. What is the difference between Recursive and Iterative DNS queries?
+* **Answer:**
+  * **Recursive Query:** The client asks a DNS server (typically a recursive resolver) to return the final resolved IP address. The resolver takes complete responsibility, querying other nameservers on behalf of the client.
+  * **Iterative Query:** The DNS client queries a nameserver, and the nameserver returns the address of the next nameserver in the hierarchy (e.g., "I don't know, but ask the TLD nameserver at IP X") instead of resolving it itself.
+
+---
+
+### Q58. What is DNS Caching? At what different levels does DNS caching occur?
+* **Answer:**
+  * **DNS Caching:** Storing hostname-to-IP mappings temporarily to bypass DNS resolution delays.
+  * **Levels of DNS Caching:**
+    1. **Browser Cache:** Browsers cache records locally (e.g., Chrome cache).
+    2. **OS/Hosts Cache:** Operating system DNS client cache.
+    3. **Router Cache:** Home/office gateway routers cache queries.
+    4. **Recursive Resolver Cache:** ISP or public resolver (e.g., `8.8.8.8`) caches queries to avoid traversing root/TLD servers.
+
+---
+
+### Q59. What state is a TCP socket in when it receives a SYN packet? Explain the transition states.
+* **Answer:**
+  * **Initial State:** Server socket is in the `LISTEN` state.
+  * **SYN Received:** When the server receives a `SYN` packet from a client, it transitions to the **`SYN_RCVD`** (SYN Received) state.
+  * **Transition:** The server allocates resource metadata (or uses SYN cookies), transmits a `SYN-ACK`, and waits for the client's final `ACK`. Once the `ACK` arrives, the socket transitions to **`ESTABLISHED`**.
+
+---
+
+### Q60. How does a SYN Cookie cryptographically encode connection parameters?
+* **Answer:**
+  * To prevent SYN floods, the server does not store connection state in memory when it receives a `SYN`. Instead, it generates a cryptographic cookie and uses it as the initial sequence number ($ISN$) in the `SYN-ACK`:
+    $$ISN = \text{Hash}(SrcIP, DstIP, SrcPort, DstPort, SecretKey) + L$$
+    Where $L$ is a timestamp counter protecting against replay attacks.
+  * **Verification:** When the client returns the final `ACK` (with `Acknowledge Number = ISN + 1`), the server subtracts 1, regenerates the hash using the packet's IP/port details, and verifies it. If it matches, the connection is instantiated.
+
+---
+
+### Q61. What are the differences between IPv4 and IPv6 header structures? Name 3 fields removed in IPv6.
+* **Answer:**
+  * IPv6 headers have a fixed size of 40 bytes to simplify hardware parsing.
+  * **Removed Fields:**
+    1. **Header Length (IHL):** No longer needed since the IPv6 header is fixed at 40 bytes.
+    2. **Identification / Flags / Fragment Offset:** Moved to optional Extension Headers. IPv6 routers do not fragment packets; source hosts must perform fragmentation.
+    3. **Header Checksum:** Removed to speed up routing. Relies on Layer 2 and Layer 4 integrity checks instead.
+
+---
+
+### Q62. Explain the TLS 1.3 handshake optimization (1-RTT) and how it compares to TLS 1.2 (2-RTT).
+* **Answer:**
+  * **TLS 1.2 Handshake (2-RTT):** Requires two network round-trips:
+    * *RTT 1:* Negotiate cipher suites, exchange random bytes, share public key parameters.
+    * *RTT 2:* Exchange key shares, verify certificates, and activate symmetric encryption.
+  * **TLS 1.3 Handshake (1-RTT):** The client guesses the key exchange algorithm and sends its public key share directly in the first `ClientHello` message. The server responds with its key share, certificate, and a Finished flag in `ServerHello`, completing key setup in a single RTT.
+
+---
+
+### Q63. What is QUIC (Quick UDP Internet Connections)? Why does it run over UDP instead of TCP?
+* **Answer:**
+  * **QUIC:** A multiplexed transport protocol designed by Google that forms the foundation of HTTP/3.
+  * **Why UDP:** Modifying TCP requires updating OS kernels worldwide, which is slow. UDP is supported by all middleboxes (firewalls, routers). By running over UDP, QUIC can implement custom transport-layer features entirely in application space.
+  * **Key Features:**
+    * **Connection Migration:** Connections are identified by a 64-bit Connection ID, not the 4-tuple IP/Port. If a client switches from Wi-Fi to Cellular, the connection stays open.
+    * **No Head-of-Line Blocking:** Multiplexed streams are independent; packet loss in stream A does not stall stream B.
+
+---
+
+### Q64. What is the difference between REST and gRPC in modern API communication?
+* **Answer:**
+  * **REST (Representational State Transfer):**
+    * Uses HTTP/1.1 or HTTP/2.
+    * Payload format is text-based (JSON/XML).
+    * Loose coupling; easy to test but higher bandwidth overhead.
+  * **gRPC (Google Remote Procedure Call):**
+    * Runs strictly over HTTP/2.
+    * Payload format is serialized binary (**Protocol Buffers**).
+    * Strong contract definition (compiled `.proto` files). High performance, low bandwidth, and supports bidirectional streaming.
+
+---
+
+### Q65. What is a CORS (Cross-Origin Resource Sharing) Preflight Request? What HTTP method does it use?
+* **Answer:**
+  * **Preflight Request:** A safety mechanism where the browser sends an initial request before sending the actual cross-origin request.
+  * **Why:** To check if the target server understands and permits the cross-origin call before sending potentially modifying data.
+  * **HTTP Method:** Uses the **`OPTIONS`** method.
+  * **Response:** The server returns headers like `Access-Control-Allow-Methods` and `Access-Control-Allow-Origin`. If approved, the browser sends the actual request (e.g., `POST` or `PUT`).
+
+---
+
+### Q66. Explain the difference between Symmetric and Asymmetric Routing in BGP.
+* **Answer:**
+  * **Symmetric Routing:** Data packets traveling from Host A to Host B, and return packets from Host B to Host A, follow the exact same path/routers.
+  * **Asymmetric Routing:** Outbound packets (A $\rightarrow$ B) and inbound return packets (B $\rightarrow$ A) follow different physical paths across Autonomous Systems. This is common in BGP due to independent hot-potato routing policies configured by different ISPs.
+
+---
+
+### Q67. How does a Stateful Firewall track TCP handshakes in its connection table?
+* **Answer:**
+  * A stateful firewall maintains a **State Table** tracking connection tuples (`SrcIP, DstIP, SrcPort, DstPort, Protocol`).
+  * **Handshake tracking:**
+    1. **SYN:** Transitions connection state to `SYN_SENT`.
+    2. **SYN-ACK:** Transitions connection state to `SYN_RCVD`.
+    3. **ACK:** Transitions state to `ESTABLISHED`.
+  * **Traffic matching:** Once established, any incoming packets matching the active state table tuple are allowed through. If a packet arrives with the `ACK` flag set but no matching entry in the table, it is dropped.
+
+---
+
+### Q68. What is the difference between a Socket Descriptor and a File Descriptor in Unix-based operating systems?
+* **Answer:**
+  * **In Unix, everything is a file:** Both sockets and files are represented by an integer reference index in the process descriptor table called a **File Descriptor (FD)**.
+  * **Differences:**
+    * **File Descriptor:** Represents an active stream to a static physical file, directory, or pipe. Operations are strictly read, write, seek, and close.
+    * **Socket Descriptor:** A specific type of file descriptor created via `socket()`. It is bound to a network address and cannot perform random-access offsets (`lseek()`). It supports network-specific operations like `connect()`, `bind()`, `accept()`, and `listen()`.
+
+---
+
+### Q69. Explain standard TCP Congestion Control algorithms (Tahoe, Reno, Cubic). How do they differ?
+* **Answer:**
+  * **TCP Tahoe:** If a packet loss occurs (timeout or 3 duplicate ACKs), `cwnd` is reset to 1 MSS, and `ssthresh` is set to `cwnd / 2`.
+  * **TCP Reno:** Adds **Fast Recovery**. If a loss occurs via 3 duplicate ACKs, `cwnd` is halved (`cwnd = cwnd / 2`) and ssthresh is set to the new `cwnd`, bypassing the slow start phase. If a timeout occurs, it still resets `cwnd` to 1.
+  * **TCP Cubic:** Used by default in Linux. Instead of growing `cwnd` linearly during congestion avoidance, it uses a cubic growth function. It scales up window sizes rapidly when the network is stable, slowing down as it approaches the previous limit to prevent sudden packet drops.
+
+---
+
+### Q70. Compare HTTP/1.0, HTTP/1.1, HTTP/2, and HTTP/3.
+* **Answer:**
+  * **HTTP/1.0:** Opens a brand new TCP connection for every single request/response cycle, creating high connection overhead.
+  * **HTTP/1.1:** Introduced **Persistent Connections** (`Connection: keep-alive`), allowing a single TCP connection to serve multiple requests sequentially. Vulnerable to request-level Head-of-Line (HoL) blocking.
+  * **HTTP/2:** Introduced **Multiplexing** over a single TCP connection using binary framing. Eliminates request-level HoL blocking but is vulnerable to TCP-level packet loss HoL blocking.
+  * **HTTP/3:** Replaces TCP with **QUIC** (over UDP). Streams are independent, eliminating TCP-level HoL blocking.
+
+---
+
+### Q71. Explain HTTP Pipelining vs. Multiplexing.
+* **Answer:**
+  * **HTTP Pipelining (HTTP/1.1):** A client sends multiple requests over a single TCP connection without waiting for responses. The server **must** return responses in the exact order the requests were received. If the first response is delayed, all subsequent responses are blocked (Head-of-Line blocking).
+  * **Multiplexing (HTTP/2):** Client and server break requests and responses into independent binary frames and interleave them over a single connection. The server can return responses out-of-order as soon as they are ready.
+
+---
+
+### Q72. What is the difference between a Public IP and a Private IP? Name the private IP ranges reserved under RFC 1918.
+* **Answer:**
+  * **Public IP:** Globally unique IP addresses routed across the public Internet.
+  * **Private IP:** Non-routable IP addresses used inside local area networks (LANs). Local routers drop private IP packets if they try to enter the public Internet.
+  * **RFC 1918 Reserved Ranges:**
+    * **Class A:** `10.0.0.0` to `10.255.255.255`
+    * **Class B:** `172.16.0.0` to `172.31.255.255`
+    * **Class C:** `192.168.0.0` to `192.168.255.255`
+
+---
+
+### Q73. Explain the mechanism of ARP Cache Poisoning (ARP Spoofing).
+* **Answer:**
+  * **ARP Spoofing:** An attacker sends unsolicited, forged ARP responses to local devices (e.g., telling the gateway router: *"I have IP 192.168.1.10 (Target Host)"* and telling the host: *"I have IP 192.168.1.1 (Gateway Router)"*).
+  * **Mechanism:** Since ARP is stateless and lacks authentication, local devices accept these messages and update their ARP caches.
+  * **Impact:** All traffic between the host and the gateway routes through the attacker's machine, enabling Man-in-the-Middle (MitM) eavesdropping, credential harvesting, or modification of data in transit.
+
+---
+
+### Q74. Compare Link-State (OSPF) vs. Distance-Vector (RIP) routing protocols in terms of convergence.
+* **Answer:**
+  * **RIP (Distance-Vector) Convergence:** Slow. RIP routers advertise tables periodically (e.g., every 30 seconds). A route failure takes time to propagate, leading to loops (Count to Infinity) before the network stabilizes.
+  * **OSPF (Link-State) Convergence:** Extremely fast. OSPF routers send updates (LSAs) immediately when a link state changes. Since every router maintains a complete topology map, they quickly re-run Dijkstra's algorithm to compute alternative paths.
+
+---
+
+### Q75. What is the purpose of the TCP `RST` (Reset) packet? When is it sent?
+* **Answer:**
+  * **RST (Reset):** A TCP control flag indicating that the sender wants to abort the connection immediately and release resources.
+  * **When sent:**
+    1. A connection request (SYN) is received on a port where no service is listening.
+    2. A packet arrives for a socket connection that has already closed or does not exist (e.g., after a server reboot, the server rejects old packets).
+    3. Firewalls or security devices inject RST packets to force-close connections matching malicious traffic rules.
