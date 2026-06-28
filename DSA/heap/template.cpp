@@ -39,13 +39,11 @@ using MaxPairHeap = priority_queue<pii>;
 using MinHeap     = priority_queue<int, vector<int>, greater<int>>;
 using MinPairHeap = priority_queue<pii, vector<pii>, greater<pii>>;
 
-// Custom Comparator Setup (Sorts pairs ascending by their SECOND element)
-struct CompareSecond {
-    bool operator()(const pii& a, const pii& b) const {
-        return a.second > b.second; 
-    }
-};
-using CustomHeap = priority_queue<pii, vector<pii>, CompareSecond>;
+bool cmp(const pii& a, const pii& b) {
+    return a.second > b.second;
+}
+
+priority_queue<pii, vector<pii>, decltype(&cmp)> pq(cmp);
 
 // =========================================================================
 // 2. K-TH VARIANT CLASSIC PROBLEMS
@@ -195,8 +193,8 @@ public:
  */
 vector<int> mergeKsortedArrays(const vector<vector<int>>& arrays) {
     // Priority queue elements structured as: {value, {array_index, element_index}}
-    using ElementState = pair<int, pair<int, int>>;
-    priority_queue<ElementState, vector<ElementState>, greater<ElementState>> pq;
+    using T = pair<int, pair<int, int>>;
+    priority_queue<T, vector<T>, greater<T>> pq;
 
     for (int i = 0; i < (int)arrays.size(); i++) {
         if (!arrays[i].empty()) {
@@ -220,83 +218,68 @@ vector<int> mergeKsortedArrays(const vector<vector<int>>& arrays) {
 
 /**
  * LeetCode 373: Find K Pairs with Smallest Sums
- * Strategy: Multi-pointer advancement using Min Heap.
- * Time: O(K log K) | Space: O(K)
+ *
+ * Problem Statement:
+ * Given two integer arrays nums1 and nums2 sorted in ascending order,
+ * and an integer k, return the k pairs (u, v), where u belongs to nums1
+ * and v belongs to nums2, with the smallest sums.
+ *
+ * Approach:
+ * Multi-pointer advancement using a Min Heap (K-way Merge).
+ *
+ * Time Complexity: O(k log min(n, k))
+ * Space Complexity: O(min(n, k))
  */
 vector<pair<int, int>> kSmallestPairs(const vector<int>& nums1, const vector<int>& nums2, int k) {
     vector<pair<int, int>> result;
     if (nums1.empty() || nums2.empty() || k <= 0) return result;
-    
+    int n=nums1.size(), m=nums2.size();
     // Min heap storing: {sum, {idx1, idx2}}
-    using PairState = pair<int, pair<int, int>>;
-    priority_queue<PairState, vector<PairState>, greater<PairState>> pq;
+    using T = pair<int, pair<int, int>>;
+    priority_queue<T, vector<T>, greater<T>> pq;
     
     // Push nums1[i] + nums2[0] for up to min(nums1.size(), k)
-    for (int i = 0; i < min((int)nums1.size(), k); ++i) {
+    for (int i = 0; i < min(n, k); ++i) {
         pq.push({nums1[i] + nums2[0], {i, 0}});
     }
     
-    while (k-- > 0 && !pq.empty()) {
+    while (k > 0 && !pq.empty()) {
         auto [sum, indices] = pq.top(); pq.pop();
         auto [i, j] = indices;
         result.push_back({nums1[i], nums2[j]});
         
         // Push the next candidate pair nums1[i] + nums2[j + 1]
-        if (j + 1 < (int)nums2.size()) {
+        if (j + 1 < m) {
             pq.push({nums1[i] + nums2[j + 1], {i, j + 1}});
         }
+        k--;
     }
     return result;
 }
 
-/**
- * LeetCode 632: Smallest Range Covering Elements from K Lists
- * Strategy: Track current maximum element in Min Heap to capture optimal windows.
- * Time: O(N log K) | Space: O(K)
- */
-vector<int> smallestRange(const vector<vector<int>>& nums) {
-    using ElementState = pair<int, pair<int, int>>;
-    priority_queue<ElementState, vector<ElementState>, greater<ElementState>> pq;
-    
-    int currentMax = INT_MIN;
-    for (int i = 0; i < (int)nums.size(); ++i) {
-        pq.push({nums[i][0], {i, 0}});
-        currentMax = max(currentMax, nums[i][0]);
-    }
-    
-    int start = -1e9, end = 1e9;
-    
-    while (!pq.empty()) {
-        auto [currentMin, coord] = pq.top(); pq.pop();
-        auto [arrIdx, elemIdx] = coord;
-        
-        if (currentMax - currentMin < end - start) {
-            start = currentMin;
-            end = currentMax;
-        }
-        
-        if (elemIdx + 1 == (int)nums[arrIdx].size()) {
-            break;
-        }
-        
-        int nextVal = nums[arrIdx][elemIdx + 1];
-        currentMax = max(currentMax, nextVal);
-        pq.push({nextVal, {arrIdx, elemIdx + 1}});
-    }
-    
-    return {start, end};
-}
 
 /**
- * Strategy: Decreasing order sort + BFS search on combination matrices.
- * Time: O(K log K) | Space: O(K)
+ * Maximum Sum Combinations (Top K Sum Combinations)
+ *
+ * Problem Statement:
+ * Given two integer arrays nums1 and nums2 of size N, find the top k
+ * maximum sum combinations, where each combination consists of one
+ * element from nums1 and one element from nums2. Return the k largest
+ * possible sums.
+ *
+ * Approach:
+ * Sort both arrays in decreasing order and perform a Best-First Search
+ * (BFS) on the virtual sum matrix using a Max Heap and a Visited Set.
+ *
+ * Time Complexity: O(n log n + k log k)
+ * Space Complexity: O(k)
  */
 vector<int> maxKsumCombination(vector<int>& nums1, vector<int>& nums2, int k) {
     sort(nums1.rbegin(), nums1.rend());
     sort(nums2.rbegin(), nums2.rend());
 
-    using ElementNode = pair<int, pair<int, int>>; // {sum, {idx1, idx2}}
-    priority_queue<ElementNode> pq;
+    using T = pair<int, pair<int, int>>; // {sum, {idx1, idx2}}
+    priority_queue<T> pq;
     set<pair<int, int>> visited;
 
     pq.push({nums1[0] + nums2[0], {0, 0}});
@@ -406,13 +389,3 @@ vector<int> replaceElementsByRank(const vector<int>& arr) {
     return result;
 }
 
-// =========================================================================
-// EXECUTIVE EXECUTION BLOCK
-// =========================================================================
-int main() {
-    // Fast Input/Output Pipeline
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    
-    return 0;
-}
