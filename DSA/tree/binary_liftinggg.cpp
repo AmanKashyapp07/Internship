@@ -45,11 +45,12 @@ void dfs_precompute(int u, int p, int d) {
 
     // Derive ancestor coordinates iteratively
     for (int j = 1; j < LOG; j++) {
-        if (up[u][j - 1] == -1) {
-            up[u][j] = -1; // Bound overshoot
-        } else {
-            // The 2^j-th ancestor is the 2^(j-1)-th ancestor of the 2^(j-1)-th ancestor
-            up[u][j] = up[up[u][j - 1]][j - 1];
+        int p = up[u][j - 1];
+        if (p != -1) {
+            up[u][j] = up[p][j - 1];
+        }
+        else {
+            up[u][j] = -1; // No ancestor exists at this level
         }
     }
 

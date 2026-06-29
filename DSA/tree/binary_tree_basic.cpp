@@ -259,16 +259,37 @@ int maxPathDFS(TreeNode* root) {
 /**
  * Finds the K-th smallest element in a BST using Inorder Traversal.
  */
-void kthDFS(TreeNode* root, int k) {
-    if (!root) return;
-    kthDFS(root->left, k);
-    if (++kthCnt == k) {
-        kthAns = root->val;
-        return;
-    }
-    kthDFS(root->right, k);
-}
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right)
+ *         : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int inorder(TreeNode* root, int k, int &cnt) {
+        if (!root) return -1;
 
+        int left = inorder(root->left, k, cnt);
+        if (left != -1) return left;
+
+        cnt++;
+        if (cnt == k) return root->val;
+
+        return inorder(root->right, k, cnt);
+    } // returns -1 if not found, otherwise returns the k-th smallest value
+
+    int kthSmallest(TreeNode* root, int k) {
+        int cnt = 0;
+        return inorder(root, k, cnt);
+    }
+};
 /**
  * Checks if the tree has a root-to-leaf path matching the target sum.
  */

@@ -84,6 +84,35 @@ ll sumSubarrayMins(const vi& arr) {
     return total;
 }
 
+int maximumScore(vector<int>& nums, int k) {
+    int n = nums.size();
+    stack<int> stk; // Monotonic increasing stack of indices
+    ll maxi = -1;
+
+    // Sentinel value: process remaining stack at the end with i = n
+    for (int i = 0; i <= n; i++) {
+
+        while (!stk.empty() && (i==n || nums[stk.top()] >= nums[i])) { 
+            // Pop equals (avoid duplicates in stack) to ensure PSE is strict (<) and NSE is non-strict (<=).
+            // This prevents duplicate values in subarrays from being counted twice.
+            int j = stk.top();
+            stk.pop();
+
+            // PSE index (strictly smaller on the left), that's why left is stk.top(), not stk.top() + 1
+            int left = stk.empty() ? -1 : stk.top();
+            // NSE index (smaller or equal on the right) = i, that's why right is i, not i - 1
+            int right = i;
+            // keep in mind, both boundaries are exclusive, so the number of subarrays where arr[j] is the minimum is (j - left) * (right - j)
+            left=max(left, k); 
+            right=min(right, k); // right boundary should be at most k+1
+
+            maxi=max(maxi, nums[j] * (right-left+1)); 
+        }
+        if(i < n) stk.push(i); // Push current index onto stack
+    }
+    return maxi;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. SUM OF SUBARRAY MAXIMUMS
 // Symmetric to Sum of Subarray Minimums — use a decreasing stack instead.
