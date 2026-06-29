@@ -1,0 +1,260 @@
+==========================================================
+DYNAMIC PROGRAMMING FOR INTERVIEWS / OAs
+==========================================================
+
+Think of DP as 15 major topics.
+
+Master these topics and you'll solve almost every DP question in
+LeetCode, CSES, Codeforces Div2, and company OAs.
+
+==========================================================
+1. 1D DP
+==========================================================
+
+Leetcode
+---------
+• 70. Climbing Stairs
+• 746. Min Cost Climbing Stairs
+• 198. House Robber
+• 213. House Robber II
+• 740. Delete and Earn
+• 91. Decode Ways
+• 322. Coin Change
+• 279. Perfect Squares
+
+CSES
+-----
+• Dice Combinations
+• Minimizing Coins
+• Coin Combinations I
+• Coin Combinations II
+
+==========================================================
+2. 2D DP (Grid DP)
+==========================================================
+
+Leetcode
+---------
+• 62. Unique Paths
+• 63. Unique Paths II
+• 64. Minimum Path Sum
+• 120. Triangle
+• 931. Minimum Falling Path Sum
+• 1289. Minimum Falling Path Sum II
+
+CSES
+-----
+• Grid Paths
+
+==========================================================
+3. KNAPSACK DP
+==========================================================
+
+Leetcode
+---------
+• 416. Partition Equal Subset Sum
+• 494. Target Sum
+• 1049. Last Stone Weight II
+• 474. Ones and Zeroes
+• 879. Profitable Schemes
+
+CSES
+-----
+• Book Shop
+• Money Sums
+
+==========================================================
+4. SUBSEQUENCE DP
+==========================================================
+
+Leetcode
+---------
+• 300. Longest Increasing Subsequence
+• 673. Number of Longest Increasing Subsequence
+• 354. Russian Doll Envelopes
+• 646. Maximum Length of Pair Chain
+
+CSES
+-----
+• Increasing Subsequence
+
+==========================================================
+5. STRING DP
+==========================================================
+
+Leetcode
+---------
+• 1143. Longest Common Subsequence
+• 72. Edit Distance
+• 583. Delete Operation for Two Strings
+• 115. Distinct Subsequences
+• 97. Interleaving String
+• 712. Minimum ASCII Delete Sum
+
+CSES
+-----
+• Edit Distance
+
+==========================================================
+6. PALINDROME DP
+==========================================================
+
+Leetcode
+---------
+• 5. Longest Palindromic Substring
+• 516. Longest Palindromic Subsequence
+• 131. Palindrome Partitioning
+• 132. Palindrome Partitioning II
+• 647. Palindromic Substrings
+
+CSES
+-----
+• (No dedicated problem)
+
+==========================================================
+7. INTERVAL DP
+==========================================================
+
+Leetcode
+---------
+• 312. Burst Balloons
+• 1000. Minimum Cost to Merge Stones
+• 1547. Minimum Cost to Cut a Stick
+• 1039. Minimum Score Triangulation
+• 664. Strange Printer
+
+CSES
+-----
+• Removal Game
+
+==========================================================
+8. DP ON TREES
+==========================================================
+
+Leetcode
+---------
+• 337. House Robber III
+• 124. Binary Tree Maximum Path Sum
+• 543. Diameter of Binary Tree
+• 834. Sum of Distances in Tree
+• 968. Binary Tree Cameras - Pending
+
+CSES
+-----
+• Tree Matching
+• Tree Distances I
+• Tree Distances II
+
+
+
+==========================================================
+10. BITMASK DP
+==========================================================
+
+Leetcode
+---------
+• 698. Partition to K Equal Sum Subsets
+• 847. Shortest Path Visiting All Nodes
+• 526. Beautiful Arrangement
+• 1125. Smallest Sufficient Team
+
+CSES
+-----
+• Elevator Rides
+• Hamiltonian Flights
+
+==========================================================
+11. DIGIT DP
+==========================================================
+
+Leetcode
+---------
+• 902. Numbers At Most N Given Digit Set
+• 233. Number of Digit One
+• 2719. Count of Integers
+
+CSES
+-----
+• Counting Numbers
+
+
+
+
+==========================================================
+15. ADVANCED DP OPTIMIZATION
+==========================================================
+
+Leetcode
+---------
+• 410. Split Array Largest Sum
+• 1335. Minimum Difficulty of a Job Schedule
+• 1478. Allocate Mailboxes
+
+CSES
+-----
+• Projects
+
+Optimization Techniques
+-----------------------
+• Divide & Conquer DP
+• Knuth Optimization
+• Convex Hull Trick
+• Monotonic Queue DP
+• Bitset DP
+
+==========================================================
+MOST IMPORTANT CSES DP PROBLEMS
+==========================================================
+
+1. Dice Combinations
+2. Minimizing Coins
+3. Coin Combinations I
+4. Coin Combinations II
+5. Removing Digits
+6. Grid Paths
+7. Book Shop
+8. Array Description
+9. Money Sums
+10. Removal Game
+11. Increasing Subsequence
+12. Projects
+13. Elevator Rides
+14. Counting Numbers
+15. Edit Distance
+16. Hamiltonian Flights
+17. Tree Matching
+
+==========================================================
+MOST IMPORTANT LEETCODE DP PROBLEMS
+==========================================================
+
+Beginner
+---------
+• 70. Climbing Stairs
+• 198. House Robber
+• 746. Min Cost Climbing Stairs
+• 322. Coin Change
+• 62. Unique Paths
+• 64. Minimum Path Sum
+
+Intermediate
+------------
+• 300. Longest Increasing Subsequence
+• 1143. Longest Common Subsequence
+• 72. Edit Distance
+• 416. Partition Equal Subset Sum
+• 494. Target Sum
+• 516. Longest Palindromic Subsequence
+• 312. Burst Balloons
+• 1547. Minimum Cost to Cut a Stick
+
+Advanced
+--------
+• 698. Partition to K Equal Sum Subsets
+• 847. Shortest Path Visiting All Nodes
+• 1125. Smallest Sufficient Team
+• 2050. Parallel Courses III
+• 834. Sum of Distances in Tree
+• 233. Number of Digit One
+• 410. Split Array Largest Sum
+• 1335. Minimum Difficulty of a Job Schedule

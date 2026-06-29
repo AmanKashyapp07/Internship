@@ -1,0 +1,270 @@
+==========================================================
+1. GRAPH TRAVERSAL (BFS / DFS)
+==========================================================
+
+Leetcode
+---------
+• 200. Number of Islands
+• 695. Max Area of Island
+• 733. Flood Fill
+• 994. Rotting Oranges
+• 542. 01 Matrix
+• 1091. Shortest Path in Binary Matrix
+• 417. Pacific Atlantic Water Flow
+• 130. Surrounded Regions
+• 286. Walls and Gates
+• 841. Keys and Rooms
+
+CSES
+-----
+• Counting Rooms
+• Labyrinth
+• Message Route
+• Monsters
+
+==========================================================
+2. CONNECTED COMPONENTS
+==========================================================
+
+Leetcode
+---------
+• 547. Number of Provinces
+• 200. Number of Islands
+• 323. Number of Connected Components in an Undirected Graph
+• 1319. Number of Operations to Make Network Connected
+
+CSES
+-----
+• Counting Rooms
+• Building Roads
+• Road Construction
+
+==========================================================
+3. CYCLE DETECTION
+==========================================================
+
+Leetcode
+---------
+• 207. Course Schedule
+• 210. Course Schedule II
+• 684. Redundant Connection
+• 685. Redundant Connection II - Pending
+• 802. Find Eventual Safe States
+
+CSES
+-----
+• Round Trip
+• Round Trip II
+
+==========================================================
+4. TOPOLOGICAL SORT
+==========================================================
+
+Leetcode
+---------
+• 207. Course Schedule
+• 210. Course Schedule II
+• 1136. Parallel Courses
+• 2050. Parallel Courses III
+• 1203. Sort Items by Groups Respecting Dependencies - 
+
+CSES
+-----
+• Course Schedule
+• Longest Flight Route
+• Game Routes
+
+==========================================================
+5. SHORTEST PATH
+==========================================================
+
+BFS
+----
+Leetcode
+• 1091. Shortest Path in Binary Matrix
+
+CSES
+• Message Route
+
+-----------------------
+
+0-1 BFS
+--------
+
+Leetcode
+• 1368. Minimum Cost to Make at Least One Valid Path in a Grid
+• 2290. Minimum Obstacle Removal to Reach Corner
+
+CSES
+• (No dedicated problem)
+
+-----------------------
+
+Dijkstra
+---------
+
+Leetcode
+• 743. Network Delay Time
+• 1631. Path With Minimum Effort
+• 778. Swim in Rising Water
+• 787. Cheapest Flights Within K Stops
+• 1976. Number of Ways to Arrive at Destination
+• 1928. Minimum Cost to Reach Destination in Time
+• 505. The Maze II 
+• 1334. Find the City With the Smallest Number of Neighbors
+
+CSES
+• Shortest Routes I
+• Flight Discount
+• Flight Routes
+• Investigation
+
+-----------------------
+
+Bellman Ford
+------------
+
+Leetcode
+• 787. Cheapest Flights Within K Stops (alternative solution)
+
+CSES
+• High Score
+• Cycle Finding
+
+-----------------------
+
+Floyd Warshall
+--------------
+
+Leetcode
+• 1334. Find the City With the Smallest Number of Neighbors
+
+CSES
+• Shortest Routes II
+
+==========================================================
+6. BIPARTITE GRAPH
+==========================================================
+
+Leetcode
+---------
+• 785. Is Graph Bipartite?
+• 886. Possible Bipartition
+
+CSES
+-----
+• Building Teams
+
+==========================================================
+7. DISJOINT SET UNION (DSU)
+==========================================================
+
+Leetcode
+---------
+• 547. Number of Provinces
+• 684. Redundant Connection
+• 721. Accounts Merge
+• 947. Most Stones Removed
+• 1319. Make Network Connected
+• 1101. Earliest Moment When Everyone Become Friends
+
+CSES
+-----
+• Road Construction
+
+==========================================================
+8. MINIMUM SPANNING TREE
+==========================================================
+
+Leetcode
+---------
+• 1584. Min Cost to Connect All Points
+• 1135. Connecting Cities With Minimum Cost
+
+CSES
+-----
+• Road Reparation
+
+==========================================================
+9. STRONGLY CONNECTED COMPONENTS
+==========================================================
+
+Leetcode
+---------
+• 1192. Critical Connections (Tarjan concept)
+• 802. Find Eventual Safe States (related DAG after SCC)
+
+CSES
+-----
+• Planets and Kingdoms
+• Coin Collector
+
+==========================================================
+10. BRIDGES & ARTICULATION POINTS
+==========================================================
+
+Leetcode
+---------
+• 1192. Critical Connections in a Network
+
+CSES
+-----
+• Necessary Roads
+• Necessary Cities
+
+==========================================================
+11. DAG DYNAMIC PROGRAMMING
+==========================================================
+
+Leetcode
+---------
+• 2050. Parallel Courses III
+• 797. All Paths From Source to Target
+• 2328. Number of Increasing Paths in a Grid
+• 1857. Largest Color Value in a Directed Graph
+
+CSES
+-----
+• Longest Flight Route
+• Game Routes
+• Coin Collector
+• Hamiltonian Flights
+
+==========================================================
+12. TREE ALGORITHMS
+==========================================================
+
+Leetcode
+---------
+• 543. Diameter of Binary Tree
+• 124. Binary Tree Maximum Path Sum
+• 236. Lowest Common Ancestor
+• 863. All Nodes Distance K
+• 834. Sum of Distances in Tree
+• 310. Minimum Height Trees
+
+CSES
+-----
+• Tree Diameter
+• Tree Distances I
+• Tree Distances II
+• Tree Matching
+• Company Queries I
+• Company Queries II
+• Subordinates
+• Tree Traversals
+• Distance Queries
+
+==========================================================
+13. ADVANCED GRAPH
+==========================================================
+
+Hamiltonian / Bitmask - 
+---------------------
+
+Leetcode
+• 847. Shortest Path Visiting All Nodes - 
+
+CSES
+• Hamiltonian Flights - 
+
