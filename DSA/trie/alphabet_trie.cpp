@@ -169,6 +169,24 @@ bool isCompleteString(string word, TrieNode* root) {
     return true;
 } // this checks every prefix of the word is present in the trie and is a complete word. If any prefix is not a complete word, it returns false.
 
+string longestWord(vector<string>& words) {
+
+    Trie trie;
+    for (auto& word : words) {
+        trie.insert(word);
+    }
+
+    string longest = "";
+    for (auto& word : words) {
+        if (isCompleteString(word, trie.root)) {
+            if (word.length() > longest.length() || (word.length() == longest.length() && word < longest)) {
+                longest = word;
+            }
+        }
+    }
+    return longest;
+}
+
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);

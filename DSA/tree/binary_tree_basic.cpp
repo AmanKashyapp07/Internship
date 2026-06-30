@@ -24,6 +24,21 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
+
+unordered_map<TreeNode*, int> nodeToId;
+vector<TreeNode*> idToNode;
+
+void assignIds(TreeNode* root) {
+    if (!root) return;
+
+    int id = idToNode.size();
+    nodeToId[root] = id;
+    idToNode.push_back(root);
+
+    assignIds(root->left);
+    assignIds(root->right);
+}
+
 // Global/Utility variables for specific problems
 int diameter = 0;
 int maxPath = INT_MIN;
