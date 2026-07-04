@@ -35,16 +35,27 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
 class Solution {
 public:
-    int scheduleCourse(vector<vector<int>>& courses) {
-        int maxCount=0;
-        // couses storing pair<duration, lastDay>
-        priority_queue<pair<int,int>> pq; 
-        sort(courses.begin(), courses.end(), [](const vector<int>& a, const vector<int>& b) {
-            return a[1] < b[1]; // Sort by lastDay
-        });
-        
+    int nthUglyNumber(int n) {
+        priority_queue<long long, vector<long long>, greater<long long>> pq;
+        unordered_set<long long> seen;
+        pq.push(1);
+        seen.insert(1);
+        long long ugly = 1;
+        while(pq.size() && n!=0) {
+            ugly = pq.top();
+            pq.pop();
+            n--;
+            if(n == 0) return ugly;
+            for(int factor : {2, 3, 5}) {
+                long long nextUgly = ugly * factor;
+                if(seen.find(nextUgly) == seen.end()) {
+                    seen.insert(nextUgly);
+                    pq.push(nextUgly);
+                }
+            }
+        }
+        return -1; // This line should never be reached if n is valid
     }
 };
