@@ -55,11 +55,11 @@ using vi = vector<int>;
 
 void templateIncreasing(const vi& nums) {
     stack<int> stk; // Stores indices; values are monotonically increasing
-
+    int n = nums.size();
     for (int i = 0; i <= (int)nums.size(); i++) {
-        int curVal = (i == (int)nums.size()) ? INT_MIN : nums[i]; // Sentinel to flush
+       
 
-        while (!stk.empty() && curVal <= nums[stk.top()]) {
+        while (!stk.empty() && (i==n || nums[i] <= nums[stk.top()])) {
             int j = stk.top();
             stk.pop();
 
@@ -73,7 +73,7 @@ void templateIncreasing(const vi& nums) {
             // rightSpan = nse - j   (number of subarrays where j is the left boundary of min)
             // contribution = nums[j] * leftSpan * rightSpan
         }
-        stk.push(i);
+        if(i < n) stk.push(i);
     }
 }
 

@@ -37,7 +37,7 @@ using ll  = long long;
 bool bad(int x, const vector<int>& pos, int n) {
     if (x < 1 || x >= n) return false;
     return pos[x] > pos[x + 1];
-}
+} // checks if the pair (x, x+1) is in the wrong order based on their positions
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);

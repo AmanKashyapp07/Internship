@@ -33,7 +33,7 @@ public:
 
         for (int i = l; i <= mid; i++) {
             while (j <= r && (long long)nums[i] > 2LL * nums[j]) j++;
-            count += (j - (mid + 1));
+            count += (j - (mid + 1)); // all elements from mid+1 to j-1 are valid pairs with nums[i], so we add that count, j-1 - (mid+1) + 1 = j - (mid + 1)
         }
 
         vector<int> temp;

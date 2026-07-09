@@ -53,14 +53,14 @@ int main() {
     for (int i = 0; i < n; i++) cin >> finish[i];
 
     vector<array<int, 3>> meetings;
-
+// problem is saying to maximize the number of meetings that can be held in a single room, given the start and finish times of each meeting. The approach is to sort the meetings by their finish times and then select meetings that start after the last selected meeting's finish time. This greedy approach ensures that we can accommodate the maximum number of meetings in the room.
     for (int i = 0; i < n; i++) {
         meetings.push_back({finish[i], start[i], i + 1});
     }
 
-    sort(all(meetings));
+    sort(all(meetings)); // sort meetings by finish time, if finish time is same then by start time, if start time is also same then by index, because we want to select meetings that finish earlier so that we can accommodate more meetings in the room.
 
-    vector<int> ans;
+    vector<int> ans; // represents the indices of the selected meetings that can be held in the room. We will iterate through the sorted meetings and select those that start after the last selected meeting's finish time, ensuring that we maximize the number of meetings in the room.
 
     int lastEnd = -1;
 

@@ -188,7 +188,7 @@ vi dailyTemperatures(const vi& temps) {
             // than the stack top, so it cannot resolve the Next Greater query for it.
             int j = stk.top(); // for jth index, i is the next warmer day
             stk.pop();
-            result[j] = i - j; // Days to wait for a warmer temperature
+            result[j] = i - j; // Days to wait for a warmer temperature, as i is the index of the next warmer day, so i-1 - j + 1 = i - j
         }
         stk.push(i);
     }

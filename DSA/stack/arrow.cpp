@@ -35,14 +35,14 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
+bool comparator(const vector<int>& a, const vector<int>& b) {
+    return a[0] < b[0] || (a[0] == b[0] && a[1] < b[1]); // sort by start time, if start time is same, sort by end time
+}
 
 class Solution {
 public:
     int findMinArrowShots(vector<vector<int>>& points) {
-        sort(points.begin(), points.end(), [](const vector<int>& a, const vector<int>& b) {
-            return a[0]<b[0] || (a[0]==b[0] && a[1]<b[1]); // sort by start point, and if equal, by end point
-        });
+        sort(points.begin(), points.end(), comparator); // sort the points by start time, if start time is same, sort by end time
         int arrows=0;
         ll end=LLONG_MIN; // initialize end to the minimum possible value
         for(auto& p:points){

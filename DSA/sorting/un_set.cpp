@@ -55,7 +55,7 @@ int helper(vector<int>& arr) {
     }
     int longest = 0;
     for (int x : arr) {
-        if (s.count(x - 1) == 0) {
+        if (s.count(x - 1) == 0) { // if x-1 is not present in the set, then x is the start of a new sequence
             int curr = 1;
             int len = 1;
             while (s.count(x + curr)) {

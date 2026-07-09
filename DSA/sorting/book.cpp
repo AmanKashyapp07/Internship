@@ -10,6 +10,8 @@
  * 
  * Logic/Approach:
  * If max book > sum of others, answer is 2 * max. Otherwise, answer is sum of all books.
+ * as if max book time is greater than sum of all other books, then one person will have to read the max book and the other person will read all other books. So total time will be 2 * max book time.
+ * otherwise , both can read books in parallel and total time will be sum of all books, that will surely be minimum time, otherwise one person will have to wait for the other to finish reading the max book, that will increase the total time.
  */
 
 #include <algorithm>

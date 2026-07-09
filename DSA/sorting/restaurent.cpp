@@ -10,6 +10,8 @@
  * 
  * Logic/Approach:
  * Sweep-line: sort arrivals (+1) and departures (-1) and track maximum prefix sum.
+ * if two intervals have same start and end time, we will consider the departure first, because if we consider the arrival first, then we will count the customer twice, once for arrival and once for departure, which is not correct. So we will consider the departure first, so that we can count the customer only once.
+ * it means if (1,2) and (2,3) , then max answer will be 1, because at time 2, one customer will leave and another will arrive, so we will consider the departure first, so that we can count the customer only once.
  */
 
 #include <iostream>

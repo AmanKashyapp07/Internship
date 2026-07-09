@@ -14,11 +14,12 @@
 #include <algorithm>
 #include <climits>
 #include <iostream>
-#include <queue>
 #include <stack>
 #include <vector>
+#include <string>
 
 using namespace std;
+using ll = long long;
 using vi = vector<int>;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,73 +64,6 @@ int trap(vi &height) {
     }
 
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. TRAPPING RAIN WATER II (3D version)
-// LC 407
-//
-// Given a 2D height map, compute total volume of trapped water.
-//
-// Idea:
-// - Use a min-heap (priority queue) and BFS from the boundary inward.
-// - The water level at any inner cell is bounded by the minimum boundary cell seen so far.
-// - Start by pushing all boundary cells into the heap.
-// - Pop the smallest cell (potential water level boundary).
-// - For each unvisited neighbor, water trapped = max(0, current_boundary - neighbor_height).
-//   Then push the neighbor into the heap with height = max(neighbor_height, current_boundary).
-//
-// Time: O(M * N * log(M * N)) | Space: O(M * N)
-// ─────────────────────────────────────────────────────────────────────────────
-
-int trapRainWater2D(vector<vector<int>> &heightMap)
-{
-    if (heightMap.empty() || heightMap[0].empty())
-        return 0;
-    int m = heightMap.size(), n = heightMap[0].size();
-    if (m < 3 || n < 3)
-        return 0;
-
-    // Min-heap: {height, row, col}
-    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
-    vector<vector<bool>> visited(m, vector<bool>(n, false));
-
-    // Push all boundary cells
-    for (int i = 0; i < m; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            if (i == 0 || i == m - 1 || j == 0 || j == n - 1)
-            {
-                pq.push({heightMap[i][j], i, j});
-                visited[i][j] = true;
-            }
-        }
-    }
-
-    int water = 0;
-    int dx[] = {0, 0, 1, -1};
-    int dy[] = {1, -1, 0, 0};
-
-    while (!pq.empty())
-    {
-        auto [h, x, y] = pq.top();
-        pq.pop();
-
-        for (int d = 0; d < 4; d++)
-        {
-            int nx = x + dx[d], ny = y + dy[d];
-            if (nx < 0 || nx >= m || ny < 0 || ny >= n || visited[nx][ny])
-                continue;
-
-            visited[nx][ny] = true;
-            // Water trapped above this cell is bounded by current minimum boundary h
-            water += max(0, h - heightMap[nx][ny]);
-            // Push with max(neighbor height, current boundary) as the new boundary
-            pq.push({max(h, heightMap[nx][ny]), nx, ny});
-        }
-    }
-    return water;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. CONTAINER WITH MOST WATER

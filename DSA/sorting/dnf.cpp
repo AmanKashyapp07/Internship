@@ -39,15 +39,15 @@ public:
         int high = nums.size() - 1;
 
         while (mid <= high) {
-            if (nums[mid] == 0) {
-                swap(nums[low], nums[mid]);
+            if (nums[mid] == 0) { // if the current element is 0, we swap it with the element at low pointer and increment both low and mid pointers
+                swap(nums[low], nums[mid]); // swap the current element with the element at low pointer
                 low++;
                 mid++;
             }
-            else if (nums[mid] == 1) {
+            else if (nums[mid] == 1) { // if the current element is 1, we just move the mid pointer to the next element
                 mid++;
             }
-            else { // nums[mid] == 2
+            else { // if current element is 2, we swap it with the element at high pointer and decrement the high pointer, we do not increment mid pointer because we need to check the swapped element at mid pointer, in nums[i]==0, we do not need to check mid pointer again because we know that the swapped element is 0 and we have already handled it in the previous if condition.
                 swap(nums[mid], nums[high]);
                 high--;
             }

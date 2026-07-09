@@ -67,7 +67,7 @@ int main()
     }
     for(int i=0;i<n;i++)
     {
-        candies[i]=max(left[i],right[i]);
+        candies[i]=max(left[i],right[i]); // as we need to satisfy both conditions, we take the maximum of both passes, we are doing in two pass because we cannot assign candies in one pass as we need to check both left and right conditions, so we do two passes and take the maximum of both passes.
     }
     long long totalCandies=0;
     for(int i=0;i<n;i++)

@@ -24,7 +24,7 @@ struct DisjointSet {
 
     // Find function with Path Compression
     int find(int i) {
-        if (i == parent[i])
+        if (i == parent[i]) // If the slot is its own parent, it means it's free, so we return it
             return i;
         return parent[i] = find(parent[i]); // Path compression
     }

@@ -94,17 +94,13 @@ int main() {
             freq++;
     }
 
-    if (freq <= n / 2)
-        cout << -1 << '\n';
-    else
-        cout << candidate << '\n';
+    if (freq <= n / 2) cout << -1 << '\n';
+    else cout << candidate << '\n';
 
     vector<int> ans = majorityElementK(arr, 2);
 
-    if (ans.empty())
-        cout << -1 << '\n';
-    else
-        cout << ans[0] << '\n';
+    if (ans.empty()) cout << -1 << '\n';
+    else cout << ans[0] << '\n';
 
     return 0;
 }
