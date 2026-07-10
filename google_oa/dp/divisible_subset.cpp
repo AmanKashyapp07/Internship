@@ -21,7 +21,7 @@ using namespace std;
 
 class Solution {
 public:
-    vector<int> memo;
+    vector<int> dp;
     vector<int> par;
     vector<int> arr;
 
@@ -31,27 +31,28 @@ public:
         arr = nums;
         sort(arr.begin(), arr.end()); // Sort to simplify divisibility checking
         
-        memo.assign(n, 1);
+        dp.assign(n, 1);
         par.assign(n, -1);
         int maxLen = 1, lastIdx = 0;
         
         // DP state: dp[i] is the size of the largest divisible subset ending at index i
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < i; j++) {
-                if (arr[i] % arr[j] == 0 && memo[j] + 1 > memo[i]) {
-                    memo[i] = memo[j] + 1; 
+                if (arr[i] % arr[j] == 0 && dp[j] + 1 > dp[i]) {
+                    dp[i] = dp[j] + 1; 
                     par[i] = j;
                 }
             }
-            if (memo[i] > maxLen) { 
-                maxLen = memo[i]; 
+            if (dp[i] > maxLen) { 
+                maxLen = dp[i]; 
                 lastIdx = i; 
             }
         }
         
         vector<int> ans;
-        for (int curr = lastIdx; curr != -1; curr = par[curr]) {
-            ans.push_back(arr[curr]); // Reconstruct path
+        while(lastIdx != -1) {
+            ans.push_back(arr[lastIdx]);
+            lastIdx = par[lastIdx];
         }
         reverse(ans.begin(), ans.end());
         return ans;

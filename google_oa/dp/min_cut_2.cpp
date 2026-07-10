@@ -1,71 +1,56 @@
 /**
- * LeetCode 132 - Palindrome Partitioning II (Tabulation)
- *
- * Description:
- * Given a string s, partition s such that every substring of the partition is a palindrome.
- * Return the minimum cuts needed for a palindrome partitioning of s.
- *
- * Approach:
- * - Dynamic Programming with Bottom-Up Tabulation.
- * - Precompute the `isPalindrome` 2D table.
- * - Let `dp[i]` be the minimum cuts to partition the prefix `s[0...i]`.
- * - Transition: If `s[j...i]` is a palindrome, `dp[i] = min(dp[i], 1 + dp[j - 1])`.
- *
- * Time Complexity: O(n^2)
- * Space Complexity: O(n^2)
+ * Palindrome Partitioning II (LeetCode 132)
+ * Minimum cuts needed to partition string into palindromic substrings.
+ * Time: O(n^2), Space: O(n^2)
  */
 
-#include <iostream>
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <climits>
-
+#include <iostream>
+#include <vector>
 using namespace std;
 
 class Solution {
 public:
-    vector<int> memo;
-    vector<vector<bool>> isPal;
-    string str;
-    int size;
-
     int minCut(string s) {
-        str = s;
-        size = s.size();
-        isPal.assign(size, vector<bool>(size, false));
+        int n = s.size();
+        if (n <= 1) return 0;
 
-        for (int i = 0; i < size; i++) {
+        // Precompute all palindromic substrings
+        vector<vector<bool>> isPal(n, vector<bool>(n, false));
+
+        for (int i = 0; i < n; ++i) {
             isPal[i][i] = true;
         }
-
-        for (int lengthVal = 2; lengthVal <= size; lengthVal++) {
-            for (int i = 0; i + lengthVal - 1 < size; i++) {
-                int j = i + lengthVal - 1;
-                if (lengthVal == 2) {
-                    isPal[i][j] = (str[i] == str[j]);
-                } else {
-                    isPal[i][j] = (str[i] == str[j]) && isPal[i + 1][j - 1];
+        for (int len = 2; len <= n; ++len) {
+            for (int i = 0; i <= n - len; ++i) {
+                int j = i + len - 1;
+                if(s[i]==s[j]){
+                    if(len==2) isPal[i][j] = true;
+                    else isPal[i][j] = isPal[i + 1][j - 1];
+                }
+                else{
+                    isPal[i][j] = false;
                 }
             }
         }
 
-        memo.assign(size, INT_MAX);
+        // dp[i] = min cuts for prefix s[0..i]
+        vector<int> dp(n, INT_MAX);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < n; ++i) {
             if (isPal[0][i]) {
-                memo[i] = 0;
+                dp[i] = 0;
                 continue;
             }
-
-            for (int j = 1; j <= i; j++) {
+            for (int j = 1; j <= i; ++j) {
                 if (isPal[j][i]) {
-                    memo[i] = min(memo[i], 1 + memo[j - 1]);
+                    dp[i] = min(dp[i], 1 + dp[j - 1]);
                 }
             }
         }
 
-        return memo[size - 1];
+        return dp[n - 1];
     }
 };
 
@@ -74,7 +59,7 @@ int main() {
     cin.tie(nullptr);
 
     string s;
-    if (!(cin >> s)) return 0;
+    cin >> s;
 
     Solution solver;
     cout << solver.minCut(s) << '\n';

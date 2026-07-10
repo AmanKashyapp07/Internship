@@ -1,51 +1,37 @@
 /**
- * Problem: Matrix Chain Multiplication (Tabulation)
- *
- * Description:
- * Given a sequence of matrices, find the most efficient way to multiply these matrices together.
- *
- * Approach:
- * - Interval Dynamic Programming with Bottom-Up Tabulation.
- * - Fill the DP table `dp[i][j]` (minimum multiplications for matrix range `i` to `j`) by increasing subproblem lengths.
- * - Transition: Try all split points `k` between `i` and `j-1`.
- *   - `dp[i][j] = min(dp[i][k] + dp[k+1][j] + arr[i-1] * arr[k] * arr[j])`.
- *
- * Time Complexity: O(n^3)
- * Space Complexity: O(n^2)
+ * Matrix Chain Multiplication (Tabulation)
+ * Find minimum cost to multiply chain of matrices.
+ * Time: O(n^3), Space: O(n^2)
  */
 
 #include <algorithm>
+#include <climits>
 #include <iostream>
 #include <vector>
-#include <climits>
 
 using namespace std;
 using ll = long long;
 
 class Solution {
 public:
-    vector<int> input;
-    vector<vector<ll>> memo;
-
     ll matrixMultiplication(vector<int>& arr) {
-        input = arr;
         int n = arr.size();
-        memo.assign(n, vector<ll>(n, 0));
+        if (n <= 2) return 0;
 
-        for (int lengthVal = 2; lengthVal <= n - 1; lengthVal++) {
-            for (int i = 1; i + lengthVal - 1 < n; i++) {
-                int j = i + lengthVal - 1;
-                memo[i][j] = LLONG_MAX;
+        vector<vector<ll>> dp(n, vector<ll>(n, 0)); // dp[i][j] = minimum cost to multiply matrices from i to j
 
-                for (int k = i; k < j; k++) { // k is between i and j-1 inclusive
-                    memo[i][j] = min(
-                        memo[i][j],
-                        memo[i][k] + memo[k + 1][j] + 1LL * input[i - 1] * input[k] * input[j]
-                    );
+        for (int len = 2; len < n; ++len) {
+            for (int i = 1; i+len<=n; ++i) { // we cannot start i from 0 because we need arr[i-1] for cost calculation
+                int j = i + len - 1;
+                dp[i][j] = LLONG_MAX;
+
+                for (int k = i; k < j; ++k) {
+                    ll cost = dp[i][k] + dp[k + 1][j] + 1LL * arr[i - 1] * arr[k] * arr[j];
+                    dp[i][j] = min(dp[i][j], cost);
                 }
             }
         }
-        return memo[1][n - 1];
+        return dp[1][n - 1];
     }
 };
 
@@ -54,12 +40,9 @@ int main() {
     cin.tie(nullptr);
 
     int n;
-    if (!(cin >> n)) return 0;
-
+    cin >> n;
     vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-    }
+    for (int &x : arr) cin >> x;
 
     Solution solver;
     cout << solver.matrixMultiplication(arr) << '\n';

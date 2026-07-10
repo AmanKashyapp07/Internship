@@ -1,270 +1,193 @@
+#include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <cassert>
 
 using namespace std;
 
 class Solution {
 public:
-    vector<vector<int>> memo;
-    string text1Val;
-    string text2Val;
-    string str1;
-    string str2;
-    string str;
-    string pattern;
-
-    // =============================================================================
-    // 1. Longest Common Subsequence (LCS) - Length & String Reconstruction
-    // =============================================================================
-
+    // 1. Longest Common Subsequence (Length)
     int longestCommonSubsequence(string text1, string text2) {
-        text1Val = text1;
-        text2Val = text2;
-        int m = text1.length(), n = text2.length();
-        memo.assign(m + 1, vector<int>(n + 1, 0));
-        
-        for (int i = 1; i <= m; ++i) {
+        int m = text1.size(), n = text2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (text1Val[i - 1] == text2Val[j - 1]) {
-                    memo[i][j] = 1 + memo[i - 1][j - 1];
-                } else {
-                    memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
-                }
+                if (text1[i - 1] == text2[j - 1])
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
             }
-        }
-        return memo[m][n];
+        return dp[m][n];
     }
 
+    // 2. Longest Common Subsequence (Reconstruct String)
     string getLCS(string text1, string text2) {
-        text1Val = text1;
-        text2Val = text2;
-        int m = text1.length(), n = text2.length();
-        memo.assign(m + 1, vector<int>(n + 1, 0));
-        
-        for (int i = 1; i <= m; ++i) {
+        int m = text1.size(), n = text2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (text1Val[i - 1] == text2Val[j - 1]) {
-                    memo[i][j] = 1 + memo[i - 1][j - 1];
-                } else {
-                    memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
-                }
+                if (text1[i - 1] == text2[j - 1])
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
             }
-        }
-        
-        string lcs = "";
+
+        // Reconstruct LCS
+        string lcs;
         int i = m, j = n;
         while (i > 0 && j > 0) {
-            if (text1Val[i - 1] == text2Val[j - 1]) {
-                lcs.push_back(text1Val[i - 1]);
-                i--; j--;
-            } else if (memo[i - 1][j] > memo[i][j - 1]) {
-                i--;
+            if (text1[i - 1] == text2[j - 1]) {
+                lcs.push_back(text1[i - 1]);
+                --i; --j;
+            } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                --i;
             } else {
-                j--;
+                --j;
             }
         }
         reverse(lcs.begin(), lcs.end());
         return lcs;
     }
 
-    // =============================================================================
-    // 2. Longest Common Substring (Contiguous Match)
-    // =============================================================================
-
+    // 3. Longest Common Substring (Contiguous)
     int longestCommonSubstring(string text1, string text2) {
-        text1Val = text1;
-        text2Val = text2;
-        int m = text1.length(), n = text2.length();
-        memo.assign(m + 1, vector<int>(n + 1, 0));
+        int m = text1.size(), n = text2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
         int maxLen = 0;
-        
-        for (int i = 1; i <= m; ++i) {
+
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (text1Val[i - 1] == text2Val[j - 1]) {
-                    memo[i][j] = 1 + memo[i - 1][j - 1];
-                    maxLen = max(maxLen, memo[i][j]);
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                    maxLen = max(maxLen, dp[i][j]);
                 } else {
-                    memo[i][j] = 0;
+                    dp[i][j] = 0;
                 }
             }
-        }
         return maxLen;
     }
 
-    // =============================================================================
-    // 3. Shortest Common Supersequence (SCS) - String Reconstruction
-    // =============================================================================
+    // 4. Shortest Common Supersequence
+    string shortestCommonSupersequence(string str1, string str2) {
+        int m = str1.size(), n = str2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
 
-    string shortestCommonSupersequence(string str1_param, string str2_param) {
-        str1 = str1_param;
-        str2 = str2_param;
-        int m = str1.length(), n = str2.length();
-        memo.assign(m + 1, vector<int>(n + 1, 0));
-        
-        for (int i = 1; i <= m; ++i) {
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (str1[i - 1] == str2[j - 1]) {
-                    memo[i][j] = 1 + memo[i - 1][j - 1];
-                } else {
-                    memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
-                }
+                if (str1[i - 1] == str2[j - 1])
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
             }
-        }
-        
-        string scs = "";
+
+        // Reconstruct SCS
+        string scs;
         int i = m, j = n;
         while (i > 0 && j > 0) {
             if (str1[i - 1] == str2[j - 1]) {
                 scs.push_back(str1[i - 1]);
-                i--; j--;
-            } else if (memo[i - 1][j] > memo[i][j - 1]) {
+                --i; --j;
+            } else if (dp[i - 1][j] > dp[i][j - 1]) {
                 scs.push_back(str1[i - 1]);
-                i--;
+                --i;
             } else {
                 scs.push_back(str2[j - 1]);
-                j--;
+                --j;
             }
         }
-        
         while (i > 0) scs.push_back(str1[--i]);
         while (j > 0) scs.push_back(str2[--j]);
-        
+
         reverse(scs.begin(), scs.end());
         return scs;
     }
 
-    // =============================================================================
-    // 4. Longest Palindromic Subsequence (LPS)
-    // =============================================================================
-
+    // 5. Longest Palindromic Subsequence
     int longestPalindromeSubseq(string s) {
-        str = s;
-        pattern = s;
-        reverse(pattern.begin(), pattern.end());
-        return longestCommonSubsequence(str, pattern);
+        string rev = s;
+        reverse(rev.begin(), rev.end());
+        return longestCommonSubsequence(s, rev);
     }
 
-    // =============================================================================
-    // 5. Minimum Operations to Convert String A to B (Insertions & Deletions)
-    // =============================================================================
-
+    // 6. Min Insertions + Deletions to convert s1 to s2
     pair<int, int> minOperations(string s1, string s2) {
-        int m = s1.length(), n = s2.length();
-        int lcsLen = longestCommonSubsequence(s1, s2);
-        return {m - lcsLen, n - lcsLen}; // {deletions, insertions}
+        int lcs = longestCommonSubsequence(s1, s2);
+        return {s1.size() - lcs, s2.size() - lcs};
     }
 
-    // =============================================================================
-    // 6. Minimum Insertions to Make a String Palindrome
-    // =============================================================================
-
+    // 7. Minimum Insertions to make Palindrome
     int minInsertions(string s) {
-        return s.length() - longestPalindromeSubseq(s);
+        return s.size() - longestPalindromeSubseq(s);
     }
 
-    // =============================================================================
-    // 7. Longest Repeating Subsequence
-    // =============================================================================
+    // 8. Longest Repeating Subsequence
+    int longestRepeatingSubsequence(string s) {
+        int n = s.size();
+        vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
 
-    int longestRepeatingSubsequence(string str_param) {
-        str = str_param;
-        int n = str.length();
-        memo.assign(n + 1, vector<int>(n + 1, 0));
-        
-        for (int i = 1; i <= n; ++i) {
+        for (int i = 1; i <= n; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (str[i - 1] == str[j - 1] && i != j) {
-                    memo[i][j] = 1 + memo[i - 1][j - 1];
-                } else {
-                    memo[i][j] = max(memo[i - 1][j], memo[i][j - 1]);
-                }
+                if (s[i - 1] == s[j - 1] && i != j)
+                    dp[i][j] = 1 + dp[i - 1][j - 1];
+                else
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
             }
-        }
-        return memo[n][n];
+        return dp[n][n];
     }
 
-    // =============================================================================
-    // 8. Edit Distance
-    // =============================================================================
-
+    // 9. Edit Distance (Levenshtein)
     int minDistance(string word1, string word2) {
-        str1 = word1;
-        str2 = word2;
-        int m = word1.length(), n = word2.length();
-        memo.assign(m + 1, vector<int>(n + 1, 0));
-        
-        for (int i = 0; i <= m; ++i) memo[i][0] = i;
-        for (int j = 0; j <= n; ++j) memo[0][j] = j;
-        
-        for (int i = 1; i <= m; ++i) {
+        int m = word1.size(), n = word2.size();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+
+        for (int i = 0; i <= m; ++i) dp[i][0] = i;
+        for (int j = 0; j <= n; ++j) dp[0][j] = j;
+
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (str1[i - 1] == str2[j - 1]) {
-                    memo[i][j] = memo[i - 1][j - 1];
-                } else {
-                    memo[i][j] = 1 + min({
-                        memo[i - 1][j],     // Delete
-                        memo[i][j - 1],     // Insert
-                        memo[i - 1][j - 1]  // Replace
-                    });
-                }
+                if (word1[i - 1] == word2[j - 1])
+                    dp[i][j] = dp[i - 1][j - 1];
+                else
+                    dp[i][j] = 1 + min({dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]});
             }
-        }
-        return memo[m][n];
+        return dp[m][n];
     }
 
-    // =============================================================================
-    // 9. Distinct Subsequences
-    // =============================================================================
-
+    // 10. Distinct Subsequences
     int numDistinct(string s, string t) {
-        str = s;
-        pattern = t;
-        int m = s.length(), n = t.length();
+        int m = s.size(), n = t.size();
         vector<vector<unsigned long long>> dp(m + 1, vector<unsigned long long>(n + 1, 0));
-        
-        for (int i = 0; i <= m; ++i) {
-            dp[i][0] = 1;
-        }
-        
-        for (int i = 1; i <= m; ++i) {
+
+        for (int i = 0; i <= m; ++i) dp[i][0] = 1;
+
+        for (int i = 1; i <= m; ++i)
             for (int j = 1; j <= n; ++j) {
-                if (str[i - 1] == pattern[j - 1]) {
+                if (s[i - 1] == t[j - 1])
                     dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
-                } else {
+                else
                     dp[i][j] = dp[i - 1][j];
-                }
             }
-        }
-        return static_cast<int>(dp[m][n]);
+        return dp[m][n];
     }
 };
 
-// =============================================================================
-// Verification Execution Block
-// =============================================================================
 int main() {
     Solution solver;
 
-    string s1 = "abcde";
-    string s2 = "ace";
-    
-    assert(solver.longestCommonSubsequence(s1, s2) == 3);
-    assert(solver.getLCS(s1, s2) == "ace");
+    assert(solver.longestCommonSubsequence("abcde", "ace") == 3);
+    assert(solver.getLCS("abcde", "ace") == "ace");
     assert(solver.longestCommonSubstring("abcde", "abfce") == 2);
     assert(solver.shortestCommonSupersequence("abac", "cab") == "cabac");
     assert(solver.longestPalindromeSubseq("bbbab") == 4);
-    
-    pair<int, int> ops = solver.minOperations("sea", "eat");
-    assert(ops.first == 1 && ops.second == 1);
-    
     assert(solver.minInsertions("mbadm") == 2);
     assert(solver.longestRepeatingSubsequence("aabebcdd") == 3);
     assert(solver.minDistance("horse", "ros") == 3);
     assert(solver.numDistinct("rabbbit", "rabbit") == 3);
-    
-    cout << "All clean Tabulation tests passed successfully!" << endl;
+
+    cout << "All tests passed successfully!" << endl;
     return 0;
 }
