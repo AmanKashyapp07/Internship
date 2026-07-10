@@ -1,6 +1,6 @@
 /**
  * ========================================================
- *              Sliding Window Maximum
+ *              Sliding Window Minimum
  * ========================================================
  *
  * Problem:
@@ -39,7 +39,7 @@
 #include <deque>
 using namespace std;
 
-vector<int> maxSlidingWindow(vector<int>& arr, int k)
+vector<int> minSlidingWindow(vector<int>& arr, int k)
 {
     int n = arr.size();
 
@@ -49,12 +49,16 @@ vector<int> maxSlidingWindow(vector<int>& arr, int k)
     for (int R = 0; R < n; R++)
     {
         int L = R - k + 1;
+
+        // 1. Remove expired indices
         while (!dq.empty() && dq.front() < L) dq.pop_front();
 
-        while (!dq.empty() && arr[dq.back()] <= arr[R]) dq.pop_back();
+        // 2. Remove larger elements
+        while (!dq.empty() && arr[dq.back()] >= arr[R]) dq.pop_back();
 
         dq.push_back(R);
-        if(L>=0) ans.push_back(arr[dq.front()]); // Front is the maximum for the current window
+
+        if(L >= 0) ans.push_back(arr[dq.front()]); // Front is the minimum for the current window
     }
 
     return ans;
@@ -65,7 +69,7 @@ int main()
     vector<int> arr = {1, 3, -1, -3, 5, 3, 6, 7};
     int k = 3;
 
-    vector<int> ans = maxSlidingWindow(arr, k);
+    vector<int> ans = minSlidingWindow(arr, k);
 
     for (int x : ans)
         cout << x << " ";

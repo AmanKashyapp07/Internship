@@ -67,28 +67,18 @@ int idx2 = lower_bound(all(arr), x) - arr.begin() - 1;
 
 
 int searchInsertPosition(const vector<int>& arr, int x) {
-    return (int)(lower_bound(all(arr), x) - arr.begin());
+    return lower_bound(all(arr), x) - arr.begin();
 }
 
 
 
-// 6. First and last occurrence
 pair<int, int> firstAndLastOccurrence(const vector<int>& arr, int x) {
-    auto first_it = lower_bound(all(arr), x);
-    if (first_it == arr.end() || *first_it != x) {
-        return {-1, -1}; // element not present
-    }
-    auto last_it = upper_bound(all(arr), x);
-    int first_idx = (int)(first_it - arr.begin());
-    int last_idx = (int)(last_it - arr.begin()) - 1;
-    return {first_idx, last_idx};
+    return {lower_bound(all(arr), x) - arr.begin(),
+            upper_bound(all(arr), x) - arr.begin() - 1};
 }
 
-// 7. Count Occurrences in a Sorted Array
 int countOccurrences(const vector<int>& arr, int x) {
-    auto p = firstAndLastOccurrence(arr, x);
-    if (p.first == -1) return 0;
-    return p.second - p.first + 1;
+    return upper_bound(all(arr), x) - lower_bound(all(arr), x);
 }
 
 // 8. Search in rotated sorted array-I (Unique elements)
@@ -183,35 +173,35 @@ int findMinInRotatedSortedArray(const vector<int>& arr) {
 // 11. Find out how many times the array is rotated
 int findRotationCount(const vector<int>& arr) {
     int low = 0, high = arr.size() - 1;
-    int min_val = INF;
-    int min_idx = -1;
+    int mini = INF;
+    int ans = -1;
     while (low <= high) {
         int mid = low + (high - low) / 2;
         
         // Same logic as finding the minimum, but tracking the index instead of value
         if (arr[low] <= arr[high]) {
-            if (arr[low] < min_val) {
-                min_val = arr[low];
-                min_idx = low; // Rotation count equals the index of smallest element
+            if (arr[low] < mini) {
+                mini = arr[low];
+                ans = low; // Rotation count equals the index of smallest element
             }
             break;
         }
         
         if (arr[low] <= arr[mid]) {
-            if (arr[low] < min_val) {
-                min_val = arr[low];
-                min_idx = low;
+            if (arr[low] < mini) {
+                mini = arr[low];
+                ans = low;
             }
             low = mid + 1;
         } else {
-            if (arr[mid] < min_val) {
-                min_val = arr[mid];
-                min_idx = mid;
+            if (arr[mid] < mini) {
+                mini = arr[mid];
+                ans = mid;
             }
             high = mid - 1;
         }
     }
-    return min_idx;
+    return ans;
 }
 
 // 12. Single element in a Sorted Array (Every other element appears twice)
@@ -279,18 +269,15 @@ int findKthPositive(vector<int>& arr, int k) {
 
             int missing = arr[mid] - (mid + 1); // Number of missing elements before arr[mid]
 
-            if (missing < k) {
+            if (missing < k) { // we can still find kth missing number after arr[mid]
                 idx = mid; 
                 low = mid + 1;
-            } else {
+            } else { // if missing >= k, we need to search in the left half, even if missing == k, we need to find the first element where missing < k
                 high = mid - 1;
             }
         }
 
-        if (idx == -1) { // All missing numbers are before the first element of arr, if array will be [5,6,7,8] and k=3, so idx will be always -1 in our binary search, so we will return k as the answer.
-            return k;
-        }
-        return k+idx+1; // The kth missing number is after arr[idx], so we add idx + 1 to k to account for the numbers present in arr before arr[idx].
+        return k+idx+1; // The kth missing number is k + idx + 1
     }
 
 
@@ -311,7 +298,7 @@ bool searchIn2DMatrix(const vector<vector<int>>& matrix, int target) {
         else high = mid - 1;
     }
     return false;
-}
+} 
 
 // 3. Search in 2D matrix - II (Rows and Columns are individually sorted)
 // Time Complexity: O(N + M) - Starts from top-right corner
@@ -421,7 +408,7 @@ int matrixMedian(const vector<vector<int>>& matrix) {
     return ans;
 }
 
-    int main() {
+int main() {
     // Fast I/O
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
