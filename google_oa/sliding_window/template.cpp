@@ -37,25 +37,6 @@ public:
         return ans;
     }
 
-    // LeetCode 424: Longest Repeating Character Replacement
-    // Strategy: Variable Window (Optimization via Max Frequency Preservation)
-    // Time Complexity: O(N) | Space Complexity: O(1)
-    int characterReplacement(string s, int k){
-        int freq[26] = {0};
-        int left = 0, maxFreq = 0, ans = 0;
-        for (int right = 0; right < s.size(); right++)
-        {
-            maxFreq = max(maxFreq, ++freq[s[right] - 'A']);
-            while (right - left + 1 - maxFreq > k)
-            {
-                freq[s[left] - 'A']--;
-                left++;
-            }
-            ans = max(ans, right - left + 1);
-        }
-        return ans;
-    }
-
     // Helper for LeetCode 930 & 1248: Counts subarrays with sum/count at most K
     // Strategy: Exact Count K = (At Most K) - (At Most K-1)
     // Time Complexity: O(N) | Space Complexity: O(1)
@@ -163,12 +144,9 @@ public:
                 {
                     if (s[i] == t[j]) j--;
                     i--;
-                } // we are doing this because we want to find the start index of the window, so we need to move i back to the point where we found the first character of t in s
-                int start = i + 1; // Compute compressed start index
-
+                }
+                int start = i + 1;
                 if (end - start + 1 < len) len = end - start + 1, idx = start;
-                
-                // Reset standard search variables just past the start pointer to find alternative solutions
                 i = start + 1;
                 j = 0;
                 continue;

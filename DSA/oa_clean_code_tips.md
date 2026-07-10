@@ -211,7 +211,56 @@ public:
 
 ---
 
-## 6. Most Used Ways to Initialize Each Container in C++
+## 6. Clean Code Patterns That Save Time
+
+### Custom Sort Comparator (Easy to Get Wrong)
+*   Always use `bool` return type and `<` (strictly less than) — never `<=`:
+    ```cpp
+    // Sort intervals by start time, break ties by end time descending
+    sort(intervals.begin(), intervals.end(), [](const auto& a, const auto& b) {
+        return a[0] != b[0] ? a[0] < b[0] : a[1] > b[1];
+    });
+    ```
+*   For a `priority_queue` with custom order:
+    ```cpp
+    auto cmp = [](const pair<int,int>& a, const pair<int,int>& b) {
+        return a.second > b.second; // Min-heap by second element
+    };
+    priority_queue<pair<int,int>, vector<pair<int,int>>, decltype(cmp)> pq(cmp);
+    ```
+
+### `auto` & Structured Bindings (Cleaner Loop Code)
+*   Iterating over maps or pairs without verbose types:
+    ```cpp
+    for (auto& [key, val] : freq_map) { ... }        // Map iteration
+    for (auto& [dist, node] : adj[u]) { ... }        // Weighted adjacency list
+    ```
+
+### Inline Lambda Helpers (Avoid Duplicating Logic)
+*   Define short recursive helpers inline in C++14+ using `std::function`:
+    ```cpp
+    function<int(int, int)> dfs = [&](int node, int parent) -> int {
+        int depth = 0;
+        for (int child : adj[node]) {
+            if (child != parent) depth = max(depth, 1 + dfs(child, node));
+        }
+        return depth;
+    };
+    ```
+
+### Bitmask Utility Functions
+*   Count set bits (number of selected items in a mask):
+    ```cpp
+    int cnt = __builtin_popcount(mask);     // For int
+    int cnt = __builtin_popcountll(mask);   // For long long
+    ```
+*   Check if bit `i` is set: `(mask >> i) & 1`
+*   Set bit `i`: `mask | (1 << i)`
+*   Clear bit `i`: `mask & ~(1 << i)`
+
+---
+
+## 7. Most Used Ways to Initialize Each Container in C++
 
 Quick reference for the most common and fastest initialization syntax to save writing time during the OA.
 
@@ -373,4 +422,6 @@ Different C++ containers have different methods for resetting. Knowing the exact
 | Grid/Graph traversal | Runtime Error (Segfault) | Check boundary variables before accessing indices |
 | Class-based / Global variables | Wrong Answer / RE | Re-initialize/reset containers (`.clear()`, `.assign()`) inside the entry function |
 | Resetting queues/stacks/heaps | Compile Error | Re-assign to empty instance: `q = queue<int>();` |
+| `unordered_map` with many keys | TLE (hash collisions) | Switch to `map` or use a custom hash if seeing TLE on hash-based containers |
+| Counting bits in a bitmask | Verbose code / bugs | Use `__builtin_popcount(mask)` for `int`, `__builtin_popcountll` for `long long` |
 

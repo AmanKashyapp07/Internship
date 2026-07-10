@@ -1,203 +1,234 @@
-/**
- * Problem: Alphabetical Trie
- * Link: N/A
- * Category: Trie
- * 
- * Description:
- * Alphabetical trie template.
- * 
- * Logic/Approach:
- * Node structure with a size 26 array of child pointers.
- */
-
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
 #include <iostream>
-#include <vector>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
 #include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
 
-// TrieNode represents a single character node in the Trie
-struct TrieNode {
-    TrieNode* child[26] = {}; // Pointers to child nodes (a-z)
-    bool isEnd = false;       // True if a word ends at this node
-    int cntEnd = 0;           // Number of words ending exactly at this node
-    int cntPrefix = 0;        // Number of words sharing this prefix path
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define pb push_back
+#define ff first
+#define ss second
+
+const int INF = INT_MAX;
+const ll LINF = LLONG_MAX;
+const ll MOD = 1e9 + 7;
+// ------------------------------------------------------------
+// Alphabet Trie
+//
+// insert()
+// search()
+// startsWith()
+// countWordsEqualTo()
+// countWordsStartingWith()
+// erase()
+//
+// Time: O(L)
+// ------------------------------------------------------------
+
+struct Node {
+    Node* child[26] = {};
+    bool end = false;
+    int endCnt = 0; // stores the count of words that end at this node
+    int preCnt = 0; // stores the count of words that pass through this node (prefix count)
 };
 
 class Trie {
 public:
-    TrieNode* root = new TrieNode();
+    Node* root = new Node();
+    // --------------------------------------------------------
+    // Insert
+    // --------------------------------------------------------
+    void insert(string word) {
+        Node* cur = root;
 
-    // Inserts a word into the trie, updating prefix counts along the path
-    void insert(const string& word) {
-        TrieNode* node = root;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) node->child[idx] = new TrieNode();
-            node = node->child[idx];
-            node->cntPrefix++;
+        for (char c : word) {
+            int i = c - 'a';
+
+            if (!cur->child[i])
+                cur->child[i] = new Node();
+
+            cur = cur->child[i];
+            cur->preCnt++;
         }
-        node->isEnd = true;
-        node->cntEnd++;
+
+        cur->end = true;
+        cur->endCnt++;
     }
 
-    // Returns true if the exact word exists in the trie
-    bool search(const string& word) {
-        TrieNode* node = root;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) return false;
-            node = node->child[idx];
+    // --------------------------------------------------------
+    // Search
+    // --------------------------------------------------------
+    bool search(string word) {
+        Node* cur = root;
+
+        for (char c : word) {
+            int i = c - 'a';
+
+            if (!cur->child[i])
+                return false;
+
+            cur = cur->child[i];
         }
-        return node->isEnd;
+
+        return cur->end;
     }
 
-    // Returns true if there is any word starting with the given prefix
-    bool startsWith(const string& prefix) {
-        TrieNode* node = root;
-        for (char ch : prefix) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) return false;
-            node = node->child[idx];
+    // --------------------------------------------------------
+    // Prefix Exists
+    // --------------------------------------------------------
+    bool startsWith(string prefix) {
+        Node* cur = root;
+
+        for (char c : prefix) {
+            int i = c - 'a';
+
+            if (!cur->child[i])
+                return false;
+
+            cur = cur->child[i];
         }
+
         return true;
     }
 
-    // Returns how many times the exact word has been inserted
-    int countWordsEqualTo(const string& word) {
-        TrieNode* node = root;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) return 0;
-            node = node->child[idx];
-        }
-        return node->cntEnd;
-    }
+    // --------------------------------------------------------
+    // Exact Count
+    // --------------------------------------------------------
+    int countWordsEqualTo(string word) {
+        Node* cur = root;
 
-    // Returns the total number of words sharing the given prefix
-    int countWordsStartingWith(const string& prefix) {
-        TrieNode* node = root;
-        for (char ch : prefix) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) return 0;
-            node = node->child[idx];
-        }
-        return node->cntPrefix;
-    }
+        for (char c : word) {
+            int i = c - 'a';
 
-    // Decrements counts along the path to simulate deletion of a word
-    void erase(const string& word) {
-        TrieNode* node = root;
-        vector<TrieNode*> path;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!node->child[idx]) return;
-            node = node->child[idx];
-            path.push_back(node);
-        }
-        node->cntEnd--;
-        if (node->cntEnd == 0) node->isEnd = false;
-        for (auto cur : path) cur->cntPrefix--;
-    }
+            if (!cur->child[i])
+                return 0;
 
-    // Returns the longest common prefix among a list of words using Trie traversal
-    string longestCommonPrefix(const vector<string>& words) {
-    TrieNode* node = root;
-    string prefix = "";
-
-    while (true) {
-        int flag = 0;
-        int idx = -1;
-
-        for (int i = 0; i < 26; i++) {
-            if (node->child[i]) {
-                flag++;
-                idx = i;
-                if (flag > 1)
-                    break;
-            }
+            cur = cur->child[i];
         }
 
-        if (flag != 1)
-            break;
-
-        prefix += char(idx + 'a');
-        node = node->child[idx];
+        return cur->endCnt;
     }
 
-    return prefix;
-}
+    // --------------------------------------------------------
+    // Prefix Count
+    // --------------------------------------------------------
+    int countWordsStartingWith(string prefix) {
+        Node* cur = root;
+
+        for (char c : prefix) {
+            int i = c - 'a';
+
+            if (!cur->child[i])
+                return 0;
+
+            cur = cur->child[i];
+        }
+
+        return cur->preCnt;
+    }
+
+    
 };
 
-int countDistinctSubstrings(string &s)
-{
-    TrieNode* root = new TrieNode();
+// ------------------------------------------------------------
+// Count Distinct Substrings
+//
+// Every newly created trie node represents one new substring.
+// Answer = new nodes + empty string.
+// ------------------------------------------------------------
+int countDistinctSubstrings(string s) {
 
-    // Counts number of NEW nodes created.
-    // Each new node corresponds to one
-    // previously unseen distinct substring.
-    int distinctCount = 0;
+    Node* root = new Node();
+    int cnt = 0;
 
-    int n = s.size();
+    for (int i = 0; i < s.size(); i++) {
 
-    // Start every substring from index i
-    for(int i=0;i<n;i++)
-    {
-        TrieNode* node = root;
+        Node* cur = root;
 
-        // Generate all substrings starting at i
-        for(int j=i;j<n;j++)
-        {
-            int idx = s[j] - 'a';
+        for (int j = i; j < s.size(); j++) {
 
-            // First time reaching this path
-            // => new distinct substring found
-            if(node->child[idx] == nullptr)
-            {
-                node->child[idx] = new TrieNode();
+            int k = s[j] - 'a';
 
-                distinctCount++;
+            if (!cur->child[k]) {
+                cur->child[k] = new Node();
+                cnt++;
             }
 
-            node = node->child[idx];
+            cur = cur->child[k];
         }
     }
 
-    // +1 for empty substring ""
-    return distinctCount + 1;
+    return cnt + 1;
 }
 
-bool isCompleteString(string word, TrieNode* root) {
-    TrieNode* node = root;
-    for (char ch : word) {
-        int idx = ch - 'a';
-        if (!node->child[idx]) return false;
-        node = node->child[idx];
-        if (!node->isEnd) return false; // Check if the prefix is a complete word
-    }
-    return true;
-} // this checks every prefix of the word is present in the trie and is a complete word. If any prefix is not a complete word, it returns false.
+// ------------------------------------------------------------
+// Complete String
+//
+// Every prefix of word must exist as a complete word.
+// ------------------------------------------------------------
+bool isCompleteString(string word, Node* root) {
 
+    Node* cur = root;
+
+    for (char c : word) {
+
+        int i = c - 'a';
+
+        if (!cur->child[i])
+            return false;
+
+        cur = cur->child[i];
+
+        if (!cur->end)
+            return false;
+    }
+
+    return true;
+}
+
+// ------------------------------------------------------------
+// Longest Complete String
+// ------------------------------------------------------------
 string longestWord(vector<string>& words) {
 
     Trie trie;
-    for (auto& word : words) {
-        trie.insert(word);
+
+    for (auto &w : words)
+        trie.insert(w);
+
+    string ans = "";
+
+    for (auto &w : words) {
+
+        if (!isCompleteString(w, trie.root))
+            continue;
+
+        if (w.size() > ans.size() ||
+           (w.size() == ans.size() && w < ans))
+            ans = w;
     }
 
-    string longest = "";
-    for (auto& word : words) {
-        if (isCompleteString(word, trie.root)) {
-            if (word.length() > longest.length() || (word.length() == longest.length() && word < longest)) {
-                longest = word;
-            }
-        }
-    }
-    return longest;
-}
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    return 0;
+    return ans;
 }
