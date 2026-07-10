@@ -18,63 +18,39 @@ using ll = long long;
 
 int n;
 vector<vector<int>> adj;
-vector<ll> subtreeSize;
-vector<ll> ans;
+vector<ll> sz, dist;
+// dist[u] = sum of distances from node u to all other nodes
+// sz[u] = size of subtree rooted at u
+void dfs1(int u, int p, int d) {
+    dist[1] += d; 
+    sz[u] = 1;
+    for (int v : adj[u]) if(v!=p) dfs1(v, u, d + 1), sz[u] += sz[v];
+} // build dist[1] and sz[u] for all u
 
-void dfs1(int node, int parent, int depth)
-{
-    ans[1] += depth;
-    subtreeSize[node] = 1;
-
-    for (int child : adj[node])
-    {
-        if (child == parent)
-            continue;
-
-        dfs1(child, node, depth + 1);
-        subtreeSize[node] += subtreeSize[child];
-    }
+void dfs2(int u, int p) {
+    for(int v : adj[u]) if(v!=p) dist[v] = dist[u] - sz[v] + (n - sz[v]), dfs2(v, u);
 }
 
-void dfs2(int node, int parent)
-{
-    for (int child : adj[node])
-    {
-        if (child == parent)
-            continue;
-
-        ans[child] = ans[node] + n - 2 * subtreeSize[child];
-        dfs2(child, node);
-    }
-}
-
-int main()
-{
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     cin >> n;
-
-    adj.resize(n + 1);
-    subtreeSize.resize(n + 1);
-    ans.resize(n + 1, 0);
-
-    for (int i = 0; i < n - 1; i++)
-    {
+    adj.assign(n + 1, {});
+    sz.assign(n + 1, 0);
+    dist.assign(n + 1, 0);
+    for (int i = 0; i < n - 1; i++) {
         int u, v;
         cin >> u >> v;
-
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
 
-    dfs1(1, 0, 0);
-    dfs2(1, 0);
+    dfs1(1, 0, 0); // initial parent is 0 (non-existent)
+    dfs2(1, 0); // starting from root node 1, with parent 0 (non-existent)
 
     for (int i = 1; i <= n; i++)
-    {
-        cout << ans[i] << " ";
-    }
+        cout << dist[i] << " ";
     cout << '\n';
 
     return 0;

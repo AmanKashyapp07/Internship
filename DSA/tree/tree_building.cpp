@@ -1,21 +1,7 @@
-/**
- * Problem: Binary Tree Reconstruction
- * Category: Tree Data Structure / Divide and Conquer
- * * Description:
- * Reconstructs a unique binary tree from combination sequences:
- * 1. Inorder + Postorder Traversals
- * 2. Preorder + Inorder Traversals
- * * Approach:
- * Uses a hash map to look up root element split indices in O(1) time. 
- * Divides array ranges using calculated subtree sizes to build the tree recursively.
- */
-
 #include <vector>
 #include <unordered_map>
-
 using namespace std;
 
-// Definition for a binary tree node (Included for completeness)
 struct TreeNode {
     int val;
     TreeNode *left, *right;
@@ -23,119 +9,68 @@ struct TreeNode {
 };
 
 class Solution {
-private:
-    unordered_map<int, int> pos; // Fast lookup cache for Inorder element indices
+    unordered_map<int, int> pos;
 
-    // =========================================================================
-    // HELPER METHODS (DIVIDE & CONQUER RECURSION)
-    // =========================================================================
+    TreeNode* buildPost(vector<int>& in, vector<int>& post,
+                        int il, int ir, int pl, int pr) {
+        if (il > ir) return nullptr;
 
-    /**
-     * Recursive builder for Inorder + Postorder
-     * - Inorder:   [Left Subtree] -> [Root] -> [Right Subtree]
-     * - Postorder: [Left Subtree] -> [Right Subtree] -> [Root]
-     */
-    TreeNode* buildFromInPost(const vector<int>& inorder, const vector<int>& postorder,
-                              int inL, int inR,
-                              int postL, int postR) {
-        if (inL > inR) return nullptr;
+        int val = post[pr];
+        TreeNode* root = new TreeNode(val);
 
-        // The last element of Postorder is always the root of the current subtree
-        int rootVal = postorder[postR];
-        TreeNode* root = new TreeNode(rootVal);
+        int mid = pos[val];
+        int left = mid - il;
 
-        // Find the boundary split point in the Inorder array
-        int mid = pos[rootVal];
-        int leftSize = mid - inL;
+        root->left = buildPost(in, post,
+                               il, mid - 1,
+                               pl, pl + left - 1);
 
-        // Build Left Subtree
-        root->left = buildFromInPost(
-            inorder, postorder,
-            inL, mid - 1,
-            postL, postL + leftSize - 1
-        );
-
-        // Build Right Subtree
-        root->right = buildFromInPost(
-            inorder, postorder,
-            mid + 1, inR,
-            postL + leftSize, postR - 1
-        );
+        root->right = buildPost(in, post,
+                                mid + 1, ir,
+                                pl + left, pr - 1);
 
         return root;
     }
 
-    /**
-     * Recursive builder for Preorder + Inorder
-     * - Preorder: [Root] -> [Left Subtree] -> [Right Subtree]
-     * - Inorder:  [Left Subtree] -> [Root] -> [Right Subtree]
-     */
-    TreeNode* buildFromPreIn(const vector<int>& preorder, const vector<int>& inorder,
-                             int preL, int preR,
-                             int inL, int inR) {
-        if (preL > preR) return nullptr;
+    TreeNode* buildPre(vector<int>& pre, vector<int>& in,
+                       int pl, int pr, int il, int ir) {
+        if (pl > pr) return nullptr;
 
-        // The first element of Preorder is always the root of the current subtree
-        int rootVal = preorder[preL];
-        TreeNode* root = new TreeNode(rootVal);
+        int val = pre[pl];
+        TreeNode* root = new TreeNode(val);
 
-        // Find the boundary split point in the Inorder array
-        int mid = pos[rootVal];
-        int leftSize = mid - inL;
+        int mid = pos[val];
+        int left = mid - il;
 
-        // Build Left Subtree
-        root->left = buildFromPreIn(
-            preorder, inorder,
-            preL + 1, preL + leftSize,
-            inL, mid - 1
-        );
+        root->left = buildPre(pre, in,
+                              pl + 1, pl + left,
+                              il, mid - 1);
 
-        // Build Right Subtree
-        root->right = buildFromPreIn(
-            preorder, inorder,
-            preL + leftSize + 1, preR,
-            mid + 1, inR
-        );
+        root->right = buildPre(pre, in,
+                               pl + left + 1, pr,
+                               mid + 1, ir);
 
         return root;
     }
 
 public:
-    // =========================================================================
-    // PUBLIC API INTERFACES
-    // =========================================================================
-
-    /**
-     * Reconstruct Tree using Inorder and Postorder arrays.
-     * Time Complexity: O(N) | Space Complexity: O(N) for the lookup map
-     */
-    TreeNode* buildTreeFromInorderAndPostorder(vector<int>& inorder, vector<int>& postorder) {
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
         pos.clear();
-        for (int i = 0; i < inorder.size(); i++) {
+        for (int i = 0; i < inorder.size(); i++)
             pos[inorder[i]] = i;
-        }
 
-        return buildFromInPost(
-            inorder, postorder,
-            0, inorder.size() - 1,
-            0, postorder.size() - 1
-        );
+        return buildPost(inorder, postorder,
+                         0, inorder.size() - 1,
+                         0, postorder.size() - 1);
     }
 
-    /**
-     * Reconstruct Tree using Preorder and Inorder arrays.
-     * Time Complexity: O(N) | Space Complexity: O(N) for the lookup map
-     */
-    TreeNode* buildTreeFromPreorderAndInorder(vector<int>& preorder, vector<int>& inorder) {
+    TreeNode* buildTreePre(vector<int>& preorder, vector<int>& inorder) {
         pos.clear();
-        for (int i = 0; i < inorder.size(); i++) {
+        for (int i = 0; i < inorder.size(); i++)
             pos[inorder[i]] = i;
-        }
 
-        return buildFromPreIn(
-            preorder, inorder,
-            0, preorder.size() - 1,
-            0, inorder.size() - 1
-        );
+        return buildPre(preorder, inorder,
+                        0, preorder.size() - 1,
+                        0, inorder.size() - 1);
     }
 };
