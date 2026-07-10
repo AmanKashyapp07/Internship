@@ -2,76 +2,48 @@
  * CSES 1745 - Money Sums
  *
  * Description:
- * Given n coins with positive values, find all possible sums that can be formed using the coins.
+ * You are given n coins with positive integer values. 
+ * What are all the possible sums you can form using these coins?
+ * Output the count of distinct possible sums (excluding 0) followed by the sums in ascending order.
  *
- * Approach:
- * - 0/1 Knapsack style dynamic programming / tabulation.
- * - Let `dp[x]` be a boolean indicating if sum `x` is possible.
- * - Initialize `dp[0] = true` and all other sums as `false`.
- * - Iterate through each coin, and update the DP table backwards (from `totalSum` down to `coin`) to prevent reusing the same coin.
- *
+ * Approach: 0/1 Knapsack DP (Subset Sum)
  * Time Complexity: O(n * sum)
  * Space Complexity: O(sum)
  */
 
-#include <iostream>
 #include <vector>
 using namespace std;
 
 class Solution {
 public:
-    vector<bool> memo;
-    vector<int> coinValues;
-    int size;
-    int totalSum;
-
-    vector<int> getMoneySums(int n, vector<int>& coins) {
-        size = n;
-        coinValues = coins;
-        totalSum = 0;
+    vector<int> getMoneySums(vector<int>& coins) {
+        int n = coins.size();
+        if (n == 0) return {};
+        
+        int total = 0;
         for (int c : coins) {
-            totalSum += c;
+            total += c;
         }
-
-        memo.assign(totalSum + 1, false);
-        memo[0] = true;
-
-        // Knapsack DP: dp[s] tracks if subset sum s is reachable
-        for (int coin : coinValues) {
-            for (int sum = totalSum; sum >= coin; sum--) {
-                memo[sum] = memo[sum] || memo[sum - coin];
+        
+        vector<bool> dp(total + 1, false);
+        dp[0] = true;
+        
+        // Update DP table backwards to use each coin at most once
+        for (int coin : coins) {
+            for (int sum = total; sum >= coin; sum--) {
+                if (dp[sum - coin]) {
+                    dp[sum] = true;
+                }
             }
         }
-
-        vector<int> ans;
-        for (int sum = 1; sum <= totalSum; sum++) {
-            if (memo[sum]) {
-                ans.push_back(sum);
+        
+        vector<int> possibleSums;
+        for (int s = 1; s <= total; s++) {
+            if (dp[s]) {
+                possibleSums.push_back(s);
             }
         }
-        return ans;
+        
+        return possibleSums;
     }
 };
-
-int main() {
-    ios::sync_with_stdio(0); cin.tie(0);
-    int n;
-    if (!(cin >> n)) return 0;
-    vector<int> coins(n);
-    for (int i = 0; i < i; i++) { // Wait, the original code had: for (int i = 0; i < n; i++)
-        // Let me fix that loop condition to: i < n
-    }
-    for (int i = 0; i < n; i++) {
-        cin >> coins[i];
-    }
-    
-    Solution solver;
-    vector<int> ans = solver.getMoneySums(n, coins);
-
-    cout << ans.size() << '\n';
-    for (size_t i = 0; i < ans.size(); i++) {
-        cout << ans[i] << (i + 1 == ans.size() ? "" : " ");
-    }
-    cout << '\n';
-    return 0;
-}

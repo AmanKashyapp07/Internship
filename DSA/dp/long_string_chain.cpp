@@ -27,22 +27,23 @@ class Solution {
 public:
     vector<string> dictionary;
     unordered_map<string, int> memo;
-
+    bool comparator(const string &a, const string &b) {
+        return a.length() < b.length();
+    }
     int longestStrChain(vector<string> &words) {
         dictionary = words;
-        // Sort words by length to process smaller words first
-        sort(dictionary.begin(), dictionary.end(), [](const string &a, const string &b) {
-            return a.length() < b.length();
-        });
+        sort(dictionary.begin(), dictionary.end(), comparator);
         memo.clear();
         int ans = 1;
         // DP state: memo[w] stores the longest chain ending at word w
         for (const string &w : dictionary) {
             memo[w] = 1;
-            for (size_t i = 0; i < w.length(); i++) {
-                string prev = w.substr(0, i) + w.substr(i + 1); // Delete i-th character
-                if (memo.count(prev))
-                    memo[w] = max(memo[w], memo[prev] + 1); // Transition
+            int n = w.length();
+            for(int i=0;i<n;i++){
+                string before = w.substr(0, i) + w.substr(i + 1); // string from [0,i-1] + string from [i+1,n-1]
+                if (memo.find(before) != memo.end()) {
+                   memo[w] = max(memo[w], memo[before] + 1);
+                }
             }
             ans = max(ans, memo[w]);
         }

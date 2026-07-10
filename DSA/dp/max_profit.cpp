@@ -26,47 +26,25 @@ using ll = long long;
 
 class Solution {
 public:
-    vector<pair<pair<int, int>, int>> pairList;
-    vector<ll> memo;
-
-    ll solve(int i) {
-        if (i >= (int)pairList.size()) return 0;
-        if (memo[i] != -1) return memo[i];
-
-        auto target = make_pair(make_pair(pairList[i].first.second, 0), 0);
-        int nextIndex = lower_bound(pairList.begin() + i + 1, pairList.end(), target) - pairList.begin();
-
-        ll includeProfit = pairList[i].second + solve(nextIndex);
-        ll excludeProfit = solve(i + 1);
-
-        return memo[i] = max(includeProfit, excludeProfit);
-    }
-
-    ll getMaxProfit(vector<pair<pair<int, int>, int>>& jobs) {
-        pairList = jobs;
-        sort(pairList.begin(), pairList.end());
-        int n = pairList.size();
-        memo.assign(n, -1);
-        return solve(0);
+    long long getMaxProfit(vector<pair<pair<int, int>, int>>& jobs) {
+        sort(jobs.begin(), jobs.end());
+        int n = jobs.size();
+        
+        vector<int> start(n), end(n), reward(n);
+        for (int i = 0; i < n; i++) {
+            start[i] = jobs[i].first.first;
+            end[i] = jobs[i].first.second;
+            reward[i] = jobs[i].second;
+        }
+        
+        vector<long long> dp(n + 1, 0);
+        
+        for (int i = n - 1; i >= 0; i--) {
+            int next = lower_bound(start.begin(), start.end(), end[i]) - start.begin();
+            dp[i] = max(dp[i + 1], reward[i] + dp[next]);
+        }
+        
+        return dp[0];
     }
 };
 
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n;
-    if (!(cin >> n)) return 0;
-
-    vector<pair<pair<int, int>, int>> jobs;
-    for (int i = 0; i < n; i++) {
-        int s, e, p;
-        cin >> s >> e >> p;
-        jobs.push_back({{s, e}, p});
-    }
-
-    Solution solver;
-    cout << solver.getMaxProfit(jobs) << '\n';
-
-    return 0;
-}

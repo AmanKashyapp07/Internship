@@ -1,19 +1,14 @@
 /**
  * LeetCode 526 - Beautiful Arrangement
  *
- * Description:
- * Suppose you have n integers labeled 1 to n. A permutation of these n integers perm (1-indexed) is
- * considered a beautiful arrangement if for every 1 <= i <= n, either perm[i] is divisible by i or i is divisible by perm[i].
- * Given an integer n, return the number of beautiful arrangements you can construct.
+ * Suppose you have n integers labeled from 1 to n.
+ * A permutation perm (1-indexed) is beautiful if for every i (1 <= i <= n),
+ * either perm[i] divides i or i divides perm[i].
  *
- * Approach:
- * - Bitmask Dynamic Programming with Memoization.
- * - Let `solve(mask)` compute the number of beautiful arrangements for the prefix of length `i = __builtin_popcount(mask)`.
- * - Iterate through each number `num` (0-based) from 0 to n - 1. If it's not placed yet:
- *   - Check if `(num + 1) % (i + 1) == 0` or `(i + 1) % (num + 1) == 0`.
- *   - If so, transition recursively to `solve(mask | (1 << num))`.
+ * Return the number of beautiful arrangements that can be constructed.
  *
- * Time Complexity: O(2^n * n)
+ * Approach: Bitmask DP + Memoization
+ * Time Complexity: O(n * 2^n)
  * Space Complexity: O(2^n)
  */
 
@@ -22,37 +17,37 @@ using namespace std;
 
 class Solution {
 public:
-    int size;
+    int n;
     vector<int> memo;
 
-    int solve(int mask) {
-        int i = __builtin_popcount(mask);   // current position (0-based)
+    int dp(int mask) {
+        int pos = __builtin_popcount(mask); // current position to fill (0-based)
 
-        if (i == size)
+        if (pos == n) {
             return 1;
+        }
 
-        if (memo[mask] != -1)
+        if (memo[mask] != -1) {
             return memo[mask];
+        }
 
-        int ans = 0;
-
-        for (int num = 0; num < size; num++) {   // numbers are 0-based
-            if ((mask & (1 << num)) == 0) {
-
-                // actual number = num + 1
-                // actual position = i + 1
-                if ((num + 1) % (i + 1) == 0 || (i + 1) % (num + 1) == 0) {
-                    ans += solve(mask | (1 << num));
+        int count = 0;
+        for (int num = 0; num < n; num++) {
+            if ((mask & (1 << num)) == 0) { // number not used yet
+                int val = num + 1;
+                int idx = pos + 1;
+                if (val % idx == 0 || idx % val == 0) {
+                    count += dp(mask | (1 << num));
                 }
             }
         }
 
-        return memo[mask] = ans;
+        return memo[mask] = count;
     }
 
     int countArrangement(int n) {
-        size = n;
+        this->n = n;
         memo.assign(1 << n, -1);
-        return solve(0);
+        return dp(0);
     }
 };

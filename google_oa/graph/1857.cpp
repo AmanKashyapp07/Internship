@@ -17,6 +17,13 @@
  * Time Complexity: O((n + m) * 26)
  * Space Complexity: O(n * 26)
  */
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <numeric>
+#include <vector>
+
+using namespace std;
 
 class Solution {
 public:

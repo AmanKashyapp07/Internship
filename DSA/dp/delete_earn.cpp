@@ -8,8 +8,8 @@
  *
  * Approach:
  * - Reduce the problem to House Robber style DP.
- * - Aggregate the values of nums into a frequency / points sum array `sum` where `sum[i]` represents total points from all occurrences of `i`.
- * - Perform 1D DP: `dp[i] = max(dp[i-1], dp[i-2] + sum[i])`.
+ * - Aggregate the values of nums into a frequency / points sum array `points` where `points[i]` represents total points from all occurrences of `i`.
+ * - Reuse the House Robber solution (memoized recursive DP) on the `points` array.
  *
  * Time Complexity: O(n + maxVal) where maxVal is the maximum element in nums.
  * Space Complexity: O(maxVal)
@@ -22,7 +22,30 @@ using namespace std;
 
 class Solution {
 public:
-    vector<int> points;
+    int robHelper(int i, const vector<int>& nums, vector<int>& dp) {
+        // Base cases
+        if (i == 0) return nums[0];
+        if (i == 1) return max(nums[0], nums[1]);
+
+        // If already computed, return the result
+        if (dp[i] != -1) return dp[i];
+
+        // Recursive relation: max of skipping or robbing the current house
+        dp[i] = max(robHelper(i - 1, nums, dp), nums[i] + robHelper(i - 2, nums, dp));
+        return dp[i];
+    }
+
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0; // No houses to rob
+        if (n == 1) return nums[0]; // Only one house
+
+        // DP array to memoize results
+        vector<int> dp(n, -1);
+
+        // Start from the last house
+        return robHelper(n - 1, nums, dp);
+    }
 
     int deleteAndEarn(vector<int>& nums) {
         if (nums.empty()) return 0;
@@ -31,21 +54,12 @@ public:
         int maxVal = *max_element(nums.begin(), nums.end());
         
         // Accumulate total points possible for each number
-        points.assign(maxVal + 1, 0);
+        vector<int> points(maxVal + 1, 0);
         for (int num : nums) {
             points[num] += num;
         }
         
-        // Standard House Robber space-optimized DP
-        int prev2 = 0; // Represents dp[i-2]
-        int prev1 = 0; // Represents dp[i-1]
-        
-        for (int i = 0; i <= maxVal; ++i) {
-            int current = max(prev1, prev2 + points[i]);
-            prev2 = prev1;
-            prev1 = current;
-        }
-        
-        return prev1;
+        // Reuse House Robber solution
+        return rob(points);
     }
 };

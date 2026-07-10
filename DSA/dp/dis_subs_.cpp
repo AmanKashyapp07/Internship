@@ -1,15 +1,19 @@
 /**
- * LeetCode 115 - Distinct Subsequences (Memoized)
+ * LeetCode 115 - Distinct Subsequences (Tabulation)
  *
  * Description:
  * Given two strings s and t, return the number of distinct subsequences of s which equals t.
  *
  * Approach:
- * - Dynamic Programming with Memoization.
- * - Let `solve(i, j)` return the number of distinct subsequences of `s[0...i]` matching `t[0...j]`.
+ * - Dynamic Programming with Tabulation (Bottom-Up).
+ * - dp[i][j] = number of distinct subsequences of s[0...i-1] that match t[0...j-1]
+ * - Base cases:
+ *   - dp[0][0] = 1 (empty string has one way to form empty subsequence)
+ *   - dp[i][0] = 1 for all i (empty pattern can always be formed)
+ *   - dp[0][j] = 0 for j > 0 (non-empty pattern cannot be formed from empty string)
  * - Transition:
- *   - Always try to skip `s[i]`: `solve(i - 1, j)`.
- *   - If `s[i] == t[j]`, we can also match them: `solve(i - 1, j - 1)`.
+ *   - dp[i][j] = dp[i-1][j]  (skip s[i-1])
+ *   - If s[i-1] == t[j-1], add dp[i-1][j-1]
  *
  * Time Complexity: O(m * n) where m = s.length(), n = t.length().
  * Space Complexity: O(m * n)
@@ -54,39 +58,34 @@ const ll MOD = 1e9 + 7;
 
 class Solution {
 public:
-    string str;
-    string pattern;
-    int size;
-    int cols;
-    vector<vector<long long>> memo;
-
-    int solve(int i, int j) {
-        if (j < 0)
-            return 1;
-
-        if (i < 0)
-            return 0;
-
-        if (memo[i][j] != -1)
-            return memo[i][j];
-
-        long long ans = solve(i - 1, j);
-
-        if (str[i] == pattern[j])
-            ans += solve(i - 1, j - 1);
-
-        return memo[i][j] = ans;
-    }
-
-    int numDistinct(string str1, string str2) {
-        str = str1;
-        pattern = str2;
-
-        size = str.size();
-        cols = pattern.size();
-
-        memo.assign(size, vector<long long>(cols, -1));
-
-        return solve(size - 1, cols - 1);
+    int numDistinct(string s, string t) {
+        int m = s.size();
+        int n = t.size();
+        
+        if (n == 0) return 1;
+        if (m == 0) return 0;
+        
+        // dp[i][j] = number of ways to form t[0..j-1] using s[0..i-1]
+        vector<vector<long long>> dp(m + 1, vector<long long>(n + 1, 0));
+        
+        // Base cases
+        for (int i = 0; i <= m; ++i) {
+            dp[i][0] = 1;  // Empty pattern can always be formed
+        }
+        // dp[0][j] remains 0 for j > 0 (already initialized)
+        
+        for (int i = 1; i <= m; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                // Skip current character of s
+                dp[i][j] = dp[i - 1][j];
+                
+                // If characters match, add the ways where we use this character
+                if (s[i - 1] == t[j - 1]) {
+                    dp[i][j] += dp[i - 1][j - 1];
+                }
+            }
+        }
+        
+        return dp[m][n];
     }
 };

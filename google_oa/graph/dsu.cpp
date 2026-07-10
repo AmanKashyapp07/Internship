@@ -25,7 +25,7 @@ struct DSU {
     vector<int> parent, sz;
     DSU(int n) {
         parent.resize(n + 1); sz.assign(n + 1, 1);
-        iota(parent.begin(), parent.end(), 0);
+        for(int i=1;i<=n;i++) parent[i] = i; // 1-based indexing
     }
     int find(int x) {
         return parent[x] == x ? x : parent[x] = find(parent[x]); // Path compression
@@ -36,7 +36,7 @@ struct DSU {
         if (sz[a] < sz[b]) swap(a, b);
         parent[b] = a; sz[a] += sz[b]; // Union by size
         return sz[a];
-    }
+    } // returns the size of the new component after uniting a and b
 };
 
 int main() {
