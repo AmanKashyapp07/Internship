@@ -66,10 +66,6 @@ public:
             q.pop();
             processed++;
 
-            // Update global answer
-            for (int c = 0; c < 26; c++)
-                ans = max(ans, dp[u][c]);
-
             // Relax every outgoing edge
             for (int v : graph[u]) {
 
@@ -94,7 +90,7 @@ public:
                     q.push(v);
             }
         }
-
+        for(int i = 0; i < n; i++) for(int c = 0; c < 26; c++) ans = max(ans, dp[i][c]);
         // Cycle exists if not all nodes were processed
         return processed == n ? ans : -1;
     }

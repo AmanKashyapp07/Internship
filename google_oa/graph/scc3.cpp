@@ -1,66 +1,112 @@
 /**
  * CSES 1686 - Coin Collector
  *
- * Description:
- * Each room has some coins. Find the maximum coins you can collect by traversing rooms.
- * You can choose where to start and end.
+ * Problem Statement:
+ * You are given a directed graph where each vertex contains some coins.
+ * You may start and end at any vertex while following directed edges.
+ * Find the maximum number of coins that can be collected.
  *
  * Approach:
- * - Condense the directed graph into a DAG of Strongly Connected Components (SCC) using Kosaraju's algorithm.
- * - The sum of coins of all nodes in an SCC forms the weight of the SCC node.
- * - Build the condensed DAG where edges exist between different SCC components.
- * - Compute the maximum weight path on the DAG using DP and Topological Sort.
+ * - Use Kosaraju's algorithm to find all Strongly Connected Components (SCCs).
+ * - Every SCC becomes a single node whose weight is the sum of coins in that SCC.
+ * - Build the condensed graph, which is a Directed Acyclic Graph (DAG).
+ * - Run DP on the DAG to find the maximum-weight path.
  *
- * Time Complexity: O(V + E)
- * Space Complexity: O(V + E)
+ * Time Complexity: O(n + m)
+ * Space Complexity: O(n + m)
  */
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include <algorithm>
+
 using namespace std;
 
 vector<vector<int>> g, rg;
 vector<bool> vis;
-vector<int> comp, order;
+vector<int> comp;
+stack<int>s;
 
 void dfs1(int u) {
     vis[u] = true;
-    for (int v : g[u]) if (!vis[v]) dfs1(v);
-    order.push_back(u);
+    for (int v : g[u])
+        if (!vis[v])
+            dfs1(v);
+
+    s.push(u);
 }
 
 void dfs2(int u, int id) {
     comp[u] = id;
+
     for (int v : rg[u]) if (!comp[v]) dfs2(v, id);
 }
 
-long long solveDAG(int u, const vector<long long>& weight, const vector<vector<int>>& dag, vector<long long>& dp) {
+long long dfs(int u, vector<vector<int>> &dag, vector<long long> &weight, vector<long long> &dp) {
     if (dp[u] != -1) return dp[u];
-    long long mx = 0;
-    for (int v : dag[u]) mx = max(mx, solveDAG(v, weight, dag, dp));
-    return dp[u] = weight[u] + mx; // DP state transition: dp[u] = weight[u] + max(dp[v])
+
+    long long ans = weight[u];
+
+    for (int v : dag[u])
+        ans = max(ans, weight[u] + dfs(v, dag, weight, dp));
+
+    return dp[u] = ans;
 }
 
 int main() {
-    ios::sync_with_stdio(0); cin.tie(0);
-    int n, m; cin >> n >> m;
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
     vector<long long> coins(n + 1);
-    for (int i = 1; i <= n; i++) cin >> coins[i];
-    g.resize(n + 1); rg.resize(n + 1);
-    for (int i = 0, u, v; i < m; i++) { cin >> u >> v; g[u].push_back(v); rg[v].push_back(u); }
-    vis.assign(n + 1, false);
-    for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
-    comp.assign(n + 1, 0); reverse(order.begin(), order.end());
-    int scc = 0;
-    for (int u : order) if (!comp[u]) dfs2(u, ++scc); // Condense graph into SCCs
-    vector<long long> weight(scc + 1, 0);
-    for (int i = 1; i <= n; i++) weight[comp[i]] += coins[i];
-    vector<vector<int>> dag(scc + 1);
-    for (int u = 1; u <= n; u++) {
-        for (int v : g[u]) if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]); // Build DAG of components
+
+    for (int i = 1; i <= n; i++)
+        cin >> coins[i];
+
+    g.resize(n + 1);
+    rg.resize(n + 1);
+
+    while (m--) {
+        int u, v;
+        cin >> u >> v;
+        g[u].push_back(v);
+        rg[v].push_back(u);
     }
-    vector<long long> dp(scc + 1, -1); long long ans = 0;
-    for (int i = 1; i <= scc; i++) ans = max(ans, solveDAG(i, weight, dag, dp)); // Find max path in DAG
+
+    vis.assign(n + 1, false);
+
+    for (int i = 1; i <= n; i++)
+        if (!vis[i])
+            dfs1(i);
+
+    
+    comp.assign(n + 1, 0);
+    int scc = 0;
+
+    while (!s.empty()) {
+        int u = s.top();
+        s.pop();
+
+        if (comp[u]) continue;
+
+        scc++;
+        dfs2(u, scc);
+    }
+
+    vector<long long> weight(scc + 1); // weight[i] = sum of coins in component i
+
+    for (int i = 1; i <= n; i++)  weight[comp[i]] += coins[i];
+
+    vector<vector<int>> dag(scc + 1);
+
+    for (int u = 1; u <= n; u++) for (int v : g[u]) if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
+
+    vector<long long> dp(scc + 1, -1);
+
+    long long ans = 0;
+    for (int i = 1; i <= scc; i++) ans = max(ans, dfs(i, dag, weight, dp));
+
     cout << ans << '\n';
 }

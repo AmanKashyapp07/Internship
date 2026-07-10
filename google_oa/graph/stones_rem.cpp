@@ -14,7 +14,11 @@
  * Space Complexity: O(N)
  */
 
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+
 using namespace std;
 
 class DSU {
@@ -27,9 +31,7 @@ public:
     }
 
     int find(int x) {
-        if (parent[x] != x)
-            parent[x] = find(parent[x]);
-        return parent[x];
+       return (parent[x] == x) ? x : parent[x] = find(parent[x]);
     }
 
     void unite(int u, int v) {
@@ -60,10 +62,7 @@ public:
         
         int components = 0;
         
-        for (int node : used) {
-            if (dsu.find(node) == node)
-                components++;
-        }
+        for (int node : used) if (dsu.find(node) == node) components++;
         
         return stones.size() - components;
     }

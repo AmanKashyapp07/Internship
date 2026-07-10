@@ -1,79 +1,40 @@
-/**
- * CSES 1194 - Monsters
- *
- * Description:
- * You are in a grid with monsters and must escape to the boundary.
- * Monsters move simultaneously. Find if you can escape, and if so, print the path.
- *
- * Approach:
- * - Perform Multi-source BFS starting from all monster locations to compute the minimum time `monster_dist[r][c]` at which a monster can reach each cell.
- * - Perform a single BFS from your starting point 'A' to calculate your distance `my_dist[r][c]`.
- * - You can only move to a cell if `my_dist[r][c] < monster_dist[r][c]`.
- * - If you reach the boundary, backtrack using parent pointers to output the path.
- *
- * Time Complexity: O(R * C)
- * Space Complexity: O(R * C)
- */
 
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
 #include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include <vector>
-
+#include <numeric>
+#include <algorithm>
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
-
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
-
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
 
 
+const int INF = 1e9;
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     int n, m;
-    cin >> n >> m;
+    cin >> n >>m;
 
     vector<string> g(n);
     for (auto &row : g) cin >> row;
 
-    const int INF = 1e9;
-    vector<vector<int>> md(n, vector<int>(m, INF));
-    queue<pair<int,int>> q;
+    vector<vector<int>> monster(n, vector<int>(m, INF));
+    vector<vector<int>> dist(n, vector<int>(m, INF));
+    vector<vector<pair<int,int>>> parent(n, vector<pair<int,int>>(m, {-1, -1}));
+    vector<vector<char>> move(n, vector<char>(m));
 
+    queue<pair<int,int>> q;
     pair<int,int> start;
 
+    int dr[] = {-1, 1, 0, 0};
+    int dc[] = {0, 0, -1, 1};
+    char dir[] = {'U', 'D', 'L', 'R'};
+
+    // Read starting positions
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             if (g[i][j] == 'M') {
-                md[i][j] = 0;
+                monster[i][j] = 0;
                 q.push({i, j});
             }
             if (g[i][j] == 'A')
@@ -81,30 +42,21 @@ int main() {
         }
     }
 
-    int dr[] = {-1, 1, 0, 0};
-    int dc[] = {0, 0, -1, 1};
-
     // Multi-source BFS from monsters
     while (!q.empty()) {
         auto [r, c] = q.front();
         q.pop();
 
         for (int k = 0; k < 4; k++) {
-            int nr = r + dr[k];
-            int nc = c + dc[k];
+            int nr = r + dr[k], nc = c + dc[k];
 
             if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
-            if (g[nr][nc] == '#') continue;
-            if (md[nr][nc] != INF) continue;
+            if (g[nr][nc] == '#' || monster[nr][nc] != INF) continue;
 
-            md[nr][nc] = md[r][c] + 1;
+            monster[nr][nc] = monster[r][c] + 1;
             q.push({nr, nc});
         }
     }
-
-    vector<vector<int>> dist(n, vector<int>(m, INF));
-    vector<vector<pair<int,int>>> par(n, vector<pair<int,int>>(m, {-1, -1}));
-    vector<vector<char>> moveDir(n, vector<char>(m));
 
     q.push(start);
     dist[start.first][start.second] = 0;
@@ -120,23 +72,17 @@ int main() {
             break;
         }
 
-        char dir[] = {'U', 'D', 'L', 'R'};
-
         for (int k = 0; k < 4; k++) {
-            int nr = r + dr[k];
-            int nc = c + dc[k];
-
-            if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
-            if (g[nr][nc] == '#') continue;
-            if (dist[nr][nc] != INF) continue;
-
+            int nr = r + dr[k], nc = c + dc[k];
             int nd = dist[r][c] + 1;
 
-            if (nd >= md[nr][nc]) continue; // If the monster can reach this cell before or at the same time as the player, skip it.
+            if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
+            if (g[nr][nc] == '#' || dist[nr][nc] != INF) continue;
+            if (nd >= monster[nr][nc]) continue; // if the monster can reach this cell before or at the same time as us, we cannot go there
 
             dist[nr][nc] = nd;
-            par[nr][nc] = {r, c};
-            moveDir[nr][nc] = dir[k];
+            parent[nr][nc] = {r, c};
+            move[nr][nc] = dir[k];
             q.push({nr, nc});
         }
     }
@@ -147,15 +93,12 @@ int main() {
     }
 
     string path;
-    auto [r, c] = end;
-
-    while (make_pair(r, c) != start) {
-        path.push_back(moveDir[r][c]);
-        auto [pr, pc] = par[r][c];
-        r = pr;
-        c = pc;
+    auto cur = end;
+    while(cur != start) {
+        auto [r, c] = cur;
+        path += move[r][c];
+        cur = parent[r][c];
     }
-
     reverse(path.begin(), path.end());
 
     cout << "YES\n";

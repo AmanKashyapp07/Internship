@@ -41,9 +41,11 @@ int main() {
     ios::sync_with_stdio(0); cin.tie(0);
     int n, m; cin >> n >> m;
     g.resize(n + 1); rg.resize(n + 1);
+
     for (int i = 0, u, v; i < m; i++) { cin >> u >> v; g[u].push_back(v); rg[v].push_back(u); }
     vis.assign(n + 1, false);
     for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
+    
     vis.assign(n + 1, false);
     vector<vector<int>> sccs;
     // Extract SCC components in stack order
@@ -55,6 +57,7 @@ int main() {
         dfs2(u, comp);
         sccs.push_back(comp);
     }
+    
     if (sccs.size() == 1) { cout << "YES\n"; return 0; }
     cout << "NO\n" << sccs[1][0] << ' ' << sccs[0][0] << '\n'; // Route fails from component 2 root to component 1 root
 }

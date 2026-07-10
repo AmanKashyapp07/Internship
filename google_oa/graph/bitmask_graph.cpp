@@ -1,19 +1,60 @@
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define pb push_back
+#define ff first
+#define ss second
+
+const int INF = INT_MAX;
+const ll LINF = LLONG_MAX;
+const ll MOD = 1e9 + 7;
+
+
 /**
- * LeetCode 847 - Shortest Path Visiting All Nodes
+ * LeetCode 847. Shortest Path Visiting All Nodes
  *
- * Description:
- * You have an undirected, connected graph of n nodes. Return the length of the shortest path
- * that visits every node. You may start and stop at any node, and repeat nodes and edges.
+ * Idea:
+ * BFS on state = (current node, visited mask).
  *
- * Approach:
- * - Perform Multi-Source BFS on the state space.
- * - State is represented as a pair: (current_node, visited_nodes_mask).
- * - Start the BFS from every node with its initial mask (1 << node).
- * - Process neighbors by updating the bitmask.
- * - The first state popped from the queue with a full mask (all bits set to 1) represents the shortest path.
+ * State:
+ *   node -> current position
+ *   mask -> bitmask of visited nodes
  *
- * Time Complexity: O(n * 2^n)
- * Space Complexity: O(n * 2^n)
+ * Start BFS from every node (multi-source BFS).
+ * Each move updates:
+ *   newMask = mask | (1 << neighbor)
+ *
+ * The first time we reach mask == (1<<n)-1,
+ * we have visited every node in the shortest possible path.
+ *
+ * Time:  O((V + E) * 2^V)
+ * Space: O(V * 2^V)
  */
 
 class Solution {
@@ -36,8 +77,7 @@ public:
         }
 
         int steps = 0;
-        vector<int> dr = {-1, 0, 1, 0};
-        vector<int> dc = {0, 1, 0, -1};
+
         while (!q.empty()) {
             int sz = q.size();
 
@@ -51,7 +91,7 @@ public:
                 for (int v : graph[u]) {
                     int newMask = mask | (1 << v);
 
-                    if (vis[v][newMask]) // If we have already visited this state (node v with newMask), we skip it to avoid redundant processing and ensure we only explore unique states in our BFS. This prevents cycles and ensures that we find the shortest path efficiently.
+                    if (vis[v][newMask])
                         continue;
 
                     vis[v][newMask] = true;
