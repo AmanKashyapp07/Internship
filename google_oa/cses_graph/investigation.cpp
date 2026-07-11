@@ -69,7 +69,7 @@ int main() {
         auto [d, u] = pq.top();
         pq.pop();
 
-        if(d>dist[u]) continue;
+        if(d!=dist[u]) continue;
 
         for (auto [v, w] : adj[u]) {
             if (d + w < dist[v]) {

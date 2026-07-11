@@ -49,72 +49,55 @@ using vll = vector<ll>;
 const int INF  = INT_MAX;
 const ll  LINF = LLONG_MAX;
 const ll  MOD  = 1e9 + 7;
-
-// ─────────────────────────────────────────────────────────────────────────────
-
-struct Edge {
-    int to;
-    ll cost;
-};
-
+using namespace std;
+ 
+using ll = long long;
+const ll INF = 1e18;
+ 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n, m, k;
-    cin >> n >> m >> k;
-
-    vector<vector<Edge>> graph(n + 1);
-
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+ 
+    int n, m;
+    cin >> n >> m;
+ 
+    vector<vector<pair<int, int>>> adj(n + 1);
+ 
     for (int i = 0; i < m; i++) {
-        int a, b;
-        ll c;
+        int a, b, c;
         cin >> a >> b >> c;
-
-        graph[a].push_back({b, c});
+        adj[a].push_back({b, c});
     }
-
-    // (distance, node)
+ 
+    vector<ll> dist(n + 1, INF);
+ 
     priority_queue<
-        pll,
-        vector<pll>,
-        greater<pll>
-    > pq; // this pq holds (distance, node) pairs, and is a min-heap based on distance, so that we can always process the node with the smallest distance next, which is essential for Dijkstra's algorithm to work correctly, as it ensures that we are always expanding the shortest path first, and since we are looking for k shortest paths, we will allow each node to be processed up to k times, and we will keep track of how many times each node has been processed using the cnt array, and when we pop a node from the priority queue, if it is the destination node n, we will record its distance as one of the k shortest paths, and if we have already recorded k paths, we will stop processing further.
-
-    vector<int> cnt(n + 1, 0);
-    vector<ll> answer;
-
+        pair<ll, int>,
+        vector<pair<ll, int>>,
+        greater<pair<ll, int>>
+    > pq;
+ 
+    dist[1] = 0;
     pq.push({0, 1});
-
+ 
     while (!pq.empty()) {
-        auto [dist, node] = pq.top();
+        auto [d, u] = pq.top();
         pq.pop();
-
-        // Already processed k shortest paths to this node
-        if (cnt[node] >= k) {
-            continue;
-        }
-
-        cnt[node]++;
-
-        // Record shortest paths reaching destination
-        if (node == n) {
-            answer.push_back(dist);
-
-            if ((int)answer.size() == k) {
-                break;
+ 
+        if (d != dist[u]) continue;
+ 
+        for (auto [v, w] : adj[u]) {
+            if (dist[v] > dist[u] + w) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
             }
         }
-
-        for (const auto &edge : graph[node]) {
-            pq.push({dist + edge.cost, edge.to});
-        }
     }
-
-    for (int i = 0; i < k; i++) {
-        cout << answer[i] << " ";
+ 
+    for (int i = 1; i <= n; i++) {
+        cout << dist[i] << ' ';
     }
     cout << '\n';
-
+ 
     return 0;
 }

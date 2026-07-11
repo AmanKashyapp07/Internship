@@ -46,20 +46,17 @@ const ll MOD = 1e9 + 7;
 vi maxSlidingWindow(const vi& nums, int k) {
     deque<int> dq;
     vi ans;
-
-    for (int R = 0; R < nums.size(); R++) {
+    int n = nums.size();
+    for (int R = 0; R < n; R++) {
         int L = R - k + 1;
 
-        while (!dq.empty() && dq.front() < L)
-            dq.pop_front();
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
 
-        while (!dq.empty() && nums[dq.back()] <= nums[R])
-            dq.pop_back();
+        while (!dq.empty() && nums[dq.back()] <= nums[R]) dq.pop_back();
 
         dq.push_back(R);
 
-        if (L >= 0)
-            ans.push_back(nums[dq.front()]);
+        if (L >= 0) ans.push_back(nums[dq.front()]);
     }
 
     return ans;
@@ -76,20 +73,18 @@ vi maxSlidingWindow(const vi& nums, int k) {
 vi minSlidingWindow(const vi& nums, int k) {
     deque<int> dq;
     vi ans;
+    int n = nums.size();
 
-    for (int R = 0; R < nums.size(); R++) {
+    for (int R = 0; R < n; R++) {
         int L = R - k + 1;
 
-        while (!dq.empty() && dq.front() < L)
-            dq.pop_front();
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
 
-        while (!dq.empty() && nums[dq.back()] >= nums[R])
-            dq.pop_back();
+        while (!dq.empty() && nums[dq.back()] >= nums[R]) dq.pop_back();
 
         dq.push_back(R);
 
-        if (L >= 0)
-            ans.push_back(nums[dq.front()]);
+        if (L >= 0) ans.push_back(nums[dq.front()]);
     }
 
     return ans;

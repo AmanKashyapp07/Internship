@@ -34,7 +34,7 @@ int main() {
         adj[u].push_back({v, w});
     }
 
-    priority_queue<pii, vector<pii>, greater<>> pq;
+    priority_queue<pii, vector<pii>, greater<>> pq; // storing {cost, node} in min-heap
     vector<int> cnt(n + 1);
 
     pq.push({0, 1});

@@ -18,20 +18,6 @@
 #include <vector>
 using namespace std;
  
-vector<vector<int>> adj;
-vector<bool> vis;
- 
-void dfs(int u)
-{
-    vis[u] = true;
- 
-    for (int v : adj[u])
-    {
-        if (!vis[v])
-            dfs(v);
-    }
-}
- 
 int main()
 {
     ios::sync_with_stdio(false);
@@ -40,8 +26,8 @@ int main()
     int n, m;
     cin >> n >> m;
  
-    adj.resize(n + 1);
-    vis.assign(n + 1, false);
+    vector<vector<int>> adj(n + 1);
+    vector<int> indegree(n + 1);
  
     while (m--)
     {
@@ -49,25 +35,40 @@ int main()
         cin >> a >> b;
  
         adj[a].push_back(b);
-        adj[b].push_back(a);
+        indegree[b]++;
     }
  
-    vector<int> reps; // one representative per component
+    queue<int> q;
  
     for (int i = 1; i <= n; i++)
     {
-        if (!vis[i])
+        if (indegree[i] == 0)
+            q.push(i);
+    }
+ 
+    vector<int> topo;
+ 
+    while (!q.empty())
+    {
+        int u = q.front();
+        q.pop();
+ 
+        topo.push_back(u);
+ 
+        for (int v : adj[u])
         {
-            reps.push_back(i);
-            dfs(i);
+            if (--indegree[v] == 0)
+                q.push(v);
         }
     }
  
-    cout << reps.size() - 1 << '\n';
- 
-    for (int i = 1; i < reps.size(); i++)
+    if ((int)topo.size() != n)
     {
-        cout << reps[i - 1] << ' ' << reps[i] << '\n';
+        cout << "IMPOSSIBLE\n";
+        return 0;
     }
+ 
+    for (int x : topo)
+        cout << x << ' ';
+    cout << '\n';
 }
-    

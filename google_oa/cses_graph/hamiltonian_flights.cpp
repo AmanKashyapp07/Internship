@@ -1,19 +1,21 @@
 /**
  * CSES 1690 - Hamiltonian Flights
  *
- * Description:
- * Count the number of Hamiltonian paths from city 1 to city n in a directed graph.
+ * Problem:
+ * Count the number of Hamiltonian paths from city 1 to city n
+ * in a directed graph.
+ *
  * Every city must be visited exactly once.
  *
  * Approach:
- * - Use Bitmask Dynamic Programming.
- * - Let dp[mask][u] be the number of ways to reach node u after visiting
- *   exactly the nodes in mask.
- * - Start from node 0 with mask = 1.
- * - For every state, extend the path to each unvisited neighbor.
+ * - Use Bitmask DP.
+ * - Let dp[mask][u] be the number of ways to reach city u
+ *   after visiting exactly the cities in mask.
+ * - Start from city 1 with mask = 1.
+ * - Extend every state to an unvisited neighbor.
  *
- * Time Complexity: O(n * 2^n + m * 2^n)
- * Space Complexity: O(n * 2^n)
+ * Time:  O((n + m) * 2^n)
+ * Space: O(n * 2^n)
  */
 
 #include <iostream>
@@ -37,22 +39,24 @@ int main() {
         graph[--u].push_back(--v);
     }
 
-    int target = (1 << n) - 1;
-    vector<vector<long long>> dp(1 << n, vector<long long>(n, 0)); // dp[mask][u] = number of ways to reach node u after visiting nodes in mask
+    int fullMask = (1 << n) - 1;
+
+    vector<vector<long long>> dp(1 << n, vector<long long>(n));
 
     dp[1][0] = 1;
 
-    for (int mask = 1; mask <= target; mask++) {
+    for (int mask = 1; mask <= fullMask; mask++) {
         for (int u = 0; u < n; u++) {
             if (!(mask & (1 << u))) continue;
+
             for (int v : graph[u]) {
                 if (mask & (1 << v)) continue;
+
                 int nextMask = mask | (1 << v);
-                dp[nextMask][v] += dp[mask][u];
-                dp[nextMask][v] %= MOD;
+                dp[nextMask][v] = (dp[nextMask][v] + dp[mask][u]) % MOD;
             }
         }
     }
 
-    cout << dp[target][n - 1] << '\n';
+    cout << dp[fullMask][n - 1] << '\n';
 }

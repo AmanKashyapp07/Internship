@@ -11,10 +11,10 @@ struct Node {
 };
 
 class BinaryTrie {
-    Node* root = new Node();
+    
 
 public:
-
+    Node* root = new Node();
     // --------------------------------------------------------
     // Insert
     // --------------------------------------------------------
