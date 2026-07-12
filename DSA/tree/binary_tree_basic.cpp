@@ -1,292 +1,266 @@
-/*
-    Problem: Binary Tree Basics
-
-    Includes:
-    - Height
-    - Same Tree
-    - Validate BST
-    - Balanced Binary Tree
-    - Invert Binary Tree
-    - LCA in BST
-    - Level Order Traversal
-    - Vertical Order Traversal
-    - Right View
-*/
-
 #include <iostream>
 #include <vector>
 #include <queue>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <climits>
-#include <unordered_set>
-#include <set>
 using namespace std;
 
 struct TreeNode {
     int val;
     TreeNode *left, *right;
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-}; // this will be given in leetcode problems, so we don't need to implement it ourselves
+};
 
+// Global mapping framework
 unordered_map<TreeNode*, int> id;
 unordered_map<int, TreeNode*> node;
-
 int idx = 0;
 
 void assignIds(TreeNode* root) {
     if (!root) return;
     id[root] = idx;
-    node[idx] = root;
-    idx++;
+    node[idx++] = root;
     assignIds(root->left);
     assignIds(root->right);
 }
 
-int height(TreeNode* root) {
-    if (!root) return 0;
-    int L = height(root->left);
-    int R = height(root->right);
-    return 1 + max(L, R);
+int height(TreeNode* r) {
+    return r ? 1 + max(height(r->left), height(r->right)) : 0;
 }
 
 bool same(TreeNode* a, TreeNode* b) {
-    if (!a || !b) return a == b; // if both are null, return true; if one is null, return false
-    return a->val == b->val &&
-           same(a->left, b->left) &&
-           same(a->right, b->right);
+    if (!a || !b) return a == b;
+    return a->val == b->val && same(a->left, b->left) && same(a->right, b->right);
 }
 
-bool isBST(TreeNode* root, long long lo = LLONG_MIN, long long hi = LLONG_MAX) {
-    if (!root) return true;
-    if (root->val <= lo || root->val >= hi) return false;
-
-    return isBST(root->left, lo, root->val) &&
-           isBST(root->right, root->val, hi);
+bool isBST(TreeNode* r, long long lo = LLONG_MIN, long long hi = LLONG_MAX) {
+    return !r || (r->val > lo && r->val < hi && isBST(r->left, lo, r->val) && isBST(r->right, r->val, hi));
 }
 
-int check(TreeNode* root) {
-    if (!root) return 0;
-
-    int l = check(root->left);
-    int r = check(root->right);
-
-    if (l == -1 || r == -1 || abs(l - r) > 1) return -1;
-
-    return 1 + max(l, r);
-} // checking if the tree is balanced or not, returns -1 if not balanced, else returns height of the tree
-// just manipulate height dfs to check 
-
-
-TreeNode* lcaBST(TreeNode* root, TreeNode* p, TreeNode* q) {
-    if (!root) return nullptr;
-    
-    if (p->val < root->val && q->val < root->val) return lcaBST(root->left, p, q);
-    if (p->val > root->val && q->val > root->val) return lcaBST(root->right, p, q);
-
-    return root;
+int check(TreeNode* r) {
+    if (!r) return 0;
+    int l = check(r->left), w = check(r->right);
+    return (l == -1 || w == -1 || abs(l - w) > 1) ? -1 : 1 + max(l, w);
 }
 
-vector<vector<int>> levelOrder(TreeNode* root) {
+TreeNode* lcaBST(TreeNode* r, TreeNode* p, TreeNode* q) {
+    if (!r) return nullptr;
+    if (p->val < r->val && q->val < r->val) return lcaBST(r->left, p, q);
+    if (p->val > r->val && q->val > r->val) return lcaBST(r->right, p, q);
+    return r;
+}
+
+vector<vector<int>> levelOrder(TreeNode* r) {
     vector<vector<int>> ans;
-    if (!root) return ans;
-
+    if (!r) return ans;
     queue<TreeNode*> q;
-    q.push(root);
-
+    q.push(r);
     while (!q.empty()) {
         int sz = q.size();
-        vector<int> level;
-
+        vector<int> lvl;
         while (sz--) {
-            TreeNode* cur = q.front();
-            q.pop();
-            level.push_back(cur->val);
-            if (cur->left) q.push(cur->left);
-            if (cur->right) q.push(cur->right);
+            TreeNode* c = q.front(); q.pop();
+            lvl.push_back(c->val);
+            if (c->left) q.push(c->left);
+            if (c->right) q.push(c->right);
         }
-        ans.push_back(level);
+        ans.push_back(lvl);
     }
     return ans;
 }
 
-int diameter = 0;
-int maxPath = INT_MIN;
-map<int, int> pos;
+int dfsDiameter(TreeNode* r, int& d) {
+    if (!r) return 0;
+    int l = dfsDiameter(r->left, d), w = dfsDiameter(r->right, d);
+    d = max(d, l + w);
+    return 1 + max(l, w);
+}
 
-int dfsDiameter(TreeNode* root) {
-    if (!root) return 0;
+int dfsMaxPath(TreeNode* r, int& mx) {
+    if (!r) return 0;
+    int l = max(0, dfsMaxPath(r->left, mx)), w = max(0, dfsMaxPath(r->right, mx));
+    mx = max(mx, r->val + l + w);
+    return r->val + max(l, w);
+}
 
-    int l = dfsDiameter(root->left);
-    int r = dfsDiameter(root->right);
-    diameter = max(diameter, l + r);
-    return 1 + max(l, r);
-} // it will return the height of the tree, but it will also update the diameter variable to store the maximum diameter found so far
-
-int dfsMaxPath(TreeNode* root) {
-    if (!root) return 0;
-
-    int l = max(0, dfsMaxPath(root->left)); // why max(0, ...) ? because we want to ignore negative paths, if the left path is negative, we don't want to include it in the path sum
-    int r = max(0, dfsMaxPath(root->right));
-
-    maxPath = max(maxPath, root->val + l + r);
-
-    return root->val + max(l, r);
-} // it will return max path sum from root to leaf, but it will also update the maxPath variable to store the maximum path sum found so far
-
-void kth(TreeNode* root, int k, int& cnt, int& ans) {
-    if (!root || ans != -1) return;
-    kth(root->left, k, cnt, ans);
-    cnt++; // for counting root node as well
-    if (cnt == k) {
-        ans = root->val;
+void kth(TreeNode* r, int k, int& cnt, int& ans, bool rev = false) {
+    if (!r || ans != -1) return;
+    kth(rev ? r->right : r->left, k, cnt, ans, rev);
+    if (++cnt == k) {
+        ans = r->val;
         return;
     }
-    kth(root->right, k, cnt, ans);
+    kth(rev ? r->left : r->right, k, cnt, ans, rev);
 }
 
-int kthSmallest(TreeNode* root, int k) {
-    int cnt = 0, ans = -1;
-    kth(root, k, cnt, ans);
-    return ans;
+int kthSmallest(TreeNode* r, int k) {
+    int c = 0, a = -1;
+    kth(r, k, c, a, false);
+    return a;
 }
 
-bool hasPathSum(TreeNode* root, int sum) {
-    if (!root) return false;
-    int value = root->val;
-    if (!root->left && !root->right) return sum == value; // if it's a leaf node, check if the sum equals the value of the node
-    
-    return hasPathSum(root->left, sum - value) ||
-           hasPathSum(root->right, sum - value);
-} // checks if there is a root-to-leaf path in the tree such that the sum of the values along the path equals the given sum
+int kthLargest(TreeNode* r, int k) {
+    int c = 0, a = -1;
+    kth(r, k, c, a, true);
+    return a;
+}
 
-void dfsPaths(TreeNode* root, vector<int>& path, vector<vector<int>>& ans) {
-    if (!root) return;
+bool hasPathSum(TreeNode* r, int sum) {
+    if (!r) return false;
+    if (!r->left && !r->right) return sum == r->val;
+    return hasPathSum(r->left, sum - r->val) || hasPathSum(r->right, sum - r->val);
+}
 
-    path.push_back(root->val);
+void dfsPaths(TreeNode* r, vector<int>& p, vector<vector<int>>& ans) {
+    if (!r) return;
+    p.push_back(r->val);
+    if (!r->left && !r->right) ans.push_back(p);
+    dfsPaths(r->left, p, ans);
+    dfsPaths(r->right, p, ans);
+    p.pop_back();
+}
 
-    if (!root->left && !root->right)
-        ans.push_back(path);
-
-    dfsPaths(root->left, path, ans);
-    dfsPaths(root->right, path, ans);
-
-    path.pop_back();
-} // returns all paths from root to leaf nodes in the binary tree, storing them in ans. The path vector keeps track of the current path being explored.
-
-vector<vector<int>> allPaths(TreeNode* root) {
+vector<vector<int>> allPaths(TreeNode* r) {
     vector<vector<int>> ans;
-    vector<int> path;
-
-    dfsPaths(root, path, ans);
-
+    vector<int> p;
+    dfsPaths(r, p, ans);
     return ans;
 }
 
-int minBST(TreeNode* root) {
-    if(!root) return INT_MAX;
-    while(root && root->left) root = root->left;
-    int value = root->val;
-    return value;
+int minBST(TreeNode* r) {
+    if (!r) return INT_MAX;
+    while (r->left) r = r->left;
+    return r->val;
 }
 
-int maxBST(TreeNode* root) {
-    if(!root) return INT_MIN;
-    while(root && root->right) root = root->right;
-    int value = root->val;
-    return value;
+int maxBST(TreeNode* r) {
+    if (!r) return INT_MIN;
+    while (r->right) r = r->right;
+    return r->val;
 }
 
-bool searchBST(TreeNode* root, int x) {
-    while (root) {
-        if (root->val == x) return true;
-        if (x < root->val) root = root->left;
-        else root = root->right;
+bool searchBST(TreeNode* r, int x) {
+    while (r) {
+        if (r->val == x) return true;
+        r = (x < r->val) ? r->left : r->right;
     }
     return false;
 }
 
-void kth_2(TreeNode* root, int k, int& cnt, int& ans) {
-    if (!root || ans != -1) return;
-    kth_2(root->right, k, cnt, ans);
-    cnt++;
-    if (cnt == k) {
-        ans = root->val;
-        return;
-    }
-    kth_2(root->left, k, cnt, ans);
-}
-
-int kthLargest(TreeNode* root, int k) {
-    int cnt = 0, ans = -1;
-    kth_2(root, k, cnt, ans);
-    return ans;
-}
-
-int burnTime(TreeNode* root, int target) {
-    if (!root) return 0;
-
+int burnTime(TreeNode* r, int target) {
+    if (!r) return 0;
     unordered_map<TreeNode*, TreeNode*> par;
-    unordered_set<TreeNode*> vis;
     queue<TreeNode*> q;
-
     TreeNode* start = nullptr;
-
-    q.push(root);
-
+    q.push(r);
+    
     while (!q.empty()) {
-        TreeNode* cur = q.front();
-        q.pop();
-
-        if (cur->val == target)
-            start = cur;
-
-        if (cur->left) {
-            par[cur->left] = cur;
-            q.push(cur->left);
-        }
-
-        if (cur->right) {
-            par[cur->right] = cur;
-            q.push(cur->right);
-        }
+        TreeNode* c = q.front(); q.pop();
+        if (c->val == target) start = c;
+        if (c->left) { par[c->left] = c; q.push(c->left); }
+        if (c->right) { par[c->right] = c; q.push(c->right); }
     }
-
     if (!start) return 0;
 
+    unordered_set<TreeNode*> vis{start};
     q.push(start);
-    vis.insert(start);
-
     int time = 0;
 
     while (!q.empty()) {
         int sz = q.size();
         bool spread = false;
-
         while (sz--) {
-            TreeNode* cur = q.front();
-            q.pop();
-
-            if (cur->left && vis.insert(cur->left).second) { // vis.insert(cur->left).second checks if the left child has already been visited. If it hasn't, it marks it as visited and returns true, allowing the fire to spread to that node.
-                q.push(cur->left);
-                spread = true;
-            }
-
-            if (cur->right && vis.insert(cur->right).second) {
-                q.push(cur->right);
-                spread = true;
-            }
-
-            if (par.count(cur) && vis.insert(par[cur]).second) {
-                q.push(par[cur]);
-                spread = true;
-            }
+            TreeNode* c = q.front(); q.pop();
+            if (c->left && vis.insert(c->left).second) { q.push(c->left); spread = true; }
+            if (c->right && vis.insert(c->right).second) { q.push(c->right); spread = true; }
+            if (par.count(c) && vis.insert(par[c]).second) { q.push(par[c]); spread = true; }
         }
-
-        if (spread)
-            time++;
+        if (spread) time++;
     }
-
     return time;
+}
+
+vector<int> deepestLeaves(TreeNode* r) {
+    vector<int> ans;
+    if (!r) return ans;
+    queue<TreeNode*> q;
+    q.push(r);
+    while (!q.empty()) {
+        int sz = q.size();
+        ans.clear();
+        while (sz--) {
+            TreeNode* c = q.front(); q.pop();
+            ans.push_back(c->val);
+            if (c->left) q.push(c->left);
+            if (c->right) q.push(c->right);
+        }
+    }
+    return ans;
+}
+// Helper DFS: Calculates standard tree height and tracks where the max split occurs
+int getHeight(TreeNode* r, int& max_d, TreeNode*& split_node) {
+    if (!r) return 0;
+    
+    int lh = getHeight(r->left, max_d, split_node);
+    int rh = getHeight(r->right, max_d, split_node);
+    
+    // Check if the path passing through the current node creates a new maximum diameter
+    if (lh + rh > max_d) {
+        max_d = lh + rh;
+        split_node = r; 
+    }
+    return 1 + max(lh, rh);
+}
+
+// Main function: Returns {diameter_length, a_node_on_the_diameter_path}
+pair<int, int> diameterAndNode(TreeNode* r) {
+    if (!r) return {0, 0};
+    
+    int max_d = 0;
+    TreeNode* split_node = nullptr;
+    
+    // First DFS: Locates the highest node where the maximum diameter split occurs
+    getHeight(r, max_d, split_node);
+    
+    // Second DFS step (Implicit): Return the value of that tracked split node
+    return {max_d, split_node ? split_node->val : 0};
+}
+
+void preorder(TreeNode* root, vector<int>& ans) {
+    if (!root) return;
+
+    ans.push_back(root->val);
+    preorder(root->left, ans);
+    preorder(root->right, ans);
+}
+
+void inorder(TreeNode* root, vector<int>& ans) {
+    if (!root) return;
+
+    inorder(root->left, ans);
+    ans.push_back(root->val);
+    inorder(root->right, ans);
+}
+
+void postorder(TreeNode* root, vector<int>& ans) {
+    if (!root) return;
+
+    postorder(root->left, ans);
+    postorder(root->right, ans);
+    ans.push_back(root->val);
+}
+
+
+int height(TreeNode* root) {
+    if (!root) return 0;
+    return 1 + max(height(root->left), height(root->right));
+}
+
+void print(vector<int>& v) {
+    for (int x : v)
+        cout << x << " ";
+    cout << '\n';
 }

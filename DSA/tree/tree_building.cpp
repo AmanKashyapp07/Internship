@@ -3,74 +3,52 @@
 using namespace std;
 
 struct TreeNode {
-    int val;
-    TreeNode *left, *right;
+    int val; TreeNode *left, *right;
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
 class Solution {
-    unordered_map<int, int> pos;
+    unordered_map<int, int> pos; // Inorder index mapping for O(1) pivot lookups
 
-    TreeNode* buildPost(vector<int>& in, vector<int>& post,
-                        int il, int ir, int pl, int pr) {
-        if (il > ir) return nullptr;
+    // Recursive helper that builds subtrees by checking if the next structural element 
+    // falls within the current inorder [left, right] boundary.
+    TreeNode* build(vector<int>& order, int& idx, int l, int r, bool is_pre) {
+        if (l > r) return nullptr;
 
-        int val = post[pr];
-        TreeNode* root = new TreeNode(val);
+        TreeNode* root = new TreeNode(order[idx]);
+        int mid = pos[order[idx]];
+        
+        // Move iterator pointer forward for preorder, backward for postorder
+        idx += (is_pre ? 1 : -1); 
 
-        int mid = pos[val];
-        int left = mid - il;
-
-        root->left = buildPost(in, post,
-                               il, mid - 1,
-                               pl, pl + left - 1);
-
-        root->right = buildPost(in, post,
-                                mid + 1, ir,
-                                pl + left, pr - 1);
-
-        return root;
-    }
-
-    TreeNode* buildPre(vector<int>& pre, vector<int>& in,
-                       int pl, int pr, int il, int ir) {
-        if (pl > pr) return nullptr;
-
-        int val = pre[pl];
-        TreeNode* root = new TreeNode(val);
-
-        int mid = pos[val];
-        int left = mid - il;
-
-        root->left = buildPre(pre, in,
-                              pl + 1, pl + left,
-                              il, mid - 1);
-
-        root->right = buildPre(pre, in,
-                               pl + left + 1, pr,
-                               mid + 1, ir);
-
+        if (is_pre) {
+            // Preorder: Root -> Left -> Right (processes left subtree first)
+            root->left  = build(order, idx, l, mid - 1, is_pre);
+            root->right = build(order, idx, mid + 1, r, is_pre);
+        } else {
+            // Postorder: Left -> Right -> Root (processes right subtree first in reverse)
+            root->right = build(order, idx, mid + 1, r, is_pre);
+            root->left  = build(order, idx, l, mid - 1, is_pre);
+        }
         return root;
     }
 
 public:
+    // Build Tree from Inorder and Postorder
     TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
         pos.clear();
-        for (int i = 0; i < inorder.size(); i++)
-            pos[inorder[i]] = i;
-
-        return buildPost(inorder, postorder,
-                         0, inorder.size() - 1,
-                         0, postorder.size() - 1);
+        for (int i = 0; i < inorder.size(); i++) pos[inorder[i]] = i;
+        
+        int idx = postorder.size() - 1; // Start from the root at the end of postorder
+        return build(postorder, idx, 0, inorder.size() - 1, false);
     }
 
+    // Build Tree from Preorder and Inorder
     TreeNode* buildTreePre(vector<int>& preorder, vector<int>& inorder) {
         pos.clear();
-        for (int i = 0; i < inorder.size(); i++)
-            pos[inorder[i]] = i;
-
-        return buildPre(preorder, inorder,
-                        0, preorder.size() - 1,
-                        0, inorder.size() - 1);
+        for (int i = 0; i < inorder.size(); i++) pos[inorder[i]] = i;
+        
+        int idx = 0; // Start from the root at the beginning of preorder
+        return build(preorder, idx, 0, inorder.size() - 1, true);
     }
 };

@@ -40,6 +40,7 @@ int main() {
     if ((int)order.size() < n) { cout << "IMPOSSIBLE\n"; return 0; }
 
     reverse(order.begin(), order.end()); // Reversing the order gives the correct sorting
+    // it gives lexicographically smallest order if we use a max heap, and largest if we use a min heap
 
     for (int x : order) cout << x << ' ';
     

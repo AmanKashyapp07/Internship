@@ -1,18 +1,15 @@
 /**
  * CSES 1686 - Coin Collector
  *
- * Description:
- * Each room has some coins. Find the maximum coins you can collect by traversing rooms.
- * You can choose where to start and end.
+ * Idea:
+ * 1. Find Strongly Connected Components (Kosaraju).
+ * 2. Compress every SCC into one node.
+ * 3. Weight of each SCC = sum of coins in that SCC.
+ * 4. Build the condensed DAG.
+ * 5. Find the maximum weighted path in the DAG using DP.
  *
- * Approach:
- * - Condense the directed graph into a DAG of Strongly Connected Components (SCC) using Kosaraju's algorithm.
- * - The sum of coins of all nodes in an SCC forms the weight of the SCC node.
- * - Build the condensed DAG where edges exist between different SCC components.
- * - Compute the maximum weight path on the DAG using DP and Topological Sort.
- *
- * Time Complexity: O(V + E)
- * Space Complexity: O(V + E)
+ * Time:  O(N + M)
+ * Space: O(N + M)
  */
 
 #include <iostream>
@@ -20,47 +17,165 @@
 #include <algorithm>
 using namespace std;
 
-vector<vector<int>> g, rg;
-vector<bool> vis;
-vector<int> comp, order;
+class CoinCollector {
+private:
+    int n, m;
 
-void dfs1(int u) {
-    vis[u] = true;
-    for (int v : g[u]) if (!vis[v]) dfs1(v);
-    order.push_back(u);
-}
+    vector<vector<int>> graph;
+    vector<vector<int>> reverseGraph;
 
-void dfs2(int u, int id) {
-    comp[u] = id;
-    for (int v : rg[u]) if (!comp[v]) dfs2(v, id);
-}
+    vector<int> component;
+    vector<int> finishOrder;
+    vector<bool> visited;
 
-long long solveDAG(int u, const vector<long long>& weight, const vector<vector<int>>& dag, vector<long long>& dp) {
-    if (dp[u] != -1) return dp[u];
-    long long mx = 0;
-    for (int v : dag[u]) mx = max(mx, solveDAG(v, weight, dag, dp));
-    return dp[u] = weight[u] + mx; // DP state transition: dp[u] = weight[u] + max(dp[v])
-}
+    vector<long long> coins;
+    vector<long long> componentWeight;
+
+    vector<vector<int>> dag;
+    vector<long long> dp;
+
+    //---------------------------------------------------------
+    // First DFS (stores finishing order)
+    //---------------------------------------------------------
+    void dfsFinishOrder(int node) {
+        visited[node] = true;
+
+        for (int next : graph[node]) {
+            if (!visited[next])
+                dfsFinishOrder(next);
+        }
+
+        finishOrder.push_back(node);
+    }
+
+    //---------------------------------------------------------
+    // Second DFS (assign SCC id)
+    //---------------------------------------------------------
+    void dfsAssignComponent(int node, int id) {
+        component[node] = id;
+
+        for (int next : reverseGraph[node]) {
+            if (component[next] == 0)
+                dfsAssignComponent(next, id);
+        }
+    }
+
+    //---------------------------------------------------------
+    // DP on condensed DAG
+    //---------------------------------------------------------
+    long long solve(int node) {
+
+        if (dp[node] != -1)
+            return dp[node];
+
+        long long best = 0;
+
+        for (int next : dag[node]) {
+            best = max(best, solve(next));
+        }
+
+        return dp[node] = componentWeight[node] + best;
+    } // returns max weighted path starting from node in the condensed DAG
+    // condensed means that every SCC is compressed into one node, and the edges between SCCs are preserved in the DAG
+
+public:
+
+    void readInput() {
+
+        cin >> n >> m;
+
+        graph.assign(n + 1, {});
+        reverseGraph.assign(n + 1, {});
+        coins.assign(n + 1, 0);
+
+        for (int i = 1; i <= n; i++)
+            cin >> coins[i];
+
+        while (m--) {
+
+            int u, v;
+            cin >> u >> v;
+
+            graph[u].push_back(v);
+            reverseGraph[v].push_back(u);
+        }
+    }
+
+    int buildSCCs() {
+
+        visited.assign(n + 1, false);
+
+        for (int i = 1; i <= n; i++) {
+            if (!visited[i])
+                dfsFinishOrder(i);
+        }
+
+        reverse(finishOrder.begin(), finishOrder.end());
+
+        component.assign(n + 1, 0);
+
+        int sccCount = 0;
+
+        for (int node : finishOrder) {
+            if (component[node] == 0)
+                dfsAssignComponent(node, ++sccCount);
+        }
+
+        return sccCount;
+    }
+
+    void computeComponentWeights(int sccCount) {
+
+        componentWeight.assign(sccCount + 1, 0);
+
+        for (int i = 1; i <= n; i++) {
+            componentWeight[component[i]] += coins[i];
+        }
+    }
+
+    void buildCondensedGraph(int sccCount) {
+
+        dag.assign(sccCount + 1, {});
+
+        for (int u = 1; u <= n; u++) {
+
+            for (int v : graph[u]) {
+
+                if (component[u] != component[v]) {
+                    dag[component[u]].push_back(component[v]);
+                }
+            }
+        }
+    }
+
+    long long maximumCoins(int sccCount) {
+
+        dp.assign(sccCount + 1, -1);
+
+        long long answer = 0;
+
+        for (int i = 1; i <= sccCount; i++) {
+            answer = max(answer, solve(i));
+        } // finds the maximum weighted path in the condensed DAG starting from any SCC
+
+        return answer;
+    }
+};
 
 int main() {
-    ios::sync_with_stdio(0); cin.tie(0);
-    int n, m; cin >> n >> m;
-    vector<long long> coins(n + 1);
-    for (int i = 1; i <= n; i++) cin >> coins[i];
-    g.resize(n + 1); rg.resize(n + 1);
-    for (int i = 0, u, v; i < m; i++) { cin >> u >> v; g[u].push_back(v); rg[v].push_back(u); }
-    vis.assign(n + 1, false);
-    for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
-    comp.assign(n + 1, 0); reverse(order.begin(), order.end());
-    int scc = 0;
-    for (int u : order) if (!comp[u]) dfs2(u, ++scc); // Condense graph into SCCs
-    vector<long long> weight(scc + 1, 0);
-    for (int i = 1; i <= n; i++) weight[comp[i]] += coins[i];
-    vector<vector<int>> dag(scc + 1);
-    for (int u = 1; u <= n; u++) {
-        for (int v : g[u]) if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]); // Build DAG of components
-    }
-    vector<long long> dp(scc + 1, -1); long long ans = 0;
-    for (int i = 1; i <= scc; i++) ans = max(ans, solveDAG(i, weight, dag, dp)); // Find max path in DAG
-    cout << ans << '\n';
+
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    CoinCollector solver;
+
+    solver.readInput();
+
+    int sccCount = solver.buildSCCs();
+
+    solver.computeComponentWeights(sccCount);
+
+    solver.buildCondensedGraph(sccCount);
+
+    cout << solver.maximumCoins(sccCount) << '\n';
 }
