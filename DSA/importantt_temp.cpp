@@ -99,6 +99,159 @@ Usage:
     st.query(l, r);         // Sum over [l, r]
 */
 
+/*
+==================== SEGMENT TREE VARIANTS ====================
+
+Only TWO things change for different problems:
+
+1. What each Node stores.
+2. How two child Nodes are merged.
+
+Everything else (build, update, query) remains identical.
+
+---------------------------------------------------------------
+1. Range Sum Query
+---------------------------------------------------------------
+Node:
+    struct Node { long long sum; };
+
+Leaf:
+    {a[i]}
+
+Merge:
+    parent.sum = left.sum + right.sum;
+
+Identity (No overlap):
+    {0}
+
+---------------------------------------------------------------
+2. Range Minimum Query
+---------------------------------------------------------------
+Node:
+    struct Node { int mn; };
+
+Leaf:
+    {a[i]}
+
+Merge:
+    parent.mn = min(left.mn, right.mn);
+
+Identity:
+    {INT_MAX}
+
+---------------------------------------------------------------
+3. Range Maximum Query
+---------------------------------------------------------------
+Node:
+    struct Node { int mx; };
+
+Leaf:
+    {a[i]}
+
+Merge:
+    parent.mx = max(left.mx, right.mx);
+
+Identity:
+    {INT_MIN}
+
+---------------------------------------------------------------
+4. Range GCD
+---------------------------------------------------------------
+Node:
+    struct Node { int g; };
+
+Leaf:
+    {a[i]}
+
+Merge:
+    parent.g = gcd(left.g, right.g);
+
+Identity:
+    {0}
+
+---------------------------------------------------------------
+5. Maximum Prefix Sum
+---------------------------------------------------------------
+Node:
+    struct Node {
+        long long sum;     // Total segment sum
+        long long pref;    // Best prefix sum
+    };
+
+Leaf:
+    {x, max(0LL, x)}
+
+Merge:
+    sum  = L.sum + R.sum;
+    pref = max(L.pref, L.sum + R.pref);
+
+Identity:
+    {0, 0}
+
+---------------------------------------------------------------
+6. Maximum Suffix Sum
+---------------------------------------------------------------
+Node:
+    struct Node {
+        long long sum;
+        long long suff;
+    };
+
+Leaf:
+    {x, max(0LL, x)}
+
+Merge:
+    sum  = L.sum + R.sum;
+    suff = max(R.suff, R.sum + L.suff);
+
+Identity:
+    {0, 0}
+
+---------------------------------------------------------------
+7. Maximum Subarray Sum
+---------------------------------------------------------------
+Node:
+    struct Node {
+        long long sum;     // Total segment sum
+        long long pref;    // Best prefix
+        long long suff;    // Best suffix
+        long long ans;     // Best subarray
+    };
+
+Leaf:
+    best = max(0LL, x);
+    {x, best, best, best}
+
+Merge:
+    sum  = L.sum + R.sum;
+    pref = max(L.pref, L.sum + R.pref);
+    suff = max(R.suff, R.sum + L.suff);
+    ans  = max({L.ans, R.ans, L.suff + R.pref});
+
+Identity:
+    {0, 0, 0, 0}
+
+---------------------------------------------------------------
+8. Range XOR
+---------------------------------------------------------------
+Node:
+    struct Node { int xr; };
+
+Leaf:
+    {a[i]}
+
+Merge:
+    xr = L.xr ^ R.xr;
+
+Identity:
+    {0}
+
+===============================================================
+The recursive build(), update() and query() NEVER change.
+Only Node, merge(), leaf initialization, and identity change.
+===============================================================
+
+*/
 struct SegTree2 {
     int n;
     vector<int> tree;
