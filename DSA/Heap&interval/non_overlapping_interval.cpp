@@ -50,6 +50,9 @@ const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
 // ─────────────────────────────────────────────────────────────────────────────
+bool comparator(const pair<int, int>& a, const pair<int, int>& b) {
+    return a.second < b.second; // Sort by end time because we want to select intervals that end earlier to maximize the number of non-overlapping intervals.
+}
 
 int main()
 {
@@ -58,15 +61,9 @@ int main()
 
     int n;
     cin >> n;
-
     vector<pair<int, int>> intervals(n);
-    sort(intervals.begin(), intervals.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
-        return a.second < b.second; // Sort by end time because we want to select intervals that end earlier to maximize the number of non-overlapping intervals.
-    });
-    for (auto &p : intervals)
-    {
-        cin >> p.first >> p.second;
-    }
+    sort(intervals.begin(), intervals.end(), comparator);
+    for (auto &p : intervals) cin >> p.first >> p.second;
 
     int keep=1;
     int right=intervals[0].second;

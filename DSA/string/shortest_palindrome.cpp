@@ -45,8 +45,10 @@ public:
         // starting at (n - 1 - i)
         for (int i = 0; i < n; i++) {
             // prefix of original string corresponds to suffix of reversed string
-            if (forward.get(0, i) == backward.get(n - 1 - i, n - 1)) {
-                ans = i + 1;
+            int revL = n - 1 - i;
+            int revR = n - 1;
+            if(forward.get(0, i) == backward.get(revL, revR)) {
+                ans = i + 1; // length of the longest palindromic prefix
             }
         }
 

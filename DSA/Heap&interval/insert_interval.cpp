@@ -51,8 +51,7 @@ const ll MOD = 1e9 + 7;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-int main()
-{
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -60,40 +59,38 @@ int main()
     cin >> n;
 
     vector<pair<int, int>> intervals(n);
-    for (auto &p : intervals)
-    {
+    for (auto &p : intervals) {
         cin >> p.first >> p.second;
     }
 
-    pair<int, int> newInterval;
-    cin >> newInterval.first >> newInterval.second;
-
-    // sort(intervals.begin(), intervals.end());
+    pair<int, int> newInt;
+    cin >> newInt.first >> newInt.second;
 
     vector<pair<int, int>> result;
 
-    for (auto &interval : intervals)
-    {
-        // completely before
-        if (interval.second < newInterval.first)
-        {
+    for (auto &interval : intervals) {
+        if (interval.second < newInt.first) {
+            // No overlap, add as is
             result.push_back(interval);
-        }
-
-        // completely after
-        else if (interval.first > newInterval.second)
-        {
-            result.push_back(newInterval);
-            newInterval = interval; // in future, this will not affect other intervals, as in question it is given that intervals are non-overlapping and sorted. we can also stop here
-        }
-
-        // overlap
-        else
-        {
-            newInterval.first = min(newInterval.first, interval.first);
-            newInterval.second = max(newInterval.second, interval.second);
+        } 
+        else if (interval.first > newInt.second) {
+            // New interval ends before this one starts
+            result.push_back(newInt);
+            newInt = interval;
+        } 
+        else {
+            // Overlapping - merge
+            newInt.first = min(newInt.first, interval.first);
+            newInt.second = max(newInt.second, interval.second);
         }
     }
 
-    result.push_back(newInterval);
+    result.push_back(newInt);
+
+    // Output the result
+    for (auto &p : result) {
+        cout << p.first << " " << p.second << "\n";
+    }
+
+    return 0;
 }

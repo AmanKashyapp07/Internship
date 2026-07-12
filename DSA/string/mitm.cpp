@@ -40,8 +40,8 @@ public:
     vector<int> subsetSum(vector<int>& nums) {
         int n = nums.size();
         vector<int> sums;
-
-        for (int mask = 0; mask < (1 << n); ++mask) {
+        int maxTarget = 1<<n - 1;
+        for (int mask = 0; mask<=maxTarget; ++mask) {
             int currentSum = 0;
             for (int i = 0; i < n; ++i) {
                 if (mask & (1 << i)) {

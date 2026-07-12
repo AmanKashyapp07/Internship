@@ -1,6 +1,7 @@
 /**
  * Minimum Insertions to Make a String Palindrome
  * Using LCS (Recursion + Memoization)
+ * Logic = N - LPS(s) = N - LCS(s, reverse(s))
  */
 
 #include <algorithm>
@@ -43,20 +44,16 @@ const ll MOD = 1e9 + 7;
 int lcs(int i, int j, const string &s1, const string &s2,
         vector<vector<int>> &dp) {
 
-    if (i == 0 || j == 0)
-        return 0;
+    if(i<0 || j<0) return 0;
 
     if (dp[i][j] != -1)
         return dp[i][j];
 
-    if (s1[i - 1] == s2[j - 1]) {
-        return dp[i][j] = 1 + lcs(i - 1, j - 1, s1, s2, dp);
-    }
+    if(s1[i] == s2[j]) return dp[i][j] = 1 + lcs(i - 1, j - 1, s1, s2, dp);
 
-    return dp[i][j] = max(
-        lcs(i - 1, j, s1, s2, dp),
-        lcs(i, j - 1, s1, s2, dp)
-    );
+    return dp[i][j] = max(lcs(i - 1, j, s1, s2, dp), lcs(i, j - 1, s1, s2, dp));
+
+  
 }
 
 int minInsertionsToMakePalindrome(const string &s) {
@@ -67,7 +64,7 @@ int minInsertionsToMakePalindrome(const string &s) {
 
     vector<vector<int>> dp(n + 1, vector<int>(n + 1, -1));
 
-    int lpsLength = lcs(n, n, s, reversed, dp);
+    int lpsLength = lcs(n-1, n-1, s, reversed, dp);
 
     return n - lpsLength;
 }

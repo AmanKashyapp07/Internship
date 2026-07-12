@@ -1,17 +1,17 @@
 /**
- * CSES Problem Set
- *
- * Interval Templates
+ * CSES Problem Set - Interval Templates
  *
  * 1. Meeting Rooms II
  *    - Minimum rooms required
- *    - Sort by start time
- *    - Min Heap of ending times
+ *    - Sort by start time + Min-heap of end times
  *
  * 2. Activity Selection
- *    - Maximum non-overlapping intervals
- *    - Sort by ending time
- *    - Greedy
+ *    - Maximum number of non-overlapping intervals
+ *    - Sort by end time + Greedy
+ *
+ * 3. Room Allocation (CSES)
+ *    - Assign rooms to customers
+ *    - Minimize total rooms used
  */
 
 #include <algorithm>
@@ -53,128 +53,117 @@ const ll MOD = 1e9 + 7;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MEETING ROOMS II
-//
-// Given intervals, return minimum rooms required.
-//
-// Idea:
-// - Sort by start time.
-// - Heap stores ending times of active meetings.
-// - If earliest ending meeting finishes before current starts,
-//   reuse that room.
-// - Heap size = rooms currently occupied.
-// - Maximum heap size encountered = answer.
-//
-// Time : O(n log n)
-// Space: O(n)
+// Return the minimum number of conference rooms required.
 // ─────────────────────────────────────────────────────────────────────────────
+int minMeetingRooms(vector<pii> intervals) {
+    if (intervals.empty()) return 0;
 
-int minMeetingRooms(vector<pii> &intervals)
-{
-    sort(all(intervals)); // this already sort by start time because pair is sorted by first element by default
+    // Sort by start time
+    sort(all(intervals));
 
-    // Min-heap storing:
-    // {departure time of the room currently in use, room id}
-    //
-    // The room that becomes free the earliest is always on top.
-    priority_queue<
-        pair<int, int>,
-        vector<pair<int, int>>,
-        greater<pair<int, int>>>
-        pq;
+    // Min-heap to store end times of meetings in progress
+    priority_queue<int, vector<int>, greater<int>> pq;
 
-    vector<int> assigned(n); // assigned[i] = room number given to interval i
-    int rooms = 0;           // total number of rooms created
+    int maxRooms = 0;
 
-    for (auto &cur : v)
-    {
-        int roomId;
+    for (auto& interval : intervals) {
+        int start = interval.first;
+        int end = interval.second;
 
-        // Check whether the earliest finishing room is available.
-        // For CSES Room Allocation, departure and arrival days are inclusive,
-        // so a room can only be reused if:
-        //
-        //     previous_departure < current_arrival
-        //
-        if (!pq.empty() && pq.top().first < cur.start)
-        {
-            // Reuse the room that became free first.
-            roomId = pq.top().second;
+        // If a room is free, reuse it
+        if (!pq.empty() && pq.top() <= start) {
             pq.pop();
         }
-        else
-        {
-            // No existing room is available.
-            // Create a new room.
-            roomId = ++rooms;
-        }
 
-        // Assign the selected room to the current customer.
-        assigned[cur.idx] = roomId;
-
-        // Mark this room as occupied until cur.end.
-        pq.push({cur.end, roomId});
+        pq.push(end);
+        maxRooms = max(maxRooms, (int)pq.size());
     }
+
+    return maxRooms;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACTIVITY SELECTION
-//
-// Given intervals, return maximum number of
-// non-overlapping intervals.
-//
-// Idea:
-// - Sort by ending time.
-// - Always pick interval that ends earliest.
-// - Greedy proof:
-//   leaves maximum space for future intervals.
-//
-// Time : O(n log n)
-// Space: O(1)
+// Return maximum number of non-overlapping activities.
 // ─────────────────────────────────────────────────────────────────────────────
+int maxActivities(vector<pii> intervals) {
+    if (intervals.empty()) return 0;
 
-int maxActivities(vector<pii> &intervals)
-{
-    sort(all(intervals),
-         [](const pii &a, const pii &b)
-         {
-             return a.second < b.second;
-         });
+    // Sort by ending time
+    sort(all(intervals), [](const pii& a, const pii& b) {
+        return a.second < b.second;
+    });
 
-    int cnt = 0;
-    int lastEnd = -INF;
+    int count = 0;
+    int lastEnd = INT_MIN;
 
-    for (auto &[start, end] : intervals)
-    {
-        if (start >= lastEnd)
-        {
-            cnt++;
-            lastEnd = end;
+    for (auto& interval : intervals) {
+        if (interval.first >= lastEnd) {
+            count++;
+            lastEnd = interval.second;
         }
     }
 
-    return cnt;
+    return count;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CSES ROOM ALLOCATION
+// Assign minimum number of rooms to customers (print room numbers).
+// ─────────────────────────────────────────────────────────────────────────────
+vector<int> assignRooms(vector<tuple<int, int, int>> customers) {
+    // customers: {arrival, departure, index}
+    int n = customers.size();
+    vector<int> assigned(n);
+
+    // Sort by arrival time
+    sort(all(customers));
+
+    // Min-heap: {departure time, roomId}
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    int rooms = 0;
+
+    for (auto& cust : customers) {
+        int arrival, departure, idx;
+        tie(arrival, departure, idx) = cust;
+
+        int roomId;
+
+        if (!pq.empty() && pq.top().first < arrival) {
+            // Reuse room
+            roomId = pq.top().second;
+            pq.pop();
+        } else {
+            // New room
+            roomId = ++rooms;
+        }
+
+        assigned[idx] = roomId;
+        pq.push({departure, roomId});
+    }
+
+    return assigned;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-int main()
-{
+int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
     /*
-        Example:
+    // Example Usage:
 
-        int n;
-        cin >> n;
+    int n;
+    cin >> n;
+    vector<pii> intervals(n);
+    for (int i = 0; i < n; i++) {
+        cin >> intervals[i].first >> intervals[i].second;
+    }
 
-        vector<pii> intervals(n);
-
-        for(auto &p : intervals)
-            cin >> p.first >> p.second;
-
-        cout << minMeetingRooms(intervals) << '\n';
-        cout << maxActivities(intervals) << '\n';
+    cout << minMeetingRooms(intervals) << '\n';
+    cout << maxActivities(intervals) << '\n';
     */
 
     return 0;

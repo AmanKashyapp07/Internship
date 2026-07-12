@@ -42,13 +42,14 @@ public:
     int cnt = 0;
 
     for (int right = 0; right < nums.size(); right++) {
-        int left = lower_bound(nums.begin(), nums.begin() + right+1,
-                               nums[right] - limit) - nums.begin();
+        auto start = nums.begin();
+        auto end = nums.begin() + right + 1;
+        int left = lower_bound(start, end, nums[right] - limit) - start;
         // we wanted lowest left that satisfies nums[right] - nums[left] <= limit
         // so using lower bound to find the first index where nums[left] >= nums[right] - limit
         // our search range is [0, right) because we want pairs (left, right) with left < right]
 
-        cnt += right - left;
+        cnt += right - left; // why right - left? because all indices from left to right-1 will satisfy the condition, so we add (right - left) pairs
     }
 
     return cnt;

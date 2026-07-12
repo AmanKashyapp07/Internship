@@ -35,6 +35,15 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
+// problem - we have to find k closest elements to x in array arr
+
+vector<int> helper(int low, int high, vector<int>& arr){ // returns vector from low to high , both inclusive
+    vector<int> ans;
+    for(int i=low;i<=high;i++){
+        ans.push_back(arr[i]);
+    }
+    return ans;
+}
 
 class Solution {
 public:
@@ -43,14 +52,14 @@ public:
         int mini = INT_MAX;
         int maxi = INT_MIN;
         for(int i=0;i<n;i++) mini=min(mini, arr[i]), maxi=max(maxi, arr[i]);
-        if(x<=mini) return vector<int>(arr.begin(), arr.begin()+k);
-        if(x>=maxi) return vector<int>(arr.end()-k, arr.end());
+        if(x<=mini) return helper(0, k - 1, arr);
+        if(x>=maxi) return helper(n - k, n - 1, arr);
         int low=0, high=n-1;
         while(high-low+1!=k){
             if(abs(arr[low]-x)>abs(arr[high]-x)) low++;
             else high--;
         }
-        return vector<int>(arr.begin()+low, arr.begin()+high+1); // vector from low to high , both inclusive
+        return helper(low, high, arr);
 
         
     }

@@ -9,27 +9,15 @@ int main() {
     string s, t;
     cin >> s >> t;
 
-    if (s.size() != t.size()) {
-        cout << "false\n";
-        return 0;
-    }
+    if(s.size() != t.size()) cout << "false\n", exit(0);
 
     unordered_map<char, char> mp1, mp2;
 
     for (int i = 0; i < s.size(); i++) {
         char a = s[i];
         char b = t[i];
-
-        if (mp1.count(a) && mp1[a] != b) {
-            cout << "false\n";
-            return 0;
-        }
-
-        if (mp2.count(b) && mp2[b] != a) {
-            cout << "false\n";
-            return 0;
-        }
-
+        if (mp1.count(a) && mp1[a] != b) cout << "false\n", exit(0);
+        if (mp2.count(b) && mp2[b] != a) cout << "false\n", exit(0);
         mp1[a] = b;
         mp2[b] = a;
     }

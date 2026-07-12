@@ -46,6 +46,12 @@ public:
     }
 };
 
+bool isPalindrome(int l, int r, const FastHash& H1, const FastHash& H2, int n) {
+    ll hash1 = H1.get(l, r);
+    ll hash2 = H2.get(n - 1 - r, n - 1 - l);
+    return hash1 == hash2;
+}
+
 int main() {
 
     string s = "abacaba";
@@ -57,16 +63,9 @@ int main() {
     FastHash H1(s);
     FastHash H2(rev);
 
-    auto isPalindrome = [&](int L, int R) {
 
-        int revL = n - 1 - R;
-        int revR = n - 1 - L;
-
-        return H1.get(L, R) == H2.get(revL, revR);
-    };
-
-    cout << isPalindrome(0, 2) << '\n'; // "aba" -> 1
-    cout << isPalindrome(1, 3) << '\n'; // "bac" -> 0
-    cout << isPalindrome(2, 4) << '\n'; // "aca" -> 1
-    cout << isPalindrome(0, 6) << '\n'; // "abacaba" -> 1
+    cout << isPalindrome(0, 2, H1, H2, n) << '\n'; // "aba" -> 1
+    cout << isPalindrome(1, 3, H1, H2, n) << '\n'; // "bac" -> 0
+    cout << isPalindrome(2, 4, H1, H2, n) << '\n'; // "aca" -> 1
+    cout << isPalindrome(0, 6, H1, H2, n) << '\n'; // "abacaba" -> 1
 }

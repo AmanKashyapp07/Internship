@@ -1,3 +1,10 @@
+/**
+ * Problem: Course Schedule III (LeetCode 630)
+ * 
+ * Given n courses with duration and deadline, return the maximum number
+ * of courses you can complete without taking more than one at a time.
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -35,31 +42,36 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
 class Solution {
 public:
     int scheduleCourse(vector<vector<int>>& courses) {
-        int maxCount=0;
-        sort(courses.begin(),courses.end(),[](const vector<int>& a,const vector<int>& b){
-            return a[1]<b[1]; // sorting by deadline because we want to take courses with earlier deadlines first to maximise the number of courses we can take
+        // Sort by deadline (earliest first)
+        sort(courses.begin(), courses.end(), [](const vector<int>& a, const vector<int>& b) {
+            return a[1] < b[1];
         });
-        priority_queue<int> pq; // max heap to keep track of the durations of the courses we have taken
-        int currentTime=0;
-        for(auto& course:courses){
-            int duration=course[0];
-            int deadline=course[1];
-            if(currentTime+duration<=deadline){ // if we can take this course without exceeding the deadline, just take it and push it into the max heap
-                // max heap represents the courses we have taken, and the top of the max heap is the course with the longest duration. If we can take a new course without exceeding the deadline, we just add it to our schedule and update the current time.
-                currentTime+=duration;
+
+        priority_queue<int> pq; // max-heap of durations taken
+        int time = 0;
+        int count = 0;
+
+        for (auto& c : courses) {
+            int duration = c[0];
+            int deadline = c[1];
+
+            if (time + duration <= deadline) {
+                // Can take this course
+                time += duration;
                 pq.push(duration);
-                maxCount++;
-            }else if(!pq.empty() && pq.top()>duration){ // if we cannot take this course without exceeding the deadline, we check if we can replace the longest duration course we have taken with this one. If the longest duration course is longer than the current course, we can replace it to free up time for the current course.
-                // why pq.top()>duration? because we want to replace the longest duration course with the current course to free up time for the current course. If the longest duration course is shorter than the current course, we cannot replace it because it will not free up enough time for the current course.
-                currentTime+=duration-pq.top(); // replace the longest duration course with the current one
+                count++;
+            } 
+            else if (!pq.empty() && pq.top() > duration) {
+                // Replace the longest course with this one
+                time += duration - pq.top();
                 pq.pop();
                 pq.push(duration);
             }
         }
-        return maxCount;
+
+        return count;
     }
 };

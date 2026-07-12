@@ -24,12 +24,7 @@ public:
         }
     }
 
-    ll get(int l, int r) const {
-        if (l > r) return 0;
-        return (pref[r + 1]
-              - pref[l] * power[r - l + 1] % MOD
-              + MOD) % MOD;
-    }
+    ll get(int l, int r) const {return (pref[r + 1] - pref[l] * power[r - l + 1] % MOD + MOD) % MOD;}
 };
 
 class Solution {

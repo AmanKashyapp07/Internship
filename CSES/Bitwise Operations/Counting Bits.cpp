@@ -1,0 +1,56 @@
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define pb push_back
+#define ff first
+#define ss second
+
+const int INF = INT_MAX;
+const ll LINF = LLONG_MAX;
+const ll MOD = 1e9 + 7;
+
+int main() {
+    long long n;
+    cin >> n;
+
+    long long ans = 0;
+
+    for (int k = 0; k < 60; k++) {
+        long long h = 1LL << k;
+        long long b = h << 1;
+
+        long long full_blocks = (n + 1) / b;
+        ans += full_blocks * h;
+
+        long long rem = (n + 1) % b;
+        ans += max(0LL, rem - h);
+    }
+
+    cout << ans << '\n';
+}
