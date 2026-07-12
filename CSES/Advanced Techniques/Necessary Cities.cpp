@@ -42,7 +42,8 @@ vector<int> tin, low;
 vector<bool> isArticulation;
 
 int timer = 0;
-
+// we have to return Articulation points in a graph, which are vertices that, when removed, increase the number of connected components in the graph. We can find them using a DFS-based algorithm that tracks discovery times and low values of vertices.
+// just standard implementation, nothing fancy, but we have to be careful about the root of the DFS tree, because it is an articulation point if and only if it has more than one child in the DFS tree. For other vertices, they are articulation points if they have a child v such that low[v] >= tin[u], which means that there is no back edge from v or its descendants to u or its ancestors.
 void dfs(int u, int parent) {
     tin[u] = low[u] = ++timer;
 

@@ -21,63 +21,41 @@
 #include <algorithm>
 using namespace std;
 
-class DSU {
-
+struct DSU {
     vector<int> p, sz;
+    int comp;
+    DSU(int n) : p(n), sz(n, 1), comp(n) { iota(p.begin(), p.end(), 0); }
 
-public:
-
-    DSU(int n) : p(n), sz(n, 1) {
-        for (int i = 0; i < n; i++) p[i] = i;
-    }
-
-    int find(int x) {
-
-        return p[x] == x ? x : p[x] = find(p[x]);
-
-    }
+    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
 
     bool unite(int a, int b) {
-
-        a = find(a), b = find(b);
-
-        if (a == b) return false;
-
+        if ((a = find(a)) == (b = find(b))) return false;
         if (sz[a] < sz[b]) swap(a, b);
-
         p[b] = a;
-
         sz[a] += sz[b];
-
+        comp--;
         return true;
-
     }
 
+    int size(int x) { return sz[find(x)]; }
 };
 
-class Solution
-{
+class Solution {
 public:
-    int earliestAcq(vector<vector<int>> &logs, int n)
-    {
+    int earliestAcq(vector<vector<int>>& logs, int n) {
         sort(logs.begin(), logs.end());
 
         DSU dsu(n);
-        int components = n;
 
-        for (auto &log : logs)
-        {
-            int time = log[0];
+        for (auto &log : logs) {
+            int t = log[0];
             int u = log[1];
             int v = log[2];
 
-            if (dsu.unite(u, v))
-            {
-                components--;
+            dsu.unite(u, v);
 
-                if (components == 1)
-                    return time;
-            }
+            if (dsu.comp == 1)
+                return t;
         }
 
         return -1;

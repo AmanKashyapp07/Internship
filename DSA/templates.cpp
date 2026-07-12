@@ -38,13 +38,20 @@ const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 const ll P = 31;
 
+
+
+
+
+
+
+
+
+
 /*
 ================================================================================
           CHEAT SHEET: ITERATIVE VS. RECURSIVE SEGMENT TREE
 ================================================================================
-
 Choose the right tool based on the operations your problem demands:
-
 1. WHEN TO USE AN ITERATIVE SEGMENT TREE (The Speed Daemon)
    ------------------------------------------------------------
    ✔ Best For: Standard point updates and associative range queries 
@@ -54,14 +61,12 @@ Choose the right tool based on the operations your problem demands:
    ✔ Implementation Note: The iterative traversal goes bottom-up. Because it 
      merges left and right fragments in arbitrary order during range queries, it
      works perfectly only if the operation is commutative (i.e., A + B == B + A).
-
 2. WHEN TO USE A RECURSIVE SEGMENT TREE (The Structural Powerhouse)
    ------------------------------------------------------------
    ✔ Best For: Non-commutative merges, Lazy Propagation, and Binary Search 
                 on the tree structure.
    ✔ Why: Traversal goes top-down. This gives you complete control over the 
           exact order in which sub-segments are explored and combined.
-   
    ✔ Mandatory Scenarios:
      1. Non-Commutative Operations: Problems like "Maximum Subarray Sum in a Range" 
         or "Matrix Multiplication" where order matters immensely (Left child MUST 
@@ -71,91 +76,68 @@ Choose the right tool based on the operations your problem demands:
         only naturally possible top-down.
      3. Tree-Walking: Finding the first element in a range >= X (e.g., CSES Hotel Queries) 
         by routing left or right conditionally based on node values.
-
 ================================================================================
 SUMMARY RULE of THUMB:
 Default to Iterative for basic Point-Update / Range-Query tasks to maximize speed. 
 Switch to Recursive the moment you see Range Updates (Lazy) or Non-Commutative merges.
 ================================================================================
 */
-
 /*
 Usage:
     SegTree st(a);          // Build from array
     st.update(idx, val);    // a[idx] = val
     st.query(l, r);         // Sum over [l, r]
 */
-
 /*
 ==================== SEGMENT TREE VARIANTS ====================
-
 Only TWO things change for different problems:
-
 1. What each Node stores.
 2. How two child Nodes are merged.
-
 Everything else (build, update, query) remains identical.
-
 ---------------------------------------------------------------
 1. Range Sum Query
 ---------------------------------------------------------------
 Node:
     struct Node { long long sum; };
-
 Leaf:
     {a[i]}
-
 Merge:
     parent.sum = left.sum + right.sum;
-
 Identity (No overlap):
     {0}
-
 ---------------------------------------------------------------
 2. Range Minimum Query
 ---------------------------------------------------------------
 Node:
     struct Node { int mn; };
-
 Leaf:
     {a[i]}
-
 Merge:
     parent.mn = min(left.mn, right.mn);
-
 Identity:
     {INT_MAX}
-
 ---------------------------------------------------------------
 3. Range Maximum Query
 ---------------------------------------------------------------
 Node:
     struct Node { int mx; };
-
 Leaf:
     {a[i]}
-
 Merge:
     parent.mx = max(left.mx, right.mx);
-
 Identity:
     {INT_MIN}
-
 ---------------------------------------------------------------
 4. Range GCD
 ---------------------------------------------------------------
 Node:
     struct Node { int g; };
-
 Leaf:
     {a[i]}
-
 Merge:
     parent.g = gcd(left.g, right.g);
-
 Identity:
     {0}
-
 ---------------------------------------------------------------
 5. Maximum Prefix Sum
 ---------------------------------------------------------------
@@ -164,17 +146,13 @@ Node:
         long long sum;     // Total segment sum
         long long pref;    // Best prefix sum
     };
-
 Leaf:
     {x, max(0LL, x)}
-
 Merge:
     sum  = L.sum + R.sum;
     pref = max(L.pref, L.sum + R.pref);
-
 Identity:
     {0, 0}
-
 ---------------------------------------------------------------
 6. Maximum Suffix Sum
 ---------------------------------------------------------------
@@ -183,17 +161,13 @@ Node:
         long long sum;
         long long suff;
     };
-
 Leaf:
     {x, max(0LL, x)}
-
 Merge:
     sum  = L.sum + R.sum;
     suff = max(R.suff, R.sum + L.suff);
-
 Identity:
     {0, 0}
-
 ---------------------------------------------------------------
 7. Maximum Subarray Sum
 ---------------------------------------------------------------
@@ -204,40 +178,31 @@ Node:
         long long suff;    // Best suffix
         long long ans;     // Best subarray
     };
-
 Leaf:
     best = max(0LL, x);
     {x, best, best, best}
-
 Merge:
     sum  = L.sum + R.sum;
     pref = max(L.pref, L.sum + R.pref);
     suff = max(R.suff, R.sum + L.suff);
     ans  = max({L.ans, R.ans, L.suff + R.pref});
-
 Identity:
     {0, 0, 0, 0}
-
 ---------------------------------------------------------------
 8. Range XOR
 ---------------------------------------------------------------
 Node:
     struct Node { int xr; };
-
 Leaf:
     {a[i]}
-
 Merge:
     xr = L.xr ^ R.xr;
-
 Identity:
     {0}
-
 ===============================================================
 The recursive build(), update() and query() NEVER change.
 Only Node, merge(), leaf initialization, and identity change.
 ===============================================================
-
 */
 struct SegTree2 {
     int n;
@@ -307,6 +272,15 @@ struct SegTree2 {
     }
 };
 
+
+
+
+
+
+
+
+
+
 /*
 Coordinate Compressor Usage:
   CoordinateCompressor cc;
@@ -315,33 +289,25 @@ Coordinate Compressor Usage:
   int orig = cc.vals[idx];   // Get original value back
   int sz = cc.size();       // Size of universe for Fenwick/SegTree sizing
   // WARNING: get(x) on a value NOT add()-ed before build() returns an arbitrary insertion-point index.
-
 -----------------------------------------------------------
 1. HOW TO USE WITH YOUR FENWICK TREE TEMPLATE:
    Your Fenwick tree takes 0-based arguments publicly. Since cc.get(x) 
    returns a 0-indexed integer, they map directly.
-
    // Size the BIT using cc.size()
    Fenwick ft(cc.size()); 
-   
    // Point Update:
    ft.update(cc.get(val), 1); 
-   
    // Range Query [L, R] Inclusive:
    int ans = ft.query(cc.get(l), cc.get(r));
-
 -----------------------------------------------------------
 2. HOW TO USE WITH YOUR SEGTREE TEMPLATE:
    Your SegTree is initialized using a base vector. Build a frequency 
    or value tracking vector matching the size of the compressed universe first.
-
    // Create base frequency mapping array
    vector<int> base_counts(cc.size(), 0);
    for (int x : arr) base_counts[cc.get(x)]++;
-   
    // Initialize tree
    SegTree st(base_counts);
-   
    // Range Query [L, R] Inclusive / Updates:
    st.update(cc.get(idx), new_val);
    int ans = st.query(cc.get(l), cc.get(r));
@@ -357,6 +323,14 @@ struct CoordinateCompressor {
     int get(int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); }
     int size() { return vals.size(); }
 };
+
+
+
+
+
+
+
+
 
 
 /*
@@ -383,12 +357,20 @@ struct Fenwick {
     }
 };
 
+
+
+
+
+
+
+
+
+
 /* 
 Usage: 
   SegTree st(a);           // Build tree from vector 'a' (0-indexed)
   st.update(idx, val);     // Sets a[idx] = val
   st.query(l, r);          // Returns sum of range [l, r] inclusive
-
 Tips to change from Sum to Min/Max or custom structures (like Non-Commutative operations):
   1. In constructor: change '+' to 'min' (or 'max') in:
      t[i] = t[i << 1] + t[i << 1 | 1];
@@ -425,6 +407,15 @@ struct SegTree {
     }
 };
 
+
+
+
+
+
+
+
+
+
 /*
 Usage:
   SparseTable st(a);       // Build sparse table from vector 'a' (0-indexed)
@@ -456,6 +447,15 @@ struct SparseTable {
     }
 };
 
+
+
+
+
+
+
+
+
+
 // Returns the polynomial rolling hash of a single word/string 's' in O(|s|)
 ll hashWord(string s) {
     ll h = 0;
@@ -463,11 +463,19 @@ ll hashWord(string s) {
     return h;
 }
 
+
+
+
+
+
+
+
+
+
 /*
 Usage:
   FastHash fh(s);          // Build prefix hashes for string 's' (0-indexed)
   fh.get(l, r);            // Returns hash value of substring s[l..r] in O(1)
-
 Tips to change polynomial parameters or double hashing:
   1. Change base multiplier 'P' (default 31 for lowercase, 53 for mixed case) or 'MOD'.
   2. For double hashing to avoid collisions, compute hash using two different bases/mods.
@@ -485,6 +493,15 @@ struct FastHash {
         return (h[r + 1] - h[l] * p[r - l + 1] % MOD + MOD) % MOD;
     }
 };
+
+
+
+
+
+
+
+
+
 
 /*
 KMP equivalent (Pattern Matching / Rabin-Karp) using FastHash
@@ -509,6 +526,15 @@ vi hash_kmp(string text, string pattern) {
     }
     return occurrences;
 }
+
+
+
+
+
+
+
+
+
 
 /*
 Z-array using FastHash (Z-Algo equivalent)
@@ -537,6 +563,15 @@ vector<int> hash_z_algo(string s) {
     }
     return z;
 } // z[i] stores the length of the longest substring starting from s[i] that is also a prefix of s
+
+
+
+
+
+
+
+
+
 
 /*
 Manacher's equivalent using FastHash (Palindromic substrings)
@@ -582,6 +617,14 @@ pair<vi, vi> hash_manacher(string s) {
 }
 
 
+
+
+
+
+
+
+
+
 /*
 Usage:
   DSU dsu(n);             // Init with n elements (1-indexed safe)
@@ -606,6 +649,48 @@ struct DSU {
     int size(int x) { return sz[find(x)]; }
 };
 
+// no need to check parents before merging, 
+// i mean do not write dsu.find(a)!=dsu.find(b) before dsu.unite(a,b), because dsu.unite already checks if they are in the same component or not, and returns false if they are already connected. So just call dsu.unite(a,b) directly.
+
+
+
+
+
+
+
+
+int removeStones(vector<vector<int>>& stones) {
+    const int OFFSET = 10001;
+    DSU dsu(20005);
+    
+    unordered_set<int> used;
+    
+    for (auto &s : stones) {
+        int row = s[0];
+        int col = s[1] + OFFSET;
+        
+        dsu.unite(row, col);
+        
+        used.insert(row);
+        used.insert(col);
+    }
+    int components = 0;
+    for (int x : used) {
+        if (dsu.find(x) == x) components++;
+    }
+    // why dsu.comp is not used: because dsu.comp counts all components including those that were never used in the stones, so we need to count only the components that are actually present in the stones.
+    return stones.size() - components;
+}
+
+
+
+
+
+
+
+
+
+
 /*
 Kruskal's Algorithm (MST)
 Time Complexity: O(E log E)
@@ -617,6 +702,15 @@ struct Edge {
     int u, v; long long w;
     bool operator<(const Edge& o) const { return w < o.w; } // Sort edges by weight for Kruskal's algorithm
 };
+
+
+
+
+
+
+
+
+
 
 long long kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     DSU dsu(n);
@@ -632,6 +726,50 @@ long long kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     return mst_weight;
 }
 
+
+
+
+
+
+
+
+
+
+long long prim(int n, vector<vector<pair<int, long long>>>& adj) {
+    vector<bool> in_mst(n + 1, false);
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq;
+    pq.push({0, 1}); // Start from node 1 with weight 0
+    long long mst_weight = 0;
+
+    while (!pq.empty()) {
+        auto [w, u] = pq.top(); pq.pop();
+        if (in_mst[u]) continue;
+        in_mst[u] = true;
+        mst_weight += w;
+
+        for (auto& [v, weight] : adj[u]) {
+            if (!in_mst[v]) {
+                pq.push({weight, v});
+            }
+        }
+    }
+    return mst_weight;
+} // returns the total weight of the minimum spanning tree using Prim's algorithm
+
+
+
+
+
+
+
+
+
+
+// comparison between Kruskal's and Prim's algorithm:
+// 1. Kruskal's algorithm is better for sparse graphs, while Prim's algorithm is better for dense graphs.
+// 2. Kruskal's algorithm uses a disjoint set union (DSU) data structure, while Prim's algorithm uses a priority queue (min-heap).
+// 3. Kruskal's algorithm sorts the edges by weight, while Prim's algorithm grows the MST from a starting node.
+// 4. In OAs, mostly prefer Kruskal's algorithm because it is easier to implement and understand, and it works well for most cases.
 /*
 Topological Sort (Kahn's and DFS)
 Returns topological order of nodes. Returns empty vector if cycle exists.
@@ -657,12 +795,20 @@ vector<int> kahn(int n, vector<vector<int>>& adj, int start_node = 1) {
     return order.size() == n ? order : vector<int>{};
 }
 
+
+
+
+
+
+
+
+
+
 /*
 DAG Solver (Shortest/Longest Paths, Path Counts)
 Returns {dist, path_counts} in O(V + E) using Kahn's topological sort.
 */
 struct DAGEdge { int to; long long w; };
-
 pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdge>>& adj, int src, int start_node = 1, bool max_path = false) {
     vector<int> in_deg(adj.size(), 0);
     for (int u = start_node; u < start_node + n; u++) {
@@ -697,6 +843,15 @@ pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdg
     }
     return {dist, paths};
 }
+
+
+
+
+
+
+
+
+
 
 // calculates the sum of distances from each node to all other nodes in a tree using rerooting technique
 class TreeDistances {
@@ -749,6 +904,14 @@ public:
 };
 
 
+
+
+
+
+
+
+
+
 class TreeDiameter {
     int n; const vector<vector<int>>& adj;
     vector<int> d1,d2;
@@ -797,9 +960,16 @@ public:
 };
 
 
+
+
+
+
+
+
+
+
 /*
 Usage:
-
   Bridge B;
   auto ans = B.get(adj); // Returns vector<pair<int,int>> of bridges
 */
@@ -824,6 +994,15 @@ struct Bridge {
     }
 };
 
+
+
+
+
+
+
+
+
+
 struct Articulation {
     int t; vector<int> tin, low; vector<int> res;
     void dfs(int u, int p, vector<vector<int>>& adj) {
@@ -845,6 +1024,16 @@ struct Articulation {
         return res;
     }
 };
+
+
+
+
+
+
+
+
+
+
 /*
 Usage:
   BinaryLifting bl(n, root, adj);
@@ -929,6 +1118,15 @@ struct BinaryLifting {
     }
 };
 
+
+
+
+
+
+
+
+
+
 /*
 Usage:
   XorTrie trie;
@@ -941,6 +1139,15 @@ struct Nodee {
     Nodee *c[2] = {};
     int cnt = 0;
 };
+
+
+
+
+
+
+
+
+
 
 struct XorTrie {
     Nodee *root = new Nodee();
@@ -978,6 +1185,15 @@ struct XorTrie {
     }
 };
 
+
+
+
+
+
+
+
+
+
 /*
 Usage (String Trie):
   StringTrie trie;         // Initialize character String Trie (lowercase 'a'-'z')
@@ -992,6 +1208,15 @@ struct Node {
     Node *c[26] = {};
     int endCnt = 0, preCnt = 0;
 };
+
+
+
+
+
+
+
+
+
 
 struct StringTrie {
     Node *root = new Node();
@@ -1020,6 +1245,15 @@ public:
     int countEqual(string s) { Node *n = find(s); return n ? n->endCnt : 0; }
     int countPrefix(string s) { Node *n = find(s); return n ? n->preCnt : 0; }
 };
+
+
+
+
+
+
+
+
+
 
 /*
 Usage:
@@ -1062,10 +1296,20 @@ struct SCC {
         for (auto& neighbors : dag) {
             sort(neighbors.begin(), neighbors.end());
             neighbors.erase(unique(neighbors.begin(), neighbors.end()), neighbors.end());
-        }
+        } // removes duplicate edges in the condensed DAG
         return dag;
     }
 };
+
+
+
+
+
+
+
+
+
+
 /*
 Usage:
   DigitDP dp;
@@ -1099,6 +1343,15 @@ public:
     }
 };
 
+
+
+
+
+
+
+
+
+
 // Binary Exponentiation
 long long power(long long a, long long b, int MOD) {
     long long res = 1;
@@ -1109,14 +1362,42 @@ long long power(long long a, long long b, int MOD) {
     }
     return res;
 }
+
+
+
+
+
+
+
+
+
+
 // a^b^c = power(a, power(b, c, MOD - 1), MOD) (Fermat's Little Theorem)
 // Modular Inverse (MOD must be prime)
 long long inv(long long x, int MOD) {
     return power(x, MOD - 2, MOD);
 }
 
+
+
+
+
+
+
+
+
+
 // Factorials + Inverse Factorials
 vector<long long> fac, ifac;
+
+
+
+
+
+
+
+
+
 
 void init_nCr(int n, int MOD) {
     fac.resize(n + 1);
@@ -1131,18 +1412,54 @@ void init_nCr(int n, int MOD) {
         ifac[i - 1] = ifac[i] * i % MOD;
 }
 
+
+
+
+
+
+
+
+
+
 long long nCr(int n, int r, int MOD) {
     if (r < 0 || r > n) return 0;
     return fac[n] * ifac[r] % MOD * ifac[n - r] % MOD;
 }
+
+
+
+
+
+
+
+
+
 
 long long nPr(int n, int r, int MOD) {
     if (r < 0 || r > n) return 0;
     return fac[n] * ifac[n - r] % MOD;
 }
 
+
+
+
+
+
+
+
+
+
 // Sieve (minimum prime factor)
 vector<int> min_pf;
+
+
+
+
+
+
+
+
+
 
 void sieve(int n) {
     min_pf.resize(n + 1);
@@ -1154,6 +1471,15 @@ void sieve(int n) {
                 if (min_pf[j] == j)
                     min_pf[j] = i;
 }
+
+
+
+
+
+
+
+
+
 
 vector<pair<int,int>> prime_factorize(int n) {
     vector<pair<int,int>> pf;
@@ -1174,39 +1500,37 @@ vector<pair<int,int>> prime_factorize(int n) {
     return pf;
 }
 
+
+
+
+
+
+
+
+
+
 /*
 Bit Operations
-
 1 << i              // 2^i
-
 x & (1 << i)        // check if i-th bit is set
 x |= (1 << i)       // set i-th bit
 x &= ~(1 << i)      // clear i-th bit
 x ^= (1 << i)       // toggle i-th bit
-
 x & (x - 1)         // removes the lowest set bit
 x & -x              // value of the lowest set bit
-
 (x & (x - 1)) == 0  // check if x is a power of 2 (x > 0)
-
 __builtin_popcount(x)      // number of set bits (int)
 __builtin_popcountll(x)    // number of set bits (long long)
-
 __builtin_clz(x)           // leading zeros (int)
 __builtin_clzll(x)         // leading zeros (long long)
-
 __builtin_ctz(x)           // trailing zeros (int)
 __builtin_ctzll(x)         // trailing zeros (long long)
-
 __builtin_parity(x)        // 1 if odd number of set bits, else 0
-
 msb = 31 - __builtin_clz(x)        // index of most significant set bit
 msb = 63 - __builtin_clzll(x)      // (long long)
-
 lsb = __builtin_ctz(x)             // index of least significant set bit
 lsb = __builtin_ctzll(x)           // (long long)
 */
-
 int XORupto(int n) {
     if (n % 4 == 0) return n;
     if (n % 4 == 1) return 1;
@@ -1215,12 +1539,18 @@ int XORupto(int n) {
 }
 
 
+
+
+
+
+
+
+
+
 // ------------------------------------------------------------
 // Sliding Window Maximum
-//
 // Deque: decreasing
 // Front = maximum of current window
-//
 // Time: O(N)
 // ------------------------------------------------------------
 vi maxSlidingWindow(const vi& nums, int k) {
@@ -1242,12 +1572,19 @@ vi maxSlidingWindow(const vi& nums, int k) {
     return ans;
 }
 
+
+
+
+
+
+
+
+
+
 // ------------------------------------------------------------
 // Sliding Window Minimum
-//
 // Deque: increasing
 // Front = minimum of current window
-//
 // Time: O(N)
 // ------------------------------------------------------------
 vi minSlidingWindow(const vi& nums, int k) {
@@ -1270,6 +1607,15 @@ vi minSlidingWindow(const vi& nums, int k) {
     return ans;
 }
 
+
+
+
+
+
+
+
+
+
 int lis_length(const vi& a) {
     vi dp;
     for (int x : a) {
@@ -1279,6 +1625,15 @@ int lis_length(const vi& a) {
     }
     return dp.size();
 } // time complexity: O(n log n), returns the length of the longest increasing subsequence
+
+
+
+
+
+
+
+
+
 
 vector<int> reconstruct_lis(const vi& a) {
     int n = a.size();
@@ -1300,6 +1655,15 @@ vector<int> reconstruct_lis(const vi& a) {
     reverse(lis.begin(), lis.end());
     return lis;
 } // time complexity: O(n log n), returns the longest increasing subsequence itself
+
+
+
+
+
+
+
+
+
 
 string lcs(const string& a, const string& b) {
     int n = a.size(), m = b.size();
@@ -1329,56 +1693,53 @@ string lcs(const string& a, const string& b) {
     return lcs_str;
 } // time complexity: O(n * m), returns the longest common subsequence of strings a and b
 
+
+
+
+
+
+
+
+
+
 /*
 =========================================================
 INTERVAL DP TEMPLATE (Bottom-Up)
 =========================================================
-
 State:
     dp[l][r] = answer for interval [l, r]
-
 Transition:
     dp[l][r] = combine(dp[l][k], dp[k+1][r], l, k, r)
-
 Order:
     Increasing interval length.
-
 Time:
     O(n^3)
-
 =========================================================
 Common Variants
-
 1. Matrix Chain Multiplication
 --------------------------------
 State:
     dp[l][r] = minimum cost to multiply matrices l...r
-
 Base:
     dp[i][i] = 0
-
 Transition:
     dp[l][r] = min(
         dp[l][k] +
         dp[k+1][r] +
         arr[l] * arr[k+1] * arr[r+1]
     )
-
 ---------------------------------------------------------
 2. Merge Stones / Slimes
 --------------------------------
 State:
     dp[l][r] = minimum cost to merge interval
-
 Extra:
     prefix sums required
-
 Transition:
     dp[l][r] = min(
         dp[l][k] +
         dp[k+1][r]
     ) + sum(l,r)
-
 ---------------------------------------------------------
 3. Optimal BST
 --------------------------------
@@ -1387,52 +1748,42 @@ Transition:
         dp[l][k-1] +
         dp[k+1][r]
     ) + freqSum(l,r)
-
 ---------------------------------------------------------
 4. Polygon Triangulation
 --------------------------------
 State:
     dp[l][r] = minimum triangulation cost
-
 Transition:
     for k = l+1 ... r-1
-
     dp[l][r] = min(
         dp[l][k] +
         dp[k][r] +
         cost(l,k,r)
     )
-
 ---------------------------------------------------------
 5. Burst Balloons
 --------------------------------
 State:
     dp[l][r] = maximum coins from balloons l...r
-
 Pad array with 1 at both ends.
-
 Transition:
     Choose LAST balloon k.
-
     dp[l][r] = max(
         dp[l][k-1] +
         dp[k+1][r] +
         a[l-1] * a[k] * a[r+1]
     )
-
 ---------------------------------------------------------
 6. Rod Cutting / Stick Cutting
 --------------------------------
 State:
     dp[l][r] = minimum cost to cut segment
-
 Transition:
     dp[l][r] = min(
         dp[l][k] +
         dp[k][r] +
         cuts[r] - cuts[l]
     )
-
 =========================================================
 */
 long long solveIntervalDPBottomUp(int n) {
@@ -1460,6 +1811,15 @@ long long solveIntervalDPBottomUp(int n) {
     return dp[0][n - 1];
 }
 
+
+
+
+
+
+
+
+
+
 vector<vector<int>> generateSubsets(vector<int>& nums) {
     vector<vector<int>> subsets;
     int n = nums.size();
@@ -1473,6 +1833,15 @@ vector<vector<int>> generateSubsets(vector<int>& nums) {
     return subsets;
 }
 
+
+
+
+
+
+
+
+
+
 int sumOfAllSubsets(vector<int>& nums) {
     int n = nums.size();
     int total_sum = 0;
@@ -1485,6 +1854,15 @@ int sumOfAllSubsets(vector<int>& nums) {
     }
     return total_sum;
 }
+
+
+
+
+
+
+
+
+
 
 vector<int> kadaneWithLandR(const vector<int>& nums) {
     int n = nums.size();
@@ -1510,6 +1888,14 @@ vector<int> kadaneWithLandR(const vector<int>& nums) {
 }
 
 
+
+
+
+
+
+
+
+
 void solve_(vector<int>& nums, vector<int>& curr, vector<vector<int>>& ans, int mask) {
     if (curr.size() == nums.size()) {
         ans.push_back(curr);
@@ -1525,6 +1911,15 @@ void solve_(vector<int>& nums, vector<int>& curr, vector<vector<int>>& ans, int 
     }
 }
 
+
+
+
+
+
+
+
+
+
 vector<vector<int>> generatePermutations(vector<int>& nums) {
     vector<vector<int>> ans;
     vector<int> curr;
@@ -1533,6 +1928,15 @@ vector<vector<int>> generatePermutations(vector<int>& nums) {
 
     return ans;
 }
+
+
+
+
+
+
+
+
+
 
 int lps(string s) {
     int n = s.size();
@@ -1553,9 +1957,17 @@ int lps(string s) {
 
     return dp[0][n - 1];
 } // time complexity: O(n^2), returns the length of the longest palindromic subsequence
+
+
+
+
+
+
+
+
+
+
 // min insertions to make a string palindrome = n - lps(s)
-
-
 bool checkSubsequence(const string& s, const string& t) {
     int n = s.size(), m = t.size();
     int j = 0; // Pointer for t
@@ -1564,6 +1976,15 @@ bool checkSubsequence(const string& s, const string& t) {
     }
     return j == m; // If we have matched all characters of t
 } // time complexity: O(n), returns true if t is a subsequence of s
+
+
+
+
+
+
+
+
+
 
 vector<vector<int>> palindromeTable(vector<int>& nums) {
     int n = nums.size();
@@ -1582,6 +2003,15 @@ vector<vector<int>> palindromeTable(vector<int>& nums) {
     return isPalindrome;
 } // time complexity: O(n^2), returns a table where isPalindrome[l][r] is true if the subarray nums[l..r] is a palindrome
 
+
+
+
+
+
+
+
+
+
 vector<int> buildCycle(int start, const vector<int>& parent) {
     vector<int> cycle;
     int cur = start;
@@ -1595,6 +2025,16 @@ vector<int> buildCycle(int start, const vector<int>& parent) {
 
     return cycle;
 }
+
+
+
+
+
+
+
+
+
+
 /*=============================================================================
     1. UNDIRECTED GRAPH CYCLE RECONSTRUCTION (1-indexed)
 =============================================================================*/
@@ -1635,6 +2075,15 @@ public:
         return {};
     }
 };
+
+
+
+
+
+
+
+
+
 
 /*=============================================================================
     2. DIRECTED GRAPH CYCLE RECONSTRUCTION (1-indexed)
@@ -1678,6 +2127,15 @@ public:
     }
 };
 
+
+
+
+
+
+
+
+
+
 /*=============================================================================
     3. NEGATIVE WEIGHT CYCLE FINDING (Bellman-Ford, 1-indexed)
 =============================================================================*/
@@ -1685,6 +2143,15 @@ struct Edge {
     int u, v; 
     ll w; 
 };
+
+
+
+
+
+
+
+
+
 
 vector<int> findNegativeCycle(int n, const vector<Edge>& edges) {
     vector<ll> dist(n + 1, 0); 
@@ -1709,6 +2176,15 @@ vector<int> findNegativeCycle(int n, const vector<Edge>& edges) {
     }
     return buildCycle(lastRelaxedNode, parent);
 }
+
+
+
+
+
+
+
+
+
 
 /*=============================================================================
     4. SHORTEST CYCLE LENGTH / GIRT (BFS, 0-indexed)
@@ -1738,6 +2214,15 @@ int findShortestCycle(int n, const vector<vector<int>>& adj) {
     return minCycleLen == INT_MAX ? -1 : minCycleLen;
 }
 
+
+
+
+
+
+
+
+
+
 /*=============================================================================
     5. IDENTIFY ALL CYCLIC DEPENDENCY NODES (Kahn's Peeling, 0-indexed)
 =============================================================================*/
@@ -1764,6 +2249,15 @@ vector<int> getNodesInCycles(int n, const vector<vector<int>>& adj, vector<int>&
     return cyclicNodes;
 }
 
+
+
+
+
+
+
+
+
+
 bool dfs_bipartite(int u, int color, vector<int>& colors, const vector<vector<int>>& adj) {
     colors[u] = color;
     for (int v : adj[u]) {
@@ -1775,6 +2269,14 @@ bool dfs_bipartite(int u, int color, vector<int>& colors, const vector<vector<in
     }
     return true;
 }
+
+
+
+
+
+
+
+
 
 
 vector<int> shortestPathDAG(int n, vector<vector<pair<int,int>>>& adj, int src) {
@@ -1811,6 +2313,14 @@ vector<int> shortestPathDAG(int n, vector<vector<pair<int,int>>>& adj, int src) 
 }
 
 
+
+
+
+
+
+
+
+
 int rangeBitwiseAnd(int left, int right) {
     int shift = 0;
     while (left < right) {
@@ -1820,6 +2330,15 @@ int rangeBitwiseAnd(int left, int right) {
     }
     return left << shift;
 }
+
+
+
+
+
+
+
+
+
 
 int totalHammingDistance(const vector<int>& nums) {
     int total = 0, n = nums.size();
@@ -1832,6 +2351,15 @@ int totalHammingDistance(const vector<int>& nums) {
     }
     return total;
 }
+
+
+
+
+
+
+
+
+
 
 int longestNiceSubarray(const vector<int>& nums) {
     int n = nums.size();
@@ -1848,6 +2376,15 @@ int longestNiceSubarray(const vector<int>& nums) {
     return maxLength;
 } // finds the length of the longest subarray such that the bitwise AND of any two elements is 0 (i.e., no two elements share a set bit).
 
+
+
+
+
+
+
+
+
+
 int subarrayBitwiseORs(vector<int>& arr) {
         unordered_set<int>s1;
         unordered_set<int>s2;
@@ -1860,6 +2397,15 @@ int subarrayBitwiseORs(vector<int>& arr) {
         }
         return s1.size();
 } // finds the number of distinct values that can be obtained by taking the bitwise OR of all possible contiguous subarrays of the given array.
+
+
+
+
+
+
+
+
+
 
 int countTotalSetBits(int n) {
    int total_ones = 0;
@@ -1883,6 +2429,14 @@ int countTotalSetBits(int n) {
 } // counts the total number of set bits in the binary representations of all numbers from 1 to n.
 
 
+
+
+
+
+
+
+
+
 int CountSubsetsWithSumK(const vector<int>& nums, int k) {
     int n = nums.size();
     vector<int> dp(k + 1, 0);
@@ -1896,6 +2450,15 @@ int CountSubsetsWithSumK(const vector<int>& nums, int k) {
 
     return dp[k];
 } // counts the number of subsets of nums that sum up to k.
+
+
+
+
+
+
+
+
+
 
 int minSubsetSumDifference(const vector<int>& nums) {
     int totalSum = accumulate(nums.begin(), nums.end(), 0);
@@ -1917,6 +2480,15 @@ int minSubsetSumDifference(const vector<int>& nums) {
 
     return totalSum; // This line should never be reached.
 } // finds the minimum difference between the sums of two subsets of nums.
+
+
+
+
+
+
+
+
+
 
 vector<int> getMoneySums(vector<int>& coins) {
     int n = coins.size();
@@ -1949,6 +2521,15 @@ vector<int> getMoneySums(vector<int>& coins) {
     return possibleSums;
     }
 
+
+
+
+
+
+
+
+
+
 int CountOfLIS(const vector<int>& nums) {
     int n = nums.size();
     if (n == 0) return 0;
@@ -1980,6 +2561,15 @@ int CountOfLIS(const vector<int>& nums) {
     return totalCount;
 } // counts the number of longest increasing subsequences in nums.
 
+
+
+
+
+
+
+
+
+
 vector<int> dijkstra(int n, const vector<vector<pair<int,int>>>& adj, int src) {
     vector<int> dist(n, INT_MAX);
     dist[src] = 0;
@@ -1999,6 +2589,15 @@ vector<int> dijkstra(int n, const vector<vector<pair<int,int>>>& adj, int src) {
 
     return dist;
 } // computes the shortest path from src to all other nodes in a weighted graph using Dijkstra's algorithm.
+
+
+
+
+
+
+
+
+
 
 vector<int> bellman_ford(int n, const vector<Edge>& edges, int src) {
     vector<long long> dist(n + 1, LLONG_MAX);
@@ -2022,6 +2621,36 @@ vector<int> bellman_ford(int n, const vector<Edge>& edges, int src) {
     return vector<int>(dist.begin() + 1, dist.end()); // Return distances excluding the 0th index
 } // computes the shortest path from src to all other nodes in a weighted graph using the Bellman-Ford algorithm, and detects negative weight cycles.
 
+
+
+
+
+
+vector<int> shortestPathUnweighted(int n, const vector<vector<int>>& adj, int src) {
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+    queue<int> q;
+    q.push(src);
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u]) {
+            if (dist[v] == INT_MAX) { // Not visited
+                dist[v] = dist[u] + 1;
+                q.push(v);
+            }
+        }
+    }
+
+    return dist;
+} // computes the shortest path from src to all other nodes in an unweighted graph using BFS. Don;t use dijkstra for unweighted graphs as BFS is more efficient and simpler. and don't use this for weighted graphs as it will give wrong answer. Use dijkstra or bellman_ford for weighted graphs.
+
+
+
+
+
+
+
 vector<vector<int>> floyd_warshall(int n, const vector<vector<int>>& graph) {
     vector<vector<int>> dist = graph; // Initialize distance matrix with the input graph
     for (int k = 0; k < n; k++) {
@@ -2035,6 +2664,45 @@ vector<vector<int>> floyd_warshall(int n, const vector<vector<int>>& graph) {
     }
     return dist;
 } // computes the shortest paths between all pairs of vertices in a weighted graph using the Floyd-Warshall algorithm.
+
+
+
+
+
+
+
+
+
+
+// comparison between dijkstra, bellman_ford, and floyd_warshall:
+// Dijkstra: O((V + E) log V), works only for non-negative weights
+// Bellman-Ford: O(V * E), works for negative weights, detects negative cycles
+// Floyd-Warshall: O(V^3), computes all pairs shortest paths, works for negative weights, detects negative cycles
+bool cycle_detection_floyd(int n, const vector<vector<int>>& graph) {
+    vector<vector<int>> dist = graph; // Initialize distance matrix with the input graph
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX) {
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (dist[i][i] < 0) return true; // Negative cycle detected
+    }
+    return false;
+} // detects if there is a negative weight cycle in the graph using the Floyd-Warshall algorithm.
+
+
+
+
+
+
+
+
+
 
 vector<int> lexicographical_topo_sort(int n,const vector<vector<int>>& adj,vector<int> indegree) {
 
@@ -2066,5 +2734,262 @@ vector<int> lexicographical_topo_sort(int n,const vector<vector<int>>& adj,vecto
 
     return order;
 } // make sure edges are reversed before calling this function. This will give you the lexicographically largest topological order. If you want the lexicographically smallest topological order, use a min-heap instead of a max-heap.
+
+
+
+
+
+
+
+
+
+
 //    min-heap → lexicographically smallest topological order.
 // max-heap → lexicographically largest topological order.
+void DPonDAG(int n, const vector<vector<pair<int,int>>>& adj, int src) {
+    vector<int> indeg(n, 0);
+    for (int u = 0; u < n; u++) {
+        for (auto [v, wt] : adj[u]) {
+            indeg[v]++;
+        }  
+    }
+    vector<int> topo_order;
+    queue<int> q;
+    for (int i = 0; i < n; i++) {
+        if (indeg[i] == 0) q.push(i);
+    }
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        topo_order.push_back(u);
+        for (auto [v, wt] : adj[u]) {
+            if (--indeg[v] == 0) q.push(v);
+        }
+    }
+
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+    for(auto u : topo_order) {
+        if(dist[u] != INT_MAX) { // Only process if u is reachable
+            for(auto [v, wt] : adj[u]) {
+                if(dist[u] + wt < dist[v]) {
+                    dist[v] = dist[u] + wt;
+                }
+            }
+        }
+    }
+} // Computes shortest paths from src in a Directed Acyclic Graph (DAG) using Dynamic Programming on the topological order. Time complexity: O(V + E). Prefer this over Dijkstra for DAGs as it is more efficient and simpler.
+// this template is used in many problems like finding the shortest path in a DAG, longest path in a DAG, number of paths from src to all other vertices, etc.
+// for exmaple, for finding longest path in DAG , just change the comparison operator from < to > and initialize dist[src] = 0 and dist[v] = INT_MIN for all other vertices.
+
+
+
+
+
+
+
+
+
+
+// and same template is used for DP on DAG for longest path in DAG by changing the comparison operator from < to > and initializing dist[src] = 0 and dist[v] = INT_MIN for all other vertices.
+// many applications are based on DP on DAG like finding the number of paths from src to all other vertices, finding the longest path in a DAG, etc. just change the transition and the base case accordingly.
+struct GraphMColouring{
+    bool isValid(int node, int color, const vector<vector<int>>& adj, const vector<int>& colors) {
+        for (int neighbor : adj[node]) {
+            if (colors[neighbor] == color) return false;
+        }
+        return true;
+    }
+    void dfs(int node, int m, const vector<vector<int>>& adj, vector<int>& colors, int& count) {
+        if (node == adj.size()) {
+            count++;
+            return;
+        }
+        for (int color = 1; color <= m; color++) {
+            if (isValid(node, color, adj, colors)) {
+                colors[node] = color;
+                dfs(node + 1, m, adj, colors, count);
+                colors[node] = 0; // backtrack
+            }
+        }
+    }
+    int countColorings(int n, int m, const vector<vector<int>>& adj) {
+        vector<int> colors(n, 0);
+        int count = 0;
+        dfs(0, m, adj, colors, count);
+        return count;
+    }
+};
+
+
+
+
+
+
+
+
+
+
+int findCheapestPrice(int n, vector<vector<int>> &flights, int src, int dst, int k) {
+    vector<vector<pair<int, int>>> adj(n);
+    for (auto &f : flights) adj[f[0]].push_back({f[1], f[2]});
+    int maxFlights = k + 1;
+    vector<vector<int>> dist(n, vector<int>(maxFlights + 1, INT_MAX));
+    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
+    dist[src][0] = 0; pq.push({0, src, 0}); // state: {cost, node, flightsTaken}
+    // State Dijkstra tracking distance by number of flights taken
+    while (!pq.empty()) {
+        auto [cost, node, flightsTaken] = pq.top(); pq.pop();
+        if (cost > dist[node][flightsTaken]) continue;
+        if (node == dst) return cost;
+        for (auto &[next, price] : adj[node]) {
+            if (flightsTaken + 1 <= maxFlights && cost + price < dist[next][flightsTaken + 1]) {
+                dist[next][flightsTaken + 1] = cost + price;
+                pq.push({cost + price, next, flightsTaken + 1});
+            }
+        }
+    }
+    return -1;
+} // finds the cheapest price from src to dst with at most k stops using a modified Dijkstra's algorithm. The graph is represented as an adjacency list, and the priority queue is used to explore the cheapest paths first. The state is tracked by the number of flights taken to ensure we do not exceed k stops.
+
+
+
+
+
+
+
+
+
+
+int shortestPathVisitingAllNodes(int n, const vector<vector<int>>& graph) {
+    int allVisitedMask = (1 << n) - 1; // All nodes visited mask
+    queue<pair<int, int>> q; // {currentNode, visitedMask}
+    vector<vector<int>> dist(n, vector<int>(1 << n, INT_MAX));
+    
+    for (int i = 0; i < n; i++) {
+        q.push({i, 1 << i});
+        dist[i][1 << i] = 0;
+    }
+    
+    while (!q.empty()) {
+        auto [node, mask] = q.front(); q.pop();
+        int currentDist = dist[node][mask];
+        
+        if (mask == allVisitedMask) return currentDist; // All nodes visited
+        
+        for (int neighbor : graph[node]) {
+            int nextMask = mask | (1 << neighbor);
+            if (dist[neighbor][nextMask] > currentDist + 1) {
+                dist[neighbor][nextMask] = currentDist + 1;
+                q.push({neighbor, nextMask});
+            }
+        }
+    }
+    
+    return -1; // Should never reach here if the graph is connected
+} // finds the shortest path that visits all nodes in an undirected graph using BFS with state compression. The state is represented by the current node and a bitmask of visited nodes. we push all nodes as starting points into the queue and explore all possible paths while keeping track of the visited nodes using the bitmask. The algorithm returns the length of the shortest path that visits all nodes.
+
+
+
+
+
+
+
+
+
+
+int shortestCycleInUndirectedGraph(int n, const vector<vector<int>>& adj) {
+    int minCycleLength = INT_MAX;
+
+    for (int start = 0; start < n; start++) {
+        vector<int> dist(n, -1);
+        vector<int> parent(n, -1);
+        queue<int> q;
+
+        dist[start] = 0;
+        q.push(start);
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+
+            for (int v : adj[u]) {
+                if (dist[v] == -1) { // Not visited
+                    dist[v] = dist[u] + 1;
+                    parent[v] = u;
+                    q.push(v);
+                } else if (parent[u] != v) { // Found a cycle
+                    minCycleLength = min(minCycleLength, dist[u] + dist[v] + 1); // why dist[u] + dist[v] + 1? Because we are counting the edges in the cycle, which is the distance from start to u, plus the distance from start to v, plus the edge (u,v) that closes the cycle.
+                }
+            }
+        }
+    }
+
+    return minCycleLength == INT_MAX ? -1 : minCycleLength;
+} // finds the length of the shortest cycle in an undirected graph using BFS. The algorithm explores all nodes as starting points and keeps track of distances and parents to detect cycles. If a cycle is found, it updates the minimum cycle length. If no cycle exists, it returns -1.
+
+
+
+
+
+int ShortestCommonSubsequence(const string& s1, const string& s2) {
+    int n = s1.size(), m = s2.size();
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+
+    int lcsLength = dp[n][m];
+    return n + m - lcsLength; // Length of shortest common supersequence
+} // computes the length of the shortest common supersequence of two strings by first calculating the length of their longest common subsequence (LCS) and then using the formula: length(SCS) = length(s1) + length(s2) - length(LCS).
+// what is SCS? SCS (Shortest Common Supersequence) is the shortest sequence that contains both given sequences as subsequences.
+
+string SCS(const string& s1, const string& s2) {
+    int n = s1.size(), m = s2.size();
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+    // Fill the dp table for LCS
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+
+    // Reconstruct the SCS from the dp table
+    string scs;
+    int i = n, j = m;
+    while (i > 0 && j > 0) {
+        if (s1[i - 1] == s2[j - 1]) {
+            scs += s1[i - 1];
+            i--; j--;
+        } else if (dp[i - 1][j] > dp[i][j - 1]) {
+            scs += s1[i - 1];
+            i--;
+        } else {
+            scs += s2[j - 1];
+            j--;
+        }
+    }
+
+    // Add remaining characters from s1 or s2
+    while (i > 0) {
+        scs += s1[i - 1];
+        i--;
+    }
+    while (j > 0) {
+        scs += s2[j - 1];
+        j--;
+    }
+
+    reverse(scs.begin(), scs.end());
+    return scs;
+} // constructs the shortest common supersequence of two strings by first calculating their longest common subsequence and then backtracking through the DP table to build the SCS.
