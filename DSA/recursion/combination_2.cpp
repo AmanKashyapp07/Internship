@@ -65,14 +65,10 @@ void dfs(int start, int target) {
         ans.pb(cur);
         return;
     }
-
-    for (int i = start; i < (int)a.size(); i++) {
-        if (i > start && a[i] == a[i - 1])
-            continue;
-
-        if (a[i] > target)
-            break;
-
+    int n = a.size();
+    for (int i = start; i < n; i++) {
+        if (i > start && a[i] == a[i - 1]) continue;
+        if (a[i] > target) break;
         cur.pb(a[i]);
         dfs(i + 1, target - a[i]); // use each element only once
         cur.pop_back();

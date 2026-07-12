@@ -69,8 +69,7 @@ void dfs(int idx) {
 
     for (int j = idx; j < n; j++) {
         if (!pal[idx][j]) continue;
-
-        cur.pb(s.substr(idx, j - idx + 1));
+        cur.pb(s.substr(idx, j - idx + 1)); // s.substr(a,b) gives substring starting at index a of length b
         dfs(j + 1);
         cur.pop_back();
     }
@@ -91,15 +90,11 @@ int main() {
 
     // length >= 2
     for (int len = 2; len <= n; len++) {
-        for (int i = 0; i + len - 1 < n; i++) {
+        for (int i = 0; i + len <= n; i++) {
             int j = i + len - 1;
-
-            if (s[i] != s[j]) continue;
-
-            if (len <= 3)
-                pal[i][j] = true;
-            else
-                pal[i][j] = pal[i + 1][j - 1];
+            if (s[i] == s[j]) {
+                pal[i][j] = (len <= 3) || pal[i + 1][j - 1];
+            }
         }
     }
 

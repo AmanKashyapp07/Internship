@@ -59,46 +59,46 @@ public:
     int minCost(vector<vector<int>>& grid) {
         int m = grid.size();
         int n = grid[0].size();
-        
-        vector<vector<int>> dist(m, vector<int>(n, INF)); 
-        deque<pair<int, int>> dq;
-        
+
+        vector<vector<int>> dist(m, vector<int>(n, INF));
+
+        using T = vector<int>; // {cost, row, col}
+        priority_queue<T, vector<T>, greater<T>> pq;
+
         dist[0][0] = 0;
-        dq.push_back({0, 0});
-        
-        // Match directions cleanly with 1-based indexing from problem statement:
+        pq.push({0, 0, 0});
+
         // 1: Right, 2: Left, 3: Down, 4: Up
         int dr[] = {0, 0, 0, 1, -1};
         int dc[] = {0, 1, -1, 0, 0};
-        
-        while(!dq.empty()) {
-            auto [r, c] = dq.front(); dq.pop_front();
-            
-            if (r == m - 1 && c == n - 1) return dist[r][c];
-            
-            int current_dir = grid[r][c];
-            
-            for (int i = 1; i <= 4; i++) {
-                int nr = r + dr[i];
-                int nc = c + dc[i];
-                
-                if (nr >= 0 && nr < m && nc >= 0 && nc < n) {
-                    int weight = (current_dir == i) ? 0 : 1; // 0 if moving in the preferred direction, 1 otherwise
-                    
-                    if (dist[r][c] + weight < dist[nr][nc]) {
-                        dist[nr][nc] = dist[r][c] + weight;
-                        
-                        // 0-1 BFS placement logic
-                        if (weight == 0) {
-                            dq.push_front({nr, nc});
-                        } else {
-                            dq.push_back({nr, nc});
-                        }
-                    }
+
+        while (!pq.empty()) {
+            auto v = pq.top();
+            int cost = v[0], r = v[1], c = v[2];
+            pq.pop();
+
+            if (cost > dist[r][c])
+                continue;
+
+            if (r == m - 1 && c == n - 1)
+                return cost;
+
+            for (int dir = 1; dir <= 4; dir++) {
+                int nr = r + dr[dir];
+                int nc = c + dc[dir];
+
+                if (nr < 0 || nr >= m || nc < 0 || nc >= n)
+                    continue;
+
+                int newCost = cost + (grid[r][c] != dir);
+
+                if (newCost < dist[nr][nc]) {
+                    dist[nr][nc] = newCost;
+                    pq.push({newCost, nr, nc});
                 }
             }
         }
-        
+
         return dist[m - 1][n - 1];
     }
 };

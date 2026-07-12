@@ -1,14 +1,3 @@
-/**
- * Problem: Binary Trie (XOR Trie)
- * Link: N/A
- * Category: Trie
- * 
- * Description:
- * XOR Trie template supporting maximum XOR queries.
- * 
- * Logic/Approach:
- * Node structure with a size 2 array of binary bits.
- */
 
 #include <iostream>
 #include <vector>
@@ -16,61 +5,86 @@
 
 using namespace std;
 
-// TrieNode for Binary Trie storing bits (0 or 1)
-struct TrieNode {
-    TrieNode* child[2] = {}; // Left child (0), Right child (1)
-    int cnt = 0;             // Number of values passing through this node
+struct Node {
+    Node* child[2] = {};
+    int cnt = 0; // stores the count of numbers that pass through this node (prefix count)
 };
 
 class BinaryTrie {
-public:
-    TrieNode* root = new TrieNode();
+    
 
-    // Inserts a number into the trie by checking its binary bits (MSB to LSB)
-    void insert(int num) {
-        TrieNode* node = root;
-        for (int bit = 31; bit >= 0; bit--) {
-            int b = (num >> bit) & 1;
-            if (!node->child[b]) node->child[b] = new TrieNode();
-            node = node->child[b];
-            node->cnt++;
+public:
+    Node* root = new Node();
+    // --------------------------------------------------------
+    // Insert
+    // --------------------------------------------------------
+    void insert(int x) {
+        Node* cur = root;
+
+        for (int b = 31; b >= 0; b--) {
+            int bit = (x >> b) & 1;
+
+            if (!cur->child[bit])
+                cur->child[bit] = new Node();
+
+            cur = cur->child[bit];
+            cur->cnt++;
         }
     }
 
-    // Finds the maximum XOR value possible with 'num' using greedy bit selection
-    int maxXor(int num) {
-        TrieNode* node = root;
+    // --------------------------------------------------------
+    // Maximum XOR
+    // Greedily take opposite bit if possible.
+    // --------------------------------------------------------
+    int maxXor(int x) {
+        Node* cur = root;
         int ans = 0;
-        for (int bit = 31; bit >= 0; bit--) {
-            int b = (num >> bit) & 1;
-            int want = 1 - b; // Oppose the current bit to maximize XOR (1 ^ 0 = 1)
-            if (node->child[want]) {
-                ans |= (1 << bit);
-                node = node->child[want];
+
+        for (int b = 31; b >= 0; b--) {
+            int bit = (x >> b) & 1;
+            int want = bit ^ 1;
+
+            if (cur->child[want]) {
+                ans |= (1 << b);
+                cur = cur->child[want];
             } else {
-                node = node->child[b];
+                cur = cur->child[bit];
             }
         }
+
         return ans;
     }
 
-    // Counts elements 'y' in the trie such that (num XOR y) < k
-    int countLessThanK(int num, int k) {
-        TrieNode* node = root;
+    // --------------------------------------------------------
+    // Count numbers y such that
+    //      (x XOR y) < k
+    // --------------------------------------------------------
+    int countLessThanK(int x, int k) {
+        Node* cur = root;
         int ans = 0;
-        for (int bit = 31; bit >= 0; bit--) {
-            if (!node) break;
-            int nBit = (num >> bit) & 1, kBit = (k >> bit) & 1;
-            if (kBit == 1) {
-                // If k has 1, matching the bit of num yields 0, which is < 1. Add all such elements.
-                if (node->child[nBit]) ans += node->child[nBit]->cnt;
-                // Continue searching on the opposite branch (yielding XOR 1)
-                node = node->child[1 - nBit];
+
+        for (int b = 31; b >= 0; b--) {
+
+            if (!cur) break;
+
+            int xb = (x >> b) & 1;
+            int kb = (k >> b) & 1;
+
+            if (kb == 1) {
+
+                // XOR bit = 0 is already smaller
+                if (cur->child[xb])
+                    ans += cur->child[xb]->cnt;
+
+                // Continue with XOR bit = 1
+                cur = cur->child[xb ^ 1];
+
             } else {
-                // If k has 0, we must match num's bit to keep XOR result 0
-                node = node->child[nBit];
+                // Must keep XOR bit = 0
+                cur = cur->child[xb];
             }
         }
+
         return ans;
     }
 };

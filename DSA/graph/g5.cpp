@@ -1,6 +1,40 @@
-// ============================================================================
-// SECTION 4: SHORTEST PATH ALGORITHMS AND PROBLEMS
-// ============================================================================
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define pb push_back
+#define ff first
+#define ss second
+
+const int INF = INT_MAX;
+const ll LINF = LLONG_MAX;
+const ll MOD = 1e9 + 7;
+
 
 // 1. Shortest Path in Undirected Graph with Unit Weights (Standard BFS)
 vi shortestPathUnitWeights(int V, vector<vi>& adj, int src) {
@@ -164,48 +198,6 @@ int minimumEffortPath(vector<vector<int>>& heights) {
     return 0;
 }
 
-int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
-    vector<vector<pair<int, int>>> adj(n);
-    for (auto& f : flights) {
-        adj[f[0]].push_back({f[1], f[2]});
-    }
-
-    int maxFlights = k + 1;
-    vector<vector<int>> dist(n, vector<int>(maxFlights + 1, INT_MAX));
-
-    // Min-heap storing: {cost, node, flightsTaken}
-    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
-
-    dist[src][0] = 0;
-    pq.push({0, src, 0});
-
-    while (!pq.empty()) {
-        auto [cost, node, flightsTaken] = pq.top();
-        pq.pop();
-
-        if (cost > dist[node][flightsTaken]) {
-            continue;
-        }
-
-        if (node == dst) {
-            return cost;
-        }
-
-        for (auto& [next, price] : adj[node]) {
-            if (flightsTaken + 1 > maxFlights) {
-                continue;
-            }
-
-            int newCost = cost + price;
-            if (newCost < dist[next][flightsTaken + 1]) {
-                dist[next][flightsTaken + 1] = newCost;
-                pq.push({newCost, next, flightsTaken + 1});
-            }
-        }
-    }
-
-    return -1;
-}
 
 // 8. Network Delay Time (Dijkstra Variant)
 int networkDelayTime(vector<vector<int>>& times, int n, int k) {
@@ -279,89 +271,3 @@ int countPaths(int n, vector<vector<int>>& roads) {
     return ways[n - 1] % MOD;
 }
 
-// 10. Minimum Multiplications to Reach End (State BFS)
-int minimumMultiplications(vi& arr, int start, int end) {
-    if (start == end) return 0;
-    vi dist(100000, INF);
-    dist[start] = 0;
-    queue<int> q;
-    q.push(start);
-
-    while (!q.empty()) {
-        int node = q.front();
-        q.pop();
-
-        for (auto it : arr) {
-            int num = (1LL * node * it) % 100000;
-            if (dist[node] + 1 < dist[num]) {
-                dist[num] = dist[node] + 1;
-                if (num == end) return dist[num];
-                q.push(num);
-            }
-        }
-    }
-    return -1;
-}
-
-// 11. Bellman Ford Algorithm (Handles negative weights & detects negative cycles)
-vi bellmanFord(int V, vector<vector<int>>& edges, int src, bool& hasNegativeCycle) {
-    vi dist(V, 1e8); // Using 1e8 as per standard competitive problem bounds to avoid overflow
-    dist[src] = 0;
-
-    // Relax all edges V-1 times
-    for (int i = 0; i < V - 1; i++) {
-        for (auto it : edges) {
-            int u = it[0], v = it[1], wt = it[2];
-            if (dist[u] != 1e8 && dist[u] + wt < dist[v]) {
-                dist[v] = dist[u] + wt;
-            }
-        }
-    }
-
-    // Nth relaxation check for negative cycles
-    hasNegativeCycle = false;
-    for (auto it : edges) {
-        int u = it[0], v = it[1], wt = it[2];
-        if (dist[u] != 1e8 && dist[u] + wt < dist[v]) {
-            hasNegativeCycle = true;
-            return {-1};
-        }
-    }
-    return dist;
-}
-
-// 12 & 13. Floyd Warshall Algorithm & Find the City with Smallest Number of Neighbors
-int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {
-    vector<vi> matrix(n, vi(n, INF));
-    for (int i = 0; i < n; i++) matrix[i][i] = 0;
-    for (auto& it : edges) {
-        matrix[it[0]][it[1]] = it[2];
-        matrix[it[1]][it[0]] = it[2];
-    }
-
-    // Classic Floyd Warshall All-Pairs Shortest Path DP execution
-    for (int k = 0; k < n; k++) {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (matrix[i][k] != INF && matrix[k][j] != INF) {
-                    matrix[i][j] = min(matrix[i][j], matrix[i][k] + matrix[k][j]);
-                }
-            }
-        }
-    }
-
-    int cntCity = n;
-    int cityNo = -1;
-
-    for (int i = 0; i < n; i++) {
-        int cnt = 0;
-        for (int j = 0; j < n; j++) {
-            if (matrix[i][j] <= distanceThreshold) cnt++;
-        }
-        if (cnt <= cntCity) {
-            cntCity = cnt;
-            cityNo = i;
-        }
-    }
-    return cityNo;
-}

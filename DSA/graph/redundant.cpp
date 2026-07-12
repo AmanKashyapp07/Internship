@@ -15,74 +15,68 @@
  * Time Complexity: O(N * alpha(N))
  * Space Complexity: O(N)
  */
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
-class DisjointSet {
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+class DSU {
+    vector<int> p, sz;
+
 public:
-    vector<int> rank, parent, size;
-
-    DisjointSet(int n) {
-        rank.resize(n + 1, 0);
-        parent.resize(n + 1);
-        size.resize(n + 1, 1);
-
-        for (int i = 0; i <= n; i++)
-            parent[i] = i;
+    DSU(int n) {
+        p.resize(n + 1);
+        sz.assign(n + 1, 1);
+        iota(p.begin(), p.end(), 0);
     }
 
-    int findUPar(int node) {
-        if (node == parent[node])
-            return node;
-        return parent[node] = findUPar(parent[node]);
+    int find(int x) {
+        return p[x] == x ? x : p[x] = find(p[x]);
     }
 
-    void unionByRank(int u, int v) {
-        int ulp_u = findUPar(u);
-        int ulp_v = findUPar(v);
+    bool unite(int a, int b) {
+        a = find(a);
+        b = find(b);
 
-        if (ulp_u == ulp_v)
-            return;
+        if (a == b) return false;
 
-        if (rank[ulp_u] < rank[ulp_v]) {
-            parent[ulp_u] = ulp_v;
-        } else if (rank[ulp_v] < rank[ulp_u]) {
-            parent[ulp_v] = ulp_u;
-        } else {
-            parent[ulp_v] = ulp_u;
-            rank[ulp_u]++;
-        }
-    }
-
-    void unionBySize(int u, int v) {
-        int ulp_u = findUPar(u);
-        int ulp_v = findUPar(v);
-
-        if (ulp_u == ulp_v)
-            return;
-
-        if (size[ulp_u] < size[ulp_v]) {
-            parent[ulp_u] = ulp_v;
-            size[ulp_v] += size[ulp_u];
-        } else {
-            parent[ulp_v] = ulp_u;
-            size[ulp_u] += size[ulp_v];
-        }
+        if (sz[a] < sz[b]) swap(a, b);
+        p[b] = a;
+        sz[a] += sz[b];
+        return true;
     }
 };
 
 class Solution {
 public:
     vector<int> findRedundantConnection(vector<vector<int>>& edges) {
-        int n = edges.size();
-        DisjointSet ds(n);
+        DSU dsu(edges.size());
 
-        for (auto &edge : edges) {
-            int u = edge[0];
-            int v = edge[1];
-            if (ds.findUPar(u) == ds.findUPar(v))
-                return edge;
-
-            ds.unionBySize(u, v); 
-        }
+        for (auto &e : edges)
+            if (!dsu.unite(e[0], e[1]))
+                return e;
 
         return {};
     }

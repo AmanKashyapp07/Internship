@@ -42,11 +42,9 @@ private:
             if (isSafe(node, color, colors, graph)) {
                 colors[node] = color; // Choose
                 if (dfs(node + 1, m, n, colors, graph)) return true;
-
                 colors[node] = 0; // Backtrack
             }
         }
-
         return false;
     }
 

@@ -58,18 +58,12 @@ const ll  MOD  = 1e9 + 7;
 
 void generateSubsets(int idx, vi& nums, vi& ds, vector<vi>& ans) {
     ans.pb(ds);
-
     for (int i = idx; i < nums.size(); i++) {
-        // Skip duplicates at the same level
-        if (i > idx && nums[i] == nums[i - 1])
-            continue;
-
+        if (i > idx && nums[i] == nums[i - 1]) continue;
         ds.pb(nums[i]);
-
         generateSubsets(i + 1, nums, ds, ans);
-
-        ds.pop_back(); // backtrack
-    } // here there is for loop because we are iterating over the array and generating subsets, so we need to backtrack after each recursive call to explore other possibilities, it;s not simple pick
+        ds.pop_back();
+    }
 }
 
 int main() {

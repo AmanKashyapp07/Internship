@@ -1,29 +1,41 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <climits>
 using namespace std;
-#define all(x) (x).begin(), (x).end()
+using ll = long long;
 
+vector<int> buildCycle(int start, const vector<int>& parent) {
+    vector<int> cycle;
+    int cur = start;
+    while (true) {
+        cycle.push_back(cur);
+        cur = parent[cur];
+
+        if (cur == start)
+            break;
+    }
+
+    return cycle;
+}
 /*=============================================================================
-    1. UNDIRECTED GRAPH CYCLE RECONSTRUCTION (CSES Round Trip)
+    1. UNDIRECTED GRAPH CYCLE RECONSTRUCTION (1-indexed)
 =============================================================================*/
-struct UndirectedCycle {
+class UndirectedCycle {
+private:
     int n, startNode = -1, endNode = -1;
     vector<vector<int>> adj;
-    vector<int> vis, parent; // vis: 0=unvisited, 1=visited
-
-    UndirectedCycle(int n) : n(n), adj(n + 1), vis(n + 1, 0), parent(n + 1, -1) {}
-    
-    void addEdge(int u, int v) {
-        adj[u].push_back(v); adj[v].push_back(u);
-    }
+    vector<int> vis, parent;
 
     bool dfs(int u, int p) {
         vis[u] = 1;
         for (int v : adj[u]) {
-            if (v == p) continue; // Skip immediate parent in undirected graph
+            if (v == p) continue; 
             if (!vis[v]) {
                 parent[v] = u;
                 if (dfs(v, u)) return true;
-            } else { // Neighbor is visited and not parent -> Cycle found
+            } else { 
                 startNode = v; endNode = u;
                 return true;
             }
@@ -31,153 +43,153 @@ struct UndirectedCycle {
         return false;
     }
 
+public:
+    UndirectedCycle(int n) : n(n), adj(n + 1), vis(n + 1, 0), parent(n + 1, -1) {}
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v); adj[v].push_back(u);
+    }
+
     vector<int> getCycle() {
         for (int i = 1; i <= n; i++) {
             if (!vis[i] && dfs(i, -1)) {
-                vector<int> cycle = {startNode};
-                int cur = endNode;
-                while (cur != startNode) {
-                    cycle.push_back(cur);
-                    cur = parent[cur];
-                }
-                cycle.push_back(startNode);
-                reverse(all(cycle));
-                return cycle;
+                return buildCycle(startNode, parent);
             }
         }
         return {};
     }
 };
 
-struct DirectedCycle {
+/*=============================================================================
+    2. DIRECTED GRAPH CYCLE RECONSTRUCTION (1-indexed)
+=============================================================================*/
+class DirectedCycle {
+private:
     int n, startNode = -1, endNode = -1;
     vector<vector<int>> adj;
     vector<bool> vis, inPath;
     vector<int> parent;
 
-    DirectedCycle(int n)
-        : n(n),
-          adj(n + 1),
-          vis(n + 1, false),
-          inPath(n + 1, false),
-          parent(n + 1, -1) {}
+    bool dfs(int u) {
+        vis[u] = inPath[u] = true;
+        for (int v : adj[u]) {
+            if (!vis[v]) {
+                parent[v] = u;
+                if (dfs(v)) return true;
+            } else if (inPath[v]) {   
+                startNode = v; endNode = u;
+                return true;
+            }
+        }
+        inPath[u] = false;
+        return false;
+    }
+
+public:
+    DirectedCycle(int n) : n(n), adj(n + 1), vis(n + 1, false), inPath(n + 1, false), parent(n + 1, -1) {}
 
     void addEdge(int u, int v) {
         adj[u].push_back(v);
     }
 
-    bool dfs(int u) {
-        vis[u] = true;
-        inPath[u] = true;
-
-        for (int v : adj[u]) {
-            if (!vis[v]) {
-                parent[v] = u;
-                if (dfs(v)) return true;
-            }
-            else if (inPath[v]) {   // back edge
-                startNode = v;
-                endNode = u;
-                return true;
-            }
-        }
-
-        inPath[u] = false;
-        return false;
-    }
-
     vector<int> getCycle() {
         for (int i = 1; i <= n; i++) {
             if (!vis[i] && dfs(i)) {
-                vector<int> cycle = {startNode};
-                int cur = endNode;
-                while (cur != startNode) {
-                    cycle.push_back(cur);
-                    cur = parent[cur];
-                }
-                cycle.push_back(startNode);
-                reverse(all(cycle));
-
-                return cycle;
+                return buildCycle(startNode, parent);
             }
         }
         return {};
     }
 };
-/*=============================================================================
-    3. NEGATIVE CYCLE RECONSTRUCTION (CSES Cycle Finding)
-=============================================================================*/
-struct Edge { int u, v; ll w; };
 
-vector<int> negativeCycle(int n, vector<Edge>& edges) {
-    vector<ll> dist(n + 1, 0); vector<int> parent(n + 1, -1);
-    int x = -1;
+/*=============================================================================
+    3. NEGATIVE WEIGHT CYCLE FINDING (Bellman-Ford, 1-indexed)
+=============================================================================*/
+struct Edge { 
+    int u, v; 
+    ll w; 
+};
+
+vector<int> findNegativeCycle(int n, const vector<Edge>& edges) {
+    vector<ll> dist(n + 1, 0); 
+    vector<int> parent(n + 1, -1);
+    int lastRelaxedNode = -1;
     
-    // Run Bellman-Ford N times. If Nth iteration relaxes an edge, a negative cycle exists.
     for (int i = 1; i <= n; i++) {
-        x = -1;
-        for (auto &e : edges) {
+        lastRelaxedNode = -1;
+        for (const auto &e : edges) {
             if (dist[e.u] + e.w < dist[e.v]) {
-                dist[e.v] = dist[e.u] + e.w; parent[e.v] = e.u; x = e.v; // x is the last relaxed node, which is guaranteed to be part of a negative cycle or can reach one.
+                dist[e.v] = dist[e.u] + e.w; 
+                parent[e.v] = e.u; 
+                lastRelaxedNode = e.v; 
             }
         }
     }
-    if (x == -1) return {}; // No negative cycle
+    if (lastRelaxedNode == -1) return {}; 
     
-    // Backtrack N times to ensure x is strictly inside the cycle loop
-    for (int i = 0; i < n; i++) x = parent[x]; // This is necessary because the node x may not be part of the cycle itself, but rather a node that can reach the cycle. By backtracking N times, we ensure that we land on a node that is guaranteed to be part of the cycle. by iterating N times, we are making sure that we are moving back through the graph enough times to reach a node that is part of the cycle, since the cycle can be at most N nodes long. This guarantees that we are inside the cycle when we start reconstructing it, at some point it will enter the cycle as we backtrack through the parent pointers. Once we are inside the cycle, we can reconstruct the cycle by following the parent pointers until we return to the starting node.
-    
-    vector<int> cycle;
-    int start = x; cycle.push_back(start);
-    x=parent[start];
-    while (x != start) { cycle.push_back(x); x = parent[x]; }
-    cycle.push_back(x); reverse(all(cycle));
-    return cycle;
+    // Backtrack N times to guarantee entry into the cycle structure
+    for (int i = 0; i < n; i++) {
+        lastRelaxedNode = parent[lastRelaxedNode];
+    }
+    return buildCycle(lastRelaxedNode, parent);
 }
 
-
-
 /*=============================================================================
-    5. SHORTEST CYCLE LENGTH (LeetCode 2608) - 0-indexed
+    4. SHORTEST CYCLE LENGTH / GIRT (BFS, 0-indexed)
 =============================================================================*/
-int shortestCycleLength(int n, vector<vector<int>>& adj) {
-    int ans = INT_MAX;
-    // Multi-source BFS: Find shortest cycle passing through each possible root
+int findShortestCycle(int n, const vector<vector<int>>& adj) {
+    int minCycleLen = INT_MAX;
+    
     for (int src = 0; src < n; src++) {
-        vector<int> dist(n, -1), parent(n, -1); queue<int> q;
-        dist[src] = 0; q.push(src);
+        vector<int> dist(n, -1), parent(n, -1); 
+        queue<int> q;
+        dist[src] = 0; 
+        q.push(src);
+        
         while (!q.empty()) {
             int u = q.front(); q.pop();
             for (int v : adj[u]) {
                 if (dist[v] == -1) {
-                    dist[v] = dist[u] + 1; parent[v] = u; q.push(v);
-                } else if (parent[u] != v) { // Visited node and not immediate parent -> Cycle
-                    ans = min(ans, dist[u] + dist[v] + 1);
+                    dist[v] = dist[u] + 1; 
+                    parent[v] = u; 
+                    q.push(v);
+                } else if (parent[u] != v) { 
+                    minCycleLen = min(minCycleLen, dist[u] + dist[v] + 1);
                 }
             }
         }
     }
-    return ans == INT_MAX ? -1 : ans;
+    return minCycleLen == INT_MAX ? -1 : minCycleLen;
 }
 
 /*=============================================================================
-    6. ALL NODES BELONGING TO CYCLES (Kahn's Algorithm) - 0-indexed
+    5. IDENTIFY ALL CYCLIC DEPENDENCY NODES (Kahn's Peeling, 0-indexed)
 =============================================================================*/
-vector<int> nodesInCycles(int n, vector<vector<int>>& adj, vector<int>& indeg) {
-    queue<int> q; vector<int> alive(n, 1), cycleNodes;
-    for (int i = 0; i < n; i++) if (indeg[i] == 0) q.push(i);
+vector<int> getNodesInCycles(int n, const vector<vector<int>>& adj, vector<int>& indegree) {
+    queue<int> q; 
+    vector<bool> isAcyclic(n, false); 
+    vector<int> cyclicNodes;
     
-    // Peeling layers: Nodes removed by Kahn's can NEVER be part of any cycle
-    while (!q.empty()) {
-        int u = q.front(); q.pop(); alive[u] = 0;
-        for (int v : adj[u]) if (--indeg[v] == 0) q.push(v);
+    for (int i = 0; i < n; i++) {
+        if (indegree[i] == 0) q.push(i);
     }
-    // Remaining unpeeled nodes are locked inside cyclic dependencies
-    for (int i = 0; i < n; i++) if (alive[i]) cycleNodes.push_back(i);
-    return cycleNodes;
+    
+    while (!q.empty()) {
+        int u = q.front(); q.pop(); 
+        isAcyclic[u] = true;
+        for (int v : adj[u]) {
+            if (--indegree[v] == 0) q.push(v);
+        }
+    }
+    
+    for (int i = 0; i < n; i++) {
+        if (!isAcyclic[i]) cyclicNodes.push_back(i);
+    }
+    return cyclicNodes;
 }
 
 int main() {
-    ios::sync_with_stdio(false); cin.tie(nullptr);
+    ios::sync_with_stdio(false); 
+    cin.tie(nullptr);
     return 0;
 }

@@ -52,43 +52,35 @@ const ll MOD = 1e9 + 7;
 
 
 // shortest path in DAG (directed acyclic graph) using topological sort
+// shortest path from source to all other nodes in a weighted directed acyclic graph (DAG) using topological sorting and dynamic programming. The algorithm first computes the topological order of the nodes, then relaxes the edges in that order to find the shortest paths.
 
 vector<int> shortestPathDAG(int n, vector<vector<pair<int,int>>>& adj, int src) {
     vector<int> indeg(n);
 
     for (int u = 0; u < n; u++) {
-        for (auto [v, wt] : adj[u]) {
+        for (auto [v, wt] : adj[u])
             indeg[v]++;
-        }
-    }
-
-    queue<int> q;
-    for (int i = 0; i < n; i++) {
-        if (indeg[i] == 0) q.push(i);
-    }
-
-    vector<int> topo;
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
-        topo.push_back(u);
-
-        for (auto [v, wt] : adj[u]) {
-            if (--indeg[v] == 0) {
-                q.push(v);
-            }
-        }
     }
 
     vector<int> dist(n, INT_MAX);
     dist[src] = 0;
 
-    for (int u : topo) {
-        if (dist[u] == INT_MAX) continue;
+    queue<int> q;
+    for (int i = 0; i < n; i++)
+        if (indeg[i] == 0)
+            q.push(i);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
 
         for (auto [v, wt] : adj[u]) {
-            dist[v] = min(dist[v], dist[u] + wt);
+            if (dist[u] != INT_MAX && dist[u] + wt < dist[v]) {
+                dist[v] = dist[u] + wt;
+            }
+            indeg[v]--;
+            if (indeg[v] == 0)
+                q.push(v);
         }
     }
 

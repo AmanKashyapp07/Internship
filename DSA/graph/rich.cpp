@@ -30,60 +30,47 @@
  */
 
 
+#include <string>
 #include <vector>
 #include <queue>
-#include <algorithm>
-
+#include <unordered_set>
+#include <unordered_map>
 using namespace std;
+
 
 class Solution {
 public:
-    vector<int> lewisQuiet(int n, vector<vector<int>>& richer, vector<int>& quiet) {
-        // Step 1: Build the graph (Rich -> Poor) and track indegrees
+    vector<int> loudAndRich(vector<vector<int>>& richer, vector<int>& quiet) {
+        int n = quiet.size();
+
         vector<vector<int>> adj(n);
-        vector<int> indegree(n, 0);
-        
-        for (const auto& edge : richer) {
-            int rich = edge[0];
-            int poor = edge[1];
-            adj[rich].push_back(poor);
-            indegree[poor]++;
+        vector<int> indegree(n), ans(n);
+        // ans[i] = index of quietest person reachable from i (including i)
+        // quiet[i] = quietness of person i
+        for (auto &e : richer) {
+            adj[e[0]].push_back(e[1]); // making graph from richer to poorer
+            indegree[e[1]]++;
         }
-        
-        // Step 2: Initialize answers where everyone is their own baseline
-        vector<int> answer(n);
-        for (int i = 0; i < n; ++i) {
-            answer[i] = i;
-        }
-        
-        // Step 3: Queue all people who have NO ONE richer than them
+
         queue<int> q;
-        for (int i = 0; i < n; ++i) {
-            if (indegree[i] == 0) {
+
+        for (int i = 0; i < n; i++) {
+            ans[i] = i;
+            if (indegree[i] == 0)
                 q.push(i);
-            }
         }
-        
-        // Step 4: Topological Sort (Kahn's Algorithm)
+
         while (!q.empty()) {
-            int rich = q.front();
+            int u = q.front();
             q.pop();
-            
-            for (int poor : adj[rich]) {
-                // If the best candidate from the rich person is quieter than 
-                // the best candidate found so far for the poor person, update it.
-                if (quiet[answer[rich]] < quiet[answer[poor]]) {
-                    answer[poor] = answer[rich];
-                }
-                
-                // Decrement indegree; push to queue if all richer ancestors are processed
-                indegree[poor]--;
-                if (indegree[poor] == 0) {
-                    q.push(poor);
-                }
+
+            for (int v : adj[u]) {
+                if (quiet[ans[u]] < quiet[ans[v]]) ans[v] = ans[u]; // update quietest person for v if u's quietest is quieter
+                if (--indegree[v] == 0)
+                    q.push(v);
             }
         }
-        
-        return answer;
+
+        return ans;
     }
 };

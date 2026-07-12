@@ -59,10 +59,8 @@ int main()
         cin >> arr[i];
         pref[i] = pref[i - 1] + arr[i];
     }
-
     deque<int> dq;
     long long ans = LLONG_MIN;
-
     for (int i = A; i <= n; i++)
     {
         // Valid prefix indices:
@@ -72,12 +70,10 @@ int main()
         int R = i - A;
 
         // 1. Remove expired indices
-        while (!dq.empty() && dq.front() < L)
-            dq.pop_front();
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
 
         // 2. Insert new candidate (R)
-        while (!dq.empty() && pref[dq.back()] >= pref[R])
-            dq.pop_back();
+        while (!dq.empty() && pref[dq.back()] >= pref[R])  dq.pop_back();
 
         dq.push_back(R);
 

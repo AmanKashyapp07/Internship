@@ -41,19 +41,15 @@ public:
     vector<vector<int>> ans;
     void helper(int idx, int prev, vector<int>& nums, vector<int>& temp) {
         if (idx == nums.size()) {
-            if (temp.size() >= 2)
-                ans.push_back(temp);
+            if (temp.size() >= 2) ans.push_back(temp);
             return;
         }
-
         if (nums[idx] >= prev) {
             temp.push_back(nums[idx]);
             helper(idx + 1, nums[idx], nums, temp);
             temp.pop_back();
         }
-
-        if (nums[idx] != prev)
-            helper(idx + 1, prev, nums, temp);
+        if (nums[idx] != prev) helper(idx + 1, prev, nums, temp); // skip duplicates
     }
     vector<vector<int>> findSubsequences(vector<int>& nums) {
         ans.clear();
@@ -61,4 +57,5 @@ public:
         helper(0, INT_MIN, nums, temp);
         return ans;
     }
+    // problem statement is https://leetcode.com/problems/increasing-subsequences/
 };

@@ -50,29 +50,31 @@ int main() {
     int n;
     cin >> n;
 
-    vector<array<int, 3>> a(n);
+    int m=3;
+    vector<vector<int>> a(n, vector<int>(m));
 
     for (int i = 0; i < n; i++) {
         cin >> a[i][0] >> a[i][1];
         a[i][2] = i;
     }
 
-    sort(all(a));
+    sort(all(a)); // sort by start time, then by end time, then by index
 
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq; // min-heap of (end time, room number)
     vector<int> ans(n);
 
     int rooms = 0;
 
-    for (auto &[l, r, i] : a) {
+    for (auto &v : a) {
+        int l = v[0], r = v[1], i = v[2];
         int room;
 
-        if (!pq.empty() && pq.top().first < l) {
-            room = pq.top().second;
-            pq.pop();
+        if (!pq.empty() && pq.top().first < l) { // if the earliest ending room is free before the current meeting starts
+            room = pq.top().second; // reuse that room
+            pq.pop(); // remove it from the heap since we are going to update its end time
         } else {
-            rooms++;
-            room = rooms;
+            rooms++; // need a new room
+            room = rooms; // assign the new room number
         }
 
         ans[i] = room;

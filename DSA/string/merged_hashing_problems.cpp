@@ -32,15 +32,16 @@ public:
     ll get(int l, int r) const {
         return (pref[r + 1] - pref[l] * power[r - l + 1] % MOD + MOD) % MOD;
     }
-};
 
-ll hashWord(const string &s) {
-    ll h = 0;
-    for (char c : s) {
-        h = (h * P + c - 'a' + 1) % MOD;
+    // Computes the hash of an entire string in O(m) time
+    static ll hashWord(const string& s) {
+        ll h = 0;
+        for (char c : s) {
+            h = (h * P + (c - 'a' + 1)) % MOD;
+        }
+        return h;
     }
-    return h;
-}
+};
 
 // ---------------------------------------------------------------------------
 
@@ -90,7 +91,7 @@ public:
         for (int i = 0; i < k; i++) {
             string p = patterns[i];
             if (p.length() <= n) {
-                groups[p.length()].push_back({hashWord(p), i});
+                groups[p.length()].push_back({FastHash::hashWord(p), i});
             }
         }
 

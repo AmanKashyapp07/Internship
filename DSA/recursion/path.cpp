@@ -36,20 +36,13 @@ private:
             ans.push_back(path);
             return;
         }
-
         vis[r][c] = 1;
-
         for (int k = 0; k < 4; k++) {
             int nr = r + dr[k];
             int nc = c + dc[k];
-
             bool isValid = nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] == 1 && !vis[nr][nc];
-            if (isValid) {
-                dfs(nr, nc, n, grid, vis, path + dir[k], ans);
-            }
+            if (isValid) dfs(nr, nc, n, grid, vis, path + dir[k], ans);
         }
-
-        // Backtrack
         vis[r][c] = 0;
     }
 

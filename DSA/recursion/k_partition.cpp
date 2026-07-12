@@ -27,12 +27,8 @@ private:
     vector<int> memo;
 
     bool solve(int mask, const vector<int>& nums) {
-        if (mask == (1 << nums.size()) - 1) {
-            return true;
-        }
-        if (memo[mask] != -1) {
-            return memo[mask];
-        }
+        if (mask == (1 << nums.size()) - 1) return true;
+        if (memo[mask] != -1) return memo[mask];
 
         // Calculate the sum accumulated in the current bucket
         int current_sum = 0;
@@ -41,18 +37,15 @@ private:
                 current_sum += nums[i];
             }
         }
-        current_sum %= target;
+        current_sum %= target; // current sum in the current bucket
 
         for (int j = 0; j < nums.size(); j++) {
             if (!(mask & (1 << j))) { // if j-th element is not used yet
                 if (current_sum + nums[j] <= target) {
-                    if (solve(mask | (1 << j), nums)) {
-                        return memo[mask] = 1;
-                    }
+                    if (solve(mask | (1 << j), nums)) return memo[mask] = 1;
                 }
             }
         }
-
         return memo[mask] = 0;
     }
 public:

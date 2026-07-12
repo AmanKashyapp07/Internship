@@ -1,59 +1,54 @@
 /**
  * Problem: Priority Queue / Heap Master Template
  * Category: Heap Data Structure
- *
- * Description:
- * A production-grade competitive programming and interview template covering 
- * essential Priority Queue patterns, time complexities, and algorithms.
- *
- * Standard Complexities:
- * - Push / Insert : O(log N)
- * - Pop / Delete  : O(log N)
- * - Top / Peek    : O(1)
- * - Heapify Init  : O(N)
  */
 
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <unordered_map>
-#include <set>
-#include <string>
 #include <algorithm>
+#include <array>
 #include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 using namespace std;
-
-// Standard Type Aliases
+using ll = long long;
+using ull = unsigned long long;
 using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
 
-// =========================================================================
-// 1. STANDARD HEAP TYPE DEFINITIONS
-// =========================================================================
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define pb push_back
+#define ff first
+#define ss second
 
-// Max Heaps (Largest element on top)
+const int INF = INT_MAX;
+const ll LINF = LLONG_MAX;
+const ll MOD = 1e9 + 7;
+
+// Standard Heap Types
 using MaxHeap     = priority_queue<int>;
-using MaxPairHeap = priority_queue<pii>;
-
-// Min Heaps (Smallest element on top)
 using MinHeap     = priority_queue<int, vector<int>, greater<int>>;
+using MaxPairHeap = priority_queue<pii>;
 using MinPairHeap = priority_queue<pii, vector<pii>, greater<pii>>;
 
-bool cmp(const pii& a, const pii& b) {
-    return a.second > b.second;
-}
-
-priority_queue<pii, vector<pii>, decltype(&cmp)> pq(cmp);
-
 // =========================================================================
-// 2. K-TH VARIANT CLASSIC PROBLEMS
+// 1. K-TH VARIANTS
 // =========================================================================
-
-/**
- * Strategy: Maintain a Min Heap of size K. 
- * The top element represents the lower bound threshold of our top-K largest elements.
- * Time: O(N log K) | Space: O(K)
- */
 int kthLargest(const vector<int>& nums, int k) {
     MinHeap pq;
     for (int x : nums) {
@@ -63,11 +58,6 @@ int kthLargest(const vector<int>& nums, int k) {
     return pq.top();
 }
 
-/**
- * Strategy: Maintain a Max Heap of size K. 
- * The top element represents the upper bound threshold of our top-K smallest elements.
- * Time: O(N log K) | Space: O(K)
- */
 int kthSmallest(const vector<int>& nums, int k) {
     MaxHeap pq;
     for (int x : nums) {
@@ -77,74 +67,58 @@ int kthSmallest(const vector<int>& nums, int k) {
     return pq.top();
 }
 
-/**
- * Strategy: Count frequencies using a hash map, then push frequencies into a Min Heap.
- * Time: O(N log K) | Space: O(N)
- */
+// =========================================================================
+// 2. TOP K FREQUENT
+// =========================================================================
 vector<int> topKFrequent(const vector<int>& nums, int k) {
-    unordered_map<int, int> freqMap;
-    for (int x : nums) freqMap[x]++;
+    unordered_map<int, int> freq;
+    for (int x : nums) freq[x]++;
 
-    MinPairHeap pq; // Stores {frequency, element}
-    for (auto& [num, freq] : freqMap) {
-        pq.push({freq, num});
-        if (pq.size() > k) pq.pop(); // Evict elements with the lowest frequency
+    MinPairHeap pq;
+    for (auto& [num, f] : freq) {
+        pq.push({f, num});
+        if (pq.size() > k) pq.pop();
     }
 
-    vector<int> result;
+    vector<int> res;
     while (!pq.empty()) {
-        result.push_back(pq.top().second);
+        res.push_back(pq.top().second);
         pq.pop();
     }
-    return result;
+    return res;
 }
 
-/**
- * LeetCode 973: K Closest Points to Origin
- * Strategy: Use a Max Heap to keep track of the K closest points.
- * Time: O(N log K) | Space: O(K)
- */
+// =========================================================================
+// 3. K CLOSEST POINTS
+// =========================================================================
 vector<vector<int>> kClosestPoints(const vector<vector<int>>& points, int k) {
-    // Max heap storing {distance_squared, index_of_point}
-    priority_queue<pair<int, int>> pq;
+    priority_queue<pair<int, int>> pq; // {dist, index}
     for (int i = 0; i < (int)points.size(); ++i) {
-        int dist = points[i][0] * points[i][0] + points[i][1] * points[i][1];
-        pq.push({dist, i});
-        if (pq.size() > k) {
-            pq.pop();
-        }
+        int d = points[i][0] * points[i][0] + points[i][1] * points[i][1];
+        pq.push({d, i});
+        if (pq.size() > k) pq.pop();
     }
-    vector<vector<int>> result;
+
+    vector<vector<int>> res;
     while (!pq.empty()) {
-        result.push_back(points[pq.top().second]);
+        res.push_back(points[pq.top().second]);
         pq.pop();
     }
-    return result;
+    return res;
 }
 
 // =========================================================================
-// 3. STREAM & SLIDING WINDOW PATTERNS
+// 4. STREAM & MEDIAN
 // =========================================================================
-
-/**
- * LeetCode 295: Find Median from Data Stream
- * Strategy: Balance elements across two halves. 
- * - Max Heap (left side) holds the smaller numbers.
- * - Min Heap (right side) holds the larger numbers.
- * Time: O(log N) per insert | Space: O(N)
- */
 class MedianFinder {
 private:
-    MaxHeap left;  // Stores smaller half
-    MinHeap right; // Stores larger half
-
+    MaxHeap left;
+    MinHeap right;
 public:
     void addNum(int num) {
         left.push(num);
         right.push(left.top());
         left.pop();
-
-        // Rebalance to preserve the invariant: size(left) >= size(right)
         if (right.size() > left.size()) {
             left.push(right.top());
             right.pop();
@@ -152,153 +126,101 @@ public:
     }
 
     double findMedian() {
-        if (left.size() > right.size()) {
-            return left.top();
-        }
+        if (left.size() > right.size()) return left.top();
         return (left.top() + right.top()) / 2.0;
     }
 };
 
-/**
- * LeetCode 703: Kth Largest Element in a Stream
- */
 class KthLargestStream {
 private:
     MinHeap pq;
-    int maxCapacity;
-
+    int k;
 public:
-    KthLargestStream(int k, const vector<int>& nums) : maxCapacity(k) {
-        for (int x : nums) {
-            add(x);
-        }
+    KthLargestStream(int k, const vector<int>& nums) : k(k) {
+        for (int x : nums) add(x);
     }
     
     int add(int val) {
         pq.push(val);
-        if ((int)pq.size() > maxCapacity) {
-            pq.pop();
-        }
+        if ((int)pq.size() > k) pq.pop();
         return pq.top();
     }
 };
 
 // =========================================================================
-// 4. K-WAY MERGE & ARRAY MATCHING PATTERNS
+// 5. K-WAY MERGE
 // =========================================================================
-
-/**
- * Strategy: Pointer tracking across K arrays using a tuple state structure.
- * Time: O(N log K) where N is total elements | Space: O(K)
- */
 vector<int> mergeKsortedArrays(const vector<vector<int>>& arrays) {
-    // Priority queue elements structured as: {value, {array_index, element_index}}
-    using T = pair<int, pair<int, int>>;
+    using T = tuple<int, int, int>; // value, arrIdx, elemIdx
     priority_queue<T, vector<T>, greater<T>> pq;
 
-    for (int i = 0; i < (int)arrays.size(); i++) {
+    for (int i = 0; i < (int)arrays.size(); ++i) {
         if (!arrays[i].empty()) {
-            pq.push({arrays[i][0], {i, 0}});
+            pq.push({arrays[i][0], i, 0});
         }
     }
 
-    vector<int> result;
+    vector<int> res;
     while (!pq.empty()) {
-        auto [val, coord] = pq.top(); pq.pop();
-        auto [arrIdx, elemIdx] = coord;
-        
-        result.push_back(val);
-
+        auto [val, arrIdx, elemIdx] = pq.top(); pq.pop();
+        res.push_back(val);
         if (elemIdx + 1 < (int)arrays[arrIdx].size()) {
-            pq.push({arrays[arrIdx][elemIdx + 1], {arrIdx, elemIdx + 1}});
+            pq.push({arrays[arrIdx][elemIdx + 1], arrIdx, elemIdx + 1});
         }
     }
-    return result;
+    return res;
 }
 
-/**
- * LeetCode 373: Find K Pairs with Smallest Sums
- *
- * Problem Statement:
- * Given two integer arrays nums1 and nums2 sorted in ascending order,
- * and an integer k, return the k pairs (u, v), where u belongs to nums1
- * and v belongs to nums2, with the smallest sums.
- *
- * Approach:
- * Multi-pointer advancement using a Min Heap (K-way Merge).
- *
- * Time Complexity: O(k log min(n, k))
- * Space Complexity: O(min(n, k))
- */
+// =========================================================================
+// 6. K SMALLEST PAIRS
+// =========================================================================
 vector<pair<int, int>> kSmallestPairs(const vector<int>& nums1, const vector<int>& nums2, int k) {
     vector<pair<int, int>> result;
     if (nums1.empty() || nums2.empty() || k <= 0) return result;
-    int n=nums1.size(), m=nums2.size();
-    // Min heap storing: {sum, {idx1, idx2}}
+
     using T = pair<int, pair<int, int>>;
     priority_queue<T, vector<T>, greater<T>> pq;
-    
-    // Push nums1[i] + nums2[0] for up to min(nums1.size(), k)
-    for (int i = 0; i < min(n, k); ++i) {
+
+    for (int i = 0; i < min((int)nums1.size(), k); ++i) {
         pq.push({nums1[i] + nums2[0], {i, 0}});
     }
-    
-    while (k > 0 && !pq.empty()) {
-        auto [sum, indices] = pq.top(); pq.pop();
-        auto [i, j] = indices;
-        result.push_back({nums1[i], nums2[j]});
-        
-        // Push the next candidate pair nums1[i] + nums2[j + 1]
-        if (j + 1 < m) {
+
+    while (k-- && !pq.empty()) {
+        auto [sum, idx] = pq.top(); pq.pop();
+        auto [i, j] = idx;
+        result.emplace_back(nums1[i], nums2[j]);
+        if (j + 1 < (int)nums2.size()) {
             pq.push({nums1[i] + nums2[j + 1], {i, j + 1}});
         }
-        k--;
     }
     return result;
-}
+} 
 
-
-/**
- * Maximum Sum Combinations (Top K Sum Combinations)
- *
- * Problem Statement:
- * Given two integer arrays nums1 and nums2 of size N, find the top k
- * maximum sum combinations, where each combination consists of one
- * element from nums1 and one element from nums2. Return the k largest
- * possible sums.
- *
- * Approach:
- * Sort both arrays in decreasing order and perform a Best-First Search
- * (BFS) on the virtual sum matrix using a Max Heap and a Visited Set.
- *
- * Time Complexity: O(n log n + k log k)
- * Space Complexity: O(k)
- */
+// =========================================================================
+// 7. MAX K SUM COMBINATIONS
+// =========================================================================
 vector<int> maxKsumCombination(vector<int>& nums1, vector<int>& nums2, int k) {
     sort(nums1.rbegin(), nums1.rend());
     sort(nums2.rbegin(), nums2.rend());
 
-    using T = pair<int, pair<int, int>>; // {sum, {idx1, idx2}}
+    using T = pair<int, pair<int, int>>;
     priority_queue<T> pq;
     set<pair<int, int>> visited;
 
     pq.push({nums1[0] + nums2[0], {0, 0}});
     visited.insert({0, 0});
-
+    int n1= nums1.size(), n2=nums2.size();
     vector<int> result;
     while (k-- && !pq.empty()) {
-        auto [sum, position] = pq.top(); pq.pop();
-        auto [i, j] = position;
-        
+        auto [sum, pos] = pq.top(); pq.pop();
+        auto [i, j] = pos;
         result.push_back(sum);
 
-        // Branch right step
-        if (i + 1 < (int)nums1.size() && !visited.count({i + 1, j})) {
+        if (i + 1 < n1 && !visited.count({i + 1, j})) {
             pq.push({nums1[i + 1] + nums2[j], {i + 1, j}});
             visited.insert({i + 1, j});
         }
-        // Branch down step
-        if (j + 1 < (int)nums2.size() && !visited.count({i, j + 1})) {
+        if (j + 1 < n2 && !visited.count({i, j + 1})) {
             pq.push({nums1[i] + nums2[j + 1], {i, j + 1}});
             visited.insert({i, j + 1});
         }
@@ -307,85 +229,59 @@ vector<int> maxKsumCombination(vector<int>& nums1, vector<int>& nums2, int k) {
 }
 
 // =========================================================================
-// 5. GREEDY HEAP ALGORITHMS
+// 8. GREEDY HEAP ALGORITHMS
 // =========================================================================
-
-/**
- * Strategy: Greedy combination (Huffman coding principle). Always combine 
- * the two shortest remaining sticks first.
- * Time: O(N log N) | Space: O(N)
- */
 int minCostToConnectSticks(const vector<int>& sticks) {
-    MinHeap pq(sticks.begin(), sticks.end()); // O(N) heap construction optimization
-    int dynamicTotalCost = 0;
-
+    MinHeap pq(sticks.begin(), sticks.end());
+    int cost = 0;
     while (pq.size() > 1) {
-        int shortest = pq.top(); pq.pop();
-        int secondShortest = pq.top(); pq.pop();
-
-        int combinedLength = shortest + secondShortest;
-        dynamicTotalCost += combinedLength;
-
-        pq.push(combinedLength);
+        int a = pq.top(); pq.pop();
+        int b = pq.top(); pq.pop();
+        int merged = a + b;
+        cost += merged;
+        pq.push(merged);
     }
-    return dynamicTotalCost;
+    return cost;
 }
 
-/**
- * LeetCode 767: Reorganize String
- * Strategy: Use a Max Heap to arrange characters by highest frequency first, 
- * keeping track of the previous character to prevent adjacency duplicates.
- * Time: O(N log A) where A is alphabet size (26) | Space: O(A)
- */
+// arranging characters of string in such a way that no two adjacent characters are same
 string reorganizeString(string s) {
-    unordered_map<char, int> freqMap;
-    for (char c : s) freqMap[c]++;
-    
-    // Max heap storing: {frequency, char}
+    unordered_map<char, int> freq;
+    for (char c : s) freq[c]++;
+
     priority_queue<pair<int, char>> pq;
-    for (auto& [c, count] : freqMap) {
-        if (count > ((int)s.length() + 1) / 2) return "";
-        pq.push({count, c});
+    for (auto& [c, cnt] : freq) {
+        if (cnt > (int(s.length()) + 1) / 2) return "";
+        pq.push({cnt, c});
     }
-    
-    string result = "";
+
+    string result;
     pair<int, char> prev = {-1, '#'};
-    
     while (!pq.empty()) {
-        auto [count, c] = pq.top(); pq.pop();
+        auto [cnt, c] = pq.top(); pq.pop();
         result += c;
-        
-        if (prev.first > 0) {
-            pq.push(prev);
-        }
-        
-        prev = {count - 1, c};
+        if (prev.first > 0) pq.push(prev);
+        prev = {cnt - 1, c};
     }
     return result.length() == s.length() ? result : "";
 }
 
-/**
- * Strategy: Sort values to map continuous numerical bounds to direct rank identifiers.
- * Time: O(N log N) | Space: O(N)
- */
+// =========================================================================
+// 9. RANK TRANSFORM
+// =========================================================================
 vector<int> replaceElementsByRank(const vector<int>& arr) {
-    vector<int> sortedCopy = arr;
-    sort(sortedCopy.begin(), sortedCopy.end());
+    vector<int> sorted = arr;
+    sort(sorted.begin(), sorted.end());
 
-    unordered_map<int, int> ranks;
-    int currentRank = 1;
-
-    for (int x : sortedCopy) {
-        if (ranks.find(x) == ranks.end()) {
-            ranks[x] = currentRank++;
+    unordered_map<int, int> rankMap;
+    int rank = 1;
+    for (int x : sorted) {
+        if (rankMap.find(x) == rankMap.end()) {
+            rankMap[x] = rank++;
         }
     }
 
     vector<int> result;
-    result.reserve(arr.size());
-    for (int x : arr) {
-        result.push_back(ranks[x]);
-    }
+    for (int x : arr) result.push_back(rankMap[x]);
     return result;
 }
-

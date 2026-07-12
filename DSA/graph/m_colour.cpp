@@ -2,17 +2,17 @@
  * GeeksforGeeks - M-Coloring Problem
  *
  * Description:
- * Given an undirected graph and an integer m, determine if the graph can be colored
- * with at most m colors such that no two adjacent vertices share the same color.
+ * Determine whether an undirected graph can be colored using at most m colors
+ * such that no two adjacent vertices have the same color.
  *
  * Approach:
- * - Backtracking approach.
- * - Attempt to assign each color from 1 to m to the current vertex.
- * - Check if the color assignment is safe (no adjacent vertex has the same color).
+ * - Use backtracking.
+ * - For each vertex, try every color from 1 to m.
+ * - Assign a color only if none of its neighbors has that color.
  * - Recursively color the remaining vertices.
  *
  * Time Complexity: O(m^V)
- * Space Complexity: O(V) recursion stack.
+ * Space Complexity: O(V)
  */
 
 #include <iostream>
@@ -20,33 +20,35 @@
 using namespace std;
 
 class GraphColoring {
-    bool isSafe(int node, int col, vector<int>& colors, vector<vector<int>>& graph) {
-        // isSafe: verify no neighbor of the current node shares the target color
-        for (int v : graph[node]) if (colors[v] == col) return false;
+    bool isSafe(int u, int color, vector<int>& colors, vector<vector<int>>& graph) {
+        for (int v : graph[u])
+            if (colors[v] == color)
+                return false;
         return true;
     }
-    bool solve(int node, int n, int m, vector<int>& colors, vector<vector<int>>& graph) {
-        if (node == n) return true;
-        for (int col = 1; col <= m; col++) {
-            if (isSafe(node, col, colors, graph)) {
-                colors[node] = col; // Tentatively assign color
-                if (solve(node + 1, n, m, colors, graph)) return true;
-                colors[node] = 0; // Backtrack
-            }
+
+    bool dfs(int u, int n, int m, vector<int>& colors, vector<vector<int>>& graph) {
+        if (u == n)
+            return true;
+
+        for (int color = 1; color <= m; color++) {
+            if (!isSafe(u, color, colors, graph))
+                continue;
+
+            colors[u] = color;
+
+            if (dfs(u + 1, n, m, colors, graph))
+                return true;
+
+            colors[u] = 0;
         }
+
         return false;
     }
+
 public:
     bool canColor(int n, vector<vector<int>>& graph, int m) {
-        vector<int> colors(n, 0); // colous[i] = 0 means uncolored, otherwise holds color index
-        return solve(0, n, m, colors, graph);
+        vector<int> colors(n, 0);
+        return dfs(0, n, m, colors, graph);
     }
 };
-
-int main() {
-    int n = 4, m = 3;
-    vector<vector<int>> graph(n);
-    graph[0] = {1, 2, 3}; graph[1] = {0, 2}; graph[2] = {0, 1, 3}; graph[3] = {0, 2};
-    GraphColoring obj;
-    cout << (obj.canColor(n, graph, m) ? "Coloring Possible\n" : "Coloring Not Possible\n");
-}

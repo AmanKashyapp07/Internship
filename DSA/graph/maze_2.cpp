@@ -60,12 +60,8 @@ public:
         int m = maze.size(), n = maze[0].size();
 
         vector<vector<int>> dist(m, vector<int>(n, INT_MAX));
-
-        priority_queue<
-            pair<int, pair<int, int>>,
-            vector<pair<int, pair<int, int>>>,
-            greater<>
-        > pq;
+        using T = pair<int, pair<int, int>>; // (distance, (row, col))
+        priority_queue<T, vector<T>, greater<T>> pq; // min heap
 
         dist[start[0]][start[1]] = 0;
         pq.push({0, {start[0], start[1]}});
@@ -76,9 +72,7 @@ public:
         while (!pq.empty()) {
             auto [d, cell] = pq.top();
             pq.pop();
-
             auto [r, c] = cell;
-
             if (d > dist[r][c]) continue;
 
             for (int k = 0; k < 4; k++) {

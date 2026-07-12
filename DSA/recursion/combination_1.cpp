@@ -30,15 +30,10 @@ void backtrack(int idx, int target, const vector<int>& nums) {
         return;
     }
 
-    if (idx == nums.size() || target < 0)
-        return;
-
-    // Take current element
+    if (idx == nums.size() || target < 0) return;
     curr.push_back(nums[idx]);
     backtrack(idx, target - nums[idx], nums); // same index -> reuse allowed
     curr.pop_back();
-
-    // Skip current element
     backtrack(idx + 1, target, nums);
 }
 // whenever path reconstruction is needed, we need to backtrack after each recursive call to explore other possibilities, we cannot avoid backtracking step, as we are modifying the curr vector in place, so we need to backtrack after each recursive call to explore other possibilities, if just want count , we can avoid backtracking step, as we are not modifying any global variable in place, so we can just return the count from each recursive call and add them up, but here we need to store the path in curr vector, so we need to backtrack after each recursive call to explore other possibilities

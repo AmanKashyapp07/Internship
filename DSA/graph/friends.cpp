@@ -16,46 +16,43 @@
  * Time Complexity: O(L * log(L) + L * alpha(V)) where L is the number of logs.
  * Space Complexity: O(n)
  */
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
 
-class DSU
-{
-    vector<int> parent, rank;
+class DSU {
+
+    vector<int> p, sz;
 
 public:
-    DSU(int n)
-    {
-        parent.resize(n);
-        rank.assign(n, 0);
 
-        for (int i = 0; i < n; i++)
-            parent[i] = i;
+    DSU(int n) : p(n), sz(n, 1) {
+        for (int i = 0; i < n; i++) p[i] = i;
     }
 
-    int find(int x)
-    {
-        if (parent[x] == x)
-            return x;
-        return parent[x] = find(parent[x]);
+    int find(int x) {
+
+        return p[x] == x ? x : p[x] = find(p[x]);
+
     }
 
-    bool unite(int u, int v)
-    {
-        u = find(u);
-        v = find(v);
+    bool unite(int a, int b) {
 
-        if (u == v)
-            return false;
+        a = find(a), b = find(b);
 
-        if (rank[u] < rank[v])
-            swap(u, v);
+        if (a == b) return false;
 
-        parent[v] = u;
+        if (sz[a] < sz[b]) swap(a, b);
 
-        if (rank[u] == rank[v])
-            rank[u]++;
+        p[b] = a;
+
+        sz[a] += sz[b];
 
         return true;
+
     }
+
 };
 
 class Solution

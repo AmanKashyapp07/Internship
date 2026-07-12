@@ -46,8 +46,11 @@ public:
     }
 
     ll get(int l, int r) const {
-        return (pref[r + 1] - pref[l] * power[r - l + 1] % MOD + MOD) % MOD;
+        int R = r + 1;
+        int L = l;
+        return (pref[R] - pref[L] * power[R - L] % MOD + MOD) % MOD;
     }
+      
 
     static ll hashWord(const string& s) {
         ll h = 0;

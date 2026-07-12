@@ -1,73 +1,61 @@
 /**
  * LeetCode 787 - Cheapest Flights Within K Stops
  *
- * Description:
- * There are n cities connected by flights. Return the cheapest price from src to dst
- * with at most k stops. If there is no such route, return -1.
+ * Problem:
+ * Given n cities and a list of flights [from, to, price], return the cheapest
+ * price from src to dst using at most k stops. Return -1 if no such route exists.
  *
  * Approach:
- * - Use a modified Dijkstra's algorithm.
- * - Maintain a 2D distance array `dist[node][stops]` to store the minimum cost to reach `node` with a certain number of stops.
- * - Alternatively, use a min-heap priority queue storing `{cost, node, stops_taken}`.
- * - Do not relax edges if the number of stops exceeds k.
+ * - Build an adjacency list.
+ * - Use Dijkstra's algorithm with state:
+ *      {cost, node, flightsUsed}
+ * - Track the minimum cost for each (node, flightsUsed).
+ * - A path can use at most (k + 1) flights.
  *
- * Time Complexity: O(E * log(V))
- * Space Complexity: O(V * K)
+ * Time:  O(E log V)
+ * Space: O(V * K)
  */
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <queue>
 using namespace std;
 
 class Solution {
 public:
-    int findCheapestPrice(int n, vector<vector<int>> &flights, int src, int dst, int k)
-{
-    vector<vector<pair<int, int>>> adj(n);
+    int findCheapestPrice(int n, vector<vector<int>>& flights,int src, int dst, int k) {
 
-    for (auto &f : flights)
-    {
-        adj[f[0]].push_back({f[1], f[2]});
-    }
+        vector<vector<pair<int,int>>> adj(n);
+        for (auto &f : flights)
+            adj[f[0]].push_back({f[1], f[2]});
 
-    int maxFlights = k + 1;
+        int maxFlights = k + 1;
+        vector<vector<int>> dist(n, vector<int>(maxFlights + 1, INT_MAX));
+        using T = vector<int>; // {cost, node, flightsUsed}
+        priority_queue<T, vector<T>, greater<T>> pq;
 
-    vector<vector<int>> dist(n, vector<int>(maxFlights + 1, INT_MAX));
+        dist[src][0] = 0;
+        pq.push({0, src, 0});
 
-    priority_queue<
-        tuple<int, int, int>,
-        vector<tuple<int, int, int>>,
-        greater<>>
-        pq;
+        while (!pq.empty()) {
+            auto v = pq.top();
+            int cost = v[0], node = v[1], used = v[2];
+            pq.pop();
 
-    dist[src][0] = 0;
-    pq.push({0, src, 0}); // {cost, node, flightsTaken}
+            if (cost != dist[node][used]) continue;
+            if (node == dst) return cost;
+            if (used == maxFlights) continue;
 
-    while (!pq.empty())
-    {
-        auto [cost, node, flightsTaken] = pq.top();
-        pq.pop();
+            for (auto &[next, price] : adj[node]) {
+                int newCost = cost + price;
 
-        if (cost > dist[node][flightsTaken])
-            continue;
-
-        if (node == dst)
-            return cost;
-
-        for (auto &[next, price] : adj[node])
-        {
-            if (flightsTaken + 1 > maxFlights)
-                continue;
-
-            int newCost = cost + price;
-
-            if (newCost < dist[next][flightsTaken + 1])
-            {
-                dist[next][flightsTaken + 1] = newCost;
-                pq.push({newCost, next, flightsTaken + 1});
+                if (newCost < dist[next][used + 1]) {
+                    dist[next][used + 1] = newCost;
+                    pq.push({newCost, next, used + 1});
+                }
             }
         }
-    }
 
-    return -1;
-}
+        return -1;
+    }
 };

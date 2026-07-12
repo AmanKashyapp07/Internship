@@ -56,36 +56,20 @@ const ll  MOD  = 1e9 + 7;
 
 string kthPermutation(int n, int k) {
     vector<int> nums;
-
-    // (n-1)!
     int fact = 1;
-    for (int i = 1; i < n; i++)
-        fact *= i;
-
-    // Available numbers
-    for (int i = 1; i <= n; i++)
-        nums.pb(i);
-
-    k--; // convert to 0-based indexing
-
+    for (int i = 1; i <= n; i++) {
+        nums.push_back(i);
+        if (i < n) fact *= i;   // (n-1)!
+    }
+    k--;
     string ans;
-
     while (!nums.empty()) {
-        int idx = k / fact;
-
-        // Pick outer number
-        ans += to_string(nums[idx]);
-
-        nums.erase(nums.begin() + idx); // takes o(n)
-
-        if (nums.empty())
-            break;
-
-        // Move inside selected block
-        k %= fact; // this is crucial, if k=16 and fact=6, then remaining k will be 16%6=4, so we need to move inside the selected block, so that we can find the next number in the permutation sequence, if we don't do this, then we will always be in the same block and will not be able to find the next number in the permutation sequence
-
-        // Next block size = (remaining-1)!
-        fact /= nums.size(); // earlier it was (n-1)! but now we have one less number, so it becomes (n-2)! and so on, so we divide by the size of the remaining numbers to get the new block size, or we can use count of remaining numbers to get the new block size, as we are removing one number from the available numbers, so the size of the remaining numbers decreases by 1, so we divide by the size of the remaining numbers to get the new block size
+        int pos = k / fact;
+        ans += to_string(nums[pos]);
+        nums.erase(nums.begin() + pos); // erase number at idx pos (0-based)
+        if (nums.empty()) break;
+        k %= fact;
+        fact /= nums.size();
     }
 
     return ans;

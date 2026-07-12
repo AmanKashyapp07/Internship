@@ -14,26 +14,52 @@
  * Time Complexity: O(2^n * n) since there can be at most 2^(n-1) paths and each path takes O(n) to copy.
  * Space Complexity: O(n) recursion stack (excluding the output memory).
  */
+#include <algorithm>
+#include <array>
+#include <climits>
+#include <cmath>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
-class Solution {
+using namespace std;
+class Solution
+{
 public:
     vector<vector<int>> result;
 
-    void dfs(int node, vector<vector<int>>& graph, vector<int>& path) {
+    void dfs(int node, vector<vector<int>> &graph, vector<int> &path)
+    {
         path.push_back(node);
 
-        if (node == graph.size() - 1) {
+        if (node == graph.size() - 1)
+        {
             result.push_back(path);
-        } else {
-            for (int nei : graph[node]) {
-                dfs(nei, graph, path);
+        }
+        else
+        {
+            for (int neighbor : graph[node])
+            {
+                dfs(neighbor, graph, path);
             }
         }
 
-        path.pop_back();
+        path.pop_back(); // Backtrack before returning
     }
 
-    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>> &graph)
+    {
         vector<int> path;
         dfs(0, graph, path);
         return result;

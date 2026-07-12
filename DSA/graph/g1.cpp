@@ -34,12 +34,6 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-/**
- * Problem: Breadth-First Search (BFS) Traversal
- * Given an unweighted graph and a starting node, visit all reachable nodes level by level.
- * It is commonly used to find the shortest path in unweighted graphs or perform level-order traversal.
- * Complexity: O(V + E) time, where V is vertices and E is edges.
- */
 vector<int> bfs(int n, vector<vector<int>>& adj, int src) {
     vector<int> vis(n, 0), order;
     queue<int> q;
@@ -58,12 +52,6 @@ vector<int> bfs(int n, vector<vector<int>>& adj, int src) {
     return order;
 }
 
-/**
- * Problem: Depth-First Search (DFS) Traversal
- * Given a graph and a starting node, traverse as deep as possible along each branch before backtracking.
- * It is highly useful for structural analysis, topological sorting, and finding path connectivity.
- * Complexity: O(V + E) time and O(V) space for recursive call stack.
- */
 void dfs(int node, vector<vector<int>>& adj, vector<int>& vis) {
     vis[node] = 1;
     for (int nbr : adj[node]) {
@@ -71,12 +59,6 @@ void dfs(int node, vector<vector<int>>& adj, vector<int>& vis) {
     }
 }
 
-/**
- * Problem: Count Connected Components in Undirected Graph
- * Find the total number of disconnected subgraphs in a given undirected graph structure.
- * Traverses all unvisited vertices sequentially and launches DFS/BFS to explore each complete component.
- * Complexity: O(V + E) time, ensuring each node and edge is examined at most once.
- */
 int countComponents(int n, vector<vector<int>>& adj) {
     vector<int> vis(n, 0);
     int components = 0;
@@ -89,74 +71,6 @@ int countComponents(int n, vector<vector<int>>& adj) {
     return components;
 }
 
-/**
- * Problem: Undirected Cycle Detection using BFS
- * Determine if a given undirected graph contains at least one cycle utilizing level-order traversal.
- * Tracks the parent of each visited node to differentiate immediate back-edges from cycle loops.
- * Complexity: O(V + E) time complexity with O(V) space for vertex tracking.
- */
-bool cycleBFS(int src, vector<vector<int>>& adj, vector<int>& vis) {
-    queue<pair<int, int>> q;
-    q.push({src, -1});
-    vis[src] = 1;
-    while (!q.empty()) {
-        auto [node, parent] = q.front(); q.pop();
-        for (int nbr : adj[node]) {
-            if (!vis[nbr]) {
-                vis[nbr] = 1;
-                q.push({nbr, node});
-            } else if (nbr != parent) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/**
- * Problem: Undirected Cycle Detection using DFS
- * Determine if an undirected graph contains a cycle using depth-first search recursion.
- * Traverses neighbors while carrying parent node information to verify if an active node is revisited.
- * Complexity: O(V + E) time with recursion stack depth up to O(V).
- */
-bool cycleDFS(int node, int parent, vector<vector<int>>& adj, vector<int>& vis) {
-    vis[node] = 1;
-    for (int nbr : adj[node]) {
-        if (!vis[nbr]) {
-            if (cycleDFS(nbr, node, adj, vis)) return true;
-        } else if (nbr != parent) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * Problem: Directed Cycle Detection using DFS
- * Check if a directed graph contains a cycle using depth-first search recursion.
- * Utilizes a path tracking array (recursion stack vis) to detect back-edges to nodes in the active path.
- * Complexity: O(V + E) time and O(V) space for tracking state arrays.
- */
-bool directedCycleDFS(int node, vector<vector<int>>& adj, vector<int>& vis, vector<int>& pathVis) {
-    vis[node] = 1;
-    pathVis[node] = 1;
-    for (int nbr : adj[node]) {
-        if (!vis[nbr]) {
-            if (directedCycleDFS(nbr, adj, vis, pathVis)) return true;
-        } else if (pathVis[nbr]) {
-            return true;
-        }
-    }
-    pathVis[node] = 0;
-    return false;
-}
-
-/**
- * Problem: Topological Sort (Kahn's Algorithm)
- * Generate a linear ordering of vertices in a Directed Acyclic Graph (DAG) using indegrees.
- * Repeatedly processes vertices with indegree zero using a queue and reduces indegrees of neighbors.
- * Complexity: O(V + E) time, also implicitly detects cycles if topological size != V.
- */
 vector<int> kahnTopo(int n, vector<vector<int>>& adj) {
     vector<int> indegree(n, 0);
     for (int u = 0; u < n; u++) {
@@ -178,12 +92,6 @@ vector<int> kahnTopo(int n, vector<vector<int>>& adj) {
     return topo;
 }
 
-/**
- * Problem: Shortest Path in Unweighted Graph
- * Calculate the shortest distance from a single source node to all other nodes in an unweighted graph.
- * Uses a queue-based Breadth-First Search (BFS) to guarantee optimal distance calculation per level.
- * Complexity: O(V + E) time and O(V) space for storing distance values.
- */
 vector<int> shortestPathUnweighted(int n, vector<vector<int>>& adj, int src) {
     vector<int> dist(n, INF);
     queue<int> q;
@@ -201,12 +109,6 @@ vector<int> shortestPathUnweighted(int n, vector<vector<int>>& adj, int src) {
     return dist;
 }
 
-/**
- * Problem: Shortest Path with Non-Negative Weights (Dijkstra)
- * Find the shortest paths from a source vertex to all other vertices in a weighted graph.
- * Utilizes a priority queue to greedily relax edges starting from the closest unvisited node.
- * Complexity: O(E log V) time, where negative edge weights are not allowed.
- */
 vector<ll> dijkstra(int n, vector<vector<pair<int, int>>>& adj, int src) {
     vector<ll> dist(n, LINF);
     priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
@@ -225,18 +127,12 @@ vector<ll> dijkstra(int n, vector<vector<pair<int, int>>>& adj, int src) {
     return dist;
 }
 
-/**
- * Problem: Shortest Path in a Directed Acyclic Graph (DAG)
- * Find the shortest path from a source node to all other nodes when the graph contains no cycles.
- * Obtains a topological ordering of the vertices first, then relaxes outgoing edges of each node sequentially.
- * Complexity: O(V + E) time, which is faster than Dijkstra for acyclic structures.
- */
 vector<ll> shortestPathDAG(int n, vector<vector<pair<int, int>>>& adj, int src) {
     vector<vector<int>> dag(n);
     for (int u = 0; u < n; u++) {
         for (auto [v, wt] : adj[u]) dag[u].push_back(v);
     }
-    vector<int> topo = topoSortDFS(n, dag);
+    vector<int> topo = kahnTopo(n, dag);
     vector<ll> dist(n, LINF);
     dist[src] = 0;
     for (int node : topo) {
@@ -248,12 +144,6 @@ vector<ll> shortestPathDAG(int n, vector<vector<pair<int, int>>>& adj, int src) 
     return dist;
 }
 
-/**
- * Problem: Single-Source Shortest Path with Negative Weights (Bellman-Ford)
- * Computes shortest distances from a single source to all vertices in a weighted graph containing negative edges.
- * Iteratively relaxes all E edges V-1 times to propagate shortest distance values.
- * Complexity: O(V * E) time complexity, and can handle negative weight edges.
- */
 vector<ll> bellmanFord(int n, vector<vector<int>>& edges, int src) {
     vector<ll> dist(n, LINF);
     dist[src] = 0;
@@ -266,14 +156,8 @@ vector<ll> bellmanFord(int n, vector<vector<int>>& edges, int src) {
         }
     }
     return dist;
-}
+}   
 
-/**
- * Problem: Negative Cycle Detection (Bellman-Ford check)
- * Verify if a weighted graph contains a cycle whose total edge weight sum is negative.
- * Runs an extra relaxation pass on all edges after V-1 iterations; any further change indicates a cycle.
- * Complexity: O(E) time when run after a full Bellman-Ford run has been completed.
- */
 bool hasNegativeCycle(int n, vector<vector<int>>& edges, vector<ll>& dist) {
     for (auto& e : edges) {
         int u = e[0], v = e[1], wt = e[2];
@@ -282,31 +166,16 @@ bool hasNegativeCycle(int n, vector<vector<int>>& edges, vector<ll>& dist) {
     return false;
 }
 
-/**
- * Problem: All-Pairs Shortest Path (Floyd-Warshall)
- * Calculate the shortest distances between every pair of vertices in a weighted directed graph.
- * Dynamic programming approach that systematically considers each vertex as an intermediate routing step.
- * Complexity: O(V^3) time and O(V^2) space, best suited for dense, small graphs.
- */
 void floydWarshall(vector<vector<ll>>& dist) {
     int n = dist.size();
-    for (int via = 0; via < n; via++) {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dist[i][via] == LINF || dist[via][j] == LINF) continue;
-                dist[i][j] = min(dist[i][j], dist[i][via] + dist[via][j]);
+    for(int i = 0; i < n; i++) dist[i][i] = 0;
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            for(int k = 0; k < n; k++) {
+                if(dist[j][i] != LINF && dist[i][k] != LINF) {
+                    dist[j][k] = min(dist[j][k], dist[j][i] + dist[i][k]);
+                }
             }
         }
     }
-}
-
-/**
- * Program Execution Entry Point
- * Configures fast input/output operations for C++ streams to maximize performance during execution.
- * Returns code 0 upon successful completion of the main execution block.
- */
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    return 0;
 }

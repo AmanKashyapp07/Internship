@@ -1,20 +1,3 @@
-// ============================================================================
-// SECTION 5: MINIMUM SPANNING TREE & DISJOINT SET PROBLEMS
-// ============================================================================
-/**
- * CSES Problem Set
- *
- * Problem: CSES Solution Template
- * Link: https://cses.fi/
- * Category: Template
- *
- * Description:
- * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
- *
- * Logic/Approach:
- * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
- */
-
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -52,274 +35,219 @@ const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
-
-// 1. Disjoint Set Union (DSU) Structure (Union by Rank & Size with Path Compression)
-class DisjointSet {
+class DSU {
 public:
-    vi rank, parent, size;
-    DisjointSet(int n) {
-        rank.resize(n + 1, 0);
-        parent.resize(n + 1);
-        size.resize(n + 1, 1);
-        for (int i = 0; i <= n; i++) parent[i] = i;
+    vector<int> p, sz;
+    DSU(int n) {
+        p.resize(n + 1);
+        sz.assign(n + 1, 1);
+        iota(p.begin(), p.end(), 0);
     }
 
-    int findUPar(int node) {
-        if (node == parent[node]) return node;
-        return parent[node] = findUPar(parent[node]); // Path compression
+    int find(int x) {
+        return p[x] == x ? x : p[x] = find(p[x]);
     }
 
-    void unionByRank(int u, int v) {
-        int ulp_u = findUPar(u);
-        int ulp_v = findUPar(v);
-        if (ulp_u == ulp_v) return;
-        if (rank[ulp_u] < rank[ulp_v]) {
-            parent[ulp_u] = ulp_v;
-        } else if (rank[ulp_v] < rank[ulp_u]) {
-            parent[ulp_v] = ulp_u;
-        } else {
-            parent[ulp_v] = ulp_u;
-            rank[ulp_u]++;
-        }
-    }
-
-    void unionBySize(int u, int v) {
-        int ulp_u = findUPar(u);
-        int ulp_v = findUPar(v);
-        if (ulp_u == ulp_v) return;
-        if (size[ulp_u] < size[ulp_v]) {
-            parent[ulp_u] = ulp_v;
-            size[ulp_v] += size[ulp_u];
-        } else {
-            parent[ulp_v] = ulp_u;
-            size[ulp_u] += size[ulp_v];
-        }
+    bool unite(int a, int b) {
+        a = find(a), b = find(b);
+        if (a == b) return false;
+        if (sz[a] < sz[b]) swap(a, b);
+        p[b] = a;
+        sz[a] += sz[b];
+        return true;
     }
 };
 
-// 2 & 4. Prim's Algorithm (Find MST Weight & Tree)
-int primsMST(int V, const vector<vector<pii>>& adj) {
-    priority_queue<pii, vector<pii>, greater<pii>> pq; // {weight, node}
-    vi vis(V, 0);
-    pq.push({0, 0});
-    int sum = 0;
 
-    while (!pq.empty()) {
-        int wt = pq.top().ff;
-        int node = pq.top().ss;
-        pq.pop();
+// 1. Number of Operations to Make Network Connected
+int makeConnected(int n, vector<vector<int>>& connections) {
+    if (connections.size() < n - 1)
+        return -1;
 
-        if (vis[node] == 1) continue;
-        vis[node] = 1;
-        sum += wt;
+    DSU ds(n);
 
-        for (auto it : adj[node]) {
-            int adjNode = it.ff;
-            int edW = it.ss;
-            if (!vis[adjNode]) {
-                pq.push({edW, adjNode});
-            }
-        }
+    for (auto &e : connections) {
+        ds.unite(e[0], e[1]);
     }
-    return sum;
+
+    int components = 0;
+
+    for (int i = 0; i < n; i++)
+        if (ds.find(i) == i)
+            components++;
+
+    return components - 1;
 }
 
-// 5. Number of Operations to Make Network Connected
-int makeConnected(int n, vector<vector<int>>& connections) {
-    if ((int)connections.size() < n - 1) return -1;
-    DisjointSet ds(n);
-    int extraEdges = 0;
-    for (auto it : connections) {
-        if (ds.findUPar(it[0]) == ds.findUPar(it[1])) {
-            extraEdges++;
-        } else {
-            ds.unionBySize(it[0], it[1]);
-        }
-    }
-    int components = 0;
-    for (int i = 0; i < n; i++) {
-        if (ds.parent[i] == i) components++;
-    }
-    return components - 1;
-} 
-
+// 2. Most Stones Removed with Same Row or Column
 int removeStones(vector<vector<int>>& stones) {
+    int maxRow = 0, maxCol = 0;
 
-        int maxRow = 0, maxCol = 0;
-
-        for (const auto& stone : stones) {
-            maxRow = max(maxRow, stone[0]);
-            maxCol = max(maxCol, stone[1]);
-
-        }
-
-        DisjointSet ds(maxRow + maxCol + 2);
-        unordered_set<int> usedNodes;
-
-        for (const auto& stone : stones) {
-            int rowNode = stone[0];
-            int colNode = stone[1] + maxRow + 1;
-            ds.unionBySize(rowNode, colNode); // unionBySize(rowNode, colNode) groups together all stones that are directly or indirectly connected through shared rows or columns. Each connected component can be reduced to one stone, so the answer is totalStones - numberOfConnectedComponents.
-            usedNodes.insert(rowNode);
-            usedNodes.insert(colNode);
-
-        }
-
-        int components = 0;
-
-        for (int node : usedNodes) {
-            if (ds.findUPar(node) == node) components++;
-        }
-
-        return stones.size() - components;
-
+    for (auto &s : stones) {
+        maxRow = max(maxRow, s[0]);
+        maxCol = max(maxCol, s[1]);
     }
-// answer is total stones - number of connected components. Each connected component can be reduced to 1 stone, so we can remove all other stones in that component.
-// a connected component is formed by stones that share the same row or column. We can use DSU to find the number of connected components. Each stone can be represented as a node in the graph, and we can connect nodes that share the same row or column. The number of connected components can be found by counting the number of unique parents in the DSU after processing all stones. The final answer is the total number of stones minus the number of connected components.
-// 7. Accounts Merge
 
+    DSU ds(maxRow + maxCol + 2);
+    unordered_set<int> used;
 
-vi numIslandsII(int n, int m, vector<vector<int>>& queries) {
+    for (auto &s : stones) {
+        int row = s[0];
+        int col = s[1] + maxRow + 1;
 
-    // DSU for all cells in the grid
-    DisjointSet ds(n * m);
+        ds.unite(row, col);
 
-    // Tracks whether a cell is currently land or water
-    vector<vi> vis(n, vi(m, 0));
+        used.insert(row);
+        used.insert(col);
+    }
 
-    // Stores answer after every query
-    vi ans;
+    int components = 0;
 
-    // Current number of islands
+    for (int node : used)
+        if (ds.find(node) == node)
+            components++;
+
+    return stones.size() - components;
+}
+
+// 3. Number of Islands II
+vector<int> numIslandsII(int n, int m, vector<vector<int>>& queries) {
+    DSU ds(n * m);
+
+    vector<vector<int>> vis(n, vector<int>(m, 0));
+    vector<int> ans;
+
     int cnt = 0;
 
-    // 4-direction movement
     int dr[] = {-1, 0, 1, 0};
     int dc[] = {0, 1, 0, -1};
 
-    for (auto it : queries) {
+    for (auto &q : queries) {
+        int r = q[0];
+        int c = q[1];
 
-        int row = it[0];
-        int col = it[1];
-
-        // If land already exists here,
-        // island count remains unchanged
-        if (vis[row][col] == 1) {
-            ans.pb(cnt);
+        if (vis[r][c]) {
+            ans.push_back(cnt);
             continue;
         }
 
-        // Convert water -> land
-        vis[row][col] = 1;
-
-        // Assume this creates a new island
+        vis[r][c] = 1;
         cnt++;
 
-        // Check all 4 neighbours
-        for (int i = 0; i < 4; i++) {
+        int node = r * m + c;
 
-            int adjr = row + dr[i];
-            int adjc = col + dc[i];
+        for (int k = 0; k < 4; k++) {
+            int nr = r + dr[k];
+            int nc = c + dc[k];
 
-            // Valid neighbour?
-            if (adjr >= 0 && adjr < n &&
-                adjc >= 0 && adjc < m) {
+            if (nr < 0 || nr >= n || nc < 0 || nc >= m)
+                continue;
 
-                // Neighbour is land
-                if (vis[adjr][adjc] == 1) {
+            if (!vis[nr][nc])
+                continue;
 
-                    // Convert 2D cell to DSU node number
-                    int nodeNo = row * m + col;
-                    int adjNodeNo = adjr * m + adjc;
+            int adj = nr * m + nc;
 
-                    // If both lands belong to different islands
-                    if (ds.findUPar(nodeNo) != ds.findUPar(adjNodeNo)) {
-
-                        // Merging two islands into one
-                        cnt--;
-
-                        ds.unionBySize(nodeNo, adjNodeNo);
-                    }
-                }
+            if (ds.find(node) != ds.find(adj)) {
+                cnt--;
+                ds.unite(node, adj);
             }
         }
 
-        // Store island count after this query
-        ans.pb(cnt);
+        ans.push_back(cnt);
     }
 
     return ans;
 }
 
-// 9. Making a Large Island
+// 4. Making A Large Island
 int largestIsland(vector<vector<int>>& grid) {
     int n = grid.size();
-    DisjointSet ds(n * n);
+    DSU ds(n * n);
+
     int dr[] = {-1, 0, 1, 0};
     int dc[] = {0, 1, 0, -1};
 
-    // Step 1: Connect existing 1s
     for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
-            if (grid[r][c] == 0) continue;
-            for (int i = 0; i < 4; i++) {
-                int nr = r + dr[i], nc = c + dc[i];
-                if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] == 1) {
-                    ds.unionBySize(r * n + c, nr * n + nc);
-                }
+            if (!grid[r][c])
+                continue;
+
+            for (int k = 0; k < 4; k++) {
+                int nr = r + dr[k];
+                int nc = c + dc[k];
+
+                if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc])
+                    ds.unite(r * n + c, nr * n + nc);
             }
         }
     }
 
-    // Step 2: Try converting each 0 to 1
-    int mx = 0;
+    int ans = 0;
+
     for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
-            if (grid[r][c] == 1) continue;
-            set<int> components;
-            for (int i = 0; i < 4; i++) {
-                int nr = r + dr[i], nc = c + dc[i];
-                if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc] == 1) {
-                    components.insert(ds.findUPar(nr * n + nc));
-                }
+
+            if (grid[r][c])
+                continue;
+
+            set<int> comps;
+
+            for (int k = 0; k < 4; k++) {
+                int nr = r + dr[k];
+                int nc = c + dc[k];
+
+                if (nr >= 0 && nr < n && nc >= 0 && nc < n && grid[nr][nc])
+                    comps.insert(ds.find(nr * n + nc));
             }
-            // components holds distinct connected components of 1s adjacent to the current 0 cell. We can calculate the total size of the new island formed by converting this 0 to 1 by summing the sizes of these distinct components and adding 1 for the current cell.
-            int sizeTotal = 1;
-            for (auto it : components) sizeTotal += ds.size[it];
-            mx = max(mx, sizeTotal);
+
+            int cur = 1;
+
+            for (int p : comps)
+                cur += ds.sz[p];
+
+            ans = max(ans, cur);
         }
     }
-    // Handle the fallback where grid has no 0s
-    return mx == 0 ? n * n : mx;
+
+    return ans == 0 ? n * n : ans;
 }
 
-// 10. Swim in Rising Water (DSU or Dijkstra variant)
+// 5. Swim in Rising Water
 int swimInWater(vector<vector<int>>& grid) {
     int n = grid.size();
-    priority_queue<pair<int, pii>, vector<pair<int, pii>>, greater<pair<int, pii>>> pq; // {max_height, {r, c}}
-    vector<vi> vis(n, vi(n, 0));
+    using T = pair<int, pair<int,int>>;
+    priority_queue<T, vector<T>, greater<T>> pq; // {time, {r, c}}
+
+    vector<vector<int>> vis(n, vector<int>(n, 0));
 
     pq.push({grid[0][0], {0, 0}});
     vis[0][0] = 1;
+
     int dr[] = {-1, 0, 1, 0};
     int dc[] = {0, 1, 0, -1};
 
     while (!pq.empty()) {
-        int t = pq.top().ff;
-        int r = pq.top().ss.ff;
-        int c = pq.top().ss.ss;
+        auto [t, cell] = pq.top();
         pq.pop();
 
-        if (r == n - 1 && c == n - 1) return t;
+        auto [r, c] = cell;
 
-        for (int i = 0; i < 4; i++) {
-            int nr = r + dr[i], nc = c + dc[i];
-            if (nr >= 0 && nr < n && nc >= 0 && nc < n && !vis[nr][nc]) {
-                vis[nr][nc] = 1;
-                pq.push({max(t, grid[nr][nc]), {nr, nc}}); // max(t, grid[nr][nc]) ensures that we always consider the maximum height encountered along the path to reach (nr, nc). This is crucial because we can only move to a cell if the water level has risen to at least the height of that cell.
-            }
+        if (r == n - 1 && c == n - 1)
+            return t;
+
+        for (int k = 0; k < 4; k++) {
+            int nr = r + dr[k];
+            int nc = c + dc[k];
+
+            if (nr < 0 || nr >= n || nc < 0 || nc >= n || vis[nr][nc])
+                continue;
+
+            vis[nr][nc] = 1;
+            pq.push({max(t, grid[nr][nc]), {nr, nc}});
         }
     }
+
     return 0;
 }
 
@@ -359,39 +287,6 @@ vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections)
     return bridges;
 }
 
-// 2. Articulation Points in a Graph
-void dfsArticulation(int node, int parent, int& timer, vi& tin, vi& low, vi& vis,
-                      vi& mark, const vector<vi>& adj) {
-    vis[node] = 1;
-    tin[node] = low[node] = timer++;
-    int child = 0;
-    for (auto it : adj[node]) {
-        if (it == parent) continue;
-        if (!vis[it]) {
-            dfsArticulation(it, node, timer, tin, low, vis, mark, adj);
-            low[node] = min(low[node], low[it]);
-            if (low[it] >= tin[node] && parent != -1) {
-                mark[node] = 1;
-            }
-            child++;
-        } else {
-            low[node] = min(low[node], tin[it]);
-        }
-    }
-    if (child > 1 && parent == -1) mark[node] = 1;
-}
-
-vi articulationPoints(int V, vector<vi>& adj) {
-    vi tin(V), low(V), vis(V, 0), mark(V, 0);
-    int timer = 0;
-    for (int i = 0; i < V; i++) {
-        if (!vis[i]) dfsArticulation(i, -1, timer, tin, low, vis, mark, adj);
-    }
-    vi ans;
-    for (int i = 0; i < V; i++) if (mark[i] == 1) ans.pb(i);
-    if (ans.size() == 0) return {-1};
-    return ans;
-}
 
 // 3. Kosaraju's Algorithm (Strongly Connected Components in Directed Graph)
 void dfsKosaraju(int node, vi& vis, const vector<vi>& adj, stack<int>& st) {
