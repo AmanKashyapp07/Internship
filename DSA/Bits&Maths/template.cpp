@@ -1,107 +1,241 @@
 /**
- * Problem: Bit Manipulation Master Template
- * Category: Bits & Binary Representations
+ * Master Math + Bit Manipulation Template
  *
- * Description:
- * A comprehensive reference covering basic operations, built-ins, standard mathematical tricks, 
- * subset/submask enumeration, and genuine bitwise interview questions asked in OAs.
+ * Includes:
+ * - Binary Exponentiation
+ * - Modular Inverse
+ * - Factorial + nCr
+ * - GCD / LCM
+ * - Prime Check
+ * - Sieve of Eratosthenes
+ * - Basic Bit Operations
+ * - Common Bit Tricks
+ * - GCC Built-ins
  */
 
 #include <iostream>
 #include <vector>
-#include <string>
 #include <algorithm>
-#include <climits>
 #include <utility>
 
 using namespace std;
 
-// =========================================================================
-// 1. BASIC BIT-WISE OPERATIONS
-// =========================================================================
+const long long MOD = 1e9 + 7;
 
-// Check if the i-th bit (0-indexed) is set
+// ============================================================================
+// MODULAR ARITHMETIC
+// ============================================================================
+
+// O(log b)
+long long power(long long a, long long b) {
+    long long res = 1;
+    a %= MOD;
+    while (b) {
+        if (b & 1) res = res * a % MOD;
+        a = a * a % MOD;
+        b >>= 1;
+    }
+    return res;
+}
+
+// Modular inverse (MOD must be prime)
+long long inv(long long x) {
+    return power(x, MOD - 2);
+}
+
+// a / b modulo MOD
+// ans = a * inv(b) % MOD;
+
+// ============================================================================
+// FACTORIAL + NCR
+// ============================================================================
+
+class Factorial {
+    vector<long long> fact, invFact;
+
+public:
+    Factorial(int n) {
+        fact.resize(n + 1);
+        invFact.resize(n + 1);
+
+        fact[0] = 1;
+        for (int i = 1; i <= n; i++)
+            fact[i] = fact[i - 1] * i % MOD;
+
+        invFact[n] = inv(fact[n]);
+
+        for (int i = n; i >= 1; i--)
+            invFact[i - 1] = invFact[i] * i % MOD;
+    }
+
+    long long nCr(int n, int r) {
+        if (r < 0 || r > n) return 0;
+        return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+    }
+};
+
+// ============================================================================
+// MATHEMATICAL UTILITIES
+// ============================================================================
+
+// Greatest Common Divisor
+long long gcd(long long a, long long b) {
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+
+// Least Common Multiple
+long long lcm(long long a, long long b) {
+    return a / gcd(a, b) * b;
+}
+
+// you can also use long long g = gcd(a, b); and long long l = lcm(a, b);
+// Prime Check
+bool isPrime(long long n) {
+    if (n < 2) return false;
+
+    for (long long i = 2; i * i <= n; i++)
+        if (n % i == 0)
+            return false;
+
+    return true;
+}
+
+// Sieve of Eratosthenes
+vector<bool> sieve(int n) {
+    vector<bool> prime(n + 1, true);
+
+    if (n >= 0) prime[0] = false;
+    if (n >= 1) prime[1] = false;
+
+    for (int i = 2; i * i <= n; i++) {
+        if (!prime[i]) continue;
+
+        for (int j = i * i; j <= n; j += i)
+            prime[j] = false;
+    }
+
+    return prime;
+} // time complexity: O(n log log n) | space complexity: O(n)
+
+// ============================================================================
+// BASIC BIT OPERATIONS
+// ============================================================================
+
+// Check if ith bit is set
 bool isSet(int mask, int i) {
     return mask & (1 << i);
 }
 
-// Set the i-th bit
+// Set ith bit
 int setBit(int mask, int i) {
     return mask | (1 << i);
 }
 
-// Clear the i-th bit
+// Clear ith bit
 int clearBit(int mask, int i) {
     return mask & ~(1 << i);
 }
 
-// Toggle the i-th bit
+// Toggle ith bit
 int toggleBit(int mask, int i) {
     return mask ^ (1 << i);
 }
 
-// Extract the value of the i-th bit (0 or 1), i is 0-indexed
+// Get ith bit (0 or 1)
 int getBit(int mask, int i) {
     return (mask >> i) & 1;
 }
 
-// =========================================================================
-// 2. STANDARD MATHEMETICAL TRICKS
-// =========================================================================
+// ============================================================================
+// COMMON BIT TRICKS
+// ============================================================================
 
-// Remove the lowest set bit (e.g. 1100 -> 1000)
+// Remove lowest set bit
 int removeLSB(int x) {
     return x & (x - 1);
 }
 
-// Extract the value of the lowest set bit (e.g. 1100 -> 0100)
+// Value of lowest set bit
 int lowestSetBit(int x) {
     return x & -x;
 }
 
-// Check if a number is a power of two
+// Check power of two
 bool isPowerOfTwo(int x) {
     return x > 0 && !(x & (x - 1));
 }
 
-vector<int> convertToBinary(int n) {
-    vector<int> binary(32, 0);
-    for(int i = 0; i < 32; i++) {
-        binary[i] = (n >> i) & 1;
-    }
-    reverse(binary.begin(), binary.end());
-    return binary;
+// Next power of two
+int nextPowerOfTwo(int x) {
+    if (x <= 1) return 1;
+    return 1 << (32 - __builtin_clz(x - 1));
 }
 
-int convertFromBinary(const vector<int>& binary) {
+// ============================================================================
+// BINARY CONVERSION
+// ============================================================================
+
+vector<int> convertToBinary(int n) {
+    vector<int> bits(32);
+
+    for (int i = 0; i < 32; i++)
+        bits[i] = (n >> i) & 1;
+
+    reverse(bits.begin(), bits.end());
+
+    return bits;
+}
+
+int convertFromBinary(const vector<int>& bits) {
     int n = 0;
-    for(int i = 0; i < binary.size(); i++) {
-        n = (n << 1) | binary[i]; // n<<1 will become 00 , then it will be 01 or 00 depending on the binary[i] value, then it will be 010 or 000 depending on the binary[i] value, and so on.
-    }
+
+    for (int b : bits)
+        n = (n << 1) | b;
+
     return n;
 }
 
+// ============================================================================
+// GCC BUILT-INS
+// ============================================================================
 
-// =========================================================================
-// 3. GCC BUILT-INS (FAST ASSEMBLER METRICS)
-// =========================================================================
+// Number of set bits
+int popcount(int x) {
+    return __builtin_popcount(x);
+}
 
-// Number of set bits (popcount)
-int popcount(int x) { return __builtin_popcount(x); }
-int popcountll(long long x) { return __builtin_popcountll(x); }
+int popcountll(long long x) {
+    return __builtin_popcountll(x);
+}
 
-// Index of the Most Significant Bit (0-indexed)
-// __builtin_clz counts leading zeros; 31 - clz yields MSB index
-int msb(int x) { return x == 0 ? -1 : 31 - __builtin_clz(x); }
+// Index of most significant set bit
+int msb(int x) {
+    return x == 0 ? -1 : 31 - __builtin_clz(x);
+}
 
-// Index of the Least Significant Bit (0-indexed)
-// __builtin_ctz counts trailing zeros
-int lsb(int x) { return x == 0 ? -1 : __builtin_ctz(x); }
+// Index of least significant set bit
+int lsb(int x) {
+    return x == 0 ? -1 : __builtin_ctz(x);
+}
 
-// =========================================================================
-// 4. GENUINE INTERVIEW & OA PROBLEMS
-// =========================================================================
+// Leading zeros
+int leadingZeros(int x) {
+    return __builtin_clz(x);
+}
 
+// Trailing zeros
+int trailingZeros(int x) {
+    return __builtin_ctz(x);
+}
+
+// Odd/even parity of set bits
+int parity(int x) {
+    return __builtin_parity(x);
+}
 
 /**
  * LeetCode 137: Single Number II
