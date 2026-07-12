@@ -6,53 +6,23 @@
 
 using namespace std;
 
-// Segment Tree template configured for Range Minimum Query and Point Update
-struct SegmentTree {
-    int n;
-    vector<int> tree;
-    const int INF_VAL = INT_MAX;
-
-    SegmentTree(vector<int>& a) {
-        n = a.size();
-        tree.assign(4 * n, INF_VAL);
-        build(1, 0, n - 1, a);
+struct SegTree {
+    int n; vector<int> t;
+    SegTree(vector<int>& a) : n(a.size()), t(2 * n) {
+        for (int i = 0; i < n; i++) t[n + i] = a[i];
+        for (int i = n - 1; i > 0; --i) t[i] = min(t[i << 1], t[i << 1 | 1]);
     }
-
-    void build(int node, int l, int r, vector<int>& a) {
-        if (l == r) {
-            tree[node] = a[l];
-            return;
+    void update(int p, int val) {
+        for (t[p += n] = val; p > 1; p >>= 1) t[p >> 1] = min(t[p], t[p ^ 1]);
+    }
+    int query(int l, int r) {
+        int s = INT_MAX;
+        for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) s = min(s, t[l++]);
+            if (r & 1) s = min(s, t[--r]);
         }
-        int mid = (l + r) / 2;
-        build(2 * node, l, mid, a);
-        build(2 * node + 1, mid + 1, r, a);
-        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+        return s;
     }
-
-    int query(int node, int l, int r, int ql, int qr) {
-        if (qr < l || ql > r) return INF_VAL;      // No overlap (returns infinity)
-        if (ql <= l && r <= qr) return tree[node]; // Complete overlap
-        int mid = (l + r) / 2;                     // Partial overlap
-        return min(query(2 * node, l, mid, ql, qr),
-                   query(2 * node + 1, mid + 1, r, ql, qr));
-    }
-
-    void update(int node, int l, int r, int idx, int val) {
-        if (l == r) {
-            tree[node] = val;
-            return;
-        }
-        int mid = (l + r) / 2;
-        if (idx <= mid)
-            update(2 * node, l, mid, idx, val);
-        else
-            update(2 * node + 1, mid + 1, r, idx, val);
-        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
-    }
-
-    // Public functions (0-based indexing)
-    int query(int l, int r) { return query(1, 0, n - 1, l, r); }
-    void update(int idx, int val) { update(1, 0, n - 1, idx, val); }
 };
 
 int main() {
@@ -68,7 +38,7 @@ int main() {
         }
 
         // Initialize Segment Tree
-        SegmentTree st(a);
+        SegTree st(a);
 
         // Process Queries
         for (int i = 0; i < q; i++) {

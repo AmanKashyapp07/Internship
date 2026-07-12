@@ -1,127 +1,114 @@
-/*
-How Coordinate Compression Maps to the Fenwick Tree Template (Old vs. New):
-
-1. SIZING:
-   Old: Fenwick ft(n);
-   New: Fenwick ft(unique_size);
-
-2. UPDATING:
-   Old: ft.update(idx, val);
-   New: ft.update(get_rank(val), val);
-
-3. QUERYING:
-   Old: ft.query(l, r);
-   New: ft.query(get_rank(l), get_rank(r));
-
-The Fenwick Tree class/struct itself remains 100% UNMODIFIED.
-*/
-
-#include <algorithm>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
-// 0-Indexed Fenwick Tree (Binary Indexed Tree)
+// =========================================================================
+// TEMPLATE 1: FENWICK TREE (Binary Indexed Tree)
+// =========================================================================
+// Publicly accepts 0-indexed arguments, but manages them 1-indexed internally 
+// to take advantage of the standard, ultra-fast `i & -i` bitwise operations.
 struct Fenwick {
-    int n;
-    vector<int> bit;
-
-    Fenwick(int n) : n(n), bit(n, 0) {}
-
-    // Add val to index idx
-    void update(int idx, int val) {
-        while (idx < n) {
-            bit[idx] += val;
-            idx = idx | (idx + 1);
-        }
+    int n; vector<int> bit;
+    Fenwick(int n) : n(n), bit(n + 1) {} // Sized to n + 1 to stay perfectly safe from out-of-bounds
+    
+    void update(int i, int val) {
+        for (++i; i <= n; i += i & -i) bit[i] += val; // Converts 0-index to 1-index, updates frequency
     }
-
-    // Prefix sum query from 0 to idx
-    int query(int idx) {
-        int sum = 0;
-        while (idx >= 0) {
-            sum += bit[idx];
-            idx = (idx & (idx + 1)) - 1;
-        }
-        return sum;
+    int query(int i) {
+        int s = 0;
+        for (++i; i > 0; i -= i & -i) s += bit[i];   // Accumulates prefix sum safely from [0 ... i]
+        return s;
     }
-
-    // Range sum query [l, r]
-    int query(int l, int r) {
-        if (l > r) return 0;
-        return query(r) - (l ? query(l - 1) : 0);
+    int query(int l, int r) { 
+        return (l > r) ? 0 : query(r) - query(l - 1); // Returns total frequency within range [l, r] inclusive
     }
 };
 
-// Structure to store query events offline
-struct Event {
+// =========================================================================
+// TEMPLATE 2: COORDINATE COMPRESSOR
+// =========================================================================
+// Gathers huge numbers (like salaries up to 10^9) and remaps them down 
+// to a tiny scale [0, 1, 2, ... Unique Elements - 1] preserving relative order.
+struct CoordinateCompressor {
+    vector<int> vals;
+    void add(int x) { vals.push_back(x); }
+    void build() {
+        sort(vals.begin(), vals.end());
+        vals.erase(unique(vals.begin(), vals.end()), vals.end()); // Deduplicates and locks ranks
+    }
+    int get(int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); } // Returns 0-based compressed index
+    int size() { return vals.size(); }
+};
+
+// Helper structure to save incoming queries offline
+struct Query {
     char type;
     int a, b;
 };
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    // Optimize standard input/output streams for fast competitive programming execution
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
     int n, q;
-    if (cin >> n >> q) {
-        vector<int> salaries(n + 1); // 1-based indexing for employee lookup
-        vector<int> coords;          // Vector to collect all coordinates for compression
+    cin >> n >> q;
 
-        for (int i = 1; i <= n; i++) {
-            cin >> salaries[i];
-            coords.push_back(salaries[i]);
+    vector<int> salary(n + 1);
+    CoordinateCompressor cc;
+
+    // STEP 1: Collect all original employee salaries to prepare for compression universe
+    for (int i = 1; i <= n; i++) {
+        cin >> salary[i];
+        cc.add(salary[i]);
+    }
+
+    // STEP 2: Collect all future query metrics before building our mapping coordinates
+    vector<Query> queries(q);
+    for (int i = 0; i < q; i++) {
+        cin >> queries[i].type >> queries[i].a >> queries[i].b;
+        if (queries[i].type == '!') {
+            cc.add(queries[i].b); // Add the new salary value to the compression index map
+        } else {
+            cc.add(queries[i].a); // Add the lower range target boundary
+            cc.add(queries[i].b); // Add the upper range target boundary
         }
+    }
 
-        vector<Event> events(q);
-        for (int i = 0; i < q; i++) {
-            cin >> events[i].type >> events[i].a >> events[i].b;
-            if (events[i].type == '!') {
-                coords.push_back(events[i].b); // Collect new salary coordinate
-            } else {
-                coords.push_back(events[i].a); // Collect lower bound coordinate
-                coords.push_back(events[i].b); // Collect upper bound coordinate
-            }
-        }
+    // STEP 3: Complete coordinate compression sorting and unique processing
+    cc.build();
 
-        // --- Coordinate Compression ---
-        sort(coords.begin(), coords.end());
-        coords.erase(unique(coords.begin(), coords.end()), coords.end());
+    // STEP 4: Size our tracking Fenwick tree perfectly to the compressed universe scale
+    Fenwick ft(cc.size());
 
-        // Lambda to get compressed rank in O(log M)
-        auto get_rank = [&](int val) {
-            return lower_bound(coords.begin(), coords.end(), val) - coords.begin();
-        };
+    // STEP 5: Populate initial frequencies. Every employee adds an occurrence count of 1
+    for (int i = 1; i <= n; i++) {
+        ft.update(cc.get(salary[i]), +1);
+    }
 
-        // Create Fenwick Tree of size equal to unique coordinates
-        int unique_size = coords.size();
-        Fenwick ft(unique_size);
+    // STEP 6: Execute the operations sequentially
+    for (auto &q : queries) {
+        if (q.type == '!') {
+            int emp_id = q.a;
+            int new_sal = q.b;
 
-        // Populate initial salaries in the Fenwick Tree
-        for (int i = 1; i <= n; i++) {
-            ft.update(get_rank(salaries[i]), 1);
-        }
+            // Step A: Evict the previous salary value from the tracking index (-1 frequency)
+            ft.update(cc.get(salary[emp_id]), -1);
 
-        // Process Queries
-        for (int i = 0; i < q; i++) {
-            if (events[i].type == '!') {
-                int emp = events[i].a;
-                int new_sal = events[i].b;
+            // Step B: Formally modify the local scalar assignment mapping tracking table
+            salary[emp_id] = new_sal;
 
-                // 1. Remove old salary count
-                ft.update(get_rank(salaries[emp]), -1);
-                // 2. Update employee's salary locally
-                salaries[emp] = new_sal;
-                // 3. Add new salary count
-                ft.update(get_rank(new_sal), 1);
-            } else {
-                int a = events[i].a;
-                int b = events[i].b;
-                // Range Query: count active elements between compressed ranks of a and b
-                cout << ft.query(get_rank(a), get_rank(b)) << "\n";
-            }
+            // Step C: Incorporate the incoming target new salary value (+1 frequency)
+            ft.update(cc.get(salary[emp_id]), +1);
+        } else {
+            // Translate explicit absolute bounds down into safe ordinal compressed arrays
+            int L = cc.get(q.a);
+            int R = cc.get(q.b);
+
+            // Fetch structural sum boundaries in O(log N) directly
+            cout << ft.query(L, R) << '\n';
         }
     }
 
