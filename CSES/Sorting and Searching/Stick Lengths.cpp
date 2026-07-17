@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1074
+
 #include <bits/stdc++.h>
 #define int long long
 #define input(v) for (auto &x : v) cin >> x

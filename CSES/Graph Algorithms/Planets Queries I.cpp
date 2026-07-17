@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1750
+
 /**
  * CSES - Planets Queries I
  *

@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/2428
+
 #include <bits/stdc++.h>
 
 #define int long long

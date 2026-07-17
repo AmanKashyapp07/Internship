@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1144
+
 /*
 How Coordinate Compression Maps to the Fenwick Tree Template (Old vs. New):
 

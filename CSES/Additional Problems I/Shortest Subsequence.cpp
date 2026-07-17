@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1087
+
 #include <bits/stdc++.h>
 using namespace std;
 

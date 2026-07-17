@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1683
+
 #include <algorithm>
 #include <array>
 #include <climits>

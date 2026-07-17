@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1662
+
 #include <bits/stdc++.h>
 #define int long long
 #define input(v)      \

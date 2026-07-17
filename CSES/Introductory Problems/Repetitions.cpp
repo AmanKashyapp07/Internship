@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1069
+
 #include <iostream>
 #include <string>
 using namespace std;

@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1746
+
 /**
  * CSES Problem Set
  *

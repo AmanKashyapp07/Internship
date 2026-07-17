@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1722
+
 #include <iostream>
 #include <string>
 #define int long long

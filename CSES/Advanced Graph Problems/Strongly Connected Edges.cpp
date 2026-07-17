@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/2177
+
 /*
 CSES Problem: Strongly Connected Edges
 

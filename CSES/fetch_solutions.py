@@ -136,8 +136,9 @@ def fetch_one(session, task_name, task_url, category):
         out_dir    = os.path.join(CSES_DIR, cat_folder)
         os.makedirs(out_dir, exist_ok=True)
         filepath   = os.path.join(out_dir, sanitize(task_name) + ext)
+        comment = f"# Link: {task_url}\n\n" if ext == ".py" else f"// Link: {task_url}\n\n"
         with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(pre.text)
+            f.write(comment + pre.text)
 
         return f"  [+] Saved → {cat_folder}/{sanitize(task_name)}{ext}"
 

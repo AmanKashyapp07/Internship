@@ -1,3 +1,5 @@
+// Link: https://cses.fi/problemset/task/1732
+
 #include <iostream>
 #include <string>
 #include <vector>
