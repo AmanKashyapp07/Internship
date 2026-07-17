@@ -27,6 +27,13 @@ void assignIds(TreeNode* root) {
     assignIds(root->right);
 }
 
+TreeNode* invertTree(TreeNode* root) {
+    if (!root) return nullptr;
+    swap(root->left, root->right);
+    invertTree(root->left);
+    invertTree(root->right);
+    return root;
+}
 int height(TreeNode* r) {
     return r ? 1 + max(height(r->left), height(r->right)) : 0;
 }
