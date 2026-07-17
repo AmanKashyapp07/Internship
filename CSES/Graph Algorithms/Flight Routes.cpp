@@ -1,3 +1,28 @@
+/**
+ * CSES Problem Set
+ *
+ * Problem: Flight Routes
+ * Link: https://cses.fi/problemset/task/1196
+ * Category: Graph Algorithms
+ *
+ * Description:
+ * Find the k shortest route costs from city 1 to city n.
+ * Routes may revisit cities multiple times.
+ *
+ * Logic/Approach:
+ * Modified Dijkstra:
+ *
+ * - Maintain a min-heap storing (distance, node).
+ * - Let cnt[u] = number of times node u has been popped.
+ * - A node is processed at most k times.
+ * - Since states are popped in increasing distance order,
+ *   the first k times node n is popped correspond to the
+ *   k shortest route costs from 1 to n.
+ *
+ * Complexity:
+ * O(k * m * log(k * m))
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -18,22 +43,24 @@
 #include <vector>
 
 using namespace std;
-using ll = long long;
+using ll  = long long;
 using ull = unsigned long long;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
-using vi = vector<int>;
+using vi  = vector<int>;
 using vll = vector<ll>;
 
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
+#define all(x)   (x).begin(), (x).end()
+#define rall(x)  (x).rbegin(), (x).rend()
+#define pb       push_back
+#define ff       first
+#define ss       second
 
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
+const int INF  = INT_MAX;
+const ll  LINF = LLONG_MAX;
+const ll  MOD  = 1e9 + 7;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 struct Edge {
     int to;

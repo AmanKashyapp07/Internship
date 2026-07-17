@@ -1,3 +1,17 @@
+/**
+ * CSES Problem Set
+ *
+ * Problem: CSES Solution Template
+ * Link: https://cses.fi/
+ * Category: Template
+ *
+ * Description:
+ * A template file containing boilerplate code, fast I/O setup, and common macros/imports for solving CSES problems.
+ *
+ * Logic/Approach:
+ * Provides basic imports, standard namespace, and empty main function with fast I/O configuration.
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>

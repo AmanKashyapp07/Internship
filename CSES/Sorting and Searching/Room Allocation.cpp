@@ -1,3 +1,10 @@
+/**
+ * CSES Problem Set
+ *
+ * Problem: Room Allocation
+ * Link: https://cses.fi/problemset/task/1164
+ */
+
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -18,6 +25,7 @@
 #include <vector>
 
 using namespace std;
+
 using ll = long long;
 using ull = unsigned long long;
 using pii = pair<int, int>;

@@ -1,50 +1,101 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
-// Fenwick Tree (Binary Indexed Tree) for point updates and dynamic range sums
+// Fenwick tree implementation for 1-based indexing
 struct Fenwick {
-    int n; vector<long long> bit;
-    Fenwick(int n): n(n), bit(n + 1) {}
-    void upd(int i, long long x){ for(; i <= n; i += i & -i) bit[i] += x; }
-    long long qry(int i){ long long s = 0; for(; i; i -= i & -i) s += bit[i]; return s; }
-    // Range sum query: yields the sum within the interval [l, r]
-    long long qry(int l, int r){ return qry(r) - qry(l - 1); }
+    int n;
+    vector<long long> bit;
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
+
+    void update(int i, long long val) {
+        for (; i <= n; i += i & -i) bit[i] += val;
+    }
+
+    long long query(int i) {
+        long long s = 0;
+        for (; i > 0; i -= i & -i) s += bit[i];
+        return s;
+    }
+
+    long long query(int l, int r) {
+        return query(r) - query(l - 1);
+    }
 };
 
-// Euler Tour technique variant to flatten subtrees into contiguous array segments
-struct Euler {
-    int t = 0; vector<int> in, out;
-    Euler(int n): in(n + 1), out(n + 1) {}
-    // Discovers tree layout; the entire subtree of u lives exactly inside [in[u], out[u]]
-    void dfs(int u, int p, vector<vector<int>> &g){
-        in[u] = ++t;
-        for(int v : g[u]) if(v != p) dfs(v, u, g);
-        out[u] = t; // The time tracking ends when all child subtrees are completely visited
+// Euler Tour Technique (Variant A) to map subtree of u to contiguous range [tin[u], tout[u]]
+struct EulerTour {
+    int n;
+    int timer;
+    vector<int> tin, tout;
+
+    EulerTour(int n) {
+        this->n = n;
+        timer = 0;
+        tin.assign(n + 1, 0);
+        tout.assign(n + 1, 0);
+    }
+
+    void dfs_subtree(int u, int p, const vector<vector<int>>& adj) {
+        tin[u] = ++timer;
+        for (int v : adj[u]) {
+            if (v != p) {
+                dfs_subtree(v, u, adj);
+            }
+        }
+        tout[u] = timer;
     }
 };
 
 int main() {
-    ios::sync_with_stdio(0); cin.tie(0);
-    int n, q; cin >> n >> q;
-    vector<long long> val(n + 1);
-    for(int i = 1; i <= n; i++) cin >> val[i];
-    vector<vector<int>> g(n + 1);
-    for(int i = 1, u, v; i < n; i++){
-        cin >> u >> v; g[u].push_back(v); g[v].push_back(u);
+    // Fast I/O
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n, q;
+    if (!(cin >> n >> q)) return 0;
+
+    vector<int> values(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> values[i];
     }
-    Euler et(n); et.dfs(1, 0, g);
+
+    vector<vector<int>> adj(n + 1);
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // Build subtree Euler Tour (Variant A)
+    EulerTour et(n);
+    et.dfs_subtree(1, 0, adj);
+
+    // Initialize Fenwick tree (sizes correspond to flattened index)
     Fenwick ft(n);
-    // Populate the Fenwick tree using each node's flattened 'in' time index
-    for(int i = 1; i <= n; i++) ft.upd(et.in[i], val[i]);
-    while(q--){
-        int t, s; cin >> t >> s;
-        if(t == 1){ // Type 1: Point update to change node s's value to x
-            long long x; cin >> x;
-            ft.upd(et.in[s], x - val[s]); // Apply the net difference at the node's position
-            val[s] = x;
-        } else { // Type 2: Query the sum of values within the entire subtree of s
-            // Subtree query converts to a clean range sum query on the interval [in[s], out[s]]
-            cout << ft.qry(et.in[s], et.out[s]) << '\n';
+    for (int i = 1; i <= n; i++) {
+        ft.update(et.tin[i], values[i]);
+    }
+
+    while (q--) {
+        int type;
+        cin >> type;
+        if (type == 1) { // Update value of node s to x
+            int s;
+            long long x;
+            cin >> s >> x;
+            long long delta = x - values[s];
+            ft.update(et.tin[s], delta);
+            values[s] = x;
+        } else { // Query subtree sum of node s
+            int s;
+            cin >> s;
+            cout << ft.query(et.tin[s], et.tout[s]) << "\n";
         }
     }
+
+    return 0;
 }

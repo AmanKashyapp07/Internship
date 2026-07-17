@@ -106,7 +106,7 @@ int main() {
     }
 
     // Reachability bitsets on DAG
-    vector<bitset<50000>> reach(C); // 50000 is the maximum number of SCCs, adjust if needed
+    vector<bitset<50000>> reach(C);
 
     for (int i = C - 1; i >= 0; i--) {
         int u = topo[i];

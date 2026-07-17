@@ -15,13 +15,15 @@ struct Centroid {
 
     int dfs(int u, int p) {
         sz[u] = 1;
-        for (int v : g[u]) if (v != p) sz[u] += dfs(v, u);
+        for (int v : g[u])
+            if (v != p)
+                sz[u] += dfs(v, u);
         return sz[u];
     }
 
     int centroid(int u, int p, int tot) {
         for (int v : g[u])
-            if (v != p && sz[v] > tot / 2) // if sz[v] > tot / 2, then v is a child of u and has more than half of the total nodes, so u cannot be the centroid
+            if (v != p && sz[v] > tot / 2)
                 return centroid(v, u, tot);
         return u;
     }

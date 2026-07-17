@@ -16,24 +16,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
-
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
-
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
 
 int n, m;
 vector<vector<int>> adj;
@@ -42,8 +25,7 @@ vector<int> tin, low;
 vector<bool> isArticulation;
 
 int timer = 0;
-// we have to return Articulation points in a graph, which are vertices that, when removed, increase the number of connected components in the graph. We can find them using a DFS-based algorithm that tracks discovery times and low values of vertices.
-// just standard implementation, nothing fancy, but we have to be careful about the root of the DFS tree, because it is an articulation point if and only if it has more than one child in the DFS tree. For other vertices, they are articulation points if they have a child v such that low[v] >= tin[u], which means that there is no back edge from v or its descendants to u or its ancestors.
+
 void dfs(int u, int parent) {
     tin[u] = low[u] = ++timer;
 

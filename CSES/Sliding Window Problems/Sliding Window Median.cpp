@@ -1,74 +1,70 @@
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
 
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
+struct CoordinateCompressor {
+    vector<int> vals;
 
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-
-multiset<int> lo, hi;
-
-void balance() {
-    // If lo has more than 1 extra element compared to hi, move the max of lo to hi
-    while (lo.size() > hi.size() + 1) {
-        hi.insert(*lo.rbegin());
-        lo.erase(prev(lo.end()));
+    void add(int x) {
+        vals.push_back(x);
     }
 
-    // If hi has more elements than lo, move the min of hi to lo
-    while (lo.size() < hi.size()) {
-        lo.insert(*hi.begin());
-        hi.erase(hi.begin());
+    void build() {
+        sort(vals.begin(), vals.end());
+        vals.erase(unique(vals.begin(), vals.end()), vals.end());
     }
-}
 
-void add(int x) {
-    if (lo.empty() || x <= *lo.rbegin()) 
-        lo.insert(x);
-    else 
-        hi.insert(x);
+    int get(int x) {
+        return lower_bound(vals.begin(), vals.end(), x) - vals.begin();
+    }
 
-    balance(); // Maintains relative size dynamically
-}
+    int size() {
+        return vals.size();
+    }
+};
 
-void remove(int x) {
-    auto it = lo.find(x);
+struct Fenwick {
+    int n;
+    vector<int> bit;
 
-    if (it != lo.end())
-        lo.erase(it);
-    else 
-        hi.erase(hi.find(x)); // We are guaranteed x is in the window, so it must be in hi
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
 
-    balance(); // Rebalances after the total size temporarily drops
+    void update(int i, int val) {
+        i++;
+        while (i <= n) {
+            bit[i] += val;
+            i += i & -i;
+        }
+    }
+
+    int query(int i) {
+        i++;
+        int sum = 0;
+        while (i > 0) {
+            sum += bit[i];
+            i -= i & -i;
+        }
+        return sum;
+    }
+
+    int query(int l, int r) {
+        if (l > r) return 0;
+        return query(r) - (l ? query(l - 1) : 0);
+    }
+};
+
+int kth(Fenwick &bit, int k) {
+    int l = 0, r = bit.n - 1;
+
+    while (l < r) {
+        int mid = (l + r) / 2;
+
+        if (bit.query(mid) >= k)
+            r = mid;
+        else
+            l = mid + 1;
+    }
+
+    return l;
 }
 
 int main() {
@@ -76,25 +72,40 @@ int main() {
     cin.tie(nullptr);
 
     int n, k;
-    if (!(cin >> n >> k)) return 0;
+    cin >> n >> k;
 
     vector<int> a(n);
-    for (int &x : a)
-        cin >> x;
+    CoordinateCompressor cc;
 
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        cc.add(a[i]);
+    }
+
+    cc.build();
+
+    Fenwick bit(cc.size());
+
+    vector<int> id(n);
+    for (int i = 0; i < n; i++)
+        id[i] = cc.get(a[i]);
+
+    // First window
     for (int i = 0; i < k; i++)
-        add(a[i]);
+        bit.update(id[i], 1);
 
-    // Use .rbegin() which is slightly cleaner than prev(lo.end()) for grabbing the max value
-    cout << *lo.rbegin(); 
+    int need = (k + 1) / 2;
+
+    cout << cc.vals[kth(bit, need)];
 
     for (int i = k; i < n; i++) {
-        remove(a[i - k]);
-        add(a[i]);
+        bit.update(id[i - k], -1);
+        bit.update(id[i], 1);
 
-        cout << ' ' << *lo.rbegin(); 
+        cout << " " << cc.vals[kth(bit, need)];
     }
 
     cout << '\n';
+
     return 0;
 }

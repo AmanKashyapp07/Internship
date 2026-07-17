@@ -160,25 +160,25 @@ struct EulerTour {
 
     // 1. Subtree flattening (Size N) -> Range [tin[u], tout[u]]
     // Now constructs flat_val directly at 0-indexed positions matching your SegTree
-    void dfs_subtree(int u, int p, const vector<vector<int>>& adj, vector<int>& flat_val, const vector<int>& val) {
+    void dfs_subtree(int u, int p, const vector<vector<int>>& g, vector<int>& flat_val, const vector<int>& val) {
         tin[u] = ++timer; 
         flat_val[timer - 1] = val[u]; // Maps directly to 0-indexed SegTree array slots
-        for (int v : adj[u]) if (v != p) dfs_subtree(v, u, adj, flat_val, val);
+        for (int v : g[u]) if (v != p) dfs_subtree(v, u, g, flat_val, val);
         tout[u] = timer;
     }
 
     // 2. Path flattening (Size 2N) -> Prefix sum to tin[u] = Path(root -> u)
-    void dfs_path(int u, int p, const vector<vector<int>>& adj, vector<int>& flat_val, const vector<int>& val) {
+    void dfs_path(int u, int p, const vector<vector<int>>& g, vector<int>& flat_val, const vector<int>& val) {
         tin[u] = ++timer; flat_val[timer] = val[u];
-        for (int v : adj[u]) if (v != p) dfs_path(v, u, adj, flat_val, val);
+        for (int v : g[u]) if (v != p) dfs_path(v, u, g, flat_val, val);
         tout[u] = ++timer; flat_val[timer] = -val[u];
     }
 
     // 3. LCA flattening (Size 2N-1) -> RMQ on depth array over [first_occ[u], first_occ[v]]
-    void dfs_lca(int u, int p, int d, const vector<vector<int>>& adj) {
+    void dfs_lca(int u, int p, int d, const vector<vector<int>>& g) {
         first_occ[u] = euler_lca.size(); euler_lca.push_back(u); depth[u] = d;
-        for (int v : adj[u]) {
-            if (v != p) { dfs_lca(v, u, d + 1, adj); euler_lca.push_back(u); }
+        for (int v : g[u]) {
+            if (v != p) { dfs_lca(v, u, d + 1, g); euler_lca.push_back(u); }
         }
     }
 };
@@ -551,11 +551,11 @@ struct SubtreeMaxEngine {
     EulerTour et;
     SegTree seg;
 
-    SubtreeMaxEngine(int n, vector<int>& val, const vector<vector<int>>& adj)
+    SubtreeMaxEngine(int n, vector<int>& val, const vector<vector<int>>& g)
         : et(n) {
 
         vector<int> flat(n);
-        et.dfs_subtree(1, 0, adj, flat, val);
+        et.dfs_subtree(1, 0, g, flat, val);
         seg = SegTree(flat);
     }
 
@@ -570,19 +570,19 @@ struct SubtreeMaxEngine {
 
 struct Centroid{
     int n;
-    vector<vector<int>> adj;
+    vector<vector<int>> g;
     vector<int> subsize;
 
-    Centroid(int n, const vector<vector<int>>& adj) : n(n), adj(adj), subsize(n + 1, 0) {}
+    Centroid(int n, const vector<vector<int>>& g) : n(n), g(g), subsize(n + 1, 0) {}
 
     void addEdge(int u, int v) {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
+        g[u].push_back(v);
+        g[v].push_back(u);
     }
 
     int dfs(int u, int p) {
         subsize[u] = 1;
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v != p) {
                 subsize[u] += dfs(v, u);
             }
@@ -591,7 +591,7 @@ struct Centroid{
     }
 
     int centroid(int u, int p, int total) {
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v != p && subsize[v] > total / 2) {
                 return centroid(v, u, total);
             }
@@ -788,7 +788,7 @@ long long kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     return mst_weight;
 }
 
-long long prim(int n, vector<vector<pair<int, long long>>>& adj) {
+long long prim(int n, vector<vector<pair<int, long long>>>& g) {
     vector<bool> in_mst(n + 1, false);
     priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq;
     pq.push({0, 1});
@@ -800,7 +800,7 @@ long long prim(int n, vector<vector<pair<int, long long>>>& adj) {
         in_mst[u] = true;
         mst_weight += w;
 
-        for (auto& [v, weight] : adj[u]) {
+        for (auto& [v, weight] : g[u]) {
             if (!in_mst[v]) {
                 pq.push({weight, v});
             }
@@ -813,10 +813,10 @@ long long prim(int n, vector<vector<pair<int, long long>>>& adj) {
 Topological Sort (Kahn's and DFS)
 Returns topological order of nodes. Returns empty vector if cycle exists.
 */
-vector<int> kahn(int n, vector<vector<int>>& adj, int start_node = 1) {
-    vector<int> in_deg(adj.size(), 0);
+vector<int> kahn(int n, vector<vector<int>>& g, int start_node = 1) {
+    vector<int> in_deg(g.size(), 0);
     for (int u = start_node; u < start_node + n; u++) {
-        for (int v : adj[u]) in_deg[v]++;
+        for (int v : g[u]) in_deg[v]++;
     }
     queue<int> q;
     for (int i = start_node; i < start_node + n; i++) {
@@ -826,7 +826,7 @@ vector<int> kahn(int n, vector<vector<int>>& adj, int start_node = 1) {
     while (!q.empty()) {
         int u = q.front(); q.pop();
         order.push_back(u);
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (--in_deg[v] == 0) q.push(v);
         }
     }
@@ -838,10 +838,10 @@ DAG Solver (Shortest/Longest Paths, Path Counts)
 Returns {dist, path_counts} in O(V + E) using Kahn's topological sort.
 */
 struct DAGEdge { int to; long long w; };
-pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdge>>& adj, int src, int start_node = 1, bool max_path = false) {
-    vector<int> in_deg(adj.size(), 0);
+pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdge>>& g, int src, int start_node = 1, bool max_path = false) {
+    vector<int> in_deg(g.size(), 0);
     for (int u = start_node; u < start_node + n; u++) {
-        for (auto& e : adj[u]) in_deg[e.to]++;
+        for (auto& e : g[u]) in_deg[e.to]++;
     }
     queue<int> q;
     for (int i = start_node; i < start_node + n; i++) {
@@ -851,17 +851,17 @@ pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdg
     while (!q.empty()) {
         int u = q.front(); q.pop();
         order.push_back(u);
-        for (auto& e : adj[u]) {
+        for (auto& e : g[u]) {
             if (--in_deg[e.to] == 0) q.push(e.to);
         }
     }
     const long long INF_VAL = 1e18;
-    vector<long long> dist(adj.size(), max_path ? -INF_VAL : INF_VAL);
-    vector<long long> paths(adj.size(), 0);
+    vector<long long> dist(g.size(), max_path ? -INF_VAL : INF_VAL);
+    vector<long long> paths(g.size(), 0);
     dist[src] = 0; paths[src] = 1;
     for (int u : order) {
         if (dist[u] == (max_path ? -INF_VAL : INF_VAL)) continue;
-        for (auto& e : adj[u]) {
+        for (auto& e : g[u]) {
             if (max_path) {
                 dist[e.to] = max(dist[e.to], dist[u] + e.w);
             } else {
@@ -875,19 +875,19 @@ pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdg
 
 class TreeDistances {
     int n;
-    const vector<vector<int>>& adj;
+    const vector<vector<int>>& g;
     vector<int> subtree_sz;
     vector<long long> total_dist;
 
 public:
     TreeDistances(int nodes, const vector<vector<int>>& graph)
-        : n(nodes), adj(graph),
+        : n(nodes), g(graph),
           subtree_sz(nodes + 1, 0),
           total_dist(nodes + 1, 0) {}
 
     void dfs_size(int u, int p) {
         subtree_sz[u] = 1;
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v == p) continue;
             dfs_size(v, u);
             subtree_sz[u] += subtree_sz[v];
@@ -896,14 +896,14 @@ public:
 
     void dfs_root(int u, int p, int depth) {
         total_dist[1] += depth;
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v == p) continue;
             dfs_root(v, u, depth + 1);
         }
     }
 
     void reroot(int u, int p) {
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v == p) continue;
             total_dist[v] = total_dist[u] - subtree_sz[v] + (n - subtree_sz[v]);
             reroot(v, u);
@@ -919,11 +919,11 @@ public:
 };
 
 class TreeDiameter {
-    int n; const vector<vector<int>>& adj;
+    int n; const vector<vector<int>>& g;
     vector<int> d1, d2;
 
     void dfs(int u, int p, vector<int>& d) {
-        for (int v : adj[u]) if (v != p)
+        for (int v : g[u]) if (v != p)
             d[v] = d[u] + 1, dfs(v, u, d);
     }
 
@@ -933,7 +933,7 @@ class TreeDiameter {
 
 public:
     TreeDiameter(int n, const vector<vector<int>>& g)
-        : n(n), adj(g), d1(n + 1), d2(n + 1) {}
+        : n(n), g(g), d1(n + 1), d2(n + 1) {}
 
     int diameter() {
         fill(d1.begin(), d1.end(), 0);
@@ -968,54 +968,54 @@ public:
 /*
 Usage:
   Bridge B;
-  auto ans = B.get(adj); // Returns vector<pair<int,int>> of bridges
+  auto ans = B.get(g); // Returns vector<pair<int,int>> of bridges
 */
 struct Bridge {
     int t; vector<int> tin, low; vector<pair<int,int>> res;
-    void dfs(int u, int p, vector<vector<int>>& adj) {
+    void dfs(int u, int p, vector<vector<int>>& g) {
         tin[u] = low[u] = ++t;
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v == p) continue;
             if (tin[v]) low[u] = min(low[u], tin[v]);
             else {
-                dfs(v, u, adj);
+                dfs(v, u, g);
                 low[u] = min(low[u], low[v]);
                 if (low[v] > tin[u]) res.push_back({u, v});
             }
         }
     }
-    vector<pair<int,int>> get(vector<vector<int>>& adj) {
-        int n = adj.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
-        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, adj);
+    vector<pair<int,int>> get(vector<vector<int>>& g) {
+        int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
+        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
         return res;
     }
 };
 
 struct Articulation {
     int t; vector<int> tin, low; vector<int> res;
-    void dfs(int u, int p, vector<vector<int>>& adj) {
+    void dfs(int u, int p, vector<vector<int>>& g) {
         tin[u] = low[u] = ++t; int children = 0;
-        for (int v : adj[u]) {
+        for (int v : g[u]) {
             if (v == p) continue;
             if (tin[v]) low[u] = min(low[u], tin[v]);
             else {
-                dfs(v, u, adj); low[u] = min(low[u], low[v]);
+                dfs(v, u, g); low[u] = min(low[u], low[v]);
                 if (low[v] >= tin[u] && p != -1) res.push_back(u);
                 children++;
             }
         }
         if (p == -1 && children > 1) res.push_back(u);
     }
-    vector<int> get(vector<vector<int>>& adj) {
-        int n = adj.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
-        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, adj);
+    vector<int> get(vector<vector<int>>& g) {
+        int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
+        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
         return res;
     }
 };
 
 /*
 Usage:
-  BinaryLifting bl(n, root, adj);
+  BinaryLifting bl(n, root, g);
   int noddelca = bl.lca(u, v);
   int ancestor = bl.lift(u, k);
   int dist = bl.depth[u] + bl.depth[v] - 2 * bl.depth[noddelca];
@@ -1025,18 +1025,18 @@ struct BinaryLifting {
     vector<vector<int>> up;
     vector<int> depth;
 
-    BinaryLifting(int n, int root, vector<vector<int>>& adj) {
+    BinaryLifting(int n, int root, vector<vector<int>>& g) {
         LOG = 32 - __builtin_clz(n);
         up.assign(n + 1, vector<int>(LOG, -1));
         depth.assign(n + 1, 0);
-        dfs(root, -1, 0, adj);
+        dfs(root, -1, 0, g);
     }
 
-    void dfs(int u, int p, int d, vector<vector<int>>& adj) {
+    void dfs(int u, int p, int d, vector<vector<int>>& g) {
         depth[u] = d; up[u][0] = p;
         for (int j = 1; j < LOG; j++) 
             if (up[u][j - 1] != -1) up[u][j] = up[up[u][j - 1]][j - 1];
-        for (int v : adj[u]) if (v != p) dfs(v, u, d + 1, adj);
+        for (int v : g[u]) if (v != p) dfs(v, u, d + 1, g);
     }
 
     int lift(int u, int k) {
@@ -1069,15 +1069,15 @@ struct BinaryLifting {
         if (k <= d2) return lift(b, d2 - k);
         return -1;
     }
-    void dfsCount(int u, int p, vector<int>& cnt, vector<vector<int>>& adj) {
-        for (int v : adj[u]) {
+    void dfsCount(int u, int p, vector<int>& cnt, vector<vector<int>>& g) {
+        for (int v : g[u]) {
             if (v == p) continue;
-            dfsCount(v, u, cnt, adj);
+            dfsCount(v, u, cnt, g);
             cnt[u] += cnt[v];
         }
     }
 
-    vector<int> countingPaths(int n, vector<pair<int,int>>& paths, vector<vector<int>>& adj) {
+    vector<int> countingPaths(int n, vector<pair<int,int>>& paths, vector<vector<int>>& g) {
         vector<int> cnt(n + 1, 0);
 
         for (auto &[a, b] : paths) {
@@ -1089,7 +1089,7 @@ struct BinaryLifting {
                 cnt[up[l][0]]--;
         }
 
-        dfsCount(1, -1, cnt, adj);
+        dfsCount(1, -1, cnt, g);
 
         return cnt;
     }
@@ -1196,19 +1196,19 @@ Usage:
   auto dag = graph.get_dag();
 */
 struct SCC {
-    int n; vector<vector<int>> adj, radj, sccs, dag; stack<int> order; vector<int> comp; vector<bool> vis;
-    SCC(int n) : n(n), adj(n + 1), radj(n + 1), comp(n + 1, -1), vis(n + 1) {}
+    int n; vector<vector<int>> g, rg, sccs, dag; stack<int> order; vector<int> comp; vector<bool> vis;
+    SCC(int n) : n(n), g(n + 1), rg(n + 1), comp(n + 1, -1), vis(n + 1) {}
 
-    void add(int u, int v) { adj[u].push_back(v); radj[v].push_back(u); }
+    void add(int u, int v) { g[u].push_back(v); rg[v].push_back(u); }
 
     void dfs1(int u) {
         vis[u] = 1;
-        for (int v : adj[u]) if (!vis[v]) dfs1(v);
+        for (int v : g[u]) if (!vis[v]) dfs1(v);
         order.push(u);
     }
     void dfs2(int u, int c) {
         comp[u] = c; sccs[c].push_back(u);
-        for (int v : radj[u]) if (comp[v] == -1) dfs2(v, c);
+        for (int v : rg[u]) if (comp[v] == -1) dfs2(v, c);
     }
     vector<vector<int>> build() {
         for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
@@ -1223,7 +1223,7 @@ struct SCC {
     }
     vector<vector<int>> get_dag() {
         dag.resize(sccs.size());
-        for (int u = 1; u <= n; u++) for (int v : adj[u])
+        for (int u = 1; u <= n; u++) for (int v : g[u])
             if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
         for (auto& neighbors : dag) {
             sort(neighbors.begin(), neighbors.end());
@@ -1251,164 +1251,346 @@ public:
 // for this question we can use the DirectedGraphToDAG class to convert the directed graph into a DAG of its strongly connected components (SCCs). Once we have the DAG, we can perform a reachability analysis on it.
 
 
+struct HierholzerUndirected {
+    int n, m = 0;
+    vector<vector<pair<int,int>>> g;
+    vector<bool> used;
+    vector<int> deg, path;
 
+    HierholzerUndirected(int n) : n(n), g(n + 1), deg(n + 1, 0) {}
 
+    // Add an undirected edge
+    void addEdge(int u, int v) {
+        g[u].push_back({v, m});
+        g[v].push_back({u, m});
+        used.push_back(false);
+        deg[u]++;
+        deg[v]++;
+        m++;
+    }
 
+    void dfs(int u) {
+        while (!g[u].empty()) {
+            auto [v, id] = g[u].back();
+            g[u].pop_back();
+
+            if (used[id]) continue;
+            used[id] = true;
+
+            dfs(v);
+        }
+        path.push_back(u);
+    }
+
+    vector<int> getEulerianCircuit(int start) {
+        // Every vertex must have even degree.
+        for (int i = 1; i <= n; i++)
+            if (deg[i] & 1)
+                return {};
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+    vector<int> getEulerianPath(int start, int end) {
+        if (start == end) return getEulerianCircuit(start);
+        // Exactly 2 vertices must have odd degree (start and end).
+        for (int i = 1; i <= n; i++) {
+            if (i == start || i == end) {
+                if (!(deg[i] & 1)) return {};
+            } else {
+                if (deg[i] & 1) return {};
+            }
+        }
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    } // eulerian path means that it visits every edge exactly once, but it does not necessarily start and end at the same vertex. An Eulerian circuit is a special case of an Eulerian path that starts and ends at the same vertex.
+};
+
+/*
+Returns:
+- Eulerian circuit if it exists.
+- Empty vector otherwise.
+
+Checks performed:
+1. Every vertex has even degree.
+2. All edges are reachable from the start vertex
+   (verified by path.size() == edges + 1).
+
+/*
+Hierholzer's Algorithm
+----------------------
+Used to find an Eulerian Path/Circuit in O(V + E).
+
+Definitions
+-----------
+Eulerian Path    : Visits every edge exactly once.
+Eulerian Circuit : Eulerian Path that starts and ends at the same vertex.
+
+Undirected Graph
+----------------
+Eulerian Circuit:
+- Every vertex has even degree.
+- All vertices having degree > 0 belong to one connected component.
+
+Eulerian Path:
+- Exactly 0 or 2 vertices have odd degree.
+- If 2 exist, they are the start and end.
+- All vertices having degree > 0 belong to one connected component.
+
+Directed Graph
+--------------
+Eulerian Circuit:
+- indegree(v) == outdegree(v) for every vertex.
+- All vertices with edges are connected.
+
+Eulerian Path:
+- One vertex: outdegree = indegree + 1 (start)
+- One vertex: indegree = outdegree + 1 (end)
+- All others: indegree = outdegree
+
+Why edge IDs?
+-------------
+In an undirected graph each edge appears twice in gacency lists.
+A unique edge ID ensures every edge is traversed exactly once.
+
+Algorithm
+---------
+dfs(u):
+    while(u has unused edge)
+        mark edge used
+        dfs(next)
+    path.push_back(u)
+
+Reverse the path at the end.
+
+Verification
+------------
+Let E be the number of edges.
+A valid Eulerian traversal must contain exactly E + 1 vertices.
+
+if(path.size() != E + 1)
+    => Graph is disconnected or some edges were not visited.
+
+Complexity
+----------
+Time  : O(V + E)
+Space : O(V + E)
+
+*/
+
+struct HierholzerDirected {
+    int n, m = 0;
+    vector<vector<int>> g;
+    vector<int> indeg, outdeg;
+    vector<int> path;
+
+    HierholzerDirected(int n)
+        : n(n), g(n + 1), indeg(n + 1, 0), outdeg(n + 1, 0) {}
+
+    void addEdge(int u, int v) {
+        g[u].push_back(v);
+        outdeg[u]++;
+        indeg[v]++;
+        m++;
+    }
+
+    void dfs(int u) {
+        while (!g[u].empty()) {
+            int v = g[u].back();
+            g[u].pop_back();
+            dfs(v);
+        }
+        path.push_back(u);
+    }
+
+    vector<int> getEulerianCircuit(int start) {
+        // Every vertex must satisfy indegree == outdegree.
+        for (int i = 1; i <= n; i++)
+            if (indeg[i] != outdeg[i])
+                return {};
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+
+    vector<int> getEulerianPath(int start, int end) {
+        if (start == end) return getEulerianCircuit(start);
+        // Validation: Start and End vertices should satisfy the indegree/outdegree conditions and rest of the vertices should have equal indegree and outdegree.
+        for (int i = 1; i <= n; i++) {
+            if (i == start) {
+                if (outdeg[i] != indeg[i] + 1)
+                    return {};
+            } else if (i == end) {
+                if (indeg[i] != outdeg[i] + 1)
+                    return {};
+            } else {
+                if (indeg[i] != outdeg[i])
+                    return {};
+            }
+        }
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+}; 
+
+/*
+Returns:
+- Eulerian circuit if it exists, starting from the given vertex and ending on the same vertex.
+- Empty vector otherwise.
+
+Checks performed:
+1. indegree(v) == outdegree(v) for every vertex.
+2. All edges are reachable from the start vertex
+   (verified by path.size() == edges + 1).
+
+To obtain an Eulerian Path instead of a Circuit:
+- Exactly one vertex should satisfy outdegree = indegree + 1 (start).
+- Exactly one vertex should satisfy indegree = outdegree + 1 (end).
+- Every other vertex must satisfy indegree == outdegree.
+*/
 
 
 /*
-Usage:
-  nodde* root = nullptr;
-  ImplicitTreap treap;
+================================================================================
+FUNCTIONAL GRAPH DECOMPOSITION
+================================================================================
+A Functional Graph is a directed graph where every vertex has an outdegree of exactly 1.
+Every connected component of such a graph contains exactly one directed cycle, with
+trees rooted on the cycle nodes and edges directed towards the cycle.
 
-  // 1. Insert element 'x' at 0-based index 'idx' (shifts elements to the right):
-  void insert(nodde* &root, int idx, char x) {
-      nodde* l, *r;
-      treap.split(root, idx, l, r);
-      nodde* new_node = new nodde(x);
-      root = treap.merge(treap.merge(l, new_node), r);
-  }
+Visual Example:
+      [Tree Leaf] -> [Tree Node] 
+                           \
+                            v
+   [Cycle Node 1] ----> [Cycle Node 2 (Root of Tree)]
+         ^                     |
+         |                     v
+   [Cycle Node 4] <---- [Cycle Node 3]
 
-  // 2. Delete element at 0-based index 'idx':
-  void erase(nodde* &root, int idx) {
-      nodde* l, *mid, *r;
-      treap.split(root, idx, l, r);
-      treap.split(r, 1, mid, r);
-      delete mid;
-      root = treap.merge(l, r);
-  }
+This decomposition structure computes:
+1. Identifying all cycle vertices.
+2. The length of the cycle for each cycle vertex (non-cycle vertices have cyc[u] = -1).
+3. The distance of each non-cycle vertex to the cycle (cycle vertices have dist[u] = 0).
 
-  // 3. Reverse substring in range [L, R] (0-based, inclusive):
-  void reverse_range(nodde* &root, int L, int R) {
-      nodde* l, *mid, *r;
-      treap.split(root, L, l, r);
-      treap.split(r, R - L + 1, mid, r);
-      if (mid) mid->rev ^= true;
-      root = treap.merge(treap.merge(l, mid), r);
-  }
-
-  // 4. Print/traverse elements in inorder traversal:
-  treap.inorder(root); cout << "\n";
-
---------------------------------------------------------------------------------
-IMPLICIT TREAP VARIATIONS (CSES & LEETCODE) & HOW TO MODIFY TEMPLATE:
---------------------------------------------------------------------------------
-1. Dynamic Substring Reversals & Range Queries
-   - Problems: CSES Substring Reversals, CSES Reversals and Sums
-   - Template Modification:
-     * To support lazy reversal propagation, the `rev` flag is used.
-     * Ensure `push()` swaps left and right children and propagates `rev` before accessing children.
-     * For range sum queries, add `long long sum` and `long long val` to `nodde`.
-     * Update `update()` to recalculate `sum`:
-       `t->sum = t->val + (t->l ? t->l->sum : 0) + (t->r ? t->r->sum : 0);`
-     * When querying range [L, R], split the treap into `l`, `mid`, `r`, read `mid->sum`, and merge them back.
-
-2. Cut and Paste (Subsegment Relocation)
-   - Problems: CSES Cut and Paste
-   - Template Modification:
-     * To cut range [L, R] and paste it at the end of the array:
-       - Split the tree into prefix `l` (size L) and suffix `r` (size N - L).
-       - Split `r` into subsegments `mid` (size R - L + 1) and new suffix `r` (remaining).
-       - Merge prefix and suffix: `nodde* temp = merge(l, r);`
-       - Append `mid` at the end: `root = merge(temp, mid);`
-
-3. Design Most Recently Used (MRU) Queue
-   - Problems: LeetCode 1756 (Design Most Recently Used Queue)
-   - Template Modification:
-     * Treap maintains elements of the queue.
-     * `fetch(k)` retrieves the k-th element (1-based index in the problem description, so k-1 is 0-based).
-     * Split at `k-1` into `l` and `r`, then split `r` at `1` to isolate the `k-th` node `mid`.
-     * Merge `l` and `r` to remove the element, then merge `mid` at the end to place it at the back:
-       `root = merge(merge(l, r), mid);`
-
-4. Dynamic Range Minimum / Maximum Query
-   - Problems: LeetCode 699 (Falling Squares), LeetCode 715 (Range Module)
-   - Template Modification:
-     * Add `int mn` or `int mx` to `nodde`.
-     * In `update()`: `t->mn = min({t->val, t->l ? t->l->mn : INF, t->r ? t->r->mn : INF});`
-     * If there are range assignments (like setting all elements in [L, R] to H), add a lazy propagation field `lazy_set` to `nodde`, and apply it in `push()`.
---------------------------------------------------------------------------------
+Time Complexity : O(N)
+Space Complexity: O(N)
+================================================================================
 */
-struct nodde {
-    char val;
-    int pri, sz; // pri means priority, sz means size of the subtree
-    bool rev;
-    nodde *l, *r;
+struct FunctionalGraphDecomposition {
+    int n;
+    vector<int> cyc;   // cyc[i] = length of the cycle node `i` belongs to (or -1 if not on a cycle)
+    vector<int> dist;  // dist[i] = distance of node `i` to its cycle root (0 if on a cycle)
+    vector<int> indeg; // indeg[i] = in-degree of node `i`
+    vector<vector<int>> rev; // rev[u] = stores reversed adjacency list (to walk away from cycle roots)
+    const int LOG = 20;
+    vector<vector<int>> up; // up[u][j] = 2^j-th ancestor of node `u` in the reversed graph
 
-    nodde(char c) {
-        val = c;
-        pri = rand();
-        sz = 1;
-        rev = false;
-        l = r = nullptr;
+    // `to[i]` represents the single outgoing edge from vertex `i` (0-indexed)
+    FunctionalGraphDecomposition(vector<int> &to) {
+        n = to.size();
+        cyc.assign(n, -1);
+        dist.assign(n, -1);
+        indeg.assign(n, 0);
+        rev.assign(n, {});
+        up.assign(n, vector<int>(LOG, -1));
+        for(int i = 0; i < n; i++) up[i][0] = to[i];
+
+        for(int k=1; k < LOG; k++){
+            for(int i = 0; i < n; i++){
+                up[i][k] = up[up[i][k-1]][k-1];}}
+
+        // Build reversed graph and calculate in-degrees
+        for (int i = 0; i < n; i++)
+            rev[to[i]].push_back(i), indeg[to[i]]++;
+
+        findCycles(to);
+        buildDist();
+        
+    }
+
+    int jump(int u, int k) {
+        for(int j = 0; j < LOG; j++){
+            if(k & (1 << j)) u = up[u][j];}
+        return u;
+    }
+    // Identifies cycles and computes cycle lengths
+    void findCycles(vector<int> &to) {
+        vector<int> alive(n, 1), vis(n);
+        queue<int> q;
+
+        // Leaf-peeling (Kahn's Topological Sort algorithm style):
+        // Repeatedly remove vertices with in-degree 0.
+        // The vertices that are left "alive" at the end are exactly the cycle vertices.
+        for (int i = 0; i < n; i++)
+            if (!indeg[i]) q.push(i);
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            alive[u] = 0; // Mark tree nodes as dead (not part of any cycle)
+            if (!--indeg[to[u]]) q.push(to[u]);
+        }
+
+        // For all alive (cycle) nodes, traverse and compute their cycle length
+        for (int i = 0; i < n; i++) {
+            if (!alive[i] || vis[i]) continue;
+
+            // 1. Calculate the cycle length
+            int u = i, len = 0;
+            do vis[u] = 1, len++, u = to[u];
+            while (u != i);
+
+            // 2. Set cycle length and initialize distance to 0 for all nodes in this cycle
+            u = i;
+            do {
+                cyc[u] = len;
+                dist[u] = 0;
+                u = to[u];
+            } while (u != i);
+        }
+    }
+
+    // DFS on the reversed graph to propagate the distance to cycle roots
+    void dfs(int u) {
+        for (int v : rev[u])
+            if (dist[v] == -1) {
+                dist[v] = dist[u] + 1;
+                dfs(v);
+            }
+    }
+
+    // Propagates distances from all cycle vertices outward to tree leaves
+    void buildDist() {
+        for (int i = 0; i < n; i++)
+            if (cyc[i] != -1) // If `i` is on a cycle, start DFS to find distances of its tree branches
+                dfs(i);
     }
 };
-
-struct ImplicitTreap {
-    int size(nodde* root) { return root ? root->sz : 0; }
-
-    void update(nodde* root) { if (root) root->sz = 1 + size(root->l) + size(root->r); }
-    
-    void push(nodde* root) {
-        if (!root || !root->rev) return; // if the node is null or not marked for reversal, do nothing
-        swap(root->l, root->r);
-        if (root->l) root->l->rev ^= 1;
-        if (root->r) root->r->rev ^= 1;
-        root->rev = false;
-    } // this pushes the reversal flag down to the children and swaps the left and right children of the current node because the subtree needs to be reversed
-
-    void split(nodde* root, int k, nodde* &l, nodde* &r) {
-        if (!root) return void(l = r = nullptr);
-        push(root);
-        if (size(root->l) < k) split(root->r, k - size(root->l) - 1, root->r, r), l = root;
-        else split(root->l, k, l, root->l), r = root;
-        update(root);
-    } // this splits the treap into two parts: the left part contains the first k elements, and the right part contains the rest. It uses the size of the left subtree to determine whether to go left or right in the recursion.
-
-    nodde* merge(nodde* l, nodde* r) {
-        push(l); push(r);
-        if (!l || !r) return l ? l : r;
-        if (l->pri > r->pri) return l->r = merge(l->r, r), update(l), l;
-        return r->l = merge(l, r->l), update(r), r;
-    } // this merges two treaps into one, maintaining the heap property based on priority. It recursively merges the right child of the left treap with the right treap or the left child of the right treap with the left treap, depending on which root has a higher priority.
-
-    void inorder(nodde* root) {
-        if (!root) return;
-        push(root); inorder(root->l); cout << root->val; inorder(root->r);
-    }
-
-    void insert(nodde* &root, int idx, char x) {
-        nodde *l, *r;
-        split(root, idx, l, r);
-        nodde* new_node = new nodde(x);
-        root = merge(merge(l, new_node), r);
-    }
-
-    void deletee(nodde* &root, int idx) {
-        nodde *l, *mid, *r;
-        split(root, idx, l, r);
-        split(r, 1, mid, r);
-        delete mid;
-        root = merge(l, r);
-    }
-
-    void reverse_range(nodde* &root, int L, int R) {
-        nodde *l, *mid, *r;
-        split(root, L, l, r);
-        split(r, R - L + 1, mid, r);
-        if (mid) mid->rev ^= true;
-        root = merge(merge(l, mid), r);
-    }
-
-    int sum_range(nodde* &root, int L, int R) {
-        nodde *l, *mid, *r;
-        split(root, L, l, r);
-        split(r, R - L + 1, mid, r);
-        int res = 0;
-        if (mid) res = mid->sz; // Assuming we want the count of nodes in the range
-        root = merge(merge(l, mid), r);
-        return res;
-    } // this function calculates the sum (or count) of nodes in the range [L, R] by splitting the treap into three parts: left, middle, and right. It then retrieves the size of the middle part and merges everything back together.
-};
-
-

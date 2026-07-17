@@ -1,3 +1,6 @@
+// CSES Problem: <problem name>
+// https://cses.fi/problemset/task/<id>
+
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -34,6 +37,8 @@ using vll = vector<ll>;
 const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 int main()
 {

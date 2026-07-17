@@ -1,40 +1,13 @@
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
 #include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
 #include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include <vector>
+#include <utility>
+#include <chrono>
+#include <random>
 
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
 
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
-
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-
+// Function to generate a random odd base to prevent hacking/collisions
 int get_random_base(int min_val, int max_val) {
     // Seed using high-resolution steady clock
     mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());

@@ -584,14 +584,11 @@ int merge(vector<int>& nums, int left, int mid, int right) {
         }
     }
 
-    while (i <= mid)
-        temp[k++] = nums[i++];
+    while (i <= mid) temp[k++] = nums[i++];
 
-    while (j <= right)
-        temp[k++] = nums[j++];
+    while (j <= right) temp[k++] = nums[j++];
 
-    for (int p = 0; p < k; p++)
-        nums[left + p] = temp[p];
+    for (int p = 0; p < k; p++) nums[left + p] = temp[p];
 
     return inversions;
 }
@@ -645,123 +642,39 @@ struct SOS {
 };
 
 /*
-========================================
-SOS DP (Sum Over Subsets DP)
-========================================
+SOS DP (O(B * 2^B), Mem: O(2^B))
 
-Preprocessing:
-    Time   : O(B * 2^B)
-    Memory : O(2^B)
+Use:
+- Masks <= 20~22 bits
+- Many subset/superset/intersection queries
 
-Use when:
-    - Masks have <= 20~22 bits.
-    - Need counts/info over ALL subsets or ALL supersets.
-    - Many queries on bitmasks.
-
-----------------------------------------
-Usage
-----------------------------------------
-
+Usage:
 SOS sos;
+for (int x : a) sos.add(x);
+sos.build();
 
-for (int x : a)
-    sos.add(x);      // Insert every mask
+countSubsets(x)    -> y ⊆ x      ((y | x) == x)
+countSupersets(x)  -> y ⊇ x      ((y & x) == x)
+countIntersect(x,n)-> (y & x) != 0
 
-sos.build();         // Call once after all insertions
+Common Patterns:
+(y | x) == x  -> subset
+(y & x) == x  -> superset
+(y & x) != 0  -> intersect
+(y & x) == 0  -> disjoint = countSubsets((N-1)^x)
+contains bits -> superset
+contained in  -> subset
 
-Queries:
+Recognize:
+- subset/superset of mask
+- contains all bits
+- disjoint/intersect
+- many bitmask queries
 
-sos.countSubsets(x);
-    # y such that (y | x) == x
-    => y is a subset of x.
-
-sos.countSupersets(x);
-    # y such that (y & x) == x
-    => y is a superset of x.
-
-sos.countIntersect(x, n);
-    # y such that (y & x) != 0
-    where n = total inserted masks.
-
-----------------------------------------
-Useful Bitmask Patterns
-----------------------------------------
-
-Need: y ⊆ x
-Condition:
-    (y | x) == x
-Use:
-    countSubsets(x)
-
-------------------------
-
-Need: x ⊆ y
-Condition:
-    (y & x) == x
-Use:
-    countSupersets(x)
-
-------------------------
-
-Need: (y & x) != 0
-Answer:
-    total - countSubsets(~x)
-
-Implemented as:
-    countIntersect(x, total)
-
-------------------------
-
-Need: (y & x) == 0
-Answer:
-    countSubsets((N - 1) ^ x)
-
-------------------------
-
-Need: mask contains all bits of x
-Condition:
-    (mask & x) == x
-Use:
-    countSupersets(x)
-
-------------------------
-
-Need: mask is contained inside x
-Condition:
-    (mask | x) == x
-Use:
-    countSubsets(x)
-
-----------------------------------------
-Recognizing SOS DP
-----------------------------------------
-
-Look for:
-
-    (a | b) == b    -> subset queries
-    (a & b) == b    -> superset queries
-    (a & b) != 0    -> intersect
-    (a & b) == 0    -> disjoint
-    "contains all bits"
-    "is subset/superset"
-    many bitmask queries
-
-----------------------------------------
-Common Problems
-----------------------------------------
-
-CSES:
-    - Bit Problem
-
-Codeforces:
-    - 165E Compatible Numbers
-    - 449D Jzzhu and Numbers
-    - 383E Vowels
-
-LeetCode:
-    - 982 Triples with Bitwise AND Equal To Zero
-    - 1125 Smallest Sufficient Team
-    - 1494 Parallel Courses II
+Problems:
+CSES: Bit Problem
+CF: 165E, 449D, 383E
+LC: 982, 1125, 1494
 */
 
 
@@ -804,4 +717,144 @@ struct XorBasis {
     long long countDistinctXors() {
         return 1LL << rank();
     }
+};
+
+/*
+=========================================================
+BITSET TEMPLATE & CP/OA TRICKS
+=========================================================
+std::bitset is a class template that represents a fixed-size sequence of N bits.
+It provides a space-optimized representation of booleans (1 bit per element)
+and optimizes bitwise operations by a factor of 32 or 64 (using word-level parallelism).
+
+Complexity Improvement: O(N) -> O(N / 64)
+
+1. Initialization & Basics:
+--------------------------------
+bitset<1000> b;           // Init all 0s
+bitset<1000> b(val);      // Init from unsigned long long
+bitset<1000> b("0101");   // Init from binary string (right-to-left mapping)
+
+b.set(i)                  // Sets i-th bit to 1 (0-indexed)
+b.reset(i)                // Sets i-th bit to 0
+b.flip(i)                 // Toggles i-th bit
+b.test(i)                 // Returns true if i-th bit is 1 (throws if out of bounds)
+b[i]                      // Returns reference to i-th bit (no bounds check)
+
+b.set()                   // Sets all bits to 1
+b.reset()                 // Sets all bits to 0
+b.flip()                  // Toggles all bits
+
+b.count()                 // Number of set bits (popcount)
+b.any()                   // Returns true if any bit is 1
+b.none()                  // Returns true if no bit is 1
+b.all()                   // Returns true if all bits are 1
+b.size()                  // Returns N
+
+b.to_ulong()              // Converts to unsigned long (throws if overflows)
+b.to_ullong()             // Converts to unsigned long long (throws if overflows)
+b.to_string()             // Converts to std::string
+
+2. GCC Specific Extensions (Game Changers for CP):
+--------------------------------
+Since CP contests (Codeforces, AtCoder, Codechef) and most OAs use GCC,
+you can use these non-standard but extremely fast helper functions:
+
+b._Find_first()           // Returns the index of the first set bit (LSB).
+                          // Returns b.size() if no bits are set.
+b._Find_next(idx)         // Returns the index of the next set bit after `idx`.
+                          // Returns b.size() if no more bits are set.
+
+*Usage: Iterating over all set bits of a bitset in O(count/64):
+for (size_t i = b._Find_first(); i < b.size(); i = b._Find_next(i)) {
+    // Process index `i`
+}
+
+3. CP/OA Tricks & Patterns:
+--------------------------------
+A. Subset Sum / Knapsack DP (Reachability):
+   If we want to find all reachable subset sums given array `A`:
+   Standard DP: O(N * Sum) -> DP with bitset: O(N * Sum / 64)
+   
+   bitset<MAX_SUM> dp;
+   dp[0] = 1;
+   for (int x : A) {
+       dp |= (dp << x); // or dp |= dp.operator<<((size_t)x) to avoid compiler issues
+   }
+   // Now dp[i] is 1 if sum `i` is reachable.
+
+B. Bitset for Graph Reachability / Transitive Closure:
+   Find all reachable nodes in a DAG (or any graph via Floyd-Warshall).
+   Optimized to O(N^3 / 64) or O(N * (N + M) / 64):
+   
+   vector<bitset<MAXN>> reach(N);
+   // Initialize reach[i][i] = 1 and reach[i][j] = 1 if edge i->j exists
+   // Process DAG in reverse topological order:
+   for (int u : reverse_topo_order) {
+       for (int v : adj[u]) {
+           reach[u] |= reach[v];
+       }
+   }
+
+C. Set Intersection / Common Elements:
+   Given two sets of numbers, find count of common elements:
+   (bitset1 & bitset2).count() // O(N / 64)
+
+D. Bitset for Grid/Matrix Path:
+   Checking if there's a path in a grid where we only move down and right.
+
+E. Sieve of Eratosthenes Space Optimization:
+   bitset<MAX_VAL> is_prime;
+   is_prime.set();
+   is_prime[0] = is_prime[1] = 0;
+   for (int p = 2; p * p < MAX_VAL; p++) {
+       if (is_prime[p]) {
+           for (int i = p * p; i < MAX_VAL; i += p) {
+               is_prime.reset(i);
+           }
+       }
+   }
+
+4. Crucial Gotchas & Warnings:
+--------------------------------
+- Compile-time Constant Size: The size N must be a compile-time constant.
+  If you need dynamic size, use `std::vector<bool>` (space-optimized but lacks bitwise shifts)
+  or `boost::dynamic_bitset` (not always available in OAs).
+- Pass by Reference: Always pass bitsets to functions by reference (e.g., `const bitset<N>& b`)
+  to avoid O(N/64) copy overhead.
+- Stack Overflow: Large bitsets (e.g., N >= 10^7) should NOT be declared inside functions
+  (on the stack) as it will cause a Stack Overflow. Declare them globally or dynamically:
+  `auto dp = make_unique<bitset<10000000>>();`
+- Implicit Conversion Warning: Shift operators `<<` and `>>` expect `size_t`. 
+  To avoid compiler or VS Code IntelliSense overload warnings, cast shift amounts:
+  `dp << (size_t)sz` or `dp << static_cast<size_t>(sz)`.
+=========================================================
+*/
+
+struct Bitset {
+    // 1. Subset Sum
+    template<size_t S>
+    static bitset<S> subset(const vector<int>& a) {
+        bitset<S> dp;
+        dp[0] = 1;
+        for (int x : a) dp |= (dp << x);
+        return dp;
+    }
+
+    // 2. Transitive Closure
+    template<size_t N>
+    static vector<bitset<N>> reach(int n, vector<vector<int>>& g) {
+        vector<bitset<N>> r(n);
+        for (int i = 0; i < n; i++) {
+            r[i][i] = 1;
+            for (int j : g[i]) r[i][j] = 1;
+        }
+
+        for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
+                if (r[i][k]) r[i] |= r[k];
+
+        return r;
+    }
+
 };

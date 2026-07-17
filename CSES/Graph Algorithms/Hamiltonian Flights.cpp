@@ -20,7 +20,7 @@ int solve(int mask, int u) {
         if (mask & (1 << v)) continue;
 
         // City n must be visited last
-        if (v == n - 1 && mask != (1 << n) - 1 - (1 << (n - 1))) // if node is n-1 and mask is not all nodes except n-1, then continue, because we want to visit n-1 last
+        if (v == n - 1 && mask != (1 << n) - 1 - (1 << (n - 1)))
             continue;
 
         ans += solve(mask | (1 << v), v);
