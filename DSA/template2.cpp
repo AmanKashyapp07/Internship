@@ -858,3 +858,99 @@ struct Bitset {
     }
 
 };
+
+struct MatrixExponentiation {
+    static vector<vector<long long>> multiply(const vector<vector<long long>>& A, const vector<vector<long long>>& B, long long MOD) {
+        int n = A.size();
+        int m = B[0].size();
+        int p = B.size();
+        vector<vector<long long>> C(n, vector<long long>(m, 0));
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int k = 0; k < p; k++) {
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+                }
+            }
+        }
+        return C;
+    } // multiplies two matrices A and B under modulo MOD, returns the resulting matrix C.
+    // Here, each matric is represented as a vector of vectors, where the outer vector represents rows and the inner vector represents columns. The function iterates through each cell of the resulting matrix C and computes its value by summing the products of corresponding elements from A and B, taking care to apply the modulo operation to prevent overflow.
+
+    static vector<vector<long long>> power(vector<vector<long long>> A, long long b, long long MOD) {
+        int n = A.size();
+        vector<vector<long long>> res(n, vector<long long>(n, 0));
+        for (int i = 0; i < n; i++) res[i][i] = 1; // Identity matrix
+        while (b) {
+            if (b & 1) res = multiply(res, A, MOD);
+            A = multiply(A, A, MOD);
+            b >>= 1;
+        }
+        return res;
+    } // computes the power of a square matrix A raised to the exponent b under modulo MOD using binary exponentiation. It initializes the result matrix res as the identity matrix and iteratively squares the matrix A while halving the exponent b. If the current bit of b is set (i.e., b is odd), it multiplies the result matrix res by A. This process continues until b becomes zero, and the final result is returned.
+};
+
+int computeNthFibo(int n, int MOD) {
+    // use matrix exponentiation to compute Fibonacci numbers efficiently
+    // recurrence relation is {F(n), F(n-1)} = {{1, 1}, {1, 0}}^(n-1) * {F(1), F(0)}
+    vector<vector<long long>> base = {{1, 1}, {1, 0}};
+    vector<vector<long long>> result = MatrixExponentiation::power(base, n, MOD);
+    return result[0][1]; // the nth Fibonacci number is located at position (0, 1) in the resulting matrix after exponentiation.
+} // computes the nth Fibonacci number modulo MOD using matrix exponentiation. It defines the base matrix for the Fibonacci recurrence relation and uses the power function to compute its nth power. The result is extracted from the appropriate position in the resulting matrix.
+
+const int MOD = 1e9 + 7;
+
+struct CountOfEulerianSubgraphs {
+    int n;
+    vector<vector<int>> adj;
+    vector<bool> vis;
+
+    CountOfEulerianSubgraphs(int n) : n(n), adj(n), vis(n, false) {}
+
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    void dfs(int u) {
+        vis[u] = true;
+        for (int v : adj[u]) {
+            if (!vis[v]) dfs(v);
+        }
+    }
+
+    int count(int m) {
+        int components = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (!vis[i]) {
+                dfs(i);
+                components++;
+            }
+        }
+
+        return power(2, m - n + components, MOD);
+    }
+}; /*
+Proof:
+Let xe = 1 if edge e is included, otherwise 0.
+For every vertex, the sum of incident xe must be even, giving one linear equation over GF(2).
+Thus Eulerian subgraphs are exactly the solutions of Ax = 0, where A is the incidence matrix.
+The number of solutions is 2^(m - rank(A)).
+For an undirected graph, rank(A) = n - c, where c is the number of connected components.
+Hence the answer is 2^(m - n + c).
+*/
+
+
+int computeArea(int x1, int y1, int x2, int y2,
+                int x3, int y3, int x4, int y4) {
+
+    int area1 = (x2 - x1) * (y2 - y1);
+    int area2 = (x4 - x3) * (y4 - y3);
+
+    int overlapWidth = max(0, min(x2, x4) - max(x1, x3));
+    int overlapHeight = max(0, min(y2, y4) - max(y1, y3));
+
+    int overlapArea = overlapWidth * overlapHeight;
+
+    return area1 + area2 - overlapArea;
+} // finds the total area covered by two rectangles defined by their bottom-left and top-right coordinates. It calculates the area of each rectangle, determines the overlapping region (if any), and subtracts the overlap from the sum of the individual areas to avoid double counting.

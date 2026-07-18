@@ -1246,9 +1246,6 @@ public:
 
 }; // this helps in many problem solving, especially when we need to analyze the structure of a directed graph and its strongly connected components. normally it will be tough, but after conversion to DAG, it becomes easier to analyze and solve problems related to reachability, cycles, and other properties of the graph.
 
-// A directed graph consists of n nodes and m edges. The edges are numbered 1,2,\dots,n.
-//Your task is to answer q queries of the form "can you reach node b from node a?"
-// for this question we can use the DirectedGraphToDAG class to convert the directed graph into a DAG of its strongly connected components (SCCs). Once we have the DAG, we can perform a reachability analysis on it.
 
 
 struct HierholzerUndirected {
@@ -1594,3 +1591,300 @@ struct FunctionalGraphDecomposition {
                 dfs(i);
     }
 };
+
+struct ChromaticNumber {
+    int n;
+    vector<int> adj;
+    vector<bool> independent;
+    vector<int> dp;
+
+    ChromaticNumber(int _n) : n(_n) {
+        adj.assign(n, 0);
+    }
+
+    void addEdge(int u, int v) {
+        adj[u] |= (1 << v);
+        adj[v] |= (1 << u);
+    }
+
+    int solve() {
+        int N = 1 << n;
+
+        independent.assign(N, false);
+        independent[0] = true;
+
+        // Compute all independent sets
+        for (int mask = 1; mask < N; mask++) {
+            int v = __builtin_ctz(mask);
+            int rest = mask ^ (1 << v);
+            independent[mask] = independent[rest] && ((adj[v] & rest) == 0);
+        }
+
+        const int INF = 1e9;
+        dp.assign(N, INF);
+        dp[0] = 0;
+
+        // DP over submasks
+        for (int mask = 1; mask < N; mask++) {
+            for (int sub = mask; sub; sub = (sub - 1) & mask) {
+                if (independent[sub]) {
+                    dp[mask] = min(dp[mask], dp[mask ^ sub] + 1);
+                }
+            }
+        }
+
+        return dp[N - 1];
+    }
+
+    vector<int> assignColour() {
+        vector<int> colour(n, -1);
+
+        int mask = (1 << n) - 1;
+        int curColour = 1;
+
+        // Backtrack to find the actual color assignments
+        while (mask) {
+            for (int sub = mask; sub; sub = (sub - 1) & mask) {
+                if (independent[sub] && dp[mask] == dp[mask ^ sub] + 1) {
+
+                    for (int i = 0; i < n; i++) {
+                        if (sub & (1 << i))
+                            colour[i] = curColour;
+                    }
+
+                    mask ^= sub;
+                    curColour++;
+                    break;
+                }
+            }
+        }
+
+        return colour;
+    }
+};
+
+struct TreeIsomorphism {
+ 
+    int n;
+    const vector<vector<int>>& g;
+    vector<int> id;
+ 
+    map<vector<int>, int>& mp;
+    int& nxt;
+ 
+    TreeIsomorphism(int nodes, const vector<vector<int>>& graph,
+                    map<vector<int>, int>& mp,
+                    int& nxt)
+        : n(nodes), g(graph), id(nodes + 1), mp(mp), nxt(nxt) {}
+ 
+    int dfs(int u, int p) {
+        vector<int> child;
+ 
+        for (int v : g[u]) {
+            if (v == p) continue;
+            child.push_back(dfs(v, u));
+        }
+ 
+        sort(child.begin(), child.end());
+ 
+        if (!mp.count(child))
+            mp[child] = nxt++;
+ 
+        return id[u] = mp[child];
+    }
+ 
+    int getID(int root = 1) {
+        return dfs(root, 0);
+    }
+};
+
+vector<int> find_centers(int n, const vector<vector<int>>& g) {
+    if (n == 1) return {1};
+    vector<int> deg(n + 1), leaves;
+    
+    // 1. Gather initial leaves
+    for (int i = 1; i <= n; i++) {
+        if ((deg[i] = g[i].size()) == 1) leaves.push_back(i);
+    }
+
+    // 2. Peel leaves layer by layer until 1 or 2 nodes remain
+    while (n > 2) {
+        n -= leaves.size();
+        vector<int> next_leaves;
+        
+        for (int u : leaves) {
+            for (int v : g[u]) {
+                if (--deg[v] == 1) next_leaves.push_back(v); // if v becomes a leaf, add it to the next layer
+            }
+        }
+        leaves = next_leaves; // Move to the inner layer
+    }
+    
+    return leaves; // The last remaining leaves are the centers
+} // returns the center(s) of the tree. A tree can have either one center (if it has an odd number of nodes) or two centers (if it has an even number of nodes). The center(s) are the node(s) that minimize the maximum distance to any other node in the tree.
+
+
+struct CentroidDecomposition {
+    int n, k;
+    long long ans = 0;
+    vector<vector<int>> &adj;
+    vector<int> sz, cnt;
+    vector<bool> removed;
+    // cnt[i] means the number of nodes at depth `i` from the current centroid. This is used to count pairs of nodes whose distances sum to `k`.
+    CentroidDecomposition(int n, vector<vector<int>> &adj, int k)
+        : n(n), k(k), adj(adj), sz(n + 1), removed(n + 1), cnt(k + 1) {}
+
+    int getSize(int u, int p) {
+        sz[u] = 1;
+        for (int v : adj[u])
+            if (v != p && !removed[v]) sz[u] += getSize(v, u);
+        return sz[u];
+    }
+
+    int getCentroid(int u, int p, int total) {
+        for (int v : adj[u])
+            if (v != p && !removed[v] && sz[v] > total / 2)
+                return getCentroid(v, u, total);
+        return u;
+    }
+
+    void collectDepths(int u, int p, int d, vector<int> &depths) {
+        depths.push_back(d);
+        for (int v : adj[u])
+            if (v != p && !removed[v])
+                collectDepths(v, u, d + 1, depths);
+    } // This function collects the depths of all nodes in the subtree rooted at node `u`, excluding the parent node `p`. It recursively traverses the tree, incrementing the depth `d` for each child node. The collected depths are stored in the `depths` vector, which can later be used to count pairs of nodes whose distances sum to a specific value `k`.
+
+    void process(int c) {
+        cnt[0] = 1;
+        int mxDepth = 0;
+        for (int child : adj[c]) {
+            if (removed[child]) continue;
+            vector<int> depths;
+            collectDepths(child, c, 1, depths); // for each child of the centroid, collect the depths of its subtree, then count how many pairs can be formed with previously counted depths that sum to `k`. After processing all children, reset the counts for the next iteration.
+            for (int d : depths)
+                if (d <= k) ans += cnt[k - d];
+            for (int d : depths)
+                if (d <= k) cnt[d]++, mxDepth = max(mxDepth, d);
+        }
+        for (int i = 0; i <= mxDepth; i++) cnt[i] = 0;
+    } // this function processes the centroid `c` by counting pairs of nodes whose distances sum to `k`. It initializes the count of nodes at depth 0 (the centroid itself) and iterates through each child of the centroid. For each child, it collects the depths of its subtree and counts how many pairs can be formed with previously counted depths that sum to `k`. After processing all children, it resets the counts for the next iteration.
+
+    Fenwick bit(n);
+
+    void process2(int c) {
+
+        bit.update(0, 1);          // centroid at depth 0
+
+        vector<int> usedDepths;
+        usedDepths.push_back(0);
+
+        for (int child : adj[c]) {
+
+            if (removed[child]) continue;
+
+            vector<int> depths;
+            collectDepths(child, c, 1, depths);
+
+            // Query
+            for (int d : depths) {
+
+                int l = max(0, k1 - d); // why max(0, k1 - d)? because we want to find pairs of nodes whose distances sum to a value within the range [k1, k2]. For a node at depth `d`, the other node in the pair must be at a depth that satisfies the condition: `k1 <= d + other_depth <= k2`. Rearranging this gives us the range for `other_depth`: `k1 - d <= other_depth <= k2 - d`. Since depths cannot be negative, we take the maximum of 0 and `k1 - d` to ensure we only consider valid depths.
+                int r = min(n, k2 - d);
+
+                if (l <= r)
+                    ans += bit.query(l, r);
+            }
+
+            // Insert
+            for (int d : depths) {
+                bit.update(d, 1);
+                usedDepths.push_back(d);
+            }
+        }
+
+        // Clear BIT
+        for (int d : usedDepths)
+            bit.update(d, -1);
+    } // this function processes the centroid `c` by counting pairs of nodes whose distances fall within a specified range `[k1, k2]`. It uses a Fenwick Tree (Binary Indexed Tree) to efficiently query and update counts of nodes at various depths. The function initializes the count for the centroid at depth 0, collects depths for each child subtree, queries the BIT for valid pairs, and updates the BIT with new depths. Finally, it clears the BIT to reset counts for the next iteration.
+
+    void decompose(int entry) {
+        int centroid = getCentroid(entry, -1, getSize(entry, -1));
+        process(centroid);
+        removed[centroid] = 1;
+        for (int v : adj[centroid])
+            if (!removed[v]) decompose(v);
+    }
+
+    void build() { decompose(1); }
+};
+
+
+/*
+==================== Graph / Tree Formula Cheat Sheet ====================
+
+1. Tree
+- Edges = n - 1
+- Sum of degrees = 2(n - 1)
+- Leaves = 2 + Σ(deg(v) - 2), for deg(v) >= 2
+
+2. Connected Components
+- Minimum edges to connect graph = components - 1
+- Independent cycles (Cyclomatic Number) = m - n + components
+
+3. Eulerian Graph
+- Euler Circuit  <=> all degrees even
+- Euler Path     <=> exactly 0 or 2 odd-degree vertices
+- #Eulerian subgraphs = 2^(m - n + components)
+
+4. Bipartite Graph
+- Graph is bipartite <=> no odd cycle
+- Complete bipartite K(a,b) has a*b edges
+
+5. Complete Graph K_n
+- Edges = n(n - 1) / 2
+- Degree of every vertex = n - 1
+
+6. Handshaking Lemma
+- Σ degree = 2m
+- Number of odd-degree vertices is always even
+
+7. Incidence Matrix
+- rank = n - components
+
+8. Binary Tree
+- Max nodes at level i = 2^i
+- Max nodes of height h = 2^(h + 1) - 1
+- Full binary tree: leaves = internal nodes + 1
+
+9. Diameter of Tree
+- BFS/DFS from any node -> farthest u
+- BFS/DFS from u -> diameter
+
+10. LCA
+- Binary Lifting: preprocess O(n log n), query O(log n)
+
+11. MST
+- Every MST contains exactly n - 1 edges
+
+14. SCC
+- Condensation graph is always a DAG
+
+17. Maximum Edges
+- Undirected simple graph = n(n - 1) / 2
+- Directed simple graph   = n(n - 1)
+
+18. Complete Binary Tree
+- Height = floor(log2(n))
+
+19. Useful Tree DP Identity
+- Σ(subtree sizes) = n + Σ(depth)
+
+20. Centre of Tree
+- 1 or 2 nodes
+- nodes with minimum maximum distance to all other nodes
+
+21. Centroid of Tree
+- nodes which after removal leave all components with size <= n/2
+=======================================================================
+*/

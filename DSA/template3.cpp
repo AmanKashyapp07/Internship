@@ -806,3 +806,138 @@ string minWindowSubstring(string s, string t) {
     return minLen == INT_MAX ? "" : s.substr(start, minLen);
 }
 
+struct MatrixChainMultiplication{
+    int matrixChainOrder(const vector<int>& p) {
+        int n = p.size() - 1;
+        vector<vector<int>> dp(n, vector<int>(n, 0));
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                dp[i][j] = INT_MAX;
+                for (int k = i; k < j; k++) {
+                    int cost = dp[i][k] + dp[k + 1][j] + p[i] * p[k + 1] * p[j + 1];
+                    dp[i][j] = min(dp[i][j], cost);
+                }
+            }
+        }
+
+        return dp[0][n - 1];
+    }    
+};
+
+
+
+/*
+=========================================================
+3. STRING DP — Distinct Subsequences (LeetCode 115)
+=========================================================
+*/
+class DistinctSubsequences {
+public:
+    int numDistinct(string s, string t) {
+        int n = s.size(), m = t.size();
+        vector<unsigned long long> dp(m + 1, 0);
+        dp[0] = 1;
+        
+        for (int i = 1; i <= n; i++) {
+            for (int j = m; j >= 1; j--) {
+                if (s[i - 1] == t[j - 1]) {
+                    dp[j] += dp[j - 1];
+                }
+            }
+        }
+        return dp[m];
+    }
+}; // counts total subsequences of string s that equals string t, time complexity is O(n*m), space complexity is O(m)
+
+
+struct Element{
+    int key;
+    int height;
+    Element* left;
+    Element* right;
+    Element(int k) : key(k), height(1), left(nullptr), right(nullptr) {}
+};
+
+
+
+struct AVL{
+    int height(Element* node) {
+        return node ? node->height : 0;
+    }
+    int balance(Element* node) {
+        return node ? height(node->left) - height(node->right) : 0;
+    }
+    int update(Element* node) {
+        if (node) {
+            node->height = 1 + max(height(node->left), height(node->right));
+        }
+        return node ? node->height : 0;
+    }
+    Element* rightRotate(Element* y) {
+        Element* x = y->left;
+        Element* T2 = x->right;
+        x->right = y;
+        y->left = T2;
+        update(y);
+        update(x);
+        return x;
+    }
+    Element* leftRotate(Element* x) {
+        Element* y = x->right;
+        Element* T2 = y->left;
+        y->left = x;
+        x->right = T2;
+        update(x);
+        update(y);
+        return y;
+    }
+    Element* insert(Element* node, int key) {
+        if(!node) return new Element(key);
+        if(key < node->key) node->left = insert(node->left, key);
+        else if(key > node->key) node->right = insert(node->right, key);
+        else return node;
+        update(node);
+        int balanceFactor = balance(node);
+        if(balanceFactor > 1 && key < node->left->key) return rightRotate(node); // RR
+        if(balanceFactor < -1 && key > node->right->key) return leftRotate(node); // LL
+        if(balanceFactor > 1 && key > node->left->key) { // LR
+            node->left = leftRotate(node->left);
+            return rightRotate(node);     
+        }
+        if(balanceFactor < -1 && key < node->right->key) { // RL
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+        return node;
+    }  
+    Element* minValueNode(Element* node) {
+        Element* current = node;
+        while (current->left) current = current->left;
+        return current;
+    }
+    void inorder(Element *root) {
+        if (!root) return;
+        inorder(root->left);
+        cout << root->key << " ";
+        inorder(root->right);
+
+    }
+
+    void preorder(Element *root) {}
+        if (!root) return;
+        cout << root->key << " ";
+        preorder(root->left);
+        preorder(root->right);
+    }
+
+    void postorder(Element *root) {
+        if (!root) return;
+        postorder(root->left);
+        postorder(root->right);
+        cout << root->key << " ";
+    }
+          
+
+}
