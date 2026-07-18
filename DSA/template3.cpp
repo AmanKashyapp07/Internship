@@ -925,7 +925,7 @@ struct AVL{
 
     }
 
-    void preorder(Element *root) {}
+    void preorder(Element *root) {
         if (!root) return;
         cout << root->key << " ";
         preorder(root->left);
@@ -938,6 +938,147 @@ struct AVL{
         postorder(root->right);
         cout << root->key << " ";
     }
-          
+};
 
-}
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* middleNode(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        return slow;
+    }
+    void deleteNode(ListNode* node) {
+        if (node && node->next) { // If the node is not the last node
+            node->val = node->next->val;
+            ListNode* temp = node->next;
+            node->next = node->next->next;
+            delete temp;
+        }
+    }
+};
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int ans = 0;
+
+    tuple<bool, int, int, int> dfs(TreeNode* node) {
+        if (!node)
+            return {true, INT_MAX, INT_MIN, 0};
+
+        auto [leftBST, leftMin, leftMax, leftSum] = dfs(node->left);
+        auto [rightBST, rightMin, rightMax, rightSum] = dfs(node->right);
+
+        if (leftBST && rightBST &&
+            node->val > leftMax &&
+            node->val < rightMin) {
+
+            int sum = leftSum + rightSum + node->val;
+            ans = max(ans, sum);
+
+            return {
+                true,
+                min(node->val, leftMin),
+                max(node->val, rightMax),
+                sum
+            };
+        }
+
+        return {false, 0, 0, 0};
+    }
+
+    int maxSumBST(TreeNode* root) {
+        dfs(root);
+        return ans;
+    }
+};
+
+
+
+//Given a binary tree root and an integer target, delete all the leaf nodes with value target.
+
+// Note that once you delete a leaf node with value target, if its parent node becomes a leaf node and has the value target, it should also be deleted (you need to continue doing that until you cannot).
+
+class Solution {
+public:
+    TreeNode* removeLeafNodes(TreeNode* root, int target) {
+        if (!root) return nullptr;
+
+        root->left = removeLeafNodes(root->left, target);
+        root->right = removeLeafNodes(root->right, target);
+
+        if (!root->left && !root->right && root->val == target)
+            return nullptr;
+
+        return root;
+    }
+};
+
+class Solution {
+public:
+    int n;
+    vector<int> dp;
+    unordered_set<string> st;
+
+    int solve(int i, string &s) {
+        if (i == n)
+            return 0;
+
+        if (dp[i] != -1)
+            return dp[i];
+
+        // Take current character as extra
+        int ans = 1 + solve(i + 1, s);
+
+        string curr = "";
+
+        // Try every substring starting from i
+        for (int j = i; j < n; j++) {
+            curr += s[j];
+
+            if (st.count(curr)) {
+                ans = min(ans, solve(j + 1, s));
+            }
+        }
+
+        return dp[i] = ans;
+    }
+
+    int minExtraChar(string s, vector<string>& dictionary) {
+        n = s.size();
+
+        for (string &word : dictionary)
+            st.insert(word);
+
+        dp.assign(n, -1);
+
+        return solve(0, s);
+    }
+}; // You are given a 0-indexed string s and a dictionary of words dictionary. You have to break s into one or more non-overlapping substrings such that each substring is present in dictionary. There may be some extra characters in s which are not present in any of the substrings.
+
+// Return the minimum number of extra characters left over if you break up s optimally.
+

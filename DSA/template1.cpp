@@ -1020,35 +1020,106 @@ Usage:
   int ancestor = bl.lift(u, k);
   int dist = bl.depth[u] + bl.depth[v] - 2 * bl.depth[noddelca];
 */
+/*
+==================== BINARY LIFTING TEMPLATE ====================
+
+For every node u and every power j:
+
+up[u][j]
+    = 2^j-th ancestor of u
+
+info[u][j]
+    = aggregate information on the path
+      from u to up[u][j]
+
+Transition:
+
+up[u][j] = up[ up[u][j-1] ][j-1];
+int parent = up[u][j-1];
+info[u][j] = combine(
+                info[u][j-1],
+                info[ parent ][j-1]
+             );
+
+where combine can be:
+-------------------------------------------------------
+max     -> Maximum edge weight on path
+min     -> Minimum edge weight on path
++       -> Sum of edge weights
+^       -> XOR of edge weights
+gcd     -> GCD of edge weights
+&       -> Bitwise AND
+|       -> Bitwise OR
+custom  -> Any associative operation
+-------------------------------------------------------
+
+Query:
+Whenever lifting a node upward, accumulate answer using
+
+ans = combine(ans, info[u][j]);
+u = up[u][j];
+
+Time:
+Preprocessing : O(N log N)
+Query         : O(log N)
+
+========================================================
+*/
 struct BinaryLifting {
     int LOG;
-    vector<vector<int>> up;
+    vector<vector<int>> up, mx;
     vector<int> depth;
 
-    BinaryLifting(int n, int root, vector<vector<int>>& g) {
+    BinaryLifting(int n, int root, vector<vector<pair<int,int>>> &g) {
         LOG = 32 - __builtin_clz(n);
         up.assign(n + 1, vector<int>(LOG, -1));
+        mx.assign(n + 1, vector<int>(LOG, 0));
         depth.assign(n + 1, 0);
-        dfs(root, -1, 0, g);
+
+        dfs(root, -1, 0, 0, g);
+
+        for (int j = 1; j < LOG; j++) {
+            for (int i = 1; i <= n; i++) {
+                if (up[i][j - 1] != -1) {
+                    up[i][j] = up[up[i][j - 1]][j - 1];
+                    mx[i][j] = max(mx[i][j - 1], mx[up[i][j - 1]][j - 1]);
+                }
+            }
+        }
     }
 
-    void dfs(int u, int p, int d, vector<vector<int>>& g) {
-        depth[u] = d; up[u][0] = p;
-        for (int j = 1; j < LOG; j++) 
-            if (up[u][j - 1] != -1) up[u][j] = up[up[u][j - 1]][j - 1];
-        for (int v : g[u]) if (v != p) dfs(v, u, d + 1, g);
+    void dfs(int u, int p, int d, int w, vector<vector<pair<int,int>>> &g) {
+        depth[u] = d;
+        up[u][0] = p;
+        mx[u][0] = w;
+
+        for (auto [v, wt] : g[u]) {
+            if (v == p) continue;
+            dfs(v, u, d + 1, wt, g);
+        }
     }
 
     int lift(int u, int k) {
-        for (int j = 0; j < LOG && u != -1; j++) if ((k >> j) & 1) u = up[u][j];
+        for (int j = 0; j < LOG && u != -1; j++)
+            if ((k >> j) & 1)
+                u = up[u][j];
         return u;
     }
 
     int lca(int a, int b) {
         if (depth[a] < depth[b]) swap(a, b);
+
         a = lift(a, depth[a] - depth[b]);
+
         if (a == b) return a;
-        for (int j = LOG - 1; j >= 0; j--) if (up[a][j] != up[b][j]) a = up[a][j], b = up[b][j];
+
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (up[a][j] != up[b][j]) {
+                a = up[a][j];
+                b = up[b][j];
+            }
+        }
+
         return up[a][0];
     }
 
@@ -1056,20 +1127,59 @@ struct BinaryLifting {
         return depth[a] + depth[b] - 2 * depth[lca(a, b)];
     }
 
-    int isAncestor(int a, int b) {
+    bool isAncestor(int a, int b) {
         return lca(a, b) == a;
     }
 
     int kthNodeOnPath(int a, int b, int k) {
         int l = lca(a, b);
         int d1 = depth[a] - depth[l];
-        if (k <= d1) return lift(a, k);
+
+        if (k <= d1)
+            return lift(a, k);
+
         k -= d1;
+
         int d2 = depth[b] - depth[l];
-        if (k <= d2) return lift(b, d2 - k);
+
+        if (k <= d2)
+            return lift(b, d2 - k);
+
         return -1;
     }
-    void dfsCount(int u, int p, vector<int>& cnt, vector<vector<int>>& g) {
+
+    int maxEdge(int u, int v) {
+        int ans = 0;
+
+        if (depth[u] < depth[v]) swap(u, v);
+
+        int d = depth[u] - depth[v];
+
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (d & (1 << j)) {
+                ans = max(ans, mx[u][j]);
+                u = up[u][j];
+            }
+        }
+
+        if (u == v) return ans;
+
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (up[u][j] != up[v][j]) {
+                ans = max(ans, mx[u][j]);
+                ans = max(ans, mx[v][j]);
+                u = up[u][j];
+                v = up[v][j];
+            }
+        }
+
+        ans = max(ans, mx[u][0]);
+        ans = max(ans, mx[v][0]);
+
+        return ans;
+    }
+
+    void dfsCount(int u, int p, vector<int> &cnt, vector<vector<int>> &g) {
         for (int v : g[u]) {
             if (v == p) continue;
             dfsCount(v, u, cnt, g);
@@ -1077,7 +1187,7 @@ struct BinaryLifting {
         }
     }
 
-    vector<int> countingPaths(int n, vector<pair<int,int>>& paths, vector<vector<int>>& g) {
+    vector<int> countingPaths(int n, vector<pair<int,int>> &paths, vector<vector<int>> &g) {
         vector<int> cnt(n + 1, 0);
 
         for (auto &[a, b] : paths) {
@@ -1888,3 +1998,4 @@ struct CentroidDecomposition {
 - nodes which after removal leave all components with size <= n/2
 =======================================================================
 */
+
