@@ -15,7 +15,7 @@ The OSI model is a 7-layer theoretical standard; the TCP/IP model is a 4-layer p
 | **5** | Session | Data | NetBIOS, RPC, Sockets | Inter-host session management |
 | **4** | Transport | Segment | TCP, UDP | End-to-end reliability, flow/congestion |
 | **3** | Network | Packet | IP, ICMP, ARP / Routers | Logical address routing across networks |
-| **2** | Data Link | Frame | Ethernet, MAC, 802.11 / Switches | Adjacent-node frame delivery |
+| **2** | Data Link | Frame | Ethernet, MAC, 802.11 / Switches | graphacent-node frame delivery |
 | **1** | Physical | Bits | Cables, Fiber, RJ45 / Hubs, NICs | Physical transmission of raw bit streams |
 
 *Note: In the **TCP/IP model**, OSI Layers 5–7 are collapsed into the **Application Layer**, and OSI Layers 1–2 are collapsed into the **Network Access (Link) Layer**.*

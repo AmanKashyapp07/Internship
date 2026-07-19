@@ -6,7 +6,7 @@ class Solution {
     public:
     using ll = long long;
 
-    vector<vector<int>> adj;
+    vector<vector<int>> graph;
     vector<int> core;
     vector<int> freq;
     ll ans = 0;
@@ -31,7 +31,7 @@ class Solution {
         ans += freq[core[u]];
         freq[core[u]]++;
 
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (v != par)
                 dfs(v, u);
         }
@@ -41,12 +41,12 @@ class Solution {
     long long countPerfectSquarePairs(vector<vector<int>>& edges, vector<int>& nums) {
         int n = nums.size();
 
-        adj.assign(n, {});
+        graph.assign(n, {});
         core.resize(n);
 
         for (auto &e : edges) {
-            adj[e[0]].push_back(e[1]);
-            adj[e[1]].push_back(e[0]);
+            graph[e[0]].push_back(e[1]);
+            graph[e[1]].push_back(e[0]);
         }
 
         int mx = 0;

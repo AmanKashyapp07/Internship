@@ -20,8 +20,8 @@
 #include <vector>
 using namespace std;
 
-pair<int, int> bfs(int start, const vector<vector<int>>& adj) {
-    int n = adj.size();
+pair<int, int> bfs(int start, const vector<vector<int>>& graph) {
+    int n = graph.size();
 
     vector<int> dist(n, -1);
     queue<int> q;
@@ -35,7 +35,7 @@ pair<int, int> bfs(int start, const vector<vector<int>>& adj) {
         int u = q.front();
         q.pop();
 
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
                 q.push(v);
@@ -50,8 +50,8 @@ pair<int, int> bfs(int start, const vector<vector<int>>& adj) {
     return {farthest, dist[farthest]};
 }
 
-void calculateDistances(int start, const vector<vector<int>>& adj, vector<int>& dist) {
-    int n = adj.size();
+void calculateDistances(int start, const vector<vector<int>>& graph, vector<int>& dist) {
+    int n = graph.size();
     dist.assign(n, -1);
     queue<int> q;
 
@@ -62,7 +62,7 @@ void calculateDistances(int start, const vector<vector<int>>& adj, vector<int>& 
         int u = q.front();
         q.pop();
 
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
                 q.push(v);
@@ -77,7 +77,7 @@ int main() {
     int n;
     cin >> n;
 
-    vector<vector<int>> adj(n);
+    vector<vector<int>> graph(n);
 
     for (int i = 0; i < n - 1; i++) {
         int a, b;
@@ -85,17 +85,17 @@ int main() {
         --a;
         --b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
-    auto [u, _] = bfs(0, adj);
-    auto [v, diameter] = bfs(u, adj);
+    auto [u, _] = bfs(0, graph);
+    auto [v, diameter] = bfs(u, graph);
     vector<int> dist1(n, -1);
     vector<int> dist2(n, -1);
 
-    calculateDistances(u, adj, dist1);
-    calculateDistances(v, adj, dist2);
+    calculateDistances(u, graph, dist1);
+    calculateDistances(v, graph, dist2);
     for(int i=0; i<n; i++) {
         cout << max(dist1[i], dist2[i]) << ' ';
     }

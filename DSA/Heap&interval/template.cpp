@@ -244,7 +244,7 @@ int minCostToConnectSticks(const vector<int>& sticks) {
     return cost;
 }
 
-// arranging characters of string in such a way that no two adjacent characters are same
+// arranging characters of string in such a way that no two graphacent characters are same
 string reorganizeString(string s) {
     unordered_map<char, int> freq;
     for (char c : s) freq[c]++;

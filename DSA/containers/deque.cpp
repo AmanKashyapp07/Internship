@@ -132,7 +132,7 @@ void monotonicQueueDemo() {
 void zeroOneBFS() {
 
     int n = 5;
-    vector<vector<pair<int, int>>> adj(n); // {neighbor, weight 0 or 1}
+    vector<vector<pair<int, int>>> graph(n); // {neighbor, weight 0 or 1}
     vector<int> dist(n, 1e9);
     deque<int> dq;
 
@@ -143,7 +143,7 @@ void zeroOneBFS() {
         int u = dq.front();
         dq.pop_front();
 
-        for (auto [v, w] : adj[u]) {
+        for (auto [v, w] : graph[u]) {
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 if (w == 0) {

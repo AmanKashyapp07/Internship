@@ -5,7 +5,7 @@ using namespace std;
 
 const int LOG = 20;
 
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<vector<int>> up;
 
 void dfs(int u, int parent) {
@@ -18,7 +18,7 @@ void dfs(int u, int parent) {
             up[u][j] = up[up[u][j - 1]][j - 1];
     }
 
-    for (int v : adj[u]) if(v != parent)  dfs(v, u);
+    for (int v : graph[u]) if(v != parent)  dfs(v, u);
     
 }
 
@@ -39,13 +39,13 @@ int main() {
     int n, q;
     cin >> n >> q;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
     up.assign(n + 1, vector<int>(LOG, -1));
 
     for (int i = 2; i <= n; i++) {
         int boss;
         cin >> boss;
-        adj[boss].push_back(i);
+        graph[boss].push_back(i);
     }
 
     dfs(1, -1);

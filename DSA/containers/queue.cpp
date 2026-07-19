@@ -138,7 +138,7 @@ void operations() {
 // q.push(start);
 // while(!q.empty()) {
 //     int curr = q.front(); q.pop();
-//     for(int next : adj[curr]) {
+//     for(int next : graph[curr]) {
 //         if(!visited[next]) {
 //             visited[next] = true;
 //             q.push(next);

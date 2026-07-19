@@ -22,7 +22,7 @@ Idea:
 using namespace std;
 
 int n, m;
-vector<vector<pair<int, int>>> adj;
+vector<vector<pair<int, int>>> graph;
 vector<int> tin, low, visited;
 vector<pair<int, int>> answer;
 
@@ -34,7 +34,7 @@ void dfs(int u, int parentEdge)
     visited[u] = 1;
     tin[u] = low[u] = ++timer; // Set discovery time and low-link value
 
-    for (auto [v, edgeId] : adj[u])
+    for (auto [v, edgeId] : graph[u])
     {
         if (edgeId == parentEdge)
         {
@@ -73,7 +73,7 @@ int main()
 
     cin >> n >> m;
 
-    adj.assign(n + 1, {});
+    graph.assign(n + 1, {});
     tin.assign(n + 1, 0);
     low.assign(n + 1, 0);
     visited.assign(n + 1, 0);
@@ -84,8 +84,8 @@ int main()
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back({b, i});
-        adj[b].push_back({a, i});
+        graph[a].push_back({b, i});
+        graph[b].push_back({a, i});
     }
 
     dfs(1, -1);

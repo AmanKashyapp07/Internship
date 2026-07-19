@@ -20,14 +20,14 @@
 #include <vector>
 using namespace std;
 
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<bool> vis;
 
 void dfs(int u)
 {
     vis[u] = true;
 
-    for (int v : adj[u])
+    for (int v : graph[u])
     {
         if (!vis[v])
             dfs(v);
@@ -42,7 +42,7 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
     vis.assign(n + 1, false);
 
     while (m--)
@@ -50,8 +50,8 @@ int main()
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     vector<int> reps; // one representative per component

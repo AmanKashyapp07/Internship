@@ -604,22 +604,22 @@ public:
 // Use backtracking to try departures in lexicographic order
 class Solution {
 private:
-    void dfs(string airport, unordered_map<string, multiset<string>>& adj, vector<string>& result) {
-        while (!adj[airport].empty()) {
-            string next = *adj[airport].begin();
-            adj[airport].erase(adj[airport].begin());
-            dfs(next, adj, result);
+    void dfs(string airport, unordered_map<string, multiset<string>>& graph, vector<string>& result) {
+        while (!graph[airport].empty()) {
+            string next = *graph[airport].begin();
+            graph[airport].erase(graph[airport].begin());
+            dfs(next, graph, result);
         }
         result.push_back(airport);
     }
 public:
     vector<string> findItinerary(vector<vector<string>>& tickets) {
-        unordered_map<string, multiset<string>> adj;
+        unordered_map<string, multiset<string>> graph;
         for (auto& t : tickets)
-            adj[t[0]].insert(t[1]);
+            graph[t[0]].insert(t[1]);
 
         vector<string> result;
-        dfs("JFK", adj, result);
+        dfs("JFK", graph, result);
         reverse(result.begin(), result.end());
         return result;
     }

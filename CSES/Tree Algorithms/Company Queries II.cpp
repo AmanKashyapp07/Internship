@@ -8,7 +8,7 @@ using namespace std;
 const int MAX_NODES = 200005;
 const int LOG = 20;
 
-vector<int> adj[MAX_NODES];
+vector<int> graph[MAX_NODES];
 int up[MAX_NODES][LOG];
 int depth[MAX_NODES];
 
@@ -20,7 +20,7 @@ void dfs(int u, int p, int d) {
         up[u][j] = up[up[u][j - 1]][j - 1];
     }
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v != p) {
             dfs(v, u, d + 1);
         }
@@ -67,8 +67,8 @@ int main() {
         int boss;
         cin >> boss;
 
-        adj[boss].push_back(i);
-        adj[i].push_back(boss);
+        graph[boss].push_back(i);
+        graph[i].push_back(boss);
     }
 
     dfs(1, 1, 0);

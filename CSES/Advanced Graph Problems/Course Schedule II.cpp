@@ -15,7 +15,7 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
     vector<int> indegree(n + 1, 0);
 
     for (int i = 0; i < m; i++)
@@ -23,7 +23,7 @@ int main()
         int a, b;
         cin >> a >> b;
 
-        adj[b].push_back(a); // reverse edge
+        graph[b].push_back(a); // reverse edge
         indegree[a]++;
     }
 
@@ -46,7 +46,7 @@ int main()
 
         order.push_back(node);
 
-        for (int next : adj[node])
+        for (int next : graph[node])
         {
             indegree[next]--;
 

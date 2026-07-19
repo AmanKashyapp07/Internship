@@ -5,21 +5,21 @@ using namespace std;
 
 struct SCC {
     int n;
-    vector<vector<int>> adj, radj, sccs, dag;
+    vector<vector<int>> graph, rgraph, sccs, dag;
     stack<int> order;
     vector<int> comp;
     vector<bool> vis;
 
-    SCC(int n) : n(n), adj(n + 1), radj(n + 1), comp(n + 1, -1), vis(n + 1) {}
+    SCC(int n) : n(n), graph(n + 1), rgraph(n + 1), comp(n + 1, -1), vis(n + 1) {}
 
     void add(int u, int v) {
-        adj[u].push_back(v);
-        radj[v].push_back(u);
+        graph[u].push_back(v);
+        rgraph[v].push_back(u);
     }
 
     void dfs1(int u) {
         vis[u] = true;
-        for (int v : adj[u])
+        for (int v : graph[u])
             if (!vis[v]) dfs1(v);
         order.push(u);
     }
@@ -27,7 +27,7 @@ struct SCC {
     void dfs2(int u, int c) {
         comp[u] = c;
         sccs[c].push_back(u);
-        for (int v : radj[u])
+        for (int v : rgraph[u])
             if (comp[v] == -1)
                 dfs2(v, c);
     }
@@ -50,7 +50,7 @@ struct SCC {
     vector<vector<int>> get_dag() {
         dag.assign(sccs.size(), {});
         for (int u = 1; u <= n; u++) {
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (comp[u] != comp[v])
                     dag[comp[u]].push_back(comp[v]);
             }

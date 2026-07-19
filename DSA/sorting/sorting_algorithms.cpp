@@ -41,7 +41,7 @@ void printArray(const string &label, const vector<int> &arr)
 
 /**
  * Bubble Sort:
- * - Repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order.
+ * - Repeatedly steps through the list, compares graphacent elements, and swaps them if they are in the wrong order.
  * - Time: O(N^2) worst/average, O(N) best (using optimized swapped flag).
  * - Space: O(1) in-place.
  * - Stable: Yes.

@@ -23,9 +23,9 @@ using namespace std;
 using ll = long long;
 const ll INF = 1e18;
 
-vector<ll> dijkstra(int src, vector<vector<pair<int,int>>>& adj)
+vector<ll> dijkstra(int src, vector<vector<pair<int,int>>>& graph)
 {
-    int n = adj.size() - 1;
+    int n = graph.size() - 1;
 
     vector<ll> dist(n + 1, INF);
     priority_queue<
@@ -44,7 +44,7 @@ vector<ll> dijkstra(int src, vector<vector<pair<int,int>>>& adj)
 
         if (d != dist[u]) continue;
 
-        for (auto [v, w] : adj[u])
+        for (auto [v, w] : graph[u])
         {
             if (dist[u] + w < dist[v])
             {

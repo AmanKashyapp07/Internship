@@ -2,8 +2,8 @@
  * M-Coloring Problem
  *
  * Description:
- * Given an undirected graph represented as an adjacency list and an integer m, determine if the graph
- * can be colored with at most m colors such that no two adjacent vertices share the same color.
+ * Given an undirected graph represented as an graphacency list and an integer m, determine if the graph
+ * can be colored with at most m colors such that no two graphacent vertices share the same color.
  *
  * Approach:
  * - Backtracking / DFS traversal.

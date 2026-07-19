@@ -12,27 +12,20 @@ using namespace std;
 struct FenwickTree {
     int n;
     vector<long long> bit;
-
-    FenwickTree(int n) {
-        this->n = n;
-        // Size n + 2 to safely handle (r + 1) updates on the boundary
-        bit.assign(n + 2, 0); 
-    }
-
-    // Point Update: Add val to the difference array at 0-based index idx
+    FenwickTree(int n) : n(n), bit(n + 1, 0) {}
     void update(int idx, long long val) {
-        idx++; // Convert to 1-based index
-        for (; idx <= n; idx += idx & -idx) {
+        idx++; 
+        while (idx <= n) {
             bit[idx] += val;
+            idx += idx & -idx;
         }
     }
-
-    // Prefix Query: Returns the value at 0-based index idx (Sum of differences up to idx)
     long long query(int idx) {
-        idx++; // Convert to 1-based index
+        idx++;
         long long sum = 0;
-        for (; idx > 0; idx -= idx & -idx) {
+        while (idx > 0) {
             sum += bit[idx];
+            idx -= idx & -idx;
         }
         return sum;
     }
@@ -73,8 +66,8 @@ int main() {
             } else if (type == 2) {
                 int k;
                 cin >> k;
-                // Convert 1-based index to 0-based point query
-                cout << ft.query(k - 1) << "\n";
+                k--;
+                cout << ft.query(k) << "\n";
             }
         }
     }

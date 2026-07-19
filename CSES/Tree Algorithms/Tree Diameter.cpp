@@ -3,8 +3,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-pair<int, int> bfs(int start, const vector<vector<int>>& adj) {
-    int n = adj.size() - 1;
+pair<int, int> bfs(int start, const vector<vector<int>>& graph) {
+    int n = graph.size() - 1;
 
     vector<int> dist(n + 1, -1);
     queue<int> q;
@@ -18,7 +18,7 @@ pair<int, int> bfs(int start, const vector<vector<int>>& adj) {
         int u = q.front();
         q.pop();
 
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (dist[v] != -1) continue;
 
             dist[v] = dist[u] + 1;
@@ -40,18 +40,18 @@ int main() {
     int n;
     cin >> n;
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
 
     for (int i = 0; i < n - 1; i++) {
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
-    auto [A, _] = bfs(1, adj);
-    auto [B, diameter] = bfs(A, adj);
+    auto [A, _] = bfs(1, graph);
+    auto [B, diameter] = bfs(A, graph);
 
     cout << diameter << '\n';
 

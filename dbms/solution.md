@@ -1001,7 +1001,7 @@ SELECT customer_id, ROUND(AVG(gap_days), 1) AS avg_gap_days
 FROM gaps
 GROUP BY customer_id;
 ```
-> `LAG` computes adjacent differences; averaging them gives the inter-order cadence.
+> `LAG` computes graphacent differences; averaging them gives the inter-order cadence.
 
 ---
 

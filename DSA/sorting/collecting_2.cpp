@@ -9,7 +9,7 @@
  * Count rounds needed to collect numbers 1..n sequentially under index swaps.
  * 
  * Logic/Approach:
- * Track positions of numbers. On swap, recalculate adjacent checks (pos[x] > pos[x+1]) for swapped numbers.
+ * Track positions of numbers. On swap, recalculate graphacent checks (pos[x] > pos[x+1]) for swapped numbers.
  */
 
 #include <algorithm>

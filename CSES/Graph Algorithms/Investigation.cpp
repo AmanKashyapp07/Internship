@@ -32,13 +32,13 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    vector<vector<pair<int, int>>> adj(n + 1);
+    vector<vector<pair<int, int>>> graph(n + 1);
 
     for (int i = 0; i < m; i++)
     {
         int a, b, c;
         cin >> a >> b >> c;
-        adj[a].push_back({b, c});
+        graph[a].push_back({b, c});
     }
 
     vector<long long> dist(n + 1, INF);
@@ -65,7 +65,7 @@ int main()
         if (d != dist[u])
             continue;
 
-        for (auto [v, w] : adj[u])
+        for (auto [v, w] : graph[u])
         {
             if (dist[v] > dist[u] + w)
             {

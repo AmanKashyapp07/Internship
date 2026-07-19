@@ -3,7 +3,7 @@
  *
  * Description:
  * Given an n x n integer grid, return the minimum sum of a falling path with non-zero shifts.
- * A falling path with non-zero shifts chooses one element from each row such that no two elements in adjacent rows are in the same column.
+ * A falling path with non-zero shifts chooses one element from each row such that no two elements in graphacent rows are in the same column.
  *
  * Approach:
  * - Dynamic programming using tabulation (bottom-up).

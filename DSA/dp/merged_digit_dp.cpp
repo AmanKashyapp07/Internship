@@ -140,9 +140,9 @@ public:
 };
 
 // ================================================
-// 4. Counting Numbers (No two adjacent digits same)
+// 4. Counting Numbers (No two graphacent digits same)
 // ================================================
-// Problem: Count the number of integers from 0 to x such that no two adjacent 
+// Problem: Count the number of integers from 0 to x such that no two graphacent 
 // digits are the same. ( we havt to count 0 also)
 class CountingNumbers {
 public:

@@ -6,7 +6,7 @@ using namespace std;
 const int MOD = 1e9 + 7;
 
 int n, m;
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<vector<int>> dp;
 
 int solve(int mask, int u) {
@@ -18,7 +18,7 @@ int solve(int mask, int u) {
 
     ans = 0;
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (mask & (1 << v)) continue;
 
         // City n must be visited last
@@ -38,14 +38,14 @@ int main() {
 
     cin >> n >> m;
 
-    adj.assign(n, {});
+    graph.assign(n, {});
 
     for (int i = 0; i < m; i++) {
         int a, b;
         cin >> a >> b;
         --a;
         --b;
-        adj[a].push_back(b);
+        graph[a].push_back(b);
     }
 
     dp.assign(1 << n, vector<int>(n, -1));

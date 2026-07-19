@@ -4,14 +4,14 @@
 using namespace std;
 
 int n, m;
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<int> parent, vis;
 vector<int> cycle;
 
 bool dfs(int u, int par) {
     vis[u] = 1;
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == par) continue;
 
         if (!vis[v]) {
@@ -45,7 +45,7 @@ int main() {
 
     cin >> n >> m;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
     parent.assign(n + 1, -1);
     vis.assign(n + 1, 0);
 
@@ -53,8 +53,8 @@ int main() {
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     for (int i = 1; i <= n; i++) {

@@ -80,7 +80,7 @@ Flow control prevents a fast sender from overwhelming a slow receiver's buffer s
 ```
 
 * **Mechanism:** The receiver advertises its available buffer space in the **Receiver Window (`rwnd`)** header field of every ACK packet.
-* **Sliding Window:** The sender tracks the advertised `rwnd` and limits the amount of unacknowledged data in transit to match it, dynamically adjusting the transmission window.
+* **Sliding Window:** The sender tracks the advertised `rwnd` and limits the amount of unacknowledged data in transit to match it, dynamically graphusting the transmission window.
 
 ---
 

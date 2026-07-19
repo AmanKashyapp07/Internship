@@ -38,7 +38,7 @@ public:
             } else {
                 helper(i + 1, currentValue + currentNum, currentNum, expression + "+" + currentStr);
                 helper(i + 1, currentValue - currentNum, -currentNum, expression + "-" + currentStr);
-                // Adjust for operator precedence: subtract lastValue and add lastValue * currentNum
+                // graphust for operator precedence: subtract lastValue and add lastValue * currentNum
                 helper(i + 1, currentValue - lastValue + lastValue * currentNum, lastValue * currentNum, expression + "*" + currentStr);
             }
         }

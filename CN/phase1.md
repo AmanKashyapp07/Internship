@@ -15,7 +15,7 @@ The OSI model is a conceptual 7-layer framework developed by the ISO to standard
 | **5** | **Session**      | Data | Establishes, manages, & terminates communication sessions | NetBIOS, RPC, Sockets |
 | **4** | **Transport**    | Segment | End-to-end reliability, flow control, & error recovery | TCP, UDP |
 | **3** | **Network**      | Packet | Logical routing of packets across networks | IP (IPv4/IPv6), ICMP, Routers |
-| **2** | **Data Link**    | Frame | Physical transfer of frames between adjacent nodes | Ethernet, MAC, ARP, Switches |
+| **2** | **Data Link**    | Frame | Physical transfer of frames between graphacent nodes | Ethernet, MAC, ARP, Switches |
 | **1** | **Physical**     | Bits | Physical transmission of raw bits over medium | Cables, Hubs, Repeaters, NICs |
 
 ---

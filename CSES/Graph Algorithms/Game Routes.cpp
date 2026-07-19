@@ -30,12 +30,12 @@ signed main() {
     cin.tie(NULL);
     int n,m;
     cin >> n >> m;
-    vector<vector<int>> adj(n+1);
+    vector<vector<int>> graph(n+1);
     vector<int> in_degree(n+1, 0);
     for(int i=0;i<m;i++) {
         int a,b;
         cin >> a >> b;
-        adj[a].push_back(b);
+        graph[a].push_back(b);
         in_degree[b]++;
     }
 
@@ -51,7 +51,7 @@ signed main() {
     while(!q.empty()) {
         int u=q.front();
         q.pop();
-        for(int v:adj[u]) {
+        for(int v:graph[u]) {
             ways[v]=(ways[v]+ways[u])%MOD;
             in_degree[v]--;
             if(in_degree[v]==0) {

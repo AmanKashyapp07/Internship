@@ -43,12 +43,12 @@ public:
     vector<int> loudAndRich(vector<vector<int>>& richer, vector<int>& quiet) {
         int n = quiet.size();
 
-        vector<vector<int>> adj(n);
+        vector<vector<int>> graph(n);
         vector<int> indegree(n), ans(n);
         // ans[i] = index of quietest person reachable from i (including i)
         // quiet[i] = quietness of person i
         for (auto &e : richer) {
-            adj[e[0]].push_back(e[1]); // making graph from richer to poorer
+            graph[e[0]].push_back(e[1]); // making graph from richer to poorer
             indegree[e[1]]++;
         }
 
@@ -64,7 +64,7 @@ public:
             int u = q.front();
             q.pop();
 
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (quiet[ans[u]] < quiet[ans[v]]) ans[v] = ans[u]; // update quietest person for v if u's quietest is quieter
                 if (--indegree[v] == 0)
                     q.push(v);

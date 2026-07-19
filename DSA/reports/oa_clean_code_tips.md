@@ -68,7 +68,7 @@ cin.tie(NULL);
 ### Pass Large Collections by Reference
 *   When passing vectors, strings, or sets to recursive functions (like DFS/BFS), **never** pass them by value. It copies the entire data structure on every recursive call, causing TLE/MLE.
     ```cpp
-    void dfs(int u, const vector<vector<int>>& adj, vector<bool>& vis) { // Correct (by reference)
+    void dfs(int u, const vector<vector<int>>& graph, vector<bool>& vis) { // Correct (by reference)
         // ...
     }
     ```
@@ -117,7 +117,7 @@ OA memory limits are usually 256MB or 512MB, but sometimes they can be as low as
 *   Look at whether nodes are `0`-indexed or `1`-indexed in the input description.
 *   If they are `1`-indexed, size your vectors to `N + 1` to prevent out-of-bounds access.
     ```cpp
-    vector<vector<int>> adj(N + 1);
+    vector<vector<int>> graph(N + 1);
     ```
 
 ### Prevent Recursion Stack Overflow
@@ -127,7 +127,7 @@ OA memory limits are usually 256MB or 512MB, but sometimes they can be as low as
 
 ## 5. Using Global / Class-Member Containers in LeetCode/OA Templates
 
-When coding in LeetCode-style templates (where your code is inside a `class Solution`), passing references like `vector<vector<int>>& adj` or `vector<bool>& visited` to every recursive helper function creates significant writing overhead. 
+When coding in LeetCode-style templates (where your code is inside a `class Solution`), passing references like `vector<vector<int>>& graph` or `vector<bool>& visited` to every recursive helper function creates significant writing overhead. 
 
 To speed up coding and keep helper functions clean, you can use **Class-Member variables** or **Global variables**. 
 
@@ -143,14 +143,14 @@ Declare your helper structures as private/public member variables of the class. 
 class Solution {
 private:
     // Declare containers here to avoid passing them as function arguments
-    vector<vector<int>> adj;
+    vector<vector<int>> graph;
     vector<bool> visited;
     int max_depth = 0;
 
     void dfs(int u, int depth) {
         visited[u] = true;
         max_depth = max(max_depth, depth);
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (!visited[v]) {
                 dfs(v, depth + 1);
             }
@@ -160,13 +160,13 @@ private:
 public:
     int maxDepth(int n, vector<vector<int>>& edges) {
         // CRITICAL: You MUST clear and resize class-member variables on every call
-        adj.assign(n + 1, vector<int>());
+        graph.assign(n + 1, vector<int>());
         visited.assign(n + 1, false);
         max_depth = 0;
 
         for (auto& edge : edges) {
-            adj[edge[0]].push_back(edge[1]);
-            adj[edge[1]].push_back(edge[0]);
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
         }
 
         dfs(1, 1);
@@ -182,14 +182,14 @@ If you prefer declaring variables in the global namespace (outside the class), y
 
 ```cpp
 // Global declarations
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<bool> visited;
 
 class Solution {
 private:
     void dfs(int u) {
         visited[u] = true;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (!visited[v]) dfs(v);
         }
     }
@@ -197,12 +197,12 @@ private:
 public:
     void solve(int n, vector<vector<int>>& edges) {
         // CRITICAL: Clear/Reset global variables before use
-        adj.clear();
-        adj.resize(n + 1);
+        graph.clear();
+        graph.resize(n + 1);
         visited.assign(n + 1, false);
 
         for (auto& edge : edges) {
-            adj[edge[0]].push_back(edge[1]);
+            graph[edge[0]].push_back(edge[1]);
         }
         dfs(1);
     }
@@ -233,7 +233,7 @@ public:
 *   Iterating over maps or pairs without verbose types:
     ```cpp
     for (auto& [key, val] : freq_map) { ... }        // Map iteration
-    for (auto& [dist, node] : adj[u]) { ... }        // Weighted adjacency list
+    for (auto& [dist, node] : graph[u]) { ... }        // Weighted graphacency list
     ```
 
 ### Inline Lambda Helpers (Avoid Duplicating Logic)
@@ -241,7 +241,7 @@ public:
     ```cpp
     function<int(int, int)> dfs = [&](int node, int parent) -> int {
         int depth = 0;
-        for (int child : adj[node]) {
+        for (int child : graph[node]) {
             if (child != parent) depth = max(depth, 1 + dfs(child, node));
         }
         return depth;
@@ -349,7 +349,7 @@ Quick reference for the most common and fastest initialization syntax to save wr
 
 Different C++ containers have different methods for resetting. Knowing the exact syntax prevents compiler errors and memory leaks.
 
-### 1. `std::vector` (Dynamic Arrays / Adjacency Lists)
+### 1. `std::vector` (Dynamic Arrays / graphacency Lists)
 *   **Clear to size 0 (capacity remains):**
     ```cpp
     vec.clear();
@@ -358,9 +358,9 @@ Different C++ containers have different methods for resetting. Knowing the exact
     ```cpp
     vec.assign(n, 0); // Sets size to n and fills with 0
     ```
-*   **Reset a Graph Adjacency List of size N:**
+*   **Reset a Graph graphacency List of size N:**
     ```cpp
-    adj.assign(n + 1, vector<int>()); // Resizes to n+1 and clears each sub-vector
+    graph.assign(n + 1, vector<int>()); // Resizes to n+1 and clears each sub-vector
     ```
 
 ### 2. `std::string`

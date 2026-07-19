@@ -3,7 +3,7 @@
  *
  * Description:
  * Given a triangle array, return the minimum path sum from top to bottom.
- * For each step, you may move to adjacent numbers on the row below.
+ * For each step, you may move to graphacent numbers on the row below.
  *
  * Approach:
  * - Bottom-up 1D dynamic programming.

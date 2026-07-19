@@ -47,10 +47,10 @@ const ll LINF = LLONG_MAX;
 const ll MOD = 1e9 + 7;
 
 // 1 & 2. Topological Sort / Kahn's Algorithm (BFS-based)
-vi topoSortKahn(int V, vector<vi>& adj) {
+vi topoSortKahn(int V, vector<vi>& graph) {
     vi indegree(V, 0);
     for(int i = 0; i < V; ++i) {
-        for(auto it : adj[i]) indegree[it]++;
+        for(auto it : graph[i]) indegree[it]++;
     }
     
     queue<int> q;
@@ -64,7 +64,7 @@ vi topoSortKahn(int V, vector<vi>& adj) {
         q.pop();
         topo.pb(node);
         
-        for(auto it : adj[node]){
+        for(auto it : graph[node]){
             indegree[it]--;
             if(indegree[it] == 0) q.push(it);
         }
@@ -73,30 +73,30 @@ vi topoSortKahn(int V, vector<vi>& adj) {
 }
 
 // 3. Cycle Detection in Directed Graph using Kahn's Algorithm
-bool isCyclicKahn(int V, vector<vi>& adj) {
-    vi topo = topoSortKahn(V, adj);
+bool isCyclicKahn(int V, vector<vi>& graph) {
+    vi topo = topoSortKahn(V, graph);
     return (topo.size() < (size_t)V); // If size is less than V, cycle exists
 }
 
 // 4 & 5. Course Schedule I & II
 vi findOrder(int numCourses, vector<vector<int>>& prerequisites) {
-    vector<vi> adj(numCourses);
+    vector<vi> graph(numCourses);
     for(auto& pre : prerequisites){
-        adj[pre[1]].pb(pre[0]);
+        graph[pre[1]].pb(pre[0]);
     }
-    vi topo = topoSortKahn(numCourses, adj);
+    vi topo = topoSortKahn(numCourses, graph);
     if(topo.size() == (size_t)numCourses) return topo;
     return {};
 }
 
 // 6. Find Eventual Safe States
-vi eventualSafeNodes(int V, vector<vi>& adj) {
+vi eventualSafeNodes(int V, vector<vi>& graph) {
     // A node is safe if all paths leading from it go to a terminal node.
     // Equivalent to reversing edges and running Kahn's algorithm
     vector<vi> reverse(V); // build reverse graph and push nodes with indegree 0 into queue
     vi indegree(V, 0);
     for(int i = 0; i < V; ++i){
-        for(auto it : adj[i]){
+        for(auto it : graph[i]){
             reverse[it].pb(i);
             indegree[i]++;
         }

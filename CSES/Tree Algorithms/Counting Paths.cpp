@@ -5,7 +5,7 @@ using namespace std;
 
 const int LOG = 20;
 
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<vector<int>> up;
 vector<int> depth;
 vector<long long> cnt, ans;
@@ -20,7 +20,7 @@ void dfs(int u, int p) {
             up[u][j] = up[up[u][j - 1]][j - 1];
     }
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue;
         depth[v] = depth[u] + 1;
         dfs(v, u);
@@ -55,7 +55,7 @@ int lca(int a, int b) {
 }
 
 void dfs2(int u, int p) {
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue;
         dfs2(v, u);
         cnt[u] += cnt[v];
@@ -70,7 +70,7 @@ int main() {
     int n, m;
     cin >> n >> m;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
     up.assign(n + 1, vector<int>(LOG, -1));
     depth.assign(n + 1, 0);
     cnt.assign(n + 1, 0);
@@ -79,8 +79,8 @@ int main() {
     for (int i = 0; i < n - 1; i++) {
         int a, b;
         cin >> a >> b;
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     dfs(1, -1);

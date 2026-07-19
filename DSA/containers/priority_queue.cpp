@@ -205,7 +205,7 @@ void topKDemo() {
 void dijkstraDemo() {
 
     int n = 5;
-    vector<vector<pair<int, int>>> adj(n);
+    vector<vector<pair<int, int>>> graph(n);
     vector<int> dist(n, 1e9);
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
@@ -218,7 +218,7 @@ void dijkstraDemo() {
 
         if (d > dist[u]) continue;
 
-        for (auto [v, w] : adj[u]) {
+        for (auto [v, w] : graph[u]) {
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 pq.push({dist[v], v});

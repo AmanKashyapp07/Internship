@@ -31,7 +31,7 @@ int main() {
     for (int i = 1; i <= n; i++) {
         for (int j = i; j <= n; j += i)
             cnt[i] += freq[j];
-    }
+    } // time complexity is O(n log n) and space complexity is O(n)
 
     vector<long long> ans(n + 1);
 

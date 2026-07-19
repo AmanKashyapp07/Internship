@@ -487,12 +487,12 @@ Optimization or counting on tree structure, subtree-based decisions.
 ```cpp
 class Solution {
 public:
-    int dfs(int node, int parent, vector<vector<int>>& adj, vector<int>& vals) {
+    int dfs(int node, int parent, vector<vector<int>>& graph, vector<int>& vals) {
         // Process children first, then combine
         int result = base_value;
-        for (int child : adj[node]) {
+        for (int child : graph[node]) {
             if (child != parent) {
-                int child_result = dfs(child, node, adj, vals);
+                int child_result = dfs(child, node, graph, vals);
                 result = combine(result, child_result);
             }
         }
@@ -525,15 +525,15 @@ Longest/shortest path with dependencies, counting paths in a DAG, topological or
 ```cpp
 class Solution {
 public:
-    int dag_dp(vector<vector<pair<int, int>>>& adj, int node, vector<int>& memo) {
+    int dag_dp(vector<vector<pair<int, int>>>& graph, int node, vector<int>& memo) {
         if (memo[node] != -1) {
             return memo[node];
         }
         int result = base;
-        for (auto& edge : adj[node]) {
+        for (auto& edge : graph[node]) {
             int neighbor = edge.first;
             int cost = edge.second;
-            result = best(result, dag_dp(adj, neighbor, memo) + cost);
+            result = best(result, dag_dp(graph, neighbor, memo) + cost);
         }
         return memo[node] = result;
     }
@@ -633,7 +633,7 @@ private:
 public:
     int countUpTo(string N) {
         int n = N.size();
-        // Adjust the dimensions of memo based on extra_state if needed
+        // graphust the dimensions of memo based on extra_state if needed
         vector<vector<vector<int>>> memo(n, vector<vector<int>>(2, vector<int>(2, -1)));
         return dp(0, true, false, N, memo);
     }
@@ -751,19 +751,19 @@ Computing a value for every node as root, using information from two DFS passes.
 ```cpp
 class Solution {
 private:
-    void dfs1(int u, int p, vector<vector<int>>& adj, vector<int>& down, vector<int>& size) {
-        for (int v : adj[u]) {
+    void dfs1(int u, int p, vector<vector<int>>& graph, vector<int>& down, vector<int>& size) {
+        for (int v : graph[u]) {
             if (v != p) {
-                dfs1(v, u, adj, down, size);
+                dfs1(v, u, graph, down, size);
                 size[u] += size[v];
                 down[u] += down[v] + size[v];
             }
         }
     }
 
-    void dfs2(int u, int p, int n, vector<vector<int>>& adj, vector<int>& down, vector<int>& size, vector<int>& ans) {
+    void dfs2(int u, int p, int n, vector<vector<int>>& graph, vector<int>& down, vector<int>& size, vector<int>& ans) {
         ans[u] = down[u]; // will add parent contribution
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (v != p) {
                 // When we reroot to v:
                 // - v gains (n - size[v]) nodes from above
@@ -776,7 +776,7 @@ private:
                 down[v] = down[u] - size[v] + (n - size[v]);
                 size[v] = n; // from v's perspective it sees all n nodes
 
-                dfs2(v, u, n, adj, down, size, ans);
+                dfs2(v, u, n, graph, down, size, ans);
 
                 // Restore states for backtracking if needed
                 down[u] = old_down_u;
@@ -788,13 +788,13 @@ private:
     }
 
 public:
-    vector<int> reroot(int root, vector<vector<int>>& adj, int n) {
+    vector<int> reroot(int root, vector<vector<int>>& graph, int n) {
         vector<int> down(n, 0);
         vector<int> size(n, 1);
         vector<int> ans(n, 0);
 
-        dfs1(root, -1, adj, down, size);
-        dfs2(root, -1, n, adj, down, size, ans);
+        dfs1(root, -1, graph, down, size);
+        dfs2(root, -1, n, graph, down, size, ans);
         return ans;
     }
 };

@@ -47,14 +47,14 @@ int main() {
         isShop[shops[i]] = true;
     }
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
 
     for (int i = 0; i < m; i++) {
         int u, v;
         cin >> u >> v;
 
-        adj[u].push_back(v);
-        adj[v].push_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
 
     d1.assign(n + 1, INF); // Distance to the nearest shop
@@ -72,7 +72,7 @@ int main() {
         int u = q.front();
         q.pop();
 
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             relax(v, d1[u] + 1, r1[u]);
 
             if (r2[u] != 0) // If there is a second nearest shop for u, try to relax with that as well

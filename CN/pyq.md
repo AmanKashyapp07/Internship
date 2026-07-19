@@ -21,7 +21,7 @@ A compilation of the 75 most-asked Computer Networks interview questions for sof
 * **Answer:**
   * **MAC Address (Physical/Hardware):** 48-bit address burnt into the Network Interface Card (NIC) at factory level. Used to identify devices on the **local network segment** (Layer 2).
   * **IP Address (Logical/Software):** 32-bit (IPv4) or 128-bit (IPv6) address assigned dynamically by routers/DHCP. Used to route packets across **interconnected networks** (Layer 3).
-  * **Why both:** IP addresses handle routing from country A to country B (global pathfinding). MAC addresses handle hop-by-hop transmission between adjacent switches/routers on the same wire (local delivery).
+  * **Why both:** IP addresses handle routing from country A to country B (global pathfinding). MAC addresses handle hop-by-hop transmission between graphacent switches/routers on the same wire (local delivery).
 
 ---
 
@@ -450,7 +450,7 @@ A compilation of the 75 most-asked Computer Networks interview questions for sof
 
 ### Q55. Explain the "Count to Infinity" problem in Distance-Vector routing. How does Split Horizon resolve it?
 * **Answer:**
-  * **Count to Infinity:** Occurs when a link fails, and two adjacent routers exchange updates based on stale routing information. Router A thinks Router B has a route, and Router B thinks Router A has a route, creating a loop where the metric (hop count) increments indefinitely (up to RIP's infinity limit of 16).
+  * **Count to Infinity:** Occurs when a link fails, and two graphacent routers exchange updates based on stale routing information. Router A thinks Router B has a route, and Router B thinks Router A has a route, creating a loop where the metric (hop count) increments indefinitely (up to RIP's infinity limit of 16).
   * **Split Horizon:** A routing rule stating that a router must **not** advertise a route back out of the same interface from which it learned that route.
     * *Example:* If Router A learns a route to subnet X from Router B, Split Horizon prevents A from advertising route X back to B, stopping routing loops.
 

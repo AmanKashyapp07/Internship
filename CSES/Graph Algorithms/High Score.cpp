@@ -19,7 +19,7 @@ signed main()
     cin >> n >> m;
 
     vector<Edge> edges;
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
 
     for (int i = 0; i < m; i++)
     {
@@ -27,7 +27,7 @@ signed main()
         cin >> u >> v >> w;
 
         edges.push_back({u, v, -w}); // negate weights, because we want to find the longest path, but Bellman-Ford finds the shortest path, so we negate the weights to find the longest path
-        adj[u].push_back(v);
+        graph[u].push_back(v);
     }
 
     vector<long long> dist(n + 1, LLONG_MAX);
@@ -93,7 +93,7 @@ signed main()
             return 0;
         }
 
-        for (int v : adj[u])
+        for (int v : graph[u])
         {
             if (!vis[v])
             {

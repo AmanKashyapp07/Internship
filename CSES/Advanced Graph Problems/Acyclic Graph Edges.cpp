@@ -53,10 +53,10 @@ const ll  MOD  = 1e9 + 7;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-void dfs(int u, int p, vector<vector<int>>& adj, vector<bool>& visited) {
+void dfs(int u, int p, vector<vector<int>>& graph, vector<bool>& visited) {
     visited[u] = true;
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue; // Skip the parent node
         if (visited[v]) {
             cout<<v<<" "<<u<<endl;
@@ -64,7 +64,7 @@ void dfs(int u, int p, vector<vector<int>>& adj, vector<bool>& visited) {
             return;
         }
         cout<<u<<" "<<v<<endl;
-        dfs(v, u, adj, visited);
+        dfs(v, u, graph, visited);
     }
 }
 int main() {
@@ -73,7 +73,7 @@ int main() {
 
     int n,m;
     cin >> n >> m;
-    vector<vector<int>> adj(n+1);
+    vector<vector<int>> graph(n+1);
     // take input of undirected graph
     for(int i=0;i<m;i++){
         int u,v;
@@ -84,8 +84,8 @@ int main() {
         else{
             cout<<v<<" "<<u<<endl;
         }
-        adj[u].pb(v);
-        adj[v].pb(u);
+        graph[u].pb(v);
+        graph[v].pb(u);
     }
     
 

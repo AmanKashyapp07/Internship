@@ -29,7 +29,7 @@ using namespace std;
 using ll = long long;
 
 int n;
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<ll> subtreeSize;
 vector<ll> ans;
 
@@ -38,7 +38,7 @@ void dfs1(int node, int parent, int depth)
     ans[1] += depth;
     subtreeSize[node] = 1;
 
-    for (int child : adj[node])
+    for (int child : graph[node])
     {
         if (child == parent)
             continue;
@@ -50,7 +50,7 @@ void dfs1(int node, int parent, int depth)
 
 void dfs2(int node, int parent)
 {
-    for (int child : adj[node])
+    for (int child : graph[node])
     {
         if (child == parent)
             continue;
@@ -67,7 +67,7 @@ int main()
 
     cin >> n;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
     subtreeSize.resize(n + 1);
     ans.resize(n + 1, 0);
 
@@ -76,8 +76,8 @@ int main()
         int u, v;
         cin >> u >> v;
 
-        adj[u].push_back(v);
-        adj[v].push_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
 
     dfs1(1, 0, 0);

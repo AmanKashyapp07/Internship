@@ -17,14 +17,14 @@ using namespace std;
 
 const int MAXN = 200005;
 
-vector<int> adj[MAXN];
+vector<int> graph[MAXN];
 long long dp[MAXN][2];
 
 void dfs(int u, int parent)
 {
     long long base = 0;
 
-    for (int v : adj[u])
+    for (int v : graph[u])
     {
         if (v == parent)
             continue;
@@ -37,7 +37,7 @@ void dfs(int u, int parent)
     dp[u][1] = base;
     dp[u][0] = base;
 
-    for (int v : adj[u])
+    for (int v : graph[u])
     {
         if (v == parent)
             continue;
@@ -62,8 +62,8 @@ int main()
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     dfs(1, 0);

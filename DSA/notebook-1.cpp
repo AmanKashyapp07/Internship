@@ -152,11 +152,7 @@ struct EulerTour {
     int n, timer;
     vector<int> tin, tout, depth, first_occ, euler_lca;
 
-    EulerTour(int n) {
-        this->n = n; timer = 0;
-        tin.assign(n + 1, 0); tout.assign(n + 1, 0);
-        depth.assign(n + 1, 0); first_occ.assign(n + 1, 0);
-    }
+    EulerTour(int n) : n(n), timer(0), tin(n + 1, 0), tout(n + 1, 0), depth(n + 1, 0), first_occ(n + 1, 0) {}
 
     // 1. Subtree flattening (Size N) -> Range [tin[u], tout[u]]
     // Now constructs flat_val directly at 0-indexed positions matching your SegTree
@@ -293,9 +289,7 @@ struct SegTree {
     int n; vector<int> tree;
     SegTree() : n(0) {}
 
-    SegTree(vector<int>& a) { 
-        n = a.size(); 
-        tree.resize(4 * n); 
+    SegTree(vector<int>& a) : n(a.size()), tree(4 * a.size()) { 
         build(1, 0, n - 1, a); 
     }
 
@@ -526,17 +520,14 @@ SPARSE TABLE VARIATIONS (CSES & LEETCODE) & HOW TO MODIFY TEMPLATE:
 --------------------------------------------------------------------------------
 */
 struct SparseTable {
-   int n, K;
-   vector<vector<int>> st;
+    int n, K;
+    vector<vector<int>> st;
 
-   SparseTable(vector<int> &a) {
-      n = a.size(); 
-      K = (n > 0 ? 31 - __builtin_clz(n) : 0) + 1;
-      st.assign(K, vector<int>(n));
-      st[0] = a;
-      for (int j = 1; j < K; j++)
-         for (int i = 0; i + (1<<j) <= n; i++)
-            st[j][i] = min(st[j-1][i], st[j-1][i+(1<<(j-1))]);
+    SparseTable(vector<int> &a) : n(a.size()), K((a.size() > 0 ? 31 - __builtin_clz(a.size()) : 0) + 1), st(K, vector<int>(a.size())) {
+        st[0] = a;
+        for (int j = 1; j < K; j++)
+            for (int i = 0; i + (1<<j) <= n; i++)
+                st[j][i] = min(st[j-1][i], st[j-1][i+(1<<(j-1))]);
     }
 
     int query(int l, int r) {
@@ -622,8 +613,8 @@ Tips to change polynomial parameters or double hashing:
 */
 struct FastHash {
     vector<ll> p, h;
-    FastHash(string s) {
-        int n = s.size(); p.assign(n + 1, 1); h.assign(n + 1, 0);
+    FastHash(string s) : p(s.size() + 1, 1), h(s.size() + 1, 0) {
+        int n = s.size();
         for (int i = 0; i < n; i++) {
             p[i + 1] = p[i] * P % MOD;
             h[i + 1] = (h[i] * P + (s[i] - 'a' + 1)) % MOD;
@@ -1070,11 +1061,11 @@ struct BinaryLifting {
     vector<vector<int>> up, mx;
     vector<int> depth;
 
-    BinaryLifting(int n, int root, vector<vector<pair<int,int>>> &g) {
-        LOG = 32 - __builtin_clz(n);
-        up.assign(n + 1, vector<int>(LOG, -1));
-        mx.assign(n + 1, vector<int>(LOG, 0));
-        depth.assign(n + 1, 0);
+    BinaryLifting(int n, int root, vector<vector<pair<int,int>>> &g)
+        : LOG(32 - __builtin_clz(n)),
+          up(n + 1, vector<int>(LOG, -1)),
+          mx(n + 1, vector<int>(LOG, 0)),
+          depth(n + 1, 0) {
 
         dfs(root, -1, 0, 0, g);
 
@@ -1617,7 +1608,7 @@ struct FunctionalGraphDecomposition {
     vector<int> cyc;   // cyc[i] = length of the cycle node `i` belongs to (or -1 if not on a cycle)
     vector<int> dist;  // dist[i] = distance of node `i` to its cycle root (0 if on a cycle)
     vector<int> indeg; // indeg[i] = in-degree of node `i`
-    vector<vector<int>> rev; // rev[u] = stores reversed adjacency list (to walk away from cycle roots)
+    vector<vector<int>> rev; // rev[u] = stores reversed graphacency list (to walk away from cycle roots)
     const int LOG = 20;
     vector<vector<int>> up; // up[u][j] = 2^j-th ancestor of node `u` in the reversed graph
 
@@ -1704,17 +1695,17 @@ struct FunctionalGraphDecomposition {
 
 struct ChromaticNumber {
     int n;
-    vector<int> adj;
+    vector<int> graph;
     vector<bool> independent;
     vector<int> dp;
 
     ChromaticNumber(int _n) : n(_n) {
-        adj.assign(n, 0);
+        graph.assign(n, 0);
     }
 
     void addEdge(int u, int v) {
-        adj[u] |= (1 << v);
-        adj[v] |= (1 << u);
+        graph[u] |= (1 << v);
+        graph[v] |= (1 << u);
     }
 
     int solve() {
@@ -1727,7 +1718,7 @@ struct ChromaticNumber {
         for (int mask = 1; mask < N; mask++) {
             int v = __builtin_ctz(mask);
             int rest = mask ^ (1 << v);
-            independent[mask] = independent[rest] && ((adj[v] & rest) == 0);
+            independent[mask] = independent[rest] && ((graph[v] & rest) == 0);
         }
 
         const int INF = 1e9;
@@ -1837,22 +1828,22 @@ vector<int> find_centers(int n, const vector<vector<int>>& g) {
 struct CentroidDecomposition {
     int n, k;
     long long ans = 0;
-    vector<vector<int>> &adj;
+    vector<vector<int>> &graph;
     vector<int> sz, cnt;
     vector<bool> removed;
     // cnt[i] means the number of nodes at depth `i` from the current centroid. This is used to count pairs of nodes whose distances sum to `k`.
-    CentroidDecomposition(int n, vector<vector<int>> &adj, int k)
-        : n(n), k(k), adj(adj), sz(n + 1), removed(n + 1), cnt(k + 1) {}
+    CentroidDecomposition(int n, vector<vector<int>> &graph, int k)
+        : n(n), k(k), graph(graph), sz(n + 1), removed(n + 1), cnt(k + 1) {}
 
     int getSize(int u, int p) {
         sz[u] = 1;
-        for (int v : adj[u])
+        for (int v : graph[u])
             if (v != p && !removed[v]) sz[u] += getSize(v, u);
         return sz[u];
     }
 
     int getCentroid(int u, int p, int total) {
-        for (int v : adj[u])
+        for (int v : graph[u])
             if (v != p && !removed[v] && sz[v] > total / 2)
                 return getCentroid(v, u, total);
         return u;
@@ -1860,7 +1851,7 @@ struct CentroidDecomposition {
 
     void collectDepths(int u, int p, int d, vector<int> &depths) {
         depths.push_back(d);
-        for (int v : adj[u])
+        for (int v : graph[u])
             if (v != p && !removed[v])
                 collectDepths(v, u, d + 1, depths);
     } // This function collects the depths of all nodes in the subtree rooted at node `u`, excluding the parent node `p`. It recursively traverses the tree, incrementing the depth `d` for each child node. The collected depths are stored in the `depths` vector, which can later be used to count pairs of nodes whose distances sum to a specific value `k`.
@@ -1868,7 +1859,7 @@ struct CentroidDecomposition {
     void process(int c) {
         cnt[0] = 1;
         int mxDepth = 0;
-        for (int child : adj[c]) {
+        for (int child : graph[c]) {
             if (removed[child]) continue;
             vector<int> depths;
             collectDepths(child, c, 1, depths); // for each child of the centroid, collect the depths of its subtree, then count how many pairs can be formed with previously counted depths that sum to `k`. After processing all children, reset the counts for the next iteration.
@@ -1889,7 +1880,7 @@ struct CentroidDecomposition {
         vector<int> usedDepths;
         usedDepths.push_back(0);
 
-        for (int child : adj[c]) {
+        for (int child : graph[c]) {
 
             if (removed[child]) continue;
 
@@ -1922,7 +1913,7 @@ struct CentroidDecomposition {
         int centroid = getCentroid(entry, -1, getSize(entry, -1));
         process(centroid);
         removed[centroid] = 1;
-        for (int v : adj[centroid])
+        for (int v : graph[centroid])
             if (!removed[v]) decompose(v);
     }
 
@@ -1999,3 +1990,422 @@ struct CentroidDecomposition {
 =======================================================================
 */
 
+
+/*
+======================== MINIMUM SPANNING TREE (MST) CHEAT SHEET ========================
+
+Definition
+----------
+- A spanning tree connects all vertices using exactly (n - 1) edges.
+- An MST is a spanning tree with minimum total edge weight.
+- MST exists only if the graph is connected.
+- If graph is disconnected -> Minimum Spanning Forest (MSF).
+----------------------------------------------------------------
+What is a Cut?
+----------------------------------------------------------------
+A cut is ANY partition of the vertices into two non-empty sets.
+
+Example:
+
+        {1,2,3} | {4,5,6}
+
+Every edge having one endpoint in each set is called a
+"CROSSING EDGE" of the cut.
+
+Example:
+
+1 ----- 4
+2 ----- 5
+3 ----- 6
+
+All three edges cross this cut.
+
+There are exponentially many possible cuts.
+
+----------------------------------------------------------------
+Cut Property (Most Important)
+----------------------------------------------------------------
+For ANY cut:
+
+The minimum weight edge crossing that cut
+belongs to SOME MST.
+
+If the minimum edge is UNIQUE,
+it belongs to EVERY MST.
+
+Use this theorem to prove an edge MUST be chosen.
+
+Properties
+----------
+- Number of edges in MST = n - 1.
+- MST contains no cycles.
+- There may be multiple MSTs if equal edge weights exist.
+- If all edge weights are distinct -> MST is unique.
+- Adding any extra edge to an MST creates exactly one cycle.
+- Removing any edge from an MST disconnects the tree.
+
+Algorithms
+----------
+Kruskal
+- Sort edges by weight.
+- Add edge if it connects two different components.
+- Use DSU (Union Find).
+- Complexity: O(E log E).
+
+Prim
+- Similar to Dijkstra.
+- Grow one connected component.
+- Use priority queue.
+- Complexity:
+    O(E log V) with heap.
+    O(V^2) with graphacency matrix.
+
+Boruvka
+- Each component picks its cheapest outgoing edge.
+- Mostly theoretical/parallel.
+
+Cut Property (Most Important)
+-----------------------------
+For ANY cut of the graph:
+- The minimum weight edge crossing the cut ALWAYS belongs to SOME MST.
+
+Used to prove Kruskal.
+
+Cycle Property
+--------------
+For ANY cycle:
+- The maximum weight edge in that cycle can NEVER belong to an MST
+  (if it is strictly heavier than the others).
+
+Useful for eliminating edges.
+
+Edge Classification
+-------------------
+Given edge (u,v,w):
+
+Definitely in every MST:
+- It is the UNIQUE minimum edge across some cut.
+
+Never in any MST:
+- It is the UNIQUE maximum edge in some cycle.
+
+Otherwise:
+- It may or may not appear depending on equal weights.
+
+Maximum Edge Trick
+------------------
+If edge (u,v,w) is NOT in MST:
+
+Maximum edge on path(u,v) in MST >= w
+
+Reason:
+Otherwise replacing the heavier edge with this one improves MST.
+
+Second Best MST
+---------------
+Typical approach:
+1. Build MST.
+2. For every non-MST edge:
+       replace maximum edge on MST path(u,v)
+3. Minimum valid replacement gives second MST.
+
+Requires:
+- Binary Lifting + Max Edge on Path
+or
+- Heavy Light Decomposition.
+
+Updating MST
+------------
+Add one edge:
+- Forms a cycle.
+- Remove maximum edge on that cycle.
+
+Delete one MST edge:
+- Need minimum edge reconnecting the two components.
+
+Negative Weights
+----------------
+MST works perfectly with negative edges.
+
+Directed Graph
+--------------
+No MST exists.
+Equivalent concept:
+- Minimum Spanning Arborescence (Edmonds' Algorithm).
+
+Difference from Shortest Path Tree
+----------------------------------
+MST:
+- Minimizes TOTAL tree weight.
+
+Shortest Path Tree:
+- Minimizes distance from ONE source.
+
+They are usually different.
+
+What Changes MST?
+-----------------
+Changing ONE edge weight:
+- May or may not change MST.
+- Increasing an MST edge can remove it.
+- Decreasing a non-MST edge can insert it.
+
+Common OA / Contest Patterns
+----------------------------
+1. Build MST (Kruskal)
+2. Maximum spanning tree
+3. Minimum bottleneck spanning tree
+4. Count number of MSTs
+5. Critical / Pseudo-critical edges
+6. Second Best MST
+7. MST after adding/removing edges
+8. Offline connectivity using DSU
+9. MST on grid
+10. XOR/AND/OR weighted MST variants
+
+DSU Template
+------------
+find(x)
+union(a,b)
+
+Always:
+- Path Compression
+- Union by Size / Rank
+
+Complexity:
+O(alpha(N)) per operation.
+
+Recognition Clues
+-----------------
+Think MST when problem says:
+- Connect all cities
+- Minimum total cable cost
+- Road construction
+- Network design
+- Electric wiring
+- Internet connections
+- Water pipelines
+- Connect islands
+- Minimum infrastructure cost
+- Exactly n-1 chosen edges
+- Remove expensive redundant roads
+
+Common Tricks
+-------------
+- Maximum Spanning Tree:
+      Sort edges descending.
+
+- Minimax Path:
+      Build MST.
+      Answer = maximum edge on MST path.
+
+- Maximum Bottleneck:
+      Build Maximum Spanning Tree.
+
+- Offline Queries:
+      Sort edges and queries together by weight.
+
+Remember
+--------
+Kruskal:
+    Sort edges.
+
+Prim:
+    Grow tree.
+
+Cut Property:
+    Minimum crossing edge is safe.
+
+Cycle Property:
+    Maximum edge in a cycle is unsafe.
+
+=========================================================================================
+*/
+
+/*
+======================== MST EDGE THEORY ========================
+
+Let edge e = (u, v, w)
+
+----------------------------------------------------------------
+1. Edge in EVERY MST
+----------------------------------------------------------------
+Edge e appears in every MST if:
+
+-> e is the UNIQUE minimum weight edge crossing some cut.
+
+Reason:
+By Cut Property, the lightest edge across a cut is always chosen.
+If it is unique, there is no alternative.
+
+---------------------------------------------------------------
+2. Edge in AT LEAST ONE MST
+---------------------------------------------------------------
+Edge e appears in some MST iff
+
+There is NO path from u to v consisting entirely of edges
+with weight strictly smaller than w.
+
+Equivalent:
+While running Kruskal, u and v are NOT already connected
+using only edges with weight < w.
+
+Otherwise e can never be chosen.
+
+---------------------------------------------------------------
+3. Edge in NO MST
+---------------------------------------------------------------
+Edge e cannot belong to any MST if
+
+There exists a cycle where e is the UNIQUE maximum weight edge.
+
+Reason:
+Cycle Property:
+The heaviest edge in a cycle is never useful.
+
+Equivalent:
+There already exists another path between u and v using only
+edges with weight strictly smaller than w.
+
+---------------------------------------------------------------
+4. Equal Weight Edges
+---------------------------------------------------------------
+Equal weights create multiple valid MSTs.
+
+An edge may
+- appear in some MSTs
+- disappear in others
+
+unless uniqueness conditions hold.
+
+---------------------------------------------------------------
+5. Distinct Edge Weights
+---------------------------------------------------------------
+If every edge weight is distinct
+
+-> MST is UNIQUE.
+
+Every chosen edge is forced.
+
+---------------------------------------------------------------
+6. Non-MST Edge
+---------------------------------------------------------------
+Suppose edge e is NOT chosen.
+
+Adding e creates exactly one cycle.
+
+To keep a spanning tree,
+remove the maximum edge on that cycle.
+
+If
+    w(e) == maxEdge
+then another MST may exist.
+
+If
+    w(e) > maxEdge
+then e can never improve MST.
+
+---------------------------------------------------------------
+7. MST Edge
+---------------------------------------------------------------
+Removing an MST edge splits the tree into two components.
+
+To reconnect them,
+choose the minimum edge crossing that cut.
+
+Useful in:
+- Dynamic MST
+- Second Best MST
+
+---------------------------------------------------------------
+8. Second Best MST
+---------------------------------------------------------------
+For every non-MST edge:
+
+    Add edge.
+    Find maximum edge on MST path.
+    Replace it.
+
+Minimum larger answer = Second MST.
+
+---------------------------------------------------------------
+9. Critical Edge
+---------------------------------------------------------------
+Critical edge:
+
+Removing it increases MST weight
+or disconnects the graph.
+
+Appears in EVERY MST.
+
+---------------------------------------------------------------
+10. Pseudo-Critical Edge
+---------------------------------------------------------------
+Pseudo-critical edge:
+
+Can appear in SOME MST
+but not necessarily all.
+
+Test:
+Force include the edge.
+If MST weight stays optimal,
+it is pseudo-critical.
+
+---------------------------------------------------------------
+11. Maximum Edge on MST Path
+---------------------------------------------------------------
+For any non-MST edge (u,v,w):
+
+maxEdge(path(u,v)) <= w
+
+Otherwise replacing the heavier edge
+would produce a cheaper spanning tree.
+
+Equality
+    => multiple MSTs possible.
+
+Strict inequality
+    => edge never enters MST.
+
+---------------------------------------------------------------
+12. Cut Property
+---------------------------------------------------------------
+For ANY cut:
+
+Minimum crossing edge
+belongs to SOME MST.
+
+Unique minimum
+belongs to EVERY MST.
+
+---------------------------------------------------------------
+13. Cycle Property
+---------------------------------------------------------------
+For ANY cycle:
+
+Maximum edge
+does NOT belong to ANY MST.
+
+Unique maximum
+can never appear in an MST.
+
+---------------------------------------------------------------
+14. Kruskal Interpretation
+---------------------------------------------------------------
+Sort edges by weight.
+
+Before processing weight w,
+
+All vertices connected using edges < w
+already behave as one component.
+
+Edge (u,v,w):
+
+Different components
+    -> can be chosen.
+
+Same component
+    -> never needed.
+
+===============================================================
+*/

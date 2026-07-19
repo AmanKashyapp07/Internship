@@ -28,7 +28,7 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
     vector<int> indegree(n + 1);
 
     while (m--)
@@ -36,7 +36,7 @@ int main()
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
+        graph[a].push_back(b);
         indegree[b]++;
     }
 
@@ -57,7 +57,7 @@ int main()
 
         topo.push_back(u);
 
-        for (int v : adj[u])
+        for (int v : graph[u])
         {
             if (--indegree[v] == 0)
                 q.push(v);

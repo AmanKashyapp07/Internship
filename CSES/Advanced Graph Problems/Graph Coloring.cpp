@@ -6,17 +6,17 @@ using namespace std;
 
 struct ChromaticNumber {
     int n;
-    vector<int> adj;
+    vector<int> graph;
     vector<bool> independent;
     vector<int> dp;
 
     ChromaticNumber(int _n) : n(_n) {
-        adj.assign(n, 0);
+        graph.assign(n, 0);
     }
 
     void addEdge(int u, int v) {
-        adj[u] |= (1 << v);
-        adj[v] |= (1 << u);
+        graph[u] |= (1 << v);
+        graph[v] |= (1 << u);
     }
 
     int solve() {
@@ -29,7 +29,7 @@ struct ChromaticNumber {
         for (int mask = 1; mask < N; mask++) {
             int v = __builtin_ctz(mask);
             int rest = mask ^ (1 << v);
-            independent[mask] = independent[rest] && ((adj[v] & rest) == 0);
+            independent[mask] = independent[rest] && ((graph[v] & rest) == 0);
         }
 
         const int INF = 1e9;

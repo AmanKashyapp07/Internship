@@ -28,14 +28,14 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
 
     while (m--)
     {
         int a, b;
         cin >> a >> b;
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     vector<int> parent(n + 1, -1);
@@ -49,7 +49,7 @@ int main()
         int u = q.front();
         q.pop();
 
-        for (int v : adj[u])
+        for (int v : graph[u])
         {
             if (parent[v] != -1)
                 continue;

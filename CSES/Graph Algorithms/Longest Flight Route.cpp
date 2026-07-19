@@ -30,14 +30,14 @@ int main()
 
     int n, m;
     cin >> n >> m;
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> graph(n + 1);
     vector<int> inDegree(n + 1, 0);
     vector<int> answer(n + 1, 0);
     for (int i = 0; i < m; i++)
     {
         int u, v;
         cin >> u >> v;
-        adj[u].push_back(v);
+        graph[u].push_back(v);
         inDegree[v]++;
     }
     answer[1] = 1;
@@ -56,7 +56,7 @@ int main()
         int u = q.front();
         q.pop();
         
-        for (int v : adj[u])
+        for (int v : graph[u])
         {
             if (answer[u]>0 && answer[v] < answer[u] + 1) 
             {

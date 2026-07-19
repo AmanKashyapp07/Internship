@@ -473,7 +473,7 @@ This document compiles the remaining 50 of the 100 most-asked theoretical and pr
 ### Q92. What is the difference between Row-level locking and Page-level locking?
 * **Asked by:** Microsoft, Oracle
 * **Answer:**
-  * **Row-Level Locking:** Locks individual records. High concurrency (other transactions can update adjacent rows), but higher memory overhead due to tracking thousands of individual locks.
+  * **Row-Level Locking:** Locks individual records. High concurrency (other transactions can update graphacent rows), but higher memory overhead due to tracking thousands of individual locks.
   * **Page-Level Locking:** Locks the entire disk block (page) containing many rows. Low concurrency (updates to one row block updates to all rows in that page), but extremely low memory footprint.
 
 ---

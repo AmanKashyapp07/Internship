@@ -300,7 +300,7 @@ public:
     vector<vector<int>> parent;
     int LOG;
 
-    void buildBinaryLifting(int n, vector<vector<int>>& adj, int root = 0) {
+    void buildBinaryLifting(int n, vector<vector<int>>& graph, int root = 0) {
         LOG = 32 - __builtin_clz(n);
         depth.assign(n, 0);
         parent.assign(LOG, vector<int>(n, -1));
@@ -313,7 +313,7 @@ public:
         while (!q.empty()) {
             int u = q.front();
             q.pop();
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (!visited[v]) {
                     visited[v] = true;
                     depth[v] = depth[u] + 1;
@@ -385,7 +385,7 @@ public:
 ```cpp
 class Solution {
 private:
-    pair<int, int> bfs(int start, int n, vector<vector<int>>& adj) {
+    pair<int, int> bfs(int start, int n, vector<vector<int>>& graph) {
         vector<int> dist(n, -1);
         queue<int> q;
         dist[start] = 0;
@@ -396,7 +396,7 @@ private:
             int u = q.front();
             q.pop();
 
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (dist[v] == -1) {
                     dist[v] = dist[u] + 1;
                     q.push(v);
@@ -411,9 +411,9 @@ private:
     }
 
 public:
-    int treeDiameter(int n, vector<vector<int>>& adj) {
-        auto [u, _] = bfs(0, n, adj);
-        auto [v, diameter] = bfs(u, n, adj);
+    int treeDiameter(int n, vector<vector<int>>& graph) {
+        auto [u, _] = bfs(0, n, graph);
+        auto [v, diameter] = bfs(u, n, graph);
         return diameter;
     }
 };
@@ -514,24 +514,24 @@ You need the answer for every node as if it were the root. Computing it naively 
 ```cpp
 class Solution {
 private:
-    void dfs1(int u, int p, vector<vector<int>>& adj, vector<int>& down, vector<int>& size) {
-        for (int v : adj[u]) {
+    void dfs1(int u, int p, vector<vector<int>>& graph, vector<int>& down, vector<int>& size) {
+        for (int v : graph[u]) {
             if (v != p) {
-                dfs1(v, u, adj, down, size);
+                dfs1(v, u, graph, down, size);
                 size[u] += size[v];
                 down[u] += down[v] + size[v];
             }
         }
     }
 
-    void dfs2(int u, int p, int n, vector<vector<int>>& adj, vector<int>& down, vector<int>& size, vector<int>& ans) {
+    void dfs2(int u, int p, int n, vector<vector<int>>& graph, vector<int>& down, vector<int>& size, vector<int>& ans) {
         ans[u] = down[u];
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (v != p) {
                 int old_down_u = down[u];
                 down[v] += (down[u] - down[v] - size[v]) + (n - size[v]);
                 size[v] = n;
-                dfs2(v, u, n, adj, down, size, ans);
+                dfs2(v, u, n, graph, down, size, ans);
                 down[u] = old_down_u;
                 // size[v] restoration
             }
@@ -539,12 +539,12 @@ private:
     }
 
 public:
-    vector<int> rerooting(int n, vector<vector<int>>& adj) {
+    vector<int> rerooting(int n, vector<vector<int>>& graph) {
         vector<int> down(n, 0);
         vector<int> size(n, 1);
         vector<int> ans(n, 0);
-        dfs1(0, -1, adj, down, size);
-        dfs2(0, -1, n, adj, down, size, ans);
+        dfs1(0, -1, graph, down, size);
+        dfs2(0, -1, n, graph, down, size, ans);
         return ans;
     }
 };
@@ -582,19 +582,19 @@ Convert tree to undirected graph, BFS from target node for K steps.
 ```cpp
 class Solution {
 private:
-    void build(TreeNode* node, TreeNode* parent, unordered_map<int, vector<int>>& adj) {
+    void build(TreeNode* node, TreeNode* parent, unordered_map<int, vector<int>>& graph) {
         if (parent) {
-            adj[node->val].push_back(parent->val);
-            adj[parent->val].push_back(node->val);
+            graph[node->val].push_back(parent->val);
+            graph[parent->val].push_back(node->val);
         }
-        if (node->left) build(node->left, node, adj);
-        if (node->right) build(node->right, node, adj);
+        if (node->left) build(node->left, node, graph);
+        if (node->right) build(node->right, node, graph);
     }
 
 public:
     vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
-        unordered_map<int, vector<int>> adj;
-        build(root, nullptr, adj);
+        unordered_map<int, vector<int>> graph;
+        build(root, nullptr, graph);
 
         unordered_set<int> visited = {target->val};
         queue<pair<int, int>> q;
@@ -608,7 +608,7 @@ public:
             if (dist == k) {
                 result.push_back(node);
             }
-            for (int neighbor : adj[node]) {
+            for (int neighbor : graph[node]) {
                 if (!visited.count(neighbor)) {
                     visited.insert(neighbor);
                     q.push({neighbor, dist + 1});
@@ -633,25 +633,25 @@ Subtree queries (sum of values in subtree, count of nodes), subtree updates, off
 ```cpp
 class Solution {
 private:
-    void dfs(int u, int parent, vector<vector<int>>& adj, vector<int>& entry, vector<int>& exit_pos, vector<int>& order, int& timer) {
+    void dfs(int u, int parent, vector<vector<int>>& graph, vector<int>& entry, vector<int>& exit_pos, vector<int>& order, int& timer) {
         entry[u] = timer;
         order.push_back(u);
         timer++;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (v != parent) {
-                dfs(v, u, adj, entry, exit_pos, order, timer);
+                dfs(v, u, graph, entry, exit_pos, order, timer);
             }
         }
         exit_pos[u] = timer - 1;
     }
 
 public:
-    tuple<vector<int>, vector<int>, vector<int>> eulerTour(vector<vector<int>>& adj, int n) {
+    tuple<vector<int>, vector<int>, vector<int>> eulerTour(vector<vector<int>>& graph, int n) {
         vector<int> entry(n, 0);
         vector<int> exit_pos(n, 0);
         vector<int> order;
         int timer = 0;
-        dfs(0, -1, adj, entry, exit_pos, order, timer);
+        dfs(0, -1, graph, entry, exit_pos, order, timer);
         return {entry, exit_pos, order};
     }
 };
@@ -907,46 +907,46 @@ Repeatedly find the centroid of the tree (removing it splits tree into parts of 
 ```cpp
 class Solution {
 private:
-    void getSize(int u, int p, vector<vector<int>>& adj, vector<bool>& removed, vector<int>& size) {
+    void getSize(int u, int p, vector<vector<int>>& graph, vector<bool>& removed, vector<int>& size) {
         size[u] = 1;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (v != p && !removed[v]) {
-                getSize(v, u, adj, removed, size);
+                getSize(v, u, graph, removed, size);
                 size[u] += size[v];
             }
         }
     }
 
-    int getCentroid(int u, int p, int tree_size, vector<vector<int>>& adj, vector<bool>& removed, vector<int>& size) {
-        for (int v : adj[u]) {
+    int getCentroid(int u, int p, int tree_size, vector<vector<int>>& graph, vector<bool>& removed, vector<int>& size) {
+        for (int v : graph[u]) {
             if (v != p && !removed[v]) {
                 if (size[v] > tree_size / 2) {
-                    return getCentroid(v, u, tree_size, adj, removed, size);
+                    return getCentroid(v, u, tree_size, graph, removed, size);
                 }
             }
         }
         return u;
     }
 
-    void solveCentroid(int u, vector<vector<int>>& adj, vector<bool>& removed, vector<int>& size) {
-        getSize(u, -1, adj, removed, size);
-        int c = getCentroid(u, -1, size[u], adj, removed, size);
+    void solveCentroid(int u, vector<vector<int>>& graph, vector<bool>& removed, vector<int>& size) {
+        getSize(u, -1, graph, removed, size);
+        int c = getCentroid(u, -1, size[u], graph, removed, size);
         removed[c] = true;
 
         // Process all paths through centroid c here
 
-        for (int v : adj[c]) {
+        for (int v : graph[c]) {
             if (!removed[v]) {
-                solveCentroid(v, adj, removed, size);
+                solveCentroid(v, graph, removed, size);
             }
         }
     }
 
 public:
-    void centroidDecomp(int n, vector<vector<int>>& adj) {
+    void centroidDecomp(int n, vector<vector<int>>& graph) {
         vector<int> size(n, 1);
         vector<bool> removed(n, false);
-        solveCentroid(0, adj, removed, size);
+        solveCentroid(0, graph, removed, size);
     }
 };
 ```

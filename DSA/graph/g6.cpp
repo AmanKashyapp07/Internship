@@ -146,11 +146,11 @@ vector<int> numIslandsII(int n, int m, vector<vector<int>>& queries) {
             if (!vis[nr][nc])
                 continue;
 
-            int adj = nr * m + nc;
+            int graph = nr * m + nc;
 
-            if (ds.find(node) != ds.find(adj)) {
+            if (ds.find(node) != ds.find(graph)) {
                 cnt--;
-                ds.unite(node, adj);
+                ds.unite(node, graph);
             }
         }
 
@@ -257,13 +257,13 @@ int swimInWater(vector<vector<int>>& grid) {
 
 // 1. Bridges in a Graph (Tarjan's Bridge-Finding Algorithm)
 void dfsBridge(int node, int parent, int& timer, vi& tin, vi& low, vi& vis, 
-               const vector<vi>& adj, vector<vector<int>>& bridges) {
+               const vector<vi>& graph, vector<vector<int>>& bridges) {
     vis[node] = 1;
     tin[node] = low[node] = timer++;
-    for (auto it : adj[node]) {
+    for (auto it : graph[node]) {
         if (it == parent) continue;
         if (!vis[it]) {
-            dfsBridge(it, node, timer, tin, low, vis, adj, bridges);
+            dfsBridge(it, node, timer, tin, low, vis, graph, bridges);
             low[node] = min(low[node], low[it]);
             if (low[it] > tin[node]) {
                 bridges.pb({node, it});
@@ -275,49 +275,49 @@ void dfsBridge(int node, int parent, int& timer, vi& tin, vi& low, vi& vis,
 }
 
 vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
-    vector<vi> adj(n);
+    vector<vi> graph(n);
     for (auto it : connections) {
-        adj[it[0]].pb(it[1]);
-        adj[it[1]].pb(it[0]);
+        graph[it[0]].pb(it[1]);
+        graph[it[1]].pb(it[0]);
     }
     vi tin(n, -1), low(n, -1), vis(n, 0);
     vector<vector<int>> bridges;
     int timer = 0;
-    dfsBridge(0, -1, timer, tin, low, vis, adj, bridges);
+    dfsBridge(0, -1, timer, tin, low, vis, graph, bridges);
     return bridges;
 }
 
 
 // 3. Kosaraju's Algorithm (Strongly Connected Components in Directed Graph)
-void dfsKosaraju(int node, vi& vis, const vector<vi>& adj, stack<int>& st) {
+void dfsKosaraju(int node, vi& vis, const vector<vi>& graph, stack<int>& st) {
     vis[node] = 1;
-    for (auto it : adj[node]) {
-        if (!vis[it]) dfsKosaraju(it, vis, adj, st);
+    for (auto it : graph[node]) {
+        if (!vis[it]) dfsKosaraju(it, vis, graph, st);
     }
     st.push(node);
 }
 
-void dfsReverse(int node, vi& vis, const vector<vi>& adjRev) {
+void dfsReverse(int node, vi& vis, const vector<vi>& graphRev) {
     vis[node] = 1;
-    for (auto it : adjRev[node]) {
-        if (!vis[it]) dfsReverse(it, vis, adjRev);
+    for (auto it : graphRev[node]) {
+        if (!vis[it]) dfsReverse(it, vis, graphRev);
     }
 }
 
-int kosarajuSCC(int V, vector<vi>& adj) {
+int kosarajuSCC(int V, vector<vi>& graph) {
     vi vis(V, 0);
     stack<int> st;
     // Step 1: Sort all nodes based on their finishing times
     for (int i = 0; i < V; i++) {
-        if (!vis[i]) dfsKosaraju(i, vis, adj, st);
+        if (!vis[i]) dfsKosaraju(i, vis, graph, st);
     }
 
     // Step 2: Transpose/Reverse graph matrices
-    vector<vi> adjRev(V);
+    vector<vi> graphRev(V);
     for (int i = 0; i < V; i++) {
         vis[i] = 0; // reset visited array for Step 3
-        for (auto it : adj[i]) {
-            adjRev[it].pb(i);
+        for (auto it : graph[i]) {
+            graphRev[it].pb(i);
         }
     }
 
@@ -328,7 +328,7 @@ int kosarajuSCC(int V, vector<vi>& adj) {
         st.pop();
         if (!vis[node]) {
             sccCount++;
-            dfsReverse(node, vis, adjRev);
+            dfsReverse(node, vis, graphRev);
         }
     }
     return sccCount;

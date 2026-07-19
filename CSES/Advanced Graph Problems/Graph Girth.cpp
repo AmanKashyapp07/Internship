@@ -58,12 +58,12 @@ int main() {
     cin.tie(NULL);
     int n,m;
     cin>>n>>m;
-    vector<vector<int>> adj(n+1);
+    vector<vector<int>> graph(n+1);
     for(int i=0;i<m;i++){
         int u,v;
         cin>>u>>v;
-        adj[u].push_back(v);
-        adj[v].push_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
     vector<bool> visited(n+1,false);
     int ans=INF;
@@ -75,7 +75,7 @@ int main() {
         while(!q.empty()){
             auto [u,p]=q.front();
             q.pop();
-            for(int v:adj[u]){
+            for(int v:graph[u]){
                 if(v==p) continue;
                 if(dist[v]==INF){
                     dist[v]=dist[u]+1;

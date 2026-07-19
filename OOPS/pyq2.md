@@ -1,6 +1,6 @@
 # Object-Oriented Programming (OOP) Master Interview Q&A — Part 2 (Q51–Q100) 🚀
 
-This document compiles the remaining 50 of the 100 most-asked Object-Oriented Programming (OOP) and Software Design interview questions. It focuses heavily on deep-dive **SOLID Principles**, advanced compiler memory layouts (multiple inheritance offsets, VTABLE adjustments), resource management (smart pointers, RAII), concurrency models inside OOP (monitors, class locks), and compile-time optimizations (RVO, move semantics).
+This document compiles the remaining 50 of the 100 most-asked Object-Oriented Programming (OOP) and Software Design interview questions. It focuses heavily on deep-dive **SOLID Principles**, advanced compiler memory layouts (multiple inheritance offsets, VTABLE graphustments), resource management (smart pointers, RAII), concurrency models inside OOP (monitors, class locks), and compile-time optimizations (RVO, move semantics).
 
 ---
 
@@ -164,7 +164,7 @@ This document compiles the remaining 50 of the 100 most-asked Object-Oriented Pr
   * **How dynamic_cast works:**
     * When converting a base pointer to a derived pointer (`dynamic_cast<Derived*>(base_ptr)`), the compiler checks the RTTI metadata associated with the object.
     * It traverses the virtual table (VTABLE) structures to verify if the physical object is indeed a `Derived` class instance (or its subtype).
-    * If valid, it returns the adjusted pointer. If invalid, it returns `nullptr` (for pointers) or throws `std::bad_cast` (for references). This requires runtime overhead compared to `static_cast` (which does no runtime checks).
+    * If valid, it returns the graphusted pointer. If invalid, it returns `nullptr` (for pointers) or throws `std::bad_cast` (for references). This requires runtime overhead compared to `static_cast` (which does no runtime checks).
 
 ---
 
@@ -203,14 +203,14 @@ This document compiles the remaining 50 of the 100 most-asked Object-Oriented Pr
 * **Asked by:** Core C++ roles, Game engines, Compiler devs
 * **Answer:**
   * Under multiple inheritance, a derived class object must contain the layouts of all its parent classes physically aligned.
-  * **Pointer Adjustment:**
+  * **Pointer graphustment:**
     If `Class C` inherits from `Class A` and `Class B`:
     ```cpp
     C* c_ptr = new C();
     A* a_ptr = c_ptr; // Points to start of C object (matching A layout)
-    B* b_ptr = c_ptr; // Adjusted forward by sizeof(A) to align with B layout!
+    B* b_ptr = c_ptr; // graphusted forward by sizeof(A) to align with B layout!
     ```
-    The compiler automatically inserts code to add an **offset adjustment** to the pointer address during assignment to match the memory layout of parent `B`.
+    The compiler automatically inserts code to add an **offset graphustment** to the pointer address during assignment to match the memory layout of parent `B`.
 
 ---
 

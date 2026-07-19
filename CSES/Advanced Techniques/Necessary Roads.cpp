@@ -4,7 +4,7 @@
 using namespace std;
 
 int n, m;
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 
 vector<int> tin, low;
 vector<pair<int, int>> bridges;
@@ -13,7 +13,7 @@ int timer = 0;
 void dfs(int u, int parent) {
     tin[u] = low[u] = ++timer;
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
 
         if (v == parent) continue;
 
@@ -40,14 +40,14 @@ int main() {
 
     cin >> n >> m;
 
-    adj.resize(n + 1);
+    graph.resize(n + 1);
 
     for (int i = 0; i < m; i++) {
         int a, b;
         cin >> a >> b;
 
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     tin.assign(n + 1, 0);

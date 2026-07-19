@@ -75,7 +75,7 @@ Look for these key signals in the problem statement:
 
 ## ⚡ Top Graph Bugs to Avoid
 
-1.  **Forgot to Reset:** Global adjacency lists and visited arrays retain values from previous test cases. Reset them inside the class entry function.
+1.  **Forgot to Reset:** Global graphacency lists and visited arrays retain values from previous test cases. Reset them inside the class entry function.
 2.  **Stack Overflow:** In deep tree DFS, limit local variables inside recursions or convert to iterative traversals if tree depth can reach `10^5`.
 3.  **Out of Bounds:** Graph vertices can be `1`-indexed. Ensure arrays are sized `N + 1`.
 4.  **Priority Queue Order:** In C++, `priority_queue<T>` is a max-heap. For Dijkstra, declare it as:

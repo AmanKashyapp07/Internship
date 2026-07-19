@@ -37,7 +37,7 @@ const ll MOD = 1e9 + 7;
 
 
 // 1. Shortest Path in Undirected Graph with Unit Weights (Standard BFS)
-vi shortestPathUnitWeights(int V, vector<vi>& adj, int src) {
+vi shortestPathUnitWeights(int V, vector<vi>& graph, int src) {
     vi dist(V, INF);
     dist[src] = 0;
     queue<int> q;
@@ -47,7 +47,7 @@ vi shortestPathUnitWeights(int V, vector<vi>& adj, int src) {
         int node = q.front();
         q.pop();
 
-        for (auto it : adj[node]) {
+        for (auto it : graph[node]) {
             if (dist[node] + 1 < dist[it]) {
                 dist[it] = dist[node] + 1;
                 q.push(it);
@@ -60,10 +60,10 @@ vi shortestPathUnitWeights(int V, vector<vi>& adj, int src) {
 }
 
 // 2. Shortest Path in Directed Acyclic Graph (DAG via Topo Sort)
-vi shortestPathDAG(int V, const vector<vector<pii>>& adj, int src) {
+vi shortestPathDAG(int V, const vector<vector<pii>>& graph, int src) {
     vi indegree(V, 0);
     for (int i = 0; i < V; i++) {
-        for (auto it : adj[i]) indegree[it.ff]++;
+        for (auto it : graph[i]) indegree[it.ff]++;
     }
 
     queue<int> q;
@@ -73,7 +73,7 @@ vi shortestPathDAG(int V, const vector<vector<pii>>& adj, int src) {
     while (!q.empty()) {
         int node = q.front(); q.pop();
         topo.pb(node);
-        for (auto it : adj[node]) {
+        for (auto it : graph[node]) {
             indegree[it.ff]--;
             if (indegree[it.ff] == 0) q.push(it.ff);
         }
@@ -85,7 +85,7 @@ vi shortestPathDAG(int V, const vector<vector<pii>>& adj, int src) {
     for (int i = 0; i < V; i++) {
         int node = topo[i];
         if (dist[node] != INF) {
-            for (auto it : adj[node]) {
+            for (auto it : graph[node]) {
                 int v = it.ff;
                 int wt = it.ss;
                 if (dist[node] + wt < dist[v]) {
@@ -99,7 +99,7 @@ vi shortestPathDAG(int V, const vector<vector<pii>>& adj, int src) {
 } // returns vector storing shortest distance from src to all other nodes, -1 if unreachable
 
 // 3 & 4. Dijkstra's Algorithm (Using Min-Priority Queue)
-vi dijkstra(int V, const vector<vector<pii>>& adj, int src) {
+vi dijkstra(int V, const vector<vector<pii>>& graph, int src) {
     // Note: Priority queue is used to greedily pick the minimum distance node first, 
     // optimization that guarantees O((V + E) log V) time complexity.
     priority_queue<pii, vector<pii>, greater<pii>> pq; // {dist, node}
@@ -115,7 +115,7 @@ vi dijkstra(int V, const vector<vector<pii>>& adj, int src) {
 
         if (d > dist[node]) continue;
 
-        for (auto it : adj[node]) {
+        for (auto it : graph[node]) {
             int v = it.ff;
             int wt = it.ss;
             if (d + wt < dist[v]) {
@@ -201,8 +201,8 @@ int minimumEffortPath(vector<vector<int>>& heights) {
 
 // 8. Network Delay Time (Dijkstra Variant)
 int networkDelayTime(vector<vector<int>>& times, int n, int k) {
-    vector<vector<pii>> adj(n + 1);
-    for (auto& t : times) adj[t[0]].pb({t[1], t[2]});
+    vector<vector<pii>> graph(n + 1);
+    for (auto& t : times) graph[t[0]].pb({t[1], t[2]});
 
     vi dist(n + 1, INF);
     priority_queue<pii, vector<pii>, greater<pii>> pq; // storing {time, node}
@@ -217,7 +217,7 @@ int networkDelayTime(vector<vector<int>>& times, int n, int k) {
 
         if (d > dist[node]) continue;
 
-        for (auto& it : adj[node]) {
+        for (auto& it : graph[node]) {
             if (d + it.ss < dist[it.ff]) {
                 dist[it.ff] = d + it.ss;
                 pq.push({dist[it.ff], it.ff});
@@ -235,10 +235,10 @@ int networkDelayTime(vector<vector<int>>& times, int n, int k) {
 
 // 9. Number of Ways to Arrive at Destination
 int countPaths(int n, vector<vector<int>>& roads) {
-    vector<vector<pll>> adj(n);
+    vector<vector<pll>> graph(n);
     for (auto& r : roads) {
-        adj[r[0]].pb({r[1], r[2]});
-        adj[r[1]].pb({r[0], r[2]});
+        graph[r[0]].pb({r[1], r[2]});
+        graph[r[1]].pb({r[0], r[2]});
     }
 
     priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
@@ -255,7 +255,7 @@ int countPaths(int n, vector<vector<int>>& roads) {
 
         if (d > dist[node]) continue;
 
-        for (auto& it : adj[node]) {
+        for (auto& it : graph[node]) {
             int v = it.ff;
             ll wt = it.ss;
 

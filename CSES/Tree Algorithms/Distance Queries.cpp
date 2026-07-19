@@ -8,7 +8,7 @@ using namespace std;
 const int MAX_NODES = 200005;
 const int LOG = 20; // Enough for up to 2^19 nodes
 
-vector<int> adj[MAX_NODES];
+vector<int> graph[MAX_NODES];
 int up[MAX_NODES][LOG];
 int depth[MAX_NODES];
 
@@ -23,7 +23,7 @@ void dfs(int u, int p, int d) {
     }
     
     // Process children
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v != p) {
             dfs(v, u, d + 1);
         }
@@ -77,8 +77,8 @@ int main() {
     for (int i = 0; i < n - 1; i++) {
         int u, v;
         cin >> u >> v;
-        adj[u].push_back(v);
-        adj[v].push_back(u); // Because the tree is undirected
+        graph[u].push_back(v);
+        graph[v].push_back(u); // Because the tree is undirected
     }
     
     // Initialize depth and build the 'up' table.

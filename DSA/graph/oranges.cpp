@@ -8,7 +8,7 @@
  * Approach:
  * - Multi-source BFS starting from all rotten orange coordinates.
  * - Keep track of fresh orange counts.
- * - Rot adjacent fresh oranges level-by-level and decrement the fresh orange counter.
+ * - Rot graphacent fresh oranges level-by-level and decrement the fresh orange counter.
  *
  * Time Complexity: O(R * C)
  * Space Complexity: O(R * C)

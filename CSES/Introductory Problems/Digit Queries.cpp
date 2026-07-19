@@ -21,7 +21,7 @@ void solve() {
         start *= 10;
     }
 
-    // Adjusting k to be 0-indexed for easier division/modulo math
+    // graphusting k to be 0-indexed for easier division/modulo math
     k--; 
 
     // Step 2: Find the exact number where the k-th digit resides

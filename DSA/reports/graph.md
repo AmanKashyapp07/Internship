@@ -4,7 +4,7 @@
 
 Every graph problem in an OA or interview follows a recognizable pattern. The workflow is:
 
-1. Read the problem and identify the graph type (grid, adjacency list, implicit).
+1. Read the problem and identify the graph type (grid, graphacency list, implicit).
 2. Identify what is being asked (reachability, shortest path, ordering, components, etc.).
 3. Map it to one of the 13 categories below.
 4. Apply the template for that category.
@@ -21,7 +21,7 @@ Before writing any code, answer these five questions:
 Cells in a grid, integers, strings, states (e.g., bitmasks), cities, courses.
 
 **Q2: What are the edges?**
-Adjacent cells, dependencies, flights, roads, explicit pairs in input.
+graphacent cells, dependencies, flights, roads, explicit pairs in input.
 
 **Q3: Is the graph directed or undirected?**
 Dependencies, prerequisites, and one-way roads are directed. Friendships, roads (bidirectional), and grids are usually undirected.
@@ -131,21 +131,21 @@ Counting groups, merging groups, asking "how many separate clusters exist?"
 ```cpp
 class Solution {
 private:
-    void dfs(int node, vector<vector<int>>& adj, vector<bool>& visited) {
+    void dfs(int node, vector<vector<int>>& graph, vector<bool>& visited) {
         visited[node] = true;
-        for (int neighbor : adj[node]) {
+        for (int neighbor : graph[node]) {
             if (!visited[neighbor]) {
-                dfs(neighbor, adj, visited);
+                dfs(neighbor, graph, visited);
             }
         }
     }
 
 public:
     int countComponents(int n, vector<vector<int>>& edges) {
-        vector<vector<int>> adj(n);
+        vector<vector<int>> graph(n);
         for (auto& edge : edges) {
-            adj[edge[0]].push_back(edge[1]);
-            adj[edge[1]].push_back(edge[0]);
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
         }
 
         vector<bool> visited(n, false);
@@ -153,7 +153,7 @@ public:
 
         for (int i = 0; i < n; i++) {
             if (!visited[i]) {
-                dfs(i, adj, visited);
+                dfs(i, graph, visited);
                 count++;
             }
         }
@@ -166,7 +166,7 @@ public:
 ### Key Problems
 | Problem | Trick |
 |---|---|
-| 547. Number of Provinces | Standard component count on adjacency matrix |
+| 547. Number of Provinces | Standard component count on graphacency matrix |
 | 1319. Make Network Connected | Need at least n-1 edges; count extras with DSU |
 
 ---
@@ -184,13 +184,13 @@ Problems asking if a cycle exists, whether a schedule is possible, or finding a 
 ```cpp
 class Solution {
 private:
-    bool dfs(int node, vector<vector<int>>& adj, vector<int>& color) {
+    bool dfs(int node, vector<vector<int>>& graph, vector<int>& color) {
         color[node] = 1; // GRAY: visiting
-        for (int neighbor : adj[node]) {
+        for (int neighbor : graph[node]) {
             if (color[neighbor] == 1) {
                 return true; // back edge = cycle
             }
-            if (color[neighbor] == 0 && dfs(neighbor, adj, color)) {
+            if (color[neighbor] == 0 && dfs(neighbor, graph, color)) {
                 return true;
             }
         }
@@ -199,10 +199,10 @@ private:
     }
 
 public:
-    bool hasCycleDirected(int n, vector<vector<int>>& adj) {
+    bool hasCycleDirected(int n, vector<vector<int>>& graph) {
         vector<int> color(n, 0); // 0: WHITE (unvisited)
         for (int i = 0; i < n; i++) {
-            if (color[i] == 0 && dfs(i, adj, color)) {
+            if (color[i] == 0 && dfs(i, graph, color)) {
                 return true;
             }
         }
@@ -270,11 +270,11 @@ Tasks with dependencies, ordering courses, "which comes first" problems.
 class Solution {
 public:
     vector<int> topoSort(int n, vector<vector<int>>& prerequisites) {
-        vector<vector<int>> adj(n);
+        vector<vector<int>> graph(n);
         vector<int> in_degree(n, 0);
 
         for (auto& edge : prerequisites) {
-            adj[edge[1]].push_back(edge[0]);
+            graph[edge[1]].push_back(edge[0]);
             in_degree[edge[0]]++;
         }
 
@@ -290,7 +290,7 @@ public:
             int node = q.front();
             q.pop();
             order.push_back(node);
-            for (int neighbor : adj[node]) {
+            for (int neighbor : graph[node]) {
                 in_degree[neighbor]--;
                 if (in_degree[neighbor] == 0) {
                     q.push(neighbor);
@@ -338,7 +338,7 @@ Is the graph unweighted?
 ```cpp
 class Solution {
 public:
-    vector<int> dijkstra(int n, vector<vector<pair<int, int>>>& adj, int src) {
+    vector<int> dijkstra(int n, vector<vector<pair<int, int>>>& graph, int src) {
         vector<int> dist(n, 1e9);
         dist[src] = 0;
         // Min-heap priority queue storing {cost, node}
@@ -353,7 +353,7 @@ public:
                 continue;
             }
 
-            for (auto& edge : adj[u]) {
+            for (auto& edge : graph[u]) {
                 int v = edge.first;
                 int w = edge.second;
                 if (dist[u] + w < dist[v]) {
@@ -500,21 +500,21 @@ public:
 Can nodes be split into two groups with no edges within each group? Coloring, matching, conflict problems.
 
 ### Signal Words
-"two groups", "color with two colors", "bipartition", "no two adjacent same color"
+"two groups", "color with two colors", "bipartition", "no two graphacent same color"
 
 ### Template
 
 ```cpp
 class Solution {
 private:
-    bool bfs(int start, vector<vector<int>>& adj, vector<int>& color) {
+    bool bfs(int start, vector<vector<int>>& graph, vector<int>& color) {
         queue<int> q;
         q.push(start);
         color[start] = 0;
         while (!q.empty()) {
             int node = q.front();
             q.pop();
-            for (int neighbor : adj[node]) {
+            for (int neighbor : graph[node]) {
                 if (color[neighbor] == -1) {
                     color[neighbor] = 1 - color[node];
                     q.push(neighbor);
@@ -527,11 +527,11 @@ private:
     }
 
 public:
-    bool isBipartite(int n, vector<vector<int>>& adj) {
+    bool isBipartite(int n, vector<vector<int>>& graph) {
         vector<int> color(n, -1);
         for (int i = 0; i < n; i++) {
             if (color[i] == -1) {
-                if (!bfs(i, adj, color)) {
+                if (!bfs(i, graph, color)) {
                     return false;
                 }
             }
@@ -642,7 +642,7 @@ public:
 ```cpp
 class Solution {
 public:
-    int prim(int n, vector<vector<pair<int, int>>>& adj) {
+    int prim(int n, vector<vector<pair<int, int>>>& graph) {
         vector<bool> visited(n, false);
         // Min-heap storing {cost, node}
         priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
@@ -661,7 +661,7 @@ public:
             total += cost;
             visited_count++;
 
-            for (auto& edge : adj[u]) {
+            for (auto& edge : graph[u]) {
                 int v = edge.first;
                 int w = edge.second;
                 if (!visited[v]) {
@@ -690,41 +690,41 @@ In a directed graph, find groups where every node can reach every other node in 
 ```cpp
 class Solution {
 private:
-    void dfs1(int u, vector<vector<int>>& adj, vector<bool>& visited, vector<int>& order) {
+    void dfs1(int u, vector<vector<int>>& graph, vector<bool>& visited, vector<int>& order) {
         visited[u] = true;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (!visited[v]) {
-                dfs1(v, adj, visited, order);
+                dfs1(v, graph, visited, order);
             }
         }
         order.push_back(u);
     }
 
-    void dfs2(int u, vector<vector<int>>& radj, vector<bool>& visited, vector<int>& comp) {
+    void dfs2(int u, vector<vector<int>>& rgraph, vector<bool>& visited, vector<int>& comp) {
         visited[u] = true;
         comp.push_back(u);
-        for (int v : radj[u]) {
+        for (int v : rgraph[u]) {
             if (!visited[v]) {
-                dfs2(v, radj, visited, comp);
+                dfs2(v, rgraph, visited, comp);
             }
         }
     }
 
 public:
-    vector<vector<int>> kosaraju(int n, vector<vector<int>>& adj) {
+    vector<vector<int>> kosaraju(int n, vector<vector<int>>& graph) {
         vector<bool> visited(n, false);
         vector<int> order;
 
         for (int i = 0; i < n; i++) {
             if (!visited[i]) {
-                dfs1(i, adj, visited, order);
+                dfs1(i, graph, visited, order);
             }
         }
 
-        vector<vector<int>> radj(n);
+        vector<vector<int>> rgraph(n);
         for (int u = 0; u < n; u++) {
-            for (int v : adj[u]) {
-                radj[v].push_back(u);
+            for (int v : graph[u]) {
+                rgraph[v].push_back(u);
             }
         }
 
@@ -735,7 +735,7 @@ public:
             int u = order[i];
             if (!visited[u]) {
                 vector<int> comp;
-                dfs2(u, radj, visited, comp);
+                dfs2(u, rgraph, visited, comp);
                 sccs.push_back(comp);
             }
         }
@@ -760,11 +760,11 @@ Find edges or nodes whose removal disconnects the graph.
 ```cpp
 class Solution {
 private:
-    void dfs(int u, int parent, vector<vector<int>>& adj, vector<int>& disc, vector<int>& low, int& timer, vector<vector<int>>& bridges) {
+    void dfs(int u, int parent, vector<vector<int>>& graph, vector<int>& disc, vector<int>& low, int& timer, vector<vector<int>>& bridges) {
         disc[u] = low[u] = timer++;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (disc[v] == -1) {
-                dfs(v, u, adj, disc, low, timer, bridges);
+                dfs(v, u, graph, disc, low, timer, bridges);
                 low[u] = min(low[u], low[v]);
                 if (low[v] > disc[u]) {
                     bridges.push_back({u, v});
@@ -776,7 +776,7 @@ private:
     }
 
 public:
-    vector<vector<int>> findBridges(int n, vector<vector<int>>& adj) {
+    vector<vector<int>> findBridges(int n, vector<vector<int>>& graph) {
         vector<int> disc(n, -1);
         vector<int> low(n, 0);
         vector<vector<int>> bridges;
@@ -784,7 +784,7 @@ public:
 
         for (int i = 0; i < n; i++) {
             if (disc[i] == -1) {
-                dfs(i, -1, adj, disc, low, timer, bridges);
+                dfs(i, -1, graph, disc, low, timer, bridges);
             }
         }
 
@@ -808,10 +808,10 @@ Longest/shortest path, counting paths, or optimizing values along a directed acy
 ```cpp
 class Solution {
 public:
-    int dagDp(int n, vector<vector<pair<int, int>>>& adj, vector<int>& values) {
+    int dagDp(int n, vector<vector<pair<int, int>>>& graph, vector<int>& values) {
         vector<int> in_degree(n, 0);
         for (int u = 0; u < n; u++) {
-            for (auto& edge : adj[u]) {
+            for (auto& edge : graph[u]) {
                 in_degree[edge.first]++;
             }
         }
@@ -828,7 +828,7 @@ public:
             int u = q.front();
             q.pop();
 
-            for (auto& edge : adj[u]) {
+            for (auto& edge : graph[u]) {
                 int v = edge.first;
                 int w = edge.second;
                 dp[v] = max(dp[v], dp[u] + w);
@@ -858,7 +858,7 @@ Run two BFS/DFS passes:
 ```cpp
 class Solution {
 private:
-    pair<int, int> bfs(int start, int n, vector<vector<int>>& adj) {
+    pair<int, int> bfs(int start, int n, vector<vector<int>>& graph) {
         vector<int> dist(n, -1);
         queue<int> q;
         dist[start] = 0;
@@ -869,7 +869,7 @@ private:
             int u = q.front();
             q.pop();
 
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (dist[v] == -1) {
                     dist[v] = dist[u] + 1;
                     q.push(v);
@@ -884,9 +884,9 @@ private:
     }
 
 public:
-    int treeDiameter(int n, vector<vector<int>>& adj) {
-        auto [u, _] = bfs(0, n, adj);
-        auto [v, diam] = bfs(u, n, adj);
+    int treeDiameter(int n, vector<vector<int>>& graph) {
+        auto [u, _] = bfs(0, n, graph);
+        auto [v, diam] = bfs(u, n, graph);
         return diam;
     }
 };
@@ -901,7 +901,7 @@ public:
     vector<vector<int>> parent;
     int LOG;
 
-    void buildLca(int n, vector<vector<int>>& adj, int root = 0) {
+    void buildLca(int n, vector<vector<int>>& graph, int root = 0) {
         LOG = 32 - __builtin_clz(n);
         depth.assign(n, 0);
         parent.assign(LOG, vector<int>(n, -1));
@@ -915,7 +915,7 @@ public:
             int u = q.front();
             q.pop();
 
-            for (int v : adj[u]) {
+            for (int v : graph[u]) {
                 if (!visited[v]) {
                     visited[v] = true;
                     depth[v] = depth[u] + 1;
@@ -971,15 +971,15 @@ Conditions:
 ```cpp
 class Solution {
 public:
-    vector<int> hierholzer(vector<vector<int>>& adj, int start) {
+    vector<int> hierholzer(vector<vector<int>>& graph, int start) {
         vector<int> stack = {start};
         vector<int> path;
 
         while (!stack.empty()) {
             int v = stack.back();
-            if (!adj[v].empty()) {
-                int u = adj[v].back();
-                adj[v].pop_back();
+            if (!graph[v].empty()) {
+                int u = graph[v].back();
+                graph[v].pop_back();
                 stack.push_back(u);
             } else {
                 path.push_back(stack.back());
@@ -997,11 +997,11 @@ public:
 ```cpp
 class Solution {
 private:
-    bool dfs(int u, vector<vector<int>>& adj, vector<bool>& visited, vector<int>& match_l, vector<int>& match_r) {
-        for (int v : adj[u]) {
+    bool dfs(int u, vector<vector<int>>& graph, vector<bool>& visited, vector<int>& match_l, vector<int>& match_r) {
+        for (int v : graph[u]) {
             if (!visited[v]) {
                 visited[v] = True;
-                if (match_r[v] == -1 || dfs(match_r[v], adj, visited, match_l, match_r)) {
+                if (match_r[v] == -1 || dfs(match_r[v], graph, visited, match_l, match_r)) {
                     match_l[u] = v;
                     match_r[v] = u;
                     return true;
@@ -1012,14 +1012,14 @@ private:
     }
 
 public:
-    int maxMatching(int left_n, int right_n, vector<vector<int>>& adj) {
+    int maxMatching(int left_n, int right_n, vector<vector<int>>& graph) {
         vector<int> match_l(left_n, -1);
         vector<int> match_r(right_n, -1);
 
         int result = 0;
         for (int u = 0; u < left_n; u++) {
             vector<bool> visited(right_n, false);
-            if (dfs(u, adj, visited, match_l, match_r)) {
+            if (dfs(u, graph, visited, match_l, match_r)) {
                 result++;
             }
         }

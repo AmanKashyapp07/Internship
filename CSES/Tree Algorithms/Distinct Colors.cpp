@@ -5,7 +5,7 @@ using namespace std;
 
 const int N = 200005;
 
-vector<int> adj[N];
+vector<int> graph[N];
 int color[N];
 int ans[N];
 
@@ -13,7 +13,7 @@ set<int>* dfs(int u, int p) {
     set<int>* cur = new set<int>();
     cur->insert(color[u]);
 
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue;
 
         set<int>* child = dfs(v, u);
@@ -44,8 +44,8 @@ int main() {
     for (int i = 0; i < n - 1; i++) {
         int a, b;
         cin >> a >> b;
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+        graph[a].push_back(b);
+        graph[b].push_back(a);
     }
 
     set<int>* root = dfs(1, 0);

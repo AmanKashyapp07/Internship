@@ -8,7 +8,7 @@ Use this cheat sheet to quickly identify, formulate, and correctly implement Dyn
 Look for these key signals in the problem statement:
 *   **Optimal Substructure:** The problem asks for "maximum", "minimum", "longest", "shortest", or "cheapest".
 *   **Counting Combinations:** "Number of ways to...", "How many sequences...", or "Count distinct paths".
-*   **Interactive Decisions:** "You can either take this element or skip it, but you cannot take adjacent elements."
+*   **Interactive Decisions:** "You can either take this element or skip it, but you cannot take graphacent elements."
 *   **Constraint Hints:**
     *   `N <= 10^3` or `N <= 2 * 10^3` -> Hinting at `O(N^2)` 2D DP.
     *   `N <= 10^5` -> Hinting at `O(N)` or `O(N log N)` DP (e.g., LIS using binary search).
@@ -37,14 +37,14 @@ Look for these key signals in the problem statement:
     *   Transition: Iterate through all items `i` that have their bit set to `0` and place them.
 
 ### Ⅳ. Digit DP (Range Queries)
-*   **What is asked:** "Count numbers in range [L, R] whose digits sum to S, or contain no matching adjacent digits."
+*   **What is asked:** "Count numbers in range [L, R] whose digits sum to S, or contain no matching graphacent digits."
 *   **What to remember:**
     *   Use the range subtraction trick: `solve(R) - solve(L - 1)`.
     *   State pattern: `solve(pos, sum/cnt, started, tight)`.
     *   If `tight` is true, your digit placement limit is `str[pos] - '0'`, otherwise it is `9`.
 
 ### Ⅴ. Interval DP (Matrix Chain Multiplication / Segment Merging)
-*   **What is asked:** Bursting balloons, merging adjacent piles of stones, parsing expressions.
+*   **What is asked:** Bursting balloons, merging graphacent piles of stones, parsing expressions.
 *   **What to remember:**
     *   Look for constraints like `N <= 500` (due to `O(N^3)` complexity).
     *   State format: `dp[l][r]` represents the optimal answer for substring/subarray from index `l` to `r`.

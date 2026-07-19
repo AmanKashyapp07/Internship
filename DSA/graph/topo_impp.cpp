@@ -40,7 +40,7 @@ using namespace std;
 class Solution {
 private:
     // Reusable Kahn's algorithm for topological sorting
-    vector<int> topoSort(const vector<vector<int>>& adj, vector<int>& indegree, const vector<int>& nodes) {
+    vector<int> topoSort(const vector<vector<int>>& graph, vector<int>& indegree, const vector<int>& nodes) {
         queue<int> q;
         for (int node : nodes) {
             if (indegree[node] == 0) {
@@ -54,7 +54,7 @@ private:
             q.pop();
             ordered.push_back(curr);
             
-            for (int neighbor : adj[curr]) {
+            for (int neighbor : graph[curr]) {
                 indegree[neighbor]--;
                 if (indegree[neighbor] == 0) {
                     q.push(neighbor);
@@ -77,10 +77,10 @@ public:
         }
         
         // Step 2: Initialize graphs and indegrees for both items and groups
-        vector<vector<int>> item_adj(n);
+        vector<vector<int>> item_graph(n);
         vector<int> item_indegree(n, 0);
         
-        vector<vector<int>> group_adj(group_id);
+        vector<vector<int>> group_graph(group_id);
         vector<int> group_indegree(group_id, 0);
         
         // Populate lists of all unique item nodes and group nodes to pass to topoSort
@@ -99,20 +99,20 @@ public:
                 int from_group = group[from_item];
                 
                 // Add item-level dependency
-                item_adj[from_item].push_back(to_item);
+                item_graph[from_item].push_back(to_item);
                 item_indegree[to_item]++;
                 
                 // Add group-level dependency if they belong to different groups
                 if (from_group != to_group) {
-                    group_adj[from_group].push_back(to_group);
+                    group_graph[from_group].push_back(to_group);
                     group_indegree[to_group]++;
                 }
             }
         }
         
         // Step 4: Run topological sorts at both levels
-        vector<int> sorted_items = topoSort(item_adj, item_indegree, item_nodes);
-        vector<int> sorted_groups = topoSort(group_adj, group_indegree, group_nodes);
+        vector<int> sorted_items = topoSort(item_graph, item_indegree, item_nodes);
+        vector<int> sorted_groups = topoSort(group_graph, group_indegree, group_nodes);
         
         // If a cycle is detected at either level, it's impossible to sort
         if (sorted_items.empty() || sorted_groups.empty()) {

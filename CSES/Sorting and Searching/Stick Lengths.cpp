@@ -68,47 +68,47 @@ void sieve(int n) {
 
 /*
 void readGraph(int nodes, int edges, bool directed = false) {
-    vector<vector<int>> adj(nodes + 1); // 1-indexed
+    vector<vector<int>> graph(nodes + 1); // 1-indexed
     for (int i = 0; i < edges; i++) {
         int u, v;
         cin >> u >> v;
-        adj[u].push_back(v);
-        if (!directed) adj[v].push_back(u);
+        graph[u].push_back(v);
+        if (!directed) graph[v].push_back(u);
     }
 }
 */
 
 /*
-void dfs(int node, vector<vector<int>> &adj, vector<bool> &visited) {
+void dfs(int node, vector<vector<int>> &graph, vector<bool> &visited) {
     visited[node] = true;
     // process node here
-    for (int neighbor : adj[node]) {
-        if (!visited[neighbor]) dfs(neighbor, adj, visited);
+    for (int neighbor : graph[node]) {
+        if (!visited[neighbor]) dfs(neighbor, graph, visited);
     }
 }
 */
 
 /*
-void dfsTree(int u, int p, vector<vector<int>> &adj) {
+void dfsTree(int u, int p, vector<vector<int>> &graph) {
     // before exploring children
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue;
-        dfsTree(v, u, adj);
+        dfsTree(v, u, graph);
     }
     // after exploring children
 }
 */
 
 /*
-void bfs(int start, vector<vector<int>> &adj) {
-    vector<bool> visited(adj.size(), false);
+void bfs(int start, vector<vector<int>> &graph) {
+    vector<bool> visited(graph.size(), false);
     queue<int> q;
     q.push(start);
     visited[start] = true;
     while (!q.empty()) {
         int node = q.front(); q.pop();
         // process node here
-        for (int neighbor : adj[node]) {
+        for (int neighbor : graph[node]) {
             if (!visited[neighbor]) {
                 visited[neighbor] = true;
                 q.push(neighbor);
@@ -159,12 +159,12 @@ int idx2 = upper_bound(v.begin(), v.end(), x) - v.begin(); // first > x
 /*
 int timerCnt;
 vector<int> tin, low;
-vector<vector<int>> adj;
+vector<vector<int>> graph;
 vector<pair<int,int>> bridges;
 
 void tarjanDFS(int u, int p = -1) {
     tin[u] = low[u] = ++timerCnt;
-    for (int v : adj[u]) {
+    for (int v : graph[u]) {
         if (v == p) continue;
         if (!tin[v]) {
             tarjanDFS(v, u);

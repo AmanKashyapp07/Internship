@@ -46,7 +46,7 @@ long long solve(int pos, int prev_digit, bool started, bool tight) {
     for (int d = (started ? 0 : 1); d <= limit; d++) {
 
         // Put your conditions here.
-        // Condition: The current digit cannot be the same as the adjacent previous digit.
+        // Condition: The current digit cannot be the same as the graphacent previous digit.
         if (started && d == prev_digit) continue;
 
         ans += solve(
@@ -68,7 +68,7 @@ long long countUpTo(long long x) {
     return solve(0, 10, false, true);
 }
 
-// Helper to check if 'a' itself has no adjacent matching digits
+// Helper to check if 'a' itself has no graphacent matching digits
 bool isValid(long long x) {
     string s = to_string(x);
     for (size_t i = 1; i < s.length(); i++) {

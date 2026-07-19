@@ -39,7 +39,7 @@ const ll MOD = 1e9 + 7;
  * Places all sources into the queue initially with distance zero, then performs standard level BFS exploration.
  * Complexity: O(V + E) time and O(V) space.
  */
-vector<int> multiSourceBFS(int n, vector<vector<int>>& adj, vector<int>& sources) {
+vector<int> multiSourceBFS(int n, vector<vector<int>>& graph, vector<int>& sources) {
     vector<int> dist(n, INF);
     queue<int> q;
     for (int src : sources) {
@@ -48,7 +48,7 @@ vector<int> multiSourceBFS(int n, vector<vector<int>>& adj, vector<int>& sources
     }
     while (!q.empty()) {
         int node = q.front(); q.pop();
-        for (int nbr : adj[node]) {
+        for (int nbr : graph[node]) {
             if (dist[nbr] > dist[node] + 1) {
                 dist[nbr] = dist[node] + 1;
                 q.push(nbr);
@@ -64,14 +64,14 @@ vector<int> multiSourceBFS(int n, vector<vector<int>>& adj, vector<int>& sources
  * Uses a double-ended queue (deque) to push 0-weight edges to the front and 1-weight edges to the back.
  * Complexity: O(V + E) time, which is more efficient than Dijkstra's algorithm for binary weights.
  */
-vector<int> zeroOneBFS(int n, vector<vector<pair<int, int>>>& adj, int src) {
+vector<int> zeroOneBFS(int n, vector<vector<pair<int, int>>>& graph, int src) {
     vector<int> dist(n, INF);
     deque<int> dq;
     dist[src] = 0;
     dq.push_front(src);
     while (!dq.empty()) {
         int node = dq.front(); dq.pop_front();
-        for (auto [nbr, wt] : adj[node]) {
+        for (auto [nbr, wt] : graph[node]) {
             if (dist[node] + wt < dist[nbr]) {
                 dist[nbr] = dist[node] + wt;
                 if (wt == 0) dq.push_front(nbr);
@@ -88,7 +88,7 @@ vector<int> zeroOneBFS(int n, vector<vector<pair<int, int>>>& adj, int src) {
  * Uses a modified Dijkstra's algorithm that keeps track of the visit count (cnt) for each vertex up to k times.
  * Complexity: O(K * E log V) time complexity.
  */
-vector<ll> kShortestPaths(int n, vector<vector<pair<int, int>>>& adj, int src, int dest, int k) {
+vector<ll> kShortestPaths(int n, vector<vector<pair<int, int>>>& graph, int src, int dest, int k) {
     vector<int> cnt(n, 0);
     priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
     pq.push({0, src});
@@ -101,7 +101,7 @@ vector<ll> kShortestPaths(int n, vector<vector<pair<int, int>>>& adj, int src, i
             if (answer.size() == k) return answer;
         }
         if (cnt[node] > k) continue;
-        for (auto [nbr, wt] : adj[node]) {
+        for (auto [nbr, wt] : graph[node]) {
             pq.push({dist + wt, nbr});
         }
     }

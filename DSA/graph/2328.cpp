@@ -4,7 +4,7 @@
  * Description:
  * Given an m x n grid, count the total number of strictly increasing paths.
  * A path may start and end at any cell and moves are allowed in the four
- * adjacent directions.
+ * graphacent directions.
  *
  * Return the answer modulo 1e9 + 7.
  *

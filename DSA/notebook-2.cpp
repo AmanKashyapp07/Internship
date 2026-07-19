@@ -115,18 +115,23 @@ long long nPr(int n, int r, int MOD) {
     return fac[n] * ifac[n - r] % MOD;
 }
 
-// Sieve (minimum prime factor)
-vector<int> min_pf;
-
-void sieve(int n) {
-    min_pf.resize(n + 1);
-    iota(min_pf.begin(), min_pf.end(), 0);
-
-    for (int i = 2; i * i <= n; i++)
-        if (min_pf[i] == i)
-            for (int j = i * i; j <= n; j += i)
-                if (min_pf[j] == j)
-                    min_pf[j] = i;
+vector<int> sieve(int n){
+    vector<bool> is_prime(n + 1, true);
+    is_prime[0] = is_prime[1] = false;
+    for (int i = 2; i * i <= n; i++) {
+        if (is_prime[i]) {
+            for (int j = i * i; j <= n; j += i) { // why starting from i*i? because all the multiples of i less than i*i would have already been marked by smaller primes.
+                is_prime[j] = false;
+            }
+        }
+    }
+    vector<int> primes;
+    for (int i = 2; i <= n; i++) {
+        if (is_prime[i]) {
+            primes.push_back(i);
+        }
+    }
+    return primes;
 }
 
 vector<pair<int,int>> prime_factorize(int n) {
@@ -791,7 +796,7 @@ B. Bitset for Graph Reachability / Transitive Closure:
    // Initialize reach[i][i] = 1 and reach[i][j] = 1 if edge i->j exists
    // Process DAG in reverse topological order:
    for (int u : reverse_topo_order) {
-       for (int v : adj[u]) {
+       for (int v : graph[u]) {
            reach[u] |= reach[v];
        }
    }
@@ -901,19 +906,19 @@ const int MOD = 1e9 + 7;
 
 struct CountOfEulerianSubgraphs {
     int n;
-    vector<vector<int>> adj;
+    vector<vector<int>> graph;
     vector<bool> vis;
 
-    CountOfEulerianSubgraphs(int n) : n(n), adj(n), vis(n, false) {}
+    CountOfEulerianSubgraphs(int n) : n(n), graph(n), vis(n, false) {}
 
     void addEdge(int u, int v) {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
+        graph[u].push_back(v);
+        graph[v].push_back(u);
     }
 
     void dfs(int u) {
         vis[u] = true;
-        for (int v : adj[u]) {
+        for (int v : graph[u]) {
             if (!vis[v]) dfs(v);
         }
     }
