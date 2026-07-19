@@ -363,6 +363,30 @@ struct EulerTour {
     }
 };
 
+
+// Change the '+' operations in your SegTree struct to max() or min() to support this
+// problem statement - finding the maximum value in the subtree of a given node, and also supporting point updates to change the value of a node. The Fenwick tree is not suitable for this because it can only support sum queries, and max queries are non-commutative, so we need to use a segment tree instead of a Fenwick tree for max queries.
+struct SubtreeMaxEngine {
+    EulerTour et;
+    SegTree seg;
+
+    SubtreeMaxEngine(int n, vector<int>& val, const vector<vector<int>>& g)
+        : et(n) {
+
+        vector<int> flat(n);
+        et.dfs_subtree(1, 0, g, flat, val);
+        seg = SegTree(flat);
+    }
+
+    void update_node(int u, int new_val) {
+        seg.update(et.tin[u] - 1, new_val);
+    }
+
+    int query_subtree_max(int u) {
+        return seg.query(et.tin[u] - 1, et.tout[u] - 1);
+    }
+};
+
 /*
 ===============================================================================
     EULER TOUR MAPPING TO SEGMENT / FENWICK TREE & POPULAR VARIANTS
@@ -434,47 +458,154 @@ C. Subtree Max / Min Queries:
 ===============================================================================
 */
 
-
 struct BinaryLifting {
     int LOG;
-    vector<vector<int>> up;
+    vector<vector<int>> up, info;
     vector<int> depth;
 
-    BinaryLifting(int n, int root, const vector<vector<int>> &g) {
-        LOG = 32 - __builtin_clz(n);
-        up.assign(n + 1, vector<int>(LOG, 0));
-        depth.assign(n + 1, 0);
-        dfs(root, root, 0, g);
+    // ---------- CHANGE THESE ----------
+    const int ID = 0;                 // Identity
+    int combine(int a, int b) {       // Merge operation
+        return max(a, b);
+    }
+    // ----------------------------------
+
+    BinaryLifting(int n, int root,
+                  vector<vector<pair<int,int>>> &g)
+        : LOG(32 - __builtin_clz(n)),
+          up(n + 1, vector<int>(LOG, -1)),
+          info(n + 1, vector<int>(LOG, ID)),
+          depth(n + 1) {
+
+        dfs(root, -1, 0, ID, g);
+
+        for (int j = 1; j < LOG; j++)
+            for (int i = 1; i <= n; i++)
+                if (up[i][j - 1] != -1) {
+                    int p = up[i][j - 1];
+                    up[i][j] = up[p][j - 1];
+                    info[i][j] = combine(info[i][j - 1], info[p][j - 1]);
+                }
     }
 
-    void dfs(int u, int p, int d, const vector<vector<int>> &g) {
+    void dfs(int u, int p, int d, int val,
+             vector<vector<pair<int,int>>> &g) {
         depth[u] = d;
         up[u][0] = p;
-        for (int j = 1; j < LOG; j++) {
-            up[u][j] = up[up[u][j - 1]][j - 1];
-        }
-        for (int v : g[u]) {
-            if (v != p) dfs(v, u, d + 1, g);
-        }
+        info[u][0] = val;
+
+        for (auto [v, w] : g[u])
+            if (v != p)
+                dfs(v, u, d + 1, w, g);
     }
 
-    int get_lca(int u, int v) {
-        if (depth[u] < depth[v]) swap(u, v);
-        // 1. Lift U to the same depth as V
-        for (int j = LOG - 1; j >= 0; j--) {
-            if (depth[u] - (1 << j) >= depth[v]) u = up[u][j];
-        }
-        if (u == v) return u;
-        // 2. Lift both nodes together right below the LCA
-        for (int j = LOG - 1; j >= 0; j--) {
-            if (up[u][j] != up[v][j]) {
+    int lift(int u, int k) {
+        for (int j = 0; j < LOG && u != -1; j++)
+            if (k & (1 << j))
                 u = up[u][j];
-                v = up[v][j];
+        return u;
+    }
+
+    int lca(int a, int b) {
+        if (depth[a] < depth[b]) swap(a, b);
+
+        a = lift(a, depth[a] - depth[b]);
+        if (a == b) return a;
+
+        for (int j = LOG - 1; j >= 0; j--)
+            if (up[a][j] != up[b][j])
+                a = up[a][j], b = up[b][j];
+
+        return up[a][0];
+    }
+
+    // Aggregate info on path u -> ancestor v
+    int query(int u, int v) {
+        int ans = ID;
+
+        int d = depth[u] - depth[v];
+        for (int j = LOG - 1; j >= 0; j--)
+            if (d & (1 << j)) {
+                ans = combine(ans, info[u][j]);
+                u = up[u][j];
             }
-        }
-        return up[u][0];
+
+        return ans;
+    }
+
+    // Aggregate on path a -> b
+    int pathQuery(int a, int b) {
+        int ans = ID;
+
+        if (depth[a] < depth[b]) swap(a, b);
+
+        int d = depth[a] - depth[b];
+        for (int j = LOG - 1; j >= 0; j--)
+            if (d & (1 << j)) {
+                ans = combine(ans, info[a][j]);
+                a = up[a][j];
+            }
+
+        if (a == b) return ans;
+
+        for (int j = LOG - 1; j >= 0; j--)
+            if (up[a][j] != up[b][j]) {
+                ans = combine(ans, info[a][j]);
+                ans = combine(ans, info[b][j]);
+                a = up[a][j];
+                b = up[b][j];
+            }
+
+        ans = combine(ans, info[a][0]);
+        ans = combine(ans, info[b][0]);
+        return ans;
     }
 };
+
+/*
+==================== BINARY LIFTING ====================
+
+up[u][j]   = 2^j-th ancestor of u
+info[u][j] = aggregate information from u to up[u][j]
+
+-------------------- BUILD --------------------
+
+up[u][j] = up[ up[u][j-1] ][j-1]
+
+int parent = up[u][j-1];
+info[u][j] = combine(info[u][j-1], info[parent][j-1]);
+
+-------------------- QUERY --------------------
+
+Whenever lifting a node upward:
+
+ans = combine(ans, info[u][j]);
+u = up[u][j];
+
+-------------------- CUSTOMIZE --------------------
+
+Only these two need to change:
+
+ID = Identity element
+combine(a, b)
+
+-------------------- EXAMPLES --------------------
+
+Max : ID = 0,         combine = max
+Min : ID = INF,       combine = min
+Sum : ID = 0,         combine = +
+XOR : ID = 0,         combine = ^
+GCD : ID = 0,         combine = gcd
+AND : ID = ALL_BITS,  combine = &
+OR  : ID = 0,         combine = |
+
+Time:
+Build : O(N log N)
+Query : O(log N)
+
+================================================
+*/
+
 
 // ============================================================================
 // THEME 4: DIGIT DP
@@ -611,42 +742,28 @@ INTERVAL DP TIPS & TRICKS:
 // THEME 8: GRAPH CYCLES
 // ============================================================================
 
-vector<int> buildCycle(int startNode, int endNode, const vector<int>& parent) {
-    vector<int> cycle;
-    int cur = endNode;
-    while (cur != startNode) {
-        cycle.push_back(cur);
-        cur = parent[cur];
-    }
-    cycle.push_back(startNode);
-    reverse(cycle.begin(), cycle.end());
-    return cycle;
+vector<int> buildCycle(int s, int e, const vector<int>& par) {
+    vector<int> cyc;
+    for (int u = e; u != s; u = par[u]) cyc.push_back(u);
+    cyc.push_back(s);
+    reverse(cyc.begin(), cyc.end());
+    return cyc;
 }
-    
-class UndirectedCycle
-{
-private:
-    int n, startNode = -1, endNode = -1;
-    vector<vector<int>> graph;
-    vector<int> vis, parent;
 
-    bool dfs(int u, int p)
-    {
+class UndirectedCycle {
+    int n, s = -1, e = -1;
+    vector<vector<int>> g;
+    vector<int> vis, par;
+
+    bool dfs(int u, int p) {
         vis[u] = 1;
-        for (int v : graph[u])
-        {
-            if (v == p)
-                continue;
-            if (!vis[v])
-            {
-                parent[v] = u;
-                if (dfs(v, u))
-                    return true;
-            }
-            else
-            {
-                startNode = v;
-                endNode = u;
+        for (int v : g[u]) {
+            if (v == p) continue;
+            if (!vis[v]) {
+                par[v] = u;
+                if (dfs(v, u)) return true;
+            } else {
+                s = v, e = u;
                 return true;
             }
         }
@@ -654,75 +771,47 @@ private:
     }
 
 public:
-    UndirectedCycle(int n) : n(n), graph(n + 1), vis(n + 1, 0), parent(n + 1, -1) {}
+    UndirectedCycle(int n) : n(n), g(n + 1), vis(n + 1), par(n + 1, -1) {}
 
-    void addEdge(int u, int v)
-    {
-        graph[u].push_back(v);
-        graph[v].push_back(u);
-    }
+    void addEdge(int u, int v) { g[u].push_back(v), g[v].push_back(u); }
 
-    vector<int> getCycle()
-    {
+    vector<int> getCycle() {
         for (int i = 1; i <= n; i++)
-        {
             if (!vis[i] && dfs(i, -1))
-            {
-                return buildCycle(startNode, endNode, parent);
-            }
-        }
+                return buildCycle(s, e, par);
         return {};
     }
 };
 
-class DirectedCycle
-{
-private:
-    int n, startNode = -1, endNode = -1;
-    vector<vector<int>> graph;
-    vector<bool> vis, inPath;
-    vector<int> parent;
+class DirectedCycle {
+    int n, s = -1, e = -1;
+    vector<vector<int>> g;
+    vector<int> vis, inPath, par;
 
-    bool dfs(int u)
-    {
-        vis[u] = true;
-        inPath[u] = true;
-        for (int v : graph[u])
-        {
-            if (!vis[v])
-            {
-                parent[v] = u;
-                if (dfs(v))
-                    return true;
-            }
-            else if (inPath[v])
-            {
-                startNode = v;
-                endNode = u;
+    bool dfs(int u) {
+        vis[u] = inPath[u] = 1;
+        for (int v : g[u]) {
+            if (!vis[v]) {
+                par[v] = u;
+                if (dfs(v)) return true;
+            } else if (inPath[v]) {
+                s = v, e = u;
                 return true;
             }
         }
-        inPath[u] = false;
+        inPath[u] = 0;
         return false;
     }
 
 public:
-    DirectedCycle(int n) : n(n), graph(n + 1), vis(n + 1, false), inPath(n + 1, false), parent(n + 1, -1) {}
+    DirectedCycle(int n) : n(n), g(n + 1), vis(n + 1), inPath(n + 1), par(n + 1, -1) {}
 
-    void addEdge(int u, int v)
-    {
-        graph[u].push_back(v);
-    }
+    void addEdge(int u, int v) { g[u].push_back(v); }
 
-    vector<int> getCycle()
-    {
+    vector<int> getCycle() {
         for (int i = 1; i <= n; i++)
-        {
             if (!vis[i] && dfs(i))
-            {
-                return buildCycle(startNode, endNode, parent);
-            }
-        }
+                return buildCycle(s, e, par);
         return {};
     }
 };
@@ -784,13 +873,3 @@ int IncreasingArray2(vector<int>& nums) {
 
     return totalCost;
 }
-
-/*
---------------------------------------------------------------------------------
-SLOPE TRICK TIPS & TRICKS:
---------------------------------------------------------------------------------
-- Used to compute the minimum cost to make an array non-decreasing (increasing elements or decreasing elements).
-- Every new number is pushed into a max-heap as a candidate median.
-- If the heap top is greater than the current element, it violates monotonicity. We accumulate the cost difference and swap the heap top.
---------------------------------------------------------------------------------
-*/

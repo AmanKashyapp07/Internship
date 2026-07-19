@@ -108,21 +108,3 @@ vector<ll> kShortestPaths(int n, vector<vector<pair<int, int>>>& graph, int src,
     return answer;
 }
 
-vector<int> tin, tout, euler;
-int timer = 0;
-
-/**
- * Problem: Euler Tour (Tree Flattening Technique)
- * Flatten a tree structure into a linear array to support subtree queries and range updates.
- * Performs a DFS traversal to record entry times (tin), exit times (tout), and the traversal order.
- * Complexity: O(V) time and space, where subtrees correspond to contiguous subsegments [tin[node], tout[node]].
- */
-void eulerTour(int node, int parent, vector<vector<int>>& tree) {
-    tin[node] = timer++;
-    euler.push_back(node);
-    for (int child : tree[node]) {
-        if (child == parent) continue;
-        eulerTour(child, node, tree);
-    }
-    tout[node] = timer - 1;
-}
