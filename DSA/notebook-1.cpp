@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -20,9 +19,10 @@
 #include <cstring>
 
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
+using ll = int;
+using ull = unsigned int;
 using pii = pair<int, int>;
+using vvi = vector<vector<int>>
 using pll = pair<ll, ll>;
 using vi = vector<int>;
 using vll = vector<ll>;
@@ -238,9 +238,7 @@ int removeStones(vector<vector<int>>& stones) {
     for (auto &s : stones) {
         int row = s[0];
         int col = s[1] + OFFSET;
-        
         dsu.unite(row, col);
-        
         used.insert(row);
         used.insert(col);
     }
@@ -256,20 +254,24 @@ Kruskal's Algorithm (MST)
 Time Complexity: O(E log E)
 Usage:
   vector<Edge> edges, mst_edges;
-  long long total_weight = kruskal(n, edges, mst_edges);
+  int total_weight = kruskal(n, edges, mst_edges);
 */
 struct Edge {
-    int u, v; long long w;
-    bool operator<(const Edge& o) const { return w < o.w; }
+    int u, v;
+    int w;
 };
 
-long long kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
+bool comparator(const Edge &a, const Edge &b) {
+    return a.w < b.w;
+}
+
+int kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     DSU dsu(n);
-    sort(edges.begin(), edges.end());
-    long long mst_weight = 0;
+    sort(edges.begin(), edges.end(), comparator);
+    int mst_weight = 0;
     mst_edges.clear();
     for (auto& e : edges) {
-        if (dsu.unite(e.u, e.v)) {
+        if (dsu.unite(e.u, e.v)) { // if u and v are not already connected
             mst_weight += e.w;
             mst_edges.push_back(e);
         }
@@ -277,11 +279,12 @@ long long kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     return mst_weight;
 }
 
-long long prim(int n, vector<vector<pair<int, long long>>>& g) {
+int prim(int n, vector<vector<pair<int, int>>>& g) {
     vector<bool> in_mst(n + 1, false);
-    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq;
+    using T = pair<int, int>; // {weight, vertex}
+    priority_queue<T, vector<T>, greater<T>> pq;
     pq.push({0, 1});
-    long long mst_weight = 0;
+    int mst_weight = 0;
 
     while (!pq.empty()) {
         auto [w, u] = pq.top(); pq.pop();
@@ -326,39 +329,47 @@ vector<int> kahn(int n, vector<vector<int>>& g, int start_node = 1) {
 DAG Solver (Shortest/Longest Paths, Path Counts)
 Returns {dist, path_counts} in O(V + E) using Kahn's topological sort.
 */
-struct DAGEdge { int to; long long w; };
-pair<vector<long long>, vector<long long>> solve_dag(int n, vector<vector<DAGEdge>>& g, int src, int start_node = 1, bool max_path = false) {
+
+
+pair<vector<int>, vector<int>> solve_dag(int n, vector<vector<pair<int, int>>>& g, int src, int start_node = 1) {
     vector<int> in_deg(g.size(), 0);
     for (int u = start_node; u < start_node + n; u++) {
-        for (auto& e : g[u]) in_deg[e.to]++;
+        for (auto& e : g[u]) in_deg[e.first]++;
     }
+
     queue<int> q;
     for (int i = start_node; i < start_node + n; i++) {
         if (in_deg[i] == 0) q.push(i);
     }
+
     vector<int> order;
     while (!q.empty()) {
         int u = q.front(); q.pop();
         order.push_back(u);
         for (auto& e : g[u]) {
-            if (--in_deg[e.to] == 0) q.push(e.to);
+            if (--in_deg[e.first] == 0) q.push(e.first);
         }
     }
-    const long long INF_VAL = 1e18;
-    vector<long long> dist(g.size(), max_path ? -INF_VAL : INF_VAL);
-    vector<long long> paths(g.size(), 0);
-    dist[src] = 0; paths[src] = 1;
+
+    const int INF = 1e9;
+    vector<int> dist(g.size(), -INF);
+    vector<int> paths(g.size(), 0);
+    dist[src] = 0;
+    paths[src] = 1;
+
     for (int u : order) {
-        if (dist[u] == (max_path ? -INF_VAL : INF_VAL)) continue;
+        if (dist[u] == -INF) continue;
         for (auto& e : g[u]) {
-            if (max_path) {
-                dist[e.to] = max(dist[e.to], dist[u] + e.w);
-            } else {
-                dist[e.to] = min(dist[e.to], dist[u] + e.w);
+            if (dist[e.first] < dist[u] + e.second) {
+                dist[e.first] = dist[u] + e.second;
+                paths[e.first] = paths[u];
             }
-            paths[e.to] = (paths[e.to] + paths[u]) % MOD;
+            else if (dist[e.first] == dist[u] + e.second) {
+                paths[e.first] = (paths[e.first] + paths[u]) % MOD;
+            }
         }
     }
+
     return {dist, paths};
 }
 
@@ -366,7 +377,7 @@ class TreeDistances {
     int n;
     const vector<vector<int>>& g;
     vector<int> subtree_sz;
-    vector<long long> total_dist;
+    vector<int> total_dist;
 
 public:
     TreeDistances(int nodes, const vector<vector<int>>& graph)
@@ -399,7 +410,7 @@ public:
         }
     }
 
-    vector<long long> solve(int root = 1) {
+    vector<int> solve(int root = 1) {
         dfs_size(root, 0);
         dfs_root(root, 0, 0);
         reroot(root, 0);
@@ -407,52 +418,36 @@ public:
     }
 };
 
-class TreeDiameter {
-    int n; const vector<vector<int>>& g;
-    vector<int> d1, d2;
+void dfs(int u, int p, vector<vector<int>>& g, vector<int>& dist) {
+    for (int v : g[u]) {
+        if (v == p) continue;
+        dist[v] = dist[u] + 1;
+        dfs(v, u, g, dist);
+    }
+}
 
-    void dfs(int u, int p, vector<int>& d) {
-        for (int v : g[u]) if (v != p)
-            d[v] = d[u] + 1, dfs(v, u, d);
+pair<int, vector<int>> tree_diameter(int n, vector<vector<int>>& g) {
+    vector<int> d1(n + 1), d2(n + 1);
+
+    dfs(1, 0, g, d1);
+    int a = max_element(d1.begin() + 1, d1.end()) - d1.begin();
+
+    fill(d1.begin(), d1.end(), 0);
+    dfs(a, 0, g, d1);
+    int b = max_element(d1.begin() + 1, d1.end()) - d1.begin();
+
+    int diameter = d1[b];
+
+    dfs(b, 0, g, d2);
+
+    vector<int> ecc(n + 1);
+    for (int i = 1; i <= n; i++) {
+        ecc[i] = max(d1[i], d2[i]);
     }
 
-    int farthest(vector<int>& d) {
-        return max_element(d.begin() + 1, d.end()) - d.begin();
-    }
+    return {diameter, ecc};
+} // edd[i] = eccentricity of node i, which is the maximum distance from node i to any other node in the tree. The diameter of the tree is the maximum eccentricity among all nodes.
 
-public:
-    TreeDiameter(int n, const vector<vector<int>>& g)
-        : n(n), g(g), d1(n + 1), d2(n + 1) {}
-
-    int diameter() {
-        fill(d1.begin(), d1.end(), 0);
-        dfs(1, 0, d1);
-        int a = farthest(d1);
-
-        fill(d1.begin(), d1.end(), 0);
-        dfs(a, 0, d1);
-        int b = farthest(d1);
-
-        return d1[b];
-    }
-
-    vector<int> eccentricity() {
-        fill(d1.begin(), d1.end(), 0);
-        dfs(1, 0, d1);
-        int a = farthest(d1);
-
-        fill(d1.begin(), d1.end(), 0);
-        dfs(a, 0, d1);
-        int b = farthest(d1);
-
-        fill(d2.begin(), d2.end(), 0);
-        dfs(b, 0, d2);
-
-        vector<int> ans(n + 1);
-        for (int i = 1; i <= n; i++) ans[i] = max(d1[i], d2[i]);
-        return ans;
-    }
-};
 
 /*
 Usage:
@@ -531,7 +526,7 @@ struct SCC {
         while (!order.empty()) {
             int u = order.top(); order.pop();
             if (comp[u] == -1) {
-                sccs.emplace_back();
+                sccs.emplace_back(); // create a new component
                 dfs2(u, sccs.size() - 1);
             }
         }
@@ -539,12 +534,13 @@ struct SCC {
     }
     vector<vector<int>> get_dag() {
         dag.resize(sccs.size());
-        for (int u = 1; u <= n; u++) for (int v : g[u])
-            if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
+        for (int u = 1; u <= n; u++) 
+            for (int v : g[u]) if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
+
         for (auto& neighbors : dag) {
             sort(neighbors.begin(), neighbors.end());
             neighbors.erase(unique(neighbors.begin(), neighbors.end()), neighbors.end());
-        }
+        } // this removes duplicate edges in the DAG representation of the SCCs, ensuring that each edge between components is represented only once.
         return dag;
     }
 };
@@ -818,81 +814,16 @@ Time Complexity : O(N)
 Space Complexity: O(N)
 ================================================================================
 */
-struct FunctionalGraphDecomposition {
+struct FunctionalGraph {
     int n;
-    vector<int> cyc;   // cyc[i] = length of the cycle node `i` belongs to (or -1 if not on a cycle)
-    vector<int> dist;  // dist[i] = distance of node `i` to its cycle root (0 if on a cycle)
-    vector<int> indeg; // indeg[i] = in-degree of node `i`
-    vector<vector<int>> rev; // rev[u] = stores reversed graphacency list (to walk away from cycle roots)
     const int LOG = 20;
-    vector<vector<int>> up; // up[u][j] = 2^j-th ancestor of node `u` in the reversed graph
-
-    // `to[i]` represents the single outgoing edge from vertex `i` (0-indexed)
-    FunctionalGraphDecomposition(vector<int> &to) {
-        n = to.size();
-        cyc.assign(n, -1);
-        dist.assign(n, -1);
-        indeg.assign(n, 0);
-        rev.assign(n, {});
-        up.assign(n, vector<int>(LOG, -1));
-        for(int i = 0; i < n; i++) up[i][0] = to[i];
-
-        for(int k=1; k < LOG; k++){
-            for(int i = 0; i < n; i++){
-                up[i][k] = up[up[i][k-1]][k-1];}}
-
-        // Build reversed graph and calculate in-degrees
-        for (int i = 0; i < n; i++)
-            rev[to[i]].push_back(i), indeg[to[i]]++;
-
-        findCycles(to);
-        buildDist();
-        
-    }
-
-    int jump(int u, int k) {
-        for(int j = 0; j < LOG; j++){
-            if(k & (1 << j)) u = up[u][j];}
-        return u;
-    }
-    // Identifies cycles and computes cycle lengths
-    void findCycles(vector<int> &to) {
-        vector<int> alive(n, 1), vis(n);
-        queue<int> q;
-
-        // Leaf-peeling (Kahn's Topological Sort algorithm style):
-        // Repeatedly remove vertices with in-degree 0.
-        // The vertices that are left "alive" at the end are exactly the cycle vertices.
-        for (int i = 0; i < n; i++)
-            if (!indeg[i]) q.push(i);
-
-        while (!q.empty()) {
-            int u = q.front(); q.pop();
-            alive[u] = 0; // Mark tree nodes as dead (not part of any cycle)
-            if (!--indeg[to[u]]) q.push(to[u]);
-        }
-
-        // For all alive (cycle) nodes, traverse and compute their cycle length
-        for (int i = 0; i < n; i++) {
-            if (!alive[i] || vis[i]) continue;
-
-            // 1. Calculate the cycle length
-            int u = i, len = 0;
-            do vis[u] = 1, len++, u = to[u];
-            while (u != i);
-
-            // 2. Set cycle length and initialize distance to 0 for all nodes in this cycle
-            u = i;
-            do {
-                cyc[u] = len;
-                dist[u] = 0;
-                u = to[u];
-            } while (u != i);
-        }
-    }
-
-    // DFS on the reversed graph to propagate the distance to cycle roots
-    void dfs(int u) {
+    vector<int> cyc, dist, indeg;
+    vector<vector<int>> rev, up;
+    // cyc[i] = length of the cycle for vertex i (or -1 if not in a cycle)
+    // dist[i] = distance from vertex i to the cycle (0 if in a cycle)
+    // indeg[i] = indegree of vertex i
+    // up[i][j] = 2^j-th ancestor of vertex i
+     void dfs(int u) {
         for (int v : rev[u])
             if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
@@ -900,14 +831,61 @@ struct FunctionalGraphDecomposition {
             }
     }
 
-    // Propagates distances from all cycle vertices outward to tree leaves
-    void buildDist() {
+    FunctionalGraph(vector<int>& to) {
+        n = to.size();
+        cyc.assign(n, -1);
+        dist.assign(n, -1);
+        indeg.assign(n, 0);
+        rev.assign(n, {});
+        up.assign(n, vector<int>(LOG));
+
+        for (int i = 0; i < n; i++) {
+            up[i][0] = to[i];
+            rev[to[i]].push_back(i);
+            indeg[to[i]]++;
+        }
+
+        for (int j = 1; j < LOG; j++)
+            for (int i = 0; i < n; i++) {
+                int p = up[i][j - 1];
+                up[i][j] = up[p][j - 1];
+            }
+
+        vector<int> alive(n, 1), vis(n);
+        queue<int> q;
+
         for (int i = 0; i < n; i++)
-            if (cyc[i] != -1) // If `i` is on a cycle, start DFS to find distances of its tree branches
-                dfs(i);
+            if (!indeg[i]) q.push(i);
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            alive[u] = 0;
+            if (--indeg[to[u]] == 0) q.push(to[u]);
+        }
+
+        for (int i = 0; i < n; i++) {
+            if (!alive[i] || vis[i]) continue;
+            int u = i, len = 0;
+            do vis[u] = 1, len++, u = to[u];
+            while (u != i);
+
+            u = i;
+            do {
+                cyc[u] = len;
+                dist[u] = 0;
+                u = to[u];
+            } while (u != i);
+        }
+
+        for(int i = 0; i < n; i++) if (cyc[i] != -1) dfs(i);
+    }
+
+    int jump(int u, int k) {
+        for (int j = 0; j < LOG; j++)
+            if (k & (1 << j)) u = up[u][j];
+        return u;
     }
 };
-
     
 struct TreeIsomorphism {
  
@@ -925,632 +903,82 @@ struct TreeIsomorphism {
  
     int dfs(int u, int p) {
         vector<int> child;
- 
-        for (int v : g[u]) {
-            if (v == p) continue;
-            child.push_back(dfs(v, u));
-        }
- 
+        for (int v : g[u]) if(v!=p) child.push_back(dfs(v, u));
         sort(child.begin(), child.end());
- 
-        if (!mp.count(child))
-            mp[child] = nxt++;
+        if (!mp.count(child)) mp[child] = nxt++;
  
         return id[u] = mp[child];
     }
  
-    int getID(int root = 1) {
+    int getID(int root) {
         return dfs(root, 0);
     }
 };
 
-vector<int> find_centers(int n, const vector<vector<int>>& g) {
+vector<int> find_centers(int n, vector<vector<int>>& g) {
     if (n == 1) return {1};
-    vector<int> deg(n + 1), leaves;
-    
-    // 1. Gather initial leaves
-    for (int i = 1; i <= n; i++) {
-        if ((deg[i] = g[i].size()) == 1) leaves.push_back(i);
-    }
 
-    // 2. Peel leaves layer by layer until 1 or 2 nodes remain
+    vector<int> deg(n + 1), leaves;
+    for (int i = 1; i <= n; i++)
+        if ((deg[i] = g[i].size()) == 1) leaves.push_back(i);
+
     while (n > 2) {
         n -= leaves.size();
-        vector<int> next_leaves;
-        
-        for (int u : leaves) {
-            for (int v : g[u]) {
-                if (--deg[v] == 1) next_leaves.push_back(v); // if v becomes a leaf, add it to the next layer
-            }
-        }
-        leaves = next_leaves; // Move to the inner layer
-    }
-    
-    return leaves; // The last remaining leaves are the centers
-} // returns the center(s) of the tree. A tree can have either one center (if it has an odd number of nodes) or two centers (if it has an even number of nodes). The center(s) are the node(s) that minimize the maximum distance to any other node in the tree.
-
-
-struct CentroidDecomposition {
-    int n, k;
-    long long ans = 0;
-    vector<vector<int>> &graph;
-    vector<int> sz, cnt;
-    vector<bool> removed;
-    // cnt[i] means the number of nodes at depth `i` from the current centroid. This is used to count pairs of nodes whose distances sum to `k`.
-    CentroidDecomposition(int n, vector<vector<int>> &graph, int k)
-        : n(n), k(k), graph(graph), sz(n + 1), removed(n + 1), cnt(k + 1) {}
-
-    int getSize(int u, int p) {
-        sz[u] = 1;
-        for (int v : graph[u])
-            if (v != p && !removed[v]) sz[u] += getSize(v, u);
-        return sz[u];
+        vector<int> nxt;
+        for (int u : leaves)
+            for (int v : g[u])
+                if (--deg[v] == 1) nxt.push_back(v);
+        leaves = nxt;
     }
 
-    int getCentroid(int u, int p, int total) {
-        for (int v : graph[u])
-            if (v != p && !removed[v] && sz[v] > total / 2)
-                return getCentroid(v, u, total);
-        return u;
-    }
-
-    void collectDepths(int u, int p, int d, vector<int> &depths) {
-        depths.push_back(d);
-        for (int v : graph[u])
-            if (v != p && !removed[v])
-                collectDepths(v, u, d + 1, depths);
-    } // This function collects the depths of all nodes in the subtree rooted at node `u`, excluding the parent node `p`. It recursively traverses the tree, incrementing the depth `d` for each child node. The collected depths are stored in the `depths` vector, which can later be used to count pairs of nodes whose distances sum to a specific value `k`.
-
-    void process(int c) {
-        cnt[0] = 1;
-        int mxDepth = 0;
-        for (int child : graph[c]) {
-            if (removed[child]) continue;
-            vector<int> depths;
-            collectDepths(child, c, 1, depths); // for each child of the centroid, collect the depths of its subtree, then count how many pairs can be formed with previously counted depths that sum to `k`. After processing all children, reset the counts for the next iteration.
-            for (int d : depths)
-                if (d <= k) ans += cnt[k - d];
-            for (int d : depths)
-                if (d <= k) cnt[d]++, mxDepth = max(mxDepth, d);
-        }
-        for (int i = 0; i <= mxDepth; i++) cnt[i] = 0;
-    } // this function processes the centroid `c` by counting pairs of nodes whose distances sum to `k`. It initializes the count of nodes at depth 0 (the centroid itself) and iterates through each child of the centroid. For each child, it collects the depths of its subtree and counts how many pairs can be formed with previously counted depths that sum to `k`. After processing all children, it resets the counts for the next iteration.
-
-    Fenwick bit(n);
-
-    void process2(int c) {
-
-        bit.update(0, 1);          // centroid at depth 0
-
-        vector<int> usedDepths;
-        usedDepths.push_back(0);
-
-        for (int child : graph[c]) {
-
-            if (removed[child]) continue;
-
-            vector<int> depths;
-            collectDepths(child, c, 1, depths);
-
-            // Query
-            for (int d : depths) {
-
-                int l = max(0, k1 - d); // why max(0, k1 - d)? because we want to find pairs of nodes whose distances sum to a value within the range [k1, k2]. For a node at depth `d`, the other node in the pair must be at a depth that satisfies the condition: `k1 <= d + other_depth <= k2`. Rearranging this gives us the range for `other_depth`: `k1 - d <= other_depth <= k2 - d`. Since depths cannot be negative, we take the maximum of 0 and `k1 - d` to ensure we only consider valid depths.
-                int r = min(n, k2 - d);
-
-                if (l <= r)
-                    ans += bit.query(l, r);
-            }
-
-            // Insert
-            for (int d : depths) {
-                bit.update(d, 1);
-                usedDepths.push_back(d);
-            }
-        }
-
-        // Clear BIT
-        for (int d : usedDepths)
-            bit.update(d, -1);
-    } // this function processes the centroid `c` by counting pairs of nodes whose distances fall within a specified range `[k1, k2]`. It uses a Fenwick Tree (Binary Indexed Tree) to efficiently query and update counts of nodes at various depths. The function initializes the count for the centroid at depth 0, collects depths for each child subtree, queries the BIT for valid pairs, and updates the BIT with new depths. Finally, it clears the BIT to reset counts for the next iteration.
-
-    void decompose(int entry) {
-        int centroid = getCentroid(entry, -1, getSize(entry, -1));
-        process(centroid);
-        removed[centroid] = 1;
-        for (int v : graph[centroid])
-            if (!removed[v]) decompose(v);
-    }
-
-    void build() { decompose(1); }
-};
+    return leaves;
+}// returns the center(s) of the tree. A tree can have either one center (if it has an odd number of nodes) or two centers (if it has an even number of nodes). The center(s) are the node(s) that minimize the maximum distance to any other node in the tree.
 
 
 /*
-==================== Graph / Tree Formula Cheat Sheet ====================
-
-1. Tree
-- Edges = n - 1
-- Sum of degrees = 2(n - 1)
-- Leaves = 2 + Σ(deg(v) - 2), for deg(v) >= 2
-
-2. Connected Components
-- Minimum edges to connect graph = components - 1
-- Independent cycles (Cyclomatic Number) = m - n + components
-
-3. Eulerian Graph
-- Euler Circuit  <=> all degrees even
-- Euler Path     <=> exactly 0 or 2 odd-degree vertices
-- #Eulerian subgraphs = 2^(m - n + components)
-
-4. Bipartite Graph
-- Graph is bipartite <=> no odd cycle
-- Complete bipartite K(a,b) has a*b edges
-
-5. Complete Graph K_n
-- Edges = n(n - 1) / 2
-- Degree of every vertex = n - 1
-
-6. Handshaking Lemma
-- Σ degree = 2m
-- Number of odd-degree vertices is always even
-
-7. Incidence Matrix
-- rank = n - components
-
-8. Binary Tree
-- Max nodes at level i = 2^i
-- Max nodes of height h = 2^(h + 1) - 1
-- Full binary tree: leaves = internal nodes + 1
-
-9. Diameter of Tree
-- BFS/DFS from any node -> farthest u
-- BFS/DFS from u -> diameter
-
-10. LCA
-- Binary Lifting: preprocess O(n log n), query O(log n)
-
-11. MST
-- Every MST contains exactly n - 1 edges
-
-14. SCC
-- Condensation graph is always a DAG
-
-17. Maximum Edges
-- Undirected simple graph = n(n - 1) / 2
-- Directed simple graph   = n(n - 1)
-
-18. Complete Binary Tree
-- Height = floor(log2(n))
-
-19. Useful Tree DP Identity
-- Σ(subtree sizes) = n + Σ(depth)
-
-20. Centre of Tree
-- 1 or 2 nodes
-- nodes with minimum maximum distance to all other nodes
-
-21. Centroid of Tree
-- nodes which after removal leave all components with size <= n/2
-=======================================================================
-*/
-
-
-/*
-======================== MINIMUM SPANNING TREE (MST) CHEAT SHEET ========================
-
-Definition
-----------
-- A spanning tree connects all vertices using exactly (n - 1) edges.
-- An MST is a spanning tree with minimum total edge weight.
-- MST exists only if the graph is connected.
-- If graph is disconnected -> Minimum Spanning Forest (MSF).
-----------------------------------------------------------------
-What is a Cut?
-----------------------------------------------------------------
-A cut is ANY partition of the vertices into two non-empty sets.
-
-Example:
-
-        {1,2,3} | {4,5,6}
-
-Every edge having one endpoint in each set is called a
-"CROSSING EDGE" of the cut.
-
-Example:
-
-1 ----- 4
-2 ----- 5
-3 ----- 6
-
-All three edges cross this cut.
-
-There are exponentially many possible cuts.
-
-----------------------------------------------------------------
-Cut Property (Most Important)
-----------------------------------------------------------------
-For ANY cut:
-
-The minimum weight edge crossing that cut
-belongs to SOME MST.
-
-If the minimum edge is UNIQUE,
-it belongs to EVERY MST.
-
-Use this theorem to prove an edge MUST be chosen.
-
-Properties
-----------
-- Number of edges in MST = n - 1.
-- MST contains no cycles.
-- There may be multiple MSTs if equal edge weights exist.
-- If all edge weights are distinct -> MST is unique.
-- Adding any extra edge to an MST creates exactly one cycle.
-- Removing any edge from an MST disconnects the tree.
-
-Algorithms
-----------
-Kruskal
-- Sort edges by weight.
-- Add edge if it connects two different components.
-- Use DSU (Union Find).
-- Complexity: O(E log E).
-
-Prim
-- Similar to Dijkstra.
-- Grow one connected component.
-- Use priority queue.
-- Complexity:
-    O(E log V) with heap.
-    O(V^2) with graphacency matrix.
-
-Boruvka
-- Each component picks its cheapest outgoing edge.
-- Mostly theoretical/parallel.
-
-Cut Property (Most Important)
------------------------------
-For ANY cut of the graph:
-- The minimum weight edge crossing the cut ALWAYS belongs to SOME MST.
-
-Used to prove Kruskal.
-
-Cycle Property
---------------
-For ANY cycle:
-- The maximum weight edge in that cycle can NEVER belong to an MST
-  (if it is strictly heavier than the others).
-
-Useful for eliminating edges.
-
-Edge Classification
--------------------
-Given edge (u,v,w):
-
-Definitely in every MST:
-- It is the UNIQUE minimum edge across some cut.
-
-Never in any MST:
-- It is the UNIQUE maximum edge in some cycle.
-
-Otherwise:
-- It may or may not appear depending on equal weights.
-
-Maximum Edge Trick
-------------------
-If edge (u,v,w) is NOT in MST:
-
-Maximum edge on path(u,v) in MST >= w
-
-Reason:
-Otherwise replacing the heavier edge with this one improves MST.
-
-Second Best MST
----------------
-Typical approach:
-1. Build MST.
-2. For every non-MST edge:
-       replace maximum edge on MST path(u,v)
-3. Minimum valid replacement gives second MST.
-
-Requires:
-- Binary Lifting + Max Edge on Path
-or
-- Heavy Light Decomposition.
-
-Updating MST
-------------
-Add one edge:
-- Forms a cycle.
-- Remove maximum edge on that cycle.
-
-Delete one MST edge:
-- Need minimum edge reconnecting the two components.
-
-Negative Weights
-----------------
-MST works perfectly with negative edges.
-
-Directed Graph
---------------
-No MST exists.
-Equivalent concept:
-- Minimum Spanning Arborescence (Edmonds' Algorithm).
-
-Difference from Shortest Path Tree
-----------------------------------
-MST:
-- Minimizes TOTAL tree weight.
-
-Shortest Path Tree:
-- Minimizes distance from ONE source.
-
-They are usually different.
-
-What Changes MST?
------------------
-Changing ONE edge weight:
-- May or may not change MST.
-- Increasing an MST edge can remove it.
-- Decreasing a non-MST edge can insert it.
-
-Common OA / Contest Patterns
-----------------------------
-1. Build MST (Kruskal)
-2. Maximum spanning tree
-3. Minimum bottleneck spanning tree
-4. Count number of MSTs
-5. Critical / Pseudo-critical edges
-6. Second Best MST
-7. MST after adding/removing edges
-8. Offline connectivity using DSU
-9. MST on grid
-10. XOR/AND/OR weighted MST variants
-
-DSU Template
-------------
-find(x)
-union(a,b)
-
-Always:
-- Path Compression
-- Union by Size / Rank
-
-Complexity:
-O(alpha(N)) per operation.
-
-Recognition Clues
------------------
-Think MST when problem says:
-- Connect all cities
-- Minimum total cable cost
-- Road construction
-- Network design
-- Electric wiring
-- Internet connections
-- Water pipelines
-- Connect islands
-- Minimum infrastructure cost
-- Exactly n-1 chosen edges
-- Remove expensive redundant roads
-
-Common Tricks
--------------
-- Maximum Spanning Tree:
-      Sort edges descending.
-
-- Minimax Path:
-      Build MST.
-      Answer = maximum edge on MST path.
-
-- Maximum Bottleneck:
-      Build Maximum Spanning Tree.
-
-- Offline Queries:
-      Sort edges and queries together by weight.
-
-Remember
---------
-Kruskal:
-    Sort edges.
-
-Prim:
-    Grow tree.
-
-Cut Property:
-    Minimum crossing edge is safe.
-
-Cycle Property:
-    Maximum edge in a cycle is unsafe.
-
+==================== GRAPH / TREE FORMULAE & MST CHEAT SHEET ====================
+
+1. TREE & CYCLE FORMULAE:
+   - Edges = N - 1 | Sum of degrees = 2(N - 1) | Leaves = 2 + Σ(deg(v) - 2) for deg(v) >= 2
+   - Min edges to connect = components - 1 | Cyclomatic Number (independent cycles) = M - N + components
+   - Simple graph max edges: Undirected = N(N - 1)/2 | Directed = N(N - 1)
+   - Eulerian: Circuit <=> all degrees even | Path <=> 0 or 2 odd vertices | Subgraphs = 2^(M - N + comp)
+   - Bipartite <=> No odd cycle | Complete Bipartite K(a,b) edges = a * b
+   - Complete Graph K_N: Edges = N(N - 1)/2 | Degree = N - 1
+   - Handshaking: Σ deg = 2M (number of odd-degree vertices is always even)
+   - Tree Centre: 1 or 2 nodes | Tree Centroid: sizes of components after removal <= N/2
+   - Sum(subtree sizes) = N + Sum(depth)
+
+2. MINIMUM SPANNING TREE (MST) FUNDAMENTALS:
+   - MST exists only if the graph is connected; otherwise, it's a Minimum Spanning Forest (MSF).
+   - Adding any non-MST edge creates exactly one cycle; remove the heaviest edge on it to restore MST.
+   - Removing an MST edge splits the tree; reconnect using the lightest edge crossing the cut.
+   - Second Best MST: For each non-MST edge (u, v, w), add it, query max edge on MST path(u,v) (via HLD/Binary Lifting), and replace it. Minimum weight obtained is Second Best MST.
+   - Shortest Path Tree (SPT) vs MST: SPT minimizes path from a single source; MST minimizes total weight.
+   - MST works perfectly with negative weights. For directed graphs, use Minimum Spanning Arborescence (Edmonds').
+
+3. DSU & RECOGNITION CLUES:
+   - Always implement DSU with Path Compression and Union by Size/Rank -> O(alpha(N)) per operation.
+   - Key clues to use MST: "connect all cities/islands", "minimum cable/road/infrastructure cost", "exactly N-1 edges", "remove redundant expensive edges".
+   - Minimax Path: Build MST; the answer is the maximum weight edge on the path between u and v in the MST.
 =========================================================================================
 */
 
 /*
 ======================== MST EDGE THEORY ========================
-
-Let edge e = (u, v, w)
-
-----------------------------------------------------------------
-1. Edge in EVERY MST
-----------------------------------------------------------------
-Edge e appears in every MST if:
-
--> e is the UNIQUE minimum weight edge crossing some cut.
-
-Reason:
-By Cut Property, the lightest edge across a cut is always chosen.
-If it is unique, there is no alternative.
-
----------------------------------------------------------------
-2. Edge in AT LEAST ONE MST
----------------------------------------------------------------
-Edge e appears in some MST iff
-
-There is NO path from u to v consisting entirely of edges
-with weight strictly smaller than w.
-
-Equivalent:
-While running Kruskal, u and v are NOT already connected
-using only edges with weight < w.
-
-Otherwise e can never be chosen.
-
----------------------------------------------------------------
-3. Edge in NO MST
----------------------------------------------------------------
-Edge e cannot belong to any MST if
-
-There exists a cycle where e is the UNIQUE maximum weight edge.
-
-Reason:
-Cycle Property:
-The heaviest edge in a cycle is never useful.
-
-Equivalent:
-There already exists another path between u and v using only
-edges with weight strictly smaller than w.
-
----------------------------------------------------------------
-4. Equal Weight Edges
----------------------------------------------------------------
-Equal weights create multiple valid MSTs.
-
-An edge may
-- appear in some MSTs
-- disappear in others
-
-unless uniqueness conditions hold.
-
----------------------------------------------------------------
-5. Distinct Edge Weights
----------------------------------------------------------------
-If every edge weight is distinct
-
--> MST is UNIQUE.
-
-Every chosen edge is forced.
-
----------------------------------------------------------------
-6. Non-MST Edge
----------------------------------------------------------------
-Suppose edge e is NOT chosen.
-
-Adding e creates exactly one cycle.
-
-To keep a spanning tree,
-remove the maximum edge on that cycle.
-
-If
-    w(e) == maxEdge
-then another MST may exist.
-
-If
-    w(e) > maxEdge
-then e can never improve MST.
-
----------------------------------------------------------------
-7. MST Edge
----------------------------------------------------------------
-Removing an MST edge splits the tree into two components.
-
-To reconnect them,
-choose the minimum edge crossing that cut.
-
-Useful in:
-- Dynamic MST
-- Second Best MST
-
----------------------------------------------------------------
-8. Second Best MST
----------------------------------------------------------------
-For every non-MST edge:
-
-    Add edge.
-    Find maximum edge on MST path.
-    Replace it.
-
-Minimum larger answer = Second MST.
-
----------------------------------------------------------------
-9. Critical Edge
----------------------------------------------------------------
-Critical edge:
-
-Removing it increases MST weight
-or disconnects the graph.
-
-Appears in EVERY MST.
-
----------------------------------------------------------------
-10. Pseudo-Critical Edge
----------------------------------------------------------------
-Pseudo-critical edge:
-
-Can appear in SOME MST
-but not necessarily all.
-
-Test:
-Force include the edge.
-If MST weight stays optimal,
-it is pseudo-critical.
-
----------------------------------------------------------------
-11. Maximum Edge on MST Path
----------------------------------------------------------------
-For any non-MST edge (u,v,w):
-
-maxEdge(path(u,v)) <= w
-
-Otherwise replacing the heavier edge
-would produce a cheaper spanning tree.
-
-Equality
-    => multiple MSTs possible.
-
-Strict inequality
-    => edge never enters MST.
-
----------------------------------------------------------------
-12. Cut Property
----------------------------------------------------------------
-For ANY cut:
-
-Minimum crossing edge
-belongs to SOME MST.
-
-Unique minimum
-belongs to EVERY MST.
-
----------------------------------------------------------------
-13. Cycle Property
----------------------------------------------------------------
-For ANY cycle:
-
-Maximum edge
-does NOT belong to ANY MST.
-
-Unique maximum
-can never appear in an MST.
-
----------------------------------------------------------------
-14. Kruskal Interpretation
----------------------------------------------------------------
-Sort edges by weight.
-
-Before processing weight w,
-
-All vertices connected using edges < w
-already behave as one component.
-
-Edge (u,v,w):
-
-Different components
-    -> can be chosen.
-
-Same component
-    -> never needed.
-
-===============================================================
+1. Edge in EVERY MST: e = (u,v,w) is the UNIQUE minimum weight edge crossing some cut.
+2. Edge in SOME MST: There is NO path from u to v using only edges with weight strictly smaller than w.
+3. Edge in NO MST: There exists a cycle where e is the UNIQUE maximum weight edge (i.e. u-v path exists with edges < w).
+4. Equal Weights: Create multiple valid MSTs unless uniqueness conditions hold.
+5. Distinct Weights: If every edge weight is distinct, the MST is UNIQUE.
+6. Non-MST Edge: Adding it creates exactly one cycle. To keep a spanning tree, remove the maximum edge on that cycle.
+7. MST Edge: Removing it splits the tree. Reconnect using the minimum edge crossing the cut (useful in Dynamic MST / Second Best MST).
+8. Second Best MST: For each non-MST edge, add it, find the max edge on the MST path, and replace it. Minimum resulting weight is Second MST.
+9. Critical Edge: Removing it increases MST weight (or disconnects graph). Appears in EVERY MST.
+10. Pseudo-Critical Edge: Can appear in SOME MST. If forced, the MST weight remains optimal.
+11. Max Edge on MST Path: For any non-MST edge (u,v,w): maxEdge(path(u,v)) <= w. Strict inequality means the edge never enters MST.
+12. Cut Property: For any cut, the minimum crossing edge belongs to some MST; unique minimum belongs to every MST.
+13. Cycle Property: For any cycle, the maximum edge does not belong to any MST; unique maximum can never appear in an MST.
+14. Kruskal: Sort edges. If u-v are already connected using edges < w, (u,v,w) is never needed; otherwise, it can be chosen.
+=================================================================
 */

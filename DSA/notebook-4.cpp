@@ -23,6 +23,7 @@ using ll = long long;
 using ull = unsigned long long;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
+using vvi = vector<vector<int>>;
 using vi = vector<int>;
 using vll = vector<ll>;
 
@@ -222,31 +223,6 @@ public:
     }
 }; // count subarrays with bitwise AND equal to k in O(n * log(max(nums))) time and O(n) space.
 
-void RotateMatrix(vector<vector<int>>& matrix) {
-    int n = matrix.size();
-    for (int i = 0; i < n; i++) {
-        for (int j = i + 1; j < n; j++) {
-            swap(matrix[i][j], matrix[j][i]);
-        }
-    }
-    for (int i = 0; i < n; i++) {
-        reverse(matrix[i].begin(), matrix[i].end());
-    }
-} // rotates the matrix by 90 degrees clockwise in O(n^2) time and O(1) space. Here matrix is a square matrix of size n x n.
-
-void RotateMatrix2(vector<vector<int>>& matrix) {
-    int m = matrix.size();
-    int n = matrix[0].size();
-    vector<vector<int>> rotated(n, vector<int>(m));
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            rotated[j][m - 1 - i] = matrix[i][j];
-        }
-    }
-
-    matrix = rotated;
-} // rotates the matrix by 90 degrees clockwise in O(m * n) time and O(m * n) space. Here matrix is a rectangular matrix of size m x n.
 
 vector<vector<int>> MultiplyMatrices(vector<vector<int>>& A, vector<vector<int>>& B) {
     int m = A.size();
@@ -280,17 +256,159 @@ long long countSubsequences(vector<int>& nums, int k) {
     return dp[k];
 }
 
-int IncreasingArray2(vector<int>& nums) {
-    long long totalCost = 0;
-    priority_queue<int> medianHeap;
-    for(auto x:nums){
-        medianHeap.push(x);
-        if(medianHeap.top() > x){
-            totalCost += medianHeap.top() - x;
-            medianHeap.pop();
-            medianHeap.push(x);
-        }
+struct Node {
+    int value, height;
+    Node *left, *right;
+
+    Node(int x) : value(x), height(1), left(nullptr), right(nullptr) {}
+};
+
+struct AVLTree {
+    int getHeight(Node* node) {
+        return node ? node->height : 0;
     }
 
-    return totalCost;
-} // returns the minimum cost to make the array non-decreasing by only increasing elements in O(n) time and O(1) space.
+    void updateHeight(Node* node) {
+        if (node)
+            node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+    }
+
+    int getBalance(Node* node) {
+        return getHeight(node->left) - getHeight(node->right);
+    }
+
+    Node* rotateRight(Node* root) {
+        Node* newRoot = root->left;
+        Node* subtree = newRoot->right;
+
+        newRoot->right = root;
+        root->left = subtree;
+
+        updateHeight(root);
+        updateHeight(newRoot);
+
+        return newRoot;
+    }
+
+    Node* rotateLeft(Node* root) {
+        Node* newRoot = root->right;
+        Node* subtree = newRoot->left;
+
+        newRoot->left = root;
+        root->right = subtree;
+
+        updateHeight(root);
+        updateHeight(newRoot);
+
+        return newRoot;
+    }
+
+    Node* insert(Node* root, int value) {
+        if (!root) return new Node(value);
+
+        if (value < root->value)
+            root->left = insert(root->left, value);
+        else if (value > root->value)
+            root->right = insert(root->right, value);
+        else
+            return root;
+
+        updateHeight(root);
+
+        // LL
+        if (getBalance(root) > 1 && value < root->left->value)
+            return rotateRight(root);
+
+        // RR
+        if (getBalance(root) < -1 && value > root->right->value)
+            return rotateLeft(root);
+
+        // LR
+        if (getBalance(root) > 1 && value > root->left->value) {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+
+        // RL
+        if (getBalance(root) < -1 && value < root->right->value) {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+
+        return root;
+    }
+
+    int sumOfLeaveNodes(Node* root) {
+        if (!root) return 0;
+        if (!root->left && !root->right) return root->value;
+        return sumOfLeaveNodes(root->left) + sumOfLeaveNodes(root->right);
+    }
+
+};
+
+struct Dinic {
+    struct Edge {
+        int to, rev;
+        ll cap;
+    };
+
+    int nodes;
+    vector<vector<Edge>> adj;
+    vector<int> level, it;
+
+    Dinic(int n): nodes(n), adj(n + 1), level(n + 1), it(n + 1) {}
+
+    // directed edge
+    void addEdge(int u, int v, ll cap) {
+        adj[u].push_back({v, (int)adj[v].size(), cap});
+        adj[v].push_back({u, (int)adj[u].size() - 1, 0});
+    }
+
+    // build level graph
+    bool bfs(int src, int sink) {
+        fill(level.begin(), level.end(), -1);
+        queue<int> q;
+        q.push(src), level[src] = 0;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            for (auto &e : adj[u])
+                if (e.cap && level[e.to] == -1)
+                    level[e.to] = level[u] + 1, q.push(e.to);
+        }
+        return level[sink] != -1;
+    }
+
+    // blocking flow
+    ll dfs(int u, int sink, ll flow) {
+        if (u == sink || !flow) return flow;
+        for (int &i = it[u]; i < adj[u].size(); i++) {
+            auto &e = adj[u][i];
+            if (level[e.to] != level[u] + 1 || !e.cap) continue;
+            ll pushed = dfs(e.to, sink, min(flow, e.cap));
+            if (pushed)
+                return e.cap -= pushed, adj[e.to][e.rev].cap += pushed, pushed;
+        }
+        return 0;
+    }
+
+    // max flow
+    ll maxFlow(int src, int sink) {
+        ll flow = 0, pushed;
+        while (bfs(src, sink)) {
+            fill(it.begin(), it.end(), 0);
+            while ((pushed = dfs(src, sink, LLONG_MAX)))
+                flow += pushed;
+        }
+        return flow;
+    }
+};
+// maximum flow = capacity of minimum cut
+// the absolute max amount of water you can push through network equals the capacity of narrowst bottleneck that cuts off source from sink
+// when to apply - when you have a flow network and want to find the maximum amount of flow that can be sent from source to sink or when you want to find the minimum cut in a flow network.
+// // Pattern:
+// - Maximum amount that can be sent from source to sink.
+// - Minimum cut / minimum edges to disconnect s and t.
+// - Multiple agents/items moving through a network with capacities.
+// - Assignment/matching problems (workers-jobs, students-schools, etc.).
+// - Edge/vertex-disjoint paths.
+// - Transform constraints into capacities on a graph.
