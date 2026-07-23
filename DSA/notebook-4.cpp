@@ -412,3 +412,76 @@ struct Dinic {
 // - Assignment/matching problems (workers-jobs, students-schools, etc.).
 // - Edge/vertex-disjoint paths.
 // - Transform constraints into capacities on a graph.
+
+int rowWithMax1s(vector<vector<int>> &mat) {
+    int n = mat.size();
+    int m = mat[0].size();
+
+    int row = 0, col = m - 1;
+    int ans = -1;
+
+    while (row < n && col >= 0) {
+        if (mat[row][col] == 1) {
+            ans = row;   // Current row has more 1s
+            col--;       // Check if there are more 1s to the left
+        } else {
+            row++;       // Move to next row
+        }
+    }
+
+    return ans;
+}
+
+// bool ok;
+
+long long dfs(int u, int p,
+              vector<vector<int>>& g,
+              vector<int>& val,
+              long long target)
+{
+    long long sum = val[u];
+
+    for (int v : g[u]) {
+        if (v == p) continue;
+        sum += dfs(v, u, g, val, target);
+    }
+
+    if (sum == target)
+        return 0;
+
+    if (sum > target)
+        ok = false;
+
+    return sum;
+}
+
+int maxComponents(vector<int>& val,
+                  vector<vector<int>>& g)
+{
+    int n = val.size();
+
+    long long total = 0;
+    for (int x : val)
+        total += x;
+
+    vector<long long> divisors;
+
+    for (long long d = 1; d * d <= total; d++) {
+        if (total % d == 0) {
+            divisors.push_back(d);
+            if (d * d != total)
+                divisors.push_back(total / d);
+        }
+    }
+
+    sort(divisors.begin(), divisors.end());
+
+    for (long long target : divisors) {
+        ok = true;
+
+        if (dfs(0, -1, g, val, target) == 0 && ok)
+            return total / target - 1;
+    }
+
+    return 0;
+}

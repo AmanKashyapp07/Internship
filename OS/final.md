@@ -2,19 +2,26 @@
 
 > This is a rapid-review reference covering every critical OS concept for top-tier internship interviews. Use this for last-minute revision.
 
-## 📚 Full Notes Index
-| File | Topics |
-|------|--------|
-| [l1.md](l1.md) | OS types, kernel types, system calls, boot process, 32/64-bit |
-| [l2.md](l2.md) | Memory layout, PCB, state diagram, context switching, zombie/orphan, IPC |
-| [l3.md](l3.md) | FCFS, SJF, SRTF, Priority, Round Robin, MLQ, MLFQ, Gantt charts |
-| [l4.md](l4.md) | Race conditions, mutex, semaphore, CV, classic problems |
-| [l5.md](l5.md) | Coffman conditions, prevention/avoidance/detection, Banker's Algorithm |
-| [l6.md](l6.md) | Paging, TLB, fragmentation, multi-level paging, segmentation |
-| [l7.md](l7.md) | Demand paging, page fault, FIFO/OPT/LRU, Belady's, thrashing |
-| [l8.md](l8.md) | Inodes, file allocation, journaling, DMA, disk scheduling algorithms |
+### 🔴 Pre-OA (Hands-on Coding, Numericals, & Algorithm Traces)
+| File | High-Priority OA Topics |
+|------|-------------------------|
+| [l3.md](l3.md) | CPU Scheduling Algorithms (numericals, Gantt charts, Average TAT/WT) |
+| [l4.md](l4.md) | Process Synchronization (concurrency C++ code, Producer-Consumer, Readers-Writers) |
+| [l5.md](l5.md) | Deadlocks (Banker's Algorithm numerical calculations, Safe states) |
+| [l6.md](l6.md) | Memory Management (Paging, TLB Hit/Miss EAT calculations, Page Table Size math) |
+| [l7.md](l7.md) | Virtual Memory (Page replacement algorithms - FIFO/OPT/LRU traces) |
+| [l8.md](l8.md) | Disk Scheduling Algorithms (seek time head movements - FCFS/SSTF/SCAN/C-LOOK) |
+
+### 🔵 Post-OA / Oral Interview (Theory, Core Concepts, & Systems Internals)
+| File | Key Interview Topics |
+|------|----------------------|
+| [l1.md](l1.md) | OS Architecture (User vs. Kernel mode, system calls transition, boot steps) |
+| [l2.md](l2.md) | Process/Thread memory layout, PCB/TCB, Context Switch, Zombies/Orphans, IPC types |
+| [l8.md](l8.md) | File System Internals (Inodes, Hard vs. Soft links, allocation methods) |
+| [l9.md](l9.md) | Supplemental notes (Trap vs Interrupt, Monitors, Sleeping Barber) & **20 Comparison Tables** |
 
 ---
+
 
 ## ⚡ Quick Comparison Tables
 

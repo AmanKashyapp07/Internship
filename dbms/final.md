@@ -8,17 +8,16 @@ This guide serves as a master summary, roadmap, and revision checklist for the e
 ## 1. Lecture Directory & Roadmap
 Click the links below to access the deep-dive notes for each topic:
 
-1.  **[L1 — Relational Model & Keys](file:///Users/amankashyap/Documents/cses/dbms/l1.md)**: Relational schemas, tuples, domains, super/candidate/primary/foreign keys, referential integrity.
-2.  **[L2 — ER Modeling](file:///Users/amankashyap/Documents/cses/dbms/l2.md)**: Entities, attributes, weak entity sets, cardinalities, ER-to-Relational mapping rules.
-3.  **[L3 — SQL: DDL, DML & Queries](file:///Users/amankashyap/Documents/cses/dbms/l3.md)**: DDL vs DML, SELECT syntax, JOINs (Inner/Outer/Self), Subqueries, `GROUP BY` & `HAVING`, `IN` vs `EXISTS`.
-4.  **[L4 — Normalization (1NF → BCNF)](file:///Users/amankashyap/Documents/cses/dbms/l4.md)**: Functional dependencies, Attribute Closure algorithm, 1NF/2NF/3NF/BCNF requirements, Lossless join & Dependency preservation.
-5.  **[L5 — Transactions & ACID](file:///Users/amankashyap/Documents/cses/dbms/l5.md)**: Atomicity, Consistency, Isolation, Durability, transaction state machine, conflict & view serializability, precedence graphs.
-6.  **[L6 — Concurrency Control](file:///Users/amankashyap/Documents/cses/dbms/l6.md)**: 2PL (Strict/Rigorous), Timestamp Ordering, Deadlock handling (Wait-Die vs Wound-Wait), Concurrency anomalies (Dirty Read, Lost Update, Phantom Read).
-7.  **[L7 — Indexing & Query Processing](file:///Users/amankashyap/Documents/cses/dbms/l7.md)**: Primary vs Secondary indexing, Clustered vs Non-Clustered index, Dense vs Sparse index, B-Trees vs B+ Trees.
-8.  **[L8 — Advanced SQL + Window Functions](file:///Users/amankashyap/Documents/cses/dbms/l8.md)**: Window functions (`ROW_NUMBER`, `RANK`, `DENSE_RANK`, `NTILE`, `LEAD`, `LAG`), CTEs (Common Table Expressions), Nth highest salary.
-9.  **[L9 — NoSQL & CAP Theorem](file:///Users/amankashyap/Documents/cses/dbms/l9.md)**: CAP Theorem (Consistency, Availability, Partition Tolerance), BASE properties, Document (MongoDB) and Key-Value (Redis) databases.
-10. **[L10 — Recovery & File Organization](file:///Users/amankashyap/Documents/cses/dbms/l10.md)**: Storage hierarchies, WAL (Write-Ahead Logging), Checkpoints, UNDO/REDO recovery, RAID levels (0, 1, 5, 10).
-11. **[B1 — Relational Algebra & Calculus (Bonus)](file:///Users/amankashyap/Documents/cses/dbms/l11.md)**: Procedural Relational Algebra (Select, Project, Cartesian Product, Join, Division) vs Declarative Relational Calculus.
+1.  **[L1 — Relational Model & Keys](file:///Users/amankashyap/Documents/internship/DBMS/l1.md)**: Relational schemas, domains, super/candidate/primary/foreign keys, referential integrity.
+2.  **[L2 — ER Modeling](file:///Users/amankashyap/Documents/internship/DBMS/l2.md)**: Entities, attributes, weak entity sets, cardinalities, ER-to-Relational mapping rules.
+3.  **[L3 — SQL: DDL, DML & Queries](file:///Users/amankashyap/Documents/internship/DBMS/l3.md)**: DDL vs DML, SELECT syntax, JOINs (Inner/Outer/Self), Subqueries, `GROUP BY` & `HAVING`, `IN` vs `EXISTS`.
+4.  **[L4 — Normalization (1NF → BCNF)](file:///Users/amankashyap/Documents/internship/DBMS/l4.md)**: Functional dependencies, Attribute Closure algorithm, 1NF/2NF/3NF/BCNF requirements, Lossless join & Dependency preservation.
+5.  **[L5 — Transactions & ACID](file:///Users/amankashyap/Documents/internship/DBMS/l5.md)**: Atomicity, Consistency, Isolation, Durability, transaction state machine, conflict & view serializability, precedence graphs.
+6.  **[L6 — Concurrency Control](file:///Users/amankashyap/Documents/internship/DBMS/l6.md)**: 2PL (Strict/Rigorous), Timestamp Ordering, Deadlock handling (Wait-Die vs Wound-Wait), Concurrency anomalies (Dirty Read, Lost Update, Phantom Read).
+7.  **[L7 — Indexing & Query Processing](file:///Users/amankashyap/Documents/internship/DBMS/l7.md)**: Primary vs Secondary indexing, Clustered vs Non-Clustered index, Dense vs Sparse index, B-Trees vs B+ Trees.
+8.  **[L8 — Advanced SQL + Window Functions](file:///Users/amankashyap/Documents/internship/DBMS/l8.md)**: Window functions (`ROW_NUMBER`, `RANK`, `DENSE_RANK`, `NTILE`, `LEAD`, `LAG`), CTEs (Common Table Expressions), Nth highest salary.
+9.  **[L9 — Recovery & Database Internals](file:///Users/amankashyap/Documents/internship/DBMS/l9.md)**: Storage hierarchies, WAL (Write-Ahead Logging), Checkpoints, UNDO/REDO recovery.
+10. **[L10 — SQL Problem Patterns](file:///Users/amankashyap/Documents/internship/DBMS/l10.md)**: High-frequency interview queries, Top-N per group, Cumulative Sum, gaps/consecutive login problems.
 
 ---
 
@@ -73,21 +72,8 @@ When analyzing functional dependencies (FDs) to determine normal forms:
 
 ---
 
-## 5. CAP Theorem & BASE vs ACID
-Used extensively in System Design/NoSQL interviews:
 
-*   **CAP Theorem**: In a distributed system, you can guarantee at most two out of the three properties:
-    *   **Consistency (C)**: Every read receives the most recent write or an error.
-    *   **Availability (A)**: Every non-failing node returns a non-error response (without guarantee that it contains the most recent write).
-    *   **Partition Tolerance (P)**: The system continues to operate despite arbitrary message loss or node failures. **In real networks, Partition Tolerance (P) is mandatory, so the choice is always CP or AP.**
-*   **BASE (NoSQL)**:
-    *   **B**asically **A**vailable
-    *   **S**oft state (data can change over time without interaction)
-    *   **E**ventual consistency
-
----
-
-## 6. Classic SQL Coding Patterns
+## 5. Classic SQL Coding Patterns
 
 ### Pattern A: Nth Highest Salary (using `DENSE_RANK()`)
 Handles ties correctly (if two employees share the highest salary, they are both ranked #1, and the next is ranked #2).
@@ -124,8 +110,3 @@ WHERE RowNum BETWEEN 11 AND 20; -- Page 2 (10 items per page)
 
 ---
 
-## 7. RAID Levels At-A-Glance
-*   **RAID 0 (Striping)**: Data split across disks. **No redundancy**. Best performance, worst reliability.
-*   **RAID 1 (Mirroring)**: Data duplicated. **$100\%$ redundancy**. Slow write, fast read.
-*   **RAID 5 (Block-level Striping with Distributed Parity)**: Can survive **one** disk failure. Good storage efficiency.
-*   **RAID 10 (1+0 - Striping of Mirrors)**: Requires at least 4 disks. Survives multiple disk failures (as long as no mirror pair fails completely). Fastest rebuild, highly preferred.
