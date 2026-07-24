@@ -816,26 +816,20 @@ Space Complexity: O(N)
 */
 struct FunctionalGraph {
     int n;
-    const int LOG = 20;
-    vector<int> cyc, dist, indeg;
+    static const int LOG = 20;
+
+    vector<int> dist, cyc, comp, pos, indeg;
     vector<vector<int>> rev, up;
-    // cyc[i] = length of the cycle for vertex i (or -1 if not in a cycle)
-    // dist[i] = distance from vertex i to the cycle (0 if in a cycle)
-    // indeg[i] = indegree of vertex i
-    // up[i][j] = 2^j-th ancestor of vertex i
-     void dfs(int u) {
-        for (int v : rev[u])
-            if (dist[v] == -1) {
-                dist[v] = dist[u] + 1;
-                dfs(v);
-            }
-    }
 
     FunctionalGraph(vector<int>& to) {
         n = to.size();
-        cyc.assign(n, -1);
+
         dist.assign(n, -1);
+        cyc.assign(n, -1);
+        comp.assign(n, -1);
+        pos.assign(n, -1);
         indeg.assign(n, 0);
+
         rev.assign(n, {});
         up.assign(n, vector<int>(LOG));
 
@@ -846,76 +840,174 @@ struct FunctionalGraph {
         }
 
         for (int j = 1; j < LOG; j++)
-            for (int i = 0; i < n; i++) {
-                int p = up[i][j - 1];
-                up[i][j] = up[p][j - 1];
-            }
+            for (int i = 0; i < n; i++)
+                up[i][j] = up[up[i][j - 1]][j - 1];
 
-        vector<int> alive(n, 1), vis(n);
+        vector<int> alive(n, 1);
         queue<int> q;
 
         for (int i = 0; i < n; i++)
-            if (!indeg[i]) q.push(i);
+            if (indeg[i] == 0)
+                q.push(i);
 
         while (!q.empty()) {
-            int u = q.front(); q.pop();
+            int u = q.front();
+            q.pop();
+
             alive[u] = 0;
-            if (--indeg[to[u]] == 0) q.push(to[u]);
+
+            if (--indeg[to[u]] == 0)
+                q.push(to[u]);
         }
+
+        int id = 0;
 
         for (int i = 0; i < n; i++) {
-            if (!alive[i] || vis[i]) continue;
-            int u = i, len = 0;
-            do vis[u] = 1, len++, u = to[u];
-            while (u != i);
 
-            u = i;
+            if (!alive[i] || comp[i] != -1)
+                continue;
+
+            vector<int> cycle;
+
+            int u = i;
             do {
-                cyc[u] = len;
-                dist[u] = 0;
+                cycle.push_back(u);
                 u = to[u];
             } while (u != i);
-        }
 
-        for(int i = 0; i < n; i++) if (cyc[i] != -1) dfs(i);
+            int len = cycle.size();
+
+            for (int j = 0; j < len; j++) {
+                int v = cycle[j];
+                cyc[v] = len;
+                dist[v] = 0;
+                comp[v] = id;
+                pos[v] = j;
+            }
+
+            queue<int> bfs;
+
+            for (int v : cycle)
+                bfs.push(v);
+
+            while (!bfs.empty()) {
+                int u = bfs.front();
+                bfs.pop();
+
+                for (int x : rev[u]) {
+                    if (dist[x] != -1)
+                        continue;
+
+                    dist[x] = dist[u] + 1;
+                    comp[x] = id;
+                    bfs.push(x);
+                }
+            }
+
+            id++;
+        }
     }
 
     int jump(int u, int k) {
         for (int j = 0; j < LOG; j++)
-            if (k & (1 << j)) u = up[u][j];
+            if (k & (1 << j))
+                u = up[u][j];
         return u;
     }
-};
-    
-struct TreeIsomorphism {
- 
-    int n;
-    const vector<vector<int>>& g;
-    vector<int> id;
- 
-    map<vector<int>, int>& mp;
-    int& nxt;
- 
-    TreeIsomorphism(int nodes, const vector<vector<int>>& graph,
-                    map<vector<int>, int>& mp,
-                    int& nxt)
-        : n(nodes), g(graph), id(nodes + 1), mp(mp), nxt(nxt) {}
- 
-    int dfs(int u, int p) {
-        vector<int> child;
-        for (int v : g[u]) if(v!=p) child.push_back(dfs(v, u));
-        sort(child.begin(), child.end());
-        if (!mp.count(child)) mp[child] = nxt++;
- 
-        return id[u] = mp[child];
-    }
- 
-    int getID(int root) {
-        return dfs(root, 0);
+
+    int query(int a, int b) {
+
+        if (comp[a] != comp[b])
+            return -1;
+
+        bool acycle = (dist[a] == 0);
+        bool bcycle = (dist[b] == 0);
+
+        // both in cycle
+        if (acycle && bcycle) {
+            int ans = pos[b] - pos[a];
+            if (ans < 0)
+                ans += cyc[a];
+            return ans;
+        }
+
+        // cycle -> tree
+        if (acycle && !bcycle)
+            return -1;
+
+        // tree -> tree
+        if (!acycle && !bcycle) {
+
+            if (dist[a] < dist[b])
+                return -1;
+
+            int d = dist[a] - dist[b];
+
+            if (jump(a, d) == b)
+                return d;
+
+            return -1;
+        }
+
+        // tree -> cycle
+        int entry = jump(a, dist[a]);
+
+        int ans = dist[a];
+        ans += pos[b] - pos[entry];
+        if (pos[b] < pos[entry])
+            ans += cyc[b];
+
+        return ans;
     }
 };
 
-vector<int> find_centers(int n, vector<vector<int>>& g) {
+const long long MOD1 = 1000000007;
+const long long MOD2 = 1000000009;
+const long long BASE1 = 313;
+const long long BASE2 = 317;
+const int MAX_LEN = 200005; 
+long long pow1[MAX_LEN], pow2[MAX_LEN];
+
+void precompute() {
+    pow1[0] = pow2[0] = 1;
+    for (int i = 1; i < MAX_LEN; i++) {
+        pow1[i] = (pow1[i - 1] * BASE1) % MOD1;
+        pow2[i] = (pow2[i - 1] * BASE2) % MOD2;
+    }
+}
+
+vector<long long> dfs(int u, int p, const vector<vector<int>>& graph) {
+    vector<vector<long long>> childs;
+
+    for (int v : graph[u]) {
+        if (v != p) {
+            childs.push_back(dfs(v, u, graph));
+        }
+    }
+
+    sort(childs.begin(), childs.end());
+
+    long long h1 = 1, h2 = 1;
+    int total_len = 1;
+
+    for (auto &child : childs) {
+        long long child_h1 = child[0];
+        long long child_h2 = child[1];
+        int len = child[2];
+
+        h1 = (h1 * pow1[len] + child_h1) % MOD1;
+        h2 = (h2 * pow2[len] + child_h2) % MOD2;
+        total_len += len;
+    }
+
+    h1 = (h1 * BASE1 + 2) % MOD1;
+    h2 = (h2 * BASE2 + 2) % MOD2;
+    total_len++;
+
+    return {h1, h2, total_len};
+}
+
+vector<int> centers(int n, vector<vector<int>>& g) {
     if (n == 1) return {1};
 
     vector<int> deg(n + 1), leaves;

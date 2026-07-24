@@ -485,3 +485,41 @@ int maxComponents(vector<int>& val,
 
     return 0;
 }
+
+class Solution {
+public:
+    bool helper(string &s, string &p, int i, int j, vector<vector<int>> &dp) {
+        // Base cases
+        if (i == s.size() && j == p.size()) return true; // Both strings are exhausted
+        if (j == p.size()) return false; // Pattern is exhausted but string is not
+        if (i == s.size()) { // String is exhausted
+            // Check if remaining pattern only contains '*'
+            for (int k = j; k < p.size(); ++k)
+                if (p[k] != '*') return false;
+            return true;
+        }
+
+        // If already computed
+        if (dp[i][j] != -1) return dp[i][j];
+
+        // Match conditions
+        if (p[j] == s[i] || p[j] == '?') {
+            // Characters match or '?' matches any single character
+            dp[i][j] = helper(s, p, i + 1, j + 1, dp);
+        } else if (p[j] == '*') {
+            // '*' matches zero or more characters
+            dp[i][j] = helper(s, p, i + 1, j, dp) || helper(s, p, i, j + 1, dp);
+        } else {
+            // Characters do not match
+            dp[i][j] = false;
+        }
+
+        return dp[i][j];
+    }
+
+    bool isMatch(string s, string p) {
+        // Memoization table
+        vector<vector<int>> dp(s.size(), vector<int>(p.size(), -1));
+        return helper(s, p, 0, 0, dp);
+    }
+};
