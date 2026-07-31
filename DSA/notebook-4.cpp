@@ -523,3 +523,261 @@ public:
         return helper(s, p, 0, 0, dp);
     }
 };
+
+vi nextGreaterElement(const vi& nums) {
+    int n = nums.size();
+    vi ans(n, -1);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && nums[st.top()] < nums[i]) {
+            ans[st.top()] = nums[i];
+            st.pop();
+        }
+        st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// Next Smaller Element
+//
+// Stack: increasing
+// Pop while current < stack.top()
+// ------------------------------------------------------------
+vi nextSmallerElement(const vi& nums) {
+    int n = nums.size();
+    vi ans(n, -1);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && nums[st.top()] > nums[i]) {
+            ans[st.top()] = nums[i];
+            st.pop();
+        }
+        st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// Previous Greater Element
+//
+// Stack: decreasing
+// Pop while stack.top() <= current
+// ------------------------------------------------------------
+vi previousGreaterElement(const vi& nums) {
+    int n = nums.size();
+    vi ans(n, -1);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && nums[st.top()] <= nums[i])
+            st.pop();
+
+        if (!st.empty())
+            ans[i] = nums[st.top()];
+
+        st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// Previous Smaller Element
+//
+// Stack: increasing
+// Pop while stack.top() >= current
+// ------------------------------------------------------------
+vi previousSmallerElement(const vi& nums) {
+    int n = nums.size();
+    vi ans(n, -1);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && nums[st.top()] >= nums[i])
+            st.pop();
+
+        if (!st.empty())
+            ans[i] = nums[st.top()];
+
+        st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// Stock Span
+//
+// Previous Greater Element (index version)
+// ------------------------------------------------------------
+vi stockSpan(const vi& prices) {
+    int n = prices.size();
+    vi span(n);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && prices[st.top()] <= prices[i])
+            st.pop();
+
+        span[i] = st.empty() ? i + 1 : i - st.top();
+        st.push(i);
+    }
+
+    return span;
+}
+
+// ------------------------------------------------------------
+// Next Greater Element II (Circular)
+//
+// Traverse twice.
+// Push indices only during first pass.
+// ------------------------------------------------------------
+vi nextGreaterCircular(const vi& nums) {
+    int n = nums.size();
+    vi ans(n, -1);
+    stack<int> st;
+
+    for (int i = 0; i < 2 * n; i++) {
+        while (!st.empty() && nums[st.top()] < nums[i % n]) {
+            ans[st.top()] = nums[i % n];
+            st.pop();
+        }
+
+        if (i < n)
+            st.push(i);
+    }
+
+    return ans;
+}
+
+ll sumSubarrayMins(const vi& arr) {
+    int n = arr.size();
+    stack<int> st;
+    ll ans = 0;
+
+    for (int i = 0; i <= n; i++) {
+        while (!st.empty() && (i == n || arr[st.top()] >= arr[i])) {
+            int mid = st.top();
+            st.pop();
+
+            int left = st.empty() ? -1 : st.top();
+            int right = i;
+
+            ll leftCnt = mid - left;
+            ll rightCnt = right - mid;
+
+            ans = (ans + 1LL * arr[mid] * leftCnt % MOD * rightCnt) % MOD;
+        }
+        if (i < n) st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// LC 1793 - Maximum Score of a Good Subarray
+//
+// For each element, find the largest interval where it is the
+// minimum. If that interval contains k, update the answer.
+// ------------------------------------------------------------
+int maximumScore(vector<int>& nums, int k) {
+    int n = nums.size();
+    stack<int> st;
+    ll ans = 0;
+
+    for (int i = 0; i <= n; i++) {
+        while (!st.empty() && (i == n || nums[st.top()] >= nums[i])) {
+            int mid = st.top();
+            st.pop();
+
+            int left = st.empty() ? -1 : st.top();
+            int right = i;
+
+            if (left < k && k < right)
+                ans = max(ans, 1LL * nums[mid] * (right - left - 1));
+        }
+        if (i < n) st.push(i);
+    }
+
+    return ans;
+}
+
+// ------------------------------------------------------------
+// Sum of Subarray Maximums
+//
+// Contribution:
+// arr[i] is maximum in
+// (i - previous greater) * (next greater/equal - i) subarrays.
+//
+// Stack:
+// - decreasing
+// - pop while arr[top] <= arr[i]
+// ------------------------------------------------------------
+ll sumSubarrayMaxs(const vi& arr) {
+    int n = arr.size();
+    stack<int> st;
+    ll ans = 0;
+
+    for (int i = 0; i <= n; i++) {
+        while (!st.empty() && (i == n || arr[st.top()] <= arr[i])) {
+            int mid = st.top();
+            st.pop();
+
+            int left = st.empty() ? -1 : st.top();
+            int right = i;
+
+            ll leftCnt = mid - left;
+            ll rightCnt = right - mid;
+
+            ans = (ans + 1LL * arr[mid] * leftCnt % MOD * rightCnt) % MOD;
+        }
+        if (i < n) st.push(i);
+    }
+
+    return ans;
+}
+
+vector<int> maxOfMins(vector<int>& arr) {
+        int n = arr.size();
+
+        vector<int> ans(n + 1, INT_MIN);
+        stack<int> st;
+        for (int i = 0; i <= n; i++) {
+
+            while (!st.empty() &&
+                   (i == n || arr[st.top()] >= arr[i])) { 
+                // Pop equals (avoid duplicates in stack) to ensure that the contribution range 
+                // of equal elements is uniquely partitioned and not counted twice.
+                int mid = st.top();
+                st.pop();
+
+                int left = st.empty() ? -1 : st.top();
+                int right = i;
+
+                int len = right - left - 1; // exlusive boundary
+                // mid will be the minimum of the subarray from left+1 to right-1, which has length len
+                ans[len] = max(ans[len], arr[mid]);
+            }
+
+            if (i < n) {
+                st.push(i);
+            }
+        }
+
+        // suffix maximum
+        for (int len = n - 1; len >= 1; len--) {
+            ans[len] = max(ans[len], ans[len + 1]);
+        }
+
+        vector<int> res;
+        for (int len = 1; len <= n; len++) {
+            res.push_back(ans[len]);
+        }
+
+        return res;
+    }

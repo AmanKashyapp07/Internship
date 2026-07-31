@@ -14,7 +14,7 @@ int solve(int i, int j, vector<int>& a, vector<vector<int>>& dp) {
         a[i] - solve(i + 1, j, a, dp),
         a[j] - solve(i, j - 1, a, dp)
     );
-}
+} // finds max diff in score between two players, given optimal play from both sides.
 
 signed main() {
     int n;

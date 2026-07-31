@@ -1,97 +1,43 @@
 // Link: https://cses.fi/problemset/task/1140
 
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
 #include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include <vector>
+#include <algorithm>
 
-#define int long long
-#define input(v) for (auto & x: v) cin >> x
-#define srt(v) sort((v).begin(), (v).end())
-#define rev(v) reverse((v).begin(), (v).end())
-#define maxx(v)( * max_element((v).begin(), (v).end()))
-#define minn(v)( * min_element((v).begin(), (v).end()))
 using namespace std;
-#define MOD 1000000007
-const int MAXN = 1e6 + 5;
 
-void prt(vector < int > & v) {
-    for (auto c: v) cout << c << " ";
-    cout << "\n";
-}
+struct Project {
+    long long start, end, reward;
+};
 
-// ---------------------------
-// Aman Kashyap - Forward Top-Down DP (0-indexed)
-// ---------------------------
-
-int helper(vector < pair < pair < int, int > , int >> & ish, vector < int > & dp, int idx, int n) {
-    if (idx == n) return 0;
-    if (dp[idx] != -1) return dp[idx];
-
-    // Option 1: Skip the current project and move to the next one
-    int exclude_project = helper(ish, dp, idx + 1, n);
-    auto [L, R] = ish[idx].first;
-    int val = ish[idx].second;
-    auto it = upper_bound(ish.begin() + idx + 1, ish.end(), R, [](int value, const auto & element) {
-        return value < element.first.first;
-    });
-
-    int next_idx = distance(ish.begin(), it);
-    int include_project = val + helper(ish, dp, next_idx, n);
-    return dp[idx] = max(exclude_project, include_project);
-}
-
-signed main() {
+int main() {
     ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
+    cin.tie(NULL);
 
-    int t = 1;
-    //cin >> t;
-    while (t--) {
-        int n;
-        cin >> n;
-
-        vector < pair < pair < int, int > , int >> ish(n);
-
+    int n;
+    if (cin >> n) {
+        vector<Project> p(n);
         for (int i = 0; i < n; i++) {
-            int L, R, val;
-            cin >> L >> R >> val;
-
-            ish[i] = {
-                {
-                    L,
-                    R
-                },
-                val
-            };
+            cin >> p[i].start >> p[i].end >> p[i].reward;
         }
 
-        // Sort by starting times (L) ascending, and R ascending if L is the same
-        sort(ish.begin(), ish.end(), [](const auto & a, const auto & b) {
-            if (a.first.first != b.first.first) return a.first.first < b.first.first; // Sort by L ascending
-            return a.first.second > b.first.second; // If L is the same, sort by R ascending
+        // Sort projects by end time ascending
+        sort(p.begin(), p.end(), [](const Project& a, const Project& b) {
+            return a.end < b.end;
         });
-        
-        // Initialize DP table with -1
-        vector < int > dp(n, -1);
-        
-        // Start the recursion from the 0-th index
-        cout << helper(ish, dp, 0, n) << "\n";
-    }
 
+        vector<long long> dp(n + 1, 0);
+        vector<long long> endTimes(n);
+        for (int i = 0; i < n; i++) endTimes[i] = p[i].end;
+
+        // Bottom-up Tabulation DP
+        for (int i = 1; i <= n; i++) {
+            // Find last project ending strictly before current project's start time
+            int k = upper_bound(endTimes.begin(), endTimes.begin() + i - 1, p[i - 1].start - 1) - endTimes.begin();
+            dp[i] = max(dp[i - 1], dp[k] + p[i - 1].reward);
+        }
+
+        cout << dp[n] << "\n";
+    }
     return 0;
 }

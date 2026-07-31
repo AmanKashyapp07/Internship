@@ -1,37 +1,38 @@
-// Link: https://cses.fi/problemset/task/1639
-
 #include <bits/stdc++.h>
 using namespace std;
-
-string a, b;
-vector<vector<int>> dp;
-
-int solve(int i, int j) {
-    if (i == (int)a.size()) return b.size() - j;
-    if (j == (int)b.size()) return a.size() - i;
-
-    int &ans = dp[i][j];
-    if (ans != -1) return ans;
-
-    if (a[i] == b[j]) {
-        return ans = solve(i + 1, j + 1);
-    }
-
-    return ans = 1 + min({
-        solve(i + 1, j),     // remove
-        solve(i, j + 1),     // add
-        solve(i + 1, j + 1)  // replace
-    });
-}
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
+    string a, b;
     cin >> a >> b;
 
-    dp.assign(a.size(), vector<int>(b.size(), -1));
+    int m = a.size(), n = b.size();
 
-    cout << solve(0, 0) << '\n';
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+
+    for (int i = 0; i <= m; i++)
+        dp[i][n] = m - i;
+
+    for (int j = 0; j <= n; j++)
+        dp[m][j] = n - j;
+
+    for (int i = m - 1; i >= 0; i--) {
+        for (int j = n - 1; j >= 0; j--) {
+            if (a[i] == b[j]) {
+                dp[i][j] = dp[i + 1][j + 1];
+            } else {
+                dp[i][j] = 1 + min({
+                    dp[i + 1][j],     // remove
+                    dp[i][j + 1],     // add
+                    dp[i + 1][j + 1]  // replace
+                });
+            }
+        }
+    }
+
+    cout << dp[0][0] << '\n';
+
     return 0;
 }

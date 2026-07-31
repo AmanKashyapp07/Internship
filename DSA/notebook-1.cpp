@@ -22,7 +22,7 @@ using namespace std;
 using ll = int;
 using ull = unsigned int;
 using pii = pair<int, int>;
-using vvi = vector<vector<int>>
+using vvi = vector<vector<int>>;
 using pll = pair<ll, ll>;
 using vi = vector<int>;
 using vll = vector<ll>;
@@ -41,9 +41,9 @@ const ll P = 31;
 
 struct SparseTable {
     int n, K;
-    vector<vector<int>> st;
+    vvi st;
 
-    SparseTable(vector<int> &a) : n(a.size()), K((a.size() > 0 ? 31 - __builtin_clz(a.size()) : 0) + 1), st(K, vector<int>(a.size())) {
+    SparseTable(vi &a) : n(a.size()), K((a.size() > 0 ? 31 - __builtin_clz(a.size()) : 0) + 1), st(K, vi(a.size())) {
         st[0] = a;
         for (int j = 1; j < K; j++)
             for (int i = 0; i + (1<<j) <= n; i++)
@@ -59,10 +59,10 @@ struct SparseTable {
 
 struct Centroid{
     int n;
-    vector<vector<int>> g;
-    vector<int> subsize;
+    vvi g;
+    vi subsize;
 
-    Centroid(int n, const vector<vector<int>>& g) : n(n), g(g), subsize(n + 1, 0) {}
+    Centroid(int n, const vvi& g) : n(n), g(g), subsize(n + 1, 0) {}
 
     void addEdge(int u, int v) {
         g[u].push_back(v);
@@ -93,6 +93,7 @@ struct Centroid{
         return centroid(1, 0, subsize[1]);
     }
 };
+
 
 // Returns the polynomial rolling hash of a single word/string 's' in O(|s|)
 ll hashWord(string s) {
@@ -127,11 +128,11 @@ struct FastHash {
 Z-array using FastHash (Z-Algo equivalent)
 Time Complexity: O(N log N)
 Usage:
-  vector<int> z = z_array(s);
+  vi z = z_array(s);
 */
-vector<int> z_array(string s) {
+vi z_array(string s) {
     int n = s.size();
-    vector<int> z(n, 0);
+    vi z(n, 0);
     if (n == 0) return z;
     FastHash fh(s);
     z[0] = n;
@@ -151,10 +152,10 @@ vector<int> z_array(string s) {
     return z;
 } // z[i] denotes the length of the longest substring starting from s[i] which is also a prefix of s
 
-vector<int> pi_array(string s) {
-    vector<int> z = z_array(s);
+vi pi_array(string s) {
+    vi z = z_array(s);
     int n = s.size();
-    vector<int> pi(n, 0);
+    vi pi(n, 0);
     for (int i = 1; i < n; i++){
         for (int len = z[i] - 1; len >= 0; --len) {
             if (pi[i + len] != 0) break;
@@ -169,7 +170,7 @@ vector<int> pi_array(string s) {
 Manacher's equivalent using FastHash (Palindromic substrings)
 Time Complexity: O(N log N)
 Returns:
-  pair<vector<int>, vector<int>>: {d1, d2}
+  pair<vi, vi>: {d1, d2}
   radius means the length of the palindrome centered at that index (full length = 2*radius - 1 for odd, 2*radius for even)
   d1[i] = radius of palindrome centered at i (odd-length)
   d2[i] = radius of palindrome centered between i-1 and i (even-length)
@@ -214,7 +215,7 @@ Usage:
   dsu.comp;               // Total number of disconnected components left
 */
 struct DSU {
-    vector<int> p, sz;
+    vi p, sz;
     int comp;
     DSU(int n) : p(n + 1), sz(n + 1, 1), comp(n) { iota(p.begin(), p.end(), 0); }
 
@@ -229,26 +230,6 @@ struct DSU {
     int size(int x) { return sz[find(x)]; }
 };
 
-int removeStones(vector<vector<int>>& stones) {
-    const int OFFSET = 10001;
-    DSU dsu(20005);
-    
-    unordered_set<int> used;
-    
-    for (auto &s : stones) {
-        int row = s[0];
-        int col = s[1] + OFFSET;
-        dsu.unite(row, col);
-        used.insert(row);
-        used.insert(col);
-    }
-    int components = 0;
-    for (int x : used) {
-        if (dsu.find(x) == x) components++;
-    }
-    return stones.size() - components;
-}
-
 /*
 Kruskal's Algorithm (MST)
 Time Complexity: O(E log E)
@@ -257,8 +238,7 @@ Usage:
   int total_weight = kruskal(n, edges, mst_edges);
 */
 struct Edge {
-    int u, v;
-    int w;
+    int u, v, w;
 };
 
 bool comparator(const Edge &a, const Edge &b) {
@@ -268,29 +248,29 @@ bool comparator(const Edge &a, const Edge &b) {
 int kruskal(int n, vector<Edge>& edges, vector<Edge>& mst_edges) {
     DSU dsu(n);
     sort(edges.begin(), edges.end(), comparator);
-    int mst_weight = 0;
+    int weight = 0;
     mst_edges.clear();
     for (auto& e : edges) {
         if (dsu.unite(e.u, e.v)) { // if u and v are not already connected
-            mst_weight += e.w;
+            weight += e.w;
             mst_edges.push_back(e);
         }
     }
-    return mst_weight;
+    return weight;
 }
 
-int prim(int n, vector<vector<pair<int, int>>>& g) {
+int prim(int n, vector<vector<pii>>& g) {
     vector<bool> in_mst(n + 1, false);
-    using T = pair<int, int>; // {weight, vertex}
+    using T = pii; // {weight, vertex}
     priority_queue<T, vector<T>, greater<T>> pq;
     pq.push({0, 1});
-    int mst_weight = 0;
+    int weight = 0;
 
     while (!pq.empty()) {
         auto [w, u] = pq.top(); pq.pop();
         if (in_mst[u]) continue;
         in_mst[u] = true;
-        mst_weight += w;
+        weight += w;
 
         for (auto& [v, weight] : g[u]) {
             if (!in_mst[v]) {
@@ -298,15 +278,15 @@ int prim(int n, vector<vector<pair<int, int>>>& g) {
             }
         }
     }
-    return mst_weight;
+    return weight;
 }
 
 /*
 Topological Sort (Kahn's and DFS)
 Returns topological order of nodes. Returns empty vector if cycle exists.
 */
-vector<int> kahn(int n, vector<vector<int>>& g, int start_node = 1) {
-    vector<int> in_deg(g.size(), 0);
+vi kahn(int n, vvi& g, int start_node = 1) {
+    vi in_deg(g.size(), 0);
     for (int u = start_node; u < start_node + n; u++) {
         for (int v : g[u]) in_deg[v]++;
     }
@@ -314,7 +294,7 @@ vector<int> kahn(int n, vector<vector<int>>& g, int start_node = 1) {
     for (int i = start_node; i < start_node + n; i++) {
         if (in_deg[i] == 0) q.push(i);
     }
-    vector<int> order;
+    vi order;
     while (!q.empty()) {
         int u = q.front(); q.pop();
         order.push_back(u);
@@ -322,7 +302,7 @@ vector<int> kahn(int n, vector<vector<int>>& g, int start_node = 1) {
             if (--in_deg[v] == 0) q.push(v);
         }
     }
-    return order.size() == n ? order : vector<int>{};
+    return order.size() == n ? order : vi{};
 }
 
 /*
@@ -331,29 +311,12 @@ Returns {dist, path_counts} in O(V + E) using Kahn's topological sort.
 */
 
 
-pair<vector<int>, vector<int>> solve_dag(int n, vector<vector<pair<int, int>>>& g, int src, int start_node = 1) {
-    vector<int> in_deg(g.size(), 0);
-    for (int u = start_node; u < start_node + n; u++) {
-        for (auto& e : g[u]) in_deg[e.first]++;
-    }
-
-    queue<int> q;
-    for (int i = start_node; i < start_node + n; i++) {
-        if (in_deg[i] == 0) q.push(i);
-    }
-
-    vector<int> order;
-    while (!q.empty()) {
-        int u = q.front(); q.pop();
-        order.push_back(u);
-        for (auto& e : g[u]) {
-            if (--in_deg[e.first] == 0) q.push(e.first);
-        }
-    }
+pair<vi, vi> solve_dag(int n, vector<vector<pii>>& g, int src, int start_node = 1) {
+    vi order = kahn(n, g, start_node);
 
     const int INF = 1e9;
-    vector<int> dist(g.size(), -INF);
-    vector<int> paths(g.size(), 0);
+    vi dist(g.size(), -INF); // dist[i] = longest distance from src to i
+    vi paths(g.size(), 0); // paths[i] = number of longest paths from src to i
     dist[src] = 0;
     paths[src] = 1;
 
@@ -375,72 +338,66 @@ pair<vector<int>, vector<int>> solve_dag(int n, vector<vector<pair<int, int>>>& 
 
 class TreeDistances {
     int n;
-    const vector<vector<int>>& g;
-    vector<int> subtree_sz;
-    vector<int> total_dist;
+    const vvi& g;
+    vi sz;
+    vi dist;
 
 public:
-    TreeDistances(int nodes, const vector<vector<int>>& graph)
+    TreeDistances(int nodes, const vvi& graph)
         : n(nodes), g(graph),
-          subtree_sz(nodes + 1, 0),
-          total_dist(nodes + 1, 0) {}
+          sz(nodes + 1, 0),
+          dist(nodes + 1, 0) {}
 
-    void dfs_size(int u, int p) {
-        subtree_sz[u] = 1;
+    void dfs(int u, int p, int depth) {
+        sz[u] = 1;
+        dist[1] += depth;
+
         for (int v : g[u]) {
             if (v == p) continue;
-            dfs_size(v, u);
-            subtree_sz[u] += subtree_sz[v];
-        }
-    }
-
-    void dfs_root(int u, int p, int depth) {
-        total_dist[1] += depth;
-        for (int v : g[u]) {
-            if (v == p) continue;
-            dfs_root(v, u, depth + 1);
+            dfs(v, u, depth + 1);
+            sz[u] += sz[v];
         }
     }
 
     void reroot(int u, int p) {
         for (int v : g[u]) {
             if (v == p) continue;
-            total_dist[v] = total_dist[u] - subtree_sz[v] + (n - subtree_sz[v]);
+            dist[v] = dist[u] + n - 2 * sz[v];
             reroot(v, u);
         }
     }
 
-    vector<int> solve(int root = 1) {
-        dfs_size(root, 0);
-        dfs_root(root, 0, 0);
+    vi solve(int root = 1) {
+        dist[1] = 0;
+        dfs(root, 0, 0);
         reroot(root, 0);
-        return total_dist;
+        return dist;
     }
 };
 
-void dfs(int u, int p, vector<vector<int>>& g, vector<int>& dist) {
+void dfs(int u, int p, vvi& g, vi& dist) {
     for (int v : g[u]) {
         if (v == p) continue;
         dist[v] = dist[u] + 1;
         dfs(v, u, g, dist);
     }
-}
+} // dist[i]=distance from 1 to i
 
-pair<int, vector<int>> tree_diameter(int n, vector<vector<int>>& g) {
-    vector<int> d1(n + 1), d2(n + 1);
+pair<int, vi> tree_diameter(int n, vvi& g) {
+    vi d1(n + 1), d2(n + 1);
 
     dfs(1, 0, g, d1);
-    int a = max_element(d1.begin() + 1, d1.end()) - d1.begin();
+    int a = max_element(d1.begin() + 1, d1.end()) - d1.begin(); // find the farthest node from node 1, which is one endpoint of the diameter
 
     fill(d1.begin(), d1.end(), 0);
     dfs(a, 0, g, d1);
-    int b = max_element(d1.begin() + 1, d1.end()) - d1.begin();
+    int b = max_element(d1.begin() + 1, d1.end()) - d1.begin(); // find the farthest node from node a, which is the other endpoint of the diameter
 
-    int diameter = d1[b];
+    int diameter = d1[b]; // the length of the longest path in the tree, which is the distance between nodes a and b
 
-    dfs(b, 0, g, d2);
+    dfs(b, 0, g, d2); // compute distances from node b to all other nodes in the tree
 
-    vector<int> ecc(n + 1);
+    vi ecc(n + 1);
     for (int i = 1; i <= n; i++) {
         ecc[i] = max(d1[i], d2[i]);
     }
@@ -455,8 +412,8 @@ Usage:
   auto ans = B.get(g); // Returns vector<pair<int,int>> of bridges
 */
 struct Bridge {
-    int t; vector<int> tin, low; vector<pair<int,int>> res;
-    void dfs(int u, int p, vector<vector<int>>& g) {
+    int t; vi tin, low; vector<pair<int,int>> res;
+    void dfs(int u, int p, vvi& g) {
         tin[u] = low[u] = ++t;
         for (int v : g[u]) {
             if (v == p) continue;
@@ -468,7 +425,7 @@ struct Bridge {
             }
         }
     }
-    vector<pair<int,int>> get(vector<vector<int>>& g) {
+    vector<pair<int,int>> get(vvi& g) {
         int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
         for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
         return res;
@@ -476,8 +433,8 @@ struct Bridge {
 };
 
 struct Articulation {
-    int t; vector<int> tin, low; vector<int> res;
-    void dfs(int u, int p, vector<vector<int>>& g) {
+    int t; vi tin, low; vi res;
+    void dfs(int u, int p, vvi& g) {
         tin[u] = low[u] = ++t; int children = 0;
         for (int v : g[u]) {
             if (v == p) continue;
@@ -490,7 +447,7 @@ struct Articulation {
         }
         if (p == -1 && children > 1) res.push_back(u);
     }
-    vector<int> get(vector<vector<int>>& g) {
+    vi get(vvi& g) {
         int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
         for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
         return res;
@@ -506,65 +463,71 @@ Usage:
   int cid = graph.comp[u];
   auto dag = graph.get_dag();
 */
-struct SCC {
-    int n; vector<vector<int>> g, rg, sccs, dag; stack<int> order; vector<int> comp; vector<bool> vis;
-    SCC(int n) : n(n), g(n + 1), rg(n + 1), comp(n + 1, -1), vis(n + 1) {}
 
-    void add(int u, int v) { g[u].push_back(v); rg[v].push_back(u); }
+void removeDuplicates(vi&nums){
+    sort(all(nums));
+    nums.erase(unique(all(nums)), nums.end());
+}
+struct SCC {
+    int n;
+    vector<vector<int>> g, rg, sccs, dag;
+    vector<int> comp, order;
+    vector<bool> vis;
+
+    SCC(int n) : n(n), g(n), rg(n), comp(n, -1), vis(n) {}
+
+    void add_edge(int u, int v) {
+        g[u].push_back(v);
+        rg[v].push_back(u);
+    }
 
     void dfs1(int u) {
-        vis[u] = 1;
+        vis[u] = true;
         for (int v : g[u]) if (!vis[v]) dfs1(v);
-        order.push(u);
+        order.push_back(u);
     }
+
     void dfs2(int u, int c) {
-        comp[u] = c; sccs[c].push_back(u);
+        comp[u] = c;
+        sccs.back().push_back(u);
         for (int v : rg[u]) if (comp[v] == -1) dfs2(v, c);
     }
-    vector<vector<int>> build() {
-        for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
-        while (!order.empty()) {
-            int u = order.top(); order.pop();
+
+    // Run this first to identify all components
+    void build() {
+        for (int i = 0; i < n; i++) if (!vis[i]) dfs1(i);
+        for (int i = n - 1; i >= 0; i--) {
+            int u = order[i];
             if (comp[u] == -1) {
-                sccs.emplace_back(); // create a new component
+                sccs.emplace_back();
                 dfs2(u, sccs.size() - 1);
             }
         }
-        return sccs;
     }
-    vector<vector<int>> get_dag() {
-        dag.resize(sccs.size());
-        for (int u = 1; u <= n; u++) 
-            for (int v : g[u]) if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
 
-        for (auto& neighbors : dag) {
-            sort(neighbors.begin(), neighbors.end());
-            neighbors.erase(unique(neighbors.begin(), neighbors.end()), neighbors.end());
-        } // this removes duplicate edges in the DAG representation of the SCCs, ensuring that each edge between components is represented only once.
-        return dag;
+    // Optional: Builds the condensation DAG (call build() first)
+    void build_dag() {
+        dag.resize(sccs.size());
+        for (int u = 0; u < n; u++) {
+            for (int v : g[u]) {
+                if (comp[u] != comp[v]) {
+                    dag[comp[u]].push_back(comp[v]);
+                }
+            }
+        }
+        for (auto& adj : dag) {
+            removeDuplicates(adj);
+        }
     }
 };
-
-class DirectedGraphToDAG{
-    // first build the SCC of the directed graph, then build the DAG of the SCCs
-    SCC scc;
-public:
-    DirectedGraphToDAG(int n) : scc(n) {}
-    vector<vector<int>> buildDAG(const vector<pair<int,int>>& edges) {
-        for (auto& e : edges) scc.add(e.first, e.second);
-        scc.build();
-        return scc.get_dag();
-    } // it returned the DAG of the SCCs, where each node in the DAG represents a strongly connected component of the original graph.
-
-}; // this helps in many problem solving, especially when we need to analyze the structure of a directed graph and its strongly connected components. normally it will be tough, but after conversion to DAG, it becomes easier to analyze and solve problems related to reachability, cycles, and other properties of the graph.
 
 
 
 struct HierholzerUndirected {
     int n, m = 0;
-    vector<vector<pair<int,int>>> g;
-    vector<bool> used;
-    vector<int> deg, path;
+    vvi g;
+    vi used;
+    vi deg, path;
 
     HierholzerUndirected(int n) : n(n), g(n + 1), deg(n + 1, 0) {}
 
@@ -591,7 +554,7 @@ struct HierholzerUndirected {
         path.push_back(u);
     }
 
-    vector<int> getEulerianCircuit(int start) {
+    vi getEulerianCircuit(int start) {
         // Every vertex must have even degree.
         for (int i = 1; i <= n; i++)
             if (deg[i] & 1)
@@ -607,7 +570,7 @@ struct HierholzerUndirected {
 
         return path;
     }
-    vector<int> getEulerianPath(int start, int end) {
+    vi getEulerianPath(int start, int end) {
         if (start == end) return getEulerianCircuit(start);
         // Exactly 2 vertices must have odd degree (start and end).
         for (int i = 1; i <= n; i++) {
@@ -704,9 +667,9 @@ Space : O(V + E)
 
 struct HierholzerDirected {
     int n, m = 0;
-    vector<vector<int>> g;
-    vector<int> indeg, outdeg;
-    vector<int> path;
+    vvi g;
+    vi indeg, outdeg;
+    vi path;
 
     HierholzerDirected(int n)
         : n(n), g(n + 1), indeg(n + 1, 0), outdeg(n + 1, 0) {}
@@ -727,7 +690,7 @@ struct HierholzerDirected {
         path.push_back(u);
     }
 
-    vector<int> getEulerianCircuit(int start) {
+    vi getEulerianCircuit(int start) {
         // Every vertex must satisfy indegree == outdegree.
         for (int i = 1; i <= n; i++)
             if (indeg[i] != outdeg[i])
@@ -744,7 +707,7 @@ struct HierholzerDirected {
         return path;
     }
 
-    vector<int> getEulerianPath(int start, int end) {
+    vi getEulerianPath(int start, int end) {
         if (start == end) return getEulerianCircuit(start);
         // Validation: Start and End vertices should satisfy the indegree/outdegree conditions and rest of the vertices should have equal indegree and outdegree.
         for (int i = 1; i <= n; i++) {
@@ -814,150 +777,132 @@ Time Complexity : O(N)
 Space Complexity: O(N)
 ================================================================================
 */
-struct FunctionalGraph {
-    int n;
-    static const int LOG = 20;
 
-    vector<int> dist, cyc, comp, pos, indeg;
-    vector<vector<int>> rev, up;
+// Returns empty vector if 'start' leads into an already processed component
+vi getCycleFloyd(const vi &to, const vi &comp, int start) {
+    int slow = start, fast = start;
+    
+    while(true){
+        slow = to[slow];
+        fast = to[to[fast]];
+        if(comp[slow] != -1) return {}; // already processed component
+        if (slow == fast) break;
+    }
 
-    FunctionalGraph(vector<int>& to) {
+    // 2. Phase 2: Find cycle entry point
+    slow = start;
+    while (slow != fast) {
+        slow = to[slow];
+        fast = to[fast];
+    }
+
+    // 3. Phase 3: Collect nodes in the cycle
+    vi cycle;
+    int curr = slow;
+    while(true){
+        cycle.push_back(curr);
+        curr = to[curr];
+        if(curr == slow) break;
+    }
+
+    return cycle;
+} // returns vector of nodes in the cycle, or empty vector if 'start' leads into an already processed component. already processed component means that the node is part of a cycle that has already been identified in a previous iteration, so we don't need to process it again.
+
+struct FunctionalGraph
+{
+    int n, LOG = 20;
+    vector<int> dist, cyc, comp, pos;
+    vector<vector<int>> up;
+
+    void dfs(int u, int p, const vector<int> &to, const vector<vector<int>> &radj)
+    {
+        for (int v : radj[u])
+        {
+            if (v == p) continue;
+            dist[v] = dist[u] + 1;
+            comp[v] = comp[u];
+            dfs(v, u, to, radj);
+        }
+    }
+
+    FunctionalGraph(const vector<int> &to)
+    {
         n = to.size();
-
-        dist.assign(n, -1);
-        cyc.assign(n, -1);
-        comp.assign(n, -1);
-        pos.assign(n, -1);
-        indeg.assign(n, 0);
-
-        rev.assign(n, {});
+        dist.assign(n, -1); // dist[i] = distance from node i to the cycle (or -1 if not reachable)
+        cyc.assign(n, -1); // cyc[i] = length of the cycle containing node i (or -1 if not in a cycle)
+        comp.assign(n, -1); // comp[i] = component ID of the connected component containing node i
+        pos.assign(n, -1); // pos[i] = position of node i in its cycle (0-indexed, or -1 if not in a cycle)
         up.assign(n, vector<int>(LOG));
 
-        for (int i = 0; i < n; i++) {
+        // 1. Binary Lifting table
+        for (int i = 0; i < n; i++)
             up[i][0] = to[i];
-            rev[to[i]].push_back(i);
-            indeg[to[i]]++;
-        }
-
         for (int j = 1; j < LOG; j++)
             for (int i = 0; i < n; i++)
                 up[i][j] = up[up[i][j - 1]][j - 1];
 
-        vector<int> alive(n, 1);
-        queue<int> q;
+        // 2. Cycle detection via Floyd's algorithm + Tree processing
+        int comp_id = 0;
+        vector<vector<int>> radj(n);
+        for (int i = 0; i < n; i++)
+            radj[to[i]].push_back(i);
 
         for (int i = 0; i < n; i++)
-            if (indeg[i] == 0)
-                q.push(i);
+        {
+            if (comp[i] != -1) continue;
 
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-
-            alive[u] = 0;
-
-            if (--indeg[to[u]] == 0)
-                q.push(to[u]);
-        }
-
-        int id = 0;
-
-        for (int i = 0; i < n; i++) {
-
-            if (!alive[i] || comp[i] != -1)
-                continue;
-
-            vector<int> cycle;
-
-            int u = i;
-            do {
-                cycle.push_back(u);
-                u = to[u];
-            } while (u != i);
+            vi cycle = getCycleFloyd(to, comp, i);
+            if (cycle.empty()) continue; // Leads to an already processed component
 
             int len = cycle.size();
-
-            for (int j = 0; j < len; j++) {
-                int v = cycle[j];
-                cyc[v] = len;
-                dist[v] = 0;
-                comp[v] = id;
-                pos[v] = j;
+            for (int j = 0; j < len; j++)
+            {
+                int u = cycle[j];
+                cyc[u] = len;
+                dist[u] = 0;
+                comp[u] = comp_id;
+                pos[u] = j;
             }
 
-            queue<int> bfs;
-
-            for (int v : cycle)
-                bfs.push(v);
-
-            while (!bfs.empty()) {
-                int u = bfs.front();
-                bfs.pop();
-
-                for (int x : rev[u]) {
-                    if (dist[x] != -1)
-                        continue;
-
-                    dist[x] = dist[u] + 1;
-                    comp[x] = id;
-                    bfs.push(x);
-                }
-            }
-
-            id++;
+            dfs(i, -1, to, radj); // starting from a node in the cycle, process all nodes that lead into this cycle and assign their distances and component IDs
         }
     }
 
-    int jump(int u, int k) {
+    int jump(int u, int k)
+    {
         for (int j = 0; j < LOG; j++)
-            if (k & (1 << j))
+            if ((k >> j) & 1)
                 u = up[u][j];
         return u;
     }
 
-    int query(int a, int b) {
-
-        if (comp[a] != comp[b])
+    int dis_cycle_nodes(int a, int b)
+    {
+        if (comp[a] != comp[b]) // if a and b are not in the same component, then they cannot be in the same cycle
             return -1;
-
-        bool acycle = (dist[a] == 0);
-        bool bcycle = (dist[b] == 0);
-
-        // both in cycle
-        if (acycle && bcycle) {
-            int ans = pos[b] - pos[a];
-            if (ans < 0)
-                ans += cyc[a];
-            return ans;
-        }
-
-        // cycle -> tree
-        if (acycle && !bcycle)
+        if (dist[a] != 0 || dist[b] != 0) // if either a or b is not in the cycle, then they are not both cycle nodes
             return -1;
+        return (pos[b] - pos[a] + cyc[a]) % cyc[a]; // if both a and b are in the same cycle, then the distance from a to b is the difference in their positions in the cycle, modulo the cycle length
+    }
 
-        // tree -> tree
-        if (!acycle && !bcycle) {
+    // Distance from a -> b (-1 if unreachable)
+    int query(int a, int b)
+    {
+        if (comp[a] != comp[b]) return -1;
 
-            if (dist[a] < dist[b])
-                return -1;
+        bool a_cyc = (dist[a] == 0), b_cyc = (dist[b] == 0);
 
+        if (a_cyc && b_cyc) return dis_cycle_nodes(a, b); 
+        if (a_cyc && !b_cyc) return -1;
+        if (!a_cyc && !b_cyc) // if both are in the tree leading to the cycle, then we can check if b is reachable from a by jumping up the tree
+        {
             int d = dist[a] - dist[b];
-
-            if (jump(a, d) == b)
-                return d;
-
-            return -1;
+            return (d >= 0 && jump(a, d) == b) ? d : -1;
         }
-
-        // tree -> cycle
+        // if a is in the tree and b is in the cycle, then we can jump from a to the cycle and then compute the distance to b
+        // Tree node -> Cycle node
         int entry = jump(a, dist[a]);
-
-        int ans = dist[a];
-        ans += pos[b] - pos[entry];
-        if (pos[b] < pos[entry])
-            ans += cyc[b];
-
-        return ans;
+        return dist[a] + dis_cycle_nodes(entry, b);
     }
 };
 
@@ -976,7 +921,7 @@ void precompute() {
     }
 }
 
-vector<long long> dfs(int u, int p, const vector<vector<int>>& graph) {
+vector<long long> dfs(int u, int p, const vvi& graph) {
     vector<vector<long long>> childs;
 
     for (int v : graph[u]) {
@@ -1007,16 +952,16 @@ vector<long long> dfs(int u, int p, const vector<vector<int>>& graph) {
     return {h1, h2, total_len};
 }
 
-vector<int> centers(int n, vector<vector<int>>& g) {
+vi centers(int n, vvi& g) {
     if (n == 1) return {1};
 
-    vector<int> deg(n + 1), leaves;
+    vi deg(n + 1), leaves;
     for (int i = 1; i <= n; i++)
         if ((deg[i] = g[i].size()) == 1) leaves.push_back(i);
 
     while (n > 2) {
         n -= leaves.size();
-        vector<int> nxt;
+        vi nxt;
         for (int u : leaves)
             for (int v : g[u])
                 if (--deg[v] == 1) nxt.push_back(v);
@@ -1073,4 +1018,4 @@ vector<int> centers(int n, vector<vector<int>>& g) {
 13. Cycle Property: For any cycle, the maximum edge does not belong to any MST; unique maximum can never appear in an MST.
 14. Kruskal: Sort edges. If u-v are already connected using edges < w, (u,v,w) is never needed; otherwise, it can be chosen.
 =================================================================
-*/
+*/q

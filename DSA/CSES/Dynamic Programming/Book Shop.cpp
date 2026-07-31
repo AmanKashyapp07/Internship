@@ -18,7 +18,7 @@ int main() {
     vector<int> dp(x + 1, 0);
 
     for (int i = 0; i < n; i++) {
-        for (int money = x; money >= price[i]; money--) {
+        for (int money = x; money >= price[i]; money--) { // starting from x to avoid using the same book multiple times
             dp[money] = max(
                 dp[money],
                 dp[money - price[i]] + pages[i]

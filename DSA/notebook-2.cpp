@@ -34,7 +34,10 @@ using vll = vector<ll>;
 
 const int INF = INT_MAX;
 const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
+const ll MOD = 1e9 + 7; // this is a prime number, which is useful for modular arithmetic
+
+
+
 // Binary Exponentiation
 int power(int a, int b) {
     int res = 1;
@@ -81,8 +84,8 @@ vi sieve(int n) {
     return primes;
 }
 
-vector<pair<int,int>> prime_factorize(int n) {
-    vector<pair<int,int>> pf;
+vector<pii> prime_factorize(int n) {
+    vector<pii> pf;
     for (int p = 2; p * p <= n; p++) {
         if (n % p) continue;
         int cnt = 0;
@@ -105,10 +108,12 @@ Bitwise Operations:
 */
 
 int XORupto(int n) {
-    if (n % 4 == 0) return n;
-    if (n % 4 == 1) return 1;
-    if (n % 4 == 2) return n + 1;
-    return 0;
+    switch (n % 4) {
+        case 0: return n;
+        case 1: return 1;
+        case 2: return n + 1;
+        case 3: return 0;
+    }
 }
 
 // Sliding Window Extreme Queries
@@ -227,14 +232,14 @@ int sumOfAllSubsets(vi& nums) {
 }
 
 vi kadane(const vi& nums) {
-    int n = nums.size(); int max_sum = INT_MIN, sum = 0;
+    int n = nums.size(); int maxi = INT_MIN, sum = 0;
     int start = 0, end = 0, temp_start = 0;
     for (int i = 0; i < n; i++) {
         sum += nums[i];
-        if (sum > max_sum) { max_sum = sum; start = temp_start; end = i; }
+        if (sum > maxi) { maxi = sum; start = temp_start; end = i; }
         if (sum < 0) { sum = 0; temp_start = i + 1; } // if current sum < 0, reset the start index for the next potential subarray, as there is no advantage in keeping a negative sum when looking for the maximum sum subarray
     }
-    return {max_sum, start, end};
+    return {maxi, start, end};
 }
 
 void solve_perm(vi& nums, vi& curr, vvi& ans, int mask) {
@@ -335,37 +340,44 @@ int countInversions(vi& nums) {
     return mergeSortInversions(nums, 0, nums.size() - 1);
 }
 
-// Matrix Exponentiation
-struct MatrixExponentiation {
-    static vvi multiply(const vvi& A, const vvi& B) {
-        int n = A.size(), m = B[0].size(), p = B.size();
-        vvi C(n, vi(m, 0));
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                for (int k = 0; k < p; k++) {
-                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
-                }
+vvi multiplyMatrices(const vvi& A, const vvi& B) {
+    int n = A.size(), m = B[0].size(), p = B.size();
+    vvi C(n, vi(m, 0));
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < p; k++) {       // Swapped k and j
+            for (int j = 0; j < m; j++) {   // Accesses B[k][j] contiguously in cache
+                C[i][j] = (C[i][j] + 1LL * A[i][k] * B[k][j]) % MOD;
             }
         }
-        return C;
     }
-    static vvi power(vvi A, int b) {
-        int n = A.size(); vvi res(n, vi(n, 0));
-        for (int i = 0; i < n; i++) res[i][i] = 1;
-        while (b) {
-            if (b & 1) res = multiply(res, A);
-            A = multiply(A, A);
-            b >>= 1;
-        }
-        return res;
-    }
-};
-
-int computeNthFibo(int n) {
-    vvi base = {{1, 1}, {1, 0}};
-    vvi result = MatrixExponentiation::power(base, n);
-    return result[0][1];
+    return C;
 }
+
+vvi powerMatrices(vvi A, long long b) { // Use long long for exponent
+    int n = A.size();
+    vvi res(n, vi(n, 0));
+    for (int i = 0; i < n; i++) res[i][i] = 1;
+    while (b > 0) {
+        if (b & 1) res = multiplyMatrices(res, A);
+        A = multiplyMatrices(A, A);
+        b >>= 1;
+    }
+    return res;
+}
+
+
+int nthFibonacci(long long n) {
+    // Base cases (1-indexed)
+    if (n == 1) return 1 % MOD;
+    if (n == 2) return 2 % MOD;
+
+    vvi F = {{1, 1}, {1, 0}};
+    vvi res = powerMatrices(F, n - 2);
+
+    // F_n = 2 * res[0][0] + res[0][1]
+    long long ans = (2LL * res[0][0] + res[0][1]) % MOD;
+    return ans;
+}   
 
 // Area calculation
 int computeArea(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {

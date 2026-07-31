@@ -1,31 +1,7 @@
-// Link: https://cses.fi/problemset/task/1635
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int MOD = 1e9 + 7;
-
-int countWays(int sum, vector<int>& coins, vector<int>& dp) {
-    if (sum == 0) {
-        return 1;
-    }
-
-    if (sum < 0) {
-        return 0;
-    }
-
-    if (dp[sum] != -1) {
-        return dp[sum];
-    }
-
-    long long ways = 0;
-
-    for (int coin : coins) {
-        ways = (ways + countWays(sum - coin, coins, dp)) % MOD;
-    }
-
-    return dp[sum] = ways;
-}
 
 int main() {
     ios::sync_with_stdio(false);
@@ -39,9 +15,22 @@ int main() {
         cin >> coins[i];
     }
 
-    vector<int> dp(x + 1, -1);
+    vector<int> dp(x + 1, 0);
+    dp[0] = 1;
 
-    cout << countWays(x, coins, dp) << '\n';
+    for (int sum = 1; sum <= x; sum++) {
+        for (int coin : coins) {
+            if (sum >= coin) {
+                dp[sum] = (dp[sum] + dp[sum - coin]) % MOD;
+            }
+        }
+    }
+
+    cout << dp[x] << '\n';
 
     return 0;
 }
+
+// outer loop - sum from 1 to x
+// inner loop - for each coin, check if it can contribute to the current sum
+// this is for counting all possible combinations of coins that sum up to x, where the order of coins matters.

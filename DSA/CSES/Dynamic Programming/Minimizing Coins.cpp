@@ -1,31 +1,7 @@
-// Link: https://cses.fi/problemset/task/1634
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int INF = 1e9;
-
-int minimumCoins(int sum, vector<int>& coins, vector<int>& dp) {
-    if (sum == 0) {
-        return 0;
-    }
-
-    if (sum < 0) {
-        return INF;
-    }
-
-    if (dp[sum] != -1) {
-        return dp[sum];
-    }
-
-    int answer = INF;
-
-    for (int coin : coins) {
-        answer = min(answer, 1 + minimumCoins(sum - coin, coins, dp));
-    }
-
-    return dp[sum] = answer;
-}
 
 int main() {
     ios::sync_with_stdio(false);
@@ -39,11 +15,18 @@ int main() {
         cin >> coins[i];
     }
 
-    vector<int> dp(x + 1, -1);
+    vector<int> dp(x + 1, INF);
+    dp[0] = 0;
 
-    int answer = minimumCoins(x, coins, dp);
+    for (int sum = 1; sum <= x; sum++) {
+        for (int coin : coins) {
+            if (sum >= coin) {
+                dp[sum] = min(dp[sum], 1 + dp[sum - coin]);
+            }
+        }
+    }
 
-    cout << (answer == INF ? -1 : answer) << '\n';
+    cout << (dp[x] == INF ? -1 : dp[x]) << '\n';
 
     return 0;
 }
