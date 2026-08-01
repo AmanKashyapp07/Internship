@@ -781,3 +781,47 @@ vector<int> maxOfMins(vector<int>& arr) {
 
         return res;
     }
+
+
+int partition(std::vector<int>& arr, int low, int high) {
+    // Pick a random index between low and high to avoid O(n^2) on sorted inputs
+    int randomIndex = low + rand() % (high - low + 1);
+    swap(arr[randomIndex], arr[high]);
+
+    int pivot = arr[high];
+    int i = low;
+
+    for (int j = low; j < high; ++j) {
+        if (arr[j] <= pivot) {
+            swap(arr[i], arr[j]);
+            i++;
+        }
+    }
+    swap(arr[i], arr[high]);
+    return i; // Index where the pivot ended up
+}
+
+int quickSelect(std::vector<int>& arr, int low, int high, int k) {
+    if (low == high) return arr[low];
+
+    int pivotIndex = partition(arr, low, high);
+
+    if (k == pivotIndex) {
+        return arr[k];
+    } else if (k < pivotIndex) {
+        return quickSelect(arr, low, pivotIndex - 1, k);
+    } else {
+        return quickSelect(arr, pivotIndex + 1, high, k);
+    }
+}
+
+double findMedian(std::vector<int>& arr) {
+    int n = arr.size();
+    if (n % 2 == 1) {
+        return quickSelect(arr, 0, n - 1, n / 2);
+    } else {
+        int leftMid = quickSelect(arr, 0, n - 1, n / 2 - 1);
+        int rightMid = quickSelect(arr, 0, n - 1, n / 2);
+        return (leftMid + rightMid) / 2.0;
+    }
+}

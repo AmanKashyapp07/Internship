@@ -39,23 +39,6 @@ const ll MOD = 1e9 + 7;
 const ll P = 31;
 
 
-struct SparseTable {
-    int n, K;
-    vvi st;
-
-    SparseTable(vi &a) : n(a.size()), K((a.size() > 0 ? 31 - __builtin_clz(a.size()) : 0) + 1), st(K, vi(a.size())) {
-        st[0] = a;
-        for (int j = 1; j < K; j++)
-            for (int i = 0; i + (1<<j) <= n; i++)
-                st[j][i] = min(st[j-1][i], st[j-1][i+(1<<(j-1))]);
-    }
-
-    int query(int l, int r) {
-        int j = 31 - __builtin_clz(r - l + 1);
-        return min(st[j][l], st[j][r - (1<<j) + 1]);
-    }
-};
-
 
 struct Centroid{
     int n;
