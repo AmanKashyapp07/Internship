@@ -141,6 +141,29 @@ vi minSlidingWindow(const vi& nums, int k) {
     return ans;
 }
 
+ll maxSubarraySumAtMostK(const vi& nums, int k) {
+    int n = nums.size();
+    vector<ll> pref(n + 1, 0);
+    for (int i = 0; i < n; i++)
+        pref[i + 1] = pref[i] + nums[i];
+
+    deque<int> dq;
+    ll ans = LLONG_MIN;
+
+    for (int R = 1; R <= n; R++) { // R is from 1 because pref[0] = 0 is the prefix sum of the empty subarray
+        int L = R - k;
+
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
+
+        while (!dq.empty() && pref[dq.back()] >= pref[R - 1]) dq.pop_back();
+        dq.push_back(R - 1);
+
+        ans = max(ans, pref[R] - pref[dq.front()]);
+    }
+
+    return ans;
+}
+
 // LIS Queries
 int lis(const vi& a) {
     vi dp;

@@ -82,3 +82,33 @@ int calculateNthFiboacci(int n) {
     vvl res = power(F, n - 1, 2);
     return res[0][0];
 } // this function calculates the nth Fibonacci number using matrix exponentiation. The result is returned modulo MOD.
+
+long long maxSubarraySumAtMostK(vector<int>& a, int k) {
+    int n = a.size();
+
+    vector<long long> prefix(n + 1, 0);
+    for (int i = 0; i < n; i++)
+        prefix[i + 1] = prefix[i] + a[i];
+
+    deque<int> dq;
+    dq.push_back(0);
+
+    long long ans = LLONG_MIN;
+
+    for (int i = 1; i <= n; i++) {
+
+        // Remove prefixes that are too old
+        while (!dq.empty() && dq.front() < i - k)
+            dq.pop_front();
+
+        ans = max(ans, prefix[i] - prefix[dq.front()]);
+
+        // Maintain increasing prefix sums
+        while (!dq.empty() && prefix[dq.back()] >= prefix[i])
+            dq.pop_back();
+
+        dq.push_back(i);
+    }
+
+    return ans;
+}
