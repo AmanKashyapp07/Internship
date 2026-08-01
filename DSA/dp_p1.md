@@ -166,24 +166,41 @@ int coinChangeMinCoins(const vector<int>& coins, int amount) {
 
 #### 1. Longest Common Subsequence (LCS)
 ```cpp
-int longestCommonSubsequence(string text1, string text2) {
+string longestCommonSubsequence(string text1, string text2) {
     int n = text1.size(), m = text2.size();
-    // Space optimized to 1D array of size m+1
-    vector<int> dp(m + 1, 0);
-    
+
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+
+    // Build DP table
     for (int i = 1; i <= n; i++) {
-        int prev_diag = 0; // stores dp[i-1][j-1]
         for (int j = 1; j <= m; j++) {
-            int temp = dp[j];
-            if (text1[i - 1] == text2[j - 1]) {
-                dp[j] = 1 + prev_diag;
-            } else {
-                dp[j] = max(dp[j], dp[j - 1]);
-            }
-            prev_diag = temp;
+            if (text1[i - 1] == text2[j - 1])
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            else
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
-    return dp[m];
+
+    // Reconstruct LCS
+    string lcs = "";
+    int i = n, j = m;
+
+    while (i > 0 && j > 0) {
+        if (text1[i - 1] == text2[j - 1]) {
+            lcs += text1[i - 1];
+            i--;
+            j--;
+        }
+        else if (dp[i - 1][j] > dp[i][j - 1]) {
+            i--;
+        }
+        else {
+            j--;
+        }
+    }
+
+    reverse(lcs.begin(), lcs.end());
+    return lcs;
 }
 ```
 
@@ -217,6 +234,49 @@ int minDistance(string word1, string word2) {
 - `dp[i][j]`: matches prefix `S[0..i-1]` with pattern `P[0..j-1]`.
 - For `*` in Wildcard: $dp[i][j] = dp[i-1][j] \text{ (match 1+ chars)} \mid dp[i][j-1] \text{ (match 0 chars)}$.
 - For `*` in Regex: $dp[i][j] = dp[i][j-2] \mid ((S[i-1] == P[j-2] \mid P[j-2] == '.') \ \&\& \ dp[i-1][j])$.
+```cpp
+class Solution {
+public:
+    bool solve(int i, int j, string &s, string &p,
+               vector<vector<int>> &dp) {
+
+        // Pattern finished
+        if (j == p.size())
+            return i == s.size();
+
+        // String finished
+        if (i == s.size()) {
+            while (j < p.size()) {
+                if (p[j] != '*')
+                    return false;
+                j++;
+            }
+            return true;
+        }
+
+        if (dp[i][j] != -1)
+            return dp[i][j];
+
+        if (p[j] == s[i] || p[j] == '?')
+            return dp[i][j] = solve(i + 1, j + 1, s, p, dp);
+
+        if (p[j] == '*')
+            return dp[i][j] =
+                solve(i, j + 1, s, p, dp) ||   // '*' matches empty
+                solve(i + 1, j, s, p, dp);     // '*' matches one/more chars
+
+        return dp[i][j] = false;
+    }
+
+    bool isMatch(string s, string p) {
+        int n = s.size(), m = p.size();
+
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, -1));
+
+        return solve(0, 0, s, p, dp);
+    }
+};
+```
 
 ---
 
@@ -230,18 +290,46 @@ int minDistance(string word1, string word2) {
 
 #### $O(N \log N)$ LIS (Patient Sorting via `std::lower_bound`)
 ```cpp
-int lengthOfLIS(const vector<int>& nums) {
-    vector<int> tails; // tails[i] stores smallest tail of all increasing subsequences of length i+1
-    
-    for (int x : nums) {
-        auto it = lower_bound(tails.begin(), tails.end(), x);
-        if (it == tails.end()) {
-            tails.push_back(x); // Extend longest subsequence
-        } else {
-            *it = x; // Overwrite to keep tail values as small as possible
-        }
+vector<int> longestIncreasingSubsequence(vector<int>& nums) {
+    int n = nums.size();
+
+    vector<int> tailIndex;
+    vector<int> parent(n, -1);
+
+    for (int i = 0; i < n; i++) {
+        // Find position where nums[i] should go
+        auto it = lower_bound(
+            tailIndex.begin(),
+            tailIndex.end(),
+            nums[i],
+            [&](int idx, int val) {
+                return nums[idx] < val;
+            });
+
+        int pos = it - tailIndex.begin();
+
+        if (it == tailIndex.end())
+            tailIndex.push_back(i);
+        else
+            *it = i;
+
+        // Set parent
+        if (pos > 0)
+            parent[i] = tailIndex[pos - 1];
     }
-    return tails.size();
+
+    // Reconstruct LIS
+    vector<int> lis;
+    int cur = tailIndex.back();
+
+    while (cur != -1) {
+        lis.push_back(nums[cur]);
+        cur = parent[cur];
+    }
+
+    reverse(lis.begin(), lis.end());
+
+    return lis;
 }
 ```
 

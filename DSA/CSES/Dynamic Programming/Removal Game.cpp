@@ -31,6 +31,8 @@ signed main() {
     vector<vector<int>> dp(n, vector<int>(n, LLONG_MIN));
 
     int diff = solve(0, n - 1, a, dp);
+    int score1 = (sum + diff) / 2; // score of first player
+    int score2 = (sum - diff) / 2; // score of second player
 
-    cout << (sum + diff) / 2 << '\n';
+    cout << (sum + diff) / 2 << '\n'; // find out the maximum score of the first player, given the total sum and the difference in scores.
 }

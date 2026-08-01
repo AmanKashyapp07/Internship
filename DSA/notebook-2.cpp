@@ -152,22 +152,49 @@ int lis(const vi& a) {
     return dp.size();
 }
 
-vi reconstruct_lis(const vi& a) {
-    int n = a.size(); vi dp, idx(n), prev(n, -1);
+vector<int> longestIncreasingSubsequence(vector<int>& nums) {
+    if (nums.empty()) return {};
+
+    int n = nums.size();
+    vector<int> tailIndex;
+    vector<int> parent(n, -1);
+
     for (int i = 0; i < n; i++) {
-        int pos = lower_bound(dp.begin(), dp.end(), a[i]) - dp.begin();
-        if (pos == dp.size()) dp.push_back(a[i]);
-        else dp[pos] = a[i];
-        idx[pos] = i;
-        if (pos) prev[i] = idx[pos - 1];
+        // Binary search for position in tailIndex
+        auto it = lower_bound(
+            tailIndex.begin(),
+            tailIndex.end(),
+            nums[i],
+            [&](int idx, int val) {
+                return nums[idx] < val;
+            }); // finds the first index in tailIndex where nums[idx] >= nums[i]
+
+        int pos = it - tailIndex.begin();
+
+        // 1. Link parent FIRST (predecessor is the top of the previous pile)
+        if (pos > 0) {
+            parent[i] = tailIndex[pos - 1];
+        }
+
+        // 2. Update pile top AFTER linking
+        if (it == tailIndex.end()) {
+            tailIndex.push_back(i);
+        } else {
+            tailIndex[pos] = i;
+        }
     }
-    int len = dp.size(); vi lis;
-    int curr = idx[len - 1];
-    while(curr != -1) {
-        lis.push_back(a[curr]);
-        curr = prev[curr];
+
+    // Reconstruct LIS starting from the end of the longest pile chain
+    vector<int> lis;
+    int cur = tailIndex.back();
+
+    while (cur != -1) {
+        lis.push_back(nums[cur]);
+        cur = parent[cur];
     }
+
     reverse(lis.begin(), lis.end());
+
     return lis;
 }
 
@@ -387,3 +414,13 @@ int computeArea(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) 
     int overlapHeight = max(0, min(y2, y4) - max(y1, y3));
     return area1 + area2 - (overlapWidth * overlapHeight);
 }
+
+int countOfBalancedParentheses(int len) {
+    // we have to output catalan number of n pairs of balanced parentheses
+    // C(n) = (2n)! / ((n + 1)! * n!) = C(2n, n) / (n + 1)
+    if(len % 2 != 0) return 0; // odd length cannot form balanced parentheses
+    int n = len / 2;
+    init_nCr(2 * n);
+    return nCr(2 * n, n) * inv(n + 1) % MOD;
+}
+
