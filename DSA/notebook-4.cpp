@@ -825,3 +825,13 @@ double findMedian(std::vector<int>& arr) {
         return (leftMid + rightMid) / 2.0;
     }
 }
+
+vvi mexGridConstruction(int n){
+    vvi grid(n, vi(n));
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            grid[i][j] = (i ^ j);
+        }
+    }
+    return grid;
+}

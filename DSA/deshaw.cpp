@@ -24,89 +24,167 @@ using ll = long long;
 
 struct BinaryLifting {
     int LOG;
-    vector<vector<int>> up;
+    vector<vector<int>> up, info;
     vector<int> depth;
 
-    BinaryLifting(int n, int root, vector<vector<int>> &g)
-        : LOG(32 - __builtin_clz(n)),up(n + 1, vector<int>(LOG, -1)),depth(n + 1) {
+    // ================= CUSTOMIZE =================
 
-        dfs(root, -1, 0, g);
+    static constexpr int ID = 0;
 
-        for (int j = 1; j < LOG; j++)
-            for (int i = 1; i <= n; i++)
-                if (up[i][j - 1] != -1)
-                    up[i][j] = up[up[i][j - 1]][j - 1];
+    static int combine(int a, int b) {
+        return a + b;
+
+        // return max(a,b);
+        // return min(a,b);
+        // return a ^ b;
+        // return gcd(a,b);
+        // return a & b;
+        // return a | b;
     }
 
-    void dfs(int u, int p, int d, vector<vector<int>> &g) {
+    // =============================================
+
+    BinaryLifting(int n, int root,
+                  vector<vector<int>> &g,
+                  vector<int> &val)
+        : LOG(32 - __builtin_clz(n)),
+          up(n + 1, vector<int>(LOG, -1)),
+          info(n + 1, vector<int>(LOG, ID)),
+          depth(n + 1) {
+
+        dfs(root, -1, 0, g, val);
+
+        for (int j = 1; j < LOG; j++) {
+            for (int i = 1; i <= n; i++) {
+                if (up[i][j - 1] == -1) continue;
+
+                up[i][j] = up[up[i][j - 1]][j - 1];
+                info[i][j] = combine(info[i][j - 1],
+                                     info[up[i][j - 1]][j - 1]);
+            }
+        }
+    }
+
+    void dfs(int u, int p, int d,
+             vector<vector<int>> &g,
+             vector<int> &val) {
+
         depth[u] = d;
         up[u][0] = p;
-        for (int v : g[u]) if (v != p) dfs(v, u, d + 1, g);
+        info[u][0] = val[u];
+
+        for (int v : g[u])
+            if (v != p)
+                dfs(v, u, d + 1, g, val);
     }
 
-    int lift(int u, int k) {
-        for (int j = 0; j < LOG && u != -1; j++)
-            if (k & (1 << j))
+    pair<int,int> lift(int u, int k) {
+        int ans = ID;
+
+        for (int j = 0; j < LOG && u != -1; j++) {
+            if (k & (1 << j)) {
+                ans = combine(ans, info[u][j]);
                 u = up[u][j];
-        return u;
+            }
+        }
+
+        return {u, ans};
+    }
+
+    int kthAncestor(int u, int k) {
+        return lift(u, k).first;
     }
 
     int lca(int a, int b) {
         if (depth[a] < depth[b]) swap(a, b);
 
-        a = lift(a, depth[a] - depth[b]);
+        a = lift(a, depth[a] - depth[b]).first;
+
         if (a == b) return a;
 
-        for (int j = LOG - 1; j >= 0; j--)
-            if (up[a][j] != up[b][j])
-                a = up[a][j], b = up[b][j];
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (up[a][j] != up[b][j]) {
+                a = up[a][j];
+                b = up[b][j];
+            }
+        }
 
         return up[a][0];
     }
+
+    // aggregate from u to ancestor anc (inclusive)
+    int queryUp(int u, int anc) {
+        int ans = ID;
+        int k = depth[u] - depth[anc];
+
+        for (int j = 0; j < LOG; j++) {
+            if (k & (1 << j)) {
+                ans = combine(ans, info[u][j]);
+                u = up[u][j];
+            }
+        }
+
+        return combine(ans, info[u][0]);
+    }
+
+    int dist(int u, int v) {
+        int w = lca(u, v);
+        return depth[u] + depth[v] - 2 * depth[w];
+    }
 };
+
 /*
-==================== BINARY LIFTING ====================
+--------------------------------------------------------------------------------
+BINARY LIFTING TEMPLATE USAGE GUIDE:
+--------------------------------------------------------------------------------
+1. CUSTOMIZATION (Inside `struct BinaryLifting`):
+   - Set `ID` (Identity value):
+     * Sum / XOR : ID = 0
+     * Min       : ID = INF (1e9)
+     * Max       : ID = -INF (-1e9)
+     * GCD       : ID = 0
+   - Update `combine(a, b)` function to match your query requirement:
+     `return a + b;` or `return max(a, b);` or `return gcd(a, b);`
 
-up[u][j]   = 2^j-th ancestor of u
-info[u][j] = aggregate information from u to up[u][j]
+2. INITIALIZATION:
+   int n = 7, root = 1;
+   vector<vector<int>> g(n + 1); // 1-indexed graph
+   vector<int> val(n + 1, 0);   // val[u] = weight/value at node u (or edge weight to parent)
+   
+   // Add tree edges
+   g[1].push_back(2); g[2].push_back(1);
+   ...
+   
+   // Build BinaryLifting object (O(N log N) time & space)
+   BinaryLifting bl(n, root, g, val);
 
--------------------- BUILD --------------------
+3. COMMON API QUERIES (O(log N) per query):
+   - Find LCA of u and v:
+     int lcaNode = bl.lca(u, v);
 
-up[u][j] = up[ up[u][j-1] ][j-1]
+   - Find Distance (number of edges) between u and v:
+     int d = bl.dist(u, v);
 
-int parent = up[u][j-1];
-info[u][j] = combine(info[u][j-1], info[parent][j-1]);
+   - Jump K steps up from node u:
+     int ancK = bl.kthAncestor(u, k); // returns -1 if out of bounds
 
--------------------- QUERY --------------------
+   - Query aggregate value on path from u UP to ancestor 'anc' (inclusive):
+     int pathVal = bl.queryUp(u, anc);
 
-Whenever lifting a node upward:
+   - Query aggregate value on full path between arbitrary nodes u and v:
+     int anc = bl.lca(u, v);
+     int leftPath = bl.queryUp(u, anc);  // u -> anc
+     int rightPath = bl.queryUp(v, anc); // v -> anc
+     int fullPathAns = bl.combine(leftPath, rightPath); 
+     // Note: If combine is sum/XOR, adjust for double-counting val[anc] if both include anc.
 
-ans = combine(ans, info[u][j]);
-u = up[u][j];
-
--------------------- CUSTOMIZE --------------------
-
-Only these two need to change:
-
-ID = Identity element
-combine(a, b)
-
--------------------- EXAMPLES --------------------
-
-Max : ID = 0,         combine = max
-Min : ID = INF,       combine = min
-Sum : ID = 0,         combine = +
-XOR : ID = 0,         combine = ^
-GCD : ID = 0,         combine = gcd
-AND : ID = ALL_BITS,  combine = &
-OR  : ID = 0,         combine = |
-
-Time:
-Build : O(N log N)
-Query : O(log N)
-
-================================================
+--------------------------------------------------------------------------------
+COMPLEXITIES:
+- Precomputation : O(N log N) Time | O(N log N) Space
+- Each Query     : O(log N) Time  | O(1) Auxiliary Space
+--------------------------------------------------------------------------------
 */
+
 
 
 // ============================================================================
