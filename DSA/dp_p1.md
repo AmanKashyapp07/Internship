@@ -1,10 +1,10 @@
-# 🧠 Master Dynamic Programming Patterns Guide (Interviews & OAs)
+# Master Dynamic Programming Patterns Guide (Interviews & OAs)
 
 > **The ultimate cheat sheet for recognizing, formulating, and coding Dynamic Programming problems in tech interviews (FAANG, Top Tech) and Online Assessments (OAs).**
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 1. [The 5-Step DP Problem-Solving Framework](#1-the-5-step-dp-problem-solving-framework)
 2. [Pattern 1: 0/1 Knapsack & Subset Sum Variations](#pattern-1-01-knapsack--subset-sum-variations)
 3. [Pattern 2: Unbounded Knapsack & Coin Change](#pattern-2-unbounded-knapsack--coin-change)
@@ -26,13 +26,13 @@
 When confronted with a DP problem in an OA or interview, follow this systematic 5-step process:
 
 ```
-┌────────────────────────┐    ┌────────────────────────┐    ┌────────────────────────┐
-│ 1. Identify DP Signals │ ──►│ 2. Define DP State     │ ──►│ 3. Formulate Transition│
-└────────────────────────┘    └────────────────────────┘    └────────────────────────┘
-                                                                         │
-┌────────────────────────┐    ┌────────────────────────┐                 ▼
-│ 5. Space Optimization  │ ◄──│ 4. Base Cases & Order  │ ◄───────────────┘
-└────────────────────────┘    └────────────────────────┘
+        
+ 1. Identify DP Signals   2. Define DP State       3. Formulate Transition
+        
+                                                                         
+                     
+ 5. Space Optimization    4. Base Cases & Order   
+    
 ```
 
 1. **Recognize Signals**: Optimal choices + Overlapping choices (Min/Max, Total Ways, Feasibility).
@@ -45,12 +45,12 @@ When confronted with a DP problem in an OA or interview, follow this systematic 
 
 ## Pattern 1: 0/1 Knapsack & Subset Sum Variations
 
-### 🔍 Identification Signals
+### Identification Signals
 - Given a set of items, each item can be **chosen AT MOST ONCE**.
 - Goal: Maximize/minimize total value or count total ways to reach target sum $W$.
 - Constraints: $N \le 10^3, W \le 10^4$.
 
-### 💡 Core Mechanics & Space Optimization Trick
+### Core Mechanics & Space Optimization Trick
 * **2D DP**: $dp[i][w] = \max(dp[i-1][w], \, dp[i-1][w - wt[i-1]] + val[i-1])$
 * **1D Space Optimization**: Iterate target capacity $w$ **BACKWARDS** (from $W$ down to $wt[i]$) so we use values from the *previous* item iteration, preventing multiple uses of the same item!
 
@@ -59,7 +59,7 @@ When confronted with a DP problem in an OA or interview, follow this systematic 
 1D Array:    Iterate w from W DOWN TO wt[i] (backward pass preserves previous state)
 ```
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Subset Sum / Target Sum Equal Partition (0/1 Knapsack)
 ```cpp
@@ -105,11 +105,11 @@ int findTargetSumWays(const vector<int>& nums, int target) {
 
 ## Pattern 2: Unbounded Knapsack & Coin Change
 
-### 🔍 Identification Signals
+### Identification Signals
 - Each item / coin can be **REUSED INFINITELY MANY TIMES**.
 - Single target amount/weight $X$.
 
-### ⚡ Crucial OA Distinction: Permutations vs. Combinations Loop Order
+### Crucial OA Distinction: Permutations vs. Combinations Loop Order
 * **Combinations** (Order does **NOT** matter, e.g. $\{1,2\}$ and $\{2,1\}$ are same):
   - **Outer Loop = Items**, **Inner Loop = Target Sum** (Iterate sum FORWARD).
 * **Permutations** (Order **DOES** matter, e.g. $\{1,2\}$ is different from $\{2,1\}$):
@@ -157,12 +157,12 @@ int coinChangeMinCoins(const vector<int>& coins, int amount) {
 
 ## Pattern 3: Longest Common Subsequence (LCS) & String Alignment
 
-### 🔍 Identification Signals
+### Identification Signals
 - Given 2 strings $S_1$ (length $N$) and $S_2$ (length $M$).
 - Requires comparison, editing, alignment, or matching.
 - Time Complexity: $O(N \cdot M)$. Space Complexity: $O(N \cdot M) \rightarrow O(\min(N, M))$ space optimized.
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. Longest Common Subsequence (LCS)
 ```cpp
@@ -282,11 +282,11 @@ public:
 
 ## Pattern 4: Longest Increasing Subsequence (LIS) & Binary Search ($O(N \log N)$)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Finding maximum length of increasing / non-decreasing subsequence.
 - $N$ up to $10^5 \implies O(N^2)$ DP will TLE! Must use $O(N \log N)$ binary search algorithm (Patience Sorting).
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### $O(N \log N)$ LIS (Patient Sorting via `std::lower_bound`)
 ```cpp
@@ -360,22 +360,22 @@ int maxEnvelopes(vector<vector<int>>& envelopes) {
 
 ## Pattern 5: State Machine DP (Stock Trading & House Robber)
 
-### 🔍 Identification Signals
+### Identification Signals
 - At step $i$, you can transition between explicit **finite states** (e.g., `HOLD`, `EMPTY`, `COOLDOWN`, `PAINT_RED`).
 - Choices on day $i$ depend strictly on your state on day $i-1$.
 
 ```
-         ┌───────────────────┐
-         │     0: UNHEAVY    │
-         └─────────┬─────────┘
-          buy      │      ▲ sell
-          stock    ▼      │
-         ┌───────────────────┐
-         │      1: HELD      │
-         └───────────────────┘
+         
+              0: UNHEAVY    
+         
+          buy             sell
+          stock          
+         
+               1: HELD      
+         
 ```
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Best Time to Buy and Sell Stock with Cooldown
 - 3 States:
@@ -433,11 +433,11 @@ int robCircular(vector<int>& nums) {
 
 ## Pattern 6: Grid DP & 2-Path Synchronous DP
 
-### 🔍 Identification Signals
+### Identification Signals
 - Moving on a 2D matrix $(R \times C)$ with constrained moves (e.g., Down, Right).
 - **2-Path DP** (e.g., Cherry Pickup, 2 Grid Paths simultaneously): $dp[r_1][c_1][r_2]$ where $c_2 = r_1 + c_1 - r_2$ (since total steps $r_1+c_1 = r_2+c_2$).
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Dungeon Game (Bottom-Right to Top-Left DP)
 - In Dungeon Game, standard Top-Left DP fails because future health requirements depend on remaining path.
@@ -470,7 +470,7 @@ int calculateMinimumHP(vector<vector<int>>& dungeon) {
 
 ## Pattern 7: Interval DP (Range DP & Merging Subarrays)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Subproblems are defined over subsegments/ranges $[i \dots j]$ of an array or string.
 - You can split range $[i \dots j]$ at any partition $k \in [i, j-1]$ into $[i \dots k]$ and $[k+1 \dots j]$.
 - Complexity: $O(N^3)$ Time, $O(N^2)$ Space. Loop over **length $L$ from 1 to $N$**.
@@ -488,7 +488,7 @@ for (int L = 2; L <= n; L++) {         // Length of segment
 }
 ```
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Burst Balloons ($O(N^3)$ Interval DP)
 - **Key Insight**: Instead of picking balloon to burst *first*, pick the balloon $k$ to burst **LAST** in range $[i \dots j]$!
@@ -520,12 +520,12 @@ int maxCoins(vector<int>& nums) {
 
 ## Pattern 8: Tree DP & Tree Rerouting (2-Pass DFS)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Problem on Tree structure ($N$ nodes, $N-1$ edges).
 - **Subtree DP**: Post-order traversal (children computed before parent).
 - **Tree Rerouting**: Calculate answer for ALL nodes as root in $O(N)$ time instead of naive $O(N^2)$.
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. House Robber III (Tree Subtree DP)
 ```cpp
@@ -587,12 +587,12 @@ void dfs2(int u, int p, int n, vector<vector<int>>& adj, vector<int>& count, vec
 
 ## Pattern 9: Bitmask DP (Subset Traversal & TSP)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Small limits ($N \le 20$).
 - State requires tracking which subset of items has been used/visited.
 - Mask: $i$-th bit is `1` if item $i$ is included/visited, `0` otherwise. Total states $= 2^N$.
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Traveling Salesperson Problem (TSP) / Shortest Hamiltonian Path
 - $dp[\text{mask}][u]$: min cost to visit all nodes in `mask`, ending at node `u`.
@@ -641,12 +641,12 @@ for (int mask = 0; mask < (1 << n); mask++) {
 
 ## Pattern 10: Digit DP ($N \le 10^{18}$)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Count numbers in range $[A, B]$ satisfying digit constraints (e.g. no adjacent repeated digits, digit sum divisible by $K$).
 - Inputs given as large bounds up to $10^{18}$ (represented as strings/long long).
 - Complexity: $O(\text{Length of number} \times \text{State Space})$.
 
-### 💻 Standard Digit DP Template
+### Standard Digit DP Template
 ```cpp
 long long memo[20][2][2][100]; // pos, tight, leading_zero, custom_state
 string S;
@@ -703,6 +703,55 @@ In competitive programming and top-tier OAs (e.g., Arcesium, DE Shaw, Google, Co
 - **Optimization**: Insert linear equations $y = m_j \cdot x + c_j$ into a dynamic line container / Li Chao Tree.
 - **Time Complexity Reduction**: $O(N^2) \longrightarrow O(N \log N)$ or $O(N)$.
 
+### 4. Sum Over Subsets (SOS) DP
+- **Trigger**: Compute $F[\text{mask}] = \sum_{\text{submask} \subseteq \text{mask}} A[\text{submask}]$ for all bitmasks of size $N$.
+- **Optimization**: Process bit by bit across states to avoid repeating submask paths.
+- **Time Complexity Reduction**: $O(3^N) \longrightarrow O(N \cdot 2^N)$.
+
+```cpp
+// SOS DP Template
+vector<int> sosDP(int n, const vector<int>& A) {
+    int maxMask = 1 << n;
+    vector<int> F = A;
+    for (int i = 0; i < n; i++) {
+        for (int mask = 0; mask < maxMask; mask++) {
+            if (mask & (1 << i)) {
+                F[mask] += F[mask ^ (1 << i)];
+            }
+        }
+    }
+    return F; // F[mask] contains sum over all submasks of mask!
+}
+```
+
+### 5. Divide and Conquer (D&C) DP Optimization
+- **Trigger**: Transitions of form $dp[i][j] = \min_{k < j} (dp[i-1][k] + C(k, j))$ where the optimal splitting point satisfies monotonicity $opt[i][j] \le opt[i][j+1]$.
+- **Time Complexity Reduction**: $O(K \cdot N^2) \longrightarrow O(K \cdot N \log N)$.
+
+```cpp
+// D&C DP Template
+void computeDCDP(int i, int l, int r, int optL, int optR, vector<vector<int>>& dp, const auto& cost) {
+    if (l > r) return;
+    int mid = l + (r - l) / 2;
+    pair<int, int> best = {1e9, -1};
+
+    for (int k = optL; k <= min(mid - 1, optR); k++) {
+        int cur = dp[i - 1][k] + cost(k, mid);
+        if (cur < best.first) best = {cur, k};
+    }
+
+    dp[i][mid] = best.first;
+    int optMid = best.second;
+
+    computeDCDP(i, l, mid - 1, optL, optMid, dp, cost);
+    computeDCDP(i, mid + 1, r, optMid, optR, dp, cost);
+}
+```
+
+### 6. Broken Profile / Profile DP (Grid Tiling)
+- **Trigger**: Tile an $M \times N$ grid ($M \le 10, N \le 10^5$) with $1 \times 2$ dominoes, tracking cell boundary profiles.
+- **Time Complexity**: $O(N \cdot M \cdot 2^M)$.
+
 ---
 
 ## Master DP Pattern Decision Matrix
@@ -721,4 +770,7 @@ In competitive programming and top-tier OAs (e.g., Arcesium, DE Shaw, Google, Co
 | Tree nodes, pick parent vs child | **Tree Subtree DP** | `pair<int,int>` | Post-order DFS `{take, skip}` | $O(N)$ | $O(H)$ |
 | Answers for ALL tree nodes as roots | **Tree Rerouting** | `ans[u]` | 2-pass DFS ($u \to v$ transition) | $O(N)$ | $O(N)$ |
 | Subset selection with $N \le 20$ | **Bitmask DP** | $dp[\text{mask}][u]$ | Bitwise ops `mask \| (1 << v)` | $O(N^2 \cdot 2^N)$ | $O(N \cdot 2^N)$ |
+| Sum over all submasks for $N$ bits | **SOS DP** | $F[\text{mask}]$ | Bit-by-bit DP state propagation | $O(N \cdot 2^N)$ | $O(2^N)$ |
 | Count valid integers in $[A, B]$ | **Digit DP** | `memo[pos][tight][zero]` | DFS over digits $0 \dots 9$ | $O(\log N)$ | $O(\log N)$ |
+| $dp[i][j]$ min split with monotonic $opt$ | **Divide & Conquer DP** | $dp[i][j]$ | D&C binary splitting on range | $O(K \cdot N \log N)$ | $O(K \cdot N)$ |
+| Grid domino tiling ($M \le 10$) | **Profile DP** | $dp[r][c][\text{mask}]$ | Bitmask cell-by-cell transition | $O(N \cdot M \cdot 2^M)$ | $O(2^M)$ |

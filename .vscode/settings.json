@@ -1,3 +1,10 @@
 {
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.dimInactiveRegions": false,
+    "C_Cpp.codeAnalysis.runAutomatically": false,
+    "clangd.enable": false,
+    "clangd.diagnostics": false,
+    "errorLens.enabled": false,
+    "cSpell.enabled": false
 }

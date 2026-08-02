@@ -71,7 +71,7 @@ Look for these key signals in the problem statement:
 
 ---
 
-## ⚡ Top DP Bugs to Avoid
+## Top DP Bugs to Avoid
 
 1.  **Forgot to Reset:** Global DP tables retain values from previous test cases. Reset them inside the class entry function.
 2.  **Pruning errors:** If pruning early (e.g., `sum > max_sum`), make sure you return `0` or appropriate values, but do not cache invalid states.

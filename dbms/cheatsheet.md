@@ -1,10 +1,10 @@
-# SQL Interview Cheatsheet 🚀
+# SQL Interview Cheatsheet 
 
 A comprehensive, production-grade guide to writing and optimizing SQL queries during technical interviews. This guide covers core execution rules, join semantics, advanced window functions, common query recipes, and high-frequency "gotchas".
 
 ---
 
-## 1. Logical Query Execution Order ⚙️
+## 1. Logical Query Execution Order 
 
 Understanding the execution order is the single most important tool for writing correct queries. SQL is not processed in the order it is written.
 
@@ -24,13 +24,13 @@ graph TD
 
 ### Key Interview Implications:
 * **No SELECT Aliases in WHERE/GROUP BY:** You cannot use column aliases defined in the `SELECT` clause inside the `WHERE` or `GROUP BY` clauses because those steps run *before* the SELECT projection.
-  * ❌ *Incorrect:* `SELECT salary AS sal FROM Employee WHERE sal > 50000;`
+  *  *Incorrect:* `SELECT salary AS sal FROM Employee WHERE sal > 50000;`
   *  *Correct:* `SELECT salary AS sal FROM Employee WHERE salary > 50000;`
 * **HAVING vs WHERE:** `WHERE` filters individual rows *before* aggregation. `HAVING` filters groups *after* aggregation. Never put non-aggregated filters in `HAVING`.
 
 ---
 
-## 2. Join Semantics Cheat Sheet 🧩
+## 2. Join Semantics Cheat Sheet 
 
 Use the right join type based on what happens to unmatched rows.
 
@@ -43,7 +43,7 @@ Use the right join type based on what happens to unmatched rows.
 | **`CROSS JOIN`** | Returns Cartesian Product of both tables. | No join condition; combines every row of A with every row of B. |
 | **`SELF JOIN`** | Joins a table to itself (requires aliasing). | Useful for hierarchies (e.g., matching employees to managers). |
 
-### ⚠️ Join Gotcha: ON vs WHERE filtering in LEFT JOIN
+### Join Gotcha: ON vs WHERE filtering in LEFT JOIN
 * Filtering in `ON` controls what gets joined. Left rows are preserved even if they fail the `ON` condition.
 * Filtering in `WHERE` controls what is in the final result. It runs *after* the join, effectively turning a `LEFT JOIN` into an `INNER JOIN` if filtering on the right table.
 
@@ -62,13 +62,13 @@ WHERE o.order_date > '2026-01-01'; -- filter forces non-null check
 
 ---
 
-## 3. Window Functions 🏆
+## 3. Window Functions 
 
 Refer to the dedicated guide [window.md](file:///Users/amankashyap/Documents/internship/DBMS/window.md) for a comprehensive, deep-dive breakdown of Window Functions, including ranking variations, value/analytical access, running aggregates, frame specifications (`ROWS` vs `RANGE`), and advanced interview recipes.
 
 ---
 
-## 4. Subqueries vs CTEs (Common Table Expressions) 🏗️
+## 4. Subqueries vs CTEs (Common Table Expressions) 
 
 Use **CTEs** over subqueries during interviews. They are significantly easier for interviewers to read, debug, and follow.
 
@@ -107,7 +107,7 @@ SELECT * FROM ManagementChain ORDER BY lvl, name;
 
 ---
 
-## 5. Critical Interview Recipes & Patterns 🍳
+## 5. Critical Interview Recipes & Patterns 
 
 ### Recipe 1: Finding the N-th Highest Value (Salary)
 
@@ -226,11 +226,11 @@ WHERE id IN (SELECT id FROM CTE WHERE rn > 1);
 
 ---
 
-## 6. Dangerous SQL Gotchas & Tricks ⚠️
+## 6. Dangerous SQL Gotchas & Tricks 
 
-### 1. The `NOT IN` NULL Trap 🕳️
+### 1. The `NOT IN` NULL Trap 
 If the subquery of a `NOT IN` condition returns even a single `NULL` value, the outer query will return **0 rows**!
-* ❌ *Dangerous:* `SELECT * FROM Employee WHERE id NOT IN (SELECT manager_id FROM Employee);` (If any `manager_id` is NULL, this fails).
+*  *Dangerous:* `SELECT * FROM Employee WHERE id NOT IN (SELECT manager_id FROM Employee);` (If any `manager_id` is NULL, this fails).
 *  *Fix A (NOT EXISTS):*
   ```sql
   SELECT * FROM Employee e
@@ -265,7 +265,7 @@ SELECT name, COALESCE(salary, 0) as salary FROM Employee;
 
 ---
 
-## 7. Performance & Optimization Tips for Interviews 🚀
+## 7. Performance & Optimization Tips for Interviews 
 
 If the interviewer asks: *"How would you optimize this query?"* run through this checklist:
 
@@ -275,7 +275,7 @@ If the interviewer asks: *"How would you optimize this query?"* run through this
    * Consider composite (multi-column) indexes for frequent queries filter combinations.
 2. **Sargability (Search Argument Able):**
    * Avoid putting functions on indexed columns in the `WHERE` clause. It breaks index usage.
-   * ❌ *Un-sargable:* `WHERE YEAR(hire_date) = 2026`
+   *  *Un-sargable:* `WHERE YEAR(hire_date) = 2026`
    *  *Sargable:* `WHERE hire_date >= '2026-01-01' AND hire_date <= '2026-12-31'`
 3. **Avoid `SELECT *`:**
    * Select only columns you need to reduce I/O and network bandwidth.
@@ -286,16 +286,16 @@ If the interviewer asks: *"How would you optimize this query?"* run through this
 
 ---
 
-## 8. Set Operators: UNION, INTERSECT, EXCEPT 🔗
+## 8. Set Operators: UNION, INTERSECT, EXCEPT 
 
 Combine results from two or more `SELECT` queries. Both queries must return the same number of columns with compatible data types.
 
 | Operator | Returns | Removes Duplicates? |
 | :--- | :--- | :--- |
-| **`UNION`** | All rows from both queries | ✅ Yes (slower) |
-| **`UNION ALL`** | All rows from both queries | ❌ No (faster) |
-| **`INTERSECT`** | Rows appearing in **both** queries | ✅ Yes |
-| **`EXCEPT`** / `MINUS` | Rows in first query **not** in second | ✅ Yes |
+| **`UNION`** | All rows from both queries |  Yes (slower) |
+| **`UNION ALL`** | All rows from both queries |  No (faster) |
+| **`INTERSECT`** | Rows appearing in **both** queries |  Yes |
+| **`EXCEPT`** / `MINUS` | Rows in first query **not** in second |  Yes |
 
 ```sql
 -- Customers who placed an order OR registered after 2025 (all, with dedup)
@@ -314,11 +314,11 @@ EXCEPT
 SELECT customer_id FROM Orders;
 ```
 
-> ⚠️ **Always prefer `UNION ALL` over `UNION`** unless deduplication is explicitly needed. `UNION` adds a sort/hash pass that is O(N log N).
+>  **Always prefer `UNION ALL` over `UNION`** unless deduplication is explicitly needed. `UNION` adds a sort/hash pass that is O(N log N).
 
 ---
 
-## 9. CASE WHEN — Conditional Aggregation (Pivot Pattern) 🎛️
+## 9. CASE WHEN — Conditional Aggregation (Pivot Pattern) 
 
 `CASE WHEN` inside aggregate functions is the standard SQL technique to compute conditional metrics (CTR, approval rates, quarterly pivots) without subqueries.
 
@@ -352,7 +352,7 @@ GROUP BY customer_id;
 
 ---
 
-## 10. GROUP BY Extensions: ROLLUP, CUBE, GROUPING SETS 📦
+## 10. GROUP BY Extensions: ROLLUP, CUBE, GROUPING SETS 
 
 These extensions compute multiple levels of aggregation in a single query, replacing the need for multiple `UNION ALL` blocks.
 
@@ -386,11 +386,11 @@ GROUP BY GROUPING SETS(
 );
 ```
 
-> ⚠️ **NULL in result rows from ROLLUP/CUBE does NOT mean missing data** — it represents an aggregated group. Use `GROUPING(col)` to distinguish these from real NULLs.
+>  **NULL in result rows from ROLLUP/CUBE does NOT mean missing data** — it represents an aggregated group. Use `GROUPING(col)` to distinguish these from real NULLs.
 
 ---
 
-## 11. Essential Date & String Functions 📅
+## 11. Essential Date & String Functions 
 
 ### Date Functions (PostgreSQL syntax — most standard)
 
@@ -437,7 +437,7 @@ SELECT * FROM Employee WHERE name ILIKE '%john%';
 
 ---
 
-## 12. Correlated Subqueries vs IN / ANY / ALL 🔄
+## 12. Correlated Subqueries vs IN / ANY / ALL 
 
 ### Correlated Subquery
 A subquery that references a column from the **outer query**. It executes once per row of the outer query (O(N) subquery executions). Useful but can be slow on large tables.
@@ -468,22 +468,22 @@ SELECT name FROM Employee
 WHERE salary > ALL (SELECT salary FROM Employee WHERE department = 'Engineering');
 ```
 
-> ⚠️ **`> ANY` is equivalent to `> MIN(...)`** and **`> ALL` is equivalent to `> MAX(...)`**. Prefer the aggregate form for performance — the optimizer may not convert `ANY/ALL` into index scans automatically.
+>  **`> ANY` is equivalent to `> MIN(...)`** and **`> ALL` is equivalent to `> MAX(...)`**. Prefer the aggregate form for performance — the optimizer may not convert `ANY/ALL` into index scans automatically.
 
 ---
 
-## 13. TRUNCATE vs DELETE vs DROP 🗑️
+## 13. TRUNCATE vs DELETE vs DROP 
 
 A very common interview question that tests precision on SQL DDL vs DML distinctions.
 
 | Feature | `DELETE` | `TRUNCATE` | `DROP` |
 | :--- | :--- | :--- | :--- |
 | **What it removes** | Specific rows (or all rows) | All rows | Entire table + schema |
-| **WHERE clause** | ✅ Supported | ❌ Not supported | ❌ Not applicable |
+| **WHERE clause** |  Supported |  Not supported |  Not applicable |
 | **Transaction** | DML — can be rolled back | DDL — cannot be rolled back (most engines) | DDL — cannot be rolled back |
-| **Triggers fired?** | ✅ Yes (row-level triggers execute) | ❌ No | ❌ No |
+| **Triggers fired?** |  Yes (row-level triggers execute) |  No |  No |
 | **Speed** | Slow on large tables (logs each row) | Very fast (deallocates pages) | Instant |
-| **Auto-increment reset** | ❌ No | ✅ Yes (resets identity counter) | ✅ Yes (table gone) |
+| **Auto-increment reset** |  No |  Yes (resets identity counter) |  Yes (table gone) |
 | **Referential integrity** | Respects FK constraints | Respects FK constraints | Fails if FK references exist |
 
 ```sql

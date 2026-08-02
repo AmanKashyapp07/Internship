@@ -1,10 +1,10 @@
-# 🕸️ Master Graph Patterns Guide - Part 2: Advanced & OA Patterns
+# Master Graph Patterns Guide - Part 2: Advanced & OA Patterns
 
 > **The definitive reference for Advanced Graph Algorithms: SCC, Bridges, Tree LCA/Lifting, Flow, Matching, 2-SAT, and CP Techniques for Tech Interviews and High-Tier OAs.**
 
 ---
 
-## 📋 Table of Contents (Part 2)
+## Table of Contents (Part 2)
 1. [Pattern 7: Strongly Connected Components (SCC) & 2-SAT](#pattern-7-strongly-connected-components-scc--2-sat)
 2. [Pattern 8: Bridges & Articulation Points (Tarjan's Low-Link Algorithm)](#pattern-8-bridges--articulation-points-tarjans-low-link-algorithm)
 3. [Pattern 9: Trees - Binary Lifting, LCA, and Path Queries](#pattern-9-trees---binary-lifting-lca-and-path-queries)
@@ -18,14 +18,14 @@
 
 ## Pattern 7: Strongly Connected Components (SCC) & 2-SAT
 
-### 🔍 Identification Signals
+### Identification Signals
 - **SCC**: Directed graph where every vertex in a component is reachable from every other vertex in that component.
 - **Condensation DAG**: Shrink each SCC into a single node. The resulting graph is guaranteed to be a Directed Acyclic Graph (DAG)!
 - **2-SAT**: Satisfiability of boolean formula with 2 variables per clause $(A \lor B) \land (\neg B \lor C) \dots$
   - Model clause $(A \lor B)$ as implication edges: $\neg A \implies B$ and $\neg B \implies A$.
   - Formula is satisfiable iff $x$ and $\neg x$ do **NOT** belong to the same SCC!
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. Kosaraju's 2-Pass DFS Algorithm ($O(V + E)$)
 ```cpp
@@ -104,7 +104,7 @@ bool solve2SAT(int numVars, const vector<pair<int,int>>& clauses, vector<bool>& 
 
 ## Pattern 8: Bridges & Articulation Points (Tarjan's Low-Link Algorithm)
 
-### 🔍 Identification Signals
+### Identification Signals
 - **Bridge (Critical Connection)**: Edge whose removal increases number of connected components.
 - **Articulation Point (Cut Vertex)**: Vertex whose removal increases number of connected components.
 - **Core Condition**:
@@ -113,7 +113,7 @@ bool solve2SAT(int numVars, const vector<pair<int,int>>& clauses, vector<bool>& 
     1. $u$ is root of DFS tree and has $\ge 2$ children, OR
     2. $u$ is not root and has child $v$ such that `low[v] >= tin[u]`.
 
-### 💻 Standard Template
+### Standard Template
 
 ```cpp
 class BridgeAndCutVertices {
@@ -176,11 +176,11 @@ public:
 
 ## Pattern 9: Trees - Binary Lifting, LCA, and Path Queries
 
-### 🔍 Identification Signals
+### Identification Signals
 - Queries on tree path between $u$ and $v$ (Distance, Min/Max edge weight on path, $K$-th ancestor).
 - Precomputation: $O(N \log N)$ space/time. Query: $O(\log N)$ time.
 
-### 💻 Standard Binary Lifting & LCA Template
+### Standard Binary Lifting & LCA Template
 
 ```cpp
 class TreeLCA {
@@ -242,14 +242,14 @@ public:
 
 ## Pattern 10: Eulerian & Hamiltonian Paths
 
-### 🔍 Identification Signals
+### Identification Signals
 - **Eulerian Circuit/Path**: Visit **EVERY EDGE EXACTLY ONCE**.
   - Undirected Existence: All nodes have even degree (Circuit) OR exactly 2 nodes have odd degree (Path).
   - Algorithm: Hierholzer's Algorithm ($O(V + E)$).
 - **Hamiltonian Path/TSP**: Visit **EVERY VERTEX EXACTLY ONCE**.
   - Algorithm: Bitmask DP ($O(N^2 \cdot 2^N)$).
 
-### 💻 Standard Hierholzer's Algorithm Template (Eulerian Circuit)
+### Standard Hierholzer's Algorithm Template (Eulerian Circuit)
 
 ```cpp
 vector<int> getEulerianCircuitUndirected(int n, vector<vector<pair<int,int>>>& adj, int numEdges) {
@@ -290,12 +290,12 @@ vector<int> getEulerianCircuitUndirected(int n, vector<vector<pair<int,int>>>& a
 
 ## Pattern 11: Functional Graphs & Succession Graphs
 
-### 🔍 Identification Signals
+### Identification Signals
 - Directed graph where **every vertex has out-degree exactly equal to 1** ($f(u) = v$).
 - Structure: Always consists of **a set of components, each containing a single cycle with trees rooted on the cycle directed TOWARD the cycle**.
 - Useful for: Jump $K$ steps in functional graph ($K \le 10^{18}$), Cycle length calculation.
 
-### 💻 Binary Lifting on Succession Graph ($K$-th Successor in $O(\log K)$)
+### Binary Lifting on Succession Graph ($K$-th Successor in $O(\log K)$)
 
 ```cpp
 vector<int> getKthSuccessor(int n, const vector<int>& succ, long long k) {
@@ -326,13 +326,13 @@ vector<int> getKthSuccessor(int n, const vector<int>& succ, long long k) {
 
 ## Pattern 12: Network Flow & Bipartite Matching
 
-### 🔍 Identification Signals
+### Identification Signals
 - Maximum capacity flow, bottleneck matching, grid coverage, independent sets.
 - **Kőnig's Theorem**: In any bipartite graph, **Max Matching = Min Vertex Cover**.
 - **Minimum Path Cover in DAG**: $N - \text{Max Bipartite Matching}$.
 - Algorithm: **Dinic's Algorithm** ($O(V^2 E)$ general, $O(E \sqrt{V})$ for Bipartite Matching).
 
-### 💻 Standard Dinic's Algorithm Template
+### Standard Dinic's Algorithm Template
 
 ```cpp
 struct FlowEdge {
@@ -405,6 +405,84 @@ public:
 };
 ```
 
+#### 2. Minimum Cost Maximum Flow (MCMF - Successive Shortest Path)
+```cpp
+// Minimum Cost Maximum Flow using SPFA Algorithm
+struct MCMFEdge {
+    int to, rev;
+    long long cap, flow, cost;
+};
+
+class MCMF {
+    int n, s, t;
+    vector<vector<MCMFEdge>> adj;
+    vector<long long> dist;
+    vector<int> parentEdge, parentNode;
+    vector<bool> inQueue;
+
+public:
+    MCMF(int n, int s, int t) : n(n), s(s), t(t), adj(n + 1) {}
+
+    void addEdge(int u, int v, long long cap, long long cost) {
+        adj[u].push_back({v, (int)adj[v].size(), cap, 0, cost});
+        adj[v].push_back({u, (int)adj[u].size() - 1, 0, 0, -cost});
+    }
+
+    bool spfa() {
+        dist.assign(n + 1, 1e18);
+        parentEdge.assign(n + 1, -1);
+        parentNode.assign(n + 1, -1);
+        inQueue.assign(n + 1, false);
+
+        queue<int> q;
+        q.push(s);
+        dist[s] = 0;
+        inQueue[s] = true;
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            inQueue[u] = false;
+
+            for (int i = 0; i < adj[u].size(); i++) {
+                auto& e = adj[u][i];
+                if (e.cap - e.flow > 0 && dist[u] + e.cost < dist[e.to]) {
+                    dist[e.to] = dist[u] + e.cost;
+                    parentNode[e.to] = u;
+                    parentEdge[e.to] = i;
+                    if (!inQueue[e.to]) {
+                        q.push(e.to);
+                        inQueue[e.to] = true;
+                    }
+                }
+            }
+        }
+        return dist[t] < 1e18;
+    }
+
+    pair<long long, long long> getMinCostMaxFlow() {
+        long long flow = 0, cost = 0;
+        while (spfa()) {
+            long long push = 1e18;
+            for (int u = t; u != s; u = parentNode[u]) {
+                int i = parentEdge[u];
+                int p = parentNode[u];
+                push = min(push, adj[p][i].cap - adj[p][i].flow);
+            }
+            for (int u = t; u != s; u = parentNode[u]) {
+                int i = parentEdge[u];
+                int p = parentNode[u];
+                adj[p][i].flow += push;
+                int rev = adj[p][i].rev;
+                adj[u][rev].flow -= push;
+                cost += push * adj[p][i].cost;
+            }
+            flow += push;
+        }
+        return {flow, cost}; // {Max Flow, Min Cost}
+    }
+};
+```
+
 ---
 
 ## Pattern 13: Advanced OA & CP Graph Techniques (HLD, Centroids, Hashing)
@@ -437,6 +515,7 @@ public:
 | Task dependencies / Prerequisite ordering | **Topological Sort** | Kahn's Queue Algorithm | $O(V + E)$ | $O(V + E)$ |
 | Non-negative weighted shortest path | **Single-Source Dijkstra** | Min-Priority Queue | $O(E \log V)$ | $O(V + E)$ |
 | State-space shortest path (Discount/Fuel) | **State Dijkstra** | `dist[u][state]` PQ | $O(S \cdot E \log(V \cdot S))$ | $O(V \cdot S)$ |
+| Sparse graph all-pairs shortest path | **Johnson's APSP** | Bellman-Ford + $V \times$ Dijkstra | $O(V^2 \log V + VE)$ | $O(V^2)$ |
 | Negative weights / Negative cycle finding | **Bellman-Ford** | $N$-Pass Relaxation | $O(V \cdot E)$ | $O(V + E)$ |
 | All-pairs shortest path ($V \le 500$) | **Floyd-Warshall** | 3 Nested Loops | $O(V^3)$ | $O(V^2)$ |
 | Minimum total edge weight tree spanning all nodes | **MST** | Kruskal (DSU) / Prim | $O(E \log E)$ | $O(V + E)$ |
@@ -448,3 +527,4 @@ public:
 | Visit EVERY VERTEX exactly once ($N \le 20$) | **Hamiltonian Path / TSP** | Bitmask DP | $O(N^2 \cdot 2^N)$ | $O(N \cdot 2^N)$ |
 | Out-degree = 1 for all nodes / Jump $K$ steps | **Functional Graph** | Successor Binary Lifting | $O(N \log K)$ | $O(N \log K)$ |
 | Max flow, Min Cut, Grid Min Cover | **Network Flow** | Dinic's Algorithm | $O(V^2 E)$ | $O(V + E)$ |
+| Min Cost Max Flow / Optimal Weighted Assignment | **MCMF Flow** | Successive Shortest Path (SPFA) | $O(F \cdot E \log V)$ | $O(V + E)$ |

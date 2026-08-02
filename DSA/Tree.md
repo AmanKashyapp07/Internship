@@ -1,4 +1,4 @@
-# 🌲 CSES Tree Algorithms - Master Reference
+# CSES Tree Algorithms - Master Reference
 
 > **All 13 CSES Tree Problems complete with Classic Pattern Identifiers, Precise Problem Statements, Algorithmic Logic, Minimal Informal Code Snippets, and Time/Space Complexities.**
 

@@ -1,10 +1,10 @@
-# SQL Window Functions: The Ultimate Guide 🏆
+# SQL Window Functions: The Ultimate Guide 
 
 Window functions perform calculations across a set of table rows that are related to the current row, without collapsing them into a single output row. The row-level detail is fully preserved while computing aggregate or ranking metrics.
 
 ---
 
-## 1. Syntax & Logical Execution Order ⚙️
+## 1. Syntax & Logical Execution Order 
 
 ### The Window Function Template
 ```sql
@@ -23,28 +23,28 @@ Window functions perform calculations across a set of table rows that are relate
 Logical Query Execution Order:
 `FROM` $\rightarrow$ `JOIN` $\rightarrow$ `WHERE` $\rightarrow$ `GROUP BY` $\rightarrow$ `HAVING` $\rightarrow$ **`SELECT` (Window Functions Evaluated Here)** $\rightarrow$ `DISTINCT` $\rightarrow$ `ORDER BY` $\rightarrow$ `LIMIT`
 
-> ⚠️ **Interview Implication:** Because window functions are evaluated in the `SELECT` clause (after filtering), **you cannot place window functions in the `WHERE` or `HAVING` clauses**. To filter on the result of a window function, you must wrap it in a CTE or a subquery.
+>  **Interview Implication:** Because window functions are evaluated in the `SELECT` clause (after filtering), **you cannot place window functions in the `WHERE` or `HAVING` clauses**. To filter on the result of a window function, you must wrap it in a CTE or a subquery.
 > 
-> * ❌ *Incorrect:* `SELECT name FROM Employee WHERE RANK() OVER (ORDER BY salary DESC) <= 3;`
+> *  *Incorrect:* `SELECT name FROM Employee WHERE RANK() OVER (ORDER BY salary DESC) <= 3;`
 > *  *Correct:* `WITH CTE AS (SELECT name, RANK() OVER (ORDER BY salary DESC) as rnk FROM Employee) SELECT name FROM CTE WHERE rnk <= 3;`
 
 ---
 
-## 2. Window Frame Clauses: ROWS vs RANGE vs GROUPS 🪟
+## 2. Window Frame Clauses: ROWS vs RANGE vs GROUPS 
 
 The frame clause specifies which subset of rows within the partition are evaluated for the current row.
 
 ```
 Window Partition
-┌──────────────────────────────────────┐
-│ UNBOUNDED PRECEDING                  │
-│ ...                                  │
-│ 1 PRECEDING                          │
-│ CURRENT ROW    ◄─── [Current Row]    │
-│ 1 FOLLOWING                          │
-│ ...                                  │
-│ UNBOUNDED FOLLOWING                  │
-└──────────────────────────────────────┘
+
+ UNBOUNDED PRECEDING                  
+ ...                                  
+ 1 PRECEDING                          
+ CURRENT ROW     [Current Row]    
+ 1 FOLLOWING                          
+ ...                                  
+ UNBOUNDED FOLLOWING                  
+
 ```
 
 ### Frame Boundary Keywords
@@ -70,14 +70,14 @@ AVG(amount) OVER (ORDER BY sale_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
 SUM(amount) OVER (ORDER BY sale_date RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
 ```
 
-> ⚠️ **Crucial Default Behavior Gotcha:**
+>  **Crucial Default Behavior Gotcha:**
 > If you specify `ORDER BY` in your `OVER()` clause but omit the frame clause, the database implicitly applies:
 > `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`
 > This can cause slow execution (database sorting/ranges) and unexpected output if there are ties. **Always write an explicit `ROWS` frame for running totals and moving averages.**
 
 ---
 
-## 3. Window Function Categories 📊
+## 3. Window Function Categories 
 
 ### A. Ranking Functions
 Ranking functions assign integer values to rows based on their ordering partition.
@@ -112,7 +112,7 @@ These functions retrieve data values from other rows relative to the current row
 * **`LAST_VALUE(col)`**: Returns the value of `col` from the last row in the window frame.
 * **`NTH_VALUE(col, N)`**: Returns the value of `col` from the N-th row in the window frame.
 
-> ⚠️ **The `LAST_VALUE` Trap:**
+>  **The `LAST_VALUE` Trap:**
 > Because the default window frame is `RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`, calling `LAST_VALUE(salary)` will evaluate only up to the *current row*, returning the current row's salary instead of the true last salary of the partition.
 > 
 > **Fix:** You must explicitly override the frame to scan the entire partition:
@@ -143,7 +143,7 @@ Performs standard aggregates (`SUM`, `AVG`, `COUNT`, `MIN`, `MAX`) over the defi
 
 ---
 
-## 4. Advanced Interview Patterns & Recipes 🍳
+## 4. Advanced Interview Patterns & Recipes 
 
 ### Recipe 1: Finding Top N per Group
 > **Scenario:** Find the top 3 highest-paid employees in each department. Include ties.

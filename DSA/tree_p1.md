@@ -1,10 +1,10 @@
-# 🌲 Master Tree Patterns Guide (Interviews & OAs)
+# Master Tree Patterns Guide (Interviews & OAs)
 
 > **The ultimate cheat sheet for recognizing, formulating, and coding Tree algorithms in tech interviews (FAANG, Top Tech) and Online Assessments (OAs).**
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 1. [Tree Traversal & Subtree Recursion Fundamentals](#1-tree-traversal--subtree-recursion-fundamentals)
 2. [Pattern 1: Subtree DP & Bottom-Up DFS (Return-to-Parent)](#pattern-1-subtree-dp--bottom-up-dfs-return-to-parent)
 3. [Pattern 2: Tree Rerooting DP (2-Pass DFS / All-Nodes-as-Root DP)](#pattern-2-tree-rerooting-dp-2-pass-dfs--all-nodes-as-root-dp)
@@ -41,11 +41,11 @@ Tree problems are naturally recursive because every subtree is itself a valid tr
 
 ## Pattern 1: Subtree DP & Bottom-Up DFS (Return-to-Parent)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Compute property for current node using computed attributes of its subtrees (e.g. Subtree size, Max path, Diameter, Subtree sum).
 - Uses **Post-Order DFS**: process left & right children first, then combine results at parent.
 
-### 💻 Standard Minimal Templates
+### Standard Minimal Templates
 
 #### 1. Subtree Size Calculation
 ```cpp
@@ -93,12 +93,12 @@ int dfsMaxPath(TreeNode* root, int& globalMax) {
 
 ## Pattern 2: Tree Rerooting DP (2-Pass DFS / All-Nodes-as-Root DP)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Requirement: Compute an answer for **EVERY node $i = 1 \dots N$ as if it were the root of the tree**.
 - Naive approach: Run DFS from every node $\implies O(N^2)$ (TLE!).
 - **Tree Rerooting Technique**: Solve in **$O(N)$ total time** using two DFS passes!
 
-### 💡 Core Mechanics
+### Core Mechanics
 1. **Pass 1 (Bottom-Up DFS)**: Fix root at node $1$. Compute subtree sizes `sub[u]` and the answer for node $1$ (`ans[1]`).
 2. **Pass 2 (Top-Down DFS)**: Move root from parent $u$ to child $v$. Transition formula:
 $$\text{ans}[v] = \text{ans}[u] - \text{sub}[v] + (N - \text{sub}[v])$$
@@ -109,7 +109,7 @@ $$\text{ans}[v] = \text{ans}[u] - \text{sub}[v] + (N - \text{sub}[v])$$
  - Subtree of v loses sub[v] nodes (which become closer to v than u).
 ```
 
-### 💻 Standard Rerooting Template (Sum of Distances in Tree)
+### Standard Rerooting Template (Sum of Distances in Tree)
 
 ```cpp
 // Minimal Tree Rerooting Snippet (CSES Tree Distances II / LeetCode 834)
@@ -138,15 +138,15 @@ void dfs2(int u, int p, int n) {
 
 ## Pattern 3: Binary Lifting & Lowest Common Ancestor (LCA)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Answer $Q$ queries asking for $K$-th ancestor, LCA of nodes $(u, v)$, path distance $\text{dist}(u, v)$, or min/max edge on path $u \leftrightarrow v$.
 - Time Complexity: Precomputation $O(N \log N)$, Query $O(\log N)$.
 
-### 💡 Key Formulas
+### Key Formulas
 - $\text{dist}(u, v) = \text{depth}[u] + \text{depth}[v] - 2 \cdot \text{depth}[\text{LCA}(u, v)]$
 - Binary jump transition: `up[u][j] = up[up[u][j-1]][j-1]` (where `up[u][j]` is $2^j$-th ancestor of $u$).
 
-### 💻 Standard Binary Lifting & LCA Snippet
+### Standard Binary Lifting & LCA Snippet
 
 ```cpp
 // Minimal Binary Lifting LCA Snippet
@@ -171,7 +171,7 @@ int getLCA(int u, int v) {
 
 ## Pattern 4: Euler Tour Technique (Tree Flattening to 1D Array)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Range queries on subtrees or tree paths (e.g. Add $X$ to all nodes in subtree of $u$, query sum of subtree $u$).
 - **Core Concept**: Map tree nodes into a 1D array using DFS entry time `in[u]` and exit time `out[u]`.
 - **Subtree Property**: All nodes in the subtree of $u$ occupy a contiguous subarray range `[in[u], out[u]]` in the Euler tour array!
@@ -184,7 +184,7 @@ Tree:        1             DFS Entry/Exit Order:
         4   5              Node 5: in[5]=4, out[5]=4
 ```
 
-### 💻 Standard Subtree Query Template
+### Standard Subtree Query Template
 
 ```cpp
 // Minimal Euler Tour Subtree Range Snippet
@@ -205,17 +205,17 @@ long long querySubtree(int u) { return fenwick.queryRange(in[u], out[u]); }
 
 ## Pattern 5: Tree Difference Array (Prefix Sums on Tree Paths)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Process $Q$ path update queries: "Add weight $W$ to all nodes/edges on path between $u$ and $v$".
 - Output final values of all nodes after processing all $Q$ queries in $O(N + Q)$ total time.
 
-### 💡 Difference Array Formulas
+### Difference Array Formulas
 - **Node-Based Path Update $(u \to v)$**:
   $$\text{diff}[u] += W, \quad \text{diff}[v] += W, \quad \text{diff}[\text{LCA}(u, v)] -= W, \quad \text{diff}[\text{parent}(\text{LCA}(u, v))] -= W$$
 - **Edge-Based Path Update $(u \to v)$**:
   $$\text{diff}[u] += W, \quad \text{diff}[v] += W, \quad \text{diff}[\text{LCA}(u, v)] -= 2W$$
 
-### 💻 Standard Template (CSES Counting Paths)
+### Standard Template (CSES Counting Paths)
 
 ```cpp
 // Minimal Tree Difference Array Aggregation Snippet
@@ -243,12 +243,12 @@ void dfsAggregate(int u, int p) {
 
 ## Pattern 6: Small-to-Large Merging (DSU on Tree / Sack Algorithm)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Answer queries about subtree contents (e.g. Count number of distinct colors, most frequent element in subtree $u$).
 - Avoid expensive heavy data structures per node by reusing the heavy child's map/set!
 - Complexity: $O(N \log^2 N)$ or $O(N \log N)$.
 
-### 💻 Sack Algorithm Template (CSES Distinct Colors)
+### Sack Algorithm Template (CSES Distinct Colors)
 
 ```cpp
 // Minimal Sack (DSU on Tree) Snippet
@@ -287,11 +287,11 @@ void dfsSack(int u, int p, bool keep) {
 
 ## Pattern 7: Centroid & Centroid Decomposition
 
-### 🔍 Identification Signals
+### Identification Signals
 - **Centroid**: A node whose removal splits the tree into subtrees of size $\le \lfloor N/2 \rfloor$. Every tree has at least 1 and at most 2 centroids.
 - **Centroid Decomposition**: Divide & conquer tree paths of length $K$ in $O(N \log N)$ time by recursively decomposing tree at centroids.
 
-### 💻 Finding a Tree Centroid ($O(N)$)
+### Finding a Tree Centroid ($O(N)$)
 
 ```cpp
 // Minimal Centroid Finder Snippet
@@ -309,11 +309,11 @@ int getCentroid(int u, int p, int totalN) {
 
 ## Pattern 8: Binary Search Tree (BST) & Construction Patterns
 
-### 🔍 Identification Signals
+### Identification Signals
 - Binary Tree where $\text{Left} < \text{Root} < \text{Right}$.
 - Inorder traversal yields **sorted ascending order**.
 
-### 💻 Standard BST Snippets
+### Standard BST Snippets
 
 #### 1. Validate Binary Search Tree (Range Bounds Check)
 ```cpp
@@ -351,11 +351,11 @@ TreeNode* lowestCommonAncestorBST(TreeNode* root, TreeNode* p, TreeNode* q) {
 
 ## Pattern 9: Serialization, Deserialization, & Tree Hashing
 
-### 🔍 Identification Signals
+### Identification Signals
 - Convert tree into string representation and reconstruct back (Codec).
 - Subtree Isomorphism: Check if two subtrees are identical in structure/values.
 
-### 💻 Minimal Serialization & Hashing Snippets
+### Minimal Serialization & Hashing Snippets
 
 #### 1. Preorder Serialization with Null Markers
 ```cpp

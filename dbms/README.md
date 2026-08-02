@@ -7,7 +7,7 @@
 </a>
 </p>
 
-#### You can also find all 50 answers here 👉 [Devinterview.io - Databases](https://devinterview.io/questions/software-architecture-and-system-design/databases-interview-questions)
+#### You can also find all 50 answers here  [Devinterview.io - Databases](https://devinterview.io/questions/software-architecture-and-system-design/databases-interview-questions)
 
 <br>
 
@@ -755,7 +755,7 @@ Here is the SQL code:
 
 
 
-#### Explore all 50 answers here 👉 [Devinterview.io - Databases](https://devinterview.io/questions/software-architecture-and-system-design/databases-interview-questions)
+#### Explore all 50 answers here  [Devinterview.io - Databases](https://devinterview.io/questions/software-architecture-and-system-design/databases-interview-questions)
 
 <br>
 

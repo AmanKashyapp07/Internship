@@ -131,7 +131,7 @@ When coding in LeetCode-style templates (where your code is inside a `class Solu
 
 To speed up coding and keep helper functions clean, you can use **Class-Member variables** or **Global variables**. 
 
-### ⚠️ The Golden Rule: Reset containers for every test case!
+### The Golden Rule: Reset containers for every test case!
 LeetCode and OA platforms instantiate your class once or run test cases in a loop over the same execution lifetime. If you do not reset your containers, the data from the **previous test case** will persist, leading to **Wrong Answer (WA)** or **Runtime Error (RE/Segfault)**.
 
 ---
@@ -379,7 +379,7 @@ Different C++ containers have different methods for resetting. Knowing the exact
     ```
 
 ### 4. Container Adapters (`std::queue`, `std::stack`, `std::priority_queue`)
-⚠️ **C++ Gotcha:** None of these adapters have a `.clear()` member function. 
+ **C++ Gotcha:** None of these adapters have a `.clear()` member function. 
 *   **Correct way to reset (re-assign to a new empty instance):**
     ```cpp
     q = queue<int>();

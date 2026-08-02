@@ -1,10 +1,10 @@
-# 🕸️ Master Graph Patterns Guide - Part 1: Core & Standard Patterns
+# Master Graph Patterns Guide - Part 1: Core & Standard Patterns
 
 > **The definitive reference for Core Graph Algorithms, Traversals, Shortest Paths, Topological Sort, and Spanning Trees for Tech Interviews (FAANG, Top Tech) and Online Assessments (OAs).**
 
 ---
 
-## 📋 Table of Contents (Part 1)
+## Table of Contents (Part 1)
 1. [Graph Problem-Solving Framework & Representation](#1-graph-problem-solving-framework--representation)
 2. [Pattern 1: Traversal & Reachability (BFS, DFS, 0-1 BFS, Multi-Source BFS)](#pattern-1-traversal--reachability-bfs-dfs-0-1-bfs-multi-source-bfs)
 3. [Pattern 2: Disjoint Set Union (DSU / Union-Find) & Offline Queries](#pattern-2-disjoint-set-union-dsu--union-find--offline-queries)
@@ -38,13 +38,13 @@ When faced with a graph problem in an OA or interview:
 
 ## Pattern 1: Traversal & Reachability (BFS, DFS, 0-1 BFS, Multi-Source BFS)
 
-### 🔍 Identification Signals
+### Identification Signals
 - **BFS**: Unweighted shortest path, level-by-level traversal, minimum steps.
 - **DFS**: Path existence, connected components, recursive exhaustive search, backtracking.
 - **Multi-Source BFS**: Spreading phenomena from multiple starting points simultaneously (e.g., Rotting Oranges, Fire Spreading).
 - **0-1 BFS**: Edge weights are ONLY `0` or `1` (e.g., Grid with free vs cost-1 wall turns). Solve in $O(V + E)$ using `std::deque`!
 
-### 💻 Core Templates
+### Core Templates
 
 #### 1. 2D Grid Flood Fill & Path Reconstruction
 ```cpp
@@ -158,12 +158,12 @@ int zeroOneBFS(int n, int src, int target, const vector<vector<pair<int,int>>>& 
 
 ## Pattern 2: Disjoint Set Union (DSU / Union-Find) & Offline Queries
 
-### 🔍 Identification Signals
+### Identification Signals
 - Dynamic connectivity (merging components).
 - Cycle detection in undirected graphs.
 - **Offline Query Trick**: When edges/nodes are *deleted*, process queries in **REVERSE** (from end to start) so deletions become insertions!
 
-### 💻 Standard DSU Class & Reverse Query Template
+### Standard DSU Class & Reverse Query Template
 
 ```cpp
 class DSU {
@@ -230,12 +230,12 @@ vector<int> offlineNetworkBreakdown(int n, vector<pair<int,int>>& edges, vector<
 
 ## Pattern 3: Cycle Detection & Bipartite Graphs
 
-### 🔍 Identification Signals
+### Identification Signals
 - **Undirected Cycle**: Keep track of `parent` node in DFS/BFS to avoid going back to immediate parent.
 - **Directed Cycle**: Use 3 states: `0 = UNVISITED`, `1 = VISITING (In Recursion Stack)`, `2 = VISITED`. A cycle exists if we visit a node in state `1`.
 - **Bipartite Graph (2-Coloring)**: Can we divide graph into 2 sets such that no two adjacent nodes share the same color? (Fails iff odd length cycle exists).
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. Directed Graph Cycle Detection & Path Reconstruction (3-State DFS)
 ```cpp
@@ -310,12 +310,12 @@ bool isBipartite(int n, const vector<vector<int>>& adj) {
 
 ## Pattern 4: Topological Sort & DAG DP
 
-### 🔍 Identification Signals
+### Identification Signals
 - Prerequisites, task scheduling, topological order in a Directed Acyclic Graph (DAG).
 - Kahn's Algorithm (BFS using in-degrees) or DFS post-order reversal.
 - **DAG DP**: Compute longest path, shortest path, or total number of paths in a DAG in $O(V + E)$ time!
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. Kahn's Topological Sort Algorithm ($O(V + E)$)
 ```cpp
@@ -366,13 +366,13 @@ int countPathsDAG(int n, const vector<vector<int>>& adj, const vector<int>& topo
 
 ## Pattern 5: Shortest Path Algorithms (Dijkstra, Bellman-Ford, Floyd-Warshall)
 
-### 🔍 Identification Signals
+### Identification Signals
 - **Dijkstra**: Non-negative edge weights ($O(E \log V)$).
 - **State-Space Dijkstra**: Nodes contain extra state variables (e.g. `(u, has_discount_used)`).
 - **Bellman-Ford**: Negative edge weights, negative cycle detection ($O(V \cdot E)$).
 - **Floyd-Warshall**: All-Pairs Shortest Path for $V \le 500$ ($O(V^3)$).
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### 1. Single-Source Dijkstra ($O(E \log V)$)
 ```cpp
@@ -488,16 +488,113 @@ void floydWarshall(int n, vector<vector<long long>>& dist) {
 }
 ```
 
+#### 5. State-Graph Expansion (Augmented Graph Dijkstra)
+```cpp
+// Nodes are tuples: (node, fuel/discount_state)
+struct StateNode {
+    long long cost;
+    int u, fuel;
+    bool operator>(const StateNode& other) const { return cost > other.cost; }
+};
+
+long long stateDijkstra(int n, int src, int target, int maxFuel, const vector<vector<pair<int, int>>>& adj, const vector<int>& fuelCost) {
+    vector<vector<long long>> dist(n + 1, vector<long long>(maxFuel + 1, 1e18));
+    priority_queue<StateNode, vector<StateNode>, greater<StateNode>> pq;
+
+    dist[src][0] = 0;
+    pq.push({0, src, 0});
+
+    while (!pq.empty()) {
+        auto [c, u, f] = pq.top(); pq.pop();
+        if (c > dist[u][f]) continue;
+        if (u == target) return c;
+
+        // Transition 1: Buy 1 unit of fuel at current node
+        if (f + 1 <= maxFuel && dist[u][f] + fuelCost[u] < dist[u][f + 1]) {
+            dist[u][f + 1] = dist[u][f] + fuelCost[u];
+            pq.push({dist[u][f + 1], u, f + 1});
+        }
+
+        // Transition 2: Travel to neighbor using fuel
+        for (auto& [v, w] : adj[u]) {
+            if (f >= w && dist[u][f] < dist[v][f - w]) {
+                dist[v][f - w] = dist[u][f];
+                pq.push({dist[v][f - w], v, f - w});
+            }
+        }
+    }
+    return -1;
+}
+```
+
+#### 6. Johnson's All-Pairs Shortest Path Algorithm ($O(V^2 \log V + VE)$)
+```cpp
+// Efficient All-Pairs Shortest Path for Sparse Graphs with Negative Weights
+vector<vector<long long>> johnsonAPSP(int n, const vector<vector<pair<int, int>>>& adj, const vector<tuple<int, int, int>>& edgeList) {
+    // 1. Add dummy node 0 connected to all nodes with 0 weight
+    vector<tuple<int, int, int>> extendedEdges = edgeList;
+    for (int i = 1; i <= n; i++) extendedEdges.push_back({0, i, 0});
+
+    // 2. Run Bellman-Ford from node 0 to find potential h(u)
+    vector<long long> h(n + 1, 1e18);
+    h[0] = 0;
+    for (int i = 0; i < n; i++) {
+        for (const auto& [u, v, w] : extendedEdges) {
+            if (h[u] < 1e18 && h[u] + w < h[v]) h[v] = h[u] + w;
+        }
+    }
+
+    // Check negative cycle
+    for (const auto& [u, v, w] : extendedEdges) {
+        if (h[u] < 1e18 && h[u] + w < h[v]) return {}; // Negative cycle detected!
+    }
+
+    // 3. Reweight edges: w'(u, v) = w(u, v) + h(u) - h(v) >= 0
+    vector<vector<pair<int, int>>> reweightedAdj(n + 1);
+    for (int u = 1; u <= n; u++) {
+        for (auto& [v, w] : adj[u]) {
+            reweightedAdj[u].push_back({v, w + h[u] - h[v]});
+        }
+    }
+
+    // 4. Run Dijkstra from each node
+    vector<vector<long long>> allDist(n + 1, vector<long long>(n + 1, 1e18));
+    for (int u = 1; u <= n; u++) {
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        allDist[u][u] = 0;
+        pq.push({0, u});
+
+        while (!pq.empty()) {
+            auto [d, curr] = pq.top(); pq.pop();
+            if (d > allDist[u][curr]) continue;
+
+            for (auto& [v, rw] : reweightedAdj[curr]) {
+                if (allDist[u][curr] + rw < allDist[u][v]) {
+                    allDist[u][v] = allDist[u][curr] + rw;
+                    pq.push({allDist[u][v], v});
+                }
+            }
+        }
+
+        // Restore original distance: d(u, v) = d'(u, v) - h(u) + h(v)
+        for (int v = 1; v <= n; v++) {
+            if (allDist[u][v] < 1e18) allDist[u][v] += (h[v] - h[u]);
+        }
+    }
+    return allDist;
+}
+```
+
 ---
 
 ## Pattern 6: Minimum Spanning Trees (Kruskal & Prim)
 
-### 🔍 Identification Signals
+### Identification Signals
 - Connect all $V$ nodes using $V-1$ edges such that total edge weight is minimized.
 - **Kruskal**: Sort all edges by weight, add via DSU ($O(E \log E)$).
 - **Prim**: Priority queue greedy selection from current tree component ($O(E \log V)$).
 
-### 💻 Standard Templates
+### Standard Templates
 
 #### Kruskal's Algorithm
 ```cpp

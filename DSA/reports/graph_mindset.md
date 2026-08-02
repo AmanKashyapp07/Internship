@@ -73,7 +73,7 @@ Look for these key signals in the problem statement:
 
 ---
 
-## ⚡ Top Graph Bugs to Avoid
+## Top Graph Bugs to Avoid
 
 1.  **Forgot to Reset:** Global graphacency lists and visited arrays retain values from previous test cases. Reset them inside the class entry function.
 2.  **Stack Overflow:** In deep tree DFS, limit local variables inside recursions or convert to iterative traversals if tree depth can reach `10^5`.

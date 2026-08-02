@@ -1,4 +1,4 @@
-# 🧠 CSES Dynamic Programming - Core Algorithm & Pattern Reference
+# CSES Dynamic Programming - Core Algorithm & Pattern Reference
 
 > **All 20 CSES Dynamic Programming Problems with Classic Pattern Identifiers, Precise Problem Statements, Core Algorithms & Recurrence Templates, Time/Space Complexities, and Code Snippets (only where essential).**
 

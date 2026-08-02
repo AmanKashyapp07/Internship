@@ -11,7 +11,7 @@ Monotonic stacks are used to solve the "next greater/smaller element" problem in
 
 ## Monotonic Increasing vs. Monotonic Decreasing Stack
 
-### 📈 Monotonic Increasing Stack
+### Monotonic Increasing Stack
 * **Stack State**: Elements are sorted in **increasing** order from bottom to top (e.g., `[1, 3, 5, 8]`). We pop elements larger than or equal to the current element.
 * **Core Query**: Finds the **Next / Previous Smaller** element.
 * **When to Use**:
@@ -25,7 +25,7 @@ Monotonic stacks are used to solve the "next greater/smaller element" problem in
 
 ---
 
-### 📉 Monotonic Decreasing Stack
+### Monotonic Decreasing Stack
 * **Stack State**: Elements are sorted in **decreasing** order from bottom to top (e.g., `[8, 5, 3, 1]`). We pop elements smaller than or equal to the current element.
 * **Core Query**: Finds the **Next / Previous Greater** element.
 * **When to Use**:
@@ -54,7 +54,7 @@ Monotonic stacks are used to solve the "next greater/smaller element" problem in
 
 ## 2. Decision Tree & Golden Rules
 
-### 🌟 The Core Relationship: Pop vs. Keep Equals
+### The Core Relationship: Pop vs. Keep Equals
 
 * **If you POP equal values (`>=` or `<=`)**:
   - **Previous boundary** becomes **Strict** (`<` or `>`)
@@ -73,7 +73,7 @@ graph TD
 
 ---
 
-### 🏆 The Golden Rule: When to use which?
+### The Golden Rule: When to use which?
 
 #### Category 1: Default to Popping Equals (`>=` and `<=`)
 For **90% of monotonic stack problems**, default to popping equal values (**`>=`** for min-stack, **`<=`** for max-stack).

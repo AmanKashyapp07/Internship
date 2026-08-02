@@ -1,4 +1,4 @@
-# SQL Query Design Patterns for Top-Tier Tech Interviews 🚀
+# SQL Query Design Patterns for Top-Tier Tech Interviews 
 
 In interviews for data and backend engineering roles at top-tier tech companies (like Meta, Amazon, Google, Uber, Stripe, Netflix, and Zepto), the focus shifts away from basic `SELECT` and `JOIN` statements. Interviewers want to see how you handle real-world business analytics, complex edge cases, and massive datasets.
 
@@ -6,7 +6,7 @@ This document compiles the **8 core architectural patterns** that cover almost a
 
 ---
 
-## 1. Top N within a Category (Window Functions) 🥇
+## 1. Top N within a Category (Window Functions) 
 
 ### The Scenario
 You need to find the top performers, highest earners, or most popular products grouped by a specific category.
@@ -35,7 +35,7 @@ FROM RankedEmployees
 WHERE RankNum <= 3;
 ```
 
-### 🔍 CTE Execution Visualization
+### CTE Execution Visualization
 
 #### Input Data (Joined Employee & Department)
 | Department | Employee | Salary |
@@ -63,7 +63,7 @@ Filters out rows where rank is greater than 3. In this example, all 6 rows are r
 
 ---
 
-## 2. Consecutive Events (The "Gaps & Islands" Problem) 🏝️
+## 2. Consecutive Events (The "Gaps & Islands" Problem) 
 
 ### The Scenario
 Tracking user streaks, system downtime, sensor activity, or repeated behaviors.
@@ -107,7 +107,7 @@ GROUP BY user_id, streak_group
 HAVING COUNT(login_date) >= 3;
 ```
 
-### 🔍 CTE Execution Visualization
+### CTE Execution Visualization
 
 #### Step 1: `DistinctLogins` CTE Output
 Ensures a user has at most one record per calendar date:
@@ -136,7 +136,7 @@ Groups by `user_id` and `streak_group`:
 
 ---
 
-## 3. User Retention & Next Event Analysis (Time Deltas) 📈
+## 3. User Retention & Next Event Analysis (Time Deltas) 
 
 ### The Scenario
 Calculating how fast users churn, customer lifetime patterns, or how quickly they take a second action.
@@ -165,7 +165,7 @@ WHERE rn = 1
   AND DATEDIFF(next_purchase_date, purchase_date) <= 7;
 ```
 
-### 🔍 CTE Execution Visualization
+### CTE Execution Visualization
 
 #### Input Data (Raw Purchases)
 | user_id | purchase_date |
@@ -193,7 +193,7 @@ Evaluates only the first purchase rows (`rn = 1`):
 
 ---
 
-## 4. Conditional Aggregation (Funnel Metrics) 🎯
+## 4. Conditional Aggregation (Funnel Metrics) 
 
 ### The Scenario
 Calculating business performance metrics like Click-Through Rate (CTR), Conversion Rates, or approval percentages across distinct partitions.
@@ -218,7 +218,7 @@ WHERE EXTRACT(YEAR FROM event_timestamp) = 2026
 GROUP BY campaign_id;
 ```
 
-### 🔍 Execution Visualization
+### Execution Visualization
 
 #### Input Data (Raw AdEvents)
 | campaign_id | event_type |
@@ -241,7 +241,7 @@ For each campaign, rows are evaluated by the `CASE WHEN` statements:
 
 ---
 
-## 5. Rolling Metrics & Cumulative Sums 🔄
+## 5. Rolling Metrics & Cumulative Sums 
 
 ### The Scenario
 Smoothing out volatile time-series data for dashboard reports or calculating running totals.
@@ -271,7 +271,7 @@ SELECT
 FROM MonthlyRevenue;
 ```
 
-### 🔍 CTE Execution Visualization
+### CTE Execution Visualization
 
 #### Step 1: `MonthlyRevenue` CTE Output
 Collapses raw transaction lines to get monthly totals:
@@ -290,7 +290,7 @@ Collapses raw transaction lines to get monthly totals:
 
 ---
 
-## 6. Sessionization (User Journey Clickstreams) 🖱️
+## 6. Sessionization (User Journey Clickstreams) 
 
 ### The Scenario
 Segmenting a continuous stream of events into distinct sessions based on inactivity thresholds (e.g., a 30-minute window of inactivity starts a new session).
@@ -340,7 +340,7 @@ FROM SessionGroups
 GROUP BY user_id;
 ```
 
-### 🔍 CTE Execution Visualization
+### CTE Execution Visualization
 
 #### Input Data (User Logins)
 | user_id | login_date |
@@ -383,7 +383,7 @@ Running sum of flags assigns unique group IDs to rows:
 
 ---
 
-## 7. Relational Division ("Matching All") 🔀
+## 7. Relational Division ("Matching All") 
 
 ### The Scenario
 Identifying entities that satisfy a complete set of conditions or match all components of a target list.
@@ -410,7 +410,7 @@ HAVING COUNT(DISTINCT oi.product_id) = (
 
 ---
 
-## 8. Pivot / Unpivot (Matrix Representation) 📊
+## 8. Pivot / Unpivot (Matrix Representation) 
 
 ### The Scenario
 Transposing columns into rows or vice-versa to restructure reports.
@@ -436,7 +436,7 @@ ORDER BY Total_Annual_Sales DESC;
 
 ---
 
-## Pro-Tips for Top-Tier Interviews 💡
+## Pro-Tips for Top-Tier Interviews 
 
 ### 1. Structure Code with CTEs (`WITH` clauses)
 Interviewers heavily prefer CTEs over nested subqueries. CTEs read from top to bottom, making them significantly easier to trace and debug during the screen.

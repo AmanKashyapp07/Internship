@@ -1,4 +1,4 @@
-# 🕸️ CSES Graph Algorithms & Advanced Problems - Master Reference
+# CSES Graph Algorithms & Advanced Problems - Master Reference
 
 > **All 41 CSES Graph & Advanced Graph Problems complete with Classic Pattern Identifiers, Precise Problem Statements, Algorithmic Logic, Minimal Informal Code Snippets, and Time/Space Complexities.**
 
