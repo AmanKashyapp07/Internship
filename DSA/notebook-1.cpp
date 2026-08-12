@@ -294,7 +294,7 @@ Returns {dist, path_counts} in O(V + E) using Kahn's topological sort.
 */
 
 
-pair<vi, vi> solve_dag(int n, vector<vector<pii>>& g, int src, int start_node = 1) {
+pair<vi, vi> dag_(int n, vector<vector<pii>>& g, int src, int start_node = 1) {
     vi order = kahn(n, g, start_node);
 
     const int INF = 1e9;
@@ -395,48 +395,151 @@ Usage:
   auto ans = B.get(g); // Returns vector<pair<int,int>> of bridges
 */
 struct Bridge {
-    int t; vi tin, low; vector<pair<int,int>> res;
-    void dfs(int u, int p, vvi& g) {
-        tin[u] = low[u] = ++t;
+    int timer;
+    vector<int> tin, tout, low, parent;
+    vector<pair<int, int>> bridges;
+
+    void dfs(int u, int p, vector<vector<int>> &g) {
+        parent[u] = p;
+        tin[u] = low[u] = ++timer;
+
         for (int v : g[u]) {
             if (v == p) continue;
-            if (tin[v]) low[u] = min(low[u], tin[v]);
-            else {
+
+            if (tin[v]) {
+                low[u] = min(low[u], tin[v]);
+            } else {
                 dfs(v, u, g);
                 low[u] = min(low[u], low[v]);
-                if (low[v] > tin[u]) res.push_back({u, v});
+
+                if (low[v] > tin[u])
+                    bridges.push_back({u, v});
             }
         }
+
+        tout[u] = timer;
     }
-    vector<pair<int,int>> get(vvi& g) {
-        int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
-        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
-        return res;
+
+    void build(vector<vector<int>> &g) {
+        int n = g.size();
+
+        timer = 0;
+        tin.assign(n, 0);
+        tout.assign(n, 0);
+        low.assign(n, 0);
+        parent.assign(n, -1);
+        bridges.clear();
+
+        for (int i = 0; i < n; i++)
+            if (!tin[i])
+                dfs(i, -1, g);
     }
+
+    bool isAncestor(int u, int v) {
+        return tin[u] <= tin[v] && tout[v] <= tout[u];
+    }
+
+    // Returns true if removing bridge (u,v) disconnects a and b.
+    // Assumes (u,v) is a bridge.
+    bool separated(int u, int v, int a, int b) {
+        // Make v the DFS child.
+        if (parent[u] == v)
+            swap(u, v);
+
+        bool sideA = isAncestor(v, a);
+        bool sideB = isAncestor(v, b);
+
+        return sideA != sideB;
+    };
 };
 
 struct Articulation {
-    int t; vi tin, low; vi res;
-    void dfs(int u, int p, vvi& g) {
-        tin[u] = low[u] = ++t; int children = 0;
+    int timer;
+    vector<int> tin, tout, low, par;
+    vector<vector<int>> child;
+
+    void dfs(int u, int p, vector<vector<int>>& g) {
+        par[u] = p;
+        tin[u] = low[u] = ++timer;
+
         for (int v : g[u]) {
             if (v == p) continue;
-            if (tin[v]) low[u] = min(low[u], tin[v]);
-            else {
-                dfs(v, u, g); low[u] = min(low[u], low[v]);
-                if (low[v] >= tin[u] && p != -1) res.push_back(u);
-                children++;
+
+            if (tin[v]) {
+                low[u] = min(low[u], tin[v]);
+            } else {
+                child[u].push_back(v);
+                dfs(v, u, g);
+                low[u] = min(low[u], low[v]);
             }
         }
-        if (p == -1 && children > 1) res.push_back(u);
+
+        tout[u] = timer;
     }
-    vi get(vvi& g) {
-        int n = g.size(); t = 0; tin.assign(n, 0); low.resize(n); res.clear();
-        for (int i = 0; i < n; i++) if (!tin[i]) dfs(i, -1, g);
-        return res;
+
+    void build(vector<vector<int>>& g) {
+        int n = g.size();
+        timer = 0;
+        tin.assign(n, 0);
+        tout.assign(n, 0);
+        low.assign(n, 0);
+        par.assign(n, -1);
+        child.assign(n, {});
+
+        for (int i = 0; i < n; i++)
+            if (!tin[i])
+                dfs(i, -1, g);
+    }
+
+    bool isAncestor(int u, int v) {
+        return tin[u] <= tin[v] && tout[v] <= tout[u];
+    }
+
+    // returns:
+    // -1 : parent side
+    // child vertex : separating child subtree
+    int findChild(int u, int x) {
+        int l = 0, r = child[u].size() - 1;
+
+        while (l <= r) {
+            int mid = (l + r) / 2;
+            int v = child[u][mid];
+
+            if (tin[x] < tin[v]) {
+                r = mid - 1;
+            } else if (isAncestor(v, x)) {
+                return v;
+            } else {
+                l = mid + 1;
+            }
+        }
+
+        return -1;
+    }
+
+    int component(int cut, int x) {
+        if (cut == x) return -1;
+
+        if (par[cut] == x) return cut;
+
+        if (!isAncestor(cut, x)) return par[cut];
+
+        int child = findChild(cut, x);
+        return child;
+    }
+
+    // true => disconnected after removing cut
+    bool separated(int cut, int a, int b) {
+
+        if (a == cut || b == cut)
+            return true;
+
+        int ca = component(cut, a);
+        int cb = component(cut, b);
+
+        return ca != cb;
     }
 };
-
 
 /*
 Usage:
@@ -505,235 +608,6 @@ struct SCC {
 };
 
 
-
-struct HierholzerUndirected {
-    int n, m = 0;
-    vvi g;
-    vi used;
-    vi deg, path;
-
-    HierholzerUndirected(int n) : n(n), g(n + 1), deg(n + 1, 0) {}
-
-    // Add an undirected edge
-    void addEdge(int u, int v) {
-        g[u].push_back({v, m});
-        g[v].push_back({u, m});
-        used.push_back(false);
-        deg[u]++;
-        deg[v]++;
-        m++;
-    }
-
-    void dfs(int u) {
-        while (!g[u].empty()) {
-            auto [v, id] = g[u].back();
-            g[u].pop_back();
-
-            if (used[id]) continue;
-            used[id] = true;
-
-            dfs(v);
-        }
-        path.push_back(u);
-    }
-
-    vi getEulerianCircuit(int start) {
-        // Every vertex must have even degree.
-        for (int i = 1; i <= n; i++)
-            if (deg[i] & 1)
-                return {};
-
-        path.clear();
-        dfs(start);
-        reverse(path.begin(), path.end());
-
-        // Every edge must have been used.
-        if ((int)path.size() != m + 1)
-            return {};
-
-        return path;
-    }
-    vi getEulerianPath(int start, int end) {
-        if (start == end) return getEulerianCircuit(start);
-        // Exactly 2 vertices must have odd degree (start and end).
-        for (int i = 1; i <= n; i++) {
-            if (i == start || i == end) {
-                if (!(deg[i] & 1)) return {};
-            } else {
-                if (deg[i] & 1) return {};
-            }
-        }
-
-        path.clear();
-        dfs(start);
-        reverse(path.begin(), path.end());
-
-        // Every edge must have been used.
-        if ((int)path.size() != m + 1)
-            return {};
-
-        return path;
-    } // eulerian path means that it visits every edge exactly once, but it does not necessarily start and end at the same vertex. An Eulerian circuit is a special case of an Eulerian path that starts and ends at the same vertex.
-};
-
-/*
-Returns:
-- Eulerian circuit if it exists.
-- Empty vector otherwise.
-
-Checks performed:
-1. Every vertex has even degree.
-2. All edges are reachable from the start vertex
-   (verified by path.size() == edges + 1).
-
-/*
-Hierholzer's Algorithm
-----------------------
-Used to find an Eulerian Path/Circuit in O(V + E).
-
-Definitions
------------
-Eulerian Path    : Visits every edge exactly once.
-Eulerian Circuit : Eulerian Path that starts and ends at the same vertex.
-
-Undirected Graph
-----------------
-Eulerian Circuit:
-- Every vertex has even degree.
-- All vertices having degree > 0 belong to one connected component.
-
-Eulerian Path:
-- Exactly 0 or 2 vertices have odd degree.
-- If 2 exist, they are the start and end.
-- All vertices having degree > 0 belong to one connected component.
-
-Directed Graph
---------------
-Eulerian Circuit:
-- indegree(v) == outdegree(v) for every vertex.
-- All vertices with edges are connected.
-
-Eulerian Path:
-- One vertex: outdegree = indegree + 1 (start)
-- One vertex: indegree = outdegree + 1 (end)
-- All others: indegree = outdegree
-
-Why edge IDs?
--------------
-In an undirected graph each edge appears twice in gacency lists.
-A unique edge ID ensures every edge is traversed exactly once.
-
-Algorithm
----------
-dfs(u):
-    while(u has unused edge)
-        mark edge used
-        dfs(next)
-    path.push_back(u)
-
-Reverse the path at the end.
-
-Verification
-------------
-Let E be the number of edges.
-A valid Eulerian traversal must contain exactly E + 1 vertices.
-
-if(path.size() != E + 1)
-    => Graph is disconnected or some edges were not visited.
-
-Complexity
-----------
-Time  : O(V + E)
-Space : O(V + E)
-
-*/
-
-struct HierholzerDirected {
-    int n, m = 0;
-    vvi g;
-    vi indeg, outdeg;
-    vi path;
-
-    HierholzerDirected(int n)
-        : n(n), g(n + 1), indeg(n + 1, 0), outdeg(n + 1, 0) {}
-
-    void addEdge(int u, int v) {
-        g[u].push_back(v);
-        outdeg[u]++;
-        indeg[v]++;
-        m++;
-    }
-
-    void dfs(int u) {
-        while (!g[u].empty()) {
-            int v = g[u].back();
-            g[u].pop_back();
-            dfs(v);
-        }
-        path.push_back(u);
-    }
-
-    vi getEulerianCircuit(int start) {
-        // Every vertex must satisfy indegree == outdegree.
-        for (int i = 1; i <= n; i++)
-            if (indeg[i] != outdeg[i])
-                return {};
-
-        path.clear();
-        dfs(start);
-        reverse(path.begin(), path.end());
-
-        // Every edge must have been used.
-        if ((int)path.size() != m + 1)
-            return {};
-
-        return path;
-    }
-
-    vi getEulerianPath(int start, int end) {
-        if (start == end) return getEulerianCircuit(start);
-        // Validation: Start and End vertices should satisfy the indegree/outdegree conditions and rest of the vertices should have equal indegree and outdegree.
-        for (int i = 1; i <= n; i++) {
-            if (i == start) {
-                if (outdeg[i] != indeg[i] + 1)
-                    return {};
-            } else if (i == end) {
-                if (indeg[i] != outdeg[i] + 1)
-                    return {};
-            } else {
-                if (indeg[i] != outdeg[i])
-                    return {};
-            }
-        }
-
-        path.clear();
-        dfs(start);
-        reverse(path.begin(), path.end());
-
-        if ((int)path.size() != m + 1)
-            return {};
-
-        return path;
-    }
-}; 
-
-/*
-Returns:
-- Eulerian circuit if it exists, starting from the given vertex and ending on the same vertex.
-- Empty vector otherwise.
-
-Checks performed:
-1. indegree(v) == outdegree(v) for every vertex.
-2. All edges are reachable from the start vertex
-   (verified by path.size() == edges + 1).
-
-To obtain an Eulerian Path instead of a Circuit:
-- Exactly one vertex should satisfy outdegree = indegree + 1 (start).
-- Exactly one vertex should satisfy indegree = outdegree + 1 (end).
-- Every other vertex must satisfy indegree == outdegree.
-*/
-
-
 /*
 ================================================================================
 FUNCTIONAL GRAPH DECOMPOSITION
@@ -764,130 +638,82 @@ Space Complexity: O(N)
 // Returns empty vector if 'start' leads into an already processed component
 vi getCycleFloyd(const vi &to, const vi &comp, int start) {
     int slow = start, fast = start;
-    
-    while(true){
-        slow = to[slow];
-        fast = to[to[fast]];
-        if(comp[slow] != -1) return {}; // already processed component
+    while (true) {
+        slow = to[slow]; fast = to[to[fast]];
+        if (comp[slow] != -1) return {};
         if (slow == fast) break;
     }
-
-    // 2. Phase 2: Find cycle entry point
     slow = start;
-    while (slow != fast) {
-        slow = to[slow];
-        fast = to[fast];
-    }
-
-    // 3. Phase 3: Collect nodes in the cycle
-    vi cycle;
-    int curr = slow;
-    while(true){
-        cycle.push_back(curr);
-        curr = to[curr];
-        if(curr == slow) break;
-    }
-
+    while (slow != fast) slow = to[slow], fast = to[fast];
+    vi cycle; int curr = slow;
+    do { cycle.pb(curr); curr = to[curr]; } while (curr != slow);
     return cycle;
-} // returns vector of nodes in the cycle, or empty vector if 'start' leads into an already processed component. already processed component means that the node is part of a cycle that has already been identified in a previous iteration, so we don't need to process it again.
+}
 
-struct FunctionalGraph
-{
+struct FunctionalGraph {
     int n, LOG = 20;
-    vector<int> dist, cyc, comp, pos;
-    vector<vector<int>> up;
+    vi dist, cyc, comp, pos;
+    vvi up, radj;
 
-    void dfs(int u, int p, const vector<int> &to, const vector<vector<int>> &radj)
-    {
-        for (int v : radj[u])
-        {
-            if (v == p) continue;
-            dist[v] = dist[u] + 1;
-            comp[v] = comp[u];
-            dfs(v, u, to, radj);
-        }
-    }
-
-    FunctionalGraph(const vector<int> &to)
-    {
-        n = to.size();
-        dist.assign(n, -1); // dist[i] = distance from node i to the cycle (or -1 if not reachable)
-        cyc.assign(n, -1); // cyc[i] = length of the cycle containing node i (or -1 if not in a cycle)
-        comp.assign(n, -1); // comp[i] = component ID of the connected component containing node i
-        pos.assign(n, -1); // pos[i] = position of node i in its cycle (0-indexed, or -1 if not in a cycle)
-        up.assign(n, vector<int>(LOG));
-
-        // 1. Binary Lifting table
-        for (int i = 0; i < n; i++)
-            up[i][0] = to[i];
-        for (int j = 1; j < LOG; j++)
-            for (int i = 0; i < n; i++)
-                up[i][j] = up[up[i][j - 1]][j - 1];
-
-        // 2. Cycle detection via Floyd's algorithm + Tree processing
-        int comp_id = 0;
-        vector<vector<int>> radj(n);
-        for (int i = 0; i < n; i++)
-            radj[to[i]].push_back(i);
-
-        for (int i = 0; i < n; i++)
-        {
-            if (comp[i] != -1) continue;
-
-            vi cycle = getCycleFloyd(to, comp, i);
-            if (cycle.empty()) continue; // Leads to an already processed component
-
-            int len = cycle.size();
-            for (int j = 0; j < len; j++)
-            {
-                int u = cycle[j];
-                cyc[u] = len;
-                dist[u] = 0;
-                comp[u] = comp_id;
-                pos[u] = j;
+    void dfs(int u) {
+        for (int v : radj[u]) {
+            if (dist[v] == -1) {
+                dist[v] = dist[u] + 1;
+                cyc[v] = cyc[u];
+                comp[v] = comp[u];
+                dfs(v);
             }
-
-            dfs(i, -1, to, radj); // starting from a node in the cycle, process all nodes that lead into this cycle and assign their distances and component IDs
         }
     }
 
-    int jump(int u, int k)
-    {
-        for (int j = 0; j < LOG; j++)
-            if ((k >> j) & 1)
-                u = up[u][j];
+    FunctionalGraph(const vi &to) : n(to.size()), dist(n, -1), cyc(n, -1), comp(n, -1), pos(n, -1), up(n, vi(LOG)), radj(n) {
+        for (int i = 0; i < n; i++) up[i][0] = to[i];
+        for (int j = 1; j < LOG; j++)
+            for (int i = 0; i < n; i++) up[i][j] = up[up[i][j - 1]][j - 1];
+
+        for (int i = 0; i < n; i++) radj[to[i]].pb(i);
+
+        int cid = 0;
+        for (int i = 0; i < n; i++) {
+            if (comp[i] != -1) continue;
+            vi cycle = getCycleFloyd(to, comp, i);
+            if (cycle.empty()) continue;
+            int len = cycle.size();
+            for (int j = 0; j < len; j++) {
+                int u = cycle[j];
+                dist[u] = 0; cyc[u] = len; comp[u] = cid; pos[u] = j;
+            }
+            for (int u : cycle) dfs(u);
+            cid++;
+        }
+    }
+
+    int jump(int u, int k) {
+        for (int j = 0; j < LOG; j++) if (k >> j & 1) u = up[u][j];
         return u;
     }
 
-    int dis_cycle_nodes(int a, int b)
-    {
-        if (comp[a] != comp[b]) // if a and b are not in the same component, then they cannot be in the same cycle
-            return -1;
-        if (dist[a] != 0 || dist[b] != 0) // if either a or b is not in the cycle, then they are not both cycle nodes
-            return -1;
-        return (pos[b] - pos[a] + cyc[a]) % cyc[a]; // if both a and b are in the same cycle, then the distance from a to b is the difference in their positions in the cycle, modulo the cycle length
+    int distance_in_cycle(int a, int b) {
+        if (comp[a] != comp[b] || dist[a] || dist[b]) return -1;
+        return (pos[b] - pos[a] + cyc[a]) % cyc[a];
     }
 
-    // Distance from a -> b (-1 if unreachable)
-    int query(int a, int b)
-    {
+    int query(int a, int b) {
         if (comp[a] != comp[b]) return -1;
-
-        bool a_cyc = (dist[a] == 0), b_cyc = (dist[b] == 0);
-
-        if (a_cyc && b_cyc) return dis_cycle_nodes(a, b); 
-        if (a_cyc && !b_cyc) return -1;
-        if (!a_cyc && !b_cyc) // if both are in the tree leading to the cycle, then we can check if b is reachable from a by jumping up the tree
-        {
-            int d = dist[a] - dist[b];
-            return (d >= 0 && jump(a, d) == b) ? d : -1;
-        }
-        // if a is in the tree and b is in the cycle, then we can jump from a to the cycle and then compute the distance to b
-        // Tree node -> Cycle node
-        int entry = jump(a, dist[a]);
-        return dist[a] + dis_cycle_nodes(entry, b);
+        bool ac = !dist[a], bc = !dist[b];
+        if (ac && bc) return distance_in_cycle(a, b);
+        if (ac) return -1;
+        if (!bc) return dist[a] >= dist[b] && jump(a, dist[a] - dist[b]) == b ? dist[a] - dist[b] : -1;
+        return dist[a] + distance_in_cycle(jump(a, dist[a]), b);
     }
 };
+// dist[u] → distance from u to its cycle (0 if on cycle).
+// cyc[u] → length of the cycle containing u (works for every node, not just cycle nodes).
+// comp[u] → connected component ID.
+// pos[u] → index of u inside its cycle (-1 for tree nodes).
+// jump(u, k) → node reached after k teleports.
+// query(a, b) → minimum teleports from a to b, or -1.
+// distance_in_cycle(a, b) → distance along the cycle if both are cycle nodes.
 
 const long long MOD1 = 1000000007;
 const long long MOD2 = 1000000009;

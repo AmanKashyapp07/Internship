@@ -436,3 +436,232 @@ C. Subtree Max / Min Queries:
    - Mapping: Query range `[tin[U] - 1, tout[U] - 1]` over a **Max Segment Tree** built on the flattened subtree array. (Note: Fenwick Tree cannot be used here because Max is non-invertible).
 ===============================================================================
 */
+
+
+
+struct HierholzerUndirected {
+    int n, m = 0;
+    vvi g;
+    vi used;
+    vi deg, path;
+
+    HierholzerUndirected(int n) : n(n), g(n + 1), deg(n + 1, 0) {}
+
+    // Add an undirected edge
+    void addEdge(int u, int v) {
+        g[u].push_back({v, m});
+        g[v].push_back({u, m});
+        used.push_back(false);
+        deg[u]++;
+        deg[v]++;
+        m++;
+    }
+
+    void dfs(int u) {
+        while (!g[u].empty()) {
+            auto [v, id] = g[u].back();
+            g[u].pop_back();
+
+            if (used[id]) continue;
+            used[id] = true;
+
+            dfs(v);
+        }
+        path.push_back(u);
+    }
+
+    vi getEulerianCircuit(int start) {
+        // Every vertex must have even degree.
+        for (int i = 1; i <= n; i++)
+            if (deg[i] & 1)
+                return {};
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+    vi getEulerianPath(int start, int end) {
+        if (start == end) return getEulerianCircuit(start);
+        // Exactly 2 vertices must have odd degree (start and end).
+        for (int i = 1; i <= n; i++) {
+            if (i == start || i == end) {
+                if (!(deg[i] & 1)) return {};
+            } else {
+                if (deg[i] & 1) return {};
+            }
+        }
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    } // eulerian path means that it visits every edge exactly once, but it does not necessarily start and end at the same vertex. An Eulerian circuit is a special case of an Eulerian path that starts and ends at the same vertex.
+};
+
+/*
+Returns:
+- Eulerian circuit if it exists.
+- Empty vector otherwise.
+
+Checks performed:
+1. Every vertex has even degree.
+2. All edges are reachable from the start vertex
+   (verified by path.size() == edges + 1).
+
+/*
+Hierholzer's Algorithm
+----------------------
+Used to find an Eulerian Path/Circuit in O(V + E).
+
+Definitions
+-----------
+Eulerian Path    : Visits every edge exactly once.
+Eulerian Circuit : Eulerian Path that starts and ends at the same vertex.
+
+Undirected Graph
+----------------
+Eulerian Circuit:
+- Every vertex has even degree.
+- All vertices having degree > 0 belong to one connected component.
+
+Eulerian Path:
+- Exactly 0 or 2 vertices have odd degree.
+- If 2 exist, they are the start and end.
+- All vertices having degree > 0 belong to one connected component.
+
+Directed Graph
+--------------
+Eulerian Circuit:
+- indegree(v) == outdegree(v) for every vertex.
+- All vertices with edges are connected.
+
+Eulerian Path:
+- One vertex: outdegree = indegree + 1 (start)
+- One vertex: indegree = outdegree + 1 (end)
+- All others: indegree = outdegree
+
+Why edge IDs?
+-------------
+In an undirected graph each edge appears twice in gacency lists.
+A unique edge ID ensures every edge is traversed exactly once.
+
+Algorithm
+---------
+dfs(u):
+    while(u has unused edge)
+        mark edge used
+        dfs(next)
+    path.push_back(u)
+
+Reverse the path at the end.
+
+Verification
+------------
+Let E be the number of edges.
+A valid Eulerian traversal must contain exactly E + 1 vertices.
+
+if(path.size() != E + 1)
+    => Graph is disconnected or some edges were not visited.
+
+Complexity
+----------
+Time  : O(V + E)
+Space : O(V + E)
+
+*/
+
+struct HierholzerDirected {
+    int n, m = 0;
+    vvi g;
+    vi indeg, outdeg;
+    vi path;
+
+    HierholzerDirected(int n)
+        : n(n), g(n + 1), indeg(n + 1, 0), outdeg(n + 1, 0) {}
+
+    void addEdge(int u, int v) {
+        g[u].push_back(v);
+        outdeg[u]++;
+        indeg[v]++;
+        m++;
+    }
+
+    void dfs(int u) {
+        while (!g[u].empty()) {
+            int v = g[u].back();
+            g[u].pop_back();
+            dfs(v);
+        }
+        path.push_back(u);
+    }
+
+    vi getEulerianCircuit(int start) {
+        // Every vertex must satisfy indegree == outdegree.
+        for (int i = 1; i <= n; i++)
+            if (indeg[i] != outdeg[i])
+                return {};
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        // Every edge must have been used.
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+
+    vi getEulerianPath(int start, int end) {
+        if (start == end) return getEulerianCircuit(start);
+        // Validation: Start and End vertices should satisfy the indegree/outdegree conditions and rest of the vertices should have equal indegree and outdegree.
+        for (int i = 1; i <= n; i++) {
+            if (i == start) {
+                if (outdeg[i] != indeg[i] + 1)
+                    return {};
+            } else if (i == end) {
+                if (indeg[i] != outdeg[i] + 1)
+                    return {};
+            } else {
+                if (indeg[i] != outdeg[i])
+                    return {};
+            }
+        }
+
+        path.clear();
+        dfs(start);
+        reverse(path.begin(), path.end());
+
+        if ((int)path.size() != m + 1)
+            return {};
+
+        return path;
+    }
+}; 
+
+/*
+Returns:
+- Eulerian circuit if it exists, starting from the given vertex and ending on the same vertex.
+- Empty vector otherwise.
+
+Checks performed:
+1. indegree(v) == outdegree(v) for every vertex.
+2. All edges are reachable from the start vertex
+   (verified by path.size() == edges + 1).
+
+To obtain an Eulerian Path instead of a Circuit:
+- Exactly one vertex should satisfy outdegree = indegree + 1 (start).
+- Exactly one vertex should satisfy indegree = outdegree + 1 (end).
+- Every other vertex must satisfy indegree == outdegree.
+*/

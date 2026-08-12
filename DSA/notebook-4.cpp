@@ -837,168 +837,138 @@ vvi mexGridConstruction(int n){
 }
 
 
+#include <iostream>
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <numeric>
+
+using namespace std;
+
 struct BinaryLifting {
-    int LOG;
-    vector<vector<int>> up, info;
+    static const int MAXLOG = 21; // 2^21 > 2*10^6, safe for all typical N
+    int n, root;
+    vector<array<int, MAXLOG>> up, info;
     vector<int> depth;
 
     // ================= CUSTOMIZE =================
-
-    static constexpr int ID = 0;
+    
+    static constexpr int ID = 0; 
+    
+    // Set to true if weights belong to edges (push edge weight down to child node).
+    // Set to false if weights belong to the nodes themselves.
+    static constexpr bool IS_EDGE_WEIGHT = false; 
 
     static int combine(int a, int b) {
-        return a + b;
-
+        return a + b; 
+        
         // return max(a,b);
-        // return min(a,b);
+        // return min(a,b); // (Set ID = 1e9)
         // return a ^ b;
         // return gcd(a,b);
-        // return a & b;
-        // return a | b;
     }
-
+    
     // =============================================
 
-    BinaryLifting(int n, int root,
-                  vector<vector<int>> &g,
-                  vector<int> &val)
-        : LOG(32 - __builtin_clz(n)),
-          up(n + 1, vector<int>(LOG, -1)),
-          info(n + 1, vector<int>(LOG, ID)),
-          depth(n + 1) {
+    BinaryLifting(int n, int root, const vector<vector<int>> &g, const vector<int> &val) 
+        : n(n), root(root), up(n + 1), info(n + 1), depth(n + 1, 0) {
+        
+        // Initialize dummy node 0 to safely handle out-of-bounds
+        for (int i = 0; i <= n; i++) {
+            up[i].fill(0);
+            info[i].fill(ID);
+        }
 
-        dfs(root, -1, 0, g, val);
+        // Iterative BFS to prevent Stack Overflow on deep trees
+        vector<int> q;
+        q.reserve(n);
+        q.push_back(root);
+        
+        up[root][0] = 0; // 0 represents no parent
+        info[root][0] = val[root];
+        
+        int head = 0;
+        while (head < (int)q.size()) {
+            int u = q[head++];
+            for (int v : g[u]) {
+                if (v != up[u][0]) {
+                    up[v][0] = u;
+                    depth[v] = depth[u] + 1;
+                    info[v][0] = val[v];
+                    q.push_back(v);
+                }
+            }
+        }
 
-        for (int j = 1; j < LOG; j++) {
+        // DP Table construction
+        for (int j = 1; j < MAXLOG; j++) {
             for (int i = 1; i <= n; i++) {
-                if (up[i][j - 1] == -1) continue;
-
-                up[i][j] = up[up[i][j - 1]][j - 1];
-                info[i][j] = combine(info[i][j - 1],
-                                     info[up[i][j - 1]][j - 1]);
+                int p = up[i][j - 1];
+                up[i][j] = up[p][j - 1];
+                info[i][j] = combine(info[i][j - 1], info[p][j - 1]);
             }
         }
     }
 
-    void dfs(int u, int p, int d,
-             vector<vector<int>> &g,
-             vector<int> &val) {
-
-        depth[u] = d;
-        up[u][0] = p;
-        info[u][0] = val[u];
-
-        for (int v : g[u])
-            if (v != p)
-                dfs(v, u, d + 1, g, val);
-    }
-
-    pair<int,int> lift(int u, int k) {
-        int ans = ID;
-
-        for (int j = 0; j < LOG && u != -1; j++) {
-            if (k & (1 << j)) {
-                ans = combine(ans, info[u][j]);
-                u = up[u][j];
-            }
-        }
-
-        return {u, ans};
-    }
-
+    // Jump k steps up from node u
     int kthAncestor(int u, int k) {
-        return lift(u, k).first;
+        for (int j = 0; j < MAXLOG && u != 0; j++) {
+            if ((k >> j) & 1) u = up[u][j];
+        }
+        return u == 0 ? -1 : u; // -1 if jump goes above root
     }
 
     int lca(int a, int b) {
         if (depth[a] < depth[b]) swap(a, b);
-
-        a = lift(a, depth[a] - depth[b]).first;
-
+        a = kthAncestor(a, depth[a] - depth[b]);
         if (a == b) return a;
-
-        for (int j = LOG - 1; j >= 0; j--) {
+        
+        for (int j = MAXLOG - 1; j >= 0; j--) {
             if (up[a][j] != up[b][j]) {
                 a = up[a][j];
                 b = up[b][j];
             }
         }
-
         return up[a][0];
     }
 
-    // aggregate from u to ancestor anc (inclusive)
-    int queryUp(int u, int anc) {
-        int ans = ID;
-        int k = depth[u] - depth[anc];
+    // Distance in terms of edges between a and b
+    int dist(int a, int b) {
+        return depth[a] + depth[b] - 2 * depth[lca(a, b)];
+    }
 
-        for (int j = 0; j < LOG; j++) {
-            if (k & (1 << j)) {
-                ans = combine(ans, info[u][j]);
+    // Aggregate values of exactly `k` nodes going UP from `u`
+    int queryUp(int u, int k) {
+        int res = ID;
+        for (int j = 0; j < MAXLOG && u != 0; j++) {
+            if ((k >> j) & 1) {
+                res = combine(res, info[u][j]);
                 u = up[u][j];
             }
         }
-
-        return combine(ans, info[u][0]);
+        return res;
     }
 
-    int dist(int u, int v) {
-        int w = lca(u, v);
-        return depth[u] + depth[v] - 2 * depth[w];
+    // Aggregate values on the simple path between a and b
+    int queryPath(int a, int b) {
+        int l = lca(a, b);
+        
+        // Query both branches up to, but NOT including, the LCA
+        int resA = queryUp(a, depth[a] - depth[l]);
+        int resB = queryUp(b, depth[b] - depth[l]);
+        
+        int res = combine(resA, resB);
+        
+        // If it's a node-weight graph, include the LCA node itself.
+        // If it's an edge-weight graph, the LCA node represents the edge ABOVE the LCA, 
+        // which isn't part of the a->b path, so we exclude it.
+        if (!IS_EDGE_WEIGHT) {
+            res = combine(res, info[l][0]); 
+        }
+        
+        return res;
     }
 };
-
-/*
---------------------------------------------------------------------------------
-BINARY LIFTING TEMPLATE USAGE GUIDE:
---------------------------------------------------------------------------------
-1. CUSTOMIZATION (Inside `struct BinaryLifting`):
-   - Set `ID` (Identity value):
-     * Sum / XOR : ID = 0
-     * Min       : ID = INF (1e9)
-     * Max       : ID = -INF (-1e9)
-     * GCD       : ID = 0
-   - Update `combine(a, b)` function to match your query requirement:
-     `return a + b;` or `return max(a, b);` or `return gcd(a, b);`
-
-2. INITIALIZATION:
-   int n = 7, root = 1;
-   vector<vector<int>> g(n + 1); // 1-indexed graph
-   vector<int> val(n + 1, 0);   // val[u] = weight/value at node u (or edge weight to parent)
-   
-   // Add tree edges
-   g[1].push_back(2); g[2].push_back(1);
-   ...
-   
-   // Build BinaryLifting object (O(N log N) time & space)
-   BinaryLifting bl(n, root, g, val);
-
-3. COMMON API QUERIES (O(log N) per query):
-   - Find LCA of u and v:
-     int lcaNode = bl.lca(u, v);
-
-   - Find Distance (number of edges) between u and v:
-     int d = bl.dist(u, v);
-
-   - Jump K steps up from node u:
-     int ancK = bl.kthAncestor(u, k); // returns -1 if out of bounds
-
-   - Query aggregate value on path from u UP to ancestor 'anc' (inclusive):
-     int pathVal = bl.queryUp(u, anc);
-
-   - Query aggregate value on full path between arbitrary nodes u and v:
-     int anc = bl.lca(u, v);
-     int leftPath = bl.queryUp(u, anc);  // u -> anc
-     int rightPath = bl.queryUp(v, anc); // v -> anc
-     int fullPathAns = bl.combine(leftPath, rightPath); 
-     // Note: If combine is sum/XOR, adjust for double-counting val[anc] if both include anc.
-
---------------------------------------------------------------------------------
-COMPLEXITIES:
-- Precomputation : O(N log N) Time | O(N log N) Space
-- Each Query     : O(log N) Time  | O(1) Auxiliary Space
---------------------------------------------------------------------------------
-*/
 
 
 
