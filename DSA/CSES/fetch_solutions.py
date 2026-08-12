@@ -160,18 +160,13 @@ def main():
     soup   = BeautifulSoup(resp.text, 'html.parser')
     solved = []
 
-    for h2 in soup.find_all('h2'):
-        category = h2.text.strip()
-        if category == "General":
-            continue
-        ul = h2.find_next_sibling('ul', class_='task-list')
-        if not ul:
-            continue
-        for li in ul.find_all('li', class_='task'):
-            if li.select_one('span.task-score.full, span.task-score.valid'):
-                a = li.find('a')
-                if a:
-                    solved.append((a.text.strip(), urljoin(BASE_URL, a['href']), category))
+    for a in soup.find_all('a', href=lambda h: h and '/problemset/task/' in h):
+        span = a.find_next_sibling('span', class_='task-score')
+        if span and ('full' in span.get('class', []) or 'valid' in span.get('class', [])):
+            h2 = a.find_previous('h2')
+            category = h2.text.strip() if h2 else "General"
+            if category != "General":
+                solved.append((a.text.strip(), urljoin(BASE_URL, a['href']), category))
 
     if not solved:
         print("No solved tasks found. Check your PHPSESSID.")

@@ -990,3 +990,56 @@ struct Dinic {
 // - Assignment/matching problems (workers-jobs, students-schools, etc.).
 // - Edge/vertex-disjoint paths.
 // - Transform constraints into capacities on a graph.
+
+
+
+// Computes Z-array of string s using binary search + FastHash (longest common prefix of s and s[i..]).
+// Time Complexity: O(N log N), Space Complexity: O(N).
+vi z_array(string s) {
+    int n = s.size(); vi z(n, 0); if (n == 0) return z;
+    FastHash fh(s); z[0] = n;
+    for (int i = 1; i < n; i++) {
+        int low = 1, high = n - i, ans = 0;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (fh.get(0, mid - 1) == fh.get(i, i + mid - 1)) { ans = mid; low = mid + 1; }
+            else high = mid - 1;
+        }
+        z[i] = ans;
+    }
+    return z;
+}
+
+// Computes KMP Prefix function (pi-array) using the Z-array values.
+// Time Complexity: O(N), Space Complexity: O(N).
+vi pi_array(string s) {
+    vi z = z_array(s); int n = s.size(); vi pi(n, 0);
+    for (int i = 1; i < n; i++) {
+        for (int len = z[i] - 1; len >= 0; --len) {
+            if (pi[i + len] != 0) break;
+            pi[i + len] = len + 1;
+        }
+    }
+    return pi;
+}
+
+// Computes odd-length and even-length palindrome radii for all centers using FastHash.
+// Time Complexity: O(N log N), Space Complexity: O(N).
+pair<vi, vi> manacherr(string s) {
+    int n = s.size(); vi d1(n, 1), d2(n, 0); if (n == 0) return {d1, d2};
+    FastHash fh(s); string s_rev = s; reverse(s_rev.begin(), s_rev.end()); FastHash fh_rev(s_rev);
+    auto is_pal = [&](int l, int r) { return l >= 0 && r < n && l <= r && fh.get(l, r) == fh_rev.get(n - 1 - r, n - 1 - l); };
+    for (int i = 0; i < n; i++) {
+        int low = 2, high = min(i + 1, n - i);
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (is_pal(i - mid + 1, i + mid - 1)) { d1[i] = mid; low = mid + 1; } else high = mid - 1;
+        }
+        low = 1; high = min(i, n - i);
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (is_pal(i - mid, i + mid - 1)) { d2[i] = mid; low = mid + 1; } else high = mid - 1;
+        }
+    }
+    return {d1, d2};
+}
