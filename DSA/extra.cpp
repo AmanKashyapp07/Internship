@@ -665,3 +665,328 @@ To obtain an Eulerian Path instead of a Circuit:
 - Exactly one vertex should satisfy indegree = outdegree + 1 (end).
 - Every other vertex must satisfy indegree == outdegree.
 */
+
+class BipartiteGraph
+{
+private:
+    int n, L, R;
+    vector<vector<int>> graph;     // For 2-coloring (Undirected)
+    vector<vector<int>> g_match; // For Matching (Directed: L -> R)
+    vector<int> color;
+    vector<int> match_R, match_L, vis;
+
+    bool dfs_color(int u, int c)
+    {
+        color[u] = c;
+        for (int v : graph[u])
+        {
+            if (color[v] == -1)
+            {
+                if (!dfs_color(v, c ^ 1))
+                    return false;
+            }
+            else if (color[v] == c)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool augment(int u)
+    {
+        if (vis[u])
+            return false;
+        vis[u] = 1;
+        for (int v : g_match[u])
+        {
+            if (match_R[v] == 0 || augment(match_R[v]))
+            {
+                match_R[v] = u;
+                match_L[u] = v; // Track left matching for Kőnig's
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void dfs_vertex_cover(int u, vector<bool> &vis_L, vector<bool> &vis_R)
+    {
+        vis_L[u] = true;
+        for (int v : g_match[u])
+        {
+            if (!vis_R[v])
+            {
+                vis_R[v] = true;
+                if (match_R[v] != 0 && !vis_L[match_R[v]])
+                {
+                    dfs_vertex_cover(match_R[v], vis_L, vis_R);
+                }
+            }
+        }
+    }
+
+public:
+    // Initialize for Bipartite checking (1-indexed, size N)
+    BipartiteGraph(int total_nodes) : n(total_nodes), L(0), R(0), graph(total_nodes + 1), color(total_nodes + 1, -1) {}
+
+    // Initialize for Matching (1-indexed, L and R sizes)
+    BipartiteGraph(int left_size, int right_size)
+        : n(left_size + right_size),
+          L(left_size),
+          R(right_size),
+          g_match(left_size + 1),
+          match_R(right_size + 1, 0),
+          match_L(left_size + 1, 0) {}
+
+    // Add undirected edge for Bipartite coloring check
+    void add_undirected_edge(int u, int v)
+    {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+
+    // Add directed edge (Left -> Right) for Matching algorithms
+    void add_matching_edge(int left, int right)
+    {
+        g_match[left].push_back(right);
+    }
+
+    // ---------------------------------------------------------
+    // 1. BIPARTITE CHECK (2-Coloring)
+    // ---------------------------------------------------------
+    bool is_bipartite()
+    {
+        for (int i = 1; i <= n; i++)
+        {
+            if (color[i] == -1 && !dfs_color(i, 0))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ---------------------------------------------------------
+    // 2. MAXIMUM MATCHING (Kuhn's Algorithm - O(VE))
+    // ---------------------------------------------------------
+    int maximum_matching()
+    {
+        int matches = 0;
+        match_R.assign(R + 1, 0);
+        match_L.assign(L + 1, 0);
+
+        for (int i = 1; i <= L; i++)
+        {
+            vis.assign(L + 1, 0);
+            if (augment(i))
+                matches++;
+        }
+        return matches;
+    }
+
+    // ---------------------------------------------------------
+    // 3. MINIMUM VERTEX COVER (Kőnig's Theorem)
+    // ---------------------------------------------------------
+    pair<vector<int>, vector<int>> minimum_vertex_cover()
+    {
+        maximum_matching();
+
+        vector<bool> vis_L(L + 1, false), vis_R(R + 1, false);
+
+        // Start DFS from all unmatched nodes in Left
+        for (int i = 1; i <= L; i++)
+        {
+            if (match_L[i] == 0 && !vis_L[i])
+            {
+                dfs_vertex_cover(i, vis_L, vis_R);
+            }
+        }
+
+        vector<int> cover_L, cover_R;
+        // MVC = (Unvisited Left) + (Visited Right)
+        for (int i = 1; i <= L; i++)
+            if (!vis_L[i])
+                cover_L.push_back(i);
+        for (int i = 1; i <= R; i++)
+            if (vis_R[i])
+                cover_R.push_back(i);
+
+        return {cover_L, cover_R};
+    }
+
+    // ---------------------------------------------------------
+    // 4. MAXIMUM INDEPENDENT SET (Complement of Min Vertex Cover)
+    // ---------------------------------------------------------
+    pair<vector<int>, vector<int>> maximum_independent_set()
+    {
+        auto [cover_L, cover_R] = minimum_vertex_cover();
+
+        vector<bool> in_cover_L(L + 1, false), in_cover_R(R + 1, false);
+        for (int u : cover_L)
+            in_cover_L[u] = true;
+        for (int v : cover_R)
+            in_cover_R[v] = true;
+
+        vector<int> ind_L, ind_R;
+        // MIS = All Vertices - Minimum Vertex Cover
+        for (int i = 1; i <= L; i++)
+            if (!in_cover_L[i])
+                ind_L.push_back(i);
+        for (int i = 1; i <= R; i++)
+            if (!in_cover_R[i])
+                ind_R.push_back(i);
+
+        return {ind_L, ind_R};
+    }
+};
+
+struct AVLTree {
+    int getHeight(Node* node) {
+        return node ? node->height : 0;
+    }
+
+    void updateHeight(Node* node) {
+        if (node)
+            node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+    }
+
+    int getBalance(Node* node) {
+        return getHeight(node->left) - getHeight(node->right);
+    }
+
+    Node* rotateRight(Node* root) {
+        Node* newRoot = root->left;
+        Node* subtree = newRoot->right;
+
+        newRoot->right = root;
+        root->left = subtree;
+
+        updateHeight(root);
+        updateHeight(newRoot);
+
+        return newRoot;
+    }
+
+    Node* rotateLeft(Node* root) {
+        Node* newRoot = root->right;
+        Node* subtree = newRoot->left;
+
+        newRoot->left = root;
+        root->right = subtree;
+
+        updateHeight(root);
+        updateHeight(newRoot);
+
+        return newRoot;
+    }
+
+    Node* insert(Node* root, int value) {
+        if (!root) return new Node(value);
+
+        if (value < root->value)
+            root->left = insert(root->left, value);
+        else if (value > root->value)
+            root->right = insert(root->right, value);
+        else
+            return root;
+
+        updateHeight(root);
+
+        // LL
+        if (getBalance(root) > 1 && value < root->left->value)
+            return rotateRight(root);
+
+        // RR
+        if (getBalance(root) < -1 && value > root->right->value)
+            return rotateLeft(root);
+
+        // LR
+        if (getBalance(root) > 1 && value > root->left->value) {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+
+        // RL
+        if (getBalance(root) < -1 && value < root->right->value) {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+
+        return root;
+    }
+
+    int sumOfLeaveNodes(Node* root) {
+        if (!root) return 0;
+        if (!root->left && !root->right) return root->value;
+        return sumOfLeaveNodes(root->left) + sumOfLeaveNodes(root->right);
+    }
+
+};
+
+struct Dinic {
+    struct Edge {
+        int to, rev;
+        ll cap;
+    };
+
+    int nodes;
+    vector<vector<Edge>> adj;
+    vector<int> level, it;
+
+    Dinic(int n): nodes(n), adj(n + 1), level(n + 1), it(n + 1) {}
+
+    // directed edge
+    void addEdge(int u, int v, ll cap) {
+        adj[u].push_back({v, (int)adj[v].size(), cap});
+        adj[v].push_back({u, (int)adj[u].size() - 1, 0});
+    }
+
+    // build level graph
+    bool bfs(int src, int sink) {
+        fill(level.begin(), level.end(), -1);
+        queue<int> q;
+        q.push(src), level[src] = 0;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            for (auto &e : adj[u])
+                if (e.cap && level[e.to] == -1)
+                    level[e.to] = level[u] + 1, q.push(e.to);
+        }
+        return level[sink] != -1;
+    }
+
+    // blocking flow
+    ll dfs(int u, int sink, ll flow) {
+        if (u == sink || !flow) return flow;
+        for (int &i = it[u]; i < adj[u].size(); i++) {
+            auto &e = adj[u][i];
+            if (level[e.to] != level[u] + 1 || !e.cap) continue;
+            ll pushed = dfs(e.to, sink, min(flow, e.cap));
+            if (pushed)
+                return e.cap -= pushed, adj[e.to][e.rev].cap += pushed, pushed;
+        }
+        return 0;
+    }
+
+    // max flow
+    ll maxFlow(int src, int sink) {
+        ll flow = 0, pushed;
+        while (bfs(src, sink)) {
+            fill(it.begin(), it.end(), 0);
+            while ((pushed = dfs(src, sink, LLONG_MAX)))
+                flow += pushed;
+        }
+        return flow;
+    }
+};
+// maximum flow = capacity of minimum cut
+// the absolute max amount of water you can push through network equals the capacity of narrowst bottleneck that cuts off source from sink
+// when to apply - when you have a flow network and want to find the maximum amount of flow that can be sent from source to sink or when you want to find the minimum cut in a flow network.
+// // Pattern:
+// - Maximum amount that can be sent from source to sink.
+// - Minimum cut / minimum edges to disconnect s and t.
+// - Multiple agents/items moving through a network with capacities.
+// - Assignment/matching problems (workers-jobs, students-schools, etc.).
+// - Edge/vertex-disjoint paths.
+// - Transform constraints into capacities on a graph.
