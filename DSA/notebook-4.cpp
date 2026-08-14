@@ -12,11 +12,12 @@ const ll MOD = 1e9 + 7;
 
 // K-th smallest element in two sorted arrays via binary search
 // Time: O(log(min(M, N))), Space: O(1)
-
+// k is 1-indexed
 int kthElement(const vi &nums1, const vi &nums2, int k) {
-    if (nums1.size() > nums2.size()) return kthElement(nums2, nums1, k);
+    if (nums1.size() > nums2.size()) return kthElement(nums2, nums1, k); // keeps nums1 as the smaller array
     int m = nums1.size(), n = nums2.size();
-    int l = max(0, k - n), r = min(k, m);
+    int l = max(0, k - n); // the minimum number of elements we can take from nums1
+    int r = min(k, m); // the maximum number of elements we can take from nums1
 
     while (l <= r) {
         int i = l + (r - l) / 2;
@@ -32,6 +33,17 @@ int kthElement(const vi &nums1, const vi &nums2, int k) {
         else l = i + 1;
     }
     return -1;
+}
+
+int median(const vi &nums1, const vi &nums2) {
+    int total = nums1.size() + nums2.size();
+    if (total % 2 == 1) {
+        return kthElement(nums1, nums2, total / 2 + 1);
+    } else {
+        int left = kthElement(nums1, nums2, total / 2);
+        int right = kthElement(nums1, nums2, total / 2 + 1);
+        return (left + right) / 2;
+    }
 }
 
 // Next greater lexicographical permutation in-place
@@ -66,20 +78,6 @@ int lengthOfLongestSubstring(const string &s) {
     return max_len;
 }
 
-// Minimum sum of absolute differences to make all elements equal (median)
-// Time: O(N log N), Space: O(1)
-
-ll minimumAbsoluteDifferenceSum(vi &a) {
-    int n = a.size();
-    sort(a.begin(), a.end());
-    int median = a[n / 2];
-    ll sum = 0;
-
-    for (int x : a) {
-        sum += abs(1LL * x - median);
-    }
-    return sum;
-}
 
 // Minimum moves to gather K consecutive 1s using prefix sum of shifted positions
 // Time: O(N), Space: O(N)
@@ -241,10 +239,11 @@ int maxComponents(const vi &val, const vvi &g) {
 // Time: O(|S| * |P|), Space: O(|S| * |P|)
 
 bool wildcardHelper(const string &s, const string &p, int i, int j, vvi &dp) {
-    if (i == (int)s.size() && j == (int)p.size()) return true;
-    if (j == (int)p.size()) return false;
-    if (i == (int)s.size()) {
-        for (int k = j; k < (int)p.size(); k++) {
+    int n = s.size(), m = p.size();
+    if (i == n && j == m) return true;
+    if (j == m) return false;
+    if (i == n) {
+        for (int k = j; k < m; k++) {
             if (p[k] != '*') return false;
         }
         return true;
@@ -382,6 +381,7 @@ ll sumSubarrayMins(const vi &arr) {
             st.pop();
             int l = st.empty() ? -1 : st.top();
             int r = i;
+            // l is index of previous smaller element, r is index of next smaller element
             ans = (ans + 1LL * arr[mid] * (mid - l) % MOD * (r - mid)) % MOD;
         }
         if (i < n) st.push(i);
@@ -627,58 +627,17 @@ struct DigitDP {
     }
 };
 
-// Sum Over Subsets (SOS) DP for bitmask queries
-// Time: O(B * 2^B), Space: O(2^B)
-
-struct SOS {
-    int B = 20, N = 1 << B;
-    vi f, sub, sup;
-
-    SOS() : f(N), sub(N), sup(N) {}
-
-    void add(int x) { f[x]++; }
-
-    void build() {
-        sub = sup = f;
-        for (int b = 0; b < B; b++) {
-            for (int m = 0; m < N; m++) {
-                if (m >> b & 1) sub[m] += sub[m ^ (1 << b)];
-                else sup[m] += sup[m | (1 << b)];
-            }
-        }
-    }
-
-    int subsets(int x) { return sub[x]; }
-    int supersets(int x) { return sup[x]; }
-    int disjoint(int x) { return sub[(N - 1) ^ x]; }
-    int intersect(int x, int n) { return n - disjoint(x); }
-};
-
-// Interval DP template (bottom-up pattern)
-// Time: O(N^3), Space: O(N^2)
-
-ll solveIntervalDPBottomUp(int n) {
-    vvl dp(n, vl(n, 0));
-
-    for (int len = 2; len <= n; len++) {
-        for (int l = 0; l + len <= n; l++) {
-            int r = l + len - 1;
-            dp[l][r] = 1e18;
-            for (int k = l; k < r; k++) {
-                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r]);
-            }
-        }
-    }
-    return dp[0][n - 1];
-}
-
 // Cycle detection and reconstruction in graphs
 // Time: O(V + E), Space: O(V + E)
 
 vi buildCycle(int s, int e, const vi &par) {
     vi cyc;
-    for (int u = e; u != s; u = par[u]) cyc.push_back(u);
-    cyc.push_back(s);
+    cyc.push_back(e);
+    while(true){
+        cyc.push_back(s);
+        if (s == e) break;
+        s = par[s];
+    }
     reverse(cyc.begin(), cyc.end());
     return cyc;
 }
@@ -794,64 +753,3 @@ ll makeArrayNonDecreasing(const vi &nums) {
     return total_cost;
 }
 
-// Custom Max-Heap implementation
-// Time: O(log N) push/pop, O(N) build, Space: O(N)
-
-struct MaxHeap {
-    vi heap;
-
-    int parent(int i) { return (i - 1) / 2; }
-    int left(int i) { return 2 * i + 1; }
-    int right(int i) { return 2 * i + 2; }
-
-    void swapNodes(int i, int j) { swap(heap[i], heap[j]); }
-
-    void heapifyDown(int i) {
-        int largest = i, l = left(i), r = right(i);
-        if (l < (int)heap.size() && heap[l] > heap[largest]) largest = l;
-        if (r < (int)heap.size() && heap[r] > heap[largest]) largest = r;
-        if (largest != i) {
-            swapNodes(i, largest);
-            heapifyDown(largest);
-        }
-    }
-
-    void heapifyUp(int i) {
-        while (i > 0 && heap[parent(i)] < heap[i]) {
-            swapNodes(i, parent(i));
-            i = parent(i);
-        }
-    }
-
-    void insert(int val) {
-        heap.push_back(val);
-        heapifyUp(heap.size() - 1);
-    }
-
-    int top() { return heap[0]; }
-
-    void pop() {
-        if (heap.empty()) return;
-        heap[0] = heap.back();
-        heap.pop_back();
-        if (!heap.empty()) heapifyDown(0);
-    }
-
-    void buildHeap(const vi &nums) {
-        heap = nums;
-        for (int i = (int)heap.size() / 2 - 1; i >= 0; i--) {
-            heapifyDown(i);
-        }
-    }
-
-    vi heapSort() {
-        vi original = heap, ans;
-        while (!heap.empty()) {
-            ans.push_back(top());
-            pop();
-        }
-        heap = original;
-        reverse(ans.begin(), ans.end());
-        return ans;
-    }
-};

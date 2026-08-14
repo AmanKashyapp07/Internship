@@ -350,3 +350,4 @@ int bidirectionalBFS(const string &start, const string &target) {
     }
     return -1;
 }
+

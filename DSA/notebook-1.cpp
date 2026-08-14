@@ -312,126 +312,6 @@ pair<int, vi> treeDiameter(int n, const vvi &g) {
 // Tarjan's algorithm for finding bridges
 // Time: O(V + E), Space: O(V + E)
 
-struct Bridge {
-    int timer;
-    vi tin, tout, low, parent;
-    vector<pair<int, int>> bridges;
-
-    void dfs(int u, int p, vvi &g) {
-        parent[u] = p;
-        tin[u] = low[u] = ++timer;
-
-        for (int v : g[u]) {
-            if (v == p) continue;
-
-            if (tin[v]) {
-                low[u] = min(low[u], tin[v]);
-            } else {
-                dfs(v, u, g);
-                low[u] = min(low[u], low[v]);
-
-                if (low[v] > tin[u])
-                    bridges.push_back({u, v});
-            }
-        }
-
-        tout[u] = timer;
-    }
-
-    void build(vvi &g) {
-        int n = g.size();
-        timer = 0;
-        tin.assign(n, 0);
-        tout.assign(n, 0);
-        low.assign(n, 0);
-        parent.assign(n, -1);
-        bridges.clear();
-
-        for (int i = 0; i < n; i++) {
-            if (!tin[i]) dfs(i, -1, g);
-        }
-    }
-
-    bool isAncestor(int u, int v) {
-        return tin[u] <= tin[v] && tout[v] <= tout[u];
-    }
-
-    bool separated(int u, int v, int a, int b) {
-        if (parent[u] == v) swap(u, v);
-        return isAncestor(v, a) != isAncestor(v, b);
-    }
-};
-
-// Tarjan's algorithm for articulation points and component separation
-// Time: O(V + E), Space: O(V + E)
-
-struct Articulation {
-    int timer;
-    vi tin, tout, low, par;
-    vvi child;
-
-    void dfs(int u, int p, vvi &g) {
-        par[u] = p;
-        tin[u] = low[u] = ++timer;
-
-        for (int v : g[u]) {
-            if (v == p) continue;
-
-            if (tin[v]) {
-                low[u] = min(low[u], tin[v]);
-            } else {
-                child[u].push_back(v);
-                dfs(v, u, g);
-                low[u] = min(low[u], low[v]);
-            }
-        }
-
-        tout[u] = timer;
-    }
-
-    void build(vvi &g) {
-        int n = g.size();
-        timer = 0;
-        tin.assign(n, 0);
-        tout.assign(n, 0);
-        low.assign(n, 0);
-        par.assign(n, -1);
-        child.assign(n, {});
-
-        for (int i = 0; i < n; i++) {
-            if (!tin[i]) dfs(i, -1, g);
-        }
-    }
-
-    bool isAncestor(int u, int v) {
-        return tin[u] <= tin[v] && tout[v] <= tout[u];
-    }
-
-    int findChild(int u, int x) {
-        int l = 0, r = (int)child[u].size() - 1;
-        while (l <= r) {
-            int mid = (l + r) / 2;
-            int v = child[u][mid];
-            if (tin[x] < tin[v]) r = mid - 1;
-            else if (isAncestor(v, x)) return v;
-            else l = mid + 1;
-        }
-        return -1;
-    }
-
-    int component(int cut, int x) {
-        if (cut == x) return -1;
-        if (par[cut] == x) return cut;
-        if (!isAncestor(cut, x)) return par[cut];
-        return findChild(cut, x);
-    }
-
-    bool separated(int cut, int a, int b) {
-        if (a == cut || b == cut) return true;
-        return component(cut, a) != component(cut, b);
-    }
-};
-
 // Kosaraju's algorithm for Strongly Connected Components (SCC) and DAG condensation
 // Time: O(V + E), Space: O(V + E)
 
@@ -453,7 +333,7 @@ struct SCC {
         for (int v : g[u]) {
             if (!vis[v]) dfs1(v);
         }
-        order.push_back(u);
+        order.push_back(u); // push u after traversing all its descendants
     }
 
     void dfs2(int u, int c) {
@@ -468,8 +348,8 @@ struct SCC {
         for (int i = 0; i < n; i++) {
             if (!vis[i]) dfs1(i);
         }
-        for (int i = n - 1; i >= 0; i--) {
-            int u = order[i];
+        for (int i = n - 1; i >= 0; i--) { // starting from last element
+            int u = order[i]; // order[i] is the node with the highest finishing time
             if (comp[u] == -1) {
                 sccs.emplace_back();
                 dfs2(u, (int)sccs.size() - 1);
@@ -481,15 +361,15 @@ struct SCC {
         dag.resize(sccs.size());
         for (int u = 0; u < n; u++) {
             for (int v : g[u]) {
-                if (comp[u] != comp[v]) {
-                    dag[comp[u]].push_back(comp[v]);
+                if (comp[u] != comp[v]) { // if u and v are in different components, add an edge in the DAG
+                    dag[comp[u]].push_back(comp[v]); // edge from component of u to component of v
                 }
             }
-        }
-        for (auto &adj : dag) {
-            sort(adj.begin(), adj.end());
-            adj.erase(unique(adj.begin(), adj.end()), adj.end());
-        }
+        } // first run buildDag() after build() to get the DAG of SCCs
+        for (auto &v : dag) {
+            sort(v.begin(), v.end()); // sort the vacency list of each component in the DAG
+            v.erase(unique(v.begin(), v.end()), v.end()); // remove duplicate edges
+        } // for removing duplicate edges
     }
 };
 
@@ -524,10 +404,10 @@ vi getCycleFloyd(const vi &to, const vi &comp, int start) {
 struct FunctionalGraph {
     int n, LOG = 20;
     vi dist, cyc, comp, pos;
-    vvi up, radj;
+    vvi up, rv;
 
     void dfs(int u) {
-        for (int v : radj[u]) {
+        for (int v : rv[u]) {
             if (dist[v] == -1) {
                 dist[v] = dist[u] + 1;
                 cyc[v] = cyc[u];
@@ -537,13 +417,13 @@ struct FunctionalGraph {
         }
     }
 
-    FunctionalGraph(const vi &to) : n(to.size()), dist(n, -1), cyc(n, -1), comp(n, -1), pos(n, -1), up(n, vi(LOG)), radj(n) {
+    FunctionalGraph(const vi &to) : n(to.size()), dist(n, -1), cyc(n, -1), comp(n, -1), pos(n, -1), up(n, vi(LOG)), rv(n) {
         for (int i = 0; i < n; i++) up[i][0] = to[i];
         for (int j = 1; j < LOG; j++) {
             for (int i = 0; i < n; i++) up[i][j] = up[up[i][j - 1]][j - 1];
         }
 
-        for (int i = 0; i < n; i++) radj[to[i]].push_back(i);
+        for (int i = 0; i < n; i++) rv[to[i]].push_back(i);
 
         int cid = 0;
         for (int i = 0; i < n; i++) {

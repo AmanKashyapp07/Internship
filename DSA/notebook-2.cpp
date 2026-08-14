@@ -68,7 +68,7 @@ vi sieve(int n) {
 
     for (int i = 2; i * i <= n; i++) {
         if (is_prime[i]) {
-            for (int j = i * i; j <= n; j += i) {
+            for (int j = i * i; j <= n; j += i) { // why start from i*i? because all smaller multiples of i will have already been marked by smaller primes
                 is_prime[j] = false;
             }
         }
@@ -101,13 +101,16 @@ vector<pii> prime_factorize(int n) {
 }
 
 // Prefix XOR from 1 to N
-// Time: O(1), Space: O(1)
+// Time: O(1), Space: O(1)  
 
 int XORupto(int n) {
-    if (n % 4 == 0) return n;
-    if (n % 4 == 1) return 1;
-    if (n % 4 == 2) return n + 1;
-    return 0;
+    switch (n % 4) {
+        case 0: return n;
+        case 1: return 1;
+        case 2: return n + 1;
+        case 3: return 0;
+    }
+    return 0; // should never reach here
 }
 
 // Sliding window maximum
@@ -128,9 +131,6 @@ vi maxSlidingWindow(const vi &nums, int k) {
     return ans;
 }
 
-// Sliding window minimum
-// Time: O(N), Space: O(K)
-
 vi minSlidingWindow(const vi &nums, int k) {
     int n = nums.size();
     deque<int> dq;
@@ -146,8 +146,8 @@ vi minSlidingWindow(const vi &nums, int k) {
     return ans;
 }
 
-// Maximum subarray sum with length at most K
-// Time: O(N), Space: O(N)
+// Sliding window minimum
+// Time: O(N), Space: O(K)
 
 ll maxSubarraySumAtMostK(const vi &nums, int k) {
     int n = nums.size();
@@ -155,21 +155,19 @@ ll maxSubarraySumAtMostK(const vi &nums, int k) {
     for (int i = 0; i < n; i++) {
         pref[i + 1] = pref[i] + nums[i];
     }
-
     deque<int> dq;
     ll ans = -1e18;
-
-    for (int r = 1; r <= n; r++) {
-        int l = r - k;
+    for (int r = 0; r < n; r++) {
+        int l = r - k + 1;
+        // Prefix indices allowed: [max(0, r-k+1), r]
         while (!dq.empty() && dq.front() < l) dq.pop_front();
-        while (!dq.empty() && pref[dq.back()] >= pref[r - 1]) dq.pop_back();
-        dq.push_back(r - 1);
-        ans = max(ans, pref[r] - pref[dq.front()]);
+        // Maintain increasing prefix sums
+        while (!dq.empty() && pref[dq.back()] >= pref[r]) dq.pop_back();
+        dq.push_back(r);
+        ans = max(ans, pref[r + 1] - pref[dq.front()]);
     }
-
     return ans;
 }
-
 // Length of Longest Increasing Subsequence (LIS)
 // Time: O(N log N), Space: O(N)
 
@@ -183,40 +181,44 @@ int lis(const vi &a) {
     return dp.size();
 }
 
-// Reconstruction of Longest Increasing Subsequence (LIS)
+// Longest Increasing Subsequence (LIS) reconstruction
 // Time: O(N log N), Space: O(N)
+vi lis(const vi &a) {
+    int n = a.size();
 
-vi longestIncreasingSubsequence(const vi &nums) {
-    if (nums.empty()) return {};
-    int n = nums.size();
-    vi tail_idx, par(n, -1);
+    vi dp;                  // tail values
+    vi pos;                 // index of tail
+    vi parent(n, -1);       // previous index
 
     for (int i = 0; i < n; i++) {
-        int l = 0, r = (int)tail_idx.size() - 1, pos = tail_idx.size();
-        while (l <= r) {
-            int mid = (l + r) / 2;
-            if (nums[tail_idx[mid]] >= nums[i]) {
-                pos = mid;
-                r = mid - 1;
-            } else {
-                l = mid + 1;
-            }
+        int x = a[i];
+
+        auto it = lower_bound(dp.begin(), dp.end(), x);
+        int j = it - dp.begin();
+
+        if (it == dp.end()) {
+            dp.push_back(x);
+            pos.push_back(i);
+        } else {
+            *it = x;
+            pos[j] = i;
         }
 
-        if (pos > 0) par[i] = tail_idx[pos - 1];
-
-        if (pos == (int)tail_idx.size()) tail_idx.push_back(i);
-        else tail_idx[pos] = i;
+        if (j > 0) {
+            parent[i] = pos[j - 1];
+        }
     }
 
+    // Reconstruct LIS
     vi ans;
-    int cur = tail_idx.back();
-    while (cur != -1) {
-        ans.push_back(nums[cur]);
-        cur = par[cur];
-    }
-    reverse(ans.begin(), ans.end());
+    int cur = pos.back();
 
+    while (cur != -1) {
+        ans.push_back(a[cur]);
+        cur = parent[cur];
+    }
+
+    reverse(ans.begin(), ans.end());
     return ans;
 }
 
@@ -225,28 +227,28 @@ vi longestIncreasingSubsequence(const vi &nums) {
 
 string lcs(const string &a, const string &b) {
     int n = a.size(), m = b.size();
-    vvi dp(n + 1, vi(m + 1, 0));
+    vvi dp(n + 1, vi(m + 1, 0)); // dp[i][j] = length of LCS of a[0..i-1] and b[0..j-1]
 
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
-            if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
-            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1; // if characters match, take diagonal value + 1
+            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]); // if characters don't match, take max of left and top
         }
     }
 
     string res;
     int i = n, j = m;
     while (i > 0 && j > 0) {
-        if (a[i - 1] == b[j - 1]) {
+        if (a[i - 1] == b[j - 1]) { // if characters match, add to result and move diagonally
             res += a[i - 1];
             i--; j--;
-        } else if (dp[i - 1][j] > dp[i][j - 1]) {
+        } else if (dp[i - 1][j] > dp[i][j - 1]) { // if top value is greater, move up
             i--;
-        } else {
+        } else { // if left value is greater or equal, move left
             j--;
         }
     }
-    reverse(res.begin(), res.end());
+    reverse(res.begin(), res.end()); // reverse the result since we built it backwards
     return res;
 }
 
@@ -353,7 +355,7 @@ vvi generatePermutations(const vi &nums) {
 
 // Longest Palindromic Subsequence (LPS) length
 // Time: O(N^2), Space: O(N^2)
-
+// LPS = LCS(s, reverse(s))
 int lps(const string &s) {
     int n = s.size();
     vvi dp(n, vi(n, 0));

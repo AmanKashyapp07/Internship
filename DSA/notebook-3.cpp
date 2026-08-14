@@ -56,7 +56,7 @@ int findShortestCycle(int n, const vvi &g) {
                     dist[v] = dist[u] + 1;
                     parent[v] = u;
                     q.push(v);
-                } else if (parent[u] != v) {
+                } else if (parent[u] != v) { // if v is already visited and not the parent of u, we found a cycle
                     min_cycle = min(min_cycle, dist[u] + dist[v] + 1);
                 }
             }
@@ -65,7 +65,7 @@ int findShortestCycle(int n, const vvi &g) {
     return min_cycle == 1e9 ? -1 : min_cycle;
 }
 
-// Find all nodes in graph cycles via topological peeling
+// Find all nodes in graph cycles via topological peeling, it means all nodes will be returned that are part of cycles in the directed graph
 // Time: O(V + E), Space: O(V)
 
 vi getNodesInCycles(int n, const vvi &g, vi &indegree) {
@@ -145,7 +145,7 @@ vi shortestPathDAG(int n, const vector<vector<pii>> &g, int src) {
 
 int rangeBitwiseAnd(int left, int right) {
     int shift = 0;
-    while (left < right) {
+    while(left!= right) {
         left >>= 1;
         right >>= 1;
         shift++;
@@ -265,7 +265,8 @@ int countOfLIS(const vi &nums) {
     if (n == 0) return 0;
     vi len(n, 1), count(n, 1);
     int max_len = 1;
-
+    // len[i] = length of LIS ending at index i
+    // count[i] = number of LIS ending at index i
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < i; j++) {
             if (nums[i] > nums[j]) {
@@ -293,7 +294,7 @@ int countOfLIS(const vi &nums) {
 vi dijkstra(int n, const vector<vector<pii>> &g, int src) {
     vi dist(n, 1e9);
     dist[src] = 0;
-    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    priority_queue<pii, vector<pii>, greater<pii>> pq; // min heap storing {distance, node}
     pq.push({0, src});
 
     while (!pq.empty()) {
@@ -380,12 +381,13 @@ vvi floydWarshall(int n, const vvi &g) {
 bool cycleDetectionFloyd(int n, const vvi &g) {
     vvi dist = floydWarshall(n, g);
     for (int i = 0; i < n; i++) {
-        if (dist[i][i] < 0) return true;
+        if (dist[i][i] < 0) return true; // if dist[i][i] < 0, there is a negative cycle reachable from i
     }
     return false;
 }
 
 // Lexicographically smallest topological sort using max-heap Kahn's variant
+// Use priority queue instead of queue to get the smallest node first
 // Time: O(V log V + E), Space: O(V)
 
 vi lexicographicalTopoSort(int n, const vvi &g, vi indegree) {
@@ -488,7 +490,8 @@ int findCheapestPrice(int n, const vector<vector<int>> &flights, int src, int ds
 
     int max_flights = k + 1;
     vvi dist(n, vi(max_flights + 1, 1e9));
-    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<>> pq;
+    using T = tuple<int, int, int>; // {cost, node, flights_taken}
+    priority_queue<T, vector<T>, greater<T>> pq;
 
     dist[src][0] = 0;
     pq.push({0, src, 0});
@@ -516,18 +519,18 @@ int findCheapestPrice(int n, const vector<vector<int>> &flights, int src, int ds
 int shortestPathVisitingAllNodes(int n, const vvi &g) {
     int target_mask = (1 << n) - 1;
     queue<pair<int, int>> q;
-    vvi dist(n, vi(1 << n, 1e9));
+    vvi dist(n, vi(1 << n, 1e9)); // dist[i][mask] = shortest distance to reach node i with visited nodes represented by mask
 
     for (int i = 0; i < n; i++) {
-        q.push({i, 1 << i});
-        dist[i][1 << i] = 0;
+        q.push({i, 1 << i}); // start from each node with its bitmask
+        dist[i][1 << i] = 0; // distance to reach node i with only node i visited is 0
     }
 
     while (!q.empty()) {
         auto [u, mask] = q.front();
         q.pop();
 
-        int d = dist[u][mask];
+        int d = dist[u][mask]; 
         if (mask == target_mask) return d;
 
         for (int v : g[u]) {
@@ -541,22 +544,50 @@ int shortestPathVisitingAllNodes(int n, const vvi &g) {
     return -1;
 }
 
+// count of inversions in an array using merge sort
+// Time: O(N log N), Space: O(N)
+int countInversions(vi& a, int l, int r) {
+    if (l >= r) return 0;
+    int m = l + (r - l) / 2;
+    int inv = countInversions(a, l, m) + countInversions(a, m + 1, r);
+
+    vi temp(r - l + 1);
+    int i = l, j = m + 1, k = 0;
+
+    while (i <= m && j <= r) {
+        if (a[i] <= a[j]) {
+            temp[k++] = a[i++];
+        } else {
+            temp[k++] = a[j++];
+            inv += (m - i + 1);
+        }
+    }
+    while (i <= m) temp[k++] = a[i++];
+    while (j <= r) temp[k++] = a[j++];
+
+    for (int p = 0; p < k; p++) a[l + p] = temp[p];
+    return inv;
+} 
+
 // Length of Shortest Common Supersequence (SCS)
+// SCS means the shortest string that has both s1 and s2 as subsequences
 // Time: O(|S1| * |S2|), Space: O(|S1| * |S2|)
 
 int shortestCommonSubsequenceLength(const string &s1, const string &s2) {
     int n = s1.size(), m = s2.size();
     vvi dp(n + 1, vi(m + 1, 0));
-
+    //dp[i][j] = length of LCS of s1[0..i-1] and s2[0..j-1]
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
-            dp[i][j] = (s1[i - 1] == s2[j - 1]) ? 1 + dp[i - 1][j - 1] : max(dp[i - 1][j], dp[i][j - 1]);
+            if(s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
     return n + m - dp[n][m];
 }
 
 // Reconstruct Shortest Common Supersequence (SCS) string
+// SCS means the shortest string that has both s1 and s2 as subsequences
 // Time: O(|S1| * |S2|), Space: O(|S1| * |S2|)
 
 string SCS(const string &s1, const string &s2) {
@@ -565,7 +596,8 @@ string SCS(const string &s1, const string &s2) {
 
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
-            dp[i][j] = (s1[i - 1] == s2[j - 1]) ? 1 + dp[i - 1][j - 1] : max(dp[i - 1][j], dp[i][j - 1]);
+            if(s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
 
@@ -583,8 +615,8 @@ string SCS(const string &s1, const string &s2) {
             j--;
         }
     }
-    while (i > 0) { scs += s1[i - 1]; i--; }
-    while (j > 0) { scs += s2[j - 1]; j--; }
+    while (i > 0) { scs += s1[i - 1]; i--; } // append remaining characters of s1, because they are not part of LCS
+    while (j > 0) { scs += s2[j - 1]; j--; } // append remaining characters of s2, because they are not part of LCS
 
     reverse(scs.begin(), scs.end());
     return scs;
@@ -656,7 +688,7 @@ string minWindowSubstring(const string &s, const string &t) {
 
 int matrixChainOrder(const vi &p) {
     int n = p.size() - 1;
-    vvi dp(n, vi(n, 0));
+    vvi dp(n, vi(n, 0)); // dp[i][j] = minimum cost of multiplying matrices from i to j
 
     for (int len = 2; len <= n; len++) {
         for (int i = 0; i <= n - len; i++) {
@@ -664,6 +696,7 @@ int matrixChainOrder(const vi &p) {
             dp[i][j] = 1e9;
             for (int k = i; k < j; k++) {
                 dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + p[i] * p[k + 1] * p[j + 1]);
+                // cost = p[i] * p[k + 1] * p[j + 1] is the cost of multiplying two matrices of dimensions p[i] x p[k+1] and p[k+1] x p[j+1]
             }
         }
     }
@@ -793,7 +826,9 @@ int knapsack01(int n, int W, const vi &weights, const vi &values) {
 
 int LCSLengthOf2Permutations(const vi &a, const vi &b) {
     unordered_map<int, int> pos;
-    for (int i = 0; i < (int)a.size(); i++) pos[a[i]] = i;
+    int n = a.size();
+    int m = b.size();
+    for (int i = 0; i < n; i++) pos[a[i]] = i;
 
     vi dp;
     for (int x : b) {
@@ -805,81 +840,6 @@ int LCSLengthOf2Permutations(const vi &a, const vi &b) {
     return dp.size();
 }
 
-// Reconstruct LCS sequence of two permutations via LIS
-// Time: O(N log N), Space: O(N)
-
-vi LCSof2Permutations(const vi &a, const vi &b) {
-    unordered_map<int, int> pos;
-    for (int i = 0; i < (int)a.size(); i++) pos[a[i]] = i;
-
-    vi p, val;
-    for (int x : b) {
-        if (!pos.count(x)) continue;
-        p.push_back(pos[x]);
-        val.push_back(x);
-    }
-
-    vi tail, tail_idx, parent(p.size(), -1);
-    for (int i = 0; i < (int)p.size(); i++) {
-        int j = lower_bound(tail.begin(), tail.end(), p[i]) - tail.begin();
-        if (j == (int)tail.size()) {
-            tail.push_back(p[i]);
-            tail_idx.push_back(i);
-        } else {
-            tail[j] = p[i];
-            tail_idx[j] = i;
-        }
-        if (j > 0) parent[i] = tail_idx[j - 1];
-    }
-
-    vi lcs;
-    if (tail.empty()) return lcs;
-
-    for (int cur = tail_idx.back(); cur != -1; cur = parent[cur]) {
-        lcs.push_back(val[cur]);
-    }
-    reverse(lcs.begin(), lcs.end());
-    return lcs;
-}
-
-// Length of Longest Increasing Subsequence (LIS)
-// Time: O(N log N), Space: O(N)
-
-int lis(const vi &arr) {
-    vi tail;
-    for (int x : arr) {
-        auto it = lower_bound(tail.begin(), tail.end(), x);
-        if (it == tail.end()) tail.push_back(x);
-        else *it = x;
-    }
-    return tail.size();
-}
-
-// Reconstruct Longest Increasing Subsequence (LIS) array elements
-// Time: O(N log N), Space: O(N)
-
-vi lisSequence(const vi &arr) {
-    vi tail, parent(arr.size(), -1), lis_indices;
-    for (int i = 0; i < (int)arr.size(); i++) {
-        auto it = lower_bound(tail.begin(), tail.end(), arr[i]);
-        int idx = it - tail.begin();
-        if (it == tail.end()) {
-            tail.push_back(arr[i]);
-            lis_indices.push_back(i);
-        } else {
-            *it = arr[i];
-            lis_indices[idx] = i;
-        }
-        if (idx > 0) parent[i] = lis_indices[idx - 1];
-    }
-
-    vi seq;
-    for (int i = lis_indices.back(); i != -1; i = parent[i]) {
-        seq.push_back(arr[i]);
-    }
-    reverse(seq.begin(), seq.end());
-    return seq;
-}
 
 // Longest Common Increasing Subsequence (LCIS) of arrays A and B
 // Time: O(N * M), Space: O(M)
@@ -917,31 +877,6 @@ vi LCIS(const vi &a, const vi &b) {
     return ans;
 }
 
-// Topological sort using Kahn's algorithm
-// Time: O(V + E), Space: O(V + E)
-
-vi topoSort(int n, const vvi &g) {
-    vi indegree(n, 0);
-    for (int u = 0; u < n; u++) {
-        for (int v : g[u]) indegree[v]++;
-    }
-
-    queue<int> q;
-    for (int i = 0; i < n; i++) {
-        if (indegree[i] == 0) q.push(i);
-    }
-
-    vi topo;
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-        topo.push_back(u);
-        for (int v : g[u]) {
-            if (--indegree[v] == 0) q.push(v);
-        }
-    }
-    return (int)topo.size() == n ? topo : vi{};
-}
 
 // All possible path lengths from node 1 to node N in DAG
 // Time: O(V * N + E * N), Space: O(V * N)
