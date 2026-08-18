@@ -440,40 +440,36 @@ int mex(const vi &nums) {
 }
 
 // Inversion count using Merge Sort
+// counting pairs (i, j) such that i < j and a[i] > x*a[j]
 // Time: O(N log N), Space: O(N)
 
-int mergeInversions(vi &nums, int l, int mid, int r) {
-    int invs = 0;
-    vi temp(r - l + 1);
-    int i = l, j = mid + 1, k = 0;
-
-    while (i <= mid && j <= r) {
-        if (nums[i] <= nums[j]) {
-            temp[k++] = nums[i++];
+int countInversions(vi& a, int l, int r, int x){
+    if(l >= r) return 0;
+    int m = l + (r - l) / 2;
+    int cnt = countInversions(a, l, m, x) + countInversions(a, m + 1, r, x);
+    // Count cross pairs: i in left, j in right
+    int j = m + 1;
+    for(int i = l; i <= m; i++){
+        while(j <= r && a[i] > x * a[j]){
+            j++;
+        }
+        cnt += (j - (m + 1));
+    }
+    // Normal merge
+    vi temp;
+    int i = l;
+    j = m + 1;
+    while(i <= m && j <= r){
+        if(a[i] <= a[j]){
+            temp.push_back(a[i++]);
         } else {
-            temp[k++] = nums[j++];
-            invs += (mid - i + 1);
+            temp.push_back(a[j++]);
         }
     }
-    while (i <= mid) temp[k++] = nums[i++];
-    while (j <= r) temp[k++] = nums[j++];
-
-    for (int p = 0; p < k; p++) nums[l + p] = temp[p];
-    return invs;
-}
-
-int mergeSortInversions(vi &nums, int l, int r) {
-    if (l >= r) return 0;
-    int mid = l + (r - l) / 2;
-    int invs = 0;
-    invs += mergeSortInversions(nums, l, mid);
-    invs += mergeSortInversions(nums, mid + 1, r);
-    invs += mergeInversions(nums, l, mid, r);
-    return invs;
-}
-
-int countInversions(vi nums) {
-    return mergeSortInversions(nums, 0, (int)nums.size() - 1);
+    while(i <= m) temp.push_back(a[i++]);
+    while(j <= r) temp.push_back(a[j++]);
+    copy(temp.begin(), temp.end(), a.begin() + l);
+    return cnt;
 }
 
 // Matrix multiplication modulo MOD
@@ -482,7 +478,7 @@ int countInversions(vi nums) {
 vvi multiplyMatrices(const vvi &A, const vvi &B) {
     int n = A.size(), m = B[0].size(), p = B.size();
     vvi C(n, vi(m, 0));
-
+    // n is rows of A, m is columns of B, p is columns of A / rows of B
     for (int i = 0; i < n; i++) {
         for (int k = 0; k < p; k++) {
             for (int j = 0; j < m; j++) {
@@ -499,7 +495,7 @@ vvi multiplyMatrices(const vvi &A, const vvi &B) {
 vvi powerMatrices(vvi A, ll b) {
     int n = A.size();
     vvi res(n, vi(n, 0));
-    for (int i = 0; i < n; i++) res[i][i] = 1;
+    for (int i = 0; i < n; i++) res[i][i] = 1; // Identity Matrix
 
     while (b > 0) {
         if (b & 1) res = multiplyMatrices(res, A);
@@ -510,6 +506,7 @@ vvi powerMatrices(vvi A, ll b) {
 }
 
 // N-th Fibonacci number using matrix exponentiation
+// F(1) = 1, F(2) = 2, F(3) = 3, F(4) = 5, ...
 // Time: O(log N), Space: O(1)
 
 ll nthFibonacci(ll n) {

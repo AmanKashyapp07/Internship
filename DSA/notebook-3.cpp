@@ -544,30 +544,6 @@ int shortestPathVisitingAllNodes(int n, const vvi &g) {
     return -1;
 }
 
-// count of inversions in an array using merge sort
-// Time: O(N log N), Space: O(N)
-int countInversions(vi& a, int l, int r) {
-    if (l >= r) return 0;
-    int m = l + (r - l) / 2;
-    int inv = countInversions(a, l, m) + countInversions(a, m + 1, r);
-
-    vi temp(r - l + 1);
-    int i = l, j = m + 1, k = 0;
-
-    while (i <= m && j <= r) {
-        if (a[i] <= a[j]) {
-            temp[k++] = a[i++];
-        } else {
-            temp[k++] = a[j++];
-            inv += (m - i + 1);
-        }
-    }
-    while (i <= m) temp[k++] = a[i++];
-    while (j <= r) temp[k++] = a[j++];
-
-    for (int p = 0; p < k; p++) a[l + p] = temp[p];
-    return inv;
-} 
 
 // Length of Shortest Common Supersequence (SCS)
 // SCS means the shortest string that has both s1 and s2 as subsequences
@@ -901,3 +877,4 @@ vi possibleLengths(int n, const vvi &g) {
     }
     return ans;
 }
+
