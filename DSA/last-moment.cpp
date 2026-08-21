@@ -1,6 +1,6 @@
 /*
 ================================================================================
-  LAST-MOMENT DSA REVISION SHEET FOR ONLINE ASSESSMENTS (TOP 51 TEMPLATES)
+  LAST-MOMENT DSA REVISION SHEET FOR ONLINE ASSESSMENTS (TOP 62 TEMPLATES)
   File: DSA/last-moment.cpp
   Language: C++17 / C++20
 ================================================================================
@@ -56,6 +56,17 @@
   49. Offline Query Techniques (Mo's Algorithm, Offline Fenwick)
   50. Number Theory & Combinatorics (nCr Mod, Euler Totient, Catalan)
   51. Advanced Bitmask Techniques (Submask Enumeration, XOR Basis)
+  52. Manacher's Algorithm (O(N) Longest Palindromic Substring)
+  53. Binary Lifting & Kth Ancestor (Tree Queries)
+  54. Sparse Table (Static O(1) Range Minimum Query - RMQ)
+  55. Sprague-Grundy Theorem & Nim Game (Game Theory)
+  56. Boyer-Moore Majority Voting Algorithm (> N/2 & > N/3)
+  57. Matrix Exponentiation (O(K^3 log N) Linear Recurrences)
+  58. Quickselect Algorithm (O(N) Average Kth Element)
+  59. Inversion Count (Merge Sort / Fenwick Tree)
+  60. DSU on Tree / Sack (Small-to-Large Subtree Merging)
+  61. LRU Cache Design (Doubly Linked List + Hash Map)
+  62. Palindrome Partitioning DP (Min Cuts)
 
   LAST-MINUTE PATTERN SELECTION GUIDE (AT THE BOTTOM OF FILE)
 ================================================================================
@@ -69,6 +80,7 @@
 #include <deque>
 #include <functional>
 #include <iostream>
+#include <list>
 #include <map>
 #include <numeric>
 #include <queue>
@@ -177,7 +189,7 @@ ll bs_on_answer(const vi& arr, int k, ll low, ll high) {
         ll mid = low + (high - low) / 2;
         if (isValidPredicate(mid, arr, k)) {
             ans = mid;
-            high = mid - 1; // Or low = mid + 1 depending on optimization goal
+            high = mid - 1;
         } else {
             low = mid + 1;
         }
@@ -1039,7 +1051,6 @@ void dfsBridges(int u, int p, int& timer, vi& tin, vi& low, const vvi& adj, vect
 // Pattern: Activity Selection, Jump Game I/II, Gas Station, Fractional Knapsack
 // Complexity: O(N) or O(N log N) time
 // ============================================================
-// Activity Selection (Max non-overlapping intervals)
 int maxActivities(vvi& intervals) {
     sort(all(intervals), [](const vi& a, const vi& b) { return a[1] < b[1]; });
     int count = 0, lastEnd = -1;
@@ -1049,7 +1060,6 @@ int maxActivities(vvi& intervals) {
     return count;
 }
 
-// Jump Game I (Can Reach End)
 bool canJump(const vi& nums) {
     int maxReach = 0, n = nums.size();
     for (int i = 0; i < n; i++) {
@@ -1059,7 +1069,6 @@ bool canJump(const vi& nums) {
     return true;
 }
 
-// Jump Game II (Min Jumps)
 int jumpMin(const vi& nums) {
     int jumps = 0, currEnd = 0, farthest = 0;
     for (int i = 0; i < (int)nums.size() - 1; i++) {
@@ -1072,7 +1081,6 @@ int jumpMin(const vi& nums) {
     return currEnd >= (int)nums.size() - 1 ? jumps : -1;
 }
 
-// Gas Station
 int canCompleteCircuit(const vi& gas, const vi& cost) {
     int total = 0, curr = 0, start = 0;
     for (size_t i = 0; i < gas.size(); i++) {
@@ -1232,7 +1240,6 @@ TreeNode* buildTreePreIn(vi& preorder, vi& inorder) {
     return build(0, preorder.size() - 1, 0, inorder.size() - 1);
 }
 
-// Morris Inorder Traversal (O(1) Space)
 vi morrisInorder(TreeNode* root) {
     vi res;
     TreeNode* curr = root;
@@ -1323,7 +1330,7 @@ vi coordinateCompress(const vi& vals) {
     for (size_t i = 0; i < vals.size(); i++) {
         res[i] = lower_bound(all(sorted), vals[i]) - sorted.begin();
     }
-    return res; // Maps to 0..U-1
+    return res;
 }
 
 // ============================================================
@@ -1334,8 +1341,8 @@ vi coordinateCompress(const vi& vals) {
 int maxOverlappingIntervals(const vvi& intervals) {
     vector<pair<int, int>> events;
     for (const auto& in : intervals) {
-        events.push_back({in[0], +1}); // Start
-        events.push_back({in[1], -1}); // End
+        events.push_back({in[0], +1});
+        events.push_back({in[1], -1});
     }
     sort(all(events), [](const pii& a, const pii& b) {
         return a.first == b.first ? a.second < b.second : a.first < b.first;
@@ -1438,7 +1445,6 @@ struct EulerTour {
         for (int v : adj[u]) if (v != p) dfs(v, u, adj);
         tout[u] = timer;
     }
-    // Subtree query of u corresponds to range [tin[u], tout[u]] in Fenwick Tree
 };
 
 // ============================================================
@@ -1504,7 +1510,6 @@ vi mosAlgorithm(const vi& arr, vector<Query>& queries) {
 
     vi res(q);
     int curL = 0, curR = -1;
-    // Maintain state dynamically...
     return res;
 }
 
@@ -1528,7 +1533,6 @@ ll nCr(int n, int r) {
     return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
 }
 
-// Euler Totient Function
 int phi(int n) {
     int result = n;
     for (int p = 2; p * p <= n; p++) {
@@ -1571,6 +1575,351 @@ struct XORBasis {
     }
 };
 
+// ============================================================
+// 52. MANACHER'S ALGORITHM
+// Pattern: Longest Palindromic Substring in linear time
+// Complexity: O(N) time, O(N) space
+// ============================================================
+string manacher(string s) {
+    string t = "^";
+    for (char c : s) { t += "#"; t += c; }
+    t += "#$";
+    int n = t.size();
+    vi p(n, 0);
+    int c = 0, r = 0;
+    for (int i = 1; i < n - 1; i++) {
+        int i_mirror = 2 * c - i;
+        if (r > i) p[i] = min(r - i, p[i_mirror]);
+        while (t[i + 1 + p[i]] == t[i - 1 - p[i]]) p[i]++;
+        if (i + p[i] > r) { c = i; r = i + p[i]; }
+    }
+    int maxLen = 0, centerIdx = 0;
+    for (int i = 1; i < n - 1; i++) {
+        if (p[i] > maxLen) { maxLen = p[i]; centerIdx = i; }
+    }
+    int start = (centerIdx - maxLen) / 2;
+    return s.substr(start, maxLen);
+}
+
+// ============================================================
+// 53. BINARY LIFTING (KTH ANCESTOR & LCA)
+// Pattern: O(log N) tree queries for Kth parent & LCA
+// Complexity: O(N log N) precomp, O(log N) per query
+// ============================================================
+struct BinaryLiftingTree {
+    int n, LOG;
+    vvi up;
+    vi depth;
+
+    BinaryLiftingTree(int n, int root, const vvi& adj) : n(n) {
+        LOG = 20;
+        up.assign(n + 1, vi(LOG, 0));
+        depth.assign(n + 1, 0);
+        dfs(root, root, 0, adj);
+    }
+
+    void dfs(int u, int p, int d, const vvi& adj) {
+        depth[u] = d;
+        up[u][0] = p;
+        for (int j = 1; j < LOG; j++) up[u][j] = up[up[u][j - 1]][j - 1];
+        for (int v : adj[u]) {
+            if (v != p) dfs(v, u, d + 1, adj);
+        }
+    }
+
+    int getKthAncestor(int node, int k) {
+        for (int j = 0; j < LOG; j++) {
+            if ((k >> j) & 1) {
+                node = up[node][j];
+                if (!node) break;
+            }
+        }
+        return node;
+    }
+
+    int getLCA(int u, int v) {
+        if (depth[u] < depth[v]) swap(u, v);
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (depth[u] - (1 << j) >= depth[v]) u = up[u][j];
+        }
+        if (u == v) return u;
+        for (int j = LOG - 1; j >= 0; j--) {
+            if (up[u][j] != up[v][j]) { u = up[u][j]; v = up[v][j]; }
+        }
+        return up[u][0];
+    }
+};
+
+// ============================================================
+// 54. SPARSE TABLE (STATIC RMQ)
+// Pattern: Range Minimum Query / GCD without updates in O(1)
+// Complexity: O(N log N) precomp, O(1) query
+// ============================================================
+struct SparseTable {
+    int n, LOG;
+    vvi st;
+    vi lg;
+
+    SparseTable(const vi& arr) {
+        n = arr.size();
+        LOG = 20;
+        st.assign(n, vi(LOG));
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; i++) lg[i] = lg[i / 2] + 1;
+
+        for (int i = 0; i < n; i++) st[i][0] = arr[i];
+        for (int j = 1; j < LOG; j++) {
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                st[i][j] = min(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
+            }
+        }
+    }
+
+    int queryMin(int l, int r) {
+        int j = lg[r - l + 1];
+        return min(st[l][j], st[r - (1 << j) + 1][j]);
+    }
+};
+
+// ============================================================
+// 55. SPRAGUE-GRUNDY THEOREM / NIM GAME
+// Pattern: Impartial Game Theory (Nim sum & MEX)
+// Complexity: O(N) for Nim, O(States * Transitions) for Grundy
+// ============================================================
+bool nimGameWins(const vi& piles) {
+    int xorSum = 0;
+    for (int p : piles) xorSum ^= p;
+    return xorSum != 0;
+}
+
+int calculateMEX(const unordered_set<int>& s) {
+    int mex = 0;
+    while (s.count(mex)) mex++;
+    return mex;
+}
+
+int getGrundy(int n, vi& memo, const vi& moves) {
+    if (n == 0) return 0;
+    if (memo[n] != -1) return memo[n];
+    unordered_set<int> nextStates;
+    for (int m : moves) {
+        if (n >= m) nextStates.insert(getGrundy(n - m, memo, moves));
+    }
+    return memo[n] = calculateMEX(nextStates);
+}
+
+// ============================================================
+// 56. BOYER-MOORE MAJORITY VOTING ALGORITHM
+// Pattern: Find elements appearing > N/2 or > N/3 times
+// Complexity: O(N) time, O(1) space
+// ============================================================
+int majorityElement(const vi& nums) {
+    int candidate = 0, count = 0;
+    for (int num : nums) {
+        if (count == 0) candidate = num;
+        count += (num == candidate) ? 1 : -1;
+    }
+    return candidate;
+}
+
+vi majorityElementNBy3(const vi& nums) {
+    int cand1 = 0, cand2 = 0, count1 = 0, count2 = 0;
+    for (int num : nums) {
+        if (num == cand1) count1++;
+        else if (num == cand2) count2++;
+        else if (count1 == 0) { cand1 = num; count1 = 1; }
+        else if (count2 == 0) { cand2 = num; count2 = 1; }
+        else { count1--; count2--; }
+    }
+    count1 = count2 = 0;
+    for (int num : nums) {
+        if (num == cand1) count1++;
+        else if (num == cand2) count2++;
+    }
+    vi res;
+    int n = nums.size();
+    if (count1 > n / 3) res.push_back(cand1);
+    if (count2 > n / 3) res.push_back(cand2);
+    return res;
+}
+
+// ============================================================
+// 57. MATRIX EXPONENTIATION
+// Pattern: Fast computation of linear recurrences in O(K^3 log N)
+// Complexity: O(K^3 log N) time where K is matrix size
+// ============================================================
+vvi multiplyMatrix(const vvi& A, const vvi& B, ll mod = MOD) {
+    int n = A.size(), m = B[0].size(), p = B.size();
+    vvi C(n, vi(m, 0));
+    for (int i = 0; i < n; i++) {
+        for (int k = 0; k < p; k++) {
+            for (int j = 0; j < m; j++) {
+                C[i][j] = (C[i][j] + 1LL * A[i][k] * B[k][j]) % mod;
+            }
+        }
+    }
+    return C;
+}
+
+vvi powerMatrix(vvi A, ll p, ll mod = MOD) {
+    int n = A.size();
+    vvi res(n, vi(n, 0));
+    for (int i = 0; i < n; i++) res[i][i] = 1;
+    while (p > 0) {
+        if (p & 1) res = multiplyMatrix(res, A, mod);
+        A = multiplyMatrix(A, A, mod);
+        p >>= 1;
+    }
+    return res;
+}
+
+ll fibonacciMatrix(ll n) {
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    vvi T = {{1, 1}, {1, 0}};
+    T = powerMatrix(T, n - 1);
+    return T[0][0];
+} // F(0) = 0, F(1) = 1, F(2) = 1, ...
+
+
+// ============================================================
+// 58. QUICKSELECT ALGORITHM
+// Pattern: Kth smallest/largest element without sorting
+// Complexity: O(N) average time, O(N^2) worst-case, O(1) space
+// ============================================================
+int partitionArray(vi& nums, int left, int right) {
+    int pivot = nums[right], pIndex = left;
+    for (int i = left; i < right; i++) {
+        if (nums[i] <= pivot) {
+            swap(nums[i], nums[pIndex++]);
+        }
+    }
+    swap(nums[pIndex], nums[right]);
+    return pIndex;
+}
+
+int quickselect(vi& nums, int left, int right, int k) {
+    if (left == right) return nums[left];
+    int pIndex = left + rand() % (right - left + 1);
+    swap(nums[pIndex], nums[right]);
+    int pivotIdx = partitionArray(nums, left, right);
+    if (k == pivotIdx) return nums[k];
+    else if (k < pivotIdx) return quickselect(nums, left, pivotIdx - 1, k);
+    else return quickselect(nums, pivotIdx + 1, right, k);
+}
+
+// ============================================================
+// 59. INVERSION COUNT (MERGE SORT)
+// Pattern: Count pairs (i < j) with A[i] > A[j] / Min Swaps
+// Complexity: O(N log N) time, O(N) space
+// ============================================================
+ll mergeSortInversions(vi& arr, int l, int r) {
+    if (l >= r) return 0;
+    int mid = l + (r - l) / 2;
+    ll invCount = mergeSortInversions(arr, l, mid) + mergeSortInversions(arr, mid + 1, r);
+    vi temp(r - l + 1);
+    int i = l, j = mid + 1, k = 0;
+    while (i <= mid && j <= r) {
+        if (arr[i] <= arr[j]) {
+            temp[k++] = arr[i++];
+        } else {
+            temp[k++] = arr[j++];
+            invCount += (mid - i + 1);
+        }
+    }
+    while (i <= mid) temp[k++] = arr[i++];
+    while (j <= r) temp[k++] = arr[j++];
+    copy(all(temp), arr.begin() + l);
+    return invCount;
+}
+
+// ============================================================
+// 60. DSU ON TREE / SACK (SMALL-TO-LARGE MERGING)
+// Pattern: Offline subtree queries merging color/freq maps
+// Complexity: O(N log^2 N) or O(N log N) time, O(N) space
+// ============================================================
+void mergeMaps(map<int, int>& heavyMap, map<int, int>& lightMap) {
+    for (auto& [val, count] : lightMap) {
+        heavyMap[val] += count;
+    }
+}
+
+map<int, int> dfsSack(int u, int p, const vvi& adj, const vi& color, vi& ans) {
+    map<int, int> uMap;
+    uMap[color[u]] = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        map<int, int> vMap = dfsSack(v, u, adj, color, ans);
+        if (uMap.size() < vMap.size()) swap(uMap, vMap);
+        mergeMaps(uMap, vMap);
+    }
+    ans[u] = uMap.size(); // Count distinct colors in subtree u
+    return uMap;
+}
+
+// ============================================================
+// 61. LRU CACHE DESIGN
+// Pattern: Fast O(1) Cache eviction using HashMap + Doubly LinkedList
+// Complexity: O(1) per get/put, O(Capacity) space
+// ============================================================
+class LRUCache {
+    int cap;
+    list<pair<int, int>> dll;
+    unordered_map<int, list<pair<int, int>>::iterator> cacheMap;
+
+public:
+    LRUCache(int capacity) : cap(capacity) {}
+
+    int get(int key) {
+        if (!cacheMap.count(key)) return -1;
+        dll.splice(dll.begin(), dll, cacheMap[key]);
+        return cacheMap[key]->second;
+    }
+
+    void put(int key, int value) {
+        if (cacheMap.count(key)) {
+            cacheMap[key]->second = value;
+            dll.splice(dll.begin(), dll, cacheMap[key]);
+            return;
+        }
+        if ((int)dll.size() == cap) {
+            int delKey = dll.back().first;
+            dll.pop_back();
+            cacheMap.erase(delKey);
+        }
+        dll.push_front({key, value});
+        cacheMap[key] = dll.begin();
+    }
+};
+
+// ============================================================
+// 62. PALINDROME PARTITIONING DP
+// Pattern: Min cuts to partition s into palindromes
+// Complexity: O(N^2) time, O(N^2) space
+// ============================================================
+int minCutPalindromePartition(string s) {
+    int n = s.size();
+    vector<vector<bool>> isPal(n, vector<bool>(n, false));
+    for (int i = n - 1; i >= 0; i--) {
+        for (int j = i; j < n; j++) {
+            if (s[i] == s[j]) {
+                isPal[i][j] = (j - i <= 2) || isPal[i + 1][j - 1];
+            }
+        }
+    }
+    vi dp(n, 0);
+    for (int i = 0; i < n; i++) {
+        if (isPal[0][i]) { dp[i] = 0; continue; }
+        dp[i] = i;
+        for (int j = 0; j < i; j++) {
+            if (isPal[j + 1][i]) {
+                dp[i] = min(dp[i], 1 + dp[j]);
+            }
+        }
+    }
+    return dp[n - 1];
+}
+
 /*
 ================================================================================
   LAST-MINUTE PATTERN SELECTION GUIDE (5-MINUTE OA CHEAT SHEET)
@@ -1580,6 +1929,7 @@ struct XORBasis {
   - Next greater / smaller element -> Monotonic Stack
   - Sliding window min/max -> Monotonic Queue (deque)
   - Range sum / range update queries -> Fenwick Tree / Segment Tree (Lazy)
+  - Static Range Min/Max/GCD Queries -> Sparse Table (O(1) query)
   - Unweighted shortest path / Grid min steps -> BFS / Multi-Source BFS
   - 0/1 weighted shortest path -> 0-1 BFS (deque)
   - Non-negative weighted shortest path -> Dijkstra (priority_queue)
@@ -1588,31 +1938,413 @@ struct XORBasis {
   - Topological ordering / Dependency DAG -> Topological Sort (Kahn's BFS)
   - Subset choices / Small N (N <= 20) -> Bitmask DP / Backtracking
   - Split N <= 40 into halves -> Meet in the Middle (2^(N/2))
-  - Tree subtree queries -> Euler Tour (Flattening) + Fenwick Tree
-  - Tree LCA queries -> Binary Lifting
+  - Tree subtree queries -> Euler Tour (Flattening) / DSU on Tree (Small-to-Large)
+  - Tree Kth parent / LCA queries -> Binary Lifting (O(log N))
   - Intervals / Overlapping events -> Sort by start/end / Sweep Line / Priority Queue
   - Substring matching / Prefix match -> KMP / Z-Algorithm / Rolling Hash / Trie
+  - Longest Palindromic Substring -> Manacher's Algorithm (O(N))
+  - Game theory / Taking turns -> Nim Game XOR Sum / Sprague-Grundy (MEX)
+  - Majority element (> N/2 or > N/3) -> Boyer-Moore Majority Voting (O(N) time, O(1) space)
+  - Linear Recurrences / Generalized Fibonacci -> Matrix Exponentiation (O(K^3 log N))
+  - Kth smallest/largest in unsorted array -> Quickselect (O(N) avg time)
+  - Inverted pairs / Adjacent swaps count -> Inversion Count via Merge Sort (O(N log N))
+  - O(1) Get/Put Cache -> LRU Cache (Doubly Linked List + Map)
+  - String partition into palindromes -> Palindrome Partitioning DP (O(N^2))
 ================================================================================
 */
 
-int mergeSortInversions(vector<int>& a, int l , int r){
-    if(l >= r) return 0;
-    int mid = l + (r - l) / 2;
-    int invCount = mergeSortInversions(a, l, mid) + mergeSortInversions(a, mid + 1, r);
-    vector<int> temp(r - l + 1);
-    int i = l, j = mid + 1, k = 0;
-    while(i <= mid && j <= r){
-        if(a[i] <= a[j]){
-            temp[k++] = a[i++];
-        } else {
-            temp[k++] = a[j++];
-            invCount += (mid - i + 1);
+/*
+================================================================================
+  PRE-OA CHECKLIST — READ THIS 10 MINUTES BEFORE THE TEST STARTS
+================================================================================
+
+  [MINDSET / TIME MANAGEMENT]
+  - Read ALL questions first (skim 2-3 min) before writing code for any one.
+    Solve easiest/highest-confidence problem first to bank points early.
+  - Hard cap per question: if stuck > 15-20 min with no progress, move on.
+    Partial credit exists in most OAs (many test cases pass != all).
+  - Note constraints FIRST, always. They tell you the expected complexity:
+      N <= 10          -> exponential / bitmask / brute force OK
+      N <= 20          -> bitmask DP (2^N * N)
+      N <= 500-1000     -> O(N^2) or O(N^2 log N)
+      N <= 1e5          -> O(N log N)
+      N <= 1e6-1e7       -> O(N) or O(N log N) with small constant
+      N <= 1e9 (value)  -> O(log N) / binary search / math, NOT O(N)
+  - Time limit is usually 1-2 sec => ~1e8 simple ops is roughly the ceiling.
+
+  [BEFORE YOU CODE — 60 SECOND SANITY PASS]
+  - Re-read problem statement twice. Misreading > algorithm mistakes as
+    the #1 cause of failed OAs.
+  - Check: 0-indexed or 1-indexed? Inclusive or exclusive ranges?
+  - Identify EXACT output format (space-separated? newline? "-1" vs "NO"?
+    trailing newline? case sensitivity like "Yes" vs "YES"?).
+  - Look for hidden edge cases in the statement: empty array, single
+    element, all same elements, negative numbers, duplicates, N=0.
+
+  [WHILE CODING]
+  - Use long long by default for anything that could overflow
+    (sums, products, N > ~1e5 with counting). Cast BEFORE multiplying:
+        long long x = (long long)a * b;   // not (a*b) then cast
+  - Initialize variables (esp. min/max accumulators) with safe sentinels:
+        long long best = LLONG_MIN; / LLONG_MAX;
+  - Watch off-by-one in loop bounds, mid = (l+r)/2 vs l+(r-l)/2 (overflow-safe).
+  - Vector/array bounds: double check i+1, i-1 accesses near edges.
+  - Modulo arithmetic: take mod after EVERY addition/multiplication,
+    and handle negative mod: ((x % MOD) + MOD) % MOD.
+
+  [EDGE CASES TO MANUALLY TEST BEFORE SUBMITTING]
+  - Empty input / empty array / empty string
+  - Single element
+  - All elements identical
+  - Already sorted / reverse sorted (for sorting-based problems)
+  - Negative numbers, zero, very large numbers
+  - Duplicate values (esp. for two-pointer / binary search problems)
+  - Minimum and maximum constraint values (N=1 and N=max)
+
+  [DEBUGGING UNDER TIME PRESSURE]
+  - If wrong answer on hidden tests but sample passes: re-check assumptions,
+    not just logic — did you assume sorted input? Did you assume no dupes?
+  - If TLE: check nested loops, check if you're doing O(N) work inside a
+    binary search / sliding window when it should be O(1) amortized.
+  - If RE (runtime error): almost always array out-of-bounds, division by
+    zero, or empty container .back()/.front()/.top() access.
+  - Print statements are fine for local debug — just REMOVE or comment
+    them out before final submit (some judges fail on extra stdout).
+
+  [SUBMISSION HYGIENE]
+  - Remove all debug prints / cerr statements.
+  - Remove any hardcoded test-case values you used while debugging.
+  - Make sure the function signature matches EXACTLY what's asked
+    (return type, parameter order) if it's a function-based OA (not stdin/stdout).
+  - Re-run against the given sample input/output one final time before submit.
+  - If multiple test files are allowed, submit early even with partial
+    solution — don't risk losing everything to a last-second crash/lag.
+
+  [COMMON OA "GOTCHA" PATTERNS TO RECOGNIZE FAST]
+  - "Count pairs/subarrays with sum/XOR = K"      -> prefix sum + hashmap
+  - "Kth largest/smallest, streaming"              -> heap
+  - "Min/max in every window of size K"            -> monotonic deque
+  - "Next greater/smaller element"                 -> monotonic stack
+  - "Connected components / grouping"              -> DSU or BFS/DFS
+  - "Shortest path, unweighted grid"               -> BFS
+  - "Shortest path, weighted, no negatives"        -> Dijkstra
+  - "Min cost to connect all / MST-flavored"       -> Kruskal/Prim
+  - "Optimal substructure + overlapping subproblems"-> DP (define state first!)
+  - "Can we achieve X? Feasibility check"          -> binary search on answer
+  - "Number of ways / arrangements"                -> combinatorics or DP + mod
+  - "Contiguous subarray with max/min sum"         -> Kadane's
+  - "Cycle detection in directed graph"            -> topo sort (Kahn's) fails => cycle
+  - "String matching / pattern occurs in text"     -> KMP / Z-algorithm
+
+  [LAST 2 MINUTES]
+  - Submit something, even if incomplete — partial > zero.
+  - Double-check you clicked "Submit" / "Run All Tests", not just "Run".
+  - Don't leave the tab / lose internet — some platforms auto-submit on
+    tab switch violations (proctoring). Keep the tab focused throughout.
+================================================================================
+*/
+
+/*
+================================================================================
+  STL CONTAINER SYNTAX CHEAT SHEET — QUICK REFERENCE BEFORE OA
+================================================================================
+
+  [VECTOR]
+  vector<int> v;                          // empty
+  vector<int> v(n);                       // size n, all 0
+  vector<int> v(n, -1);                   // size n, all -1
+  vector<vector<int>> grid(n, vector<int>(m, 0));   // 2D n x m
+  v.push_back(x); v.pop_back();
+  v.size(); v.empty();
+  v.front(); v.back();
+  v.begin(); v.end(); v.rbegin(); v.rend();
+  sort(v.begin(), v.end());
+  sort(v.begin(), v.end(), greater<int>());          // descending
+  sort(v.begin(), v.end(), [](int a, int b){ return a > b; });
+  reverse(v.begin(), v.end());
+  v.erase(v.begin() + i);                 // remove index i
+  v.insert(v.begin() + i, x);             // insert x at index i
+  auto it = find(v.begin(), v.end(), x);  // returns v.end() if not found
+  int mn = *min_element(v.begin(), v.end());
+  int mx = *max_element(v.begin(), v.end());
+  long long s = accumulate(v.begin(), v.end(), 0LL);
+  v.resize(newSize);
+  v.clear();
+
+  [PAIR]
+  pair<int,int> p = {1, 2};
+  pair<int,int> p = make_pair(1, 2);
+  p.first; p.second;
+  vector<pair<int,int>> vp;
+  sort(vp.begin(), vp.end());             // sorts by first, then second
+  sort(vp.begin(), vp.end(), [](auto &a, auto &b){ return a.second < b.second; });
+
+  [TUPLE]
+  tuple<int,int,int> t = {1, 2, 3};
+  get<0>(t); get<1>(t); get<2>(t);
+  auto [a, b, c] = t;                     // structured binding (C++17)
+
+  [MAP — ordered, O(log n), sorted by key]
+  map<int,int> mp;
+  mp[key] = value;
+  mp[key]++;                              // auto-inits missing key to 0
+  if (mp.find(key) != mp.end())           // check existence
+  if (mp.count(key))                      // simpler existence check
+  mp.erase(key);
+  for (auto &[k, v] : mp) { ... }         // iterates sorted by key
+  mp.begin()->first;                      // smallest key
+  prev(mp.end())->first;                  // largest key
+
+  [UNORDERED_MAP — O(1) avg, no order]
+  unordered_map<int,int> ump;
+  // same interface as map, use whenever order doesn't matter (faster)
+
+  [SET — ordered, unique, sorted]
+  set<int> s;
+  s.insert(x); s.erase(x);
+  s.count(x);                             // 0 or 1
+  s.find(x) != s.end();
+  auto it = s.lower_bound(x);             // first element >= x
+  auto it = s.upper_bound(x);             // first element > x
+  *s.begin();                             // smallest
+  *prev(s.end());                         // largest
+
+  [UNORDERED_SET — O(1) avg, no order]
+  unordered_set<int> us;
+  // same interface as set, faster when order irrelevant
+
+  [MULTISET / MULTIMAP — allow duplicates]
+  multiset<int> ms;
+  ms.erase(ms.find(x));                   // erase ONE occurrence
+                                           // ms.erase(x) removes ALL occurrences
+
+  [STACK]
+  stack<int> st;
+  st.push(x); st.pop();                   // pop returns void!
+  st.top();                               // peek
+  st.empty(); st.size();
+
+  [QUEUE]
+  queue<int> q;
+  q.push(x); q.pop();                     // pop returns void!
+  q.front(); q.back();
+  q.empty(); q.size();
+
+  [DEQUE — double ended]
+  deque<int> dq;
+  dq.push_back(x); dq.push_front(x);
+  dq.pop_back(); dq.pop_front();
+  dq.front(); dq.back();
+
+  [PRIORITY_QUEUE — max-heap by default]
+  priority_queue<int> pq;                          // max-heap
+  priority_queue<int, vector<int>, greater<int>> pq; // min-heap
+  pq.push(x); pq.pop();                            // pop returns void!
+  pq.top();                                        // peek
+  // custom comparator for pair (min-heap by first element):
+  priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+
+  [STRING]
+  string s = "hello";
+  s.substr(start, len);                   // substring, len optional (to end)
+  s.length(); s.size();
+  s += "abc";                             // concat
+  s.push_back('a');
+  reverse(s.begin(), s.end());
+  sort(s.begin(), s.end());
+  to_string(123);                         // int -> string
+  stoi(s); stol(s); stoll(s);             // string -> int/long/long long
+  s.find("sub");                          // returns string::npos if not found
+  s.find("sub") != string::npos           // existence check
+  isalpha(c); isdigit(c); isupper(c); islower(c);
+  tolower(c); toupper(c);
+
+  [BITSET]
+  bitset<32> b(num);
+  b.count();                              // number of set bits
+  b.to_ullong(); b.to_string();
+  b[i];                                   // access/set bit i
+
+  [ARRAY (fixed size, C++11)]
+  array<int, 5> a = {1,2,3,4,5};
+  // same methods as vector but fixed size, no push_back
+
+  [ITERATING]
+  for (int x : v) { ... }                 // read-only
+  for (int &x : v) { ... }                // modifiable
+  for (auto &[k, v] : mp) { ... }         // map/pair structured binding
+  for (auto it = v.begin(); it != v.end(); ++it) { ... }
+
+  [COMMON GOTCHAS]
+  - stack/queue/pq .pop() returns VOID — never do x = st.pop()
+  - map[] operator INSERTS the key if missing (careful in read-only checks;
+    use .count() or .find() instead if you don't want to insert)
+  - multiset.erase(x) removes ALL matching elements, use erase(find(x)) for one
+  - vector out-of-bounds with [] is UB (no error) — use .at(i) while
+    debugging to catch it, switch back to [] for speed if needed
+  - comparing floating point directly (==) is unsafe, use abs(a-b) < eps
+================================================================================
+*/
+
+/*
+================================================================================
+  LAST-MINUTE REVISION GUIDE — DYNAMIC PROGRAMMING
+================================================================================
+
+  [HOW TO RECOGNIZE A DP PROBLEM]
+  - Asks for: min/max value, count of ways, is it possible (yes/no),
+    longest/shortest something, optimal way to partition/select/arrange.
+  - Has "optimal substructure": answer to big problem built from answers
+    to smaller subproblems.
+  - Has "overlapping subproblems": brute force recursion recomputes the
+    same state many times (if unsure, draw the recursion tree for N=4-5).
+  - Keywords: "maximum/minimum", "number of ways", "can you reach/form",
+    "longest/shortest subsequence", "partition into", "at each step choose".
+
+  [THE 5-STEP DP FRAMEWORK — DO THIS ON PAPER FIRST]
+  1. Define state:  dp[i] / dp[i][j] = "what does this cell MEAN in words"
+     (this is the step people skip and then get stuck — always write it out)
+  2. Identify choices at each state (usually 2-K options per step).
+  3. Write recurrence: dp[state] = best/sum of (choice -> dp[smaller state])
+  4. Base case(s): smallest state(s), usually dp[0] or dp[0][0].
+  5. Answer = dp[final state] (not always dp[n][m] — sometimes max over dp[])
+
+  [TOP-DOWN (MEMO) vs BOTTOM-UP (TABULATION)]
+  - Top-down: easier to write correctly under time pressure, write the
+    brute-force recursion first, then add memo (map or array of -1).
+        if (memo[state] != -1) return memo[state];
+        return memo[state] = /* recurrence
+  - Bottom-up: needed when recursion depth might stack-overflow (N > ~1e5),
+    or when you want O(1) space optimization after.
+  - If stuck on transitions, ALWAYS write recursive brute force first,
+    verify on sample, THEN memoize. Don't try to write tabulation directly
+    for a new problem type.
+
+  [SPACE OPTIMIZATION TRICK]
+  - If dp[i] only depends on dp[i-1] (or dp[i-1], dp[i-2]), drop the array
+    dimension to O(1) using rolling variables. Common in Knapsack, Fibonacci-
+    style, House Robber-style problems. Do this ONLY after correctness works.
+
+  [CLASSIC DP PATTERNS — MAP PROBLEM TO PATTERN FAST]
+  - "Pick or skip each item, weight limit"         -> 0/1 Knapsack
+  - "Pick or skip, unlimited use per item"         -> Unbounded Knapsack
+  - "Two strings, match/replace/delete/insert"     -> Edit Distance / LCS family
+  - "Longest increasing subsequence"               -> LIS (O(N log N) w/ binary search)
+  - "Min/max path in grid, move right/down only"   -> Grid DP
+  - "Partition array into K parts optimally"       -> Interval DP or prefix + DP
+  - "Merge intervals/matrices optimally"           -> Interval DP (MCM style),
+       dp[i][j] = min over k of dp[i][k] + dp[k+1][j] + cost(i,j)
+  - "Count ways to reach N using steps {1,2,3..}"  -> 1D DP, dp[i]=sum(dp[i-step])
+  - "Subset sum / can we make sum S"               -> boolean DP, dp[sum] = true/false
+  - "N small (<=20), choose subset with constraint"-> Bitmask DP
+  - "Count numbers in [L,R] with digit property"   -> Digit DP
+  - "Max sum non-adjacent elements"                -> House Robber pattern,
+       dp[i] = max(dp[i-1], dp[i-2] + a[i])
+  - "Tree, best value using subtree choices"       -> Tree DP (post-order, combine children)
+
+  [DP DEBUGGING CHECKLIST]
+  - Print the DP table for a small example, verify by hand.
+  - Check base case indices carefully (dp[0] vs dp[1], off-by-one is #1 bug).
+  - Check iteration ORDER — are you using values not yet computed?
+    (e.g., unbounded knapsack iterates weight ascending, 0/1 knapsack
+    descending, when using 1D optimized array — this trips people up a lot)
+  - Overflow: use long long for sums/counts, mod arithmetic for "count ways".
+  - If "count ways" — remember answer might need % 1e9+7 at EVERY step,
+    not just at the end.
+
+================================================================================
+  LAST-MINUTE REVISION GUIDE — GRAPH PROBLEMS
+================================================================================
+
+  [HOW TO RECOGNIZE + PICK THE RIGHT ALGORITHM FAST]
+  - "Shortest path, unweighted"                    -> BFS
+  - "Shortest path, weighted, all edges >= 0"       -> Dijkstra (priority_queue)
+  - "Shortest path, negative edges allowed"         -> Bellman-Ford (or SPFA)
+  - "Shortest path, negative cycle detection"       -> Bellman-Ford (N-1 relax,
+       check if Nth relaxation still improves something)
+  - "All-pairs shortest path, small N (<=400)"      -> Floyd-Warshall O(N^3)
+  - "Min cost to connect all nodes (spanning tree)" -> Kruskal (DSU) or Prim
+  - "Grid problem, 4/8-directional movement"        -> BFS/DFS on grid,
+       treat each cell as a node, check bounds before recursing
+  - "0/1 weighted edges only (0 or 1 cost)"         -> 0-1 BFS (deque, push
+       front for 0-weight, back for 1-weight)
+  - "Multiple starting points, same time"           -> Multi-source BFS
+       (push all sources into queue with distance 0 initially)
+  - "Order tasks with dependencies"                 -> Topological Sort (Kahn's
+       BFS using in-degree, or DFS post-order + reverse)
+  - "Detect cycle in directed graph"                -> Kahn's: if topo sort
+       doesn't include all nodes => cycle exists
+  - "Detect cycle in undirected graph"               -> DFS with parent tracking,
+       or DSU (if union(u,v) finds u,v already same set => cycle)
+  - "Group connected components / union queries"     -> DSU (Union-Find)
+  - "Find bridges/articulation points"                -> Tarjan's (disc/low arrays)
+  - "Strongly connected components"                   -> Tarjan's SCC or Kosaraju's
+  - "Bipartite check"                                 -> BFS/DFS 2-coloring
+  - "Min spanning tree, need actual edges used"       -> Kruskal + DSU (sort
+       edges by weight, add if it doesn't form cycle)
+
+  [BFS TEMPLATE — MENTAL CHECKLIST]
+  - Use queue, NOT stack (stack = DFS, common silly mistake under pressure).
+  - Mark visited WHEN PUSHING to queue, not when popping (avoids duplicate
+    pushes of the same node -> can cause TLE or wrong distances).
+  - Track distance/level either via a parallel dist[] array or by
+    processing queue level-by-level (store queue size before the for loop).
+
+  [DFS TEMPLATE — MENTAL CHECKLIST]
+  - Recursive DFS can stack overflow if graph is a long chain and N > ~1e5;
+    prefer iterative DFS with explicit stack for large inputs.
+  - For cycle detection in directed graphs via DFS, track 3 states per node:
+    unvisited / in current recursion stack / fully processed (not just
+    visited/unvisited — 2-state DFS cycle check is WRONG for directed graphs).
+
+  [GRAPH REPRESENTATION — PICK FAST]
+  - Adjacency list: vector<vector<int>> adj(n);  -- default choice, O(V+E) space
+  - Weighted: vector<vector<pair<int,int>>> adj(n); // {neighbor, weight}
+  - Dense graph (E close to V^2) or need O(1) edge lookup: adjacency matrix
+  - Always check: is graph DIRECTED or UNDIRECTED? (undirected needs edge
+    added BOTH ways: adj[u].push_back(v); adj[v].push_back(u);)
+
+  [DSU (UNION-FIND) QUICK TEMPLATE REMINDER]
+  - Use path compression in find() AND union by rank/size for near-O(1) ops.
+  - find(x): if (parent[x]!=x) parent[x]=find(parent[x]); return parent[x];
+  - Without path compression + union by rank, DSU can degrade to O(N) per op
+    -> TLE on large inputs. Always include both optimizations.
+
+  [GRAPH DEBUGGING CHECKLIST]
+  - Off-by-one: nodes numbered 0-indexed or 1-indexed in the problem?
+    Mismatch here silently breaks everything.
+  - Self-loops and multiple edges — does the problem guarantee simple graph?
+    If not, your visited/dist logic must still handle them correctly.
+  - Disconnected graph: does your BFS/DFS need to run from EVERY unvisited
+    node (for "count components" style problems), not just node 0?
+  - Dijkstra: skip processing if popped distance > dist[node] (stale entry
+    in priority_queue) — forgetting this causes wrong answers, not just TLE.
+  - Bellman-Ford: relax ALL edges exactly V-1 times, then do ONE more pass
+    to detect negative cycles (if any edge still relaxes, cycle exists).
+  - Check edge weights: can they be 0? negative? does that rule out Dijkstra?
+================================================================================
+*/
+
+void QuickSort(vector<int>& a, int l, int r) {
+    if (l >= r) return;
+
+    int i = l, j = r;
+    int pivot = a[l + (r - l) / 2];
+
+    while (i <= j) {
+        while (a[i] < pivot) i++;
+        while (a[j] > pivot) j--;
+
+        if (i <= j) {
+            swap(a[i], a[j]);
+            i++;
+            j--;
         }
     }
-    while(i <= mid) temp[k++] = a[i++];
-    while(j <= r) temp[k++] = a[j++];
-    copy(temp.begin(), temp.end(), a.begin() + l);
-    return invCount;
-} // time complexity: O(N log N), space complexity: O(N)
 
-// no of swaps in bubble sort = no of inversions in array
+    if (l < j) QuickSort(a, l, j);
+    if (i < r) QuickSort(a, i, r);
+}
+// tc - O(n log n) average, O(n^2) worst case
+// sc - O(log n) average, O(n) worst case (recursion stack)
+
