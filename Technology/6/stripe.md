@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is STRIPE and why/when do we use it?"*
+>
+> **You say:** *"Stripe is a developer-first payment infrastructure platform. It uses client-side tokenization via Stripe Elements to keep raw card numbers off application servers for PCI-DSS compliance, models payments through a multi-step Payment Intents state machine, and fulfills purchases via cryptographically signed webhooks with idempotency keys."*
+
+---
+
 ## 1. What It Is in Plain English
 
 Handling credit cards directly on your backend server is a legal and security nightmare: if an attacker breaches your server and steals raw card numbers, you face massive regulatory fines and liability (**PCI-DSS compliance violation**).
@@ -43,22 +51,13 @@ Stripe eliminates this risk using **Tokenization & Payment Intents**:
 
 ---
 
-## 3. How I Used It (Billing & Subscription Architecture)
-
-- **Payment Processing & Webhook Fulfillment:**
-  - Implemented the **Payment Intents API** flow for secure checkout, ensuring card numbers were tokenized via Stripe Elements on the client side.
-  - Built an idempotent webhook consumer listening to `payment_intent.succeeded` and `invoice.payment_failed` events with HMAC-SHA256 signature verification.
-  - Used **Idempotency Keys** on all Stripe API calls to guarantee users were never double-charged during network retry blips.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Imagine you want to buy diamond jewelry at a high-security vault. Instead of carrying $50,000 cash in your backpack through a dangerous alley (storing raw credit card numbers on your server), an armored security truck (Stripe Elements) collects the cash directly from your bank. The truck gives your merchant a sealed, tamper-proof claim receipt (the PaymentIntent ID). The merchant hands the receipt to the vault clerk, and the money is transferred safely behind bulletproof glass."*
 
 ---
 
-## 5. 5–8 High-Yield Interview Questions & Direct Answers
+## 4. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the Payment Intents API and why did Stripe replace the legacy Charges API?
 > **Answer:** The legacy Charges API assumed a single, synchronous payment step. However, global regulations (like European PSD2 / SCA - Strong Customer Authentication) require **3D Secure 2 (3DS2)** two-factor authentication (e.g. mobile OTP / bank app authorization).
@@ -76,7 +75,7 @@ Stripe eliminates this risk using **Tokenization & Payment Intents**:
 
 ---
 
-## 6. Common "Gotcha" Questions Interviewers Ask
+## 5. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "What happens if your database is down when Stripe delivers a webhook event?"
 - **The Answer:** If your server returns an HTTP error status (`500`, `502`, `504`) or times out, Stripe automatically schedules **exponential backoff retries** over the next 72 hours (retrying after 1 min, 5 mins, 30 mins, up to days). Once your database recovers, your webhook handler processes the retried event and returns `200 OK`.

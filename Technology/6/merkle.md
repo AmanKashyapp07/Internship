@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is MERKLE and why/when do we use it?"*
+>
+> **You say:** *"A Merkle DAG is a graph where parent nodes contain the cryptographic hashes of their children. It allows checking if two complex directory trees are identical in O(1) time by comparing their top-level root hashes, forming the core tamper-proof storage model of Git and distributed content systems."*
+
+---
+
 ## 1. What It Is in Plain English
 
 Most people think Git is a system that saves file diffs (deltas). **It is not.**
@@ -22,7 +30,7 @@ Git is fundamentally a **Content-Addressable Object Store and a Merkle DAG**. Ev
                     [ COMMIT OBJECT: sha1("commit ...") ]
                     - tree: "a1b2c3..." (Root directory snapshot)
                     - parent: "f9e8d7..." (Previous commit hash)
-                    - author: "Aman <aman@...>"
+                    - author: "Developer <dev@example.com>"
                     - message: "Add pipeline scheduler"
                                       |
                                       v
@@ -34,7 +42,7 @@ Git is fundamentally a **Content-Addressable Object Store and a Merkle DAG**. Ev
                  |                                           |
                  v                                           v
 [ BLOB OBJECT: sha1("blob ...") ]           [ SUB-TREE OBJECT: sha1("tree ...") ]
-- Content: { "name": "nexuside" }           - 100644 blob "99cc..." App.tsx
+- Content: { "name": "my-app" }             - 100644 blob "99cc..." App.tsx
                                             - 100644 blob "11dd..." index.css
 ```
 
@@ -45,22 +53,13 @@ Git is fundamentally a **Content-Addressable Object Store and a Merkle DAG**. Ev
 
 ---
 
-## 3. How I Used It (NexusIDE)
-
-- **NexusIDE (Time-Travel Timelapse Engine):**
-  - Designed a custom in-memory Git-style Merkle DAG engine in TypeScript/Node.js to power the workspace **Timelapse Player**.
-  - **Deduplication:** When auto-saving intermediate code states during a student's coding session, unchanged files reused existing SHA-256 Blob references, reducing database storage footprint by **> 75%**.
-  - **Instant State Reconstruction:** To scrub the timeline back to minute 14 of an interview session, the engine simply traverses the DAG root pointer at that specific commit node, reconstructing the full multi-file directory tree in under 5 milliseconds.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Imagine you take a photograph of your living room every day. Instead of buying a new room full of furniture for each photo (full duplicate storage), you keep one master warehouse containing numbered pieces of furniture (the CAS Blob store). Each photo is just an index card (the Tree object) that lists: 'Sofa #42 on the left, Lamp #88 on the right'. If you only replace the lamp, tomorrow's index card points to Sofa #42 and new Lamp #89. The living room history is completely preserved with minimal storage."*
 
 ---
 
-## 5. Merkle Tree vs. Standard Tree Comparison
+## 4. Merkle Tree vs. Standard Tree Comparison
 
 | Dimension | Merkle DAG (Git / IPFS) | Standard File System Tree (ext4 / NTFS) |
 | :--- | :--- | :--- |
@@ -71,7 +70,7 @@ Git is fundamentally a **Content-Addressable Object Store and a Merkle DAG**. Ev
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What happens under the hood when you run `git add` and `git commit`?
 > **Answer:**
@@ -92,7 +91,7 @@ Git is fundamentally a **Content-Addressable Object Store and a Merkle DAG**. Ev
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Does Git track file renames explicitly?"
 - **The Answer:** **No.** Git does not store "rename" metadata anywhere in its object database. When you rename `foo.ts` to `bar.ts`, Git simply writes a new `tree` object pointing the name `bar.ts` to the existing unchanged `blob` hash. When running `git log` or `git status`, Git's diff engine dynamically detects renames on the fly using a similarity heuristic (if an added file shares >50% content with a deleted file).

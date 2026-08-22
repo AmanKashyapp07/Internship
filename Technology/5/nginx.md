@@ -4,9 +4,17 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is NGINX and why/when do we use it?"*
+>
+> **You say:** *"Nginx is an event-driven, asynchronous reverse proxy and load balancer. Using non-blocking worker processes, it handles SSL/TLS termination, static asset delivery via Linux zero-copy sendfile, and Layer 7 request routing to protect and scale upstream backend application servers."*
+
+---
+
 ## 1. What It Is in Plain English
 
-When a user visits `https://nexuside.io/api/workspaces`, they should not connect directly to your Node.js application process running on port `3000`. Exposing Node.js directly to the raw internet is risky because:
+When a user visits `https://cloudide.example.com/api/workspaces`, they should not connect directly to your Node.js application process running on port `3000`. Exposing Node.js directly to the raw internet is risky because:
 - Node is not optimized for SSL/TLS handshakes or serving large static image/JS files.
 - Slow client connections (e.g. 2G mobile networks) tie up Node.js sockets.
 - You cannot easily load balance traffic across multiple backend server instances.
@@ -47,32 +55,13 @@ When a user visits `https://nexuside.io/api/workspaces`, they should not connect
 
 ---
 
-## 3. How I Used It (NexusIDE & MagnusCI)
-
-- **NexusIDE (WebSocket PTY Stream Routing & SSL Termination):**
-  - Configured Nginx to proxy persistent, high-throughput WebSocket PTY connections to backend Docker orchestrators with explicit hop-by-hop upgrade headers:
-    ```nginx
-    location /ws/ {
-        proxy_pass http://websocket_cluster;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_read_timeout 3600s; # Prevents 60-second idle disconnects
-    }
-    ```
-- **MagnusCI (Reverse Proxy & Ingress Load Balancing):**
-  - Used Nginx as the front-facing Ingress controller in the K3s cluster to route GitHub webhook deliveries, serve Vite production static builds, and enforce HTTPS security headers (HSTS, CSP, X-Frame-Options).
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"A Forward Proxy (like a VPN) hides the **Client's** identity from the internet (the server only sees the VPN's IP). A Reverse Proxy (like Nginx) hides the **Server's** internal architecture from the client. When you walk into a hotel, you don't go to the kitchen to talk to the chef or the basement to talk to the boiler operator. You talk to the Concierge at the front desk (Nginx). The Concierge answers simple questions, verifies your ID, and directs your request to the right department behind closed doors."*
 
 ---
 
-## 5. Nginx vs. The Alternatives
+## 4. Nginx vs. The Alternatives
 
 | Dimension | Nginx | Apache HTTP Server | Caddy | Envoy / HAProxy |
 | :--- | :--- | :--- | :--- | :--- |
@@ -83,7 +72,7 @@ When a user visits `https://nexuside.io/api/workspaces`, they should not connect
 
 ---
 
-## 6. Core Load Balancing Algorithms in Nginx
+## 5. Core Load Balancing Algorithms in Nginx
 
 1. **Round Robin (Default):** Distributes incoming requests sequentially down the list of upstream servers.
 2. **Least Connections (`least_conn`):** Routes the new request to the server with the fewest active, in-flight connections (ideal for long-running CI build requests or terminal sessions).
@@ -92,7 +81,7 @@ When a user visits `https://nexuside.io/api/workspaces`, they should not connect
 
 ---
 
-## 7. 5–8 High-Yield Interview Questions & Direct Answers
+## 6. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the difference between a Forward Proxy and a Reverse Proxy?
 > **Answer:**
@@ -110,7 +99,7 @@ When a user visits `https://nexuside.io/api/workspaces`, they should not connect
 
 ---
 
-## 8. Common "Gotcha" Questions Interviewers Ask
+## 7. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Why does `proxy_pass http://backend;` lose the real client IP address in Node.js (`req.ip = 127.0.0.1`)?"
 - **The Answer:** Because Nginx initiates a new TCP connection to the backend server, the backend sees Nginx's IP as the remote client.

@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is PTY and why/when do we use it?"*
+>
+> **You say:** *"A Pseudo-Terminal (PTY) is a Linux kernel emulated character device pair consisting of a Master and a Slave. It provides kernel Line Discipline for interactive shells, handling signals like SIGINT on Ctrl+C, echoing, and terminal resizing via SIGWINCH over software network streams."*
+
+---
+
 ## 1. What It Is in Plain English
 
 When you type a command on your computer, the terminal does a lot of invisible work before sending the text to the program:
@@ -46,24 +54,13 @@ This logic is called **Line Discipline** in the Linux kernel. A **PTY (Pseudo-Te
 
 ---
 
-## 3. How I Used It (NexusIDE & MagnusCI)
-
-- **NexusIDE (Web PTY Streaming Pipeline):**
-  - Used `node-pty` to spawn isolated container PTYs inside Docker sandboxes.
-  - Connected the Master PTY stream bidirectionally to `xterm.js` over WebSockets.
-  - Handled terminal window resizing: Emitted `{ type: 'RESIZE', cols, rows }` from frontend `FitAddon` to the backend, which executed `ptyProcess.resize(cols, rows)` (triggering the `ioctl(TIOCSWINSZ)` syscall to send `SIGWINCH` to the container shell).
-- **MagnusCI (Live Build Log Streaming):**
-  - Captured raw PTY stdout containing ANSI color formatting and progress bars from Docker build stages, streaming them with low latency to the web dashboard.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Imagine an old 1970s teletype machine: a physical keyboard and mechanical printer connected by copper wires to a mainframe computer. A Linux PTY is a virtual software recreation of that teletype machine. The Slave end is the cable plugged into the mainframe (the shell process), the Line Discipline is the internal circuit translating keypresses, and the Master end is the remote operator's hands typing and reading the paper tape."*
 
 ---
 
-## 5. Raw Pipes vs. Pseudo-Terminals (PTYs)
+## 4. Raw Pipes vs. Pseudo-Terminals (PTYs)
 
 | Dimension | Standard Linux Pipe (`pipe()`) | Pseudo-Terminal PTY (`openpty()`) |
 | :--- | :--- | :--- |
@@ -75,7 +72,7 @@ This logic is called **Line Discipline** in the Linux kernel. A **PTY (Pseudo-Te
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the difference between "Cooked Mode" and "Raw Mode" in a terminal?
 > **Answer:**
@@ -93,7 +90,7 @@ This logic is called **Line Discipline** in the Linux kernel. A **PTY (Pseudo-Te
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Why do programs like `sudo` refuse to read passwords from standard stdin redirection (`echo 'pass' | sudo ...`)?"
 - **The Answer:** For security, `sudo` bypasses standard `stdin` and explicitly opens `/dev/tty` (the controlling terminal device directly) to ensure the password prompt is answered by an interactive human at a keyboard rather than a piped script. A PTY is required to programmatically automate interactive CLI prompts.

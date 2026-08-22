@@ -4,9 +4,17 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is HMAC and why/when do we use it?"*
+>
+> **You say:** *"HMAC-SHA256 is a symmetric cryptographic construction that verifies both data integrity and authenticity using a shared secret key and nested hashing. It ensures webhook payloads have not been altered in transit and uses constant-time string comparisons to prevent microsecond timing attacks."*
+
+---
+
 ## 1. What It Is in Plain English
 
-When you expose a public webhook endpoint (`POST https://magnusci.io/api/webhooks/github`), **anyone on the internet can send an HTTP POST request to that URL**. A malicious attacker could forge a fake webhook payload claiming "User pushed code to main branch" to trigger expensive build servers and deploy unauthorized code.
+When you expose a public webhook endpoint (`POST https://ci.example.com/api/webhooks/github`), **anyone on the internet can send an HTTP POST request to that URL**. A malicious attacker could forge a fake webhook payload claiming "User pushed code to main branch" to trigger expensive build servers and deploy unauthorized code.
 
 To prevent this:
 1. GitHub and your server share a private secret string (**Webhook Secret**).
@@ -20,7 +28,7 @@ To prevent this:
 ## 2. HMAC Cryptographic Architecture & Flow
 
 ```
-[ GITHUB / STRIPE SENDER ]                                           [ YOUR BACKEND (MagnusCI) ]
+[ GITHUB / STRIPE SENDER ]                                           [ YOUR BACKEND (CI/CD Pipeline Engines) ]
 +-----------------------------------+                               +-----------------------------------+
 | Shared Secret: "my_secret_key"    |                               | Shared Secret: "my_secret_key"    |
 | Raw Payload: '{"ref":"main"...}'  |                               | Raw Buffer: (express.raw())       |
@@ -40,36 +48,13 @@ To prevent this:
 
 ---
 
-## 3. How I Used It (MagnusCI)
-
-- **MagnusCI (GitHub Webhook Endpoint Security):**
-  - Configured Express to capture the raw unparsed request buffer via `express.raw({ type: 'application/json' })`.
-  - Implemented cryptographic signature verification in Node.js using `crypto.createHmac('sha256', secret)`:
-    ```ts
-    function verifyGitHubWebhook(req: Request, res: Response, next: NextFunction) {
-        const signatureHeader = req.headers['x-hub-signature-256'] as string;
-        if (!signatureHeader) return res.status(401).send('Missing signature');
-
-        const hmac = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET!);
-        const digest = Buffer.from('sha256=' + hmac.update(req.body).digest('hex'), 'utf8');
-        const checksum = Buffer.from(signatureHeader, 'utf8');
-
-        if (checksum.length !== digest.length || !crypto.timingSafeEqual(digest, checksum)) {
-            return res.status(401).send('Invalid signature verification failed');
-        }
-        next();
-    }
-    ```
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Imagine ordering confidential military supplies by letter. A signature on plain paper can be forged, and anyone could tamper with the letter in transit. An HMAC is like applying a custom wax seal using a unique brass stamp that only you and the General possess. When the General receives the letter, they inspect the unbroken wax seal with a microscope. If the wax is intact and matches the stamp, the General knows with 100% mathematical certainty that you wrote the letter and nobody opened the envelope along the way."*
 
 ---
 
-## 5. HMAC vs. Simple Hash Concatenation (`SHA256(Key + Msg)`)
+## 4. HMAC vs. Simple Hash Concatenation (`SHA256(Key + Msg)`)
 
 | Dimension | Proper HMAC (`HMAC-SHA256`) | Naive Hash Concatenation (`SHA256(Key + Msg)`) |
 | :--- | :--- | :--- |
@@ -79,7 +64,7 @@ To prevent this:
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is a Timing Attack in signature verification and how do you prevent it?
 > **Answer:** Standard string equality comparisons (`signature === expectedSignature`) compare characters sequentially from left to right and return `false` the **exact microsecond they encounter the first mismatched character**. An attacker measuring microsecond response times across thousands of requests can guess the signature character-by-character.
@@ -96,7 +81,7 @@ To prevent this:
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Why does `JSON.stringify(req.body)` fail HMAC verification when using `express.json()`?"
 - **The Trap:** Expecting `JSON.stringify()` to reproduce the exact byte sequence of the original HTTP request.

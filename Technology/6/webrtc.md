@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is WEBRTC and why/when do we use it?"*
+>
+> **You say:** *"WebRTC is an open standard that establishes direct, encrypted peer-to-peer (P2P) audio, video, and arbitrary binary data channels between browsers. It uses a lightweight signaling step to exchange SDP capabilities and ICE candidate network mappings via STUN and TURN servers for NAT traversal."*
+
+---
+
 ## 1. What It Is in Plain English
 
 When two people video call or transfer a file over standard WebSockets, all gigabytes of video and data must flow from User A $\to$ Central Cloud Server $\to$ User B. This incurs high server bandwidth bills, high latency, and centralized privacy risks.
@@ -39,21 +47,13 @@ When two people video call or transfer a file over standard WebSockets, all giga
 
 ---
 
-## 3. How I Used It (Real-Time Collaborative Systems)
-
-- **Peer-to-Peer Data Channels & Collaboration:**
-  - Conceptualized low-latency P2P state exchange using **`RTCDataChannel`** (configured with `ordered: true` over SCTP/UDP) for direct peer-to-peer file transfers and cursor presence updates, bypassing central server bandwidth costs.
-  - Implemented the signaling protocol using WebSockets to exchange SDP Offers, Answers, and ICE candidate packets.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Imagine you and a friend are in two large, locked office buildings (behind corporate NAT firewalls). You want to talk via walkie-talkie. The Signaling Server is like a common friend on the phone who says: 'Alice is on Roof 3, Bob is on Balcony 2'. A STUN server is like a mirror on the building opposite that tells you your exact balcony number from the outside. Once you see each other, you talk directly over your walkie-talkies (P2P WebRTC). If a concrete wall completely blocks your line of sight (Symmetric NAT), you use a Relay Runner (TURN server) to pass messages."*
 
 ---
 
-## 5. WebSockets vs. WebRTC Comparison Matrix
+## 4. WebSockets vs. WebRTC Comparison Matrix
 
 | Dimension | WebRTC (`RTCDataChannel`) | WebSockets (`ws://`, `wss://`) |
 | :--- | :--- | :--- |
@@ -66,7 +66,7 @@ When two people video call or transfer a file over standard WebSockets, all giga
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the difference between a STUN and a TURN server?
 > **Answer:**
@@ -90,7 +90,7 @@ When two people video call or transfer a file over standard WebSockets, all giga
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Why does WebRTC still require a centralized server if it is Peer-to-Peer?"
 - **The Answer:** Because two arbitrary browsers on the internet do not know each other's IP addresses, supported codecs, or NAT port mappings. A centralized server is **mandatory during the initial 2-second Signaling phase** (to exchange SDP offers and ICE candidates). Once the P2P connection succeeds, the signaling server is no longer involved in the data transfer path.

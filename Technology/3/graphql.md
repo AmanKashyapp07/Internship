@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is GRAPHQL and why/when do we use it?"*
+>
+> **You say:** *"GraphQL is a strongly-typed query language and API runtime where the client requests the exact fields and nested relationships it needs in a single POST request. It completely eliminates over-fetching and under-fetching, and uses tools like DataLoader to batch database calls and avoid the N+1 resolver problem."*
+
+---
+
 ## 1. What It Is in Plain English
 
 In a traditional REST API, if a mobile app needs a User's name, their last 3 Project titles, and the current build status of each project, it often has to make **3 separate HTTP round-trips**:
@@ -46,22 +54,13 @@ Server ---> [ GraphQL Engine executes Resolvers ] ---> Returns ONLY requested JS
 
 ---
 
-## 3. How I Used It (Full-Stack Backend Context)
-
-- **Backend & Schema Architecture:**
-  - Designed strongly-typed GraphQL schemas using SDL (`type Pipeline`, `type BuildStage`, `enum StageStatus`) mapping complex hierarchical relationships (Pipelines $\to$ Stages $\to$ StepLogs).
-  - Implemented custom query and mutation resolvers with authentication context guards.
-  - Used **`DataLoader`** to batch and cache database queries, resolving the classic GraphQL **N+1 Resolver Problem** when fetching nested relational lists.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"A REST API is like ordering a pre-packaged combo meal at a fast-food counter: Combo #1 comes with a burger, fries, and a soda. Even if you only want the burger, you must buy and carry the entire tray. GraphQL is like a high-end buffet with a personal chef: you hand the chef a custom checklist containing exactly 2 slices of tomato, 1 grilled chicken breast, and zero carbs, and the chef prepares and serves precisely that custom plate on a single dish."*
 
 ---
 
-## 5. GraphQL vs. REST Comparison Matrix
+## 4. GraphQL vs. REST Comparison Matrix
 
 | Dimension | GraphQL | RESTful APIs |
 | :--- | :--- | :--- |
@@ -74,7 +73,7 @@ Server ---> [ GraphQL Engine executes Resolvers ] ---> Returns ONLY requested JS
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the N+1 Resolver Problem in GraphQL and how do you solve it?
 > **Answer:** If a client queries 100 `Users` and requests their `Company` for each user, the `User` resolver runs 1 SQL query (`SELECT * FROM users`), and then the nested `Company` resolver runs 100 subsequent SQL queries inside a loop (`SELECT * FROM companies WHERE id = $1`)—totaling **101 database queries (N+1)**.
@@ -97,7 +96,7 @@ Server ---> [ GraphQL Engine executes Resolvers ] ---> Returns ONLY requested JS
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "Why is error handling in GraphQL unique compared to REST?"
 - **The Answer:** In REST, an error returns standard HTTP error status codes (`400`, `401`, `404`, `500`). In GraphQL, the HTTP response status is almost always **`200 OK`**, even if an error occurred! The response payload contains a top-level `errors` array alongside partial `data`:

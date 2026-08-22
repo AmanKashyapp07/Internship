@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is AZURE and why/when do we use it?"*
+>
+> **You say:** *"Azure Virtual Machines provide on-demand IaaS compute instances in Microsoft cloud datacenters. Setting them up involves configuring Virtual Networks (VNets), Network Security Groups (NSGs) as virtual firewalls, Managed SSD disks for predictable IOPS, and SSH key authentication for secure remote access."*
+
+---
+
 ## 1. What It Is in Plain English
 
 Instead of buying a physical rack-mounted server and keeping it in your house with a backup power generator, Azure gives you access to enterprise hardware in Microsoft datacenters across the globe.
@@ -42,22 +50,13 @@ In under 60 seconds, you can provision a Linux Ubuntu VM with 4 vCPUs and 16GB R
 
 ---
 
-## 3. How I Used It (NexusIDE & MagnusCI)
-
-- **NexusIDE & MagnusCI Production Cloud Hosting:**
-  - Provisioned and configured Azure Linux VMs (Ubuntu 22.04 LTS) using SSH public key authentication (disabling vulnerable password authentication entirely in `sshd_config`).
-  - Configured **Azure Network Security Groups (NSGs)** to strictly expose only Ports 80 (HTTP) and 443 (HTTPS) to the public internet, keeping Docker daemon Unix sockets (`/var/run/docker.sock`), Redis (`6379`), and PostgreSQL (`5432`) completely isolated on localhost and private VNet subnets.
-  - Attached **Azure Premium SSD Managed Disks** to ensure high read/write IOPS and low disk queue latencies when Docker build containers performed heavy multi-stage compilations and CAS chunk hashing.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"A PaaS platform (like Vercel or Heroku) is like staying in a fully furnished hotel room: convenient and clean, but you cannot change the furniture, install your own appliances, or modify the electrical wiring (cannot run custom Docker engines or kernel cgroups). An Azure VM is like renting an empty commercial building: you get the physical walls, electricity, and water pipes (CPU, RAM, Disk), and you have full root permissions to build whatever factory, server racks, or custom operating system configurations you require."*
 
 ---
 
-## 5. Azure VMs vs. AWS EC2 vs. GCP Compute Engine
+## 4. Azure VMs vs. AWS EC2 vs. GCP Compute Engine
 
 | Dimension | Azure Virtual Machines | AWS EC2 | Google Compute Engine (GCE) |
 | :--- | :--- | :--- | :--- |
@@ -69,12 +68,12 @@ In under 60 seconds, you can provision a Linux Ubuntu VM with 4 vCPUs and 16GB R
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: What is the difference between Azure B-Series (Burstable) and D-Series (General Compute) VM SKUs?
 > **Answer:**
 > - **B-Series (Burstable: e.g. `Standard_B2s`):** Cost-effective VMs for low baseline CPU workloads (e.g. dev servers, small staging apps). When the VM uses less than its baseline CPU, it accumulates **CPU Credits**. When a traffic spike hits, it bursts up to 100% CPU until credits are depleted.
-> - **D-Series (General Purpose: e.g. `Standard_D4s_v5`):** Delivers **100% sustained, dedicated vCPU performance** at all times with high memory-to-vCPU ratios. Ideal for production CI/CD build engines (MagnusCI) and container hosts where sustained compilation CPU cannot be throttled.
+> - **D-Series (General Purpose: e.g. `Standard_D4s_v5`):** Delivers **100% sustained, dedicated vCPU performance** at all times with high memory-to-vCPU ratios. Ideal for production CI/CD build engines (CI/CD Pipeline Engines) and container hosts where sustained compilation CPU cannot be throttled.
 
 ### Q2: What is a Network Security Group (NSG) and how does rule priority work?
 > **Answer:** An NSG is a stateful Layer 4 virtual firewall that filters network traffic to Azure resources.
@@ -88,7 +87,7 @@ In under 60 seconds, you can provision a Linux Ubuntu VM with 4 vCPUs and 16GB R
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "What is the difference between stopping a VM from inside the OS (`sudo shutdown -h now`) vs. 'Stopping (Deallocated)' via the Azure Portal?"
 - **The Financial Trap:**

@@ -4,6 +4,14 @@
 
 ---
 
+## 💬 "Say It Out Loud" in an Interview (The 30-Second Elevator Pitch)
+
+> **When the interviewer asks:** *"What is WEBSOCKETS and why/when do we use it?"*
+>
+> **You say:** *"WebSockets provide a full-duplex, persistent TCP connection over a single socket after an initial HTTP 101 Upgrade handshake. With a tiny 2-byte framing overhead, both client and server can push text or raw binary data simultaneously with sub-millisecond latency, making it ideal for real-time collaboration and live streaming."*
+
+---
+
 ## 1. What It Is in Plain English
 
 Traditional HTTP is like sending letters through the postal service: The client asks a question, the server replies, and the connection closes. If the client wants to know if there's new data, it has to send another letter.
@@ -36,29 +44,19 @@ Server <- 304 Empty        Client -> Request (New)    Server ---> Event: log 2  
 
 ---
 
-## 3. How I Used It (NexusIDE & MagnusCI)
-
-- **NexusIDE:**
-  - **Yjs CRDT Document Synchronization:** Required ultra-low latency, bidirectional binary packet transport (`Uint8Array` diffs) so that multiple connected users could co-edit code files without HTTP header overhead.
-  - **Interactive Terminal PTY Stream:** Bidirectional WebSocket stream where client sends keystrokes/terminal resize payloads upstream, and server streams raw ANSI escape code chunks downstream to `xterm.js`.
-- **MagnusCI:**
-  - **Real-Time Build Log Streaming:** Built a live WebSocket stream delivering PTY build log output to the frontend UI as Docker commands executed, allowing developers to monitor multi-stage CI pipelines in real time.
-
----
-
-## 4. Analogy for Live Interviews
+## 3. Analogy for Live Interviews
 
 > *"Short Polling is like a toddler in the backseat asking 'Are we there yet?' every 10 seconds. Long Polling is the parent saying 'I will only answer you when we arrive,' but once they answer, the toddler immediately asks again. Server-Sent Events is like a live sports ticker on TV broadcasting scores into your living room. WebSockets is a full two-way telephone call where both parties can talk and listen at the exact same time without hanging up."*
 
 ---
 
-## 5. The WebSocket Handshake Lifecycle
+## 4. The WebSocket Handshake Lifecycle
 
 ```
 [ CLIENT ]                                                            [ SERVER ]
     |                                                                     |
     | 1. HTTP GET /ws                                                     |
-    |    Host: api.nexuside.io                                            |
+    |    Host: api.cloudide.example.com                                            |
     |    Upgrade: websocket                                               |
     |    Connection: Upgrade                                              |
     |    Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==                      |
@@ -77,7 +75,7 @@ Server <- 304 Empty        Client -> Request (New)    Server ---> Event: log 2  
 
 ---
 
-## 6. 5–8 High-Yield Interview Questions & Direct Answers
+## 5. 5–8 High-Yield Interview Questions & Direct Answers
 
 ### Q1: Why would you choose Server-Sent Events (SSE) over WebSockets?
 > **Answer:** If the communication is **strictly one-way (Server $\to$ Client)**—such as ChatGPT AI text streaming, stock price tickers, live notifications, or CI build status monitors—SSE is vastly superior:
@@ -100,7 +98,7 @@ Server <- 304 Empty        Client -> Request (New)    Server ---> Event: log 2  
 
 ---
 
-## 7. Common "Gotcha" Questions Interviewers Ask
+## 6. Common "Gotcha" Questions Interviewers Ask
 
 ### Gotcha 1: "What is the maximum number of WebSocket connections a single Linux server can hold?"
 - **The Answer:** The theoretical limit is governed by the OS file descriptor limit and RAM. Since every socket connection is an open file descriptor in Linux, the limit is configured via `ulimit -n` (often set to 1,000,000). In practice, a modern 4GB RAM server can hold **100,000–500,000 concurrent idle WebSocket connections**, provided kernel socket buffer memory (`sysctl` settings `rmem_max`, `wmem_max`) is properly tuned.
