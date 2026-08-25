@@ -21,17 +21,17 @@
   14. Topological Sort (Kahn's & Cycle Detection)
   15. Disjoint Set Union (DSU)
   16. Dijkstra's Algorithm
-  17. Bellman-Ford & SPFA (Negative Cycles)
-  18. Floyd-Warshall (All-Pairs Shortest Path)
+  17. Beintman-Ford & SPFA (Negative Cycles)
+  18. Floyd-Warshall (all-Pairs Shortest Path)
   19. Minimum Spanning Tree (Kruskal's & Prim's)
   20. 0/1 & Unbounded Knapsack
   21. String / Subsequence DP (LCS, Edit Distance, LIS in O(N log N))
   22. Grid DP (Unique Paths, Min Path Sum)
   23. Interval DP / MCM (Matrix Chain, Burst Balloons)
-  24. Bitmask DP (Travelling Salesperson Problem - TSP)
+  24. Bitmask DP (Traveinting Salesperson Problem - TSP)
   25. Digit DP Template
   26. KMP String Matching (Prefix Function)
-  27. Rabin-Karp Rolling Hash (Double Hash)
+  27. Rabin-Karp Rointing Hash (Double Hash)
   28. Z-Algorithm
   29. Heaps & Two Heaps (Median Finder)
   30. Backtracking Template (Subsets, Permutations, Combination Sum)
@@ -103,14 +103,14 @@ using namespace __gnu_pbds;
 
 using namespace std;
 
-using ll = long long;
-using ull = unsigned long long;
+using int = long long;
+using uint = unsigned long long;
 using pii = pair<int, int>;
-using pll = pair<ll, ll>;
+using pint = pair<int, int>;
 using vi = vector<int>;
-using vll = vector<ll>;
+using vint = vector<int>;
 using vvi = vector<vector<int>>;
-using vvll = vector<vector<ll>>;
+using vvint = vector<vector<int>>;
 
 #define all(x) (x).begin(), (x).end()
 #define rall(x) (x).rbegin(), (x).rend()
@@ -119,83 +119,14 @@ using vvll = vector<vector<ll>>;
 #define ss second
 
 const int INF = 1e9 + 7;
-const ll LINF = 1e18 + 7;
-const ll MOD = 1e9 + 7;
+const int LINF = 1e18 + 7;
+const int MOD = 1e9 + 7;
 
-// ============================================================
-// 01. FAST I/O, PBDS & CUSTOM HASH
-// Pattern: Speedup I/O, Order Statistics Set, Anti-Hack Hash
-// Complexity: O(1) per op for Hash, O(log N) for PBDS
-// ============================================================
-void fast_io() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-}
 
-#if __has_include(<ext/pb_ds/assoc_container.hpp>)
-// Supports: find_by_order(k) [0-indexed iterator], order_of_key(k) [count < k]
-template <typename T>
-using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-#endif
+// for lower bound -> use lower_bound(all(v), x) - v.begin(); -> this gives the index of the first element >= x
+// for upper bound -> use upper_bound(all(v), x) - v.begin(); -> this gives the index of the first element > x
 
-struct custom_hash {
-    static uint64_t splitmix64(uint64_t x) {
-        x += 0x9e3779b97f4a7c15;
-        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-        x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-        return x ^ (x >> 31);
-    }
-    size_t operator()(uint64_t x) const {
-        static const uint64_t FIXED_RANDOM = chrono::steady_clock::now().time_since_epoch().count();
-        return splitmix64(x + FIXED_RANDOM);
-    }
-};
-// Usage: unordered_map<ll, int, custom_hash> safe_map;
 
-// ============================================================
-// 02. BINARY SEARCH FOUNDATIONS
-// Pattern: Lower/Upper Bound & Search on Answer
-// Complexity: O(log N) time, O(1) space
-// ============================================================
-int bs_lower_bound(const vi& arr, int target) {
-    int low = 0, high = arr.size();
-    while (low < high) {
-        int mid = low + (high - low) / 2;
-        if (arr[mid] >= target) high = mid;
-        else low = mid + 1;
-    }
-    return low; // First index where arr[index] >= target
-}
-
-int bs_upper_bound(const vi& arr, int target) {
-    int low = 0, high = arr.size();
-    while (low < high) {
-        int mid = low + (high - low) / 2;
-        if (arr[mid] > target) high = mid;
-        else low = mid + 1;
-    }
-    return low; // First index where arr[index] > target
-}
-
-// Binary Search on Answer Template
-bool isValidPredicate(ll mid, const vi& arr, int k) {
-    // Return true if configuration 'mid' is feasible
-    return true;
-}
-
-ll bs_on_answer(const vi& arr, int k, ll low, ll high) {
-    ll ans = -1;
-    while (low <= high) {
-        ll mid = low + (high - low) / 2;
-        if (isValidPredicate(mid, arr, k)) {
-            ans = mid;
-            high = mid - 1;
-        } else {
-            low = mid + 1;
-        }
-    }
-    return ans;
-}
 
 // ============================================================
 // 03. TWO POINTERS & FAST-SLOW POINTERS
@@ -231,64 +162,69 @@ struct ListNode {
 
 bool hasCycle(ListNode* head) {
     ListNode *slow = head, *fast = head;
-    while (fast && fast->next) {
-        slow = slow->next;
-        fast = fast->next->next;
-        if (slow == fast) return true;
+    while (fast && fast->next) { // Floyd's Tortoise and Hare algorithm
+        slow = slow->next; // Move slow pointer by 1 step
+        fast = fast->next->next; // Move fast pointer by 2 steps
+        if (slow == fast) return true; // this means there is a cycle
     }
     return false;
 }
 
-// ============================================================
-// 04. BASIC SLIDING WINDOW
-// Pattern: Dynamic or fixed contiguous subarray processing
-// Complexity: O(N) time, O(1) space
-// ============================================================
-int minSubArrayLen(int target, const vi& nums) {
-    int n = nums.size(), left = 0, sum = 0, minLen = INF;
-    for (int right = 0; right < n; right++) {
-        sum += nums[right];
-        while (sum >= target) {
-            minLen = min(minLen, right - left + 1);
-            sum -= nums[left++];
-        }
-    }
-    return minLen == INF ? 0 : minLen;
-}
 
 // ============================================================
 // 05. MONOTONIC STACK
 // Pattern: Next Greater/Smaller Element, Histogram Area
 // Complexity: O(N) time, O(N) space
 // ============================================================
-vi nextGreaterElement(const vi& nums) {
+// Next greater element using monotonic stack
+// Time: O(N), Space: O(N)
+
+vi nextGreaterElement(const vi &nums) {
     int n = nums.size();
-    vi res(n, -1);
-    stack<int> st; // Stores indices
+    vi ans(n, -1);
+    stack<int> st;
+
     for (int i = 0; i < n; i++) {
-        while (!st.empty() && nums[st.top()] < nums[i]) {
-            res[st.top()] = nums[i];
+        while (!st.empty() && nums[st.top()] < nums[i]) { // for next smaller element, change < to >
+            ans[st.top()] = nums[i];
             st.pop();
         }
         st.push(i);
     }
-    return res;
-}
+    return ans;
+} // ans[i] = next greater element of nums[i], if none exists, ans[i] = -1 , it is strictly greater, not greater or equal
 
-int largestRectangleArea(vi& heights) {
-    heights.push_back(0); // Dummy sentinel
-    int n = heights.size(), maxArea = 0;
+// Previous greater element using monotonic stack
+// Time: O(N), Space: O(N)
+
+vi previousGreaterElement(const vi &nums) {
+    int n = nums.size();
+    vi ans(n, -1);
     stack<int> st;
+
     for (int i = 0; i < n; i++) {
-        while (!st.empty() && heights[st.top()] >= heights[i]) {
+        while (!st.empty() && nums[st.top()] <= nums[i]) st.pop(); // for previous smaller element, change <= to >=
+        if (!st.empty()) ans[i] = nums[st.top()];
+        st.push(i);
+    }
+    return ans;
+} // ans[i] = previous greater element of nums[i], if none exists, ans[i] = -1 , it is strictly greater, not greater or equal
+
+
+int largestRectangleArea(vi &heights) {
+    int n = heights.size();
+    stack<int> st;
+    int maxArea = 0;
+
+    for (int i = 0; i <= n; i++) {
+        while (!st.empty() && (i == n || heights[i] < heights[st.top()])) {
             int h = heights[st.top()];
             st.pop();
-            int w = st.empty() ? i : (i - st.top() - 1);
+            int w = st.empty() ? i : i - st.top() - 1;
             maxArea = max(maxArea, h * w);
         }
         st.push(i);
     }
-    heights.pop_back();
     return maxArea;
 }
 
@@ -297,52 +233,21 @@ int largestRectangleArea(vi& heights) {
 // Pattern: Sliding Window Maximum / Minimum
 // Complexity: O(N) time, O(K) space
 // ============================================================
-vi maxSlidingWindow(const vi& nums, int k) {
-    deque<int> dq; // Indices with decreasing values
-    vi res;
-    for (int i = 0; i < (int)nums.size(); i++) {
-        if (!dq.empty() && dq.front() == i - k) dq.pop_front();
-        while (!dq.empty() && nums[dq.back()] <= nums[i]) dq.pop_back();
-        dq.push_back(i);
-        if (i >= k - 1) res.push_back(nums[dq.front()]);
+vi maxSlidingWindow(const vi &nums, int k) {
+    int n = nums.size();
+    deque<int> dq;
+    vi ans;
+
+    for (int r = 0; r < n; r++) {
+        int l = r - k + 1;
+        while (!dq.empty() && dq.front() < l) dq.pop_front();
+        while (!dq.empty() && nums[dq.back()] <= nums[r]) dq.pop_back(); // for min sliding window, change <= to >=
+        dq.push_back(r);
+        if (l >= 0) ans.push_back(nums[dq.front()]);
     }
-    return res;
+    return ans;
 }
 
-// ============================================================
-// 07. PREFIX SUMS & DIFFERENCE ARRAY
-// Pattern: Range Sum Queries, Range Updates
-// Complexity: O(1) query, O(N) precomputation / update
-// ============================================================
-int subarraySumEqualsK(const vi& nums, int k) {
-    unordered_map<int, int> prefCount;
-    prefCount[0] = 1;
-    int currSum = 0, count = 0;
-    for (int x : nums) {
-        currSum += x;
-        if (prefCount.count(currSum - k)) count += prefCount[currSum - k];
-        prefCount[currSum]++;
-    }
-    return count;
-}
-
-struct DifferenceArray {
-    vi diff;
-    DifferenceArray(int n) : diff(n + 1, 0) {}
-    void add(int l, int r, int val) {
-        diff[l] += val;
-        diff[r + 1] -= val;
-    }
-    vi getArray() {
-        vi res(diff.size() - 1);
-        int sum = 0;
-        for (size_t i = 0; i < res.size(); i++) {
-            sum += diff[i];
-            res[i] = sum;
-        }
-        return res;
-    }
-};
 
 // ============================================================
 // 08. INTERVALS PATTERNS
@@ -354,7 +259,7 @@ vvi mergeIntervals(vvi& intervals) {
     sort(all(intervals));
     vvi res;
     res.push_back(intervals[0]);
-    for (size_t i = 1; i < intervals.size(); i++) {
+    for (int i = 1; i < intervals.size(); i++) {
         if (intervals[i][0] <= res.back()[1]) {
             res.back()[1] = max(res.back()[1], intervals[i][1]);
         } else {
@@ -432,72 +337,8 @@ bool isValidBST(TreeNode* root, long long minVal = -1e18, long long maxVal = 1e1
     return isValidBST(root->left, minVal, root->val) && isValidBST(root->right, root->val, maxVal);
 }
 
-// ============================================================
-// 11. TRIE & BITWISE TRIE
-// Pattern: Prefix Match, Maximum XOR Pair
-// Complexity: O(L) insertion/search (L = word length / 32 bits)
-// ============================================================
-struct TrieNode {
-    TrieNode* children[26] = {};
-    bool isEnd = false;
-};
+// please see trie folder
 
-class Trie {
-    TrieNode* root;
-public:
-    Trie() { root = new TrieNode(); }
-    void insert(string word) {
-        TrieNode* curr = root;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!curr->children[idx]) curr->children[idx] = new TrieNode();
-            curr = curr->children[idx];
-        }
-        curr->isEnd = true;
-    }
-    bool search(string word) {
-        TrieNode* curr = root;
-        for (char ch : word) {
-            int idx = ch - 'a';
-            if (!curr->children[idx]) return false;
-            curr = curr->children[idx];
-        }
-        return curr->isEnd;
-    }
-};
-
-struct BitTrieNode {
-    BitTrieNode* child[2] = {};
-};
-
-class BitTrie {
-    BitTrieNode* root;
-public:
-    BitTrie() { root = new BitTrieNode(); }
-    void insert(int num) {
-        BitTrieNode* curr = root;
-        for (int i = 31; i >= 0; i--) {
-            int bit = (num >> i) & 1;
-            if (!curr->child[bit]) curr->child[bit] = new BitTrieNode();
-            curr = curr->child[bit];
-        }
-    }
-    int getMaxXOR(int num) {
-        BitTrieNode* curr = root;
-        int maxXor = 0;
-        for (int i = 31; i >= 0; i--) {
-            int bit = (num >> i) & 1;
-            int opp = 1 - bit;
-            if (curr->child[opp]) {
-                maxXor |= (1 << i);
-                curr = curr->child[opp];
-            } else {
-                curr = curr->child[bit];
-            }
-        }
-        return maxXor;
-    }
-};
 
 // ============================================================
 // 12. GRAPH BFS (STANDARD, MULTI-SOURCE, 0-1 BFS)
@@ -522,7 +363,7 @@ vi zeroOneBFS(int start, int n, const vector<vector<pair<int, int>>>& adj) {
         }
     }
     return dist;
-}
+} 
 
 int multiSourceBFS(vvi& grid) {
     int r = grid.size(), c = grid[0].size();
@@ -556,13 +397,29 @@ int multiSourceBFS(vvi& grid) {
 // Pattern: Connected Components, Directed Graph Cycle Detection
 // Complexity: O(V + E) time, O(V) space
 // ============================================================
-bool dfsCycleDirected(int u, const vvi& adj, vi& state) {
-    state[u] = 1; // Visiting
+bool dfsCycleDirected(int u, const vvi& adj, vector<bool> inPath, vector<bool>& visited) {
+    inPath[u] = true;
+    visited[u] = true;
     for (int v : adj[u]) {
-        if (state[v] == 1) return true; // Back edge
-        if (state[v] == 0 && dfsCycleDirected(v, adj, state)) return true;
+        if (!visited[v]) {
+            if (dfsCycleDirected(v, adj, inPath, visited)) return true;
+        } else if (inPath[v]) {
+            return true; // Cycle detected
+        }
     }
-    state[u] = 2; // Visited
+    inPath[u] = false;
+    return false;
+}
+
+bool dfsCycleUndirected(int u, const vvi& g, int parent, vector<bool>& visited) {
+    visited[u] = true;
+    for (int v : g[u]) {
+        if (!visited[v]) {
+            if (dfsCycleUndirected(v, g, u, visited)) return true;
+        } else if (v != parent) {
+            return true; // Cycle detected
+        }
+    }
     return false;
 }
 
@@ -602,7 +459,7 @@ struct DSU {
     DSU(int n) {
         components = n;
         parent.resize(n + 1);
-        iota(all(parent), 0);
+        iota(all(parent), 0); // fiint parent[i] = i
         sz.assign(n + 1, 1);
     }
     int find(int i) {
@@ -625,9 +482,9 @@ struct DSU {
 // Pattern: Non-negative weighted single-source shortest path
 // Complexity: O((V + E) log V) time, O(V) space
 // ============================================================
-vll dijkstra(int start, int n, const vector<vector<pair<int, ll>>>& adj) {
-    vll dist(n + 1, LINF);
-    priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
+vint dijkstra(int start, int n, const vector<vector<pair<int, int>>>& adj) {
+    vint dist(n + 1, LINF);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     dist[start] = 0;
     pq.push({0, start});
 
@@ -636,7 +493,7 @@ vll dijkstra(int start, int n, const vector<vector<pair<int, ll>>>& adj) {
         if (d > dist[u]) continue;
         for (auto& edge : adj[u]) {
             int v = edge.first;
-            ll w = edge.second;
+            int w = edge.second;
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 pq.push({dist[v], v});
@@ -647,7 +504,7 @@ vll dijkstra(int start, int n, const vector<vector<pair<int, ll>>>& adj) {
 }
 
 // ============================================================
-// 17. BELLMAN-FORD & SPFA (NEGATIVE CYCLES)
+// 17. BEintMAN-FORD & SPFA (NEGATIVE CYCLES)
 // Pattern: Negative edge shortest path & negative cycle detection
 // Complexity: SPFA Average O(E), Worst O(V * E)
 // ============================================================
@@ -681,8 +538,8 @@ bool spfa(int start, int n, const vector<vector<pair<int, int>>>& adj, vi& dist)
 }
 
 // ============================================================
-// 18. FLOYD-WARSHALL (ALL-PAIRS SHORTEST PATH)
-// Pattern: All pairs shortest path for small V (V <= 400)
+// 18. FLOYD-WARSHall (all-PAIRS SHORTEST PATH)
+// Pattern: all pairs shortest path for small V (V <= 400)
 // Complexity: O(V^3) time, O(V^2) space
 // ============================================================
 void floydWarshall(vvi& dist, int n) {
@@ -702,11 +559,11 @@ void floydWarshall(vvi& dist, int n) {
 // Pattern: MST on connected weighted undirected graph
 // Complexity: O(E log E) time
 // ============================================================
-struct Edge { int u, v; ll weight; };
-ll kruskalMST(int n, vector<Edge>& edges) {
+struct Edge { int u, v; int weight; };
+int kruskalMST(int n, vector<Edge>& edges) {
     sort(all(edges), [](const Edge& a, const Edge& b) { return a.weight < b.weight; });
     DSU dsu(n);
-    ll mstWeight = 0, edgesAdded = 0;
+    int mstWeight = 0, edgesAdded = 0;
     for (const auto& e : edges) {
         if (dsu.unite(e.u, e.v)) {
             mstWeight += e.weight;
@@ -716,6 +573,29 @@ ll kruskalMST(int n, vector<Edge>& edges) {
     return (edgesAdded == n - 1) ? mstWeight : -1;
 }
 
+int primMST(int n, const vector<vector<pair<int, int>>>& adj) {
+    vint key(n + 1, LINF);
+    vector<bool> inMST(n + 1, false);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    key[1] = 0; // key[i] -> minimum weight edge to connect i to MST
+    pq.push({0, 1});
+    int mstWeight = 0;
+
+    while (!pq.empty()) {
+        auto [w, u] = pq.top(); pq.pop();
+        if (inMST[u]) continue;
+        inMST[u] = true;
+        mstWeight += w;
+
+        for(auto& {v, weight} : adj[u]) {
+            if (!inMST[v] && weight < key[v]) {
+                key[v] = weight;
+                pq.push({key[v], v});
+            }
+        }
+    }
+    return mstWeight;
+}
 // ============================================================
 // 20. 0/1 & UNBOUNDED KNAPSACK
 // Pattern: Subset selection optimization (1D space optimized)
@@ -723,23 +603,24 @@ ll kruskalMST(int n, vector<Edge>& edges) {
 // ============================================================
 int knapsack01(const vi& wt, const vi& val, int W) {
     vi dp(W + 1, 0);
-    for (size_t i = 0; i < wt.size(); i++) {
+    for (int i = 0; i < wt.size(); i++) {
         for (int w = W; w >= wt[i]; w--) { // Reverse for 0/1
             dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
         }
     }
     return dp[W];
-}
+} // this is used when we can take each item at most once, and we have to return the maximum value we can get with the given weight limit W.
+
 
 int unboundedKnapsack(const vi& wt, const vi& val, int W) {
     vi dp(W + 1, 0);
-    for (size_t i = 0; i < wt.size(); i++) {
+    for (int i = 0; i < wt.size(); i++) {
         for (int w = wt[i]; w <= W; w++) { // Forward for unbounded
             dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
         }
     }
     return dp[W];
-}
+} // this is used when we can take each item any number of times, and we have to return the maximum value we can get with the given weight limit W.
 
 // ============================================================
 // 21. STRING / SUBSEQUENCE DP (LCS, EDIT DISTANCE, LIS O(N log N))
@@ -788,7 +669,7 @@ int minPathSum(const vvi& grid) {
 }
 
 // ============================================================
-// 23. INTERVAL DP / MCM (MATRIX CHAIN, BURST BALLOONS)
+// 23. INTERVAL DP / MCM (MATRIX CHAIN, BURST BallOONS)
 // Pattern: Range DP over subsegments [i, j]
 // Complexity: O(N^3) time, O(N^2) space
 // ============================================================
@@ -809,7 +690,7 @@ int matrixChainMultiplication(const vi& arr) {
 }
 
 // ============================================================
-// 24. BITMASK DP (TRAVELLING SALESPERSON PROBLEM - TSP)
+// 24. BITMASK DP (TRAVEintING SALESPERSON PROBLEM - TSP)
 // Pattern: Exponential state reduction using bitmasks (N <= 20)
 // Complexity: O(N^2 * 2^N) time, O(N * 2^N) space
 // ============================================================
@@ -830,84 +711,306 @@ int tsp(int u, int mask, int n, const vvi& dist, vvi& memo) {
 // Pattern: Counting valid numbers in range [0, N]
 // Complexity: O(Digits * State * 10) time
 // ============================================================
-string digitNumStr;
-int memoDigit[20][180][2];
+struct DigitDP {
+    string s;
+    int memo[20][2][2][100];
 
-int solveDigitDP(int idx, int currSum, bool isTight, int targetSum) {
-    if (idx == (int)digitNumStr.size()) return currSum == targetSum;
-    if (memoDigit[idx][currSum][isTight] != -1) return memoDigit[idx][currSum][isTight];
+    int dp(int pos, bool started, bool tight, int state) {
+        if (pos == (int)s.size()) return state;
+        if (memo[pos][started][tight][state] != -1) return memo[pos][started][tight][state];
 
-    int limit = isTight ? (digitNumStr[idx] - '0') : 9;
-    int ans = 0;
-    for (int d = 0; d <= limit; d++) {
-        ans += solveDigitDP(idx + 1, currSum + d, isTight && (d == limit), targetSum);
+        int limit = tight ? s[pos] - '0' : 9;
+        int ans = 0;
+
+        if (!started) {
+            ans += dp(pos + 1, false, tight && (0 == limit), state);
+        }
+
+        for (int d = (started ? 0 : 1); d <= limit; d++) {
+            ans += dp(pos + 1, true, tight && (d == limit), state + d);
+        }
+
+        return memo[pos][started][tight][state] = ans;
     }
-    return memoDigit[idx][currSum][isTight] = ans;
-}
 
-// ============================================================
-// 26. KMP STRING MATCHING (PREFIX FUNCTION)
-// Pattern: String matching via Pi-table
-// Complexity: O(N + M) time, O(M) space
-// ============================================================
-vi computePrefixFunction(string s) {
+    int solve(int n) {
+        if (n < 0) return 0;
+        s = to_string(n);
+        memset(memo, -1, sizeof(memo));
+        return dp(0, false, true, 0);
+    }
+};
+#include <bits/stdc++.h>
+using namespace std;
+
+/* ============================================================
+   1. KMP — PREFIX FUNCTION
+   ============================================================
+
+   pi[i] = length of the longest proper prefix of s[0..i]
+           which is also a suffix of s[0..i].
+
+   Use when:
+   - Searching for a pattern in a text.
+   - Finding all occurrences of a pattern.
+   - Questions involving prefix/suffix structure.
+   - "Longest proper prefix which is also suffix."
+
+   Time:  O(n)
+   Space: O(n)
+*/
+
+vector<int> prefix_function(const string& s) {
     int n = s.size();
-    vi pi(n, 0);
-    for (int i = 1; i < n; i++) {
-        int j = pi[i - 1];
-        while (j > 0 && s[i] != s[j]) j = pi[j - 1];
-        if (s[i] == s[j]) j++;
+    vector<int> pi(n, 0);
+
+    for (int i = 1, j = 0; i < n; i++) {
+
+        while (j > 0 && s[i] != s[j])
+            j = pi[j - 1];
+
+        if (s[i] == s[j])
+            j++;
+
         pi[i] = j;
     }
+
     return pi;
 }
 
-// ============================================================
-// 27. RABIN-KARP ROLLING HASH (DOUBLE HASH)
-// Pattern: Substring hash equality queries in O(1)
-// Complexity: O(N) precomputation, O(1) query
-// ============================================================
-struct DoubleStringHash {
-    string s;
-    int n;
-    const ll M1 = 1e9 + 7, M2 = 1e9 + 9;
-    const ll P1 = 31, P2 = 37;
-    vll h1, h2, p1, p2;
 
-    DoubleStringHash(string str) : s(str), n(str.size()) {
-        h1.assign(n + 1, 0); h2.assign(n + 1, 0);
-        p1.assign(n + 1, 1); p2.assign(n + 1, 1);
-        for (int i = 0; i < n; i++) {
-            h1[i + 1] = (h1[i] * P1 + (s[i] - 'a' + 1)) % M1;
-            h2[i + 1] = (h2[i] * P2 + (s[i] - 'a' + 1)) % M2;
-            p1[i + 1] = (p1[i] * P1) % M1;
-            p2[i + 1] = (p2[i] * P2) % M2;
+/* ============================================================
+   KMP — SEARCH PATTERN
+   ============================================================
+
+   Finds all occurrences of pattern in text.
+
+   Time:  O(n + m)
+   Space: O(n + m) for this combined-string implementation.
+
+   IMPORTANT:
+   If '#' can occur in the input, choose another separator.
+*/
+
+vector<int> kmp_search(const string& text,
+                       const string& pattern) {
+
+    if (pattern.empty() || pattern.size() > text.size())
+        return {};
+
+    string s = pattern + "#" + text;
+
+    vector<int> pi = prefix_function(s);
+
+    vector<int> ans;
+    int m = pattern.size();
+
+    for (int i = m + 1; i < s.size(); i++) {
+
+        if (pi[i] == m) {
+            // Convert combined-string index to text index.
+            ans.push_back(i - 2 * m);
         }
     }
 
-    pll getHash(int l, int r) {
-        ll hash1 = (h1[r + 1] - h1[l] * p1[r - l + 1] % M1 + M1) % M1;
-        ll hash2 = (h2[r + 1] - h2[l] * p2[r - l + 1] % M2 + M2) % M2;
-        return {hash1, hash2};
-    }
-};
+    return ans;
+}
 
-// ============================================================
-// 28. Z-ALGORITHM
-// Pattern: Exact match lengths at every suffix
-// Complexity: O(N) time, O(N) space
-// ============================================================
-vi zAlgorithm(string s) {
+
+/* ============================================================
+   2. Z-ALGORITHM
+   ============================================================
+
+   z[i] = length of the longest substring starting at i
+          that matches the prefix of s.
+
+   Example:
+       s = "aaaa"
+       z = [0, 3, 2, 1]
+
+   Use when:
+   - Pattern matching.
+   - Comparing prefixes with suffixes/substrings.
+   - Questions explicitly mention prefix matching.
+   - Finding occurrences of a pattern using:
+         pattern + '#' + text
+
+   Time:  O(n)
+   Space: O(n)
+*/
+
+vector<int> z_function(const string& s) {
+
     int n = s.size();
-    vi z(n, 0);
+    vector<int> z(n, 0);
+
     int l = 0, r = 0;
+
     for (int i = 1; i < n; i++) {
-        if (i <= r) z[i] = min(r - i + 1, z[i - l]);
-        while (i + z[i] < n && s[z[i]] == s[i + z[i]]) z[i]++;
-        if (i + z[i] - 1 > r) { l = i; r = i + z[i] - 1; }
+
+        // i lies inside current Z-box.
+        if (i <= r)
+            z[i] = min(r - i + 1, z[i - l]);
+
+        // Try to extend the match.
+        while (i + z[i] < n &&
+               s[z[i]] == s[i + z[i]]) {
+            z[i]++;
+        }
+
+        // Update Z-box.
+        if (i + z[i] - 1 > r) {
+            l = i;
+            r = i + z[i] - 1;
+        }
     }
+
     return z;
 }
+
+
+/* ============================================================
+   Z-ALGORITHM — SEARCH PATTERN
+   ============================================================
+
+   Finds all occurrences of pattern in text.
+
+   Time:  O(n + m)
+   Space: O(n + m)
+*/
+
+vector<int> z_search(const string& text,
+                     const string& pattern) {
+
+    if (pattern.empty() || pattern.size() > text.size())
+        return {};
+
+    string s = pattern + "#" + text;
+
+    vector<int> z = z_function(s);
+
+    vector<int> ans;
+    int m = pattern.size();
+
+    for (int i = m + 1; i < s.size(); i++) {
+
+        if (z[i] == m) {
+            // Position in original text.
+            ans.push_back(i - m - 1);
+        }
+    }
+
+    return ans;
+}
+
+
+/* ============================================================
+   3. MANACHER'S ALGORITHM
+   ============================================================
+
+   Finds palindrome radii for every possible center in O(n).
+
+   We transform:
+
+       "abba"
+
+       -> "^#a#b#b#a#$"
+
+   p[i] = radius of palindrome centered at i
+          in the transformed string.
+
+   For this transformation:
+
+       p[i] = length of corresponding palindrome
+              in the ORIGINAL string.
+
+   Use when:
+   - Longest palindromic substring.
+   - Find all palindromic substrings.
+   - Palindrome centered at every position.
+   - Need O(n) palindrome processing.
+
+   Time:  O(n)
+   Space: O(n)
+*/
+
+vector<int> manacher(const string& s) {
+
+    // Add separators so odd/even palindromes
+    // are handled uniformly.
+    string t = "^";
+
+    for (char ch : s) {
+        t += '#';
+        t += ch;
+    }
+
+    t += "#$";
+
+    int n = t.size();
+
+    vector<int> p(n, 0);
+
+    // c = center of rightmost palindrome
+    // r = right boundary of that palindrome
+    int c = 0;
+    int r = 0;
+
+    for (int i = 1; i < n - 1; i++) {
+
+        // Mirror position of i around c.
+        int mirror = 2 * c - i;
+
+        // Reuse previously calculated information.
+        if (i < r)
+            p[i] = min(r - i, p[mirror]);
+
+        // Expand palindrome.
+        while (t[i + 1 + p[i]] ==
+               t[i - 1 - p[i]]) {
+            p[i]++;
+        }
+
+        // Update rightmost palindrome.
+        if (i + p[i] > r) {
+            c = i;
+            r = i + p[i];
+        }
+    }
+
+    return p;
+}
+
+
+/* ============================================================
+   LONGEST PALINDROMIC SUBSTRING USING MANACHER
+   ============================================================ */
+
+string longest_palindrome(const string& s) {
+
+    if (s.empty())
+        return "";
+
+    vector<int> p = manacher(s);
+
+    int best = 0;
+    int center = 0;
+
+    for (int i = 1; i < p.size() - 1; i++) {
+
+        if (p[i] > best) {
+            best = p[i];
+            center = i;
+        }
+    }
+
+    // Convert transformed-string center/radius
+    // back to original-string indices.
+    int start = (center - best) / 2;
+
+    return s.substr(start, best);
+}
+
 
 // ============================================================
 // 29. HEAPS & TWO HEAPS (MEDIAN FINDER)
@@ -919,19 +1022,19 @@ class MedianFinder {
     priority_queue<int, vi, greater<int>> minHeap; // Upper half
 public:
     void addNum(int num) {
-        maxHeap.push(num);
-        minHeap.push(maxHeap.top());
-        maxHeap.pop();
+        maxHeap.push(num); // Add to maxHeap first
+        minHeap.push(maxHeap.top()); // Balance: move the largest of maxHeap to minHeap
+        maxHeap.pop(); // Remove from maxHeap
 
-        if (maxHeap.size() < minHeap.size()) {
-            maxHeap.push(minHeap.top());
-            minHeap.pop();
+        if (maxHeap.size() < minHeap.size()) { // Balance sizes
+            maxHeap.push(minHeap.top()); // Move the smallest of minHeap to maxHeap
+            minHeap.pop(); // Remove from minHeap
         }
     }
 
     double findMedian() {
-        if (maxHeap.size() > minHeap.size()) return maxHeap.top();
-        return (maxHeap.top() + minHeap.top()) / 2.0;
+        if (maxHeap.size() > minHeap.size()) return maxHeap.top(); // Odd number of elements
+        return (maxHeap.top() + minHeap.top()) / 2.0; // Even number of elements
     }
 };
 
@@ -942,7 +1045,7 @@ public:
 // ============================================================
 void generateSubsets(int idx, vi& nums, vi& current, vvi& result) {
     result.push_back(current);
-    for (size_t i = idx; i < nums.size(); i++) {
+    for (int i = idx; i < nums.size(); i++) {
         current.push_back(nums[i]);
         generateSubsets(i + 1, nums, current, result);
         current.pop_back();
@@ -965,24 +1068,139 @@ void bitTricks(int mask) {
     }
 }
 
+// ===== CRUCIAL BIT TRICKS FOR OAs (Online Assessments) =====
+
+int n = 42, i = 3; // i is 0-based index of the bit we want to manipulate from the right (LSB)
+
+// 1. Check if i-th bit is set
+bool isSet = (n & (1 << i)) != 0;
+
+// 2. Set the i-th bit
+n = n | (1 << i);
+
+// 3. Clear (unset) the i-th bit
+n = n & ~(1 << i);
+
+// 4. Toggle the i-th bit
+n = n ^ (1 << i);
+
+// 5. Check if n is a power of 2 (only one bit set, n > 0)
+bool isPow2 = n && !(n & (n - 1));
+
+// 6. Remove the rightmost set bit (Brian Kernighan's trick)
+n = n & (n - 1);   // used to count set bits efficiently
+
+// 7. Count set bits using Brian Kernighan's algorithm — O(number of set bits)
+int countBits(int x) {
+    int count = 0;
+    while (x) {
+        x = x & (x - 1); // drops lowest set bit each time
+        count++;
+    }
+    return count;
+}
+// Alternative: __builtin_popcount(x) in GCC/C++ for instant set-bit count
+
+// 8. Isolate the rightmost set bit
+int rightmostBit = n & (-n);   // works because -n is two's complement (~n + 1)
+
+// 9. Check even/odd without % operator
+bool isOdd = (n & 1);
+
+// 10. Multiply/divide by powers of 2 using shifts (faster than * or /)
+int mul = n << 1;   // n * 2
+int div = n >> 1;   // n / 2 (careful with negative numbers — rounds toward -inf)
+
+// 11. Swap two numbers without a temp variable (XOR swap)
+int a = 5, b = 9;
+a = a ^ b;
+b = a ^ b;
+a = a ^ b;
+
+// 12. XOR self-cancels — classic "find the unique element" trick
+// If every element appears twice except one, XOR of all gives the unique one
+int findUnique(vector<int>& arr) {
+    int result = 0;
+    for (int x : arr) result ^= x;   // a^a = 0, a^0 = a
+    return result;
+}
+
+// 13. Find two unique numbers when all others appear twice
+// Step 1: XOR all -> gives xor of the two uniques (say diff)
+// Step 2: Isolate any set bit in diff (a bit where the two numbers differ)
+// Step 3: Split array into two groups based on that bit, XOR each group separately
+void findTwoUnique(vector<int>& arr, int &x, int &y) {
+    int diff = 0;
+    for (int v : arr) diff ^= v;
+    int setBit = diff & (-diff);   // isolate one differing bit
+    x = 0; y = 0;
+    for (int v : arr) {
+        if (v & setBit) x ^= v;
+        else y ^= v;
+    }
+}
+
+// 14. Check if two integers have opposite signs (no branching)
+bool oppositeSigns = ((a ^ b) < 0);
+
+// 15. Get position of the rightmost set bit (1-indexed)
+int rightmostSetPos = log2(n & (-n)) + 1;
+// Or using built-in: __builtin_ctz(n) + 1  (count trailing zeros)
+
+// 16. Generate all subsets (bitmask / power set enumeration)
+// For n elements, iterate mask from 0 to (1<<n)-1
+// Each bit in mask teints whether that element is included
+void generateSubsets(vector<int>& nums) {
+    int n = nums.size();
+    for (int mask = 0; mask < (1 << n); mask++) {
+        vector<int> subset;
+        for (int i = 0; i < n; i++) {
+            if (mask & (1 << i)) subset.push_back(nums[i]);
+        }
+        // process subset here
+    }
+}
+
+// 17. Turn all bits on up to position k (useful for masks)
+int allOnesUpToK = (1 << k) - 1;
+
+// 18. Check if n has alternating bits (1010...)
+bool hasAlternating(int n) {
+    int x = n ^ (n >> 1);
+    return (x & (x + 1)) == 0;
+}
+
+// 19. Reverse bits (common in "reverse bits of a 32-bit integer" style questions)
+uint32_t reverseBits(uint32_t n) {
+    uint32_t result = 0;
+    for (int i = 0; i < 32; i++) {
+        result = (result << 1) | (n & 1);
+        n >>= 1;
+    }
+    return result;
+}
+
+// 20. Fast modulo for powers of 2 (n % (2^k) == n & (2^k - 1))
+int fastMod = n & ((1 << k) - 1);
+
 // ============================================================
 // 32. MATH: BINARY EXPONENTIATION, EXT GCD, MOD INVERSE
 // Pattern: Modular Arithmetic, Inverse
 // Complexity: O(log EXP) time
 // ============================================================
-ll power(ll base, ll exp, ll mod = MOD) {
-    ll res = 1;
-    base %= mod;
-    while (exp > 0) {
-        if (exp % 2 == 1) res = (res * base) % mod;
-        base = (base * base) % mod;
-        exp /= 2;
+
+int power(int base, int p){
+    int res = 1;
+    while(p){
+        if(p & 1) res = (1LL * res * base) % MOD;
+        base = (1LL * base * base) % MOD;
+        p >>= 1;
     }
     return res;
 }
 
-ll modInverse(ll a, ll mod = MOD) {
-    return power(a, mod - 2, mod);
+int inverse(int a){
+    return power(a, MOD - 2); // Fermat's little theorem for prime MOD
 }
 
 // ============================================================
@@ -1003,7 +1221,7 @@ void buildSPF() {
         }
     }
 }
-
+// spf[i] = smallest prime factor of i
 vi getPrimeFactorization(int x) {
     vi factors;
     while (x > 1) {
@@ -1013,38 +1231,7 @@ vi getPrimeFactorization(int x) {
     return factors;
 }
 
-// ============================================================
-// 34. SEGMENT TREE & FENWICK TREE (POINT UPDATE)
-// Pattern: Dynamic Range Sum / Query
-// Complexity: O(log N) update/query
-// ============================================================
-struct FenwickTree {
-    int n;
-    vi tree;
-    FenwickTree(int n) : n(n), tree(n + 1, 0) {}
-    void update(int i, int delta) { for (; i <= n; i += i & -i) tree[i] += delta; }
-    int query(int i) { int s = 0; for (; i > 0; i -= i & -i) s += tree[i]; return s; }
-    int queryRange(int l, int r) { return query(r) - query(l - 1); }
-};
 
-// ============================================================
-// 35. TARJAN'S BRIDGES, ARTICULATION POINTS & SCC
-// Pattern: Bridges, Articulation Points & Strongly Connected Components
-// Complexity: O(V + E) time, O(V) space
-// ============================================================
-void dfsBridges(int u, int p, int& timer, vi& tin, vi& low, const vvi& adj, vector<pii>& bridges) {
-    tin[u] = low[u] = ++timer;
-    for (int v : adj[u]) {
-        if (v == p) continue;
-        if (tin[v]) {
-            low[u] = min(low[u], tin[v]);
-        } else {
-            dfsBridges(v, u, timer, tin, low, adj, bridges);
-            low[u] = min(low[u], low[v]);
-            if (low[v] > tin[u]) bridges.push_back({u, v});
-        }
-    }
-}
 
 // ============================================================
 // 36. GREEDY ALGORITHMS
@@ -1083,7 +1270,7 @@ int jumpMin(const vi& nums) {
 
 int canCompleteCircuit(const vi& gas, const vi& cost) {
     int total = 0, curr = 0, start = 0;
-    for (size_t i = 0; i < gas.size(); i++) {
+    for (int i = 0; i < gas.size(); i++) {
         int diff = gas[i] - cost[i];
         total += diff;
         curr += diff;
@@ -1094,89 +1281,61 @@ int canCompleteCircuit(const vi& gas, const vi& cost) {
 
 // ============================================================
 // 37. KADANE'S ALGORITHM & VARIANTS
-// Pattern: Max Subarray, Circular Max Subarray, Max Product Subarray
-// Complexity: O(N) time, O(1) space
+// Max Subarray | Circular Max Subarray | Max Product Subarray
+// Time: O(N) | Space: O(1)
 // ============================================================
-int maxSubArray(const vi& nums) {
-    int maxSoFar = nums[0], curr = nums[0];
-    for (size_t i = 1; i < nums.size(); i++) {
-        curr = max(nums[i], curr + nums[i]);
-        maxSoFar = max(maxSoFar, curr);
+
+tuple<int,int,int> maxSubArray(const vi& a) {
+    int cur = a[0], ans = a[0];
+    int start = 0, bestL = 0, bestR = 0;
+
+    for (int i = 1; i < a.size(); ++i) {
+        if (a[i] > cur + a[i]) {
+            cur = a[i];
+            start = i;
+        } else {
+            cur += a[i];
+        }
+
+        if (cur > ans) {
+            ans = cur;
+            bestL = start;
+            bestR = i;
+        }
     }
-    return maxSoFar;
+
+    return {ans, bestL, bestR};
 }
 
-int maxSubarraySumCircular(const vi& nums) {
-    int total = 0, maxSoFar = nums[0], maxCurr = 0;
-    int minSoFar = nums[0], minCurr = 0;
-    for (int x : nums) {
-        maxCurr = max(x, maxCurr + x);
-        maxSoFar = max(maxSoFar, maxCurr);
-        minCurr = min(x, minCurr + x);
-        minSoFar = min(minSoFar, minCurr);
+int maxSubarraySumCircular(const vi& a) {
+    int total = 0, mx = a[0], mn = a[0];
+    int curMax = 0, curMin = 0;
+
+    for (int x : a) {
+        curMax = max(x, curMax + x);
+        mx = max(mx, curMax);
+
+        curMin = min(x, curMin + x);
+        mn = min(mn, curMin);
+
         total += x;
     }
-    return maxSoFar > 0 ? max(maxSoFar, total - minSoFar) : maxSoFar;
-}
 
-int maxProductSubarray(const vi& nums) {
-    int res = nums[0], maxP = nums[0], minP = nums[0];
-    for (size_t i = 1; i < nums.size(); i++) {
-        if (nums[i] < 0) swap(maxP, minP);
-        maxP = max(nums[i], maxP * nums[i]);
-        minP = min(nums[i], minP * nums[i]);
-        res = max(res, maxP);
+    return mx > 0 ? max(mx, total - mn) : mx;
+} // this returns max sum of a circular subarray. If all numbers are negative, it returns the maximum single element.
+
+int maxProductSubarray(const vi& a) {
+    int mx = a[0], mn = a[0], ans = a[0];
+
+    for (int i = 1; i < a.size(); ++i) {
+        if (a[i] < 0) swap(mx, mn);
+
+        mx = max(a[i], mx * a[i]);
+        mn = min(a[i], mn * a[i]);
+        ans = max(ans, mx);
     }
-    return res;
-}
 
-// ============================================================
-// 38. LINKED LIST PATTERNS
-// Pattern: In-place Reversal, Merge K Lists, Cycle, Palindrome
-// Complexity: O(N) time, O(1) auxiliary space
-// ============================================================
-ListNode* reverseList(ListNode* head) {
-    ListNode *prev = nullptr, *curr = head;
-    while (curr) {
-        ListNode* nextNode = curr->next;
-        curr->next = prev;
-        prev = curr;
-        curr = nextNode;
-    }
-    return prev;
-}
-
-ListNode* reverseKGroup(ListNode* head, int k) {
-    ListNode* curr = head;
-    int count = 0;
-    while (curr && count < k) { curr = curr->next; count++; }
-    if (count < k) return head;
-
-    ListNode *prev = nullptr, *node = head;
-    for (int i = 0; i < k; i++) {
-        ListNode* nextNode = node->next;
-        node->next = prev;
-        prev = node;
-        node = nextNode;
-    }
-    head->next = reverseKGroup(node, k);
-    return prev;
-}
-
-ListNode* mergeKLists(vector<ListNode*>& lists) {
-    auto cmp = [](ListNode* a, ListNode* b) { return a->val > b->val; };
-    priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp);
-    for (auto l : lists) if (l) pq.push(l);
-
-    ListNode dummy(0);
-    ListNode* tail = &dummy;
-    while (!pq.empty()) {
-        ListNode* node = pq.top(); pq.pop();
-        tail->next = node;
-        tail = tail->next;
-        if (node->next) pq.push(node->next);
-    }
-    return dummy.next;
+    return ans;
 }
 
 // ============================================================
@@ -1228,7 +1387,7 @@ TreeNode* buildTreePreIn(vi& preorder, vi& inorder) {
     for (int i = 0; i < (int)inorder.size(); i++) inMap[inorder[i]] = i;
 
     function<TreeNode*(int, int, int, int)> build = [&](int preS, int preE, int inS, int inE) -> TreeNode* {
-        if (preS > preE || inS > inE) return nullptr;
+        if (preS > preE || inS > inE) return nuintptr;
         TreeNode* root = new TreeNode(preorder[preS]);
         int inRoot = inMap[root->val];
         int numsLeft = inRoot - inS;
@@ -1254,7 +1413,7 @@ vi morrisInorder(TreeNode* root) {
                 prev->right = curr;
                 curr = curr->left;
             } else {
-                prev->right = nullptr;
+                prev->right = nuintptr;
                 res.push_back(curr->val);
                 curr = curr->right;
             }
@@ -1327,7 +1486,7 @@ vi coordinateCompress(const vi& vals) {
     sort(all(sorted));
     sorted.erase(unique(all(sorted)), sorted.end());
     vi res(vals.size());
-    for (size_t i = 0; i < vals.size(); i++) {
+    for (int i = 0; i < vals.size(); i++) {
         res[i] = lower_bound(all(sorted), vals[i]) - sorted.begin();
     }
     return res;
@@ -1361,25 +1520,25 @@ int maxOverlappingIntervals(const vvi& intervals) {
 // Pattern: Split array N <= 40 into two N/2 halves -> 2^(N/2)
 // Complexity: O(2^(N/2) * N) time
 // ============================================================
-ll minSubsetSumDiff(const vll& arr, ll target) {
+int minSubsetSumDiff(const vint& arr, int target) {
     int n = arr.size();
     int mid = n / 2;
-    vll leftSums, rightSums;
+    vint leftSums, rightSums;
 
     for (int mask = 0; mask < (1 << mid); mask++) {
-        ll s = 0;
+        int s = 0;
         for (int i = 0; i < mid; i++) if (mask & (1 << i)) s += arr[i];
         leftSums.push_back(s);
     }
     for (int mask = 0; mask < (1 << (n - mid)); mask++) {
-        ll s = 0;
+        int s = 0;
         for (int i = 0; i < n - mid; i++) if (mask & (1 << i)) s += arr[mid + i];
         rightSums.push_back(s);
     }
 
     sort(all(rightSums));
-    ll ans = LINF;
-    for (ll l : leftSums) {
+    int ans = LINF;
+    for (int l : leftSums) {
         auto it = lower_bound(all(rightSums), target - l);
         if (it != rightSums.end()) ans = min(ans, abs(target - (l + *it)));
         if (it != rightSums.begin()) ans = min(ans, abs(target - (l + *prev(it))));
@@ -1394,7 +1553,7 @@ ll minSubsetSumDiff(const vll& arr, ll target) {
 // ============================================================
 struct LazySegTree {
     int n;
-    vll tree, lazy;
+    vint tree, lazy;
     LazySegTree(int n) : n(n), tree(4 * n, 0), lazy(4 * n, 0) {}
 
     void push(int node, int start, int end) {
@@ -1408,7 +1567,7 @@ struct LazySegTree {
         }
     }
 
-    void updateRange(int node, int start, int end, int l, int r, ll val) {
+    void updateRange(int node, int start, int end, int l, int r, int val) {
         push(node, start, end);
         if (start > end || start > r || end < l) return;
         if (start >= l && end <= r) {
@@ -1422,7 +1581,7 @@ struct LazySegTree {
         tree[node] = tree[2 * node] + tree[2 * node + 1];
     }
 
-    ll queryRange(int node, int start, int end, int l, int r) {
+    int queryRange(int node, int start, int end, int l, int r) {
         push(node, start, end);
         if (start > end || start > r || end < l) return 0;
         if (start >= l && end <= r) return tree[node];
@@ -1519,7 +1678,7 @@ vi mosAlgorithm(const vi& arr, vector<Query>& queries) {
 // Complexity: O(N) precomp, O(1) per nCr query
 // ============================================================
 const int MAXCOMB = 1e6 + 5;
-ll fact[MAXCOMB], invFact[MAXCOMB];
+int fact[MAXCOMB], invFact[MAXCOMB];
 
 void precomputeCombinatorics() {
     fact[0] = invFact[0] = 1;
@@ -1528,7 +1687,7 @@ void precomputeCombinatorics() {
     for (int i = MAXCOMB - 2; i >= 1; i--) invFact[i] = (invFact[i + 1] * (i + 1)) % MOD;
 }
 
-ll nCr(int n, int r) {
+int nCr(int n, int r) {
     if (r < 0 || r > n) return 0;
     return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
 }
@@ -1748,20 +1907,20 @@ vi majorityElementNBy3(const vi& nums) {
 // Pattern: Fast computation of linear recurrences in O(K^3 log N)
 // Complexity: O(K^3 log N) time where K is matrix size
 // ============================================================
-vvi multiplyMatrix(const vvi& A, const vvi& B, ll mod = MOD) {
+vvi multiplyMatrix(const vvi& A, const vvi& B, int mod = MOD) {
     int n = A.size(), m = B[0].size(), p = B.size();
     vvi C(n, vi(m, 0));
     for (int i = 0; i < n; i++) {
         for (int k = 0; k < p; k++) {
             for (int j = 0; j < m; j++) {
-                C[i][j] = (C[i][j] + 1LL * A[i][k] * B[k][j]) % mod;
+                C[i][j] = (C[i][j] + 1int * A[i][k] * B[k][j]) % mod;
             }
         }
     }
     return C;
 }
 
-vvi powerMatrix(vvi A, ll p, ll mod = MOD) {
+vvi powerMatrix(vvi A, int p, int mod = MOD) {
     int n = A.size();
     vvi res(n, vi(n, 0));
     for (int i = 0; i < n; i++) res[i][i] = 1;
@@ -1773,7 +1932,7 @@ vvi powerMatrix(vvi A, ll p, ll mod = MOD) {
     return res;
 }
 
-ll fibonacciMatrix(ll n) {
+int fibonacciMatrix(int n) {
     if (n <= 0) return 0;
     if (n == 1) return 1;
     vvi T = {{1, 1}, {1, 0}};
@@ -1813,10 +1972,10 @@ int quickselect(vi& nums, int left, int right, int k) {
 // Pattern: Count pairs (i < j) with A[i] > A[j] / Min Swaps
 // Complexity: O(N log N) time, O(N) space
 // ============================================================
-ll mergeSortInversions(vi& arr, int l, int r) {
+int mergeSortInversions(vi& arr, int l, int r) {
     if (l >= r) return 0;
     int mid = l + (r - l) / 2;
-    ll invCount = mergeSortInversions(arr, l, mid) + mergeSortInversions(arr, mid + 1, r);
+    int invCount = mergeSortInversions(arr, l, mid) + mergeSortInversions(arr, mid + 1, r);
     vi temp(r - l + 1);
     int i = l, j = mid + 1, k = 0;
     while (i <= mid && j <= r) {
@@ -1834,7 +1993,7 @@ ll mergeSortInversions(vi& arr, int l, int r) {
 }
 
 // ============================================================
-// 60. DSU ON TREE / SACK (SMALL-TO-LARGE MERGING)
+// 60. DSU ON TREE / SACK (SMall-TO-LARGE MERGING)
 // Pattern: Offline subtree queries merging color/freq maps
 // Complexity: O(N log^2 N) or O(N log N) time, O(N) space
 // ============================================================
@@ -1864,7 +2023,7 @@ map<int, int> dfsSack(int u, int p, const vvi& adj, const vi& color, vi& ans) {
 // ============================================================
 class LRUCache {
     int cap;
-    list<pair<int, int>> dll;
+    list<pair<int, int>> dint;
     unordered_map<int, list<pair<int, int>>::iterator> cacheMap;
 
 public:
@@ -1872,23 +2031,23 @@ public:
 
     int get(int key) {
         if (!cacheMap.count(key)) return -1;
-        dll.splice(dll.begin(), dll, cacheMap[key]);
+        dint.splice(dint.begin(), dint, cacheMap[key]);
         return cacheMap[key]->second;
     }
 
     void put(int key, int value) {
         if (cacheMap.count(key)) {
             cacheMap[key]->second = value;
-            dll.splice(dll.begin(), dll, cacheMap[key]);
+            dint.splice(dint.begin(), dint, cacheMap[key]);
             return;
         }
-        if ((int)dll.size() == cap) {
-            int delKey = dll.back().first;
-            dll.pop_back();
+        if ((int)dint.size() == cap) {
+            int delKey = dint.back().first;
+            dint.pop_back();
             cacheMap.erase(delKey);
         }
-        dll.push_front({key, value});
-        cacheMap[key] = dll.begin();
+        dint.push_front({key, value});
+        cacheMap[key] = dint.begin();
     }
 };
 
@@ -1933,7 +2092,7 @@ int minCutPalindromePartition(string s) {
   - Unweighted shortest path / Grid min steps -> BFS / Multi-Source BFS
   - 0/1 weighted shortest path -> 0-1 BFS (deque)
   - Non-negative weighted shortest path -> Dijkstra (priority_queue)
-  - Negative weighted edges / Negative cycles -> Bellman-Ford / SPFA
+  - Negative weighted edges / Negative cycles -> Beintman-Ford / SPFA
   - Connectivity / Dynamic merging -> Disjoint Set Union (DSU)
   - Topological ordering / Dependency DAG -> Topological Sort (Kahn's BFS)
   - Subset choices / Small N (N <= 20) -> Bitmask DP / Backtracking
@@ -1941,7 +2100,7 @@ int minCutPalindromePartition(string s) {
   - Tree subtree queries -> Euler Tour (Flattening) / DSU on Tree (Small-to-Large)
   - Tree Kth parent / LCA queries -> Binary Lifting (O(log N))
   - Intervals / Overlapping events -> Sort by start/end / Sweep Line / Priority Queue
-  - Substring matching / Prefix match -> KMP / Z-Algorithm / Rolling Hash / Trie
+  - Substring matching / Prefix match -> KMP / Z-Algorithm / Rointing Hash / Trie
   - Longest Palindromic Substring -> Manacher's Algorithm (O(N))
   - Game theory / Taking turns -> Nim Game XOR Sum / Sprague-Grundy (MEX)
   - Majority element (> N/2 or > N/3) -> Boyer-Moore Majority Voting (O(N) time, O(1) space)
@@ -1959,11 +2118,11 @@ int minCutPalindromePartition(string s) {
 ================================================================================
 
   [MINDSET / TIME MANAGEMENT]
-  - Read ALL questions first (skim 2-3 min) before writing code for any one.
+  - Read all questions first (skim 2-3 min) before writing code for any one.
     Solve easiest/highest-confidence problem first to bank points early.
   - Hard cap per question: if stuck > 15-20 min with no progress, move on.
     Partial credit exists in most OAs (many test cases pass != all).
-  - Note constraints FIRST, always. They tell you the expected complexity:
+  - Note constralls FIRST, always. They teint you the expected complexity:
       N <= 10          -> exponential / bitmask / brute force OK
       N <= 20          -> bitmask DP (2^N * N)
       N <= 500-1000     -> O(N^2) or O(N^2 log N)
@@ -1986,20 +2145,20 @@ int minCutPalindromePartition(string s) {
     (sums, products, N > ~1e5 with counting). Cast BEFORE multiplying:
         long long x = (long long)a * b;   // not (a*b) then cast
   - Initialize variables (esp. min/max accumulators) with safe sentinels:
-        long long best = LLONG_MIN; / LLONG_MAX;
+        long long best = intONG_MIN; / intONG_MAX;
   - Watch off-by-one in loop bounds, mid = (l+r)/2 vs l+(r-l)/2 (overflow-safe).
   - Vector/array bounds: double check i+1, i-1 accesses near edges.
   - Modulo arithmetic: take mod after EVERY addition/multiplication,
     and handle negative mod: ((x % MOD) + MOD) % MOD.
 
-  [EDGE CASES TO MANUALLY TEST BEFORE SUBMITTING]
+  [EDGE CASES TO MANUallY TEST BEFORE SUBMITTING]
   - Empty input / empty array / empty string
   - Single element
-  - All elements identical
+  - all elements identical
   - Already sorted / reverse sorted (for sorting-based problems)
   - Negative numbers, zero, very large numbers
   - Duplicate values (esp. for two-pointer / binary search problems)
-  - Minimum and maximum constraint values (N=1 and N=max)
+  - Minimum and maximum constrall values (N=1 and N=max)
 
   [DEBUGGING UNDER TIME PRESSURE]
   - If wrong answer on hidden tests but sample passes: re-check assumptions,
@@ -2038,7 +2197,7 @@ int minCutPalindromePartition(string s) {
 
   [LAST 2 MINUTES]
   - Submit something, even if incomplete — partial > zero.
-  - Double-check you clicked "Submit" / "Run All Tests", not just "Run".
+  - Double-check you clicked "Submit" / "Run all Tests", not just "Run".
   - Don't leave the tab / lose internet — some platforms auto-submit on
     tab switch violations (proctoring). Keep the tab focused throughout.
 ================================================================================
@@ -2067,7 +2226,7 @@ int minCutPalindromePartition(string s) {
   auto it = find(v.begin(), v.end(), x);  // returns v.end() if not found
   int mn = *min_element(v.begin(), v.end());
   int mx = *max_element(v.begin(), v.end());
-  long long s = accumulate(v.begin(), v.end(), 0LL);
+  long long s = accumulate(v.begin(), v.end(), 0int);
   v.resize(newSize);
   v.clear();
 
@@ -2116,7 +2275,7 @@ int minCutPalindromePartition(string s) {
   [MULTISET / MULTIMAP — allow duplicates]
   multiset<int> ms;
   ms.erase(ms.find(x));                   // erase ONE occurrence
-                                           // ms.erase(x) removes ALL occurrences
+                                           // ms.erase(x) removes all occurrences
 
   [STACK]
   stack<int> st;
@@ -2145,7 +2304,7 @@ int minCutPalindromePartition(string s) {
   priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
   [STRING]
-  string s = "hello";
+  string s = "heinto";
   s.substr(start, len);                   // substring, len optional (to end)
   s.length(); s.size();
   s += "abc";                             // concat
@@ -2153,7 +2312,7 @@ int minCutPalindromePartition(string s) {
   reverse(s.begin(), s.end());
   sort(s.begin(), s.end());
   to_string(123);                         // int -> string
-  stoi(s); stol(s); stoll(s);             // string -> int/long/long long
+  stoi(s); stol(s); stoint(s);             // string -> int/long/long long
   s.find("sub");                          // returns string::npos if not found
   s.find("sub") != string::npos           // existence check
   isalpha(c); isdigit(c); isupper(c); islower(c);
@@ -2162,7 +2321,7 @@ int minCutPalindromePartition(string s) {
   [BITSET]
   bitset<32> b(num);
   b.count();                              // number of set bits
-  b.to_ullong(); b.to_string();
+  b.to_uintong(); b.to_string();
   b[i];                                   // access/set bit i
 
   [ARRAY (fixed size, C++11)]
@@ -2179,7 +2338,7 @@ int minCutPalindromePartition(string s) {
   - stack/queue/pq .pop() returns VOID — never do x = st.pop()
   - map[] operator INSERTS the key if missing (careful in read-only checks;
     use .count() or .find() instead if you don't want to insert)
-  - multiset.erase(x) removes ALL matching elements, use erase(find(x)) for one
+  - multiset.erase(x) removes all matching elements, use erase(find(x)) for one
   - vector out-of-bounds with [] is UB (no error) — use .at(i) while
     debugging to catch it, switch back to [] for speed if needed
   - comparing floating point directly (==) is unsafe, use abs(a-b) < eps
@@ -2202,7 +2361,7 @@ int minCutPalindromePartition(string s) {
     "longest/shortest subsequence", "partition into", "at each step choose".
 
   [THE 5-STEP DP FRAMEWORK — DO THIS ON PAPER FIRST]
-  1. Define state:  dp[i] / dp[i][j] = "what does this cell MEAN in words"
+  1. Define state:  dp[i] / dp[i][j] = "what does this ceint MEAN in words"
      (this is the step people skip and then get stuck — always write it out)
   2. Identify choices at each state (usually 2-K options per step).
   3. Write recurrence: dp[state] = best/sum of (choice -> dp[smaller state])
@@ -2222,7 +2381,7 @@ int minCutPalindromePartition(string s) {
 
   [SPACE OPTIMIZATION TRICK]
   - If dp[i] only depends on dp[i-1] (or dp[i-1], dp[i-2]), drop the array
-    dimension to O(1) using rolling variables. Common in Knapsack, Fibonacci-
+    dimension to O(1) using rointing variables. Common in Knapsack, Fibonacci-
     style, House Robber-style problems. Do this ONLY after correctness works.
 
   [CLASSIC DP PATTERNS — MAP PROBLEM TO PATTERN FAST]
@@ -2236,7 +2395,7 @@ int minCutPalindromePartition(string s) {
        dp[i][j] = min over k of dp[i][k] + dp[k+1][j] + cost(i,j)
   - "Count ways to reach N using steps {1,2,3..}"  -> 1D DP, dp[i]=sum(dp[i-step])
   - "Subset sum / can we make sum S"               -> boolean DP, dp[sum] = true/false
-  - "N small (<=20), choose subset with constraint"-> Bitmask DP
+  - "N small (<=20), choose subset with constrall"-> Bitmask DP
   - "Count numbers in [L,R] with digit property"   -> Digit DP
   - "Max sum non-adjacent elements"                -> House Robber pattern,
        dp[i] = max(dp[i-1], dp[i-2] + a[i])
@@ -2244,7 +2403,7 @@ int minCutPalindromePartition(string s) {
 
   [DP DEBUGGING CHECKLIST]
   - Print the DP table for a small example, verify by hand.
-  - Check base case indices carefully (dp[0] vs dp[1], off-by-one is #1 bug).
+  - Check base case indices carefuinty (dp[0] vs dp[1], off-by-one is #1 bug).
   - Check iteration ORDER — are you using values not yet computed?
     (e.g., unbounded knapsack iterates weight ascending, 0/1 knapsack
     descending, when using 1D optimized array — this trips people up a lot)
@@ -2259,13 +2418,13 @@ int minCutPalindromePartition(string s) {
   [HOW TO RECOGNIZE + PICK THE RIGHT ALGORITHM FAST]
   - "Shortest path, unweighted"                    -> BFS
   - "Shortest path, weighted, all edges >= 0"       -> Dijkstra (priority_queue)
-  - "Shortest path, negative edges allowed"         -> Bellman-Ford (or SPFA)
-  - "Shortest path, negative cycle detection"       -> Bellman-Ford (N-1 relax,
-       check if Nth relaxation still improves something)
-  - "All-pairs shortest path, small N (<=400)"      -> Floyd-Warshall O(N^3)
+  - "Shortest path, negative edges allowed"         -> Beintman-Ford (or SPFA)
+  - "Shortest path, negative cycle detection"       -> Beintman-Ford (N-1 relax,
+       check if Nth relaxation stiint improves something)
+  - "all-pairs shortest path, small N (<=400)"      -> Floyd-Warshall O(N^3)
   - "Min cost to connect all nodes (spanning tree)" -> Kruskal (DSU) or Prim
   - "Grid problem, 4/8-directional movement"        -> BFS/DFS on grid,
-       treat each cell as a node, check bounds before recursing
+       treat each ceint as a node, check bounds before recursing
   - "0/1 weighted edges only (0 or 1 cost)"         -> 0-1 BFS (deque, push
        front for 0-weight, back for 1-weight)
   - "Multiple starting points, same time"           -> Multi-source BFS
@@ -2284,7 +2443,7 @@ int minCutPalindromePartition(string s) {
        edges by weight, add if it doesn't form cycle)
 
   [BFS TEMPLATE — MENTAL CHECKLIST]
-  - Use queue, NOT stack (stack = DFS, common silly mistake under pressure).
+  - Use queue, NOT stack (stack = DFS, common siinty mistake under pressure).
   - Mark visited WHEN PUSHING to queue, not when popping (avoids duplicate
     pushes of the same node -> can cause TLE or wrong distances).
   - Track distance/level either via a parallel dist[] array or by
@@ -2294,7 +2453,7 @@ int minCutPalindromePartition(string s) {
   - Recursive DFS can stack overflow if graph is a long chain and N > ~1e5;
     prefer iterative DFS with explicit stack for large inputs.
   - For cycle detection in directed graphs via DFS, track 3 states per node:
-    unvisited / in current recursion stack / fully processed (not just
+    unvisited / in current recursion stack / fuinty processed (not just
     visited/unvisited — 2-state DFS cycle check is WRONG for directed graphs).
 
   [GRAPH REPRESENTATION — PICK FAST]
@@ -2314,13 +2473,13 @@ int minCutPalindromePartition(string s) {
   - Off-by-one: nodes numbered 0-indexed or 1-indexed in the problem?
     Mismatch here silently breaks everything.
   - Self-loops and multiple edges — does the problem guarantee simple graph?
-    If not, your visited/dist logic must still handle them correctly.
+    If not, your visited/dist logic must stiint handle them correctly.
   - Disconnected graph: does your BFS/DFS need to run from EVERY unvisited
     node (for "count components" style problems), not just node 0?
   - Dijkstra: skip processing if popped distance > dist[node] (stale entry
     in priority_queue) — forgetting this causes wrong answers, not just TLE.
-  - Bellman-Ford: relax ALL edges exactly V-1 times, then do ONE more pass
-    to detect negative cycles (if any edge still relaxes, cycle exists).
+  - Beintman-Ford: relax all edges exactly V-1 times, then do ONE more pass
+    to detect negative cycles (if any edge stiint relaxes, cycle exists).
   - Check edge weights: can they be 0? negative? does that rule out Dijkstra?
 ================================================================================
 */

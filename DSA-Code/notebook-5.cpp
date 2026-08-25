@@ -17,7 +17,8 @@ ll power(ll a, ll b, ll mod = MOD) {
     ll res = 1;
     a %= mod;
     while (b > 0) {
-        if (b & 1) res = (res * a) % mod;
+        if (b & 1)
+            res = (res * a) % mod;
         a = (a * a) % mod;
         b >>= 1;
     }
@@ -44,10 +45,12 @@ vvl multiply(const vvl &A, const vvl &B, int k) {
 
 vvl power(vvl A, ll p, int k) {
     vvl res(k, vl(k, 0));
-    for (int i = 0; i < k; i++) res[i][i] = 1;
+    for (int i = 0; i < k; i++)
+        res[i][i] = 1;
 
     while (p > 0) {
-        if (p & 1) res = multiply(res, A, k);
+        if (p & 1)
+            res = multiply(res, A, k);
         A = multiply(A, A, k);
         p >>= 1;
     }
@@ -65,7 +68,8 @@ ll countPathOfLengthK(vvl &adj, int src, int dest, ll k) {
 // Time: O(log N), Space: O(1)
 
 int calculateNthFiboacci(int n) {
-    if (n <= 1) return n;
+    if (n <= 1)
+        return n;
     vvl F = {{1, 1}, {1, 0}};
     return power(F, n - 1, 2)[0][0];
 }
@@ -84,9 +88,11 @@ ll maxSubarraySumAtMostK(const vi &a, int k) {
     ll ans = -1e18;
 
     for (int i = 1; i <= n; i++) {
-        while (!dq.empty() && dq.front() < i - k) dq.pop_front();
+        while (!dq.empty() && dq.front() < i - k)
+            dq.pop_front();
         ans = max(ans, pref[i] - pref[dq.front()]);
-        while (!dq.empty() && pref[dq.back()] >= pref[i]) dq.pop_back();
+        while (!dq.empty() && pref[dq.back()] >= pref[i])
+            dq.pop_back();
         dq.push_back(i);
     }
 
@@ -98,7 +104,8 @@ ll maxSubarraySumAtMostK(const vi &a, int k) {
 
 vi kthPermutation(int n, int k) {
     vi fact(n + 1, 1), nums(n), result;
-    for (int i = 1; i <= n; i++) fact[i] = fact[i - 1] * i;
+    for (int i = 1; i <= n; i++)
+        fact[i] = fact[i - 1] * i;
     iota(nums.begin(), nums.end(), 1);
 
     k--;
@@ -118,7 +125,8 @@ vi kthPermutation(int n, int k) {
 ll permutationRank(const vi &p) {
     int n = p.size();
     vl fact(n + 1, 1);
-    for (int i = 1; i <= n; i++) fact[i] = fact[i - 1] * i;
+    for (int i = 1; i <= n; i++)
+        fact[i] = fact[i - 1] * i;
 
     vi unused(n);
     iota(unused.begin(), unused.end(), 1);
@@ -138,11 +146,13 @@ ll permutationRank(const vi &p) {
 
 vi next_permutation(vi &p) {
     int n = p.size(), i = n - 2;
-    while (i >= 0 && p[i] >= p[i + 1]) i--;
+    while (i >= 0 && p[i] >= p[i + 1])
+        i--;
 
     if (i >= 0) {
         int j = n - 1;
-        while (p[j] <= p[i]) j--;
+        while (p[j] <= p[i])
+            j--;
         swap(p[i], p[j]);
     }
     reverse(p.begin() + i + 1, p.end());
@@ -166,7 +176,8 @@ ll getLCM(const vi &nums) {
                 max_pwr[p] = max(max_pwr[p], cnt);
             }
         }
-        if (temp > 1) max_pwr[temp] = max(max_pwr[temp], 1);
+        if (temp > 1)
+            max_pwr[temp] = max(max_pwr[temp], 1);
     }
 
     ll lcm = 1;
@@ -184,7 +195,8 @@ int permutationRounds(int n, const vi &a) {
     vi cycle_len;
 
     for (int i = 1; i <= n; i++) {
-        if (vis[i]) continue;
+        if (vis[i])
+            continue;
         int cur = i, len = 0;
         while (!vis[cur]) {
             vis[cur] = true;
@@ -206,12 +218,14 @@ struct Fenwick {
     Fenwick(int n) : n(n), bit(n + 1, 0) {}
 
     void add(int idx, int val) {
-        for (; idx <= n; idx += idx & -idx) bit[idx] += val;
+        for (; idx <= n; idx += idx & -idx)
+            bit[idx] += val;
     }
 
     int sum(int idx) {
         int res = 0;
-        for (; idx > 0; idx -= idx & -idx) res += bit[idx];
+        for (; idx > 0; idx -= idx & -idx)
+            res += bit[idx];
         return res;
     }
 };
@@ -239,7 +253,8 @@ int minAnySwaps(const vi &a) {
     vector<bool> vis(n, false);
 
     for (int i = 0; i < n; i++) {
-        if (vis[i]) continue;
+        if (vis[i])
+            continue;
         cycles++;
         int cur = i;
         while (!vis[cur]) {
@@ -257,8 +272,10 @@ int minMoveAnywhere(const vi &a) {
     vi lis;
     for (int x : a) {
         auto it = lower_bound(lis.begin(), lis.end(), x);
-        if (it == lis.end()) lis.push_back(x);
-        else *it = x;
+        if (it == lis.end())
+            lis.push_back(x);
+        else
+            *it = x;
     }
     return (int)a.size() - (int)lis.size();
 }
@@ -269,7 +286,8 @@ int minMoveAnywhere(const vi &a) {
 int minMoveToFront(const vi &a) {
     int n = a.size(), need = n;
     for (int i = n - 1; i >= 0; i--) {
-        if (a[i] == need) need--;
+        if (a[i] == need)
+            need--;
     }
     return need;
 }
@@ -307,39 +325,44 @@ int quickSelect(vi &nums, int k) {
     while (true) {
         int pivot = nums[r], p = l;
         for (int i = l; i < r; i++) {
-            if (nums[i] < pivot) swap(nums[p++], nums[i]);
+            if (nums[i] < pivot)
+                swap(nums[p++], nums[i]);
         }
         swap(nums[p], nums[r]);
 
-        if (p == k) return nums[p];
-        if (p < k) l = p + 1;
-        else r = p - 1;
+        if (p == k)
+            return nums[p];
+        if (p < k)
+            l = p + 1;
+        else
+            r = p - 1;
     }
 }
 
 // Generate adjacent state transitions for string BFS
 // Time: Problem dependent, Space: O(branching factor)
 
-vector<string> getNeighbors(const string &cur) {
-    return {};
-}
+vector<string> getNeighbors(const string &cur) { return {}; }
 
 // Bidirectional BFS for shortest path between start and target strings
 // Time: O(B^(D/2)), Space: O(B^(D/2))
 
 int bidirectionalBFS(const string &start, const string &target) {
-    if (start == target) return 0;
+    if (start == target)
+        return 0;
     unordered_set<string> fwd = {start}, bwd = {target}, vis = {start, target};
     int steps = 0;
 
     while (!fwd.empty() && !bwd.empty()) {
-        if (fwd.size() > bwd.size()) swap(fwd, bwd);
+        if (fwd.size() > bwd.size())
+            swap(fwd, bwd);
         unordered_set<string> nxt_set;
         steps++;
 
         for (const string &cur : fwd) {
             for (const string &nxt : getNeighbors(cur)) {
-                if (bwd.count(nxt)) return steps;
+                if (bwd.count(nxt))
+                    return steps;
                 if (!vis.count(nxt)) {
                     vis.insert(nxt);
                     nxt_set.insert(nxt);
@@ -351,3 +374,47 @@ int bidirectionalBFS(const string &start, const string &target) {
     return -1;
 }
 
+bool checkValidString(const string &s) {
+    int cmin = 0, cmax = 0;
+    // cmin represents the minimum number of open parentheses that must be closed
+    // cmax represents the maximum number of open parentheses that can be closed
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == '(') {
+            cmin++;
+            cmax++;
+        } else if (s[i] == ')') {
+            cmin--;
+            cmax--;
+        } else {
+            cmin--;
+            cmax++;
+        }
+        if (cmax < 0) // If at any point the maximum number of open parentheses is negative, it means there are more closing parentheses than opening ones, which is invalid.
+            return false;
+        if (cmin < 0) // If the minimum number of open parentheses is negative, we reset it to 0 because we can't have a negative count of open parentheses.
+            cmin = 0;
+    }
+    return cmin == 0;
+}
+
+int countPairs(vector<int>& a, int x) {
+    if (a.size() <= 1) return 0;
+
+    int mid = a.size() / 2;
+    vector<int> l(a.begin(), a.begin() + mid);
+    vector<int> r(a.begin() + mid, a.end());
+
+    int cnt = countPairs(l, x) + countPairs(r, x);
+
+    int j = 0;
+    for (int i = 0; i < l.size(); i++) {
+        while (j < r.size() && l[i] > 1LL * x * r[j])j++;
+        cnt += j;
+    }
+
+    merge(l.begin(), l.end(), r.begin(), r.end(), a.begin()); // Merge the two halves back into the original array to maintain sorted order for further recursive calls.
+    // time complexity: O(n log n) due to the merge sort approach, space complexity: O(n) for the temporary arrays l and r.
+    // merge is built in function in C++ STL that merges two sorted ranges into a single sorted range.
+
+    return cnt;
+} // finds the number of pairs (i, j) such that i < j and a[i] > x * a[j] 

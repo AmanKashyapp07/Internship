@@ -1,11 +1,35 @@
 {
+    "clangd.enable": true,
+    "clangd.diagnostics": false,
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.dimInactiveRegions": false,
     "C_Cpp.codeAnalysis.runAutomatically": false,
-    "clangd.enable": false,
-    "clangd.diagnostics": false,
     "errorLens.enabled": false,
-    "cSpell.enabled": false
-    
+    "cSpell.enabled": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "problems.decorations.enabled": false,
+    "explorer.decorations.colors": false,
+    "explorer.decorations.badges": false,
+    "workbench.editor.decorations.colors": false,
+    "workbench.editor.decorations.badges": false,
+    "workbench.colorCustomizations": {
+        "editorError.foreground": "#00000000",
+        "editorWarning.foreground": "#00000000",
+        "editorInfo.foreground": "#00000000",
+        "editorHint.foreground": "#00000000"
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.tabSize": 4
+    },
+    "[c]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.tabSize": 4
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.tabSize": 4
+    }
 }
