@@ -619,6 +619,333 @@ public:
     // - Approach: Breadth-First Search (BFS) over implicit word graph with hash set lookup.
     // - Intuition: Words are graph nodes; generate neighbors by testing 26 substitutions per character; erase visited words from set to prevent cycles.
     // - Complexity: Time: O(M^2 \cdot N) where M is word length and N is word list size, Space: O(M \cdot N) for queue and word set.
+
+
+    // =========================================================
+    // 21. MULTI-SOURCE BFS
+    // =========================================================
+
+    vector<int> multiSourceBFS(int n, vector<vector<int>>& graph, vector<int>& sources) {
+        vector<int> dist(n, INT_MAX);
+        queue<int> q;
+        for (int src : sources) {
+            dist[src] = 0;
+            q.push(src);
+        }
+        while (!q.empty()) {
+            int node = q.front(); q.pop();
+            for (int nbr : graph[node]) {
+                if (dist[nbr] > dist[node] + 1) {
+                    dist[nbr] = dist[node] + 1;
+                    q.push(nbr);
+                }
+            }
+        }
+        return dist;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find shortest distances to all vertices starting from multiple source vertices simultaneously.
+    // - Approach: Multi-source BFS pushing all initial sources into queue at depth 0.
+    // - Intuition: Pushing all sources upfront propagates wavefronts evenly across the graph in level-order.
+    // - Complexity: Time: O(V + E), Space: O(V) for queue and distance array.
+
+
+    // =========================================================
+    // 22. K SHORTEST PATHS
+    // =========================================================
+
+    vector<long long> kShortestPaths(int n, vector<vector<pair<int, int>>>& graph, int src, int dest, int k) {
+        vector<int> cnt(n, 0);
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        pq.push({0, src});
+        vector<long long> answer;
+        while (!pq.empty()) {
+            auto [dist, node] = pq.top(); pq.pop();
+            cnt[node]++;
+            if (node == dest) {
+                answer.push_back(dist);
+                if (answer.size() == (size_t)k) return answer;
+            }
+            if (cnt[node] > k) continue;
+            for (auto [nbr, wt] : graph[node]) {
+                pq.push({dist + wt, nbr});
+            }
+        }
+        return answer;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Determine top K shortest path distances from source to destination in a weighted graph.
+    // - Approach: Modified Dijkstra tracking visit count per node up to K times.
+    // - Intuition: Allowing each node to be popped at most K times guarantees finding the K smallest path costs to destination.
+    // - Complexity: Time: O(K \cdot E \log V), Space: O(K \cdot V).
+
+
+    // =========================================================
+    // 23. EVENTUAL SAFE STATES
+    // =========================================================
+
+    vector<int> eventualSafeNodes(int V, vector<vector<int>>& graph) {
+        vector<vector<int>> revGraph(V);
+        vector<int> indegree(V, 0);
+        for (int i = 0; i < V; ++i) {
+            for (auto it : graph[i]) {
+                revGraph[it].push_back(i);
+                indegree[i]++;
+            }
+        }
+        queue<int> q;
+        for (int i = 0; i < V; ++i) if (indegree[i] == 0) q.push(i);
+        vector<int> safeNodes;
+        while (!q.empty()) {
+            int node = q.front(); q.pop();
+            safeNodes.push_back(node);
+            for (auto it : revGraph[node]) {
+                indegree[it]--;
+                if (indegree[it] == 0) q.push(it);
+            }
+        }
+        sort(safeNodes.begin(), safeNodes.end());
+        return safeNodes;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all nodes from which every path leads to a terminal node (no cycle reachable).
+    // - Approach: Reversed graph construction + Kahn's Topological Sort from terminal nodes (indegree 0).
+    // - Intuition: Terminal nodes have outdegree 0 in original graph; reversing edges turns outdegree 0 into indegree 0 for standard Kahn's BFS.
+    // - Complexity: Time: O(V + E \log V), Space: O(V + E).
+
+
+    // =========================================================
+    // 24. SHORTEST PATH IN DAG VIA TOPO SORT
+    // =========================================================
+
+    vector<int> shortestPathDAG(int V, const vector<vector<pair<int, int>>>& graph, int src) {
+        vector<int> indegree(V, 0);
+        for (int i = 0; i < V; i++) {
+            for (auto it : graph[i]) indegree[it.first]++;
+        }
+        queue<int> q;
+        for (int i = 0; i < V; i++) if (indegree[i] == 0) q.push(i);
+        vector<int> topo;
+        while (!q.empty()) {
+            int node = q.front(); q.pop();
+            topo.push_back(node);
+            for (auto it : graph[node]) {
+                indegree[it.first]--;
+                if (indegree[it.first] == 0) q.push(it.first);
+            }
+        }
+        vector<int> dist(V, INT_MAX);
+        dist[src] = 0;
+        for (int i = 0; i < V; i++) {
+            int node = topo[i];
+            if (dist[node] != INT_MAX) {
+                for (auto it : graph[node]) {
+                    int v = it.first, wt = it.second;
+                    if (dist[node] + wt < dist[v]) dist[v] = dist[node] + wt;
+                }
+            }
+        }
+        for (int i = 0; i < V; i++) if (dist[i] == INT_MAX) dist[i] = -1;
+        return dist;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find shortest path distances from source to all vertices in a Directed Acyclic Graph (DAG).
+    // - Approach: Topological Sort followed by single-pass edge relaxation in topological order.
+    // - Intuition: Processing vertices in topological order guarantees all incoming shortest path distances are fully resolved before relaxing outgoing edges.
+    // - Complexity: Time: O(V + E), Space: O(V).
+
+
+    // =========================================================
+    // 25. PATH WITH MINIMUM EFFORT
+    // =========================================================
+
+    int minimumEffortPath(vector<vector<int>>& heights) {
+        int n = heights.size(), m = heights[0].size();
+        priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;
+        vector<vector<int>> diff(n, vector<int>(m, INT_MAX));
+        diff[0][0] = 0;
+        pq.push({0, {0, 0}});
+        int dr[] = {-1, 0, 1, 0};
+        int dc[] = {0, 1, 0, -1};
+        while (!pq.empty()) {
+            auto [effort, pos] = pq.top(); pq.pop();
+            auto [r, c] = pos;
+            if (r == n - 1 && c == m - 1) return effort;
+            for (int i = 0; i < 4; i++) {
+                int nr = r + dr[i], nc = c + dc[i];
+                if (nr >= 0 && nr < n && nc >= 0 && nc < m) {
+                    int newEffort = max(effort, abs(heights[r][c] - heights[nr][nc]));
+                    if (newEffort < diff[nr][nc]) {
+                        diff[nr][nc] = newEffort;
+                        pq.push({newEffort, {nr, nc}});
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find a path from top-left to bottom-right minimizing the maximum absolute height difference between adjacent cells.
+    // - Approach: Modified Dijkstra's Algorithm storing max height difference along the path.
+    // - Intuition: Min-Heap priority queue greedily expands the path with current minimum effort bottleneck first.
+    // - Complexity: Time: O(N \cdot M \log(N \cdot M)), Space: O(N \cdot M).
+
+
+    // =========================================================
+    // 26. NETWORK DELAY TIME
+    // =========================================================
+
+    int networkDelayTime(vector<vector<int>>& times, int n, int k) {
+        vector<vector<pair<int, int>>> graph(n + 1);
+        for (auto& t : times) graph[t[0]].push_back({t[1], t[2]});
+        vector<int> dist(n + 1, INT_MAX);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        dist[k] = 0;
+        pq.push({0, k});
+        while (!pq.empty()) {
+            auto [d, node] = pq.top(); pq.pop();
+            if (d > dist[node]) continue;
+            for (auto& it : graph[node]) {
+                if (d + it.second < dist[it.first]) {
+                    dist[it.first] = d + it.second;
+                    pq.push({dist[it.first], it.first});
+                }
+            }
+        }
+        int mxTime = 0;
+        for (int i = 1; i <= n; i++) {
+            if (dist[i] == INT_MAX) return -1;
+            mxTime = max(mxTime, dist[i]);
+        }
+        return mxTime;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Calculate minimum time required for signal sent from node K to reach all N nodes in network.
+    // - Approach: Dijkstra's Algorithm from source K tracking max travel time across all nodes.
+    // - Intuition: The time for all nodes to receive the signal is the maximum of all shortest path distances from K.
+    // - Complexity: Time: O((V + E) \log V), Space: O(V + E).
+
+
+    // =========================================================
+    // 27. NUMBER OF WAYS TO ARRIVE AT DESTINATION
+    // =========================================================
+
+    int countPaths(int n, vector<vector<int>>& roads) {
+        const long long INF_VAL = LLONG_MAX;
+        const int MOD_VAL = 1e9 + 7;
+        vector<vector<pair<long long, int>>> graph(n);
+        for (auto& r : roads) {
+            graph[r[0]].push_back({r[1], r[2]});
+            graph[r[1]].push_back({r[0], r[2]});
+        }
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        vector<long long> dist(n, INF_VAL), ways(n, 0);
+        dist[0] = 0; ways[0] = 1;
+        pq.push({0, 0});
+        while (!pq.empty()) {
+            auto [d, node] = pq.top(); pq.pop();
+            if (d > dist[node]) continue;
+            for (auto& it : graph[node]) {
+                int v = it.first;
+                long long wt = it.second;
+                if (d + wt < dist[v]) {
+                    dist[v] = d + wt;
+                    ways[v] = ways[node];
+                    pq.push({dist[v], v});
+                } else if (d + wt == dist[v]) {
+                    ways[v] = (ways[v] + ways[node]) % MOD_VAL;
+                }
+            }
+        }
+        return ways[n - 1] % MOD_VAL;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count the number of shortest paths from node 0 to node n-1 modulo 10^9+7.
+    // - Approach: Dijkstra's algorithm tracking both shortest distance `dist` and ways count `ways`.
+    // - Intuition: When finding a strictly shorter path, overwrite `ways[v] = ways[u]`; when finding an equal distance path, accumulate `ways[v] += ways[u]`.
+    // - Complexity: Time: O((V + E) \log V), Space: O(V + E).
+
+
+    // =========================================================
+    // 28. NUMBER OF OPERATIONS TO MAKE NETWORK CONNECTED
+    // =========================================================
+
+    int makeConnected(int n, vector<vector<int>>& connections) {
+        if (connections.size() < (size_t)(n - 1)) return -1;
+        DSU ds(n);
+        for (auto &e : connections) ds.unite(e[0], e[1]);
+        int components = 0;
+        for (int i = 0; i < n; i++) if (ds.find(i) == i) components++;
+        return components - 1;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum cables to move to connect all n computers (or return -1 if impossible).
+    // - Approach: DSU component counting (need at least n-1 edges total, and C components require C-1 moves).
+    // - Intuition: If total edges >= n - 1, extra redundant edges can always be re-wired to connect the C disconnected components.
+    // - Complexity: Time: O(E \cdot \alpha(V)), Space: O(V).
+
+
+    // =========================================================
+    // 29. MOST STONES REMOVED WITH SAME ROW OR COLUMN
+    // =========================================================
+
+    int removeStones(vector<vector<int>>& stones) {
+        int maxRow = 0, maxCol = 0;
+        for (auto &s : stones) {
+            maxRow = max(maxRow, s[0]);
+            maxCol = max(maxCol, s[1]);
+        }
+        DSU ds(maxRow + maxCol + 2);
+        unordered_set<int> used;
+        for (auto &s : stones) {
+            int row = s[0], col = s[1] + maxRow + 1;
+            ds.unite(row, col);
+            used.insert(row);
+            used.insert(col);
+        }
+        int components = 0;
+        for (int node : used) if (ds.find(node) == node) components++;
+        return stones.size() - components;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Remove maximum number of stones sharing row/column with another stone.
+    // - Approach: DSU linking row nodes to offset column nodes (`col + maxRow + 1`).
+    // - Intuition: A connected component of N stones sharing row/col coordinates can always be reduced down to 1 stone; answer is `totalStones - components`.
+    // - Complexity: Time: O(N \cdot \alpha(\text{range})), Space: O(N + \text{maxRow} + \text{maxCol}).
+
+
+    // =========================================================
+    // 30. NUMBER OF ISLANDS II (DYNAMIC LAND ADDITION)
+    // =========================================================
+
+    vector<int> numIslandsII(int n, int m, vector<vector<int>>& queries) {
+        DSU ds(n * m);
+        vector<vector<int>> vis(n, vector<int>(m, 0));
+        vector<int> ans;
+        int cnt = 0;
+        int dr[] = {-1, 0, 1, 0};
+        int dc[] = {0, 1, 0, -1};
+        for (auto &q : queries) {
+            int r = q[0], c = q[1];
+            if (vis[r][c]) { ans.push_back(cnt); continue; }
+            vis[r][c] = 1;
+            cnt++;
+            int node = r * m + c;
+            for (int k = 0; k < 4; k++) {
+                int nr = r + dr[k], nc = c + dc[k];
+                if (nr < 0 || nr >= n || nc < 0 || nc >= m || !vis[nr][nc]) continue;
+                int adjNode = nr * m + nc;
+                if (ds.unite(node, adjNode)) cnt--;
+            }
+            ans.push_back(cnt);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Maintain island count dynamically as new land cells are added sequentially.
+    // - Approach: DSU dynamic component merging with 2D-to-1D index mapping (`r * m + c`).
+    // - Intuition: Adding land increments island count by 1; merging with adjacent land cells decrements count whenever `ds.unite` merges two distinct sets.
+    // - Complexity: Time: O(Q \cdot \alpha(N \cdot M)), Space: O(N \cdot M).
 };
 
 /*
