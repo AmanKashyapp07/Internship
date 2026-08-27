@@ -367,3 +367,60 @@ int majorityElement(vi &nums) {
 // - Approach: Boyer-Moore Voting Algorithm.
 // - Intuition: The algorithm maintains a count of the current candidate for majority element. When the count drops to zero, a new candidate is chosen. The majority element will always be the last candidate standing after processing the entire array.
 // - Complexity: Time: O(N) single pass, Space: O(1) auxiliary space.
+
+
+class MyHashMap {
+private:
+    static const int SIZE = 1000;
+    vector<list<pair<int, int>>> buckets;
+
+    int hash(int key) {
+        return key % SIZE;
+    }
+
+public:
+    MyHashMap() : buckets(SIZE) {}
+
+    void put(int key, int value) {
+        int idx = hash(key);
+
+        // If key exists, update its value
+        for (auto& [k, v] : buckets[idx]) {
+            if (k == key) {
+                v = value;
+                return;
+            }
+        }
+
+        // Otherwise insert new key-value pair
+        buckets[idx].push_back({key, value});
+    }
+
+    int get(int key) {
+        int idx = hash(key);
+
+        for (auto& [k, v] : buckets[idx]) {
+            if (k == key)
+                return v;
+        }
+
+        return -1;
+    }
+
+    void remove(int key) {
+        int idx = hash(key);
+
+        for (auto it = buckets[idx].begin(); it != buckets[idx].end(); ++it) {
+            if (it->first == key) {
+                buckets[idx].erase(it);
+                return;
+            }
+        }
+    }
+};
+
+// Interview Explanation:
+// - Problem Statement: Implement a basic HashMap with put, get, and remove operations.
+// - Approach: Use an array of linked lists (buckets) to handle collisions via chaining.
+// - Intuition: The hash function maps keys to bucket indices. Each bucket is a linked list that stores key-value pairs. When inserting, we check if the key exists to update; otherwise, we append. For retrieval and removal, we traverse the linked list in the corresponding bucket.
+// - Complexity: Time: O(1) average for put/get/remove, O(N) worst-case if all keys collide, Space: O(N) for storing key-value pairs.

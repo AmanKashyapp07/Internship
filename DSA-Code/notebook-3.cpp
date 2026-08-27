@@ -22,8 +22,9 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
-// Reconstruct cycle from parent array
-// Time: O(V), Space: O(V)
+// =========================================================
+// 1. RECONSTRUCT CYCLE
+// =========================================================
 
 vi buildCycle(int start, const vi &parent) {
     vi cycle;
@@ -35,9 +36,16 @@ vi buildCycle(int start, const vi &parent) {
     }
     return cycle;
 }
+// Interview Explanation:
+// - Problem Statement: Reconstruct a detected cycle sequence from a parent predecessor array.
+// - Approach: Predecessor backtracking traversal until cycle start is revisited.
+// - Intuition: Tracing parent pointers backward from collision node retraces the cycle loop until reaching start node again.
+// - Complexity: Time: O(L) where L is cycle length (at most V), Space: O(L) to store cycle path.
 
-// Shortest cycle length (girth) in unweighted graph using BFS from each node
-// Time: O(V * (V + E)), Space: O(V)
+
+// =========================================================
+// 2. SHORTEST CYCLE LENGTH (GIRTH)
+// =========================================================
 
 int findShortestCycle(int n, const vvi &g) {
     int min_cycle = 1e9;
@@ -48,15 +56,13 @@ int findShortestCycle(int n, const vvi &g) {
         q.push(src);
 
         while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-
+            int u = q.front(); q.pop();
             for (int v : g[u]) {
                 if (dist[v] == -1) {
                     dist[v] = dist[u] + 1;
                     parent[v] = u;
                     q.push(v);
-                } else if (parent[u] != v) { // if v is already visited and not the parent of u, we found a cycle
+                } else if (parent[u] != v) {
                     min_cycle = min(min_cycle, dist[u] + dist[v] + 1);
                 }
             }
@@ -64,9 +70,16 @@ int findShortestCycle(int n, const vvi &g) {
     }
     return min_cycle == 1e9 ? -1 : min_cycle;
 }
+// Interview Explanation:
+// - Problem Statement: Find the length of the shortest cycle (girth) in an unweighted undirected graph, or -1 if acyclic.
+// - Approach: Breadth-First Search (BFS) initiated from every vertex.
+// - Intuition: BFS from node u expands level by level; the first cross-edge connecting to a visited non-parent node v discovers a minimal cycle of length dist[u] + dist[v] + 1.
+// - Complexity: Time: O(V * (V + E)) running BFS from all V nodes, Space: O(V) for BFS queue and distance/parent arrays.
 
-// Find all nodes in graph cycles via topological peeling, it means all nodes will be returned that are part of cycles in the directed graph
-// Time: O(V + E), Space: O(V)
+
+// =========================================================
+// 3. NODES IN CYCLES (TOPOLOGICAL PEELING)
+// =========================================================
 
 vi getNodesInCycles(int n, const vvi &g, vi &indegree) {
     queue<int> q;
@@ -78,8 +91,7 @@ vi getNodesInCycles(int n, const vvi &g, vi &indegree) {
     }
 
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
+        int u = q.front(); q.pop();
         is_acyclic[u] = true;
         for (int v : g[u]) {
             if (--indegree[v] == 0) q.push(v);
@@ -89,12 +101,18 @@ vi getNodesInCycles(int n, const vvi &g, vi &indegree) {
     for (int i = 0; i < n; i++) {
         if (!is_acyclic[i]) cyclic_nodes.push_back(i);
     }
-
     return cyclic_nodes;
 }
+// Interview Explanation:
+// - Problem Statement: Identify and return all nodes that are part of at least one cycle in a directed graph.
+// - Approach: Topological Peeling via in-degree reduction (Kahn's Algorithm variant).
+// - Intuition: Nodes with in-degree 0 cannot belong to any cycle; peeling them recursively eliminates all acyclic branches, leaving only cyclic nodes.
+// - Complexity: Time: O(V + E) standard topological sort pass, Space: O(V) for queue and boolean tracking array.
 
-// Bipartite graph check using DFS 2-coloring
-// Time: O(V + E), Space: O(V)
+
+// =========================================================
+// 4. BIPARTITE GRAPH CHECK (DFS 2-COLORING)
+// =========================================================
 
 bool dfsBipartite(int u, int color, vi &colors, const vvi &g) {
     colors[u] = color;
@@ -107,9 +125,16 @@ bool dfsBipartite(int u, int color, vi &colors, const vvi &g) {
     }
     return true;
 }
+// Interview Explanation:
+// - Problem Statement: Check if a graph component is bipartite (2-colorable with no two adjacent vertices sharing the same color).
+// - Approach: Recursive DFS 2-Coloring.
+// - Intuition: Color start node 0; recursively assign neighbors opposite color 1 - color; if an adjacent neighbor already has the same color, an odd cycle exists.
+// - Complexity: Time: O(V + E) visiting all reachable vertices and edges, Space: O(V) for colors array and recursion stack.
 
-// Single-source shortest path on weighted DAG in linear time
-// Time: O(V + E), Space: O(V)
+
+// =========================================================
+// 5. SHORTEST PATH ON WEIGHTED DAG
+// =========================================================
 
 vi shortestPathDAG(int n, const vector<vector<pii>> &g, int src) {
     vi indeg(n, 0);
@@ -120,15 +145,12 @@ vi shortestPathDAG(int n, const vector<vector<pii>> &g, int src) {
     vi dist(n, 1e9);
     dist[src] = 0;
     queue<int> q;
-
     for (int i = 0; i < n; i++) {
         if (indeg[i] == 0) q.push(i);
     }
 
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-
+        int u = q.front(); q.pop();
         for (auto &[v, wt] : g[u]) {
             if (dist[u] != 1e9 && dist[u] + wt < dist[v]) {
                 dist[v] = dist[u] + wt;
@@ -136,41 +158,60 @@ vi shortestPathDAG(int n, const vector<vector<pii>> &g, int src) {
             if (--indeg[v] == 0) q.push(v);
         }
     }
-
     return dist;
 }
+// Interview Explanation:
+// - Problem Statement: Find single-source shortest paths in a directed acyclic graph (DAG) with edge weights in linear time.
+// - Approach: Topological Sort via Kahn's BFS + DAG edge relaxation.
+// - Intuition: In a DAG, processing nodes in topological order guarantees that all incoming paths to u are finalized before relaxing edges out of u.
+// - Complexity: Time: O(V + E) linear DAG traversal, Space: O(V) for in-degree and distance arrays.
 
-// Bitwise AND of numbers in range [left, right]
-// Time: O(log(right)), Space: O(1)
+
+// =========================================================
+// 6. RANGE BITWISE AND
+// =========================================================
 
 int rangeBitwiseAnd(int left, int right) {
     int shift = 0;
-    while(left!= right) {
+    while (left != right) {
         left >>= 1;
         right >>= 1;
         shift++;
     }
     return left << shift;
 }
+// Interview Explanation:
+// - Problem Statement: Compute the bitwise AND of all integers in the inclusive range [left, right].
+// - Approach: Bit shift to find the common binary prefix of left and right.
+// - Intuition: Lower bits flip between 0 and 1 across any numerical range; only the shared binary prefix survives the continuous bitwise AND.
+// - Complexity: Time: O(log(right)) bit shifts (at most 32 operations), Space: O(1) auxiliary space.
 
-// Longest subarray where bitwise AND of any two elements is 0
-// Time: O(N), Space: O(1)
+
+// =========================================================
+// 7. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
+// =========================================================
 
 int longestNiceSubarray(const vi &nums) {
     int n = nums.size(), l = 0, max_len = 0, mask = 0;
     for (int r = 0; r < n; r++) {
         while ((mask & nums[r]) != 0) {
-            mask ^= nums[l];
-            l++;
+            mask ^= nums[l++];
         }
         mask |= nums[r];
         max_len = max(max_len, r - l + 1);
     }
     return max_len;
 }
+// Interview Explanation:
+// - Problem Statement: Find the length of the longest subarray where the bitwise AND of every pair of elements is 0.
+// - Approach: Sliding Window maintaining an active bitwise OR bitmask.
+// - Intuition: Pairwise AND = 0 implies each bit position is set by at most one number in the window; shrink from left when current number shares a set bit.
+// - Complexity: Time: O(N) since left and right pointers advance at most N times, Space: O(1) auxiliary space.
 
-// Number of distinct bitwise ORs of all non-empty subarrays
-// Time: O(N log(max_val)), Space: O(N log(max_val))
+
+// =========================================================
+// 8. SUBARRAY BITWISE ORs
+// =========================================================
 
 int subarrayBitwiseORs(const vi &arr) {
     unordered_set<int> res, cur;
@@ -182,9 +223,16 @@ int subarrayBitwiseORs(const vi &arr) {
     }
     return res.size();
 }
+// Interview Explanation:
+// - Problem Statement: Find the number of distinct bitwise OR values produced by all non-empty contiguous subarrays.
+// - Approach: Dynamic Programming with Hash Set tracking frontier OR values.
+// - Intuition: Bitwise OR is monotonically increasing as elements are accumulated, so cur contains at most 32 distinct values for 32-bit integers.
+// - Complexity: Time: O(N * 30) = O(N log(max_val)), Space: O(N * 30) for result set and current frontier.
 
-// Total set bits across all numbers from 1 to N
-// Time: O(log N), Space: O(1)
+
+// =========================================================
+// 9. COUNT TOTAL SET BITS (1 TO N)
+// =========================================================
 
 int countTotalSetBits(int n) {
     int total_ones = 0;
@@ -199,9 +247,16 @@ int countTotalSetBits(int n) {
     }
     return total_ones;
 }
+// Interview Explanation:
+// - Problem Statement: Count the total number of set bits (1s) in the binary representations of all numbers from 1 to N.
+// - Approach: Bitwise Position Math / Periodic Cycle Counting.
+// - Intuition: The i-th bit alternates in periodic blocks of length 2^(i+1) with 2^i ones; count complete cycles plus leftover ones in [1, N].
+// - Complexity: Time: O(log N) iterating through bit positions, Space: O(1) auxiliary space.
 
-// Count subsets with sum equal to K (0/1 Knapsack pattern)
-// Time: O(N * K), Space: O(K)
+
+// =========================================================
+// 10. COUNT SUBSETS WITH SUM K
+// =========================================================
 
 int countSubsetsWithSumK(const vi &nums, int k) {
     vi dp(k + 1, 0);
@@ -213,9 +268,16 @@ int countSubsetsWithSumK(const vi &nums, int k) {
     }
     return dp[k];
 }
+// Interview Explanation:
+// - Problem Statement: Count the number of subsets whose elements sum to exactly K.
+// - Approach: 0/1 Knapsack Dynamic Programming with 1D space optimization.
+// - Intuition: For each number, iterate backwards from K down to num so that each element is used at most once: dp[j] += dp[j - num].
+// - Complexity: Time: O(N * K) 2D loop, Space: O(K) 1D rolling array.
 
-// Partition array into two subsets minimizing absolute sum difference
-// Time: O(N * total_sum), Space: O(total_sum)
+
+// =========================================================
+// 11. MINIMUM SUBSET SUM DIFFERENCE
+// =========================================================
 
 int minSubsetSumDifference(const vi &nums) {
     int total_sum = accumulate(nums.begin(), nums.end(), 0);
@@ -233,9 +295,16 @@ int minSubsetSumDifference(const vi &nums) {
     }
     return total_sum;
 }
+// Interview Explanation:
+// - Problem Statement: Partition an array into two subsets such that the absolute difference of their sums is minimized.
+// - Approach: Subset Sum boolean DP bounded by total_sum / 2.
+// - Intuition: If one subset sums to S <= total/2, the other sums to total - S; find the largest reachable S to minimize total - 2S.
+// - Complexity: Time: O(N * total_sum) bounded knapsack DP, Space: O(total_sum) boolean array.
 
-// All possible money sums formed using given coins (Subset sum DP)
-// Time: O(N * total_sum), Space: O(total_sum)
+
+// =========================================================
+// 12. GET MONEY SUMS
+// =========================================================
 
 vi getMoneySums(const vi &coins) {
     int n = coins.size();
@@ -256,17 +325,23 @@ vi getMoneySums(const vi &coins) {
     }
     return possible;
 }
+// Interview Explanation:
+// - Problem Statement: Find all possible distinct non-zero sums that can be formed using a subset of the given coins.
+// - Approach: Subset Sum boolean knapsack DP.
+// - Intuition: Compute reachable subset sums by setting dp[s] = true if dp[s - coin] is true, iterating backwards from total sum.
+// - Complexity: Time: O(N * total_sum), Space: O(total_sum) for boolean DP vector.
 
-// Count of Longest Increasing Subsequences (LIS)
-// Time: O(N^2), Space: O(N)
+
+// =========================================================
+// 13. COUNT OF LONGEST INCREASING SUBSEQUENCES (LIS)
+// =========================================================
 
 int countOfLIS(const vi &nums) {
     int n = nums.size();
     if (n == 0) return 0;
     vi len(n, 1), count(n, 1);
     int max_len = 1;
-    // len[i] = length of LIS ending at index i
-    // count[i] = number of LIS ending at index i
+
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < i; j++) {
             if (nums[i] > nums[j]) {
@@ -287,20 +362,25 @@ int countOfLIS(const vi &nums) {
     }
     return total;
 }
+// Interview Explanation:
+// - Problem Statement: Find the number of longest increasing subsequences (LIS) in an array.
+// - Approach: 1D Dynamic Programming tracking both LIS length and count.
+// - Intuition: len[i] stores max LIS length ending at i, count[i] stores ways to achieve it; transition updates or accumulates counts when nums[i] > nums[j].
+// - Complexity: Time: O(N^2) double loop over pairs, Space: O(N) for length and count arrays.
 
-// Dijkstra's single-source shortest path for non-negative weights
-// Time: O((V + E) log V), Space: O(V + E)
+
+// =========================================================
+// 14. DIJKSTRA'S SHORTEST PATH
+// =========================================================
 
 vi dijkstra(int n, const vector<vector<pii>> &g, int src) {
     vi dist(n, 1e9);
     dist[src] = 0;
-    priority_queue<pii, vector<pii>, greater<pii>> pq; // min heap storing {distance, node}
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
     pq.push({0, src});
 
     while (!pq.empty()) {
-        auto [d, u] = pq.top();
-        pq.pop();
-
+        auto [d, u] = pq.top(); pq.pop();
         if (d > dist[u]) continue;
         for (auto &[v, wt] : g[u]) {
             if (dist[u] + wt < dist[v]) {
@@ -311,9 +391,16 @@ vi dijkstra(int n, const vector<vector<pii>> &g, int src) {
     }
     return dist;
 }
+// Interview Explanation:
+// - Problem Statement: Find single-source shortest paths in a graph with non-negative edge weights.
+// - Approach: Greedy shortest path using Min-Heap Priority Queue (std::greater).
+// - Intuition: Extract node with minimum tentative distance; relax outgoing neighbors and push updated distances, discarding outdated stale heap states.
+// - Complexity: Time: O((V + E) \log V) heap operations, Space: O(V + E) for adjacency list, priority queue, and distance vector.
 
-// Bellman-Ford algorithm with negative cycle detection
-// Time: O(V * E), Space: O(V)
+
+// =========================================================
+// 15. BELLMAN-FORD ALGORITHM
+// =========================================================
 
 vl bellmanFord(int n, const vector<Edge> &edges, int src) {
     vl dist(n + 1, 1e18);
@@ -332,12 +419,18 @@ vl bellmanFord(int n, const vector<Edge> &edges, int src) {
             throw runtime_error("Negative cycle detected");
         }
     }
-
     return vl(dist.begin() + 1, dist.end());
 }
+// Interview Explanation:
+// - Problem Statement: Find single-source shortest paths in graphs with negative edge weights and detect negative-weight cycles.
+// - Approach: Dynamic Programming edge relaxation (N - 1 rounds).
+// - Intuition: A shortest path has at most N - 1 edges; relaxing all edges N - 1 times discovers optimal paths, while an N-th relaxation identifies negative cycles.
+// - Complexity: Time: O(V * E) edge relaxation rounds, Space: O(V) for distance array.
 
-// Shortest path on unweighted graph using BFS
-// Time: O(V + E), Space: O(V)
+
+// =========================================================
+// 16. SHORTEST PATH ON UNWEIGHTED GRAPH (BFS)
+// =========================================================
 
 vi shortestPathUnweighted(int n, const vvi &g, int src) {
     vi dist(n, 1e9);
@@ -346,8 +439,7 @@ vi shortestPathUnweighted(int n, const vvi &g, int src) {
     q.push(src);
 
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
+        int u = q.front(); q.pop();
         for (int v : g[u]) {
             if (dist[v] == 1e9) {
                 dist[v] = dist[u] + 1;
@@ -357,9 +449,16 @@ vi shortestPathUnweighted(int n, const vvi &g, int src) {
     }
     return dist;
 }
+// Interview Explanation:
+// - Problem Statement: Find shortest path distances from a source node in an unweighted graph.
+// - Approach: Breadth-First Search (BFS) layer-by-layer exploration.
+// - Intuition: Since edge weights are uniformly 1, BFS guarantees that the first time a node is reached, it is reached with minimum edges.
+// - Complexity: Time: O(V + E) linear queue traversal, Space: O(V) for distance array and queue.
 
-// Floyd-Warshall All-Pairs Shortest Path
-// Time: O(V^3), Space: O(V^2)
+
+// =========================================================
+// 17. FLOYD-WARSHALL ALL-PAIRS SHORTEST PATH
+// =========================================================
 
 vvi floydWarshall(int n, const vvi &g) {
     vvi dist = g;
@@ -374,32 +473,44 @@ vvi floydWarshall(int n, const vvi &g) {
     }
     return dist;
 }
+// Interview Explanation:
+// - Problem Statement: Compute all-pairs shortest paths in a directed weighted graph with no negative cycles.
+// - Approach: Dynamic Programming considering all intermediate vertices k in [0, n-1].
+// - Intuition: For each pair (i, j), optimal path either avoids vertex k or passes through k: dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]).
+// - Complexity: Time: O(V^3) triple nested loops, Space: O(V^2) for distance matrix.
 
-// Detect negative cycles using Floyd-Warshall (dist[i][i] < 0)
-// Time: O(V^3), Space: O(V^2)
+
+// =========================================================
+// 18. NEGATIVE CYCLE DETECTION VIA FLOYD-WARSHALL
+// =========================================================
 
 bool cycleDetectionFloyd(int n, const vvi &g) {
     vvi dist = floydWarshall(n, g);
     for (int i = 0; i < n; i++) {
-        if (dist[i][i] < 0) return true; // if dist[i][i] < 0, there is a negative cycle reachable from i
+        if (dist[i][i] < 0) return true;
     }
     return false;
 }
+// Interview Explanation:
+// - Problem Statement: Detect whether a directed graph contains a negative cycle using the Floyd-Warshall algorithm.
+// - Approach: Self-distance inspection after Floyd-Warshall DP.
+// - Intuition: A negative cycle exists if and only if any vertex i has negative distance to itself (dist[i][i] < 0), indicating an infinite cost reduction loop.
+// - Complexity: Time: O(V^3) Floyd-Warshall run, Space: O(V^2) for distance matrix.
 
-// Lexicographically smallest topological sort using max-heap Kahn's variant
-// Use priority queue instead of queue to get the smallest node first
-// Time: O(V log V + E), Space: O(V)
+
+// =========================================================
+// 19. LEXICOGRAPHICAL TOPOLOGICAL SORT
+// =========================================================
 
 vi lexicographicalTopoSort(int n, const vvi &g, vi indegree) {
-    priority_queue<int> pq;
+    priority_queue<int, vi, greater<int>> pq;
     for (int i = 1; i <= n; i++) {
         if (indegree[i] == 0) pq.push(i);
     }
 
     vi order;
     while (!pq.empty()) {
-        int u = pq.top();
-        pq.pop();
+        int u = pq.top(); pq.pop();
         order.push_back(u);
         for (int v : g[u]) {
             if (--indegree[v] == 0) pq.push(v);
@@ -407,12 +518,18 @@ vi lexicographicalTopoSort(int n, const vvi &g, vi indegree) {
     }
 
     if ((int)order.size() != n) return {};
-    reverse(order.begin(), order.end());
     return order;
 }
+// Interview Explanation:
+// - Problem Statement: Find the lexicographically smallest topological ordering of a DAG using Kahn's algorithm.
+// - Approach: Priority Queue (Min-Heap variant) Kahn's BFS.
+// - Intuition: Using a min-heap priority queue instead of a FIFO queue ensures that whenever multiple vertices have in-degree 0, the smallest available vertex is selected next.
+// - Complexity: Time: O(V \log V + E) priority queue operations, Space: O(V) for priority queue and in-degree vector.
 
-// Shortest path on weighted DAG using Topological Order
-// Time: O(V + E), Space: O(V)
+
+// =========================================================
+// 20. SHORTEST PATH ON DAG VIA TOPOLOGICAL ORDER
+// =========================================================
 
 vi dpOnDAG(int n, const vector<vector<pii>> &g, int src) {
     vi indeg(n, 0);
@@ -427,8 +544,7 @@ vi dpOnDAG(int n, const vector<vector<pii>> &g, int src) {
     }
 
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
+        int u = q.front(); q.pop();
         topo_order.push_back(u);
         for (auto &[v, wt] : g[u]) {
             if (--indeg[v] == 0) q.push(v);
@@ -444,12 +560,18 @@ vi dpOnDAG(int n, const vector<vector<pii>> &g, int src) {
             }
         }
     }
-
     return dist;
 }
+// Interview Explanation:
+// - Problem Statement: Compute single-source shortest paths on a weighted DAG using topological ordering DP.
+// - Approach: Topological Sort followed by sequential vertex relaxation.
+// - Intuition: Visiting vertices in topological order guarantees that all predecessor paths to a node are evaluated before relaxing its outgoing edges.
+// - Complexity: Time: O(V + E) linear DAG traversal, Space: O(V) for topological order and distance vectors.
 
-// Graph M-Coloring backtracking to count valid colorings
-// Time: O(M^V), Space: O(V)
+
+// =========================================================
+// 21. GRAPH M-COLORING (BACKTRACKING)
+// =========================================================
 
 struct GraphMColouring {
     bool isValid(int node, int color, const vvi &g, const vi &colors) {
@@ -480,9 +602,16 @@ struct GraphMColouring {
         return count;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Determine whether an undirected graph can be colored with at most M colors such that no two adjacent vertices share the same color.
+// - Approach: Backtracking DFS trying all colors 1 to M per vertex.
+// - Intuition: Assign color to current vertex if valid with respect to colored neighbors; recursively color next vertex, backtracking (resetting color to 0) upon conflict.
+// - Complexity: Time: O(M^V) worst-case search tree, Space: O(V) for recursion stack and colors vector.
 
-// Cheapest flights with at most K stops (Dijkstra / State BFS)
-// Time: O(E * K), Space: O(V * K)
+
+// =========================================================
+// 22. CHEAPEST FLIGHTS WITHIN K STOPS
+// =========================================================
 
 int findCheapestPrice(int n, const vector<vector<int>> &flights, int src, int dst, int k) {
     vector<vector<pii>> g(n);
@@ -497,9 +626,7 @@ int findCheapestPrice(int n, const vector<vector<int>> &flights, int src, int ds
     pq.push({0, src, 0});
 
     while (!pq.empty()) {
-        auto [cost, u, taken] = pq.top();
-        pq.pop();
-
+        auto [cost, u, taken] = pq.top(); pq.pop();
         if (cost > dist[u][taken]) continue;
         if (u == dst) return cost;
 
@@ -512,25 +639,30 @@ int findCheapestPrice(int n, const vector<vector<int>> &flights, int src, int ds
     }
     return -1;
 }
+// Interview Explanation:
+// - Problem Statement: Find the cheapest flight price from source to destination with at most K stops.
+// - Approach: State-extended Dijkstra / BFS on state (cost, node, stops).
+// - Intuition: Model vertices as (node, stops_taken); relax outgoing flights only if stops + 1 <= K + 1 and new cost improves the recorded state distance.
+// - Complexity: Time: O(E * K) state transitions, Space: O(V * K) for distance table and priority queue.
 
-// Shortest path visiting all nodes (Bitmask BFS)
-// Time: O(V * 2^V), Space: O(V * 2^V)
+
+// =========================================================
+// 23. SHORTEST PATH VISITING ALL NODES (BITMASK BFS)
+// =========================================================
 
 int shortestPathVisitingAllNodes(int n, const vvi &g) {
     int target_mask = (1 << n) - 1;
     queue<pair<int, int>> q;
-    vvi dist(n, vi(1 << n, 1e9)); // dist[i][mask] = shortest distance to reach node i with visited nodes represented by mask
+    vvi dist(n, vi(1 << n, 1e9));
 
     for (int i = 0; i < n; i++) {
-        q.push({i, 1 << i}); // start from each node with its bitmask
-        dist[i][1 << i] = 0; // distance to reach node i with only node i visited is 0
+        q.push({i, 1 << i});
+        dist[i][1 << i] = 0;
     }
 
     while (!q.empty()) {
-        auto [u, mask] = q.front();
-        q.pop();
-
-        int d = dist[u][mask]; 
+        auto [u, mask] = q.front(); q.pop();
+        int d = dist[u][mask];
         if (mask == target_mask) return d;
 
         for (int v : g[u]) {
@@ -543,28 +675,39 @@ int shortestPathVisitingAllNodes(int n, const vvi &g) {
     }
     return -1;
 }
+// Interview Explanation:
+// - Problem Statement: Find the shortest path length that visits every vertex in an unweighted undirected graph (can revisit nodes and edges).
+// - Approach: Multi-source BFS on State Space (node, bitmask).
+// - Intuition: State is (current_node, visited_mask); initialize queue with all nodes at distance 0 with mask 1 << i; shortest path to mask == (1 << n) - 1 is minimal.
+// - Complexity: Time: O(V * 2^V) states visited by BFS, Space: O(V * 2^V) for visited distance matrix.
 
 
-// Length of Shortest Common Supersequence (SCS)
-// SCS means the shortest string that has both s1 and s2 as subsequences
-// Time: O(|S1| * |S2|), Space: O(|S1| * |S2|)
+// =========================================================
+// 24. SHORTEST COMMON SUPERSEQUENCE (SCS) LENGTH
+// =========================================================
 
 int shortestCommonSubsequenceLength(const string &s1, const string &s2) {
     int n = s1.size(), m = s2.size();
     vvi dp(n + 1, vi(m + 1, 0));
-    //dp[i][j] = length of LCS of s1[0..i-1] and s2[0..j-1]
+
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
-            if(s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+            if (s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
             else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
     return n + m - dp[n][m];
 }
+// Interview Explanation:
+// - Problem Statement: Find the length of the shortest common supersequence (SCS) of two strings.
+// - Approach: Reduction to Longest Common Subsequence (LCS) via formula |S1| + |S2| - LCS(S1, S2).
+// - Intuition: The supersequence must contain characters of both strings; characters common to both (LCS) only need to appear once, giving length N + M - LCS.
+// - Complexity: Time: O(|S1| * |S2|) 2D DP, Space: O(|S1| * |S2|) table space.
 
-// Reconstruct Shortest Common Supersequence (SCS) string
-// SCS means the shortest string that has both s1 and s2 as subsequences
-// Time: O(|S1| * |S2|), Space: O(|S1| * |S2|)
+
+// =========================================================
+// 25. RECONSTRUCT SHORTEST COMMON SUPERSEQUENCE (SCS)
+// =========================================================
 
 string SCS(const string &s1, const string &s2) {
     int n = s1.size(), m = s2.size();
@@ -572,7 +715,7 @@ string SCS(const string &s1, const string &s2) {
 
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
-            if(s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+            if (s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
             else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
         }
     }
@@ -591,15 +734,22 @@ string SCS(const string &s1, const string &s2) {
             j--;
         }
     }
-    while (i > 0) { scs += s1[i - 1]; i--; } // append remaining characters of s1, because they are not part of LCS
-    while (j > 0) { scs += s2[j - 1]; j--; } // append remaining characters of s2, because they are not part of LCS
+    while (i > 0) { scs += s1[i - 1]; i--; }
+    while (j > 0) { scs += s2[j - 1]; j--; }
 
     reverse(scs.begin(), scs.end());
     return scs;
 }
+// Interview Explanation:
+// - Problem Statement: Reconstruct and return the shortest common supersequence string of two strings s1 and s2.
+// - Approach: 2D LCS Table Backtracking.
+// - Intuition: Fill LCS table; backtrack from (N, M); if characters match, append once and move diagonally; else move toward larger LCS cell appending the non-matching character.
+// - Complexity: Time: O(|S1| * |S2|) table fill and backtrack, Space: O(|S1| * |S2|) for DP matrix.
 
-// Minimum Window Subsequence (shortest substring of s containing t as subsequence)
-// Time: O(|S| * |T|), Space: O(1)
+
+// =========================================================
+// 26. MINIMUM WINDOW SUBSEQUENCE
+// =========================================================
 
 string minWindowSubsequence(const string &s, const string &t) {
     if (t.empty()) return "";
@@ -628,9 +778,16 @@ string minWindowSubsequence(const string &s, const string &t) {
     }
     return start_idx == -1 ? "" : s.substr(start_idx, min_len);
 }
+// Interview Explanation:
+// - Problem Statement: Find the minimum length substring of s that contains t as a subsequence.
+// - Approach: Two-pointer forward match + backward window contraction.
+// - Intuition: Scan forward until all characters of t are matched in s; then scan backward from end to start to find the tightest left boundary for that occurrence.
+// - Complexity: Time: O(|S| * |T|) forward search and backward contraction, Space: O(1) auxiliary space.
 
-// Minimum Window Substring (shortest substring of s containing all characters of t)
-// Time: O(|S| + |T|), Space: O(|S| + |T|)
+
+// =========================================================
+// 27. MINIMUM WINDOW SUBSTRING
+// =========================================================
 
 string minWindowSubstring(const string &s, const string &t) {
     if (t.empty()) return "";
@@ -658,13 +815,20 @@ string minWindowSubstring(const string &s, const string &t) {
     }
     return min_len == 1e9 ? "" : s.substr(start, min_len);
 }
+// Interview Explanation:
+// - Problem Statement: Find the minimum window substring of s that contains all characters of t (including duplicates).
+// - Approach: Sliding Window with frequency hash maps and valid match counter.
+// - Intuition: Expand right pointer until window satisfies character requirements (valid == need.size()); then contract left pointer while preserving validity to minimize window length.
+// - Complexity: Time: O(|S| + |T|) each character processed at most twice, Space: O(|S| + |T|) for frequency maps.
 
-// Matrix Chain Multiplication minimum scalar multiplication cost
-// Time: O(N^3), Space: O(N^2)
+
+// =========================================================
+// 28. MATRIX CHAIN MULTIPLICATION
+// =========================================================
 
 int matrixChainOrder(const vi &p) {
     int n = p.size() - 1;
-    vvi dp(n, vi(n, 0)); // dp[i][j] = minimum cost of multiplying matrices from i to j
+    vvi dp(n, vi(n, 0));
 
     for (int len = 2; len <= n; len++) {
         for (int i = 0; i <= n - len; i++) {
@@ -672,15 +836,21 @@ int matrixChainOrder(const vi &p) {
             dp[i][j] = 1e9;
             for (int k = i; k < j; k++) {
                 dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + p[i] * p[k + 1] * p[j + 1]);
-                // cost = p[i] * p[k + 1] * p[j + 1] is the cost of multiplying two matrices of dimensions p[i] x p[k+1] and p[k+1] x p[j+1]
             }
         }
     }
     return dp[0][n - 1];
 }
+// Interview Explanation:
+// - Problem Statement: Find the minimum scalar multiplications needed to multiply a chain of matrices.
+// - Approach: Interval / Range Dynamic Programming over chain lengths 2 to N.
+// - Intuition: For chain i to j, try all split points k in [i, j-1]: dp[i][j] = min(dp[i][k] + dp[k+1][j] + p[i]*p[k+1]*p[j+1]).
+// - Complexity: Time: O(N^3) interval DP triple loop, Space: O(N^2) for DP table.
 
-// Count distinct subsequences of s equal to t
-// Time: O(|S| * |T|), Space: O(|T|)
+
+// =========================================================
+// 29. DISTINCT SUBSEQUENCES
+// =========================================================
 
 int numDistinct(const string &s, const string &t) {
     int n = s.size(), m = t.size();
@@ -694,16 +864,22 @@ int numDistinct(const string &s, const string &t) {
     }
     return dp[m];
 }
+// Interview Explanation:
+// - Problem Statement: Count the number of distinct subsequences of s that equal t.
+// - Approach: 1D Space-Optimized Dynamic Programming.
+// - Intuition: dp[j] represents ways to form prefix t[0...j-1]; when s[i-1] == t[j-1], dp[j] += dp[j-1] (choice to match or skip current character).
+// - Complexity: Time: O(|S| * |T|) 2D loop, Space: O(|T|) rolling array with unsigned long long.
 
-// AVL / BST Tree Element Node
+
+// =========================================================
+// 30. MAXIMUM SUM BST IN BINARY TREE
+// =========================================================
+
 struct Element {
     int key, height;
     Element *left, *right;
     Element(int k) : key(k), height(1), left(nullptr), right(nullptr) {}
 };
-
-// Maximum sum of keys in any valid BST subtree
-// Time: O(N), Space: O(N)
 
 struct MaxSumBST {
     int ans = 0;
@@ -728,9 +904,16 @@ struct MaxSumBST {
         return ans;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Find the maximum sum of node keys among all valid Binary Search Tree (BST) subtrees.
+// - Approach: Post-order Bottom-Up DFS returning {is_bst, min_val, max_val, sum}.
+// - Intuition: Current node forms a valid BST if both subtrees are valid BSTs and node->val > left_max and node->val < right_min; update global answer with valid subtree sum.
+// - Complexity: Time: O(N) single traversal visiting each node once, Space: O(H) recursion stack space.
 
-// Delete all leaf nodes with specified target value
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 31. REMOVE LEAF NODES WITH TARGET VALUE
+// =========================================================
 
 TreeNode* removeLeafNodes(TreeNode *root, int target) {
     if (!root) return nullptr;
@@ -739,9 +922,16 @@ TreeNode* removeLeafNodes(TreeNode *root, int target) {
     if (!root->left && !root->right && root->val == target) return nullptr;
     return root;
 }
+// Interview Explanation:
+// - Problem Statement: Delete all leaf nodes with a given target value repeatedly until no such leaves remain.
+// - Approach: Post-order Recursive DFS.
+// - Intuition: Process left and right children first so that parent nodes whose children were deleted become new leaves before being evaluated.
+// - Complexity: Time: O(N) bottom-up pass, Space: O(H) recursion stack space.
 
-// Minimum extra characters remaining after dictionary segmentation
-// Time: O(N^2), Space: O(N + dict_len)
+
+// =========================================================
+// 32. MINIMUM EXTRA CHARACTERS IN STRING
+// =========================================================
 
 struct MinExtraChar {
     int n;
@@ -771,9 +961,16 @@ struct MinExtraChar {
         return solve(0, s);
     }
 };
+// Interview Explanation:
+// - Problem Statement: Find the minimum number of extra characters left over after breaking a string into dictionary words.
+// - Approach: 1D Dynamic Programming with Memoization + Hash Set lookup.
+// - Intuition: At index i, either treat s[i] as an extra character (1 + solve(i + 1)), or match any valid dictionary prefix s[i...j] and transition to solve(j + 1).
+// - Complexity: Time: O(N^2) subproblem evaluation, Space: O(N + D) for memoization and dictionary set.
 
-// Binary splitting for Bounded Knapsack items
-// Time: O(log K), Space: O(log K)
+
+// =========================================================
+// 33. BOUNDED KNAPSACK (BINARY SPLIT) & 0/1 KNAPSACK
+// =========================================================
 
 void addItemBinarySplit(int w, int v, int k, vi &weights, vi &values) {
     for (int take = 1; k > 0; take <<= 1) {
@@ -784,9 +981,6 @@ void addItemBinarySplit(int w, int v, int k, vi &weights, vi &values) {
     }
 }
 
-// 0/1 Knapsack 1D DP
-// Time: O(N * W), Space: O(W)
-
 int knapsack01(int n, int W, const vi &weights, const vi &values) {
     vi dp(W + 1, 0);
     for (int i = 0; i < n; i++) {
@@ -796,14 +990,20 @@ int knapsack01(int n, int W, const vi &weights, const vi &values) {
     }
     return dp[W];
 }
+// Interview Explanation:
+// - Problem Statement: Solve the Bounded Knapsack problem where item i has weight w, value v, and count k.
+// - Approach: Binary Power Splitting (1, 2, 4, ..., rem) + 1D 0/1 Knapsack DP.
+// - Intuition: Decompose quantity k into powers of 2 items, reducing the problem from O(N * K * W) to O(N log K * W) standard 0/1 knapsack.
+// - Complexity: Time: O(W * sum(log K)) knapsack transitions, Space: O(W) rolling 1D DP vector.
 
-// LCS length of two permutations via LIS mapping
-// Time: O(N log N), Space: O(N)
+
+// =========================================================
+// 34. LCS LENGTH OF 2 PERMUTATIONS (LIS REDUCTION)
+// =========================================================
 
 int LCSLengthOf2Permutations(const vi &a, const vi &b) {
     unordered_map<int, int> pos;
     int n = a.size();
-    int m = b.size();
     for (int i = 0; i < n; i++) pos[a[i]] = i;
 
     vi dp;
@@ -815,10 +1015,16 @@ int LCSLengthOf2Permutations(const vi &a, const vi &b) {
     }
     return dp.size();
 }
+// Interview Explanation:
+// - Problem Statement: Find the length of the Longest Common Subsequence of two permutations of numbers 1 to N.
+// - Approach: Permutation Index Mapping + Longest Increasing Subsequence (LIS) via Patience Sorting.
+// - Intuition: Map each element of a to its position; transform b by replacing elements with their index in a; the LCS of a and b is isomorphic to the LIS of transformed array.
+// - Complexity: Time: O(N \log N) binary search with lower_bound, Space: O(N) for position map and LIS vector.
 
 
-// Longest Common Increasing Subsequence (LCIS) of arrays A and B
-// Time: O(N * M), Space: O(M)
+// =========================================================
+// 35. LONGEST COMMON INCREASING SUBSEQUENCE (LCIS)
+// =========================================================
 
 vi LCIS(const vi &a, const vi &b) {
     int n = a.size(), m = b.size();
@@ -852,13 +1058,39 @@ vi LCIS(const vi &a, const vi &b) {
     reverse(ans.begin(), ans.end());
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find and reconstruct the Longest Common Increasing Subsequence (LCIS) of two arrays.
+// - Approach: 1D Dynamic Programming with running optimal prefix tracking.
+// - Intuition: For each a[i], track best_len among elements b[j] < a[i]; when a[i] == b[j], extend dp[j] = best_len + 1 and record parent for backtracking.
+// - Complexity: Time: O(N * M) nested loops, Space: O(M) for DP and parent tracking vectors.
 
 
-// All possible path lengths from node 1 to node N in DAG
-// Time: O(V * N + E * N), Space: O(V * N)
+// =========================================================
+// 36. POSSIBLE PATH LENGTHS IN DAG
+// =========================================================
+
+vi topoSortHelper(int n, const vvi &g) {
+    vi indeg(n + 1, 0);
+    for (int u = 1; u <= n; u++) {
+        for (int v : g[u]) indeg[v]++;
+    }
+    queue<int> q;
+    for (int i = 1; i <= n; i++) {
+        if (indeg[i] == 0) q.push(i);
+    }
+    vi order;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        order.push_back(u);
+        for (int v : g[u]) {
+            if (--indeg[v] == 0) q.push(v);
+        }
+    }
+    return order;
+}
 
 vi possibleLengths(int n, const vvi &g) {
-    vi topo = topoSort(n, g);
+    vi topo = topoSortHelper(n, g);
     static bool dp[MAXN][MAXN];
     memset(dp, 0, sizeof(dp));
     dp[1][0] = true;
@@ -877,4 +1109,40 @@ vi possibleLengths(int n, const vvi &g) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find all possible path lengths from node 1 to node N in a directed acyclic graph.
+// - Approach: Topological Sort + 2D Reachability DP dp[node][len].
+// - Intuition: Transition dp[v][len + 1] = true if dp[u][len] is true for edge (u, v); processing in topological order guarantees optimal DP propagation.
+// - Complexity: Time: O(V * N + E * N) bitset/boolean transitions, Space: O(V * N) for DP state matrix.
 
+/*
+ ====================================================================================================
+             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: DP, STRINGS & ADVANCED GRAPHS
+ ====================================================================================================
+
+ 1. PATTERN IDENTIFICATION MATRIX:
+    | Problem Type / Clue                         | Technique / Data Structure          | Core Transition / State               |
+    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
+    | 0/1 Knapsack / Subset Sum                   | 1D DP (iterate backwards)           | dp[w] = max(dp[w], dp[w - wt] + val)  |
+    | Unbounded Knapsack / Coin Change            | 1D DP (iterate forward)             | dp[w] = min(dp[w], dp[w - coin] + 1)  |
+    | Bounded Knapsack (count k_i)                | Binary Powers Splitting (1,2,4,rem) | Reduces O(N*K*W) to O(N log K * W)     |
+    | Longest Common Subsequence (LCS)            | 2D DP table                         | match: 1 + dp[i-1][j-1], else max(...) |
+    | Shortest Common Supersequence (SCS)         | |S1| + |S2| - LCS(S1, S2)           | Backtrack LCS table to build string    |
+    | Matrix Chain Multiplication / Balloon Burst | Interval DP (outer loop: length)    | dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost)|
+    | Distinct Subsequences (s contains t)        | 1D DP backwards                     | dp[j] += dp[j-1] when s[i-1] == t[j-1]|
+    | Shortest Path in DAG                        | Topological Sort + Linear Relax     | dist[v] = min(dist[v], dist[u] + wt)  |
+    | State-extended Shortest Path (<= K stops)   | Dijkstra on (node, stops)           | dist[v][stops+1] = min(...)           |
+    | TSP / Visit all nodes (N <= 15-20)          | Bitmask BFS / DP                    | dist[node][mask]                      |
+    | Girth (Shortest Cycle in unweighted graph)  | BFS from every node                 | min_cycle = min(dist[u] + dist[v] + 1)|
+    | Cycle nodes identification                  | Topological Peeling (Kahn's BFS)    | In-degree 0 cascade leaves cycle nodes|
+    | Range Bitwise AND [L, R]                    | Bit shifts                          | while (L != R) L >>= 1, R >>= 1       |
+    | Pairwise Bitwise AND = 0 Subarray           | Sliding window + OR bitmask         | shrink left when (mask & nums[r]) != 0|
+
+ 2. TOP DP MISTAKES IN INTERVIEWS & OAs:
+    • Forgetting to iterate backwards in 0/1 Knapsack: causes items to be counted multiple times (unbounded).
+    • Negative cycle loop in Bellman-Ford: must check for dist[u] != INF before relaxing to avoid overflow.
+    • Modulo arithmetic: (a + b) % MOD; (a - b + MOD) % MOD; (1LL * a * b) % MOD.
+    • LCS Reconstruction: remember to append leftover characters of s1 and s2 after the main while loop finishes.
+    • Bitmask constraints: 1 << N is undefined behavior if N >= 31 in standard int; use 1LL << N.
+ ====================================================================================================
+*/

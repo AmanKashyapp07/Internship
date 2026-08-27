@@ -10,14 +10,15 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
-// K-th smallest element in two sorted arrays via binary search
-// Time: O(log(min(M, N))), Space: O(1)
-// k is 1-indexed
+// =========================================================
+// 1. K-TH ELEMENT & MEDIAN OF TWO SORTED ARRAYS
+// =========================================================
+
 int kthElement(const vi &nums1, const vi &nums2, int k) {
-    if (nums1.size() > nums2.size()) return kthElement(nums2, nums1, k); // keeps nums1 as the smaller array
+    if (nums1.size() > nums2.size()) return kthElement(nums2, nums1, k);
     int m = nums1.size(), n = nums2.size();
-    int l = max(0, k - n); // the minimum number of elements we can take from nums1
-    int r = min(k, m); // the maximum number of elements we can take from nums1
+    int l = max(0, k - n);
+    int r = min(k, m);
 
     while (l <= r) {
         int i = l + (r - l) / 2;
@@ -45,9 +46,16 @@ int median(const vi &nums1, const vi &nums2) {
         return (left + right) / 2;
     }
 }
+// Interview Explanation:
+// - Problem Statement: Find the k-th smallest element and median of two sorted arrays in logarithmic time.
+// - Approach: Binary search on partition cut in the smaller array.
+// - Intuition: Partition both arrays into left and right halves with total size k; valid partition satisfies l1 <= r2 and l2 <= r1, giving answer max(l1, l2).
+// - Complexity: Time: O(log(min(M, N))) binary search, Space: O(1) auxiliary space.
 
-// Next greater lexicographical permutation in-place
-// Time: O(N), Space: O(1)
+
+// =========================================================
+// 2. NEXT GREATER PERMUTATION
+// =========================================================
 
 void nextPermutation(vi &nums) {
     int n = nums.size(), i = n - 2;
@@ -60,9 +68,16 @@ void nextPermutation(vi &nums) {
     }
     reverse(nums.begin() + i + 1, nums.end());
 }
+// Interview Explanation:
+// - Problem Statement: Rearrange numbers into the lexicographically next greater permutation in-place.
+// - Approach: Standard 3-step lexicographical successor algorithm.
+// - Intuition: Find rightmost index i where nums[i] < nums[i+1], swap with smallest element to its right greater than nums[i], and reverse suffix nums[i+1...n-1].
+// - Complexity: Time: O(N) single pass and reverse, Space: O(1) in-place.
 
-// Length of longest substring without repeating characters
-// Time: O(N), Space: O(min(N, alphabet))
+
+// =========================================================
+// 3. LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS
+// =========================================================
 
 int lengthOfLongestSubstring(const string &s) {
     unordered_map<char, int> last_seen;
@@ -77,10 +92,16 @@ int lengthOfLongestSubstring(const string &s) {
     }
     return max_len;
 }
+// Interview Explanation:
+// - Problem Statement: Find the length of the longest substring without repeating characters.
+// - Approach: Sliding window with hash map storing last seen index of each character.
+// - Intuition: If character at right pointer was seen inside current window, jump left pointer to last_seen[c] + 1; update max window length r - l + 1.
+// - Complexity: Time: O(N) linear scan, Space: O(min(N, alphabet)) for character map.
 
 
-// Minimum moves to gather K consecutive 1s using prefix sum of shifted positions
-// Time: O(N), Space: O(N)
+// =========================================================
+// 4. MINIMUM MOVES TO GATHER K CONSECUTIVE ONES
+// =========================================================
 
 ll minMoves(const vi &nums, int k) {
     vl pos;
@@ -104,9 +125,16 @@ ll minMoves(const vi &nums, int k) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the minimum moves to group any K consecutive 1s together in a binary array.
+// - Approach: Shifted indices transformation + Prefix sum median cost evaluation.
+// - Intuition: For 1s at positions p_0, p_1, ..., shifting by p_i - i transforms grouping adjacent elements into gathering coordinates to their median, solvable via prefix sums.
+// - Complexity: Time: O(N) single pass and sliding window, Space: O(N) for shifted coordinates and prefix array.
 
-// 2D Prefix Sum matrix construction
-// Time: O(M * N), Space: O(M * N)
+
+// =========================================================
+// 5. 2D PREFIX SUM MATRIX
+// =========================================================
 
 vvi prefixSum2D(const vvi &matrix) {
     int m = matrix.size(), n = matrix[0].size();
@@ -122,9 +150,16 @@ vvi prefixSum2D(const vvi &matrix) {
     }
     return pref;
 }
+// Interview Explanation:
+// - Problem Statement: Construct a 2D prefix sum table supporting O(1) submatrix sum queries.
+// - Approach: Inclusion-Exclusion 2D Dynamic Programming.
+// - Intuition: Each cell sum is matrix[i][j] + pref[i-1][j] + pref[i][j-1] - pref[i-1][j-1], adding top and left sums and removing double-counted diagonal.
+// - Complexity: Time: O(M * N) filling 2D grid, Space: O(M * N) for prefix sum matrix.
 
-// Count subarrays with bitwise AND equal to K
-// Time: O(N log(max_val)), Space: O(N)
+
+// =========================================================
+// 6. COUNT SUBARRAYS WITH BITWISE AND EQUAL TO K
+// =========================================================
 
 ll countSubarraysWithAND(const vi &nums, int k) {
     ll ans = 0;
@@ -141,9 +176,16 @@ ll countSubarraysWithAND(const vi &nums, int k) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Count the number of subarrays whose bitwise AND equals K.
+// - Approach: Hash Map DP aggregating unique prefix AND results.
+// - Intuition: As elements are added, cumulative bitwise AND can change value at most 30 times; maintain counts of distinct AND values ending at previous index and transition.
+// - Complexity: Time: O(N * 30) = O(N log(max_val)), Space: O(N) for hash maps.
 
-// Multiply two 2D matrices A (M x N) and B (N x P)
-// Time: O(M * N * P), Space: O(M * P)
+
+// =========================================================
+// 7. MULTIPLY TWO 2D MATRICES
+// =========================================================
 
 vvi multiplyMatrices2D(const vvi &A, const vvi &B) {
     int m = A.size(), n = A[0].size(), p = B[0].size();
@@ -158,9 +200,16 @@ vvi multiplyMatrices2D(const vvi &A, const vvi &B) {
     }
     return C;
 }
+// Interview Explanation:
+// - Problem Statement: Multiply two 2D matrices A of dimensions M x N and B of dimensions N x P.
+// - Approach: Standard 3-nested loop matrix multiplication.
+// - Intuition: Each entry C[i][j] = sum(A[i][k] * B[k][j]) computes the dot product of row i of A and column j of B.
+// - Complexity: Time: O(M * N * P) triple loop, Space: O(M * P) for result matrix.
 
-// Count subsequences with sum equal to K (0/1 Knapsack pattern)
-// Time: O(N * K), Space: O(K)
+
+// =========================================================
+// 8. COUNT SUBSEQUENCES WITH SUM EQUAL TO K
+// =========================================================
 
 ll countSubsequences(const vi &nums, int k) {
     vl dp(k + 1, 0);
@@ -172,16 +221,22 @@ ll countSubsequences(const vi &nums, int k) {
     }
     return dp[k];
 }
+// Interview Explanation:
+// - Problem Statement: Count the number of subsequences whose sum equals K.
+// - Approach: 0/1 Knapsack 1D Dynamic Programming.
+// - Intuition: dp[sum] += dp[sum - x] scanning backwards from K down to x to prevent using the same element multiple times in the same subset.
+// - Complexity: Time: O(N * K) nested loop, Space: O(K) rolling DP vector.
 
-// Tree Node structure for BST / AVL trees
+
+// =========================================================
+// 9. ROW WITH MAXIMUM 1s IN BINARY MATRIX
+// =========================================================
+
 struct Node {
     int value, height;
     Node *left, *right;
     Node(int x) : value(x), height(1), left(nullptr), right(nullptr) {}
 };
-
-// Row index with maximum 1s in row-sorted binary matrix
-// Time: O(N + M), Space: O(1)
 
 int rowWithMax1s(const vvi &mat) {
     int n = mat.size(), m = mat[0].size();
@@ -197,9 +252,16 @@ int rowWithMax1s(const vvi &mat) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the 0-based index of the row with the maximum number of 1s in a row-sorted binary matrix.
+// - Approach: Top-Right corner staircase elimination.
+// - Intuition: Start at top-right (0, m-1); if cell is 1, update best row and move left (col--); else move down (row++); each step eliminates one row or column.
+// - Complexity: Time: O(N + M) at most N down and M left steps, Space: O(1) auxiliary space.
 
-// Maximum components tree split with equal value sum
-// Time: O(N * divisors(Sum)), Space: O(N)
+
+// =========================================================
+// 10. MAXIMUM COMPONENTS TREE SPLIT WITH EQUAL SUM
+// =========================================================
 
 static bool ok_comp;
 
@@ -234,9 +296,16 @@ int maxComponents(const vi &val, const vvi &g) {
     }
     return 0;
 }
+// Interview Explanation:
+// - Problem Statement: Find the maximum number of connected components a tree can be partitioned into such that each component has equal node sum.
+// - Approach: Factorization of total tree sum + Subtree sum DFS verification.
+// - Intuition: Number of components must divide total sum; test divisors in ascending order; DFS returns 0 when subtree reaches target sum, effectively cutting the component.
+// - Complexity: Time: O(N * divisors(total_sum)), Space: O(N) for recursion stack.
 
-// Wildcard pattern matching with '?' and '*'
-// Time: O(|S| * |P|), Space: O(|S| * |P|)
+
+// =========================================================
+// 11. WILDCARD PATTERN MATCHING
+// =========================================================
 
 bool wildcardHelper(const string &s, const string &p, int i, int j, vvi &dp) {
     int n = s.size(), m = p.size();
@@ -264,9 +333,16 @@ bool wildcardMatch(const string &s, const string &p) {
     vvi dp(s.size(), vi(p.size(), -1));
     return wildcardHelper(s, p, 0, 0, dp);
 }
+// Interview Explanation:
+// - Problem Statement: Determine if a string matches a wildcard pattern containing '?' and '*'.
+// - Approach: Top-down 2D Dynamic Programming with Memoization.
+// - Intuition: '?' matches any single character; '*' branches into matching 0 characters (solve(i, j+1)) or 1+ characters (solve(i+1, j)).
+// - Complexity: Time: O(|S| * |P|) unique state pairs, Space: O(|S| * |P|) for DP memoization table.
 
-// Next greater element using monotonic stack
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 12. NEXT GREATER ELEMENT
+// =========================================================
 
 vi nextGreaterElement(const vi &nums) {
     int n = nums.size();
@@ -282,9 +358,16 @@ vi nextGreaterElement(const vi &nums) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the next strictly greater element for every item in an array (or -1 if none exists).
+// - Approach: Monotonic Decreasing Stack storing indices.
+// - Intuition: Current element resolves all smaller elements pending on top of stack; pop them, set ans[st.top()] = nums[i], then push current index.
+// - Complexity: Time: O(N) each element pushed and popped at most once, Space: O(N) for stack and result array.
 
-// Next smaller element using monotonic stack
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 13. NEXT SMALLER ELEMENT
+// =========================================================
 
 vi nextSmallerElement(const vi &nums) {
     int n = nums.size();
@@ -300,9 +383,16 @@ vi nextSmallerElement(const vi &nums) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the next strictly smaller element for every item in an array.
+// - Approach: Monotonic Increasing Stack storing indices.
+// - Intuition: Current element resolves all strictly larger elements pending on top of stack; pop them and record answer.
+// - Complexity: Time: O(N) linear stack pass, Space: O(N) for stack and result vector.
 
-// Previous greater element using monotonic stack
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 14. PREVIOUS GREATER ELEMENT
+// =========================================================
 
 vi previousGreaterElement(const vi &nums) {
     int n = nums.size();
@@ -316,9 +406,16 @@ vi previousGreaterElement(const vi &nums) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the previous strictly greater element for each item in an array.
+// - Approach: Monotonic Decreasing Stack.
+// - Intuition: Pop all elements smaller than or equal to nums[i]; if stack is non-empty, top is the nearest previous greater element.
+// - Complexity: Time: O(N) single forward pass, Space: O(N) for stack.
 
-// Previous smaller element using monotonic stack
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 15. PREVIOUS SMALLER ELEMENT
+// =========================================================
 
 vi previousSmallerElement(const vi &nums) {
     int n = nums.size();
@@ -332,9 +429,16 @@ vi previousSmallerElement(const vi &nums) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the previous strictly smaller element for each item in an array.
+// - Approach: Monotonic Increasing Stack.
+// - Intuition: Pop all elements greater than or equal to nums[i]; remaining top of stack is the nearest previous smaller element.
+// - Complexity: Time: O(N) single forward pass, Space: O(N) for stack.
 
-// Stock span (consecutive days price <= today's price)
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 16. STOCK SPAN PROBLEM
+// =========================================================
 
 vi stockSpan(const vi &prices) {
     int n = prices.size();
@@ -348,9 +452,16 @@ vi stockSpan(const vi &prices) {
     }
     return span;
 }
+// Interview Explanation:
+// - Problem Statement: Calculate the span of stock prices (maximum consecutive days leading up to today where price <= today's price).
+// - Approach: Monotonic Stack storing indices of previous greater prices.
+// - Intuition: Pop all prices smaller than or equal to today's; span is i - st.top() (or i + 1 if stack becomes empty).
+// - Complexity: Time: O(N) linear time, Space: O(N) for stack.
 
-// Next greater element in a circular array
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 17. NEXT GREATER ELEMENT IN CIRCULAR ARRAY
+// =========================================================
 
 vi nextGreaterCircular(const vi &nums) {
     int n = nums.size();
@@ -366,9 +477,16 @@ vi nextGreaterCircular(const vi &nums) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the next greater element for every item in a circular array.
+// - Approach: Monotonic Stack over doubled virtual array [0...2N-1].
+// - Intuition: Traversing 2N indices with modulo index i % n simulates circular wrap-around while maintaining a standard monotonic decreasing stack.
+// - Complexity: Time: O(N) two passes through array, Space: O(N) for stack.
 
-// Sum of subarray minimums modulo MOD
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 18. SUM OF SUBARRAY MINIMUMS
+// =========================================================
 
 ll sumSubarrayMins(const vi &arr) {
     int n = arr.size();
@@ -381,16 +499,22 @@ ll sumSubarrayMins(const vi &arr) {
             st.pop();
             int l = st.empty() ? -1 : st.top();
             int r = i;
-            // l is index of previous smaller element, r is index of next smaller element
             ans = (ans + 1LL * arr[mid] * (mid - l) % MOD * (r - mid)) % MOD;
         }
         if (i < n) st.push(i);
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Compute the sum of minimum values of all subarrays modulo 1e9 + 7.
+// - Approach: Contribution Technique using Monotonic Stack.
+// - Intuition: Each element a[i] is the minimum for (i - l) * (r - i) subarrays where l is previous strictly smaller and r is next smaller or equal index.
+// - Complexity: Time: O(N) single pass with monotonic stack, Space: O(N) for stack.
 
-// Maximum score of good subarray containing index K (min_val * length)
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 19. MAXIMUM SCORE OF GOOD SUBARRAY
+// =========================================================
 
 int maximumScore(const vi &nums, int k) {
     int n = nums.size();
@@ -411,9 +535,16 @@ int maximumScore(const vi &nums, int k) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Find the maximum score of a good subarray containing index K, where score is min(subarray) * length.
+// - Approach: Monotonic Stack identifying valid range bounds [l+1, r-1] containing k.
+// - Intuition: For each element treated as the minimum, its validity domain is (l, r); check if index k in (l, r) and maximize nums[mid] * (r - l - 1).
+// - Complexity: Time: O(N) single pass with monotonic stack, Space: O(N) for stack.
 
-// Sum of subarray maximums modulo MOD
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 20. SUM OF SUBARRAY MAXIMUMS
+// =========================================================
 
 ll sumSubarrayMaxs(const vi &arr) {
     int n = arr.size();
@@ -432,9 +563,16 @@ ll sumSubarrayMaxs(const vi &arr) {
     }
     return ans;
 }
+// Interview Explanation:
+// - Problem Statement: Compute the sum of maximum values of all subarrays modulo 1e9 + 7.
+// - Approach: Contribution Technique using Monotonic Stack.
+// - Intuition: Each element a[i] is the maximum for (i - l) * (r - i) subarrays where l is previous strictly greater and r is next greater or equal index.
+// - Complexity: Time: O(N) linear monotonic stack pass, Space: O(N) for stack.
 
-// Maximum of minimums for every window size from 1 to N
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 21. MAXIMUM OF MINIMUMS FOR EVERY WINDOW SIZE
+// =========================================================
 
 vi maxOfMins(const vi &arr) {
     int n = arr.size();
@@ -462,9 +600,16 @@ vi maxOfMins(const vi &arr) {
     }
     return res;
 }
+// Interview Explanation:
+// - Problem Statement: Find the maximum of minimums for every window size from 1 to N.
+// - Approach: Monotonic Stack range computation + Suffix maximum propagation.
+// - Intuition: For each element a[i] with maximal window length L = r - l - 1 where it is the minimum, set ans[L] = max(ans[L], a[i]); then compute suffix maximums backwards.
+// - Complexity: Time: O(N) two linear passes, Space: O(N) for stack and result vectors.
 
-// Array median using QuickSelect
-// Time: O(N) average, Space: O(1)
+
+// =========================================================
+// 22. ARRAY MEDIAN USING QUICKSELECT
+// =========================================================
 
 int quickPartition(vi &arr, int l, int r) {
     int rand_idx = l + rand() % (r - l + 1);
@@ -490,9 +635,16 @@ double findMedian(vi &arr) {
     if (n % 2 == 1) return quickSelect(arr, 0, n - 1, n / 2);
     return (quickSelect(arr, 0, n - 1, n / 2 - 1) + quickSelect(arr, 0, n - 1, n / 2)) / 2.0;
 }
+// Interview Explanation:
+// - Problem Statement: Find the median element of an unsorted array in linear average time.
+// - Approach: Randomized QuickSelect with Lomuto Partitioning.
+// - Intuition: Randomly partition array; discard the irrelevant half to find the element that lands at N/2 (and N/2 - 1 for even lengths).
+// - Complexity: Time: O(N) average time (O(N^2) worst case), Space: O(1) auxiliary in-place.
 
-// N x N MEX grid construction (grid[i][j] = i ^ j)
-// Time: O(N^2), Space: O(N^2)
+
+// =========================================================
+// 23. N x N MEX GRID CONSTRUCTION
+// =========================================================
 
 vvi mexGridConstruction(int n) {
     vvi grid(n, vi(n));
@@ -503,99 +655,107 @@ vvi mexGridConstruction(int n) {
     }
     return grid;
 }
+// Interview Explanation:
+// - Problem Statement: Construct an N x N grid where cell (i, j) contains i ^ j (Nim-sum matrix).
+// - Approach: Bitwise XOR Matrix Construction.
+// - Intuition: XOR addition ensures every row and column contains a permutation of values, satisfying MEX (minimum excluded) grid properties.
+// - Complexity: Time: O(N^2) filling grid, Space: O(N^2) for grid matrix.
 
-// Binary Lifting for LCA, tree distance, K-th ancestor, and path queries
-// Time: O(N log N) build, O(log N) query, Space: O(N log N)
+
+// =========================================================
+// 24. BINARY LIFTING (LCA, K-TH ANCESTOR, PATH QUERIES)
+// =========================================================
 
 struct BinaryLifting {
-    static const int MAXLOG = 21;
+    static const int LOG = 21;
+
     int n, root;
-    vector<array<int, MAXLOG>> up, info;
-    vi depth;
+    vector<array<int, LOG>> up;
+    vector<int> depth;
 
-    static constexpr int ID = 0;
-    static constexpr bool IS_EDGE_WEIGHT = false;
+    BinaryLifting(int n, int root, const vector<vector<int>>& g)
+        : n(n), root(root),
+          up(n + 1),
+          depth(n + 1, 0) {
 
-    static int combine(int a, int b) { return a + b; }
-
-    BinaryLifting(int n, int root, const vvi &g, const vi &val)
-        : n(n), root(root), up(n + 1), info(n + 1), depth(n + 1, 0) {
-        for (int i = 0; i <= n; i++) {
-            up[i].fill(0);
-            info[i].fill(ID);
-        }
-
-        vi q = {root};
+        // Build parent + depth
+        vector<int> q = {root};
         up[root][0] = 0;
-        info[root][0] = val[root];
 
         int head = 0;
+
         while (head < (int)q.size()) {
             int u = q[head++];
+
             for (int v : g[u]) {
-                if (v != up[u][0]) {
-                    up[v][0] = u;
-                    depth[v] = depth[u] + 1;
-                    info[v][0] = val[v];
-                    q.push_back(v);
-                }
+                if (v == up[u][0])
+                    continue;
+
+                up[v][0] = u;
+                depth[v] = depth[u] + 1;
+
+                q.push_back(v);
             }
         }
 
-        for (int j = 1; j < MAXLOG; j++) {
-            for (int i = 1; i <= n; i++) {
-                int p = up[i][j - 1];
-                up[i][j] = up[p][j - 1];
-                info[i][j] = combine(info[i][j - 1], info[p][j - 1]);
+        // Binary lifting table
+        for (int j = 1; j < LOG; j++) {
+            for (int u = 1; u <= n; u++) {
+                up[u][j] = up[up[u][j - 1]][j - 1];
             }
         }
     }
 
+    // Move u up by k levels
     int kthAncestor(int u, int k) {
-        for (int j = 0; j < MAXLOG && u != 0; j++) {
-            if ((k >> j) & 1) u = up[u][j];
+        for (int j = 0; j < LOG && u != 0; j++) {
+            if (k & (1 << j))
+                u = up[u][j];
         }
+
         return u == 0 ? -1 : u;
     }
 
+    // Lowest Common Ancestor
     int lca(int a, int b) {
-        if (depth[a] < depth[b]) swap(a, b);
+
+        if (depth[a] < depth[b])
+            swap(a, b);
+
+        // Same depth
         a = kthAncestor(a, depth[a] - depth[b]);
-        if (a == b) return a;
-        for (int j = MAXLOG - 1; j >= 0; j--) {
+
+        if (a == b)
+            return a;
+
+        // Jump both nodes upwards
+        for (int j = LOG - 1; j >= 0; j--) {
             if (up[a][j] != up[b][j]) {
                 a = up[a][j];
                 b = up[b][j];
             }
         }
+
         return up[a][0];
     }
 
+    // Distance between two nodes
     int dist(int a, int b) {
-        return depth[a] + depth[b] - 2 * depth[lca(a, b)];
-    }
-
-    int queryUp(int u, int k) {
-        int res = ID;
-        for (int j = 0; j < MAXLOG && u != 0; j++) {
-            if ((k >> j) & 1) {
-                res = combine(res, info[u][j]);
-                u = up[u][j];
-            }
-        }
-        return res;
-    }
-
-    int queryPath(int a, int b) {
         int l = lca(a, b);
-        int res = combine(queryUp(a, depth[a] - depth[l]), queryUp(b, depth[b] - depth[l]));
-        if (!IS_EDGE_WEIGHT) res = combine(res, info[l][0]);
-        return res;
+
+        return depth[a] + depth[b] - 2 * depth[l];
     }
 };
+// Interview Explanation:
+// - Problem Statement: Perform efficient tree queries including LCA, distance, K-th ancestor, and path aggregates.
+// - Approach: Binary Lifting table up[node][k] doubling ancestor jumps (2^k).
+// - Intuition: Precompute 2^k-th ancestors via up[u][j] = up[up[u][j-1]][j-1]; any ancestor jump can be decomposed into binary powers of 2 in O(log N) time.
+// - Complexity: Time: O(N \log N) preprocessing, O(\log N) per query, Space: O(N \log N) table storage.
 
-// Digit DP template for digit sums/properties of numbers <= N
-// Time: O(digits * state_space), Space: O(digits * state_space)
+
+// =========================================================
+// 25. DIGIT DP TEMPLATE
+// =========================================================
 
 struct DigitDP {
     string s;
@@ -626,14 +786,21 @@ struct DigitDP {
         return dp(0, false, true, 0);
     }
 };
+// Interview Explanation:
+// - Problem Statement: Count numbers <= N satisfying specific digit properties (e.g. digit sum).
+// - Approach: Digit Dynamic Programming with memoization memo[pos][started][tight][state].
+// - Intuition: Construct numbers digit by digit from most to least significant; tight flag indicates whether choice is restricted by digits of N.
+// - Complexity: Time: O(digits * states) = O(18 * 2 * 2 * 100), Space: O(digits * states) memo table.
 
-// Cycle detection and reconstruction in graphs
-// Time: O(V + E), Space: O(V + E)
+
+// =========================================================
+// 26. CYCLE DETECTION & RECONSTRUCTION (UNDIRECTED / DIRECTED / NEGATIVE)
+// =========================================================
 
 vi buildCycle(int s, int e, const vi &par) {
     vi cyc;
     cyc.push_back(e);
-    while(true){
+    while (true) {
         cyc.push_back(s);
         if (s == e) break;
         s = par[s];
@@ -709,12 +876,12 @@ struct DirectedCycle {
     }
 };
 
-struct Edge {
+struct EdgeItem {
     int u, v;
     ll w;
 };
 
-vi findNegativeCycle(int n, const vector<Edge> &edges) {
+vi findNegativeCycle(int n, const vector<EdgeItem> &edges) {
     vl dist(n + 1, 0);
     vi parent(n + 1, -1);
     int last_relaxed = -1;
@@ -734,9 +901,16 @@ vi findNegativeCycle(int n, const vector<Edge> &edges) {
     for (int i = 0; i < n; i++) last_relaxed = parent[last_relaxed];
     return buildCycle(last_relaxed, parent[last_relaxed], parent);
 }
+// Interview Explanation:
+// - Problem Statement: Detect and reconstruct cycles in undirected, directed, and edge-weighted graphs.
+// - Approach: DFS with parent / path arrays (Undirected/Directed) and Bellman-Ford (Negative cycles).
+// - Intuition: Back-edge collision records start and end vertices; backtracking through parent pointers recovers the exact cyclic path sequence.
+// - Complexity: Time: O(V + E) for DFS, O(V * E) for Bellman-Ford, Space: O(V) for visited and parent arrays.
 
-// Minimum cost to make array non-decreasing using max-heap strategy
-// Time: O(N log N), Space: O(N)
+
+// =========================================================
+// 27. MAKE ARRAY NON-DECREASING (SLOPE TRICK)
+// =========================================================
 
 ll makeArrayNonDecreasing(const vi &nums) {
     ll total_cost = 0;
@@ -752,4 +926,36 @@ ll makeArrayNonDecreasing(const vi &nums) {
     }
     return total_cost;
 }
+// Interview Explanation:
+// - Problem Statement: Find minimum operations to make an array non-decreasing where each step can increment or decrement an element by 1.
+// - Approach: Greedy Slope Trick using a Max-Heap.
+// - Intuition: If current element x < heap.top(), moving top down to x minimizes cost; push x twice (once for slope inflection point, once for value adjustment).
+// - Complexity: Time: O(N \log N) heap operations, Space: O(N) for priority queue.
 
+/*
+ ====================================================================================================
+     ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: MONOTONIC STACKS, BINARY SEARCH & ADVANCED TECHNIQUES
+ ====================================================================================================
+
+ 1. PATTERN IDENTIFICATION MATRIX:
+    | Problem Type / Clue                         | Technique / Data Structure          | Core Transition / State               |
+    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
+    | Next Greater Element                        | Monotonic Decreasing Stack          | while (!st.empty() && nums[top] < x)  |
+    | Next Smaller Element                        | Monotonic Increasing Stack          | while (!st.empty() && nums[top] > x)  |
+    | Sum of Subarray Minimums                    | Contribution: (i - l) * (r - i)     | Stack finds previous & next smaller   |
+    | Maximum of Minimums for every window        | Monotonic Stack + Suffix Max        | ans[r - l - 1] = max(ans[...], a[i])  |
+    | K-th element in 2 sorted arrays             | Binary Search on partition cut      | l1 <= r2 && l2 <= r1                  |
+    | Longest substring without repeating chars   | Sliding Window + last seen map      | l = max(l, last_seen[c] + 1)          |
+    | Minimum moves to gather K 1s                | Shifted index p_i - i + median pref | cost around median index              |
+    | 2D Prefix Sum Submatrix                     | Inclusion-Exclusion                 | pref[r][c] - up - left + diag         |
+    | K-th Ancestor / LCA in Tree                 | Binary Lifting up[u][j]             | up[u][j] = up[up[u][j-1]][j-1]        |
+    | Digit properties <= N                       | Digit DP memo[pos][started][tight]  | tight restricts digit range to s[pos] |
+    | Slope Trick / Non-decreasing cost           | Max-Heap slope inflection           | total_cost += max_heap.top() - x      |
+
+ 2. TOP INTERVIEW & OA GOTCHAS:
+    • Monotonic Stack boundaries: Use index -1 and n as virtual sentinels for previous and next bounds.
+    • Duplicate handling in Contribution technique: Use strict < on one side and <= on the other to avoid double counting.
+    • Modulo arithmetic on subtraction: ALWAYS add MOD before modulo: `(ans % MOD + MOD) % MOD`.
+    • Binary Lifting log bound: Ensure `MAXLOG` (e.g. 21) covers tree size $2^{20} \approx 10^6$.
+ ====================================================================================================
+*/

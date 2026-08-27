@@ -11,8 +11,9 @@ using vvl = vector<vector<ll>>;
 const ll MOD = 1e9 + 7;
 const ll P = 31;
 
-// Centroid of a tree
-// Time: O(N), Space: O(N)
+// =========================================================
+// 1. TREE CENTROID
+// =========================================================
 
 struct Centroid {
     int n;
@@ -46,9 +47,16 @@ struct Centroid {
         return centroid(1, 0, sz[1]);
     }
 };
+// Interview Explanation:
+// - Problem Statement: Find a centroid node of a tree whose removal splits the tree into components each of size at most N / 2.
+// - Approach: Subtree size computation via DFS + greedy descent to heavy child.
+// - Intuition: At every node, if any child subtree has size > N / 2, the centroid must lie in that child's branch; otherwise the current node is the centroid.
+// - Complexity: Time: O(N) two linear tree traversals, Space: O(N) for tree adjacency and subtree size array.
 
-// Polynomial rolling hash of a string
-// Time: O(|S|), Space: O(1)
+
+// =========================================================
+// 2. POLYNOMIAL ROLLING HASH OF A STRING
+// =========================================================
 
 ll hashWord(const string &s) {
     ll h = 0;
@@ -57,9 +65,16 @@ ll hashWord(const string &s) {
     }
     return h;
 }
+// Interview Explanation:
+// - Problem Statement: Compute a 64-bit polynomial rolling hash of a string modulo 1e9 + 7.
+// - Approach: Horner's polynomial evaluation with base prime P = 31.
+// - Intuition: Interprets string as a base-P number; accumulating characters from left to right converts strings to compact hash integers for O(1) equality comparisons.
+// - Complexity: Time: O(|S|) single pass through characters, Space: O(1) auxiliary space.
 
-// Substring polynomial rolling hash
-// Time: O(N) build, O(1) query, Space: O(N)
+
+// =========================================================
+// 3. SUBSTRING POLYNOMIAL ROLLING HASH
+// =========================================================
 
 struct FastHash {
     vl p, h;
@@ -79,9 +94,16 @@ struct FastHash {
         return (h[r + 1] - h[l] * p[r - l + 1] % MOD + MOD) % MOD;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Precompute polynomial rolling hashes to query the hash of any substring s[l...r] in O(1) time.
+// - Approach: Prefix hash array + base power array precomputation.
+// - Intuition: hash(s[l...r]) = (h[r+1] - h[l] * P^(r - l + 1)) % MOD, shifting out prefix hash and aligning powers via subtraction and modular arithmetic.
+// - Complexity: Time: O(N) build, O(1) per query, Space: O(N) for powers and prefix hash arrays.
 
-// Disjoint Set Union (DSU) with path compression and union-by-size
-// Time: O(alpha(N)), Space: O(N)
+
+// =========================================================
+// 4. DISJOINT SET UNION (DSU / UNION-FIND)
+// =========================================================
 
 struct DSU {
     vi p, sz;
@@ -110,9 +132,16 @@ struct DSU {
         return sz[find(u)];
     }
 };
+// Interview Explanation:
+// - Problem Statement: Maintain disjoint sets supporting near-constant time component union and representative find queries.
+// - Approach: Disjoint Set Union (Union-Find) with Path Compression and Union by Size.
+// - Intuition: Path compression flattens tree depth to root on find; union by size attaches smaller trees beneath larger ones, bounding tree depth.
+// - Complexity: Time: O(alpha(N)) ~ O(1) amortized per operation, Space: O(N) for parent and size vectors.
 
-// Kruskal's algorithm for Minimum Spanning Tree (MST)
-// Time: O(E log E), Space: O(V + E)
+
+// =========================================================
+// 5. KRUSKAL'S MINIMUM SPANNING TREE (MST)
+// =========================================================
 
 struct Edge {
     int u, v, w;
@@ -135,9 +164,16 @@ int kruskal(int n, vector<Edge> &edges, vector<Edge> &mst) {
     }
     return total_w;
 }
+// Interview Explanation:
+// - Problem Statement: Find the Minimum Spanning Tree (MST) weight and edge set in an edge-weighted undirected graph.
+// - Approach: Greedy edge selection via sorting + DSU cycle prevention.
+// - Intuition: Sort all edges by weight; iteratively connect endpoints using DSU if they reside in different components until N - 1 edges are included.
+// - Complexity: Time: O(E \log E) edge sorting, Space: O(V + E) for DSU and MST edge storage.
 
-// Prim's algorithm for Minimum Spanning Tree (MST)
-// Time: O(E log V), Space: O(V + E)
+
+// =========================================================
+// 6. PRIM'S MINIMUM SPANNING TREE (MST)
+// =========================================================
 
 int prim(int n, const vector<vector<pii>> &g) {
     vector<bool> vis(n + 1, false);
@@ -146,9 +182,7 @@ int prim(int n, const vector<vector<pii>> &g) {
     int total_w = 0;
 
     while (!pq.empty()) {
-        auto [w, u] = pq.top();
-        pq.pop();
-
+        auto [w, u] = pq.top(); pq.pop();
         if (vis[u]) continue;
         vis[u] = true;
         total_w += w;
@@ -157,12 +191,18 @@ int prim(int n, const vector<vector<pii>> &g) {
             if (!vis[v]) pq.push({wt, v});
         }
     }
-
     return total_w;
 }
+// Interview Explanation:
+// - Problem Statement: Find the Minimum Spanning Tree (MST) total weight using Prim's algorithm.
+// - Approach: Greedy vertex expansion using a Min-Heap Priority Queue.
+// - Intuition: Start with node 1; iteratively grow the MST cut by extracting the minimum-weight boundary edge connecting an unvisited vertex to the growing tree.
+// - Complexity: Time: O(E \log V) priority queue operations, Space: O(V + E) for visited array and adjacency list.
 
-// Kahn's algorithm for Topological Sort
-// Time: O(V + E), Space: O(V + E)
+
+// =========================================================
+// 7. KAHN'S TOPOLOGICAL SORT
+// =========================================================
 
 vi kahn(int n, const vvi &g, int start = 1) {
     vi in_deg(g.size(), 0);
@@ -177,20 +217,25 @@ vi kahn(int n, const vvi &g, int start = 1) {
 
     vi order;
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
+        int u = q.front(); q.pop();
         order.push_back(u);
 
         for (int v : g[u]) {
             if (--in_deg[v] == 0) q.push(v);
         }
     }
-
     return (int)order.size() == n ? order : vi{};
 }
+// Interview Explanation:
+// - Problem Statement: Compute a valid topological ordering of a directed acyclic graph (DAG), or detect cycles.
+// - Approach: Kahn's Algorithm using in-degrees and a FIFO Queue.
+// - Intuition: Vertices with in-degree 0 have all dependencies satisfied; process them and decrement neighbor in-degrees, queuing neighbors that become 0.
+// - Complexity: Time: O(V + E) linear queue traversal, Space: O(V + E) for in-degree array and queue.
 
-// Longest paths and path counts on a DAG
-// Time: O(V + E), Space: O(V + E)
+
+// =========================================================
+// 8. LONGEST PATHS & PATH COUNTS ON A DAG
+// =========================================================
 
 pair<vi, vi> dag_(int n, const vector<vector<pii>> &g, int src, int start = 1) {
     vi in_deg(g.size(), 0);
@@ -205,8 +250,7 @@ pair<vi, vi> dag_(int n, const vector<vector<pii>> &g, int src, int start = 1) {
 
     vi order;
     while (!q.empty()) {
-        int u = q.front();
-        q.pop();
+        int u = q.front(); q.pop();
         order.push_back(u);
 
         for (auto &[v, w] : g[u]) {
@@ -230,12 +274,18 @@ pair<vi, vi> dag_(int n, const vector<vector<pii>> &g, int src, int start = 1) {
             }
         }
     }
-
     return {dist, paths};
 }
+// Interview Explanation:
+// - Problem Statement: Find the longest path distance and number of distinct longest paths from a source in a weighted DAG.
+// - Approach: Topological Sort + Dynamic Programming edge relaxation.
+// - Intuition: Relaxing edges in topological order guarantees optimal path distances and path multiplicity counts without revisiting nodes.
+// - Complexity: Time: O(V + E) linear DAG DP, Space: O(V + E) for distance, paths, and topological order arrays.
 
-// Tree rerooting DP for sum of distances from every node
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 9. TREE REROOTING DP (ALL-NODES DISTANCE SUM)
+// =========================================================
 
 struct TreeDistances {
     int n;
@@ -270,9 +320,16 @@ struct TreeDistances {
         return dist;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Compute the sum of distances from every node to all other nodes in a tree (All-Nodes Distance Sum).
+// - Approach: Two-pass Tree Rerooting Dynamic Programming.
+// - Intuition: First DFS calculates subtree sizes and sum of distances from root; rerooting DFS updates child distance in O(1): dist[v] = dist[u] - sz[v] + (N - sz[v]).
+// - Complexity: Time: O(N) two DFS traversals, Space: O(N) for tree adjacency and distance vectors.
 
-// Tree diameter and node eccentricities
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 10. TREE DIAMETER & NODE ECCENTRICITIES
+// =========================================================
 
 void dfsDist(int u, int p, const vvi &g, vi &dist) {
     for (int v : g[u]) {
@@ -305,15 +362,18 @@ pair<int, vi> treeDiameter(int n, const vvi &g) {
     for (int i = 1; i <= n; i++) {
         eccentricity[i] = max(dist1[i], dist2[i]);
     }
-
     return {diameter, eccentricity};
 }
+// Interview Explanation:
+// - Problem Statement: Find the diameter (longest path between any two nodes) and eccentricity of all vertices in a tree.
+// - Approach: Two-pass (or Three-pass) BFS/DFS tree diameter algorithm.
+// - Intuition: The farthest node from an arbitrary node 1 is an endpoint a of the diameter; the farthest node from a is the other endpoint b; distance from a to b is the diameter.
+// - Complexity: Time: O(N) linear tree traversals, Space: O(N) for distance arrays.
 
-// Tarjan's algorithm for finding bridges
-// Time: O(V + E), Space: O(V + E)
 
-// Kosaraju's algorithm for Strongly Connected Components (SCC) and DAG condensation
-// Time: O(V + E), Space: O(V + E)
+// =========================================================
+// 11. STRONGLY CONNECTED COMPONENTS (KOSARAJU'S ALGORITHM)
+// =========================================================
 
 struct SCC {
     int n;
@@ -333,7 +393,7 @@ struct SCC {
         for (int v : g[u]) {
             if (!vis[v]) dfs1(v);
         }
-        order.push_back(u); // push u after traversing all its descendants
+        order.push_back(u);
     }
 
     void dfs2(int u, int c) {
@@ -348,8 +408,8 @@ struct SCC {
         for (int i = 0; i < n; i++) {
             if (!vis[i]) dfs1(i);
         }
-        for (int i = n - 1; i >= 0; i--) { // starting from last element
-            int u = order[i]; // order[i] is the node with the highest finishing time
+        for (int i = n - 1; i >= 0; i--) {
+            int u = order[i];
             if (comp[u] == -1) {
                 sccs.emplace_back();
                 dfs2(u, (int)sccs.size() - 1);
@@ -361,20 +421,27 @@ struct SCC {
         dag.resize(sccs.size());
         for (int u = 0; u < n; u++) {
             for (int v : g[u]) {
-                if (comp[u] != comp[v]) { // if u and v are in different components, add an edge in the DAG
-                    dag[comp[u]].push_back(comp[v]); // edge from component of u to component of v
+                if (comp[u] != comp[v]) {
+                    dag[comp[u]].push_back(comp[v]);
                 }
             }
-        } // first run buildDag() after build() to get the DAG of SCCs
+        }
         for (auto &v : dag) {
-            sort(v.begin(), v.end()); // sort the vacency list of each component in the DAG
-            v.erase(unique(v.begin(), v.end()), v.end()); // remove duplicate edges
-        } // for removing duplicate edges
+            sort(v.begin(), v.end());
+            v.erase(unique(v.begin(), v.end()), v.end());
+        }
     }
 };
+// Interview Explanation:
+// - Problem Statement: Decompose a directed graph into Strongly Connected Components (SCCs) and construct its condensed DAG.
+// - Approach: Kosaraju's Algorithm (Forward DFS + Reverse Graph DFS).
+// - Intuition: Post-order finishing times on original graph order vertices such that DFS on reversed graph isolates sink components one by one into SCCs.
+// - Complexity: Time: O(V + E) two DFS passes, Space: O(V + E) for graph, reverse graph, and component mappings.
 
-// Functional Graph decomposition (outdegree = 1) with binary lifting
-// Time: O(N log N) build, O(1) jump/query, Space: O(N log N)
+
+// =========================================================
+// 12. FUNCTIONAL GRAPH DECOMPOSITION & QUERIES
+// =========================================================
 
 vi getCycleFloyd(const vi &to, const vi &comp, int start) {
     int slow = start, fast = start;
@@ -397,7 +464,6 @@ vi getCycleFloyd(const vi &to, const vi &comp, int start) {
         cycle.push_back(curr);
         curr = to[curr];
     } while (curr != slow);
-
     return cycle;
 }
 
@@ -465,9 +531,16 @@ struct FunctionalGraph {
         return dist[a] + distanceInCycle(jump(a, dist[a]), b);
     }
 };
+// Interview Explanation:
+// - Problem Statement: Decompose a functional graph (where every vertex has out-degree 1) into trees rooted on directed cycles, answering k-step jumps and path reachability.
+// - Approach: Floyd's Cycle Detection + Binary Lifting table + Component cycle offset indexing.
+// - Intuition: Every component contains exactly one directed cycle with directed trees feeding into it; binary lifting navigates tree branches, and modular arithmetic resolves cycle jumps.
+// - Complexity: Time: O(N \log N) build, O(\log N) per jump query, Space: O(N \log N) table storage.
 
-// Double-hashing tree isomorphism check
-// Time: O(N log N), Space: O(N)
+
+// =========================================================
+// 13. TREE ISOMORPHISM (DOUBLE-HASHING)
+// =========================================================
 
 const ll MOD1 = 1e9 + 7, MOD2 = 1e9 + 9, BASE1 = 313, BASE2 = 317;
 const int MAX_N = 200005;
@@ -502,12 +575,18 @@ vl dfsTreeHash(int u, int p, const vvi &g) {
     h1 = (h1 * BASE1 + 2) % MOD1;
     h2 = (h2 * BASE2 + 2) % MOD2;
     total_len++;
-
     return {h1, h2, total_len};
 }
+// Interview Explanation:
+// - Problem Statement: Check if two unrooted trees are isomorphic (structurally identical under renaming of vertices).
+// - Approach: AHU / Double-Hashing tree isomorphism algorithm.
+// - Intuition: Represent each subtree as a canonical sorted tuple of its children's hashes; identical subtree structures produce identical polynomial hashes independent of node labels.
+// - Complexity: Time: O(N \log N) sorting children hashes, Space: O(N) for tree representation and hash powers.
 
-// Tree centers by leaf trimming
-// Time: O(N), Space: O(N)
+
+// =========================================================
+// 14. TREE CENTERS BY LEAF TRIMMING
+// =========================================================
 
 vi centers(int n, const vvi &g) {
     if (n == 1) return {1};
@@ -528,6 +607,39 @@ vi centers(int n, const vvi &g) {
         }
         leaves = nxt;
     }
-
     return leaves;
 }
+// Interview Explanation:
+// - Problem Statement: Find the center(s) of a tree (nodes minimizing maximum distance to any leaf).
+// - Approach: Topological Leaf Trimming (peeling leaves layer-by-layer).
+// - Intuition: Iteratively prune all degree-1 leaves until 1 or 2 nodes remain; these surviving nodes constitute the tree's topological center(s).
+// - Complexity: Time: O(N) each vertex and edge removed once, Space: O(N) for degree array and leaves queue.
+
+/*
+ ====================================================================================================
+             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: ADVANCED TREES & GRAPHS
+ ====================================================================================================
+
+ 1. PATTERN IDENTIFICATION MATRIX:
+    | Problem Type / Clue                         | Technique / Data Structure          | Core Template / Invariant             |
+    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
+    | Divide & Conquer on Trees / Path queries    | Centroid Decomposition              | Subtree size <= N/2                   |
+    | Sum of Distances / All Roots DP             | Tree Rerooting (2 passes)           | dist[v] = dist[u] - sz[v] + (N-sz[v]) |
+    | Farthest Node / Max Distance in Tree        | Tree Diameter (2 DFS passes)        | Farthest from arbitrary node is endpt |
+    | Center of Tree / Minimum Height Tree Root   | Leaf Trimming (Degree 1 peeling)   | Prune leaves until 1 or 2 nodes remain|
+    | Tree Isomorphism (Are two trees same shape?)| Tree Hashing (Canonical sort)      | Sort child hashes + double hashing    |
+    | Successor Graph / Next pointer (outdeg = 1) | Functional Graph (Cycles + Trees)   | Binary Lifting up[u][k] + Floyd cycle |
+    | Directed Cycles / Condensed Graph           | Kosaraju's SCC (Forward + Reverse)  | Post-order finish on RG yields SCCs   |
+    | Substring Hash in O(1)                      | Polynomial Rolling Hash (Prefix)   | (h[R+1] - h[L]*P^(len)) % MOD         |
+    | Minimum Spanning Tree                       | Kruskal (Sparse) / Prim (Dense)     | Sort edges + DSU / Priority Queue     |
+
+ 2. TOP LIVE INTERVIEW & OA GOTCHAS:
+    • Tree Centers: An unweighted tree has either exactly 1 or 2 centers; never 0, never >= 3.
+    • Tree Diameter: 2-DFS trick only works on trees with NON-NEGATIVE edge weights; fails if negative edges exist.
+    • Rolling Hash collisions: Single hash with MOD = 1e9 + 7 has birthday paradox collision risk around N = 10^5;
+      always mention or implement double hashing (MOD1 = 1e9+7, MOD2 = 1e9+9) in competitive environments.
+    • DSU component count: Start with N components; decrement count every time unite() successfully returns true.
+    • Functional Graph component reachability: Node a can reach node b only if comp[a] == comp[b] AND either b is on
+      the cycle or b is an ancestor of a in the tree branch feeding into the cycle.
+ ====================================================================================================
+*/
