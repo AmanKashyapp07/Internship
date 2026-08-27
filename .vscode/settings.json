@@ -1,6 +1,8 @@
 {
     "clangd.enable": true,
     "clangd.diagnostics": false,
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file",
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.dimInactiveRegions": false,
@@ -9,6 +11,8 @@
     "cSpell.enabled": false,
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
+    "editor.inlayHints.enabled": "off",
+    "editor.inlayHints.parameterNames.enabled": "none",
     "problems.decorations.enabled": false,
     "explorer.decorations.colors": false,
     "explorer.decorations.badges": false,
@@ -22,10 +26,12 @@
     },
     "[cpp]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.formatOnSave": true,
         "editor.tabSize": 4
     },
     "[c]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.formatOnSave": true,
         "editor.tabSize": 4
     },
     "[javascript]": {
