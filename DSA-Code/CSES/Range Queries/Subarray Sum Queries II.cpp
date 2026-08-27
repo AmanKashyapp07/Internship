@@ -1,83 +1,50 @@
 // Link: https://cses.fi/problemset/task/3226
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Recursive Segment Tree for Range Maximum Subarray Sum Queries (CSES Subarray Sum Queries II)
+struct Node { long long sum, pref, suff, ans; };
+Node ZERO = {0, 0, 0, 0};
+Node leaf(long long x) { long long v = max(0LL, x); return {x, v, v, v}; }
+Node merge(Node L, Node R) {
+    return {L.sum + R.sum,
+            max(L.pref, L.sum + R.pref),
+            max(R.suff, R.sum + L.suff),
+            max({L.ans, R.ans, L.suff + R.pref})};
+}
+
 struct SegTree {
-    struct Node {
-        long long sum, pref, suff, ans;
-    };
-
-    int n;
-    vector<Node> tree;
-
-    Node identity() {
-        return {0LL, 0LL, 0LL, 0LL};
+    int n; vector<Node> t;
+    SegTree(int n, vector<int>& a) : n(n), t(4*n) { build(1, 0, n-1, a); }
+    void build(int v, int l, int r, vector<int>& a) {
+        if (l == r) { t[v] = leaf(a[l]); return; }
+        int m = (l+r)/2;
+        build(2*v, l, m, a); build(2*v+1, m+1, r, a);
+        t[v] = merge(t[2*v], t[2*v+1]);
     }
-
-    Node make_node(long long x) {
-        long long v = max(0LL, x); // Subarray can be empty (sum = 0)
-        return {x, v, v, v};
+    Node qry(int v, int l, int r, int ql, int qr) {
+        if (qr < l || ql > r) return ZERO;
+        if (ql <= l && r <= qr) return t[v];
+        int m = (l+r)/2;
+        return merge(qry(2*v, l, m, ql, qr), qry(2*v+1, m+1, r, ql, qr));
     }
-
-    Node merge(Node L, Node R) {
-        Node res;
-        res.sum = L.sum + R.sum;
-        res.pref = max(L.pref, L.sum + R.pref);
-        res.suff = max(R.suff, R.sum + L.suff);
-        res.ans = max({L.ans, R.ans, L.suff + R.pref});
-        return res;
-    }
-
-    SegTree(vector<int>& a) : n(a.size()), tree(4 * a.size()) {
-        build(1, 0, n - 1, a);
-    }
-
-    void build(int node, int lo, int hi, const vector<int>& a) {
-        if (lo == hi) {
-            tree[node] = make_node(a[lo]);
-            return;
-        }
-        int mid = (lo + hi) / 2;
-        build(2 * node, lo, mid, a);
-        build(2 * node + 1, mid + 1, hi, a);
-        tree[node] = merge(tree[2 * node], tree[2 * node + 1]);
-    }
-
-    Node query(int l, int r) {
-        return query(1, 0, n - 1, l, r);
-    }
-
-    Node query(int node, int lo, int hi, int l, int r) {
-        if (hi < l || r < lo) return identity();
-        if (l <= lo && hi <= r) return tree[node];
-        int mid = (lo + hi) / 2;
-        return merge(query(2 * node, lo, mid, l, r), query(2 * node + 1, mid + 1, hi, l, r));
-    }
+    long long qry(int l, int r) { return qry(1, 0, n-1, l, r).ans; }
 };
 
 int main() {
-    // Fast I/O
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, q;
-    if (cin >> n >> q) {
-        vector<int> a(n);
-        for (int i = 0; i < n; i++) cin >> a[i];
-
-        SegTree st(a);
-
-        while (q--) {
-            int l, r;
-            cin >> l >> r;
-            // O(log N) Range Query
-            cout << st.query(l - 1, r - 1).ans << '\n';
-        }
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; cin >> n >> q;
+    vector<int> a(n);
+    for (int& x : a) cin >> x;
+    SegTree st(n, a);
+    while (q--) {
+        int l, r; cin >> l >> r;
+        cout << st.qry(l-1, r-1) << '\n';
     }
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: For each query [l, r], find the maximum subarray sum within that range (CSES 3226).
+// - Approach: Segment Tree with augmented node (sum, pref, suff, ans) — range query version of Kadane's.
+// - Intuition: Same merge as Subarray Sum Queries, but now we query arbitrary [l, r] ranges instead of always [0, n-1].
+// - Complexity: Time: O((N + Q) log N), Space: O(N).

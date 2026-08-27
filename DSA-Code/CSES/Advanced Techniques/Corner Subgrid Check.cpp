@@ -1,70 +1,37 @@
 // Link: https://cses.fi/problemset/task/3360
-
-#include <iostream>
-#include <vector>
-#include <string>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-void solve() {
-    int n, k;
-    if (!(cin >> n >> k)) return;
-
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, k; if (!(cin >> n >> k)) return 0;
     vector<string> grid(n);
-    for (int i = 0; i < n; ++i) {
-        cin >> grid[i];
-    }
+    for (int i = 0; i < n; i++) cin >> grid[i];
 
-    // Process each letter from 'A' up to the k-th uppercase letter
-    for (int char_idx = 0; char_idx < k; ++char_idx) {
-        char target = 'A' + char_idx;
+    for (int ci = 0; ci < k; ci++) {
+        char target = 'A' + ci;
         bool found = false;
-        
-        // seen[c1][c2] will store if we've seen a row where both columns c1 and c2 have 'target'
-        // Using a flat vector or a 2D vector. A 2D vector is clean and easy to reset.
         vector<vector<bool>> seen(n, vector<bool>(n, false));
 
-        for (int r = 0; r < n; ++r) {
-            // Find all columns in this row that match our target letter
+        for (int r = 0; r < n && !found; r++) {
             vector<int> cols;
-            for (int c = 0; c < n; ++c) {
-                if (grid[r][c] == target) {
-                    cols.push_back(c);
+            for (int c = 0; c < n; c++) if (grid[r][c] == target) cols.push_back(c);
+
+            for (int i = 0; i < (int)cols.size() && !found; i++) {
+                for (int j = i + 1; j < (int)cols.size() && !found; j++) {
+                    int c1 = cols[i], c2 = cols[j];
+                    if (seen[c1][c2]) found = true;
+                    else seen[c1][c2] = true;
                 }
             }
-
-            // Check all pairs of these columns
-            int num_cols = cols.size();
-            for (int i = 0; i < num_cols; ++i) {
-                for (int j = i + 1; j < num_cols; ++j) {
-                    int c1 = cols[i];
-                    int c2 = cols[j];
-
-                    if (seen[c1][c2]) {
-                        found = true;
-                        break;
-                    }
-                    seen[c1][c2] = true;
-                }
-                if (found) break;
-            }
-            if (found) break;
         }
-
-        if (found) {
-            cout << "YES\n";
-        } else {
-            cout << "NO\n";
-        }
+        cout << (found ? "YES\n" : "NO\n");
     }
-}
-
-int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    solve();
-    
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: For each of k letters, check if an all-corner 2x2 subgrid exists with that letter at all four corners (CSES 3360).
+// - Approach: Column Pair Seen Tracking per Row.
+// - Intuition: For letter $c$, a 2x2 corner subgrid exists iff some column pair $(c_1, c_2)$ both have letter $c$ in two separate rows; tracking `seen[c1][c2]` detects this.
+// - Complexity: Time: O(k \cdot N^2), Space: O(N^2).

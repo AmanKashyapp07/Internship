@@ -1,105 +1,56 @@
 // Link: https://cses.fi/problemset/task/1144
-
-#include <algorithm>
-#include <iostream>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Standard 1-Indexed Fenwick Tree (takes 0-indexed arguments externally)
-struct Fenwick {
-    int n; 
-    vector<int> bit;
-    Fenwick(int n) : n(n), bit(n + 1, 0) {}
-    
-    void update(int i, int val) {
-        i++; // Convert 0-indexed parameter to 1-indexed BIT internally
-        while (i <= n) {
-            bit[i] += val;
-            i += i & -i; 
-        }
-    }
-    
-    int query(int i) {
+struct BIT {
+    int n; vector<int> b;
+    BIT(int n) : n(n), b(n + 1, 0) {}
+    void upd(int i, int v) { for (++i; i <= n; i += i & -i) b[i] += v; }
+    int qry(int l, int r) {
         int s = 0;
-        i++;
-        while (i >= 1) {
-            s += bit[i];
-            i -= i & -i;
-        }
+        for (int i = r + 1; i > 0; i -= i & -i) s += b[i];
+        if (l) for (int i = l; i > 0; i -= i & -i) s -= b[i];
         return s;
     }
-    
-    int query(int l, int r) { 
-        if (l > r) return 0;
-        return query(r) - (l > 0 ? query(l - 1) : 0);
-    }
-};
-
-// Coordinate Compressor Helper
-struct CoordinateCompressor {
-    vector<int> vals;
-    void add(int x) { vals.push_back(x); }
-    void build() {
-        sort(vals.begin(), vals.end());
-        vals.erase(unique(vals.begin(), vals.end()), vals.end());
-    }
-    int get(int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); }
-    int size() { return vals.size(); }
-};
-
-struct Event {
-    char type;
-    int a, b;
 };
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; cin >> n >> q;
+    vector<int> sal(n + 1);
 
-    int n, q;
-    if (cin >> n >> q) {
-        vector<int> salaries(n + 1);
-        CoordinateCompressor cc;
-        
-        for (int i = 1; i <= n; i++) {
-            cin >> salaries[i];
-            cc.add(salaries[i]);
-        }
+    // Coordinate compress all values
+    vector<int> vals;
+    for (int i = 1; i <= n; i++) { cin >> sal[i]; vals.push_back(sal[i]); }
 
-        vector<Event> events(q);
-        for (int i = 0; i < q; i++) {
-            cin >> events[i].type >> events[i].a >> events[i].b;
-            if (events[i].type == '!') {
-                cc.add(events[i].b);
-            } else {
-                cc.add(events[i].a);
-                cc.add(events[i].b);
-            }
-        }
+    struct Ev { char t; int a, b; };
+    vector<Ev> ev(q);
+    for (auto& [t, a, b] : ev) {
+        cin >> t >> a >> b;
+        vals.push_back(b);
+        if (t == '?') vals.push_back(a);
+    }
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    auto compress = [&](int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); };
 
-        cc.build();
-        Fenwick ft(cc.size());
+    BIT bit(vals.size());
+    for (int i = 1; i <= n; i++) bit.upd(compress(sal[i]), 1);
 
-        // Populate initial active salaries
-        for (int i = 1; i <= n; i++) {
-            ft.update(cc.get(salaries[i]), 1);
-        }
-
-        // Process Queries
-        for (int i = 0; i < q; i++) {
-            if (events[i].type == '!') {
-                int emp = events[i].a;
-                int new_sal = events[i].b;
-                
-                ft.update(cc.get(salaries[emp]), -1); // Remove old salary from BIT
-                salaries[emp] = new_sal;              // Update local array
-                ft.update(cc.get(new_sal), 1);         // Add new salary to BIT
-            } else {
-                cout << ft.query(cc.get(events[i].a), cc.get(events[i].b)) << "\n";
-            }
+    for (auto& [t, a, b] : ev) {
+        if (t == '!') {
+            bit.upd(compress(sal[a]), -1);
+            sal[a] = b;
+            bit.upd(compress(b), 1);
+        } else {
+            cout << bit.qry(compress(a), compress(b)) << '\n';
         }
     }
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Support salary updates and range-count queries (how many salaries in [a, b]?) (CSES 1144).
+// - Approach: Fenwick Tree on Coordinate-Compressed salary values.
+// - Intuition: Compress all possible salary values; BIT tracks frequency per compressed index; range count = prefix difference; updates remove old value and add new one.
+// - Complexity: Time: O((N + Q) log(N + Q)), Space: O(N + Q).

@@ -1,56 +1,39 @@
 // Link: https://cses.fi/problemset/task/1690
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int MOD = 1e9 + 7;
 
-int n, m;
-vector<vector<int>> graph;
-vector<vector<int>> dp;
-
-int solve(int mask, int u) {
-    if (mask == (1 << n) - 1)
-        return (u == n - 1);
-
-    int &ans = dp[mask][u];
-    if (ans != -1) return ans;
-
-    ans = 0;
-
-    for (int v : graph[u]) {
-        if (mask & (1 << v)) continue;
-
-        // City n must be visited last
-        if (v == n - 1 && mask != (1 << n) - 1 - (1 << (n - 1)))
-            continue;
-
-        ans += solve(mask | (1 << v), v);
-        ans %= MOD;
-    }
-
-    return ans;
-}
-
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    cin >> n >> m;
-
-    graph.assign(n, {});
-
-    for (int i = 0; i < m; i++) {
-        int a, b;
-        cin >> a >> b;
-        --a;
-        --b;
-        graph[a].push_back(b);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    vector<vector<int>> g(n);
+    while (m--) {
+        int u, v; cin >> u >> v; u--; v--; g[u].push_back(v);
     }
 
-    dp.assign(1 << n, vector<int>(n, -1));
+    vector<vector<int>> dp(1 << n, vector<int>(n, 0));
+    dp[1][0] = 1;
 
-    cout << solve(1, 0) << '\n';
+    for (int mask = 1; mask < (1 << n); mask++) {
+        if (!(mask & 1)) continue;
+        if ((mask & (1 << (n - 1))) && mask != (1 << n) - 1) continue;
 
+        for (int u = 0; u < n; u++) {
+            if (!(mask & (1 << u)) || dp[mask][u] == 0) continue;
+            for (int v : g[u]) {
+                if (!(mask & (1 << v))) {
+                    dp[mask | (1 << v)][v] = (dp[mask | (1 << v)][v] + dp[mask][u]) % MOD;
+                }
+            }
+        }
+    }
+    cout << dp[(1 << n) - 1][n - 1] << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Count number of Hamiltonian paths from city 1 to city n visiting all cities exactly once (CSES 1690).
+// - Approach: Bitmask Dynamic Programming (`dp[mask][u]`).
+// - Intuition: `dp[mask][u]` stores number of paths visiting subset `mask` ending at node u; bitmask transitions run in $O(2^N \cdot N)$.
+// - Complexity: Time: O(2^N \cdot N^2), Space: O(2^N \cdot N).

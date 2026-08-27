@@ -1,181 +1,58 @@
 // Link: https://cses.fi/problemset/task/2072
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-#include <cstring>
-#include <cstdlib>
-
+#include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
 
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
-
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1e9 + 7;
-const ll P = 31;
-
-struct nodde {
-    char val;
-    int pri, sz;
-    bool rev;
-    nodde *l, *r;
-
-    nodde(char c) {
-        val = c;
-        pri = rand();
-        sz = 1;
-        rev = false;
-        l = r = nullptr;
-    }
+struct Node {
+    char val; int pri, sz; bool rev;
+    Node *l, *r;
+    Node(char c) : val(c), pri(rand()), sz(1), rev(false), l(nullptr), r(nullptr) {}
 };
 
-struct ImplicitTreap {
-    int size(nodde* root) {
-        return root ? root->sz : 0;
-    }
-
-    void update(nodde* root) {
-        if (root)
-            root->sz = 1 + size(root->l) + size(root->r);
-    }
-
-    void push(nodde* root) {
-        if (!root || !root->rev) return;
-
-        swap(root->l, root->r);
-
-        if (root->l) root->l->rev ^= 1;
-        if (root->r) root->r->rev ^= 1;
-
-        root->rev = false;
-    }
-
-    void split(nodde* root, int k, nodde* &l, nodde* &r) {
-        if (!root) {
-            l = r = nullptr;
-            return;
-        }
-
-        push(root);
-
-        if (size(root->l) < k) {
-            split(root->r, k - size(root->l) - 1, root->r, r);
-            l = root;
-        } else {
-            split(root->l, k, l, root->l);
-            r = root;
-        }
-
-        update(root);
-    }
-
-    nodde* merge(nodde* l, nodde* r) {
-        push(l);
-        push(r);
-
-        if (!l || !r)
-            return l ? l : r;
-
-        if (l->pri > r->pri) {
-            l->r = merge(l->r, r);
-            update(l);
-            return l;
-        }
-
-        r->l = merge(l, r->l);
-        update(r);
-        return r;
-    }
-
-    void print_string(nodde* root) {
-        if (!root) return;
-
-        push(root);
-        print_string(root->l);
-        cout << root->val;
-        print_string(root->r);
-    }
-
-    void insert(nodde* &root, int idx, char x) {
-        nodde *l, *r;
-        split(root, idx, l, r);
-        nodde* cur = new nodde(x);
-        root = merge(merge(l, cur), r);
-    }
-
-    void deletee(nodde* &root, int idx) {
-        nodde *l, *mid, *r;
-        split(root, idx, l, r);
-        split(r, 1, mid, r);
-        delete mid;
-        root = merge(l, r);
-    }
-
-    void reverse_range(nodde* &root, int L, int R) {
-        nodde *l, *mid, *r;
-        split(root, L, l, r);
-        split(r, R - L + 1, mid, r);
-
-        if (mid)
-            mid->rev ^= 1;
-
-        root = merge(merge(l, mid), r);
-    }
-
-    void cut_range_paste(nodde* &root, int L, int R) {
-        nodde *l, *mid, *r;
-        split(root, L, l, r);
-        split(r, R - L + 1, mid, r);
-        root = merge(l, r); // Remove the segment [L, R] from the treap
-        root = merge(root, mid); // Paste the segment [L, R] at the end of the treap
-    }
-};
+int sz(Node* t) { return t ? t->sz : 0; }
+void upd(Node* t) { if (t) t->sz = 1 + sz(t->l) + sz(t->r); }
+void push(Node* t) {
+    if (!t || !t->rev) return;
+    swap(t->l, t->r);
+    if (t->l) t->l->rev ^= 1;
+    if (t->r) t->r->rev ^= 1;
+    t->rev = false;
+}
+void split(Node* t, int k, Node*& l, Node*& r) {
+    if (!t) { l = r = nullptr; return; }
+    push(t);
+    if (sz(t->l) < k) { split(t->r, k - sz(t->l) - 1, t->r, r); l = t; }
+    else              { split(t->l, k, l, t->l); r = t; }
+    upd(t);
+}
+Node* merge(Node* l, Node* r) {
+    push(l); push(r);
+    if (!l || !r) return l ? l : r;
+    if (l->pri > r->pri) { l->r = merge(l->r, r); upd(l); return l; }
+    else                  { r->l = merge(l, r->l); upd(r); return r; }
+}
+void print(Node* t) {
+    if (!t) return; push(t);
+    print(t->l); cout << t->val; print(t->r);
+}
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, m;
-    cin >> n >> m;
-
-    string str;
-    cin >> str;
-    nodde *root = nullptr;
-    ImplicitTreap treap;
-    for(auto c : str) {
-        root = treap.merge(root, new nodde(c));
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    string s; cin >> s;
+    Node* root = nullptr;
+    for (char c : s) root = merge(root, new Node(c));
+    while (m--) {
+        int a, b; cin >> a >> b; a--; b--;
+        Node *l, *mid, *r;
+        split(root, a, l, r); split(r, b - a + 1, mid, r);
+        root = merge(merge(l, r), mid); // cut [a,b] and paste at end
     }
-    while(m--) {
-        int a,b;
-        cin >> a >> b; a--; b--;
-        treap.cut_range_paste(root, a, b);
-    }
-    treap.print_string(root);
+    print(root);
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Apply m cut-and-paste operations (move substring [l,r] to end) on string s (CSES 2072).
+// - Approach: Implicit Treap with lazy reversal support.
+// - Intuition: Split into [0,a-1], [a,b], [b+1,n-1]; merge back as [0,a-1] + [b+1,n-1] + [a,b] to place the segment at the end.
+// - Complexity: Time: O((N + M) \log N), Space: O(N).

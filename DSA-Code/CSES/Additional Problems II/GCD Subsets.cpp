@@ -1,66 +1,37 @@
 // Link: https://cses.fi/problemset/task/3161
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int MOD = 1e9 + 7;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<int> freq(n + 1, 0), cnt(n + 1, 0);
+    for (int i = 0; i < n; i++) { int x; cin >> x; freq[x]++; }
 
-    int n;
-    cin >> n;
+    vector<long long> pw(n + 1, 1);
+    for (int i = 1; i <= n; i++) pw[i] = pw[i - 1] * 2 % MOD;
 
-    vector<int> freq(n + 1);
-    for (int i = 0; i < n; i++) {
-        int x;
-        cin >> x;
-        freq[x]++;
+    for (int i = 1; i <= n; i++) {
+        for (int j = i; j <= n; j += i) cnt[i] += freq[j];
     }
 
-    // pw[i] = 2^i (mod MOD)
-    vector<long long> pw(n + 1);
-    pw[0] = 1;
-    for (int i = 1; i <= n; i++)
-        pw[i] = pw[i - 1] * 2 % MOD;
-
-    vector<int> cnt(n + 1);
-
-    // cnt[i] = number of array elements divisible by i
-    for (int i = 1; i <= n; i++) {
-        for (int j = i; j <= n; j += i)
-            cnt[i] += freq[j];
-    } // time complexity is O(n log n) and space complexity is O(n)
-
-    vector<long long> ans(n + 1);
-
-    // Let:
-    // F(i) = number of non-empty subsets whose every element is divisible by i
-    //      = 2^(cnt[i]) - 1
-    //
-    // G(i) = number of subsets whose gcd is exactly i (this is what we want)
-    //
-    // Every subset counted in F(i) has gcd equal to
-    // i, 2i, 3i, ...
-    //
-    // Therefore,
-    // F(i) = G(i) + G(2i) + G(3i) + ...
-    //
-    // Rearranging,
-    // G(i) = F(i) - G(2i) - G(3i) - ...
-    //
-    // Process i from n down to 1 so that all multiples are already computed.
+    vector<long long> ans(n + 1, 0);
     for (int i = n; i >= 1; i--) {
         ans[i] = (pw[cnt[i]] - 1 + MOD) % MOD;
-
         for (int j = 2 * i; j <= n; j += i) {
-            ans[i] -= ans[j];
-            if (ans[i] < 0) ans[i] += MOD;
+            ans[i] = (ans[i] - ans[j] + MOD) % MOD;
         }
     }
 
-    for (int i = 1; i <= n; i++)
-        cout << ans[i] << " ";
+    for (int i = 1; i <= n; i++) cout << ans[i] << " ";
     cout << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: For each $g \in [1, n]$, count subsets of array whose greatest common divisor is exactly $g$ (CSES 3161).
+// - Approach: Inclusion-Exclusion Principle / Mobius Inversion DP iterating backwards.
+// - Intuition: $2^{\text{cnt}[g]} - 1$ counts subsets whose elements are all multiples of $g$; subtracting exact GCD answers for multiples $2g, 3g, \dots$ leaves exact GCD $g$.
+// - Complexity: Time: O(N \log N), Space: O(N).

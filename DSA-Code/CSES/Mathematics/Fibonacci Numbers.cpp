@@ -1,60 +1,27 @@
 // Link: https://cses.fi/problemset/task/1722
-
-#include <iostream>
-#include <string>
-#define int long long
+#include <bits/stdc++.h>
 using namespace std;
-const int MOD = 1e9 + 7;
 
-/*
-    Returns:
-        {F(n), F(n + 1)}
+const long long MOD = 1e9 + 7;
 
-    Fast Doubling Identities:
-
-    F(2k)   = F(k) * (2 * F(k + 1) - F(k))
-    F(2k+1) = F(k)^2 + F(k + 1)^2
-
-    Time Complexity: O(log n)
-*/
-pair<int, int> fibonacci(int n) {
-
-    // Base case:
-    // F(0) = 0, F(1) = 1
-    if (n == 0) {
-        return {0, 1};
-    }
-
-    // Recursively get:
-    // a = F(k)
-    // b = F(k + 1)
-    auto [a, b] = fibonacci(n / 2);
-
-    // Compute F(2k)
-    int c = a * ((2 * b % MOD - a + MOD) % MOD) % MOD;
-
-    // Compute F(2k + 1)
-    int d = (a * a % MOD + b * b % MOD) % MOD;
-
-    // If n is even:
-    // return {F(2k), F(2k+1)}
-    if (n % 2 == 0) {
-        return {c, d};
-    }
-
-    // If n is odd:
-    // return {F(2k+1), F(2k+2)}
+pair<long long, long long> fib(long long n) {
+    if (n == 0) return {0, 1};
+    auto [a, b] = fib(n / 2);
+    long long c = a * ((2 * b % MOD - a + MOD) % MOD) % MOD;
+    long long d = (a * a % MOD + b * b % MOD) % MOD;
+    if (n % 2 == 0) return {c, d};
     return {d, (c + d) % MOD};
 }
 
-signed main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n;
-    cin >> n;
-
-    cout << fibonacci(n).first << '\n'; // first because we want F(n)
-
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    long long n; cin >> n;
+    cout << fib(n).first << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Compute the n-th Fibonacci number F(n) modulo 10^9+7 for n up to 10^18 (CSES 1722).
+// - Approach: Fast Doubling method returning {F(k), F(k+1)} in O(log n).
+// - Intuition: Uses fast doubling identities: F(2k) = F(k)[2F(k+1) - F(k)], F(2k+1) = F(k)^2 + F(k+1)^2.
+// - Complexity: Time: O(log N), Space: O(log N) recursion stack.

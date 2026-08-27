@@ -1,153 +1,56 @@
 // Link: https://cses.fi/problemset/task/1096
-
 #include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define vl vector<ll>
-#define vvl vector<vl>
+const long long MOD = 1e9 + 7;
+using Matrix = vector<vector<long long>>;
 
-const ll MOD = 1e9 + 7;
-
-//---------------------------------------------------------------
-// Multiply two k x k matrices
-//---------------------------------------------------------------
-vvl multiply(const vvl &A, const vvl &B, int k) {
-    vvl C(k, vl(k, 0));
-
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < k; j++) {
-            for (int x = 0; x < k; x++) {
-                C[i][j] = (C[i][j] + A[i][x] * B[x][j]) % MOD;
-            }
-        }
-    }
-
+Matrix mul(const Matrix& A, const Matrix& B) {
+    Matrix C(6, vector<long long>(6, 0));
+    for (int i = 0; i < 6; i++)
+        for (int k = 0; k < 6; k++)
+            if (A[i][k]) for (int j = 0; j < 6; j++)
+                C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
     return C;
 }
 
-//---------------------------------------------------------------
-// Computes A^p using Binary Exponentiation
-//---------------------------------------------------------------
-vvl power(vvl A, ll p, int k) {
-    // Identity Matrix
-    vvl res(k, vl(k, 0));
-    for (int i = 0; i < k; i++)
-        res[i][i] = 1;
-
-    while (p) {
-        if (p & 1)
-            res = multiply(res, A, k);
-
-        A = multiply(A, A, k);
-        p >>= 1;
+Matrix power(Matrix A, long long p) {
+    Matrix res(6, vector<long long>(6, 0));
+    for (int i = 0; i < 6; i++) res[i][i] = 1;
+    for (; p; p >>= 1) {
+        if (p & 1) res = mul(res, A);
+        A = mul(A, A);
     }
-
     return res;
 }
 
 int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    long long n; cin >> n;
+    if (n == 0) { cout << 1; return 0; }
 
-    ll n;
-    cin >> n;
-
-    // dp[0] = 1 (empty sequence)
-    if (n == 0) {
-        cout << 1;
-        return 0;
-    }
-
-    //---------------------------------------------------------------
-    // Compute first 6 DP values normally
-    //
-    // dp[i] = dp[i-1] + dp[i-2] + ... + dp[i-6]
-    //---------------------------------------------------------------
-    vl dp(6, 0);
-    dp[0] = 1;
-
-    for (int i = 1; i <= 5; i++) {
-        for (int j = 1; j <= 6 && j <= i; j++) {
+    vector<long long> dp(6, 0); dp[0] = 1;
+    for (int i = 1; i <= 5; i++)
+        for (int j = 1; j <= 6 && j <= i; j++)
             dp[i] = (dp[i] + dp[i - j]) % MOD;
-        }
-    }
 
-    if (n <= 5) {
-        cout << dp[n];
-        return 0;
-    }
+    if (n <= 5) { cout << dp[n]; return 0; }
 
-    //---------------------------------------------------------------
-    // State Vector:
-    //
-    // [ dp[i]   ]
-    // [ dp[i-1] ]
-    // [ dp[i-2] ]
-    // [ dp[i-3] ]
-    // [ dp[i-4] ]
-    // [ dp[i-5] ]
-    //
-    // Transition:
-    //
-    // dp[i+1] = dp[i] + dp[i-1] + ... + dp[i-5]
-    //
-    // Therefore Transition Matrix is
-    //
-    // 1 1 1 1 1 1
-    // 1 0 0 0 0 0
-    // 0 1 0 0 0 0
-    // 0 0 1 0 0 0
-    // 0 0 0 1 0 0
-    // 0 0 0 0 1 0
-    //---------------------------------------------------------------
-    vvl T(6, vl(6, 0));
+    Matrix T(6, vector<long long>(6, 0));
+    for (int j = 0; j < 6; j++) T[0][j] = 1;
+    for (int i = 1; i < 6; i++) T[i][i - 1] = 1;
 
-    // First row = recurrence coefficients
-    for (int j = 0; j < 6; j++)
-        T[0][j] = 1;
+    Matrix P = power(T, n - 5);
+    vector<long long> state = {dp[5], dp[4], dp[3], dp[2], dp[1], dp[0]};
 
-    // Remaining rows simply shift the state down
-    for (int i = 1; i < 6; i++)
-        T[i][i - 1] = 1;
-
-    //---------------------------------------------------------------
-    // Base State corresponds to dp[5]
-    //
-    // [ dp5 ]
-    // [ dp4 ]
-    // [ dp3 ]
-    // [ dp2 ]
-    // [ dp1 ]
-    // [ dp0 ]
-    //---------------------------------------------------------------
-    vl state = {
-        dp[5],
-        dp[4],
-        dp[3],
-        dp[2],
-        dp[1],
-        dp[0]
-    };
-
-    //---------------------------------------------------------------
-    // We need dp[n].
-    //
-    // Base vector is at i = 5.
-    // Therefore apply transition (n-5) times.
-    //---------------------------------------------------------------
-    vvl P = power(T, n - 5, 6);
-
-    //---------------------------------------------------------------
-    // New State = P * BaseState
-    //
-    // Only the first element is needed:
-    //
-    // dp[n] = first_row(P) * BaseState
-    //---------------------------------------------------------------
-    ll ans = 0;
-
-    for (int j = 0; j < 6; j++) {
-        ans = (ans + P[0][j] * state[j]) % MOD;
-    }
-
-    cout << ans;
+    long long ans = 0;
+    for (int j = 0; j < 6; j++) ans = (ans + P[0][j] * state[j]) % MOD;
+    cout << ans << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Count ways to reach sum n by throwing a 6-sided die modulo 10^9+7 (CSES 1096).
+// - Approach: 6x6 Matrix Exponentiation on Linear Recurrence dp[n] = Σ dp[n-j] for j=1..6.
+// - Intuition: Transition matrix shifts previous 6 states and calculates new state as sum; binary exponentiation evaluates n-th term in O(6^3 log N).
+// - Complexity: Time: O(6^3 log N), Space: O(6^2).

@@ -1,105 +1,46 @@
 // Link: https://cses.fi/problemset/task/1683
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 vector<vector<int>> g, rg;
 vector<bool> vis;
-stack<int> st;
+vector<int> order, kingdom;
 
-void dfs1(int u)
-{
+void dfs1(int u) {
     vis[u] = true;
-
-    for (int v : g[u])
-        if (!vis[v])
-            dfs1(v);
-
-    st.push(u);
-} // this function performs a DFS on the original graph and pushes nodes onto a stack in the order of their finishing times. This is the first step of Kosaraju's algorithm for finding strongly connected components (SCCs).
-
-void dfs2(int u, vector<int>& comp)
-{
-    vis[u] = true;
-    comp.push_back(u);
-
-    for (int v : rg[u])
-        if (!vis[v])
-            dfs2(v, comp);
-} // this function performs a DFS on the transposed graph (rg) and collects all nodes reachable from u into the comp vector. This identifies one strongly connected component.
-
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, m;
-    cin >> n >> m;
-
-    g.resize(n + 1);
-    rg.resize(n + 1);
-
-    while (m--)
-    {
-        int a, b;
-        cin >> a >> b;
-
-        g[a].push_back(b);
-        rg[b].push_back(a);
-    }
-
-    vis.assign(n + 1, false);
-
-    for (int i = 1; i <= n; i++)
-        if (!vis[i])
-            dfs1(i);
-
-    vis.assign(n + 1, false);
-
-    vector<vector<int>> sccs;
-
-    while (!st.empty())
-    {
-        int u = st.top();
-        st.pop();
-
-        if (vis[u]) continue;
-
-        vector<int> comp;
-        dfs2(u, comp); // this will fill the comp vector with all nodes in the strongly connected component containing u
-        sccs.push_back(comp);
-    }
-    map<int, int> mp;
-    cout << sccs.size() << "\n";
-    for(int i=0; i<sccs.size(); i++) {
-        for(auto x : sccs[i]) {
-            mp[x] = i+1;
-        }
-    }
-    for(int i=1; i<=n; i++) {
-        cout << mp[i] << " ";
-    }
-    cout << "\n";
+    for (int v : g[u]) if (!vis[v]) dfs1(v);
+    order.push_back(u);
 }
-// main logic of kosaraju :
-// A->B->C->D->E
-// these are super nodes, we will run dfs on original graph and push nodes in stack, then we will run dfs on transposed graph and pop nodes from stack, this will give us strongly connected components, because
-// after dfs1 on original graph, we will have nodes in stack in order of finishing time, and when we pop nodes from stack and run dfs on transposed graph, we will get strongly connected components, because
-// if there is a path from A to B in original graph, then there is a path from B to A in transposed graph, and if there is a path from B to C in original graph, then there is a path from C to B in transposed graph, and so on, and if there is a path from E to A in original graph, then there is a path from A to E in transposed graph, so all nodes are reachables
+
+void dfs2(int u, int k) {
+    kingdom[u] = k;
+    for (int v : rg[u]) if (!kingdom[v]) dfs2(v, k);
+}
+
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    g.resize(n + 1); rg.resize(n + 1);
+    while (m--) {
+        int u, v; cin >> u >> v; g[u].push_back(v); rg[v].push_back(u);
+    }
+
+    vis.assign(n + 1, false);
+    for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
+
+    kingdom.assign(n + 1, 0);
+    reverse(order.begin(), order.end());
+    int kCount = 0;
+    for (int u : order) if (!kingdom[u]) dfs2(u, ++kCount);
+
+    cout << kCount << '\n';
+    for (int i = 1; i <= n; i++) cout << kingdom[i] << " ";
+    cout << '\n';
+    return 0;
+}
+
+// Interview Explanation:
+// - Problem Statement: Group planets into kingdoms such that two planets are in the same kingdom iff they can reach each other (CSES 1683).
+// - Approach: Kosaraju's Algorithm for Strongly Connected Components (SCCs).
+// - Intuition: 2-Pass DFS (forward finishing order stack + reverse transpose DFS) partitions directed graph into component IDs.
+// - Complexity: Time: O(V + E), Space: O(V + E).

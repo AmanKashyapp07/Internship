@@ -1,60 +1,35 @@
 // Link: https://cses.fi/problemset/task/1687
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int LOG = 20;
 
-vector<vector<int>> graph;
-vector<vector<int>> up;
-
-void dfs(int u, int parent) {
-    up[u][0] = parent;
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; cin >> n >> q;
+    vector<vector<int>> up(n + 1, vector<int>(LOG, -1));
+    for (int i = 2; i <= n; i++) cin >> up[i][0];
 
     for (int j = 1; j < LOG; j++) {
-        if (up[u][j - 1] == -1)
-            up[u][j] = -1;
-        else
-            up[u][j] = up[up[u][j - 1]][j - 1];
-    }
-
-    for (int v : graph[u]) if(v != parent)  dfs(v, u);
-    
-}
-
-int kthAncestor(int x, int k) {
-    for (int j = 0; j < LOG; j++) {
-        if (k & (1 << j)) {
-            x = up[x][j];
-            if (x == -1) return -1;
+        for (int i = 1; i <= n; i++) {
+            if (up[i][j - 1] != -1) up[i][j] = up[up[i][j - 1]][j - 1];
         }
     }
-    return x;
-}
-
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, q;
-    cin >> n >> q;
-
-    graph.resize(n + 1);
-    up.assign(n + 1, vector<int>(LOG, -1));
-
-    for (int i = 2; i <= n; i++) {
-        int boss;
-        cin >> boss;
-        graph[boss].push_back(i);
-    }
-
-    dfs(1, -1);
 
     while (q--) {
-        int x, k;
-        cin >> x >> k;
-        cout << kthAncestor(x, k) << '\n';
+        int x, k; cin >> x >> k;
+        for (int j = 0; j < LOG; j++) {
+            if ((k >> j) & 1) {
+                x = (x == -1) ? -1 : up[x][j];
+            }
+        }
+        cout << x << '\n';
     }
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find the k-th ancestor of node x in a rooted tree for q queries (CSES 1687).
+// - Approach: Binary Lifting Precomputation (`up[u][j] = up[up[u][j-1]][j-1]`).
+// - Intuition: Decomposing k into binary bits allows jumping $2^j$ steps up the tree in $O(\log k)$ time per query.
+// - Complexity: Time: O(N \log N + Q \log N), Space: O(N \log N).

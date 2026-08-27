@@ -1,76 +1,42 @@
 // Link: https://cses.fi/problemset/task/1147
-
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long;
-
-// Largest rectangle in histogram in O(m)
-ll largestHistogram(vector<int>& h) {
+long long maxHistogram(const vector<int>& h) {
     int m = h.size();
     stack<int> st;
-    ll best = 0;
-
+    long long maxArea = 0;
     for (int i = 0; i <= m; i++) {
-        int curHeight = (i == m ? 0 : h[i]);
-
-        while (!st.empty() && h[st.top()] >= curHeight) {
-            int height = h[st.top()];
-            st.pop();
-
-            int left = st.empty() ? -1 : st.top();
-            int width = i - left - 1;
-
-            best = max(best, 1LL * height * width);
+        int cur = (i == m ? 0 : h[i]);
+        while (!st.empty() && h[st.top()] >= cur) {
+            long long height = h[st.top()]; st.pop();
+            long long width = st.empty() ? i : (i - st.top() - 1);
+            maxArea = max(maxArea, height * width);
         }
-
         st.push(i);
     }
-
-    return best;
+    return maxArea;
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    vector<int> heights(m, 0);
+    long long maxBuilding = 0;
 
-    int n, m;
-    cin >> n >> m;
-
-    vector<int> height(m, 0);
-    ll answer = 0;
-
-    for (int row = 0; row < n; row++) {
-        string s;
-        cin >> s;
-
-        for (int col = 0; col < m; col++) {
-            if (s[col] == '.')
-                height[col]++;
-            else
-                height[col] = 0;
+    for (int r = 0; r < n; r++) {
+        string s; cin >> s;
+        for (int c = 0; c < m; c++) {
+            heights[c] = (s[c] == '.') ? heights[c] + 1 : 0;
         }
-
-        answer = max(answer, largestHistogram(height));
+        maxBuilding = max(maxBuilding, maxHistogram(heights));
     }
-
-    cout << answer << '\n';
+    cout << maxBuilding << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find the maximum area of a rectangular building plot on an n x m grid (CSES 1147).
+// - Approach: Row-by-row histogram height accumulation + Monotonic Stack max rectangle calculation.
+// - Intuition: Build height array for '.' characters and compute largest histogram rectangle per row in linear time.
+// - Complexity: Time: O(N \cdot M), Space: O(M).

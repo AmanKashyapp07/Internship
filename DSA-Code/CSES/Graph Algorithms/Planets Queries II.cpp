@@ -1,198 +1,87 @@
 // Link: https://cses.fi/problemset/task/1160
-
 #include <bits/stdc++.h>
 using namespace std;
 
-#define int long long
-using vi = vector<int>;
+const int LOG = 20;
 
-
-// Returns empty vector if 'start' leads into an already processed component
-vi getCycleFloyd(const vi &to, const vi &comp, int start)
-{
-    int slow = start, fast = start;
-
-    while (true)
-    {
-        slow = to[slow];
-        fast = to[to[fast]];
-
-        if (comp[slow] != -1)
-            return {};
-
-        if (slow == fast)
-            break;
-    }
-
-    slow = start;
-    while (slow != fast)
-    {
-        slow = to[slow];
-        fast = to[fast];
-    }
-
-    vi cycle;
-    int cur = slow;
-    while (true)
-    {
-        cycle.push_back(cur);
-        cur = to[cur];
-        if (cur == slow)
-            break;
-    }
-
-    return cycle;
-}
-
-struct FunctionalGraph
-{
+struct FunctionalGraph {
     int n;
-    static const int LOG = 20;
+    vector<int> dist, cyc, comp, pos;
+    vector<vector<int>> up;
 
-    vi dist, cyc, comp, pos;
-    vector<vi> up;
-
-    void dfs(int u, const vi &to, const vector<vi> &radj)
-    {
-        for (int v : radj[u])
-        {
-            if (dist[v] != -1)
-                continue; // already visited (cycle or processed)
-
-            dist[v] = dist[u] + 1;
-            comp[v] = comp[u];
-
-            dfs(v, to, radj);
-        }
-    }
-
-    FunctionalGraph(const vi &to)
-    {
+    FunctionalGraph(const vector<int>& to) {
         n = to.size();
+        dist.assign(n, -1); cyc.assign(n, -1); comp.assign(n, -1); pos.assign(n, -1);
+        up.assign(n, vector<int>(LOG));
+        for (int i = 0; i < n; i++) up[i][0] = to[i];
+        for (int j = 1; j < LOG; j++) for (int i = 0; i < n; i++) up[i][j] = up[up[i][j - 1]][j - 1];
 
-        dist.assign(n, -1);
-        cyc.assign(n, -1);
-        comp.assign(n, -1);
-        pos.assign(n, -1);
+        vector<vector<int>> radj(n);
+        for (int i = 0; i < n; i++) radj[to[i]].push_back(i);
 
-        up.assign(n, vi(LOG));
-
-        for (int i = 0; i < n; i++)
-            up[i][0] = to[i];
-
-        for (int j = 1; j < LOG; j++)
-            for (int i = 0; i < n; i++)
-                up[i][j] = up[up[i][j - 1]][j - 1];
-
-        vector<vi> radj(n);
-        for (int i = 0; i < n; i++)
-            radj[to[i]].push_back(i);
-
-        int comp_id = 0;
-
-        for (int i = 0; i < n; i++)
-        {
-            if (comp[i] != -1)
-                continue;
-
-            vi cycle = getCycleFloyd(to, comp, i);
-
-            if (cycle.empty())
-                continue;
-
-            int len = cycle.size();
-
-            for (int j = 0; j < len; j++)
-            {
-                int u = cycle[j];
-                dist[u] = 0;
-                cyc[u] = len;
-                comp[u] = comp_id;
-                pos[u] = j;
+        int compId = 0;
+        vector<int> vis(n, 0);
+        for (int i = 0; i < n; i++) {
+            if (vis[i]) continue;
+            int curr = i;
+            while (!vis[curr]) { vis[curr] = 1; curr = to[curr]; }
+            if (vis[curr] == 1) {
+                vector<int> cycle; int u = curr;
+                do { cycle.push_back(u); u = to[u]; } while (u != curr);
+                int len = cycle.size();
+                for (int j = 0; j < len; j++) {
+                    int node = cycle[j]; dist[node] = 0; cyc[node] = len; comp[node] = compId; pos[node] = j;
+                }
+                auto dfs = [&](auto &self, int v) -> void {
+                    for (int nxt : radj[v]) {
+                        if (dist[nxt] != -1) continue;
+                        dist[nxt] = dist[v] + 1; comp[nxt] = comp[v]; self(self, nxt);
+                    }
+                };
+                for (int node : cycle) dfs(dfs, node);
+                compId++;
             }
-
-            // process reverse trees
-            for (int u : cycle)
-                dfs(u, to, radj);
-
-            comp_id++;
+            curr = i;
+            while (vis[curr] == 1) { vis[curr] = 2; curr = to[curr]; }
         }
     }
 
-    int jump(int u, int k)
-    {
-        for (int j = 0; j < LOG; j++)
-            if ((k >> j) & 1)
-                u = up[u][j];
-
+    int jump(int u, int k) {
+        for (int j = 0; j < LOG; j++) if ((k >> j) & 1) u = up[u][j];
         return u;
     }
 
-    int dis_cycle_nodes(int a, int b)
-    {
-        if (comp[a] != comp[b])
-            return -1;
-
-        if (dist[a] != 0 || dist[b] != 0)
-            return -1;
-
-        return (pos[b] - pos[a] + cyc[a]) % cyc[a];
-    }
-
-    int query(int a, int b)
-    {
-        if (comp[a] != comp[b])
-            return -1;
-
-        bool ac = (dist[a] == 0);
-        bool bc = (dist[b] == 0);
-
-        if (ac && bc)
-            return dis_cycle_nodes(a, b);
-
-        if (ac && !bc)
-            return -1;
-
-        if (!ac && !bc)
-        {
-            if (dist[a] < dist[b])
-                return -1;
-
-            int d = dist[a] - dist[b];
-
-            return (jump(a, d) == b) ? d : -1;
+    int query(int a, int b) {
+        if (comp[a] != comp[b]) return -1;
+        if (dist[a] == 0 && dist[b] == 0) return (pos[b] - pos[a] + cyc[a]) % cyc[a];
+        if (dist[a] > 0 && dist[b] == 0) {
+            int entry = jump(a, dist[a]);
+            return dist[a] + (pos[b] - pos[entry] + cyc[b]) % cyc[b];
         }
-
-        int entry = jump(a, dist[a]);
-        return dist[a] + dis_cycle_nodes(entry, b);
+        if (dist[a] >= dist[b]) {
+            int d = dist[a] - dist[b];
+            if (jump(a, d) == b) return d;
+        }
+        return -1;
     }
 };
 
-signed main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, q;
-    cin >> n >> q;
-
-    vi to(n);
-
-    for (int i = 0; i < n; i++)
-    {
-        cin >> to[i];
-        --to[i];
-    }
-
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; cin >> n >> q;
+    vector<int> to(n);
+    for (int i = 0; i < n; i++) { cin >> to[i]; to[i]--; }
     FunctionalGraph fg(to);
 
-    while (q--)
-    {
-        int a, b;
-        cin >> a >> b;
-        --a;
-        --b;
-
+    while (q--) {
+        int a, b; cin >> a >> b; a--; b--;
         cout << fg.query(a, b) << '\n';
     }
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find minimum teleports to reach planet b from planet a in a functional graph for q queries (CSES 1160).
+// - Approach: Functional Graph Decomposition + Binary Lifting.
+// - Intuition: Classify nodes into tree paths or cycle nodes; queries compare tree depths via binary lifting jumps or modular cycle offsets.
+// - Complexity: Time: O(N \log N + Q \log N), Space: O(N \log N).

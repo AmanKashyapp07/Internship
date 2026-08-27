@@ -1,43 +1,37 @@
 // Link: https://cses.fi/problemset/task/1706
-
 #include <bits/stdc++.h>
 using namespace std;
 
 struct DSU {
     vector<int> p, sz;
-    int comp;
-    DSU(int n) : p(n + 1), sz(n + 1, 1), comp(n) { iota(p.begin(), p.end(), 0); }
-
+    DSU(int n) : p(n + 1), sz(n + 1, 1) { iota(p.begin(), p.end(), 0); }
     int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
-
-    bool unite(int a, int b) {
-        if ((a = find(a)) == (b = find(b))) return false;
-        if (sz[a] < sz[b]) swap(a, b);
-        p[b] = a; sz[a] += sz[b]; comp--;
-        return true;
+    void unite(int a, int b) {
+        if ((a = find(a)) != (b = find(b))) {
+            if (sz[a] < sz[b]) swap(a, b);
+            p[b] = a; sz[a] += sz[b];
+        }
     }
-    int size(int x) { return sz[find(x)]; }
 };
 
-
-int main(){
-    int n,k;
-    cin>>n>>k;
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
     DSU dsu(n);
-    while(k--){
-        int a,b;
-        cin>>a>>b;
-        dsu.unite(a,b); // uniting the two nodes a and b, if they are not already in the same component
-    }
-    vector<int> component_sizes;
-    for(int i=1; i<=n; i++) if(dsu.find(i) == i) component_sizes.push_back(dsu.size(i)); // finding the size of each component
+    while (m--) { int u, v; cin >> u >> v; dsu.unite(u, v); }
 
-    bitset<100005>dp;
+    bitset<100005> dp;
     dp[0] = 1;
-    for(int sz: component_sizes) dp |= (dp << sz); // updating the dp
-    for(int i=1; i<=n; i++){
-        if(dp[i]) cout<<1;
-        else cout<<0;
+    for (int i = 1; i <= n; i++) {
+        if (dsu.find(i) == i) dp |= (dp << dsu.sz[i]);
     }
-    
+    for (int i = 1; i <= n; i++) cout << dp[i];
+    cout << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Output binary string indicating which total group sizes [1..N] can be formed by union of disjoint student components (CSES 1706).
+// - Approach: DSU Component Aggregation + Bitset Subset Sum DP.
+// - Intuition: Finding connected component sizes via DSU turns problem into Subset Sum DP; `bitset<100005>` bit-shifts process transitions in $O(N^2 / 64)$.
+// - Complexity: Time: O(N^2 / 64), Space: O(N / 64).

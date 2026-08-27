@@ -1,96 +1,46 @@
-// CSES Problem: <problem name>
-// https://cses.fi/problemset/task/<id>
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
+// Link: https://cses.fi/problemset/task/1680
+#include <bits/stdc++.h>
 using namespace std;
-// ─────────────────────────────────────────────────────────────────────────────
 
-int main()
-{
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n, m;
-    cin >> n >> m;
-    vector<vector<int>> graph(n + 1);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    vector<vector<int>> g(n + 1);
     vector<int> inDegree(n + 1, 0);
-    vector<int> answer(n + 1, 0);
-    for (int i = 0; i < m; i++)
-    {
-        int u, v;
-        cin >> u >> v;
-        graph[u].push_back(v);
-        inDegree[v]++;
+    while (m--) {
+        int u, v; cin >> u >> v; g[u].push_back(v); inDegree[v]++;
     }
-    answer[1] = 1;
+
+    vector<int> dist(n + 1, -1), parent(n + 1, -1);
+    dist[1] = 1;
     queue<int> q;
-    for (int i = 1; i <= n; i++)
-    {
-        if (inDegree[i] == 0)
-        {
-            q.push(i);
-        }
-    }
-    vector<int> result;
-    vector<int> parent(n + 1, -1);
-    while (!q.empty())
-    {
-        int u = q.front();
-        q.pop();
-        
-        for (int v : graph[u])
-        {
-            if (answer[u]>0 && answer[v] < answer[u] + 1) 
-            {
-                answer[v] = answer[u] + 1;
+    for (int i = 1; i <= n; i++) if (inDegree[i] == 0) q.push(i);
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : g[u]) {
+            if (dist[u] != -1 && dist[u] + 1 > dist[v]) {
+                dist[v] = dist[u] + 1;
                 parent[v] = u;
             }
-            inDegree[v]--;
-            if(inDegree[v] == 0 && v==n)
-            {
-                int cur = v;
-                while (cur != -1)
-                {
-                    result.push_back(cur);
-                    cur = parent[cur];
-                }
-                reverse(result.begin(), result.end());
-            }
-            if (inDegree[v] == 0)
-            {
-                q.push(v);
-            }
+            if (--inDegree[v] == 0) q.push(v);
         }
     }
-    if (answer[n] == 0) cout << "IMPOSSIBLE\n";
 
-    else
-    {
-        cout << answer[n] << endl;
-        for (int x : result)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-   
-    }
+    if (dist[n] == -1) { cout << "IMPOSSIBLE\n"; return 0; }
+
+    vector<int> path;
+    for (int cur = n; cur != -1; cur = parent[cur]) path.push_back(cur);
+    reverse(path.begin(), path.end());
+
+    cout << dist[n] << '\n';
+    for (int x : path) cout << x << ' ';
+    cout << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find longest path from city 1 to city n in a DAG (CSES 1680).
+// - Approach: Topological Sort DP + Parent Pointer Reconstruction.
+// - Intuition: Processing nodes in topological order relaxes path lengths `dist[v] = max(dist[v], dist[u] + 1)` in linear time.
+// - Complexity: Time: O(V + E), Space: O(V + E).

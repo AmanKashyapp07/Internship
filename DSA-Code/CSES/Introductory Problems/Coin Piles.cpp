@@ -1,60 +1,20 @@
-// CSES Problem: <problem name>
-// https://cses.fi/problemset/task/<id>
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
+// Link: https://cses.fi/problemset/task/1754
+#include <bits/stdc++.h>
 using namespace std;
-using ll  = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi  = vector<int>;
-using vll = vector<ll>;
-
-#define all(x)   (x).begin(), (x).end()
-#define rall(x)  (x).rbegin(), (x).rend()
-#define pb       push_back
-#define ff       first
-#define ss       second
-
-const int INF  = INT_MAX;
-const ll  LINF = LLONG_MAX;
-const ll  MOD  = 1e9 + 7;
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    int t;
-    cin >> t;
-    while(t--) {
-        int a,b;
-        cin >> a >> b;
-        if((a+b)%3==0 && a<=2*b && b<=2*a) {
-            cout << "YES\n";
-        } else {
-            cout << "NO\n";
-        }
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int t; cin >> t;
+    while (t--) {
+        long long a, b; cin >> a >> b;
+        if ((a + b) % 3 == 0 && a <= 2 * b && b <= 2 * a) cout << "YES\n";
+        else cout << "NO\n";
     }
-
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Empty two coin piles by repeatedly removing (1, 2) or (2, 1) coins (CSES 1754).
+// - Approach: Direct Mathematical Invariant validation.
+// - Intuition: Each move removes 3 coins total, so (a+b) must be divisible by 3; neither pile can exceed double the other because max reduction ratio is 2:1.
+// - Complexity: Time: O(1) per test case, Space: O(1).

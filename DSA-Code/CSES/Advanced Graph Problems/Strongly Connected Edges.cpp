@@ -1,114 +1,51 @@
 // Link: https://cses.fi/problemset/task/2177
-
-/*
-CSES Problem: Strongly Connected Edges
-
-Given an undirected graph, orient every edge so that the resulting
-directed graph is strongly connected.
-
-If impossible, print "IMPOSSIBLE".
-
-Idea:
-- A bridge makes strong connectivity impossible.
-- Run DFS from node 1.
-- Orient tree edges from parent -> child.
-- Orient back edges from descendant -> ancestor.
-- If any bridge exists or graph is disconnected, answer is IMPOSSIBLE.
-*/
-
-#include <iostream>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-int n, m;
-vector<vector<pair<int, int>>> graph;
+vector<vector<pair<int, int>>> g;
 vector<int> tin, low, visited;
-vector<pair<int, int>> answer;
-
+vector<pair<int, int>> ans;
 int timer = 0;
 bool hasBridge = false;
 
-void dfs(int u, int parentEdge)
-{
+void dfs(int u, int pEdge) {
     visited[u] = 1;
-    tin[u] = low[u] = ++timer; // Set discovery time and low-link value
-
-    for (auto [v, edgeId] : graph[u])
-    {
-        if (edgeId == parentEdge)
-        {
-            continue;
-        }
-
-        if (!visited[v]) 
-        {
-            answer[edgeId] = {u, v}; // Orient tree edge from parent -> child
-
-            dfs(v, edgeId); // Recur for the child node
-
-            low[u] = min(low[u], low[v]); // Update low-link value of u based on child v
-
-            if (low[v] > tin[u]) // If the lowest reachable vertex from v is after u's discovery time, then (u, v) is a bridge
-            {
-                hasBridge = true;
-            }
-        }
-        else // back edge
-        {
+    tin[u] = low[u] = ++timer;
+    for (auto [v, id] : g[u]) {
+        if (id == pEdge) continue;
+        if (!visited[v]) {
+            ans[id] = {u, v};
+            dfs(v, id);
+            low[u] = min(low[u], low[v]);
+            if (low[v] > tin[u]) hasBridge = true;
+        } else {
             low[u] = min(low[u], tin[v]);
-
-            if (tin[v] < tin[u]) // only orient back edges from descendant -> ancestor
-            {
-                answer[edgeId] = {u, v};
-            }
+            if (tin[v] < tin[u]) ans[id] = {u, v};
         }
     }
 }
 
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    g.assign(n + 1, {}); tin.assign(n + 1, 0); low.assign(n + 1, 0);
+    visited.assign(n + 1, 0); ans.resize(m);
 
-    cin >> n >> m;
-
-    graph.assign(n + 1, {});
-    tin.assign(n + 1, 0);
-    low.assign(n + 1, 0);
-    visited.assign(n + 1, 0);
-    answer.resize(m);
-
-    for (int i = 0; i < m; i++)
-    {
-        int a, b;
-        cin >> a >> b;
-
-        graph[a].push_back({b, i});
-        graph[b].push_back({a, i});
+    for (int i = 0; i < m; i++) {
+        int u, v; cin >> u >> v;
+        g[u].push_back({v, i}); g[v].push_back({u, i});
     }
 
     dfs(1, -1);
+    for (int i = 1; i <= n; i++) if (!visited[i]) { cout << "IMPOSSIBLE\n"; return 0; }
+    if (hasBridge) { cout << "IMPOSSIBLE\n"; return 0; }
 
-    for (int i = 1; i <= n; i++)
-    {
-        if (!visited[i])
-        {
-            cout << "IMPOSSIBLE\n";
-            return 0;
-        }
-    }
-
-    if (hasBridge)
-    {
-        cout << "IMPOSSIBLE\n";
-        return 0;
-    }
-
-    for (auto [u, v] : answer)
-    {
-        cout << u << ' ' << v << '\n';
-    }
-
+    for (auto [u, v] : ans) cout << u << ' ' << v << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Orient edges of an undirected graph to make it strongly connected (CSES 2177).
+// - Approach: DFS Tree Orientation (Tree edges parent $\to$ child, Back edges descendant $\to$ ancestor) + Tarjan Bridge Check.
+// - Intuition: If graph is connected and has no bridges (`low[v] <= tin[u]`), orienting tree edges forward and back-edges backward creates strong connectivity.
+// - Complexity: Time: O(V + E), Space: O(V + E).

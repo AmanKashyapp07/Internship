@@ -1,8 +1,5 @@
 // Link: https://cses.fi/problemset/task/3302
-
-#include <iostream>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 const int MOD = 1e9 + 7;
@@ -10,55 +7,33 @@ const int OFFSET = 250000;
 const int MAX_SUM = 500000;
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
+    ios::sync_with_stdio(false); cin.tie(nullptr);
     int n, a;
     if (!(cin >> n >> a)) return 0;
-
     vector<int> x(n);
-    for (int i = 0; i < n; i++) {
-        int val;
-        cin >> val;
-        x[i] = val - a; // The balancing trick
-    }
+    for (int i = 0; i < n; i++) { int val; cin >> val; x[i] = val - a; }
 
-    // We only need two rows to track our states
-    vector<int> prev_row(MAX_SUM + 1, 0);
-    vector<int> curr_row(MAX_SUM + 1, 0);
-    
-    // Base case: The empty set sum is 0 (which sits at OFFSET)
-    prev_row[OFFSET] = 1;
+    vector<int> dp(MAX_SUM + 1, 0), next_dp(MAX_SUM + 1, 0);
+    dp[OFFSET] = 1;
 
-    // Go through each number in our array one by one
     for (int i = 0; i < n; i++) {
         int y = x[i];
-
-        // Check every possible sum from 0 to 500,000
+        next_dp = dp;
         for (int sum = 0; sum <= MAX_SUM; sum++) {
-            
-            // OPTION 1: Leave it
-            // The number of ways to make 'sum' is at least the number of ways 
-            // we could make it before looking at this number.
-            curr_row[sum] = prev_row[sum];
-            
-            // OPTION 2: Take it
-            // If we subtract our current number 'y' from 'sum', did we have a valid 
-            // way to make that previous total?
             int prev_sum = sum - y;
             if (prev_sum >= 0 && prev_sum <= MAX_SUM) {
-                curr_row[sum] = (curr_row[sum] + prev_row[prev_sum]) % MOD;
+                next_dp[sum] = (next_dp[sum] + dp[prev_sum]) % MOD;
             }
         }
-        
-        // Our current row is finished. It becomes the previous row for the next number!
-        prev_row = curr_row;
+        dp = next_dp;
     }
-
-    // Our answer is the number of ways to make 0 (OFFSET), minus 1 for the empty set
-    long long ans = (prev_row[OFFSET] - 1 + MOD) % MOD;
-    
+    long long ans = (dp[OFFSET] - 1 + MOD) % MOD;
     cout << ans << "\n";
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Count non-empty subsets of an array whose arithmetic mean equals a (CSES 3302).
+// - Approach: Zero-Sum Balancing Trick (`x[i] = val - a`) + Subset Sum DP with offset.
+// - Intuition: Average of subset is `a` iff $\sum (x_i - a) = 0$; shift DP indices by OFFSET = 250,000 to support negative intermediate sums.
+// - Complexity: Time: O(N \cdot \text{MAX\_SUM}), Space: O(\text{MAX\_SUM}).

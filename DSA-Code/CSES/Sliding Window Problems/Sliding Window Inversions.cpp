@@ -1,106 +1,52 @@
 // Link: https://cses.fi/problemset/task/3223
-
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-
-struct CoordinateCompressor {
-    vector<int> vals;
-    void add(int x) { vals.push_back(x); }
-
-    void build() {
-        sort(vals.begin(), vals.end());
-        vals.erase(unique(vals.begin(), vals.end()), vals.end());
-    }
-
-    int get(int x) {
-        return lower_bound(vals.begin(), vals.end(), x) - vals.begin();
-    }
-
-    int size() {
-        return vals.size();
-    }
-};
 
 struct Fenwick {
-    int n;
-    vector<int> bit;
-
-    Fenwick(int n) : n(n), bit(n + 1) {}
-
-    void update(int i, int val) {
-        i++;
-        while (i <= n) {
-            bit[i] += val;
-            i += i & -i;
-        }
-    }
-
-    int query(int i) {
-        int s = 0;
-        i++;
-        while (i > 0) {
-            s += bit[i];
-            i -= i & -i;
-        }
-        return s;
-    }
-
-    int query(int l, int r) {
-        if (l > r) return 0;
-        return query(r) - (l ? query(l - 1) : 0);
-    }
+    int n; vector<int> bit;
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
+    void add(int i, int val) { for (i++; i <= n; i += i & -i) bit[i] += val; }
+    int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
+    int queryRange(int l, int r) { return (l > r) ? 0 : query(r) - (l > 0 ? query(l - 1) : 0); }
 };
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, k; cin >> n >> k;
+    vector<int> a(n), vals;
+    for (int i = 0; i < n; i++) { cin >> a[i]; vals.push_back(a[i]); }
 
-    int n, k;
-    cin >> n >> k;
-
-    vector<int> a(n);
-
-    CoordinateCompressor cc;
-
-    for (int i = 0; i < n; i++) {
-        cin >> a[i];
-        cc.add(a[i]);
-    }
-
-    cc.build();
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    auto getRank = [&](int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); };
 
     vector<int> id(n);
-    for (int i = 0; i < n; i++)
-        id[i] = cc.get(a[i]);
+    for (int i = 0; i < n; i++) id[i] = getRank(a[i]);
 
-    Fenwick bit(cc.size());
+    Fenwick bit(vals.size());
+    long long inv = 0;
 
-    ll inv = 0;
-
-    // Build first window
     for (int i = 0; i < k; i++) {
-        // previous elements greater than current
-        inv += bit.query(id[i] + 1, cc.size() - 1);
-        bit.update(id[i], 1);
+        inv += bit.queryRange(id[i] + 1, vals.size() - 1);
+        bit.add(id[i], 1);
     }
-
     cout << inv;
 
     for (int i = k; i < n; i++) {
-
         int out = i - k;
+        bit.add(id[out], -1);
+        inv -= bit.queryRange(0, id[out] - 1);
 
-        // Remove contribution of outgoing element
-        bit.update(id[out], -1);
-        inv -= bit.query(0, id[out] - 1);
-
-        // Add contribution of incoming element
-        inv += bit.query(id[i] + 1, cc.size() - 1);
-        bit.update(id[i], 1);
-
+        inv += bit.queryRange(id[i] + 1, vals.size() - 1);
+        bit.add(id[i], 1);
         cout << " " << inv;
     }
-
     cout << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find the number of inversion pairs in every sliding window of size k (CSES 3223).
+// - Approach: Coordinate Compression + Fenwick Tree tracking sliding window frequencies.
+// - Intuition: Removing outgoing element subtracts smaller elements before it; adding incoming element adds larger elements before it in $O(\log N)$ time.
+// - Complexity: Time: O(N \log N), Space: O(N).

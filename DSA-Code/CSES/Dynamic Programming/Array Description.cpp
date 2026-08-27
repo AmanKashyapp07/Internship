@@ -1,45 +1,41 @@
+// Link: https://cses.fi/problemset/task/1746
 #include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long;
 const int MOD = 1e9 + 7;
 
-int n, m;
-vector<int> a;
-vector<vector<int>> dp;
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
 
-int solve(int i, int prev)
-{
-    if (i == n) return 1;
-    if (dp[i][prev + 1] != -1) return dp[i][prev + 1];
-
-    ll ans = 0;
-
-    if (a[i]){
-        if (prev == -1 || abs(a[i] - prev) <= 1) ans = solve(i + 1, a[i]);
-    }
-    else{
-        int l = (prev == -1 ? 1 : max(1, prev - 1));
-        int r = (prev == -1 ? m : min(m, prev + 1));
-
-        for (int cur = l; cur <= r; cur++) ans = (ans + solve(i + 1, cur)) % MOD;
+    vector<vector<long long>> dp(n, vector<long long>(m + 2, 0));
+    if (a[0] == 0) {
+        for (int val = 1; val <= m; val++) dp[0][val] = 1;
+    } else {
+        dp[0][a[0]] = 1;
     }
 
-    return dp[i][prev + 1] = ans;
+    for (int i = 1; i < n; i++) {
+        if (a[i] == 0) {
+            for (int val = 1; val <= m; val++) {
+                dp[i][val] = (dp[i - 1][val - 1] + dp[i - 1][val] + dp[i - 1][val + 1]) % MOD;
+            }
+        } else {
+            int val = a[i];
+            dp[i][val] = (dp[i - 1][val - 1] + dp[i - 1][val] + dp[i - 1][val + 1]) % MOD;
+        }
+    }
+
+    long long ans = 0;
+    for (int val = 1; val <= m; val++) ans = (ans + dp[n - 1][val]) % MOD;
+    cout << ans << '\n';
+    return 0;
 }
 
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    cin >> n >> m;
-
-    a.resize(n);
-    for (int &x : a)
-        cin >> x;
-
-    dp.assign(n, vector<int>(m + 2, -1));
-
-    cout << solve(0, -1) << "\n";
-}
+// Interview Explanation:
+// - Problem Statement: Count array configurations of size n with values $1 \dots m$ such that adjacent differences $|a[i] - a[i-1]| \le 1$ (CSES 1746).
+// - Approach: Dynamic Programming (`dp[i][v] = dp[i-1][v-1] + dp[i-1][v] + dp[i-1][v+1]`).
+// - Intuition: Transitioning index $i$ at value $v$ sums valid previous values $\{v-1, v, v+1\}$.
+// - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).

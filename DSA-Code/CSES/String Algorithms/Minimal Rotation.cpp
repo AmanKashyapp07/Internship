@@ -1,36 +1,29 @@
 // Link: https://cses.fi/problemset/task/1110
-
 #include <bits/stdc++.h>
 using namespace std;
 
-string boothAlgorithm(string s){
+string boothAlgorithm(string s) {
     string t = s + s;
     int n = s.size();
-
     int i = 0, j = 1, k = 0;
-    // i is the starting index of the current candidate for the smallest rotation
-    // j is the starting index of the next candidate for the smallest rotation
-    // k is the offset from i and j for comparison, basically, k is the length of the current matching prefix between the two candidates.
     while (i < n && j < n && k < n) {
-        if (t[i + k] == t[j + k]) {
-            k++;
-        } // If the characters at the current offset k are equal, we increment k to check the next character in the next iteration.
-        else if (t[i + k] < t[j + k]) {
-            j += k + 1; // Move j to the next candidate
-            if (i == j) j++; // Ensure i and j are not the same
-            k = 0; // Reset k for the new comparison
-        } else {
-            i += k + 1; // Move i to the next candidate
-            if (i == j) i++; // Ensure i and j are not the same
-            k = 0; // Reset k for the new comparison
-        }
+        if (t[i + k] == t[j + k]) k++;
+        else if (t[i + k] < t[j + k]) { j += k + 1; if (i == j) j++; k = 0; }
+        else { i += k + 1; if (i == j) i++; k = 0; }
     }
-
     int start = min(i, j);
     return t.substr(start, n);
-} // it returns the lexicographically smallest rotation of the string s using Booth's algorithm.
-
-int main(){
-    string s; cin>>s;
-    cout<<boothAlgorithm(s)<<endl;
 }
+
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    string s; cin >> s;
+    cout << boothAlgorithm(s) << '\n';
+    return 0;
+}
+
+// Interview Explanation:
+// - Problem Statement: Find the lexicographically smallest rotation of string s (CSES 1110).
+// - Approach: Booth's Lexicographically Smallest Rotation Algorithm ($O(N)$).
+// - Intuition: Two-pointer comparison on doubled string $s+s$ with prefix offset $k$; jumping candidates by $k+1$ when a mismatch occurs yields $O(N)$ runtime.
+// - Complexity: Time: O(N), Space: O(N).

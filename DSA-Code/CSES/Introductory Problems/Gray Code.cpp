@@ -1,37 +1,20 @@
 // Link: https://cses.fi/problemset/task/2205
-
-#include <iostream>
-#include <string>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    // Optimize standard I/O operations for performance
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n;
-    cin >> n;
-
-    // Total number of elements in a Gray code sequence of length n is 2^n
-    int total_strings = 1 << n; 
-
-    for (int i = 0; i < total_strings; i++) {
-        // Convert regular binary index i to its Gray code equivalent
-        int gray_value = i ^ (i >> 1);
-        
-        // Print the binary representation of gray_value with leading zeros
-        string bit_string = "";
-        for (int j = n - 1; j >= 0; j--) {
-            if ((gray_value >> j) & 1) {
-                bit_string += '1';
-            } else {
-                bit_string += '0';
-            }
-        }
-        cout << bit_string << "\n";
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    for (int i = 0; i < (1 << n); i++) {
+        int g = i ^ (i >> 1);
+        string s = bitset<16>(g).to_string();
+        cout << s.substr(16 - n) << '\n';
     }
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Generate Gray code sequence of n bits where consecutive codes differ in exactly 1 bit (CSES 2205).
+// - Approach: Binary-to-Gray Code Formula: G(i) = i ^ (i >> 1).
+// - Intuition: Bitwise formula `i ^ (i >> 1)` guarantees adjacent numbers differ by exactly 1 bit in binary representation.
+// - Complexity: Time: O(2^N \cdot N), Space: O(1).

@@ -1,44 +1,24 @@
 // Link: https://cses.fi/problemset/task/1073
-
-#include <algorithm>
-#include <iostream>
-#include <vector>
-#define int long long
+#include <bits/stdc++.h>
 using namespace std;
 
-signed main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<int> towers;
 
-    int n;
-    cin >> n;
-    vector<int> a(n);
-    for (int i = 0; i < n; i++)
-    {
-        cin >> a[i];
+    for (int i = 0; i < n; i++) {
+        int x; cin >> x;
+        auto it = upper_bound(towers.begin(), towers.end(), x);
+        if (it == towers.end()) towers.push_back(x);
+        else *it = x;
     }
-
-    vector<int> b;
-
-    for (int i = 0; i < n; i++)
-    {
-        auto it = upper_bound(b.begin(), b.end(), a[i]);
-
-        if (it == b.end())
-
-        {
-
-            b.push_back(a[i]);
-        }
-
-        else
-
-        {
-
-            *it = a[i];
-        }
-    }
-
-    cout << b.size() << "\n";
+    cout << towers.size() << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find minimum number of towers needed to place blocks in order such that higher blocks are smaller than lower blocks (CSES 1073).
+// - Approach: Greedy Binary Search (`upper_bound`) / Patience Sorting (LIS Variant).
+// - Intuition: Always place current block on the smallest tower top that is strictly greater than the block (`upper_bound`), otherwise create a new tower.
+// - Complexity: Time: O(N \log N), Space: O(N).

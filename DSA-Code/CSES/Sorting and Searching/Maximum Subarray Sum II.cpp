@@ -1,45 +1,33 @@
 // Link: https://cses.fi/problemset/task/1644
-
 #include <bits/stdc++.h>
 using namespace std;
 
-// Maximum Subarray Sum with Length in [A, B]
-
 int main() {
-    int n, A, B;
-    cin >> n >> A >> B;
-
-    vector<long long> arr(n + 1);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, A, B; cin >> n >> A >> B;
     vector<long long> pref(n + 1, 0);
-
     for (int i = 1; i <= n; i++) {
-        cin >> arr[i];
-        pref[i] = pref[i - 1] + arr[i];
+        long long x; cin >> x;
+        pref[i] = pref[i - 1] + x;
     }
 
     deque<int> dq;
-    long long ans = LLONG_MIN;
+    long long ans = -1e18;
 
     for (int i = A; i <= n; i++) {
-
-        // Valid range of j:
-        // i - B <= j <= i - A
-        int L = i - B;
-        int R = i - A;
-         // Remove indices outside the left boundary
-        while (!dq.empty() && dq.front() < L) {
-            dq.pop_front();
-        }
-        // Insert the new right boundary index
-        while (!dq.empty() && pref[dq.back()] >= pref[R]) {
-            dq.pop_back();
-        }
+        int L = i - B, R = i - A;
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
+        while (!dq.empty() && pref[dq.back()] >= pref[R]) dq.pop_back();
         dq.push_back(R);
 
-
-        // Minimum prefix sum in [L, R] is at the front
         ans = max(ans, pref[i] - pref[dq.front()]);
     }
-
     cout << ans << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find maximum subarray sum of length between A and B inclusive (CSES 1644).
+// - Approach: Monotonic Queue on Prefix Sums over sliding range $[i-B, i-A]$.
+// - Intuition: Subarray sum $pref[i] - pref[j]$ is maximized when $pref[j]$ is minimized over valid window $j \in [i-B, i-A]$.
+// - Complexity: Time: O(N), Space: O(N).

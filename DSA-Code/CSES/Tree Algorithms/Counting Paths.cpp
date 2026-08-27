@@ -1,110 +1,64 @@
 // Link: https://cses.fi/problemset/task/1136
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int LOG = 20;
-
-vector<vector<int>> graph;
-vector<vector<int>> up;
+vector<vector<int>> g, up;
 vector<int> depth;
-vector<long long> cnt, ans;
+vector<long long> val;
 
-void dfs(int u, int p) {
-    up[u][0] = p;
-
-    for (int j = 1; j < LOG; j++) {
-        if (up[u][j - 1] == -1)
-            up[u][j] = -1;
-        else
-            up[u][j] = up[up[u][j - 1]][j - 1];
-    }
-
-    for (int v : graph[u]) {
-        if (v == p) continue;
-        depth[v] = depth[u] + 1;
-        dfs(v, u);
-    }
+void dfs(int u, int p, int d) {
+    depth[u] = d; up[u][0] = p;
+    for (int j = 1; j < LOG; j++) up[u][j] = (up[u][j - 1] == -1) ? -1 : up[up[u][j - 1]][j - 1];
+    for (int v : g[u]) if (v != p) dfs(v, u, d + 1);
 }
 
-int lift(int x, int k) {
-    for (int j = 0; j < LOG; j++) {
-        if (k & (1 << j)) {
-            x = up[x][j];
-            if (x == -1) return -1;
-        }
-    }
-    return x;
-}
-
-int lca(int a, int b) {
-    if (depth[a] < depth[b]) swap(a, b);
-
-    a = lift(a, depth[a] - depth[b]);
-
-    if (a == b) return a;
-
+int getLCA(int u, int v) {
+    if (depth[u] < depth[v]) swap(u, v);
+    int diff = depth[u] - depth[v];
+    for (int j = LOG - 1; j >= 0; j--) if ((diff >> j) & 1) u = up[u][j];
+    if (u == v) return u;
     for (int j = LOG - 1; j >= 0; j--) {
-        if (up[a][j] != up[b][j]) {
-            a = up[a][j];
-            b = up[b][j];
-        }
+        if (up[u][j] != up[v][j]) { u = up[u][j]; v = up[v][j]; }
     }
-
-    return up[a][0];
+    return up[u][0];
 }
 
-void dfs2(int u, int p) {
-    for (int v : graph[u]) {
-        if (v == p) continue;
-        dfs2(v, u);
-        cnt[u] += cnt[v];
+void dfsAccumulate(int u, int p) {
+    for (int v : g[u]) {
+        if (v != p) {
+            dfsAccumulate(v, u);
+            val[u] += val[v];
+        }
     }
-    ans[u] = cnt[u];
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, m;
-    cin >> n >> m;
-
-    graph.resize(n + 1);
-    up.assign(n + 1, vector<int>(LOG, -1));
-    depth.assign(n + 1, 0);
-    cnt.assign(n + 1, 0);
-    ans.assign(n + 1, 0);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    g.resize(n + 1); up.assign(n + 1, vector<int>(LOG, -1)); depth.assign(n + 1, 0); val.assign(n + 1, 0);
 
     for (int i = 0; i < n - 1; i++) {
-        int a, b;
-        cin >> a >> b;
-        graph[a].push_back(b);
-        graph[b].push_back(a);
+        int u, v; cin >> u >> v; g[u].push_back(v); g[v].push_back(u);
     }
-
-    dfs(1, -1);
+    dfs(1, -1, 0);
 
     while (m--) {
-        int a, b;
-        cin >> a >> b;
-
-        int L = lca(a, b);
-
-        cnt[a]++;
-        cnt[b]++;
-        cnt[L]--;
-
+        int a, b; cin >> a >> b;
+        int L = getLCA(a, b);
+        val[a]++; val[b]++; val[L]--;
         int p = up[L][0];
-        if (p != -1) cnt[p]--;
+        if (p != -1) val[p]--;
     }
 
-    dfs2(1, -1);
-
-    for (int i = 1; i <= n; i++) {
-        cout << ans[i] << ' ';
-    }
+    dfsAccumulate(1, -1);
+    for (int i = 1; i <= n; i++) cout << val[i] << ' ';
     cout << '\n';
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Process m path queries (a, b) and count how many paths pass through each node (CSES 1136).
+// - Approach: Tree Difference Array on Subtrees (`val[a]++, val[b]++, val[L]--, val[parent(L)]--`).
+// - Intuition: Accumulating subtree sums bottom-up via post-order DFS computes total path counts across all nodes in linear time.
+// - Complexity: Time: O(N \log N + M \log N), Space: O(N \log N).

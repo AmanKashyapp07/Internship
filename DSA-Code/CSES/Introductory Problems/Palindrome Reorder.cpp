@@ -1,52 +1,33 @@
 // Link: https://cses.fi/problemset/task/1755
-
 #include <bits/stdc++.h>
 using namespace std;
 
 int main() {
-    // Optimize standard I/O operations for performance
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    string s; cin >> s;
+    vector<int> cnt(26, 0);
+    for (char c : s) cnt[c - 'A']++;
 
-    string s;
-    cin >> s;
-
-    vector<int> freq(26, 0);
-    for (char c : s) {
-        freq[c - 'A']++;
-    }
-
-    int oddCount = 0;
-    char middleChar = '\0'; // Track the single middle character if it exists
-
+    int oddCnt = 0, oddIdx = -1;
     for (int i = 0; i < 26; i++) {
-        if (freq[i] % 2 != 0) {
-            oddCount++;
-            middleChar = char('A' + i);
-            freq[i]--; // Reduce by 1 so the rest can be divided evenly into the halves
-        }
+        if (cnt[i] % 2 != 0) { oddCnt++; oddIdx = i; }
     }
 
-    // A palindrome can have at most one character with an odd frequency
-    if (oddCount > 1) {
-        cout << "NO SOLUTION\n";
-        return 0;
-    }
+    if (oddCnt > 1) { cout << "NO SOLUTION\n"; return 0; }
 
-    string left = "";
-    for (int i = 0; i < 26; i++) {
-        left.append(freq[i] / 2, char('A' + i));
-    }
+    string half = "";
+    for (int i = 0; i < 26; i++) half.append(cnt[i] / 2, 'A' + i);
+    string ans = half;
+    if (oddIdx != -1) ans.push_back('A' + oddIdx);
+    reverse(half.begin(), half.end());
+    ans += half;
 
-    string right = left;
-    reverse(right.begin(), right.end());
-
-    // Construct the final palindrome
-    if (oddCount == 1) {
-        cout << left << middleChar << right << '\n';
-    } else {
-        cout << left << right << '\n';
-    }
-
+    cout << ans << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Reorder characters of string s into a palindrome if possible (CSES 1755).
+// - Approach: Frequency Counting + Symmetric Half Mirroring.
+// - Intuition: A palindrome can have at most one character with odd frequency; construct left half alphabetically, place odd char (if any) in middle, append reversed left half.
+// - Complexity: Time: O(N), Space: O(N).

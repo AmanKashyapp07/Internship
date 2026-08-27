@@ -1,56 +1,36 @@
 // Link: https://cses.fi/problemset/task/1641
-
 #include <bits/stdc++.h>
 using namespace std;
 
-struct Number {
-    long long value;
-    int index;
-};
+struct Number { long long val; int idx; };
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n;
-    long long x;
-    cin >> n >> x;
-
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; long long x; cin >> n >> x;
     vector<Number> a(n);
+    for (int i = 0; i < n; i++) { cin >> a[i].val; a[i].idx = i + 1; }
+
+    sort(a.begin(), a.end(), [](const Number& p, const Number& q) { return p.val < q.val; });
 
     for (int i = 0; i < n; i++) {
-        cin >> a[i].value;
-        a[i].index = i + 1;
-    }
-
-    sort(a.begin(), a.end(), [](const Number& p, const Number& q) {
-        return p.value < q.value;
-    });
-
-    for (int i = 0; i < n; i++) {
-        long long target = x - a[i].value;
-
-        int left = i + 1;
-        int right = n - 1;
-
-        while (left < right) {
-            long long sum = a[left].value + a[right].value;
-
+        long long target = x - a[i].val;
+        int l = i + 1, r = n - 1;
+        while (l < r) {
+            long long sum = a[l].val + a[r].val;
             if (sum == target) {
-                cout << a[i].index << ' '
-                     << a[left].index << ' '
-                     << a[right].index << '\n';
+                cout << a[i].idx << ' ' << a[l].idx << ' ' << a[r].idx << '\n';
                 return 0;
             }
-
-            if (sum < target) {
-                left++;
-            } else {
-                right--;
-            }
+            if (sum < target) l++;
+            else r--;
         }
     }
-
     cout << "IMPOSSIBLE\n";
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find 3 distinct indices such that $a[i] + a[j] + a[k] = x$ (CSES 1641).
+// - Approach: Sort + Fix 1 Element + Two Pointers for Remaining Pair ($O(N^2)$).
+// - Intuition: Fixing $a[i]$ reduces problem to 2-Sum target $(x - a[i])$ solved in $O(N)$ with two pointers.
+// - Complexity: Time: O(N^2), Space: O(N).

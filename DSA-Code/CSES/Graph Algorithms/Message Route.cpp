@@ -1,84 +1,39 @@
 // Link: https://cses.fi/problemset/task/1667
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, m;
-    cin >> n >> m;
-
-    vector<vector<int>> graph(n + 1);
-
-    while (m--)
-    {
-        int a, b;
-        cin >> a >> b;
-        graph[a].push_back(b);
-        graph[b].push_back(a);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, m; cin >> n >> m;
+    vector<vector<int>> g(n + 1);
+    while (m--) {
+        int u, v; cin >> u >> v; g[u].push_back(v); g[v].push_back(u);
     }
 
     vector<int> parent(n + 1, -1);
-    queue<int> q;
+    queue<int> q; q.push(1); parent[1] = 0;
 
-    q.push(1);
-    parent[1] = 0;
-
-    while (!q.empty())
-    {
-        int u = q.front();
-        q.pop();
-
-        for (int v : graph[u])
-        {
-            if (parent[v] != -1)
-                continue;
-
-            parent[v] = u;
-            q.push(v);
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : g[u]) {
+            if (parent[v] == -1) { parent[v] = u; q.push(v); }
         }
     }
 
-    if (parent[n] == -1) // if we cannot reach node n from node 1, print NO and exit
-    {
-        cout << "IMPOSSIBLE\n";
-        return 0;
-    }
+    if (parent[n] == -1) { cout << "IMPOSSIBLE\n"; return 0; }
 
     vector<int> path;
-    int end = n;
-    int count = 0;
-    while (end != 0) // backtrack from node n to node 1 using the parent array to construct the path
-    {
-        path.push_back(end);
-        count++;
-        end = parent[end];
-    }
-    reverse(path.begin(), path.end()); // reverse the path to get the correct order from node 1 to node n
-    cout << count << '\n';
-    for (int node : path)
-    {
-        cout << node << ' ';
-    }
+    for (int cur = n; cur != 0; cur = parent[cur]) path.push_back(cur);
+    reverse(path.begin(), path.end());
+
+    cout << path.size() << '\n';
+    for (int x : path) cout << x << ' ';
     cout << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find shortest path in an unweighted graph from node 1 to node n (CSES 1667).
+// - Approach: BFS + Parent Array Path Reconstruction.
+// - Intuition: BFS visits nodes in increasing distance order; tracking parent pointers reconstructs shortest path.
+// - Complexity: Time: O(V + E), Space: O(V + E).

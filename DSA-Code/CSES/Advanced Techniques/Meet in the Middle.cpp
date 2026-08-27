@@ -1,63 +1,40 @@
-// CSES Problem: <problem name>
-// https://cses.fi/problemset/task/<id>
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-#define int long long 
+// Link: https://cses.fi/problemset/task/1628
+#include <bits/stdc++.h>
 using namespace std;
 
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; long long x; cin >> n >> x;
+    vector<long long> a(n);
+    for (long long &v : a) cin >> v;
 
-const int MOD  = 1e9 + 7;
-// ─────────────────────────────────────────────────────────────────────────────
-vector<int> generateSums(const vector<int>& arr) {
-    vector<int> sums;
-    int n = arr.size();
-    for (int mask = 0; mask < (1 << n); mask++) {
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            if (mask & (1 << i)) {
-                sum += arr[i];
-            }
+    auto genSums = [](const vector<long long>& arr) {
+        int sz = arr.size();
+        vector<long long> sums;
+        for (int mask = 0; mask < (1 << sz); mask++) {
+            long long s = 0;
+            for (int i = 0; i < sz; i++) if (mask & (1 << i)) s += arr[i];
+            sums.push_back(s);
         }
-        sums.push_back(sum);
-    }
-    return sums;
-}
+        return sums;
+    };
 
-signed main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    int n,x;
-    cin >> n >> x;
-    vector<int> a(n);
-    for (int i = 0; i < n; i++) {
-        cin >> a[i];
-    }
-    vector<int> left, right;
-    left=generateSums(vector<int>(a.begin(), a.begin() + n / 2));
-    right=generateSums(vector<int>(a.begin() + n / 2, a.end()));
+    auto left = genSums(vector<long long>(a.begin(), a.begin() + n / 2));
+    auto right = genSums(vector<long long>(a.begin() + n / 2, a.end()));
     sort(right.begin(), right.end());
-    int count = 0;
-    for (int sum : left) {
-        int target = x - sum;
-        count += upper_bound(right.begin(), right.end(), target) - lower_bound(right.begin(), right.end(), target);
+
+    long long count = 0;
+    for (long long s : left) {
+        long long target = x - s;
+        count += upper_bound(right.begin(), right.end(), target)
+               - lower_bound(right.begin(), right.end(), target);
     }
-    cout << count << "\n";
+    cout << count << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Count number of subsets summing exactly to x (CSES 1628).
+// - Approach: Meet in the Middle — enumerate all $2^{N/2}$ sums for each half, sort right half, binary search.
+// - Intuition: Full $O(2^N)$ is too slow; splitting into two halves reduces search space to $O(2^{N/2})$ per half, with sorted binary search matching.
+// - Complexity: Time: O(2^{N/2} \cdot N/2), Space: O(2^{N/2}).

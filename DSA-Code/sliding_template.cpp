@@ -41,7 +41,80 @@ public:
 
 
     // =====================================================================
-    // 2. HELPER: SUBARRAYS WITH SUM AT MOST K
+    // 2. LEETCODE 209: MINIMUM SIZE SUBARRAY SUM
+    // =====================================================================
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int left = 0, sum = 0, minLen = INT_MAX;
+        for (int right = 0; right < (int)nums.size(); right++) {
+            sum += nums[right];
+            while (sum >= target) {
+                minLen = min(minLen, right - left + 1);
+                sum -= nums[left++];
+            }
+        }
+        return minLen == INT_MAX ? 0 : minLen;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find the minimal length of a contiguous subarray whose sum is >= target (LeetCode 209).
+    // - Approach: Variable-size sliding window with left-pointer contraction when sum >= target.
+    // - Intuition: Expand right pointer to reach target sum; greedily shrink left pointer while sum >= target to find minimum window length.
+    // - Complexity: Time: O(N) linear time (each pointer advances at most N times), Space: O(1).
+
+
+    // =====================================================================
+    // 3. LEETCODE 438: FIND ALL ANAGRAMS IN A STRING
+    // =====================================================================
+    vector<int> findAnagrams(string s, string p) {
+        int n = s.size(), m = p.size();
+        if (n < m) return {};
+        vector<int> pFreq(26, 0), sFreq(26, 0), ans;
+        for (int i = 0; i < m; i++) {
+            pFreq[p[i] - 'a']++;
+            sFreq[s[i] - 'a']++;
+        }
+        if (pFreq == sFreq) ans.push_back(0);
+        for (int i = m; i < n; i++) {
+            sFreq[s[i] - 'a']++;
+            sFreq[s[i - m] - 'a']--;
+            if (pFreq == sFreq) ans.push_back(i - m + 1);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all start indices of p's anagrams in s (LeetCode 438).
+    // - Approach: Fixed sliding window of size m with 26-element frequency vector equality checks.
+    // - Intuition: Sliding a window of fixed size |p| adds incoming s[i] and subtracts outgoing s[i-m]; comparing frequency arrays takes O(26) = O(1).
+    // - Complexity: Time: O(N), Space: O(1) 26-element vectors.
+
+
+    // =====================================================================
+    // 4. LEETCODE 567: PERMUTATION IN STRING
+    // =====================================================================
+    bool checkInclusion(string s1, string s2) {
+        int n = s1.size(), m = s2.size();
+        if (m < n) return false;
+        vector<int> f1(26, 0), f2(26, 0);
+        for (int i = 0; i < n; i++) {
+            f1[s1[i] - 'a']++;
+            f2[s2[i] - 'a']++;
+        }
+        if (f1 == f2) return true;
+        for (int i = n; i < m; i++) {
+            f2[s2[i] - 'a']++;
+            f2[s2[i - n] - 'a']--;
+            if (f1 == f2) return true;
+        }
+        return false;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Check if s2 contains a permutation of s1 as a substring (LeetCode 567).
+    // - Approach: Fixed sliding window of size |s1| matching character frequencies.
+    // - Intuition: A substring is a permutation of s1 iff its frequency array matches s1's frequency array exactly.
+    // - Complexity: Time: O(M), Space: O(1).
+
+
+    // =====================================================================
+    // 5. HELPER: SUBARRAYS WITH SUM AT MOST K
     // =====================================================================
     int numSubarraysAtMostK(vector<int> &nums, int k) {
         if (k < 0) return 0;
@@ -61,7 +134,7 @@ public:
 
 
     // =====================================================================
-    // 3. LEETCODE 930: BINARY SUBARRAYS WITH SUM
+    // 6. LEETCODE 930: BINARY SUBARRAYS WITH SUM
     // =====================================================================
     int numSubarraysWithSum(vector<int> &nums, int goal) {
         return numSubarraysAtMostK(nums, goal) - numSubarraysAtMostK(nums, goal - 1);
@@ -74,7 +147,7 @@ public:
 
 
     // =====================================================================
-    // 4. LEETCODE 1358: NUMBER OF SUBSTRINGS CONTAINING ALL THREE CHARACTERS
+    // 7. LEETCODE 1358: NUMBER OF SUBSTRINGS CONTAINING ALL THREE CHARACTERS
     // =====================================================================
     int numberOfSubstrings(const string &s) {
         vector<int> lastSeen(3, -1);
@@ -95,7 +168,7 @@ public:
 
 
     // =====================================================================
-    // 5. LEETCODE 76: MINIMUM WINDOW SUBSTRING
+    // 8. LEETCODE 76: MINIMUM WINDOW SUBSTRING
     // =====================================================================
     bool isValid(const vector<int> &freq1, const vector<int> &freq2) {
         for (int i = 0; i < 128; i++) {
@@ -124,15 +197,9 @@ public:
         }
         return start == -1 ? "" : s.substr(start, minLen);
     }
-    // Interview Explanation:
-    // - Problem Statement: Find the minimum length substring of s that contains all characters of t (including duplicates).
-    // - Approach: Two frequency vectors with sliding window contraction.
-    // - Intuition: Expand right pointer until window contains all required character frequencies; then greedily contract left pointer while preserving validity to minimize length.
-    // - Complexity: Time: O(N * 128) -> O(N), Space: O(1) fixed 128-element frequency arrays.
-
 
     // =====================================================================
-    // 6. LEETCODE 727: MINIMUM WINDOW SUBSEQUENCE
+    // 9. LEETCODE 727: MINIMUM WINDOW SUBSEQUENCE
     // =====================================================================
     string minWindowSubsequence(const string &s, const string &t) {
         int n = s.size(), m = t.size();
@@ -162,15 +229,9 @@ public:
         }
         return idx == -1 ? "" : s.substr(idx, len);
     }
-    // Interview Explanation:
-    // - Problem Statement: Find the shortest substring of s that contains t as a subsequence.
-    // - Approach: Two-pointer forward matching + backward contraction scan.
-    // - Intuition: Scan forward to locate the first complete match of t; scan backwards from the end of the match to find the tightest possible start index.
-    // - Complexity: Time: O(N * M) worst case, Space: O(1) auxiliary space.
-
 
     // =====================================================================
-    // 7. LEETCODE 1004: MAX CONSECUTIVE ONES III
+    // 10. LEETCODE 1004: MAX CONSECUTIVE ONES III
     // =====================================================================
     int longestOnes(vector<int> &nums, int k) {
         int left = 0, zeros = 0, maxLen = 0;
@@ -183,15 +244,9 @@ public:
         }
         return maxLen;
     }
-    // Interview Explanation:
-    // - Problem Statement: Find the maximum number of consecutive 1s in a binary array if you can flip at most k 0s to 1s.
-    // - Approach: Sliding window maintaining at most k zeros.
-    // - Intuition: Window expands rightwards; whenever zero count exceeds k, advance left pointer to expel the oldest zero, maintaining validity.
-    // - Complexity: Time: O(N) two pointers advance at most N times, Space: O(1) auxiliary space.
-
 
     // =====================================================================
-    // 8. LEETCODE 904: FRUIT INTO BASKETS (AT MOST 2 DISTINCT ELEMENTS)
+    // 11. LEETCODE 904: FRUIT INTO BASKETS
     // =====================================================================
     int totalFruit(vector<int> &fruits) {
         unordered_map<int, int> count;
@@ -207,15 +262,9 @@ public:
         }
         return maxLen;
     }
-    // Interview Explanation:
-    // - Problem Statement: Find the length of the longest contiguous subarray containing at most 2 distinct integers.
-    // - Approach: Sliding window with hash map tracking frequency of elements.
-    // - Intuition: Expand window until distinct key count exceeds 2; shrink from left until only 2 distinct keys remain, updating max window size.
-    // - Complexity: Time: O(N) linear time, Space: O(1) hash map has at most 3 entries.
-
 
     // =====================================================================
-    // 9. LEETCODE 992: SUBARRAYS WITH K DIFFERENT INTEGERS
+    // 12. LEETCODE 992: SUBARRAYS WITH K DIFFERENT INTEGERS
     // =====================================================================
     int atMostKDistinct(vector<int> &nums, int k) {
         unordered_map<int, int> freq;
@@ -235,15 +284,9 @@ public:
     int subarraysWithKDistinct(vector<int> &nums, int k) {
         return atMostKDistinct(nums, k) - atMostKDistinct(nums, k - 1);
     }
-    // Interview Explanation:
-    // - Problem Statement: Count the number of subarrays with exactly k different integers.
-    // - Approach: Exact-K reduction via atMostKDistinct(k) - atMostKDistinct(k - 1).
-    // - Intuition: Finding exactly K distinct elements is non-monotonic, but "at most K" is monotonic and easily solvable via sliding window.
-    // - Complexity: Time: O(N) two linear passes, Space: O(K) hash map storage.
-
 
     // =====================================================================
-    // 10. LEETCODE 424: LONGEST REPEATING CHARACTER REPLACEMENT
+    // 13. LEETCODE 424: LONGEST REPEATING CHARACTER REPLACEMENT
     // =====================================================================
     int characterReplacement(string s, int k) {
         vector<int> freq(26, 0);
@@ -257,57 +300,7 @@ public:
         }
         return maxLen;
     }
-    // Interview Explanation:
-    // - Problem Statement: Find the length of the longest substring containing the same letter after replacing at most k characters.
-    // - Approach: Sliding window with max frequency tracking.
-    // - Intuition: In window [left, right], non-majority characters count is window_len - maxFreq; shrink left when this exceeds k.
-    // - Complexity: Time: O(N) linear time, Space: O(1) 26-element array.
 };
-
-// =========================================================================
-// SECTION 2: ALTERNATIVE WINDOW MECHANISMS (COUNTING & SLICING)
-// =========================================================================
-
-// Forward Suffix Counting Variant for LeetCode 1358
-int numberOfSubstringsWindow1(string s) {
-    vector<int> count(3, 0);
-    int totalSubstrings = 0, l = 0, n = s.length();
-
-    for (int r = 0; r < n; ++r) {
-        count[s[r] - 'a']++;
-        while (count[0] > 0 && count[1] > 0 && count[2] > 0) {
-            totalSubstrings += (n - r);
-            count[s[l++] - 'a']--;
-        }
-    }
-    return totalSubstrings;
-}
-// Interview Explanation:
-// - Problem Statement: Count substrings containing 'a', 'b', and 'c' using two-pointer forward suffix contribution.
-// - Approach: Sliding window counting forward valid suffixes.
-// - Intuition: When window s[l...r] becomes valid, every extension ending at r, r+1, ..., n-1 is also valid, contributing exactly n - r substrings per valid left boundary.
-// - Complexity: Time: O(N) linear time, Space: O(1) 3-element frequency array.
-
-
-// Backward Prefix Counting Variant for LeetCode 1358
-int numberOfSubstringsWindow2(string s) {
-    vector<int> cnt(3, 0);
-    int l = 0, ans = 0;
-
-    for (int r = 0; r < (int)s.size(); r++) {
-        cnt[s[r] - 'a']++;
-        while (cnt[0] && cnt[1] && cnt[2]) {
-            cnt[s[l++] - 'a']--;
-        }
-        ans += l;
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Count substrings containing 'a', 'b', and 'c' using two-pointer left-pointer accumulation.
-// - Approach: Sliding window counting valid backward prefixes.
-// - Intuition: Advance left pointer while window contains all three characters; after shrinking, there are l valid starting positions [0...l-1] ending at current r.
-// - Complexity: Time: O(N) linear time, Space: O(1) 3-element frequency array.
 
 /*
  ====================================================================================================
@@ -318,31 +311,15 @@ int numberOfSubstringsWindow2(string s) {
     -------------------------------------------------------------------------------------------------
     Archetype               | Window Behavior             | Problems & Triggers
     -------------------------------------------------------------------------------------------------
-    1. Fixed Window Size K  | Maintain r - l + 1 == K     | Max sum subarray of size K, Anagrams in string
+    1. Fixed Window Size K  | Maintain r - l + 1 == K     | Find Anagrams, Permutation in String
     2. Variable Maximize    | Expand r; shrink l when BAD | Longest substring without repeat, Max 1s III
-    3. Variable Minimize    | Expand r; shrink l when OK  | Minimum Window Substring, Min Size Subarray Sum
+    3. Variable Minimize    | Expand r; shrink l when OK  | Minimum Size Subarray Sum, Min Window Substring
     4. Exact-K Subarrays    | atMost(K) - atMost(K - 1)   | Subarrays with sum K, Subarrays with K distinct
     -------------------------------------------------------------------------------------------------
 
  2. EXACT-K REDUCTION FORMULA (THE GOLDEN RULE):
-    • Whenever a problem asks for "subarrays with EXACTLY K items/sum/distinct":
-      Formula: `exact(K) = atMost(K) - atMost(K - 1)`
-    • Why? Finding exact K is non-monotonic (expanding can make it valid or invalid).
-      "At most K" is strictly monotonic (expanding never decreases sum/distinct count),
-      allowing a simple O(N) sliding window!
-
- 3. SUBSTRING & SUBARRAY COUNTING RULES:
-    • "At most K" condition: Add `right - left + 1` at each step.
-      - Reason: For window [left, right], all subarrays ending at right starting at left, left+1, ... right are valid.
-    • "At least K" condition (e.g. Contains all a, b, c):
-      - Method A (Forward suffixes): Add `n - right` while shrinking left.
-      - Method B (Backward prefixes): Add `left` after shrinking.
-      - Method C (Last Seen): Add `min(lastSeen[a], lastSeen[b], lastSeen[c]) + 1`.
-
- 4. WHEN SLIDING WINDOW FAILS (CRITICAL OA TRAP):
-    • Sliding window REQUIRES MONOTONICITY (all numbers are non-negative, or window expansion only increases count).
-    • If an array contains NEGATIVE NUMBERS, sliding window FAILS because shrinking left can either increase or decrease sum!
-    • Fallback: Use `Prefix Sum + Hash Map` (e.g. `pref[r] - pref[l] == K` in O(N) time and O(N) space).
+    • Formula: `exact(K) = atMost(K) - atMost(K - 1)`
+    • "At most K" is strictly monotonic, turning exact-K into two O(N) sliding windows.
  ====================================================================================================
 */
 

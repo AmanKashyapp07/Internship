@@ -1,113 +1,49 @@
 // Link: https://cses.fi/problemset/task/1076
-
 #include <bits/stdc++.h>
 using namespace std;
 
-struct CoordinateCompressor {
-    vector<int> vals;
+multiset<int> lo, hi;
 
-    void add(int x) {
-        vals.push_back(x);
+void balance() {
+    while (lo.size() > hi.size() + 1) {
+        auto it = prev(lo.end()); hi.insert(*it); lo.erase(it);
     }
-
-    void build() {
-        sort(vals.begin(), vals.end());
-        vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    while (lo.size() < hi.size()) {
+        auto it = hi.begin(); lo.insert(*it); hi.erase(it);
     }
+}
 
-    int get(int x) {
-        return lower_bound(vals.begin(), vals.end(), x) - vals.begin();
-    }
+void add(int x) {
+    if (lo.empty() || x <= *lo.rbegin()) lo.insert(x);
+    else hi.insert(x);
+    balance();
+}
 
-    int size() {
-        return vals.size();
-    }
-};
-
-struct Fenwick {
-    int n;
-    vector<int> bit;
-
-    Fenwick(int n) : n(n), bit(n + 1, 0) {}
-
-    void update(int i, int val) {
-        i++;
-        while (i <= n) {
-            bit[i] += val;
-            i += i & -i;
-        }
-    }
-
-    int query(int i) {
-        i++;
-        int sum = 0;
-        while (i > 0) {
-            sum += bit[i];
-            i -= i & -i;
-        }
-        return sum;
-    }
-
-    int query(int l, int r) {
-        if (l > r) return 0;
-        return query(r) - (l ? query(l - 1) : 0);
-    }
-};
-
-int kth(Fenwick &bit, int k) {
-    int l = 0, r = bit.n - 1;
-
-    while (l < r) {
-        int mid = (l + r) / 2;
-
-        if (bit.query(mid) >= k)
-            r = mid;
-        else
-            l = mid + 1;
-    }
-
-    return l;
+void remove(int x) {
+    auto it = lo.find(x);
+    if (it != lo.end()) lo.erase(it);
+    else { it = hi.find(x); hi.erase(it); }
+    balance();
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n, k;
-    cin >> n >> k;
-
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, k; cin >> n >> k;
     vector<int> a(n);
-    CoordinateCompressor cc;
+    for (int &x : a) cin >> x;
 
-    for (int i = 0; i < n; i++) {
-        cin >> a[i];
-        cc.add(a[i]);
-    }
-
-    cc.build();
-
-    Fenwick bit(cc.size());
-
-    vector<int> id(n);
-    for (int i = 0; i < n; i++)
-        id[i] = cc.get(a[i]);
-
-    // First window
-    for (int i = 0; i < k; i++)
-        bit.update(id[i], 1);
-
-    int need = (k + 1) / 2;
-
-    cout << cc.vals[kth(bit, need)];
-
+    for (int i = 0; i < k; i++) add(a[i]);
+    cout << *lo.rbegin();
     for (int i = k; i < n; i++) {
-        bit.update(id[i - k], -1);
-        bit.update(id[i], 1);
-
-        cout << " " << cc.vals[kth(bit, need)];
+        remove(a[i - k]); add(a[i]);
+        cout << ' ' << *lo.rbegin();
     }
-
     cout << '\n';
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find the median element in every sliding window of size k (CSES 1076).
+// - Approach: Dual Multiset (`lo` and `hi`) maintaining balance condition `lo.size() == hi.size()` or `lo.size() == hi.size() + 1`.
+// - Intuition: `lo` stores lower half, `hi` stores upper half; top of `lo` (`*lo.rbegin()`) is always the active median in $O(\log K)$ time.
+// - Complexity: Time: O(N \log K), Space: O(K).

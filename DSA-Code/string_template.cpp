@@ -3,8 +3,9 @@
  *                 ULTIMATE STRING ALGORITHMS & HASHING MASTER BLUEPRINT
  * ====================================================================================================
  * Consolidated Master Template covering Polynomial Rolling Hash (FastHash), KMP Algorithm,
- * Z-Algorithm, Manacher's Algorithm, Booth's Algorithm, Rabin-Karp, Palindromic Decompositions,
- * Distinct Subsequences DP, and Multi-Pattern String Segmentation.
+ * Z-Algorithm, Manacher's Algorithm, Booth's Algorithm, Rabin-Karp, Minimum Window Substring,
+ * Longest Substring Without Repeating Characters, Group Anagrams, Trie Blueprint,
+ * Palindromic Decompositions, Distinct Subsequences DP, and Multi-Pattern String Segmentation.
  */
 
 #include <bits/stdc++.h>
@@ -108,15 +109,140 @@ vector<bool> palindromeQueries(const string &s, const vector<pii> &queries) {
     }
     return ans;
 }
-// Interview Explanation:
-// - Problem Statement: Answer range queries checking if substring s[l..r] is a palindrome in O(1) per query.
-// - Approach: Dual FastHash on original string s and reversed string rev.
-// - Intuition: s[l..r] is a palindrome iff its forward hash equals the reverse hash of s[n-1-r..n-1-l].
-// - Complexity: Time: O(N) precomputation, O(1) per query, Space: O(N).
 
 
 // ====================================================================================================
-// SECTION 2: CORE STRING MATCHING & PATTERN RECOGNITION
+// SECTION 2: SLIDING WINDOW & ANAGRAM HASHING PRIMITIVES
+// ====================================================================================================
+
+// 1. Minimum Window Substring (LeetCode 76)
+string minWindow(string s, string t) {
+    if (s.empty() || t.empty()) return "";
+    vi target(128, 0);
+    for (char c : t) target[c]++;
+    int required = 0;
+    for (int count : target) if (count > 0) required++;
+
+    vi window(128, 0);
+    int formed = 0, l = 0, minLen = INT_MAX, startIdx = 0;
+
+    for (int r = 0; r < (int)s.size(); r++) {
+        char c = s[r];
+        window[c]++;
+        if (target[c] > 0 && window[c] == target[c]) formed++;
+
+        while (l <= r && formed == required) {
+            if (r - l + 1 < minLen) {
+                minLen = r - l + 1;
+                startIdx = l;
+            }
+            char leftChar = s[l];
+            window[leftChar]--;
+            if (target[leftChar] > 0 && window[leftChar] < target[leftChar]) formed--;
+            l++;
+        }
+    }
+    return minLen == INT_MAX ? "" : s.substr(startIdx, minLen);
+}
+// Interview Explanation:
+// - Problem Statement: Find the minimum window substring of s containing all characters of t in O(N) time (LeetCode 76).
+// - Approach: Sliding Window with frequency table matching.
+// - Intuition: Expand right pointer until window contains all required characters; contract left pointer to minimize window size while maintaining validity.
+// - Complexity: Time: O(N), Space: O(1) 128-element ASCII table.
+
+
+// 2. Longest Substring Without Repeating Characters (LeetCode 3)
+int lengthOfLongestSubstring(string s) {
+    vi lastPos(256, -1);
+    int maxLen = 0, l = 0;
+    for (int r = 0; r < (int)s.size(); r++) {
+        if (lastPos[(unsigned char)s[r]] >= l) {
+            l = lastPos[(unsigned char)s[r]] + 1; // Jump left pointer past previous duplicate
+        }
+        lastPos[(unsigned char)s[r]] = r;
+        maxLen = max(maxLen, r - l + 1);
+    }
+    return maxLen;
+}
+// Interview Explanation:
+// - Problem Statement: Find the length of the longest substring without repeating characters (LeetCode 3).
+// - Approach: Sliding Window with last-seen character position map.
+// - Intuition: Encountering a duplicate at `lastPos[c] >= l` lets us immediately jump `l = lastPos[c] + 1` in O(1).
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// 3. Group Anagrams (LeetCode 49)
+vector<vector<string>> groupAnagrams(vector<string> &strs) {
+    unordered_map<string, vector<string>> groups;
+    for (const string &s : strs) {
+        string key = s;
+        sort(key.begin(), key.end());
+        groups[key].push_back(s);
+    }
+    vector<vector<string>> result;
+    for (auto &[key, group] : groups) result.push_back(group);
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Group string array elements into subsets of anagrams (LeetCode 49).
+// - Approach: Sorted string key hashing.
+// - Intuition: Anagrams yield identical sorted string keys; group matching keys in a hash map.
+// - Complexity: Time: O(N \cdot L \log L), Space: O(N \cdot L).
+
+
+// 4. TRIE CLASS BLUEPRINT (Prefix Tree - LeetCode 208)
+class Trie {
+    struct TrieNode {
+        TrieNode* children[26];
+        bool isEnd;
+        TrieNode() {
+            isEnd = false;
+            for (int i = 0; i < 26; i++) children[i] = nullptr;
+        }
+    };
+    TrieNode* root;
+public:
+    Trie() { root = new TrieNode(); }
+
+    void insert(const string &word) {
+        TrieNode* curr = root;
+        for (char c : word) {
+            int idx = c - 'a';
+            if (!curr->children[idx]) curr->children[idx] = new TrieNode();
+            curr = curr->children[idx];
+        }
+        curr->isEnd = true;
+    }
+
+    bool search(const string &word) {
+        TrieNode* curr = root;
+        for (char c : word) {
+            int idx = c - 'a';
+            if (!curr->children[idx]) return false;
+            curr = curr->children[idx];
+        }
+        return curr->isEnd;
+    }
+
+    bool startsWith(const string &prefix) {
+        TrieNode* curr = root;
+        for (char c : prefix) {
+            int idx = c - 'a';
+            if (!curr->children[idx]) return false;
+            curr = curr->children[idx];
+        }
+        return true;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Implement a Prefix Tree (Trie) supporting insert, exact search, and prefix matching (LeetCode 208).
+// - Approach: 26-ary tree node structure.
+// - Intuition: Shared prefix paths allow checking prefix existence and word insertion in O(L) time where L is word length.
+// - Complexity: Time: O(L) per operation, Space: O(\sum L \cdot 26).
+
+
+// ====================================================================================================
+// SECTION 3: CORE STRING MATCHING & PATTERN RECOGNITION
 // ====================================================================================================
 
 // 1. KMP Algorithm (Prefix Function / Failure Table)
@@ -144,12 +270,6 @@ vi kmpSearch(const string &text, const string &pattern) {
     }
     return matches;
 }
-// Interview Explanation:
-// - Problem Statement: Find all start indices of pattern in text in linear O(N + M) time.
-// - Approach: KMP Prefix Function (pi-array failure table).
-// - Intuition: pi[i] stores length of longest proper prefix of s[0..i] that is also a suffix; `#` separator prevents pi[i] from exceeding pattern length.
-// - Complexity: Time: O(N + M), Space: O(N + M).
-
 
 // 2. Z-Algorithm (Longest Common Prefix Array)
 vi zArray(const string &s) {
@@ -166,61 +286,17 @@ vi zArray(const string &s) {
     }
     return z;
 }
-// Interview Explanation:
-// - Problem Statement: Compute Z-array where Z[i] is the length of longest common prefix between s and suffix s[i..n-1].
-// - Approach: Z-Algorithm sliding window box [l, r] optimization.
-// - Intuition: Reuses previously calculated Z-values inside the active window [l, r] to skip redundant character comparisons.
-// - Complexity: Time: O(N), Space: O(N).
 
-
-// 3. Repeated String Match (LeetCode 686 - Rabin-Karp)
-int repeatedStringMatch(string a, string b) {
-    string s = "";
-    int count = 0;
-    while ((int)s.size() < (int)b.size()) {
-        s += a;
-        count++;
-    }
-    FastHash H(s + a + a); // Append up to two extra copies for boundary coverage
-    ll target = FastHash::hashWord(b);
-    int n = s.size(), m = b.size();
-
-    auto checkMatch = [&](int lenStr, int repCount) {
-        FastHash H_curr(s);
-        for (int i = 0; i <= lenStr - m; i++) {
-            if (H_curr.get(i, i + m - 1) == target) return repCount;
-        }
-        return -1;
-    };
-
-    int res = checkMatch(n, count);
-    if (res != -1) return res;
-
-    s += a;
-    count++;
-    res = checkMatch(s.size(), count);
-    if (res != -1) return res;
-
-    return -1;
-}
-// Interview Explanation:
-// - Problem Statement: Find minimum number of times string a must be repeated so that b is a substring of it.
-// - Approach: String repetition bounding + Rabin-Karp hash matching.
-// - Intuition: Minimum length needed is b.size(); at most count or count + 1 repetitions are required to contain b.
-// - Complexity: Time: O(|A| + |B|), Space: O(|A| + |B|).
-
-
-// 4. Manacher's Algorithm (O(N) Palindromic Radii)
+// 3. Manacher's Algorithm (O(N) Palindromic Radii)
 pair<vi, vi> manacher(const string &s) {
     int n = s.size();
-    vi d1(n, 0); // Odd length palindromes radius
+    vi d1(n, 0), d2(n, 0);
     for (int i = 0, l = 0, r = -1; i < n; i++) {
         int k = (i > r) ? 1 : min(d1[l + r - i], r - i + 1);
         while (i - k >= 0 && i + k < n && s[i - k] == s[i + k]) k++;
         d1[i] = k--;
         if (i + k > r) { l = i - k; r = i + k; }
     }
-    vi d2(n, 0); // Even length palindromes radius
     for (int i = 0, l = 0, r = -1; i < n; i++) {
         int k = (i > r) ? 0 : min(d2[l + r - i + 1], r - i + 1);
         while (i - k - 1 >= 0 && i + k < n && s[i - k - 1] == s[i + k]) k++;
@@ -229,19 +305,31 @@ pair<vi, vi> manacher(const string &s) {
     }
     return {d1, d2};
 }
-// Interview Explanation:
-// - Problem Statement: Find radii of all odd-length and even-length palindromes centered at every character in O(N).
-// - Approach: Manacher's Algorithm using active palindrome window [l, r] mirroring.
-// - Intuition: Mirrors palindrome radius across center `l + r - i` to skip redundant expansions, achieving strict O(N) time.
-// - Complexity: Time: O(N), Space: O(N).
 
+// 4. Longest Palindromic Substring (LeetCode 5 - Expand Around Center)
+string longestPalindromeSubstring(string s) {
+    if (s.empty()) return "";
+    int start = 0, maxLen = 0;
+    auto expand = [&](int l, int r) {
+        while (l >= 0 && r < (int)s.size() && s[l] == s[r]) { l--; r++; }
+        if (r - l - 1 > maxLen) {
+            start = l + 1;
+            maxLen = r - l - 1;
+        }
+    };
+    for (int i = 0; i < (int)s.size(); i++) {
+        expand(i, i);     // Odd length center
+        expand(i, i + 1); // Even length center
+    }
+    return s.substr(start, maxLen);
+}
 
 // 5. Booth's Algorithm (Smallest Circular String Rotation)
 string boothsAlgorithm(string s) {
     int n = s.size();
-    s += s; // Concatenate string to handle circular shifts
+    s += s;
     vi f(2 * n, -1);
-    int k = 0; // Index of current smallest rotation
+    int k = 0;
     for (int j = 1; j < 2 * n; j++) {
         char sj = s[j];
         int i = f[j - k - 1];
@@ -258,18 +346,13 @@ string boothsAlgorithm(string s) {
     }
     return s.substr(k, n);
 }
-// Interview Explanation:
-// - Problem Statement: Find the lexicographically smallest circular rotation of a string.
-// - Approach: Booth's algorithm modified KMP failure function on duplicated string s + s.
-// - Intuition: Maintains candidate minimum rotation index k in linear O(N) time without generating all N rotations.
-// - Complexity: Time: O(N), Space: O(N).
 
 
 // ====================================================================================================
-// SECTION 3: PALINDROMIC STRING DECOMPOSITIONS & PREPROCESSING
+// SECTION 4: PALINDROMIC DECOMPOSITIONS & SEGMENTATION DP
 // ====================================================================================================
 
-// 1. Shortest Palindrome (LeetCode 214 - Prepend Minimum Characters)
+// 1. Shortest Palindrome (LeetCode 214)
 string shortestPalindrome(string s) {
     if (s.empty()) return s;
     string rev = s;
@@ -278,72 +361,15 @@ string shortestPalindrome(string s) {
     int n = s.size(), bestLen = 0;
     for (int i = 0; i < n; i++) {
         if (fwd.get(0, i) == bwd.get(n - 1 - i, n - 1)) {
-            bestLen = i + 1; // Longest palindromic prefix length
+            bestLen = i + 1;
         }
     }
     string suffix = s.substr(bestLen);
     reverse(suffix.begin(), suffix.end());
     return suffix + s;
 }
-// Interview Explanation:
-// - Problem Statement: Convert string s into a palindrome by prepending minimum characters at the front.
-// - Approach: Find longest palindromic prefix using Rolling Hash comparisons against reversed string.
-// - Intuition: Prepending the reversed non-palindromic suffix onto the front creates the shortest palindrome.
-// - Complexity: Time: O(N), Space: O(N).
 
-
-// 2. Longest Chunked Palindrome Decomposition (LeetCode 1147)
-int longestDecomposition(string text) {
-    int n = text.size();
-    FastHash H(text);
-    int k = 0, lStart = 0, rEnd = n - 1;
-    int i = 0, j = n - 1;
-    while (i < j) {
-        if (H.get(lStart, i) == H.get(j, rEnd)) {
-            k += 2;
-            lStart = i + 1;
-            rEnd = j - 1;
-        }
-        i++; j--;
-    }
-    if (lStart <= rEnd) k += 1;
-    return k;
-}
-// Interview Explanation:
-// - Problem Statement: Split string text into maximum number of chunks a_1 + a_2 + ... + a_k such that a_i == a_{k-i+1}.
-// - Approach: Two-pointer greedy chunk matching with O(1) rolling hash equality checks.
-// - Intuition: Greedily match shortest identical prefix and suffix chunks to maximize total decomposition count.
-// - Complexity: Time: O(N), Space: O(N).
-
-
-// 3. Count Distinct Subsequences (DP with Last Occurrence Tracking)
-int countDistinctSubsequences(string s) {
-    int n = s.size();
-    vll dp(n + 1, 0);
-    dp[0] = 1; // Empty subsequence
-    vi last(26, 0);
-    for (int i = 1; i <= n; i++) {
-        int idx = s[i - 1] - 'a';
-        dp[i] = (2 * dp[i - 1]) % MOD;
-        if (last[idx] != 0) {
-            dp[i] = (dp[i] - dp[last[idx] - 1] + MOD) % MOD;
-        }
-        last[idx] = i;
-    }
-    return (dp[n] - 1 + MOD) % MOD; // Exclude empty subsequence
-}
-// Interview Explanation:
-// - Problem Statement: Count the number of distinct non-empty subsequences of string s modulo 10^9+7.
-// - Approach: DP with last occurrence tracking for duplicate subtraction.
-// - Intuition: Appending s[i-1] doubles existing distinct subsequences; subtract dp[last[ch]-1] to eliminate duplicates formed by previous character occurrence.
-// - Complexity: Time: O(N), Space: O(N).
-
-
-// ====================================================================================================
-// SECTION 4: MULTI-PATTERN & STRING SEGMENTATION DP
-// ====================================================================================================
-
-// 1. CSES Word Combinations / Word Break Counting (LeetCode 139 variant)
+// 2. CSES Word Combinations / Word Break Counting (LeetCode 139 variant)
 ll wordCombinations(const string &s, const vector<string> &wordDict) {
     int n = s.size();
     FastHash H(s);
@@ -364,14 +390,8 @@ ll wordCombinations(const string &s, const vector<string> &wordDict) {
     }
     return dp[0];
 }
-// Interview Explanation:
-// - Problem Statement: Count total ways to construct target string s using dictionary words modulo 10^9+7.
-// - Approach: Bottom-up DP + Rolling Hash matching for unique dictionary word lengths.
-// - Intuition: `dp[i]` stores ways to form suffix s[i..n-1]; iterate unique lengths and add valid transitions `dp[i + len]`.
-// - Complexity: Time: O(N \cdot L) where L = unique word lengths, Space: O(N + M).
 
-
-// 2. Substring with Concatenation of All Words (LeetCode 30)
+// 3. Substring with Concatenation of All Words (LeetCode 30)
 vi findSubstringConcatenation(string s, vector<string> &words) {
     if (s.empty() || words.empty()) return {};
     int n = s.size(), k = words[0].size(), m = words.size(), totalLen = k * m;
@@ -397,14 +417,8 @@ vi findSubstringConcatenation(string s, vector<string> &words) {
     }
     return ans;
 }
-// Interview Explanation:
-// - Problem Statement: Find starting indices of all concatenated substrings containing every word in words exactly once.
-// - Approach: Offset Sliding Window + Rolling Hash equality counts.
-// - Intuition: Run k independent sliding windows with step size k; maintain hash frequency table to validate exact matches in O(N).
-// - Complexity: Time: O(N), Space: O(M \cdot K).
 
-
-// 3. Isomorphic Strings (LeetCode 205)
+// 4. Isomorphic Strings (LeetCode 205)
 bool isIsomorphic(string s, string t) {
     if (s.size() != t.size()) return false;
     vi m1(256, -1), m2(256, -1);
@@ -415,11 +429,6 @@ bool isIsomorphic(string s, string t) {
     }
     return true;
 }
-// Interview Explanation:
-// - Problem Statement: Determine if two strings s and t are isomorphic (one-to-one character mapping).
-// - Approach: Single-pass position tracking array for both strings.
-// - Intuition: Stores last seen position of each character; matching positions guarantee consistent bi-directional mapping.
-// - Complexity: Time: O(N), Space: O(1) 256-element direct access arrays.
 
 /*
  ====================================================================================================
@@ -430,23 +439,18 @@ bool isIsomorphic(string s, string t) {
     -------------------------------------------------------------------------------------------------
     Algorithm       | Time        | Best Used For
     -------------------------------------------------------------------------------------------------
-    KMP             | O(N + M)    | Exact single pattern matching, Prefix failure function (pi-array)
+    KMP             | O(N + M)    | Single pattern matching, Prefix failure function (pi-array)
     Z-Algorithm     | O(N + M)    | Prefix matching, LCP array (Z-array), border finding
     Rabin-Karp      | O(N + M)    | Multi-pattern fixed length matching, Substring hash comparison
+    Sliding Window  | O(N)        | Minimum Window Substring, Longest Substring without repeats
+    Trie            | O(L)        | Prefix matching, Auto-complete, Word Dictionary search
     Manacher        | O(N)        | All palindromic radii d1 (odd) and d2 (even)
-    Booth's         | O(N)        | Smallest circular string rotation
     -------------------------------------------------------------------------------------------------
 
- 2. ROLLING HASH FORMULAS & COLLISION PREVENTION:
+ 2. ROLLING HASH FORMULAS:
     • Forward Hash: `pref[i+1] = (pref[i] * P + (s[i] - 'a' + 1)) % MOD`
     • Substring Query: `get(l, r) = (pref[r+1] - pref[l] * power[r-l+1] % MOD + MOD) % MOD`
-    • Choice of Constants: `MOD = 1e9 + 7` (or `1e9 + 9`), `P = 31` (lowercase) or `P = 53` (mixed case).
-    • Anti-Hash Defense: Use double hashing (MOD1 = 1e9+7, MOD2 = 1e9+9) to eliminate hash collision attacks.
-
- 3. PALINDROME STRATEGY MATRIX:
-    • Check 1 Range [l, r]: Use Dual Rolling Hash (fwd vs bwd) in O(1).
-    • Find All Palindromes: Use Manacher's Algorithm in O(N).
-    • Palindrome Partitioning: Use 2D DP Table `pal[i][j]` + Backtracking.
+    • Choice of Constants: `MOD = 1e9 + 7`, `P = 31` (lowercase) or `P = 53` (mixed case).
  ====================================================================================================
 */
 

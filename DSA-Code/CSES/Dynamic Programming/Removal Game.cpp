@@ -1,38 +1,29 @@
 // Link: https://cses.fi/problemset/task/1097
-
 #include <bits/stdc++.h>
-#define int long long
 using namespace std;
 
-int solve(int i, int j, vector<int>& a, vector<vector<int>>& dp) {
-    if (i == j) return a[i];
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<long long> a(n);
+    long long sum = 0;
+    for (long long &x : a) { cin >> x; sum += x; }
 
-    if (dp[i][j] != LLONG_MIN)
-        return dp[i][j];
+    vector<vector<long long>> dp(n, vector<long long>(n, LLONG_MIN));
 
-    return dp[i][j] = max(
-        a[i] - solve(i + 1, j, a, dp),
-        a[j] - solve(i, j - 1, a, dp)
-    );
-} // finds max diff in score between two players, given optimal play from both sides.
+    function<long long(int, int)> solve = [&](int i, int j) -> long long {
+        if (i == j) return a[i];
+        if (dp[i][j] != LLONG_MIN) return dp[i][j];
+        return dp[i][j] = max(a[i] - solve(i + 1, j), a[j] - solve(i, j - 1));
+    };
 
-signed main() {
-    int n;
-    cin >> n;
-
-    vector<int> a(n);
-    int sum = 0;
-
-    for (int &x : a) {
-        cin >> x;
-        sum += x;
-    }
-
-    vector<vector<int>> dp(n, vector<int>(n, LLONG_MIN));
-
-    int diff = solve(0, n - 1, a, dp);
-    int score1 = (sum + diff) / 2; // score of first player
-    int score2 = (sum - diff) / 2; // score of second player
-
-    cout << (sum + diff) / 2 << '\n'; // find out the maximum score of the first player, given the total sum and the difference in scores.
+    long long diff = solve(0, n - 1);
+    cout << (sum + diff) / 2 << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Two players alternately take coins from either end; find the maximum score of the first player (CSES 1097).
+// - Approach: Interval Dynamic Programming (Minimax with Memoization).
+// - Intuition: `dp[i][j]` stores the maximum score DIFFERENCE the current player can achieve from coins $[i, j]$; $\text{firstScore} = (\text{totalSum} + \text{diff}) / 2$.
+// - Complexity: Time: O(N^2), Space: O(N^2).

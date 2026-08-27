@@ -1,104 +1,47 @@
 // Link: https://cses.fi/problemset/task/2077
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-int n, m;
+int n, m, timer_ = 0;
 vector<vector<int>> adj;
-
 vector<int> tin, low;
-vector<bool> isArticulation;
-
-int timer = 0;
+vector<bool> isArt;
 
 void dfs(int u, int parent) {
-    tin[u] = low[u] = ++timer;
-
+    tin[u] = low[u] = ++timer_;
     int children = 0;
-
     for (int v : adj[u]) {
-
         if (v == parent) continue;
-
-        if (tin[v]) {
-            // Back edge
-            low[u] = min(low[u], tin[v]);
-        }
+        if (tin[v]) { low[u] = min(low[u], tin[v]); }
         else {
-            // Tree edge
             dfs(v, u);
-
             low[u] = min(low[u], low[v]);
-
-            // Non-root articulation point condition
-            if (parent != -1 && low[v] >= tin[u]) {
-                isArticulation[u] = true;
-            }
-
+            if (parent != -1 && low[v] >= tin[u]) isArt[u] = true;
             children++;
         }
     }
-
-    // Root articulation point condition
-    if (parent == -1 && children > 1) {
-        isArticulation[u] = true;
-    }
+    if (parent == -1 && children > 1) isArt[u] = true;
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
+    ios::sync_with_stdio(false); cin.tie(nullptr);
     cin >> n >> m;
-
-    adj.resize(n + 1);
-
-    for (int i = 0; i < m; i++) {
-        int a, b;
-        cin >> a >> b;
-
-        adj[a].push_back(b);
-        adj[b].push_back(a);
+    adj.resize(n + 1); tin.assign(n + 1, 0); low.assign(n + 1, 0); isArt.assign(n + 1, false);
+    while (m--) {
+        int a, b; cin >> a >> b;
+        adj[a].push_back(b); adj[b].push_back(a);
     }
-
-    tin.assign(n + 1, 0);
-    low.assign(n + 1, 0);
-    isArticulation.assign(n + 1, false);
-
     dfs(1, -1);
-
-    vector<int> answer;
-
-    for (int city = 1; city <= n; city++) {
-        if (isArticulation[city]) {
-            answer.push_back(city);
-        }
-    }
-
-    cout << answer.size() << '\n';
-
-    for (int city : answer) {
-        cout << city << ' ';
-    }
-
+    vector<int> ans;
+    for (int i = 1; i <= n; i++) if (isArt[i]) ans.push_back(i);
+    cout << ans.size() << '\n';
+    for (int x : ans) cout << x << ' ';
     cout << '\n';
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find all articulation points (cities whose removal disconnects the graph) (CSES 2077).
+// - Approach: Tarjan's Articulation Point Algorithm using DFS discovery times `tin` and low-link values `low`.
+// - Intuition: Node $u$ is an articulation point if (non-root) some child $v$ has `low[v] >= tin[u]`, or (root) it has more than one DFS child.
+// - Complexity: Time: O(V + E), Space: O(V + E).

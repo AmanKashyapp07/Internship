@@ -1,32 +1,24 @@
 // Link: https://cses.fi/problemset/task/1145
-
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
-// this is important 
+
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n;
-    cin >> n;
-
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
     vector<long long> tails;
-    // tails hold the smallest tail of all increasing subsequences of length i+1 in tails[i].
+
     for (int i = 0; i < n; i++) {
-        long long x;
-        cin >> x;
-
-        auto it = lower_bound(tails.begin(), tails.end(), x); // Find the first element in tails that is >= x , we can use binary search here because tails is always sorted in increasing order because we are always replacing elements with smaller values.
-
-        if (it == tails.end()) {
-            tails.push_back(x); // if x is greater than all elements in tails, append it to the end
-        } else {
-            *it = x; // Otherwise, replace the existing element with x. This maintains the property of tails that it is sorted and contains the smallest possible tail for increasing subsequences of that length.
-        }
+        long long x; cin >> x;
+        auto it = lower_bound(tails.begin(), tails.end(), x);
+        if (it == tails.end()) tails.push_back(x);
+        else *it = x;
     }
-
     cout << tails.size() << '\n';
     return 0;
 }
 
+// Interview Explanation:
+// - Problem Statement: Find length of the longest increasing subsequence (LIS) (CSES 1145).
+// - Approach: Patience Sorting / Greedy Binary Search (`lower_bound` on `tails` array).
+// - Intuition: `tails[len]` stores smallest tail of all increasing subsequences of length `len+1`; updating via binary search runs in $O(N \log N)$.
+// - Complexity: Time: O(N \log N), Space: O(N).

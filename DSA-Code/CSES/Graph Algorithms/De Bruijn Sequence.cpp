@@ -1,64 +1,41 @@
 // Link: https://cses.fi/problemset/task/1692
-
 #include <bits/stdc++.h>
 using namespace std;
 
 struct Hierholzer {
-    int n;
-    vector<vector<int>> g;
-    vector<int> path;
-
+    int n; vector<vector<int>> g; vector<int> path;
     Hierholzer(int n) : n(n), g(n) {}
-
-    void addEdge(int u, int v) {
-        g[u].push_back(v);
-    }
-
     void dfs(int u) {
         while (!g[u].empty()) {
-            int v = g[u].back();
-            g[u].pop_back();
-            dfs(v);
+            int v = g[u].back(); g[u].pop_back(); dfs(v);
         }
         path.push_back(u);
-    }
-
-    vector<int> getEulerianCircuit(int start) {
-        path.clear();
-        dfs(start);
-        reverse(path.begin(), path.end());
-        return path;
     }
 };
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    if (n == 1) { cout << "01\n"; return 0; }
 
-    int n;
-    cin >> n;
-
-    if (n == 1) {
-        cout << "01\n";
-        return 0;
-    }
-
-    int V = 1 << (n - 1); // why n-1? Because we are considering all possible (n-1)-bit strings as vertices
-    int mask = V - 1; // if n is 4, V is 8 (1000 in binary), mask is 7 (0111 in binary). This will help us to keep only the last (n-1) bits of the number.
-
+    int V = 1 << (n - 1), mask = V - 1;
     Hierholzer h(V);
-
     for (int u = 0; u < V; u++) {
-        h.addEdge(u, (u << 1) & mask);           // append 0 , u<<1 will shift left and & mask will keep only the last (n-1) bits
-        h.addEdge(u, ((u << 1) & mask) | 1);     // append 1 , u<<1 will shift left and & mask will keep only the last (n-1) bits, then we set the last bit to 1 using | 1
+        h.g[u].push_back((u << 1) & mask);
+        h.g[u].push_back(((u << 1) & mask) | 1);
     }
 
-    vector<int> path = h.getEulerianCircuit(0);
-    int len = path.size();
+    h.dfs(0);
+    reverse(h.path.begin(), h.path.end());
+
     string ans(n - 1, '0');
-
-    for (int i = 1; i < len; i++) // start from 1 because the first vertex is already represented by the initial string of '0's
-        ans += char('0' + (path[i] & 1)); // path[i] & 1 will give us the last bit of the vertex, which is the bit we appended to get to this vertex.
-
+    for (size_t i = 1; i < h.path.size(); i++) ans += char('0' + (h.path[i] & 1));
     cout << ans << '\n';
+    return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Construct a shortest binary sequence containing all $2^n$ binary strings of length n as substrings (CSES 1692).
+// - Approach: Eulerian Circuit on De Bruijn Graph via Hierholzer's Algorithm.
+// - Intuition: Nodes are $(n-1)$-bit states; directed edges represent appending 0 or 1. Eulerian circuit visits every edge (n-bit string) once.
+// - Complexity: Time: O(2^N), Space: O(2^N).

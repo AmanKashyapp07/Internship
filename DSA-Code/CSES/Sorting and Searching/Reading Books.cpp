@@ -1,50 +1,22 @@
-// CSES Problem: <problem name>
-// https://cses.fi/problemset/task/<id>
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-#define int long long
+// Link: https://cses.fi/problemset/task/1631
+#include <bits/stdc++.h>
 using namespace std;
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-signed main()
-{
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n;
-    cin >> n;
-
-    vector<int> a(n);
-    for (int i = 0; i < n; i++)
-    {
-        cin >> a[i];
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    long long sum = 0, mx = 0;
+    for (int i = 0; i < n; i++) {
+        long long x; cin >> x;
+        sum += x;
+        mx = max(mx, x);
     }
-
-    int sum=0;
-    int mx=0;
-    for (int i = 0; i < n; i++)
-    {
-        sum += a[i];
-        mx = max(mx, a[i]);
-    }
-    cout << max(2*mx, sum) << endl;
+    cout << max(2 * mx, sum) << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find minimum total time for two readers to read all n books without reading the same book simultaneously (CSES 1631).
+// - Approach: Mathematical Max Criterion `max(2 * max_book, sum_books)`.
+// - Intuition: If the largest book takes $> \text{sum} - \text{max}$, the bottleneck reader waiting for that single book forces time $2 \cdot \text{max}$; otherwise total sum is achieved.
+// - Complexity: Time: O(N), Space: O(1).

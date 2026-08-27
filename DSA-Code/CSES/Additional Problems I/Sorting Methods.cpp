@@ -1,157 +1,51 @@
 // Link: https://cses.fi/problemset/task/1162
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-#include <cstring>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi = vector<int>;
-using vll = vector<ll>;
-using vvi = vector<vector<int>>;
-
-#define all(x) (x).begin(), (x).end()
-#define rall(x) (x).rbegin(), (x).rend()
-#define pb push_back
-#define ff first
-#define ss second
-
-const int INF = INT_MAX;
-const ll LINF = LLONG_MAX;
-const ll MOD = 1000000007LL;
-const ll P = 31;
-
-
-/*---------------------------------------------------------------
-1. Minimum adjacent swaps = Number of inversions
-Time: O(n log n)
-----------------------------------------------------------------*/
-
 struct Fenwick {
-    int n;
-    vector<int> bit;
-
+    int n; vector<int> bit;
     Fenwick(int n) : n(n), bit(n + 1, 0) {}
-
-    void add(int idx, int val) {
-        while (idx <= n) {
-            bit[idx] += val;
-            idx += idx & -idx;
-        }
-    }
-
-    int sum(int idx) {
-        int res = 0;
-        while (idx > 0) {
-            res += bit[idx];
-            idx -= idx & -idx;
-        }
-        return res;
-    }
+    void add(int idx, int val) { for (; idx <= n; idx += idx & -idx) bit[idx] += val; }
+    int sum(int idx) { int res = 0; for (; idx > 0; idx -= idx & -idx) res += bit[idx]; return res; }
 };
 
-ll minAdjacentSwaps(vector<int> &a) {
-    int n = a.size();
-    Fenwick ft(n);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
 
-    ll inv = 0;
+    // 1. Min adjacent swaps = Inversion Count
+    Fenwick ft(n); long long inv = 0;
+    for (int i = n - 1; i >= 0; i--) { inv += ft.sum(a[i] - 1); ft.add(a[i], 1); }
 
-    for (int i = n - 1; i >= 0; i--) {
-        inv += ft.sum(a[i] - 1);
-        ft.add(a[i], 1);
-    }
-
-    return inv;
-}
-
-/*---------------------------------------------------------------
-2. Minimum arbitrary swaps = n - number of cycles
-Time: O(n)
-----------------------------------------------------------------*/
-
-int minAnySwaps(vector<int> &a) {
-    int n = a.size();
-    vector<bool> vis(n, false);
-
-    int cycles = 0;
-
+    // 2. Min arbitrary swaps = N - Permutation Cycles
+    vector<bool> vis(n, false); int cycles = 0;
     for (int i = 0; i < n; i++) {
-        if (vis[i]) continue;
-
-        cycles++;
-
-        int cur = i;
-        while (!vis[cur]) {
-            vis[cur] = true;
-            cur = a[cur] - 1; // why -1? because the array a is 1-indexed, so we need to subtract 1 to get the correct index in the 0-indexed array.
+        if (!vis[i]) {
+            cycles++; int cur = i;
+            while (!vis[cur]) { vis[cur] = true; cur = a[cur] - 1; }
         }
     }
 
-    return n - cycles;
-}
-
-/*---------------------------------------------------------------
-3. Minimum move-to-any-position operations = n - LIS
-Time: O(n log n)
-----------------------------------------------------------------*/
-
-int minMoveAnywhere(vector<int> &a) {
+    // 3. Min move-to-any-position = N - LIS
     vector<int> lis;
-
     for (int x : a) {
         auto it = lower_bound(lis.begin(), lis.end(), x);
-
-        if (it == lis.end())
-            lis.push_back(x);
-        else
-            *it = x;
+        if (it == lis.end()) lis.push_back(x);
+        else *it = x;
     }
 
-    return (int)a.size() - (int)lis.size();
-}
-
-/*---------------------------------------------------------------
-4. Minimum move-to-front operations
-Time: O(n)
-----------------------------------------------------------------*/
-
-int minMoveToFront(vector<int> &a) {
-    int n = a.size();
-
+    // 4. Min move-to-front = N - longest decremental suffix matched
     int need = n;
+    for (int i = n - 1; i >= 0; i--) if (a[i] == need) need--;
 
-    for (int i = n - 1; i >= 0; i--) {
-        if (a[i] == need)
-            need--;
-    }
-
-    return need;
+    cout << inv << " " << (n - cycles) << " " << (n - (int)lis.size()) << " " << need << '\n';
+    return 0;
 }
 
-int main(){
-    int n;
-    cin >> n;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++) cin >> a[i];
-    cout << minAdjacentSwaps(a) << " " << minAnySwaps(a) << " " << minMoveAnywhere(a) << " " << minMoveToFront(a) << endl;
-}
+// Interview Explanation:
+// - Problem Statement: Find minimum operations to sort a permutation under 4 distinct rules (CSES 1162).
+// - Approach: 1) Fenwick inversion count, 2) Cycle decomposition, 3) Patience sorting LIS, 4) Backward suffix scanning.
+// - Intuition: Adjacent swap = inversions; arbitrary swap = N - cycles; move anywhere = N - LIS; move to front = N - max matching suffix [need...N].
+// - Complexity: Time: O(N \log N), Space: O(N).

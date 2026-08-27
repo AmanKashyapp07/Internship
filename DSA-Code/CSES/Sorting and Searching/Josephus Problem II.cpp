@@ -1,72 +1,38 @@
 // Link: https://cses.fi/problemset/task/2163
-
 #include <bits/stdc++.h>
 using namespace std;
 
-// Fenwick Tree (Binary Indexed Tree)
-struct F{
-    int n;
-    vector<int> b;
-
-    F(int n):n(n),b(n+1){}
-
-    // Add value v at index i
-    void u(int i,int v){
-        for(++i;i<=n;i+=i&-i) b[i]+=v;
-    }
-
-    // Returns prefix sum [0...i]
-    int q(int i){
-        int s=0;
-        for(++i;i;i-=i&-i) s+=b[i];
-        return s;
-    }
+struct Fenwick {
+    int n; vector<int> bit;
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
+    void add(int i, int v) { for (i++; i <= n; i += i & -i) bit[i] += v; }
+    int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
 };
 
-int main(){
-    ios::sync_with_stdio(0);
-    cin.tie(0);
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, k; cin >> n >> k;
+    Fenwick bit(n);
+    for (int i = 0; i < n; i++) bit.add(i, 1);
 
-    int n,k;
-    cin>>n>>k;
-
-    F f(n);
-
-    // Initially every child is present
-    for(int i=0;i<n;i++) f.u(i,1);
-
-    int cur=0;   // Current position among remaining children
-
-    // Repeat until all children are removed
-    for(int rem=n;rem;rem--){
-        // Find next child to remove
-        cur=(cur+k)%rem;
-        int need=cur+1;
-
-        // Binary search on Fenwick tree to find the actual index
-        int l=0,h=n-1,ans=n-1;
-        while(l<=h){
-            int m=(l+h)>>1;
-            if(f.q(m)>=need)
-                ans=m,h=m-1;
-            else
-                l=m+1;
+    int cur = 0;
+    for (int rem = n; rem > 0; rem--) {
+        cur = (cur + k) % rem;
+        int need = cur + 1;
+        int low = 0, high = n - 1, ans = n - 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (bit.query(mid) >= need) { ans = mid; high = mid - 1; }
+            else low = mid + 1;
         }
-
-        // Output removed child (1-based indexing)
-        cout<<ans+1<<" \n"[rem==1];
-
-        // Mark child as removed
-        f.u(ans,-1);
+        cout << ans + 1 << (rem == 1 ? '\n' : ' ');
+        bit.add(ans, -1);
     }
+    return 0;
 }
 
-// Fenwick Tree stores PREFIX SUMS instead of individual values.
-// Prefix sums allow us to quickly know how many active elements
-// exist from index 0 to index i in O(log n).
-
-// Use the prefix sum concept when:
-// 1. You need frequent point updates.
-// 2. You need cumulative/range sum queries.
-// 3. You need to find the k-th active element by binary searching
-//    on prefix sums (as done in the Josephus problem).
+// Interview Explanation:
+// - Problem Statement: Output removal order of n children in a circle where every k-th child is removed (CSES 2163).
+// - Approach: Binary Search on Fenwick Tree prefix sums ($O(N \log^2 N)$).
+// - Intuition: Modular arithmetic finds ordinal index of target child among remaining; Fenwick tree prefix sum locates actual 0-indexed position.
+// - Complexity: Time: O(N \log^2 N), Space: O(N).

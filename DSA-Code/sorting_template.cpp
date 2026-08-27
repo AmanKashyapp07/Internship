@@ -3,7 +3,8 @@
  *                 ULTIMATE SORTING, BINARY SEARCH & GREEDY ALGORITHMS BLUEPRINT
  * ====================================================================================================
  * Consolidated Master Template covering Core Sorting Algorithms, 1D/2D Binary Search,
- * Binary Search on Answer, Dutch National Flag, Boyer-Moore Voting, Sweep-Line, and Greedy Invariants.
+ * Median of Two Sorted Arrays, Binary Search on Answer, Dutch National Flag, Boyer-Moore Voting,
+ * Sweep-Line, Merge/Insert/Non-overlapping Intervals, and Greedy Invariants.
  */
 
 #include <bits/stdc++.h>
@@ -234,15 +235,15 @@ void countingSort(vi &arr) {
 
 
 // ====================================================================================================
-// SECTION 2: BINARY SEARCH MASTER TOOLKIT (1D & 2D)
+// SECTION 2: BINARY SEARCH MASTER TOOLKIT (1D, 2D & DUAL ARRAYS)
 // ====================================================================================================
 
 // 1. Lower Bound & Upper Bound primitives
 int getLowerBound(const vi &arr, int x) {
-    return lower_bound(arr.begin(), arr.end(), x) - arr.begin(); // Smallest index with arr[idx] >= x
+    return lower_bound(arr.begin(), arr.end(), x) - arr.begin();
 }
 int getUpperBound(const vi &arr, int x) {
-    return upper_bound(arr.begin(), arr.end(), x) - arr.begin(); // Smallest index with arr[idx] > x
+    return upper_bound(arr.begin(), arr.end(), x) - arr.begin();
 }
 pair<int, int> firstAndLastOccurrence(const vi &arr, int x) {
     int lb = lower_bound(arr.begin(), arr.end(), x) - arr.begin();
@@ -251,13 +252,80 @@ pair<int, int> firstAndLastOccurrence(const vi &arr, int x) {
     return {-1, -1};
 }
 // Interview Explanation:
-// - Problem Statement: Find lower bound, upper bound, first and last occurrence, and total occurrences of target in a sorted array.
+// - Problem Statement: Find lower bound, upper bound, first and last occurrence of target in a sorted array.
 // - Approach: Binary Search bound queries.
-// - Intuition: lower_bound finds first position where element is not less than x; upper_bound finds first strictly greater element.
+// - Intuition: lower_bound finds first position where element is >= x; upper_bound finds first strictly > x element.
 // - Complexity: Time: O(log N), Space: O(1).
 
 
-// 2. Search in Rotated Sorted Array I (Distinct elements)
+// 2. Median of Two Sorted Arrays (LeetCode 4)
+double findMedianSortedArrays(const vi &nums1, const vi &nums2) {
+    if (nums1.size() > nums2.size()) return findMedianSortedArrays(nums2, nums1); // Ensure nums1 is smaller
+    int n1 = nums1.size(), n2 = nums2.size();
+    int low = 0, high = n1;
+
+    while (low <= high) {
+        int cut1 = (low + high) >> 1;
+        int cut2 = (n1 + n2 + 1) / 2 - cut1;
+
+        int l1 = (cut1 == 0) ? INT_MIN : nums1[cut1 - 1];
+        int l2 = (cut2 == 0) ? INT_MIN : nums2[cut2 - 1];
+        int r1 = (cut1 == n1) ? INT_MAX : nums1[cut1];
+        int r2 = (cut2 == n2) ? INT_MAX : nums2[cut2];
+
+        if (l1 <= r2 && l2 <= r1) {
+            if ((n1 + n2) % 2 == 0)
+                return (max(l1, l2) + min(r1, r2)) / 2.0;
+            else
+                return max(l1, l2);
+        } else if (l1 > r2) {
+            high = cut1 - 1;
+        } else {
+            low = cut1 + 1;
+        }
+    }
+    return 0.0;
+}
+// Interview Explanation:
+// - Problem Statement: Find the median of two sorted arrays nums1 and nums2 in O(log(min(N, M))) time (LeetCode 4).
+// - Approach: Binary Search on the partition index cut1 of the smaller array.
+// - Intuition: Partition both arrays such that left half contains (N+M+1)/2 elements; valid partition requires `l1 <= r2` and `l2 <= r1`.
+// - Complexity: Time: O(\log(\min(N_1, N_2))), Space: O(1).
+
+
+// 3. K-th Element of Two Sorted Arrays
+int kthElementSortedArrays(const vi &nums1, const vi &nums2, int k) {
+    int n1 = nums1.size(), n2 = nums2.size();
+    if (n1 > n2) return kthElementSortedArrays(nums2, nums1, k);
+
+    int low = max(0, k - n2), high = min(k, n1);
+    while (low <= high) {
+        int cut1 = (low + high) >> 1;
+        int cut2 = k - cut1;
+
+        int l1 = (cut1 == 0) ? INT_MIN : nums1[cut1 - 1];
+        int l2 = (cut2 == 0) ? INT_MIN : nums2[cut2 - 1];
+        int r1 = (cut1 == n1) ? INT_MAX : nums1[cut1];
+        int r2 = (cut2 == n2) ? INT_MAX : nums2[cut2];
+
+        if (l1 <= r2 && l2 <= r1) {
+            return max(l1, l2);
+        } else if (l1 > r2) {
+            high = cut1 - 1;
+        } else {
+            low = cut1 + 1;
+        }
+    }
+    return -1;
+}
+// Interview Explanation:
+// - Problem Statement: Find the k-th smallest element from two combined sorted arrays.
+// - Approach: Binary Search on partition range [max(0, k - n2), min(k, n1)].
+// - Intuition: Generalization of median of two sorted arrays where left partition holds exactly k elements.
+// - Complexity: Time: O(\log(\min(N_1, N_2))), Space: O(1).
+
+
+// 4. Search in Rotated Sorted Array I (Distinct elements)
 int searchRotatedI(const vi &arr, int target) {
     int low = 0, high = (int)arr.size() - 1;
     while (low <= high) {
@@ -273,21 +341,15 @@ int searchRotatedI(const vi &arr, int target) {
     }
     return -1;
 }
-// Interview Explanation:
-// - Problem Statement: Search for target in a rotated sorted array of distinct elements.
-// - Approach: Binary Search checking sorted half.
-// - Intuition: At least one half [low...mid] or [mid...high] is always strictly sorted; check if target falls inside that sorted range.
-// - Complexity: Time: O(log N), Space: O(1).
 
-
-// 3. Search in Rotated Sorted Array II (Contains duplicates)
+// 5. Search in Rotated Sorted Array II (Contains duplicates)
 bool searchRotatedII(const vi &arr, int target) {
     int low = 0, high = (int)arr.size() - 1;
     while (low <= high) {
         int mid = low + (high - low) / 2;
         if (arr[mid] == target) return true;
         if (arr[low] == arr[mid] && arr[mid] == arr[high]) {
-            low++; high--; // Indeterminate half, shrink bounds
+            low++; high--;
             continue;
         }
         if (arr[low] <= arr[mid]) {
@@ -300,14 +362,8 @@ bool searchRotatedII(const vi &arr, int target) {
     }
     return false;
 }
-// Interview Explanation:
-// - Problem Statement: Search for target in a rotated sorted array containing duplicates.
-// - Approach: Binary Search with boundary trimming when arr[low] == arr[mid] == arr[high].
-// - Intuition: When endpoints match mid, we cannot determine which half is sorted; safely advance low and decrement high.
-// - Complexity: Time: O(log N) avg, O(N) worst case with all duplicate values, Space: O(1).
 
-
-// 4. Find Minimum & Rotation Count in Rotated Sorted Array
+// 6. Find Minimum in Rotated Sorted Array
 int findMinRotated(const vi &arr) {
     int low = 0, high = (int)arr.size() - 1, ans = INT_MAX;
     while (low <= high) {
@@ -324,32 +380,7 @@ int findMinRotated(const vi &arr) {
     return ans;
 }
 
-int findRotationCount(const vi &arr) {
-    int low = 0, high = (int)arr.size() - 1, mini = INT_MAX, ans = 0;
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-        if (arr[low] <= arr[high]) {
-            if (arr[low] < mini) { mini = arr[low]; ans = low; }
-            break;
-        }
-        if (arr[low] <= arr[mid]) {
-            if (arr[low] < mini) { mini = arr[low]; ans = low; }
-            low = mid + 1;
-        } else {
-            if (arr[mid] < mini) { mini = arr[mid]; ans = mid; }
-            high = mid - 1;
-        }
-    }
-    return ans; // Rotation count is the index of the minimum element
-}
-// Interview Explanation:
-// - Problem Statement: Find the minimum value and total rotation count of a rotated sorted array.
-// - Approach: Binary search tracking minimum candidate in sorted halves.
-// - Intuition: In a sorted half, the minimum is always its first element; eliminate that half and explore the unsorted half.
-// - Complexity: Time: O(log N), Space: O(1).
-
-
-// 5. Single Element in a Sorted Array (Every other element appears twice)
+// 7. Single Element in a Sorted Array
 int singleNonDuplicate(const vi &arr) {
     int n = arr.size();
     if (n == 1) return arr[0];
@@ -360,7 +391,6 @@ int singleNonDuplicate(const vi &arr) {
     while (low <= high) {
         int mid = low + (high - low) / 2;
         if (arr[mid] != arr[mid - 1] && arr[mid] != arr[mid + 1]) return arr[mid];
-        // Before unique element: (even, odd) index pairs match. After unique element: (odd, even) match.
         if ((mid % 2 == 1 && arr[mid] == arr[mid - 1]) || (mid % 2 == 0 && arr[mid] == arr[mid + 1])) {
             low = mid + 1;
         } else {
@@ -369,14 +399,8 @@ int singleNonDuplicate(const vi &arr) {
     }
     return -1;
 }
-// Interview Explanation:
-// - Problem Statement: Find the unique element in a sorted array where every other element appears twice.
-// - Approach: Binary search on index parity.
-// - Intuition: Before the single element, pairs start at even indices: (0,1), (2,3); after the single element, the order flips to (odd, even).
-// - Complexity: Time: O(log N), Space: O(1).
 
-
-// 6. Find Peak Element (1D Local Maximum)
+// 8. Find Peak Element (1D Local Maximum)
 int findPeakElement(const vi &arr) {
     int n = arr.size();
     if (n == 1) return 0;
@@ -387,41 +411,13 @@ int findPeakElement(const vi &arr) {
     while (low <= high) {
         int mid = low + (high - low) / 2;
         if (arr[mid] > arr[mid - 1] && arr[mid] > arr[mid + 1]) return mid;
-        if (arr[mid] > arr[mid - 1]) low = mid + 1; // Climbing uphill, peak must exist on right
-        else high = mid - 1; // Downhill, peak must exist on left
+        if (arr[mid] > arr[mid - 1]) low = mid + 1;
+        else high = mid - 1;
     }
     return -1;
 }
-// Interview Explanation:
-// - Problem Statement: Find an index i such that arr[i] > arr[i-1] and arr[i] > arr[i+1].
-// - Approach: Binary Search following gradient slope.
-// - Intuition: If arr[mid] > arr[mid-1], the slope is increasing to the right; a peak is guaranteed to exist on the right side.
-// - Complexity: Time: O(log N), Space: O(1).
 
-
-// 7. K-th Missing Positive Number
-int findKthPositive(vi &arr, int k) {
-    int low = 0, high = (int)arr.size() - 1, idx = -1;
-    while (low <= high) {
-        int mid = low + (high - low) / 2;
-        int missing = arr[mid] - (mid + 1);
-        if (missing < k) {
-            idx = mid;
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-    return k + idx + 1;
-}
-// Interview Explanation:
-// - Problem Statement: Find the k-th positive integer missing from a strictly increasing array.
-// - Approach: Binary search on the count of missing numbers before index mid (`arr[mid] - (mid + 1)`).
-// - Intuition: Find the largest index with < k missing elements; the answer is directly computed as k + idx + 1.
-// - Complexity: Time: O(log N), Space: O(1).
-
-
-// 8. Search in 2D Matrix I (Row-major fully sorted) & II (Individually sorted rows and cols)
+// 9. Search in 2D Matrix I & II
 bool searchMatrixI(const vector<vi> &matrix, int target) {
     if (matrix.empty() || matrix[0].empty()) return false;
     int n = matrix.size(), m = matrix[0].size(), low = 0, high = n * m - 1;
@@ -437,7 +433,7 @@ bool searchMatrixI(const vector<vi> &matrix, int target) {
 
 bool searchMatrixII(const vector<vi> &matrix, int target) {
     if (matrix.empty() || matrix[0].empty()) return false;
-    int n = matrix.size(), m = matrix[0].size(), row = 0, col = m - 1; // Start top-right
+    int n = matrix.size(), m = matrix[0].size(), row = 0, col = m - 1;
     while (row < n && col >= 0) {
         if (matrix[row][col] == target) return true;
         if (matrix[row][col] > target) col--;
@@ -445,42 +441,8 @@ bool searchMatrixII(const vector<vi> &matrix, int target) {
     }
     return false;
 }
-// Interview Explanation:
-// - Problem Statement: Search for target in (I) fully flattened sorted matrix, and (II) matrix with sorted rows and columns.
-// - Approach: (I) Virtual 1D binary search. (II) Top-right staircase walk.
-// - Intuition: (I) Index mid maps to (mid / m, mid % m). (II) Top-right corner acts as a binary search tree root; left is smaller, down is larger.
-// - Complexity: (I) Time: O(log(N * M)), (II) Time: O(N + M), Space: O(1).
 
-
-// 9. Find Peak Element II (2D Peak strictly greater than 4 neighbors)
-vi findPeakElementII(const vector<vi> &matrix) {
-    int n = matrix.size(), m = matrix[0].size(), low = 0, high = m - 1;
-    while (low <= high) {
-        int mid_col = low + (high - low) / 2, max_row = 0;
-        for (int i = 0; i < n; i++) {
-            if (matrix[i][mid_col] > matrix[max_row][mid_col]) max_row = i;
-        }
-        int left = (mid_col - 1 >= 0) ? matrix[max_row][mid_col - 1] : -1;
-        int right = (mid_col + 1 < m) ? matrix[max_row][mid_col + 1] : -1;
-
-        if (matrix[max_row][mid_col] > left && matrix[max_row][mid_col] > right) {
-            return {max_row, mid_col};
-        } else if (matrix[max_row][mid_col] < left) {
-            high = mid_col - 1;
-        } else {
-            low = mid_col + 1;
-        }
-    }
-    return {-1, -1};
-}
-// Interview Explanation:
-// - Problem Statement: Find a 2D peak element in an N x M matrix strictly greater than top, bottom, left, right neighbors.
-// - Approach: Binary Search on column indices + Global column maximum.
-// - Intuition: Finding the column maximum guarantees it is greater than top and bottom neighbors; then binary search horizontally on left/right neighbors.
-// - Complexity: Time: O(N \log M), Space: O(1).
-
-
-// 10. Matrix Median (Row-wise sorted matrix with odd dimensions)
+// 10. Matrix Median
 int matrixMedian(const vector<vi> &matrix) {
     int n = matrix.size(), m = matrix[0].size();
     int target_count = (n * m + 1) / 2;
@@ -505,18 +467,51 @@ int matrixMedian(const vector<vi> &matrix) {
     }
     return ans;
 }
-// Interview Explanation:
-// - Problem Statement: Find the median element of a row-wise sorted matrix of odd dimensions.
-// - Approach: Binary search on the answer range [min_val, max_val] with upper_bound counting.
-// - Intuition: The median has at least (N * M + 1) / 2 elements <= median; monotonic count allows standard binary search on value range.
-// - Complexity: Time: O(32 * N \log M), Space: O(1).
 
 
 // ====================================================================================================
 // SECTION 3: BINARY SEARCH ON ANSWER (PREDICATE / OPTIMIZATION)
 // ====================================================================================================
 
-// 1. Aggressive Cows (Maximize Minimum Distance)
+// 1. Split Array Largest Sum / Capacity To Ship Packages (LeetCode 410 / 1011)
+bool canSplitArray(const vi &nums, int k, ll maxSum) {
+    int count = 1;
+    ll currentSum = 0;
+    for (int x : nums) {
+        if (currentSum + x > maxSum) {
+            count++;
+            currentSum = x;
+            if (count > k) return false;
+        } else {
+            currentSum += x;
+        }
+    }
+    return true;
+}
+
+int splitArray(const vi &nums, int k) {
+    ll low = *max_element(nums.begin(), nums.end());
+    ll high = accumulate(nums.begin(), nums.end(), 0LL);
+    ll ans = high;
+    while (low <= high) {
+        ll mid = low + (high - low) / 2;
+        if (canSplitArray(nums, k, mid)) {
+            ans = mid;
+            high = mid - 1; // Minimize maximum subarray sum
+        } else {
+            low = mid + 1;
+        }
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Split array nums into k contiguous subarrays such that the largest sum of any subarray is minimized (LeetCode 410).
+// - Approach: Binary Search on Answer over range [max(nums), sum(nums)].
+// - Intuition: If max sum `mid` allows partitioning into <= k subarrays, try smaller thresholds `high = mid - 1`.
+// - Complexity: Time: O(N \log(\sum - \max)), Space: O(1).
+
+
+// 2. Aggressive Cows (Maximize Minimum Distance)
 bool canPlaceCows(const vi &stalls, int k, int dist) {
     int cows = 1, lastPos = stalls[0];
     for (size_t i = 1; i < stalls.size(); i++) {
@@ -536,27 +531,21 @@ int aggressiveCows(vi stalls, int k) {
         int mid = low + (high - low) / 2;
         if (canPlaceCows(stalls, k, mid)) {
             ans = mid;
-            low = mid + 1; // Try to maximize distance
+            low = mid + 1;
         } else {
             high = mid - 1;
         }
     }
     return ans;
 }
-// Interview Explanation:
-// - Problem Statement: Place k cows in stall coordinates such that the minimum distance between any two cows is maximized.
-// - Approach: Binary Search on Answer [1, max_coordinate - min_coordinate].
-// - Intuition: If we can place cows with separation >= mid, we can always place with smaller separation; greedily place cows left-to-right.
-// - Complexity: Time: O(N \log N + N \log(\text{range})), Space: O(1).
 
-
-// 2. House Robber IV (Minimize Maximum Capability)
+// 3. House Robber IV (Minimize Maximum Capability)
 bool canRobHouses(const vi &nums, int k, int capability) {
     int robbed = 0, n = nums.size();
     for (int i = 0; i < n; ) {
         if (nums[i] <= capability) {
             robbed++;
-            i += 2; // Skip adjacent house
+            i += 2;
         } else {
             i++;
         }
@@ -574,11 +563,6 @@ int minCapability(const vi &nums, int k) {
     }
     return low;
 }
-// Interview Explanation:
-// - Problem Statement: Rob at least k non-adjacent houses such that the maximum house value robbed is minimized.
-// - Approach: Binary Search on Answer over house values.
-// - Intuition: For a given capability threshold, greedily rob every eligible house skipping its neighbor to maximize total robbed houses.
-// - Complexity: Time: O(N \log(\text{range})), Space: O(1).
 
 
 // ====================================================================================================
@@ -594,18 +578,12 @@ void sortColors(vi &nums) {
         } else if (nums[mid] == 1) {
             mid++;
         } else {
-            swap(nums[mid], nums[high--]); // Do not advance mid; swapped element must be inspected
+            swap(nums[mid], nums[high--]);
         }
     }
 }
-// Interview Explanation:
-// - Problem Statement: Sort an array of 0s, 1s, and 2s in-place in a single pass.
-// - Approach: Dutch National Flag 3-pointer partition (low, mid, high).
-// - Intuition: Maintains invariants: [0..low-1] are 0s, [low..mid-1] are 1s, and [high+1..n-1] are 2s.
-// - Complexity: Time: O(N) single pass, Space: O(1) in-place.
 
-
-// 2. Boyer-Moore Majority Element (N/2 and N/K Generalization)
+// 2. Boyer-Moore Majority Element
 int majorityElementHalf(const vi &nums) {
     int candidate = nums[0], count = 1;
     for (size_t i = 1; i < nums.size(); i++) {
@@ -619,46 +597,90 @@ int majorityElementHalf(const vi &nums) {
     return candidate;
 }
 
-vi majorityElementK(const vi &nums, int k) {
-    unordered_map<int, int> candidates;
-    for (int x : nums) {
-        if (candidates.count(x)) candidates[x]++;
-        else if ((int)candidates.size() < k - 1) candidates[x] = 1;
-        else {
-            vi toErase;
-            for (auto &[num, cnt] : candidates) {
-                if (--cnt == 0) toErase.push_back(num);
-            }
-            for (int num : toErase) candidates.erase(num);
+
+// ====================================================================================================
+// SECTION 5: SWEEP LINE & INTERVAL ALGORITHMS
+// ====================================================================================================
+
+// 1. Merge Overlapping Intervals (LeetCode 56)
+vector<vi> mergeIntervals(vector<vi> &intervals) {
+    if (intervals.empty()) return {};
+    sort(intervals.begin(), intervals.end());
+    vector<vi> merged;
+    for (const auto &interval : intervals) {
+        if (merged.empty() || merged.back()[1] < interval[0]) {
+            merged.push_back(interval);
+        } else {
+            merged.back()[1] = max(merged.back()[1], interval[1]);
         }
     }
-    unordered_map<int, int> freq;
-    for (int x : nums) if (candidates.count(x)) freq[x]++;
-    vi ans;
-    for (auto &[num, cnt] : freq) {
-        if (cnt > (int)nums.size() / k) ans.push_back(num);
-    }
-    return ans;
+    return merged;
 }
 // Interview Explanation:
-// - Problem Statement: Find all elements that appear strictly more than n/2 (or n/k) times in an array.
-// - Approach: Boyer-Moore Majority Voting Algorithm with at most k-1 candidates.
-// - Intuition: Different elements cancel each other out; if an element appears > n/k times, it cannot be completely eliminated.
-// - Complexity: Time: O(N \times K), Space: O(K) candidate map.
+// - Problem Statement: Merge all overlapping intervals into non-overlapping interval ranges (LeetCode 56).
+// - Approach: Sorting by start time + linear scan merging.
+// - Intuition: Sorting ensures intervals can only overlap with the last merged interval; extend `merged.back()[1]` if `interval[0] <= merged.back()[1]`.
+// - Complexity: Time: O(N \log N), Space: O(N).
 
 
-// ====================================================================================================
-// SECTION 5: SWEEP LINE & INTERVAL SCHEDULING
-// ====================================================================================================
+// 2. Insert Interval (LeetCode 57)
+vector<vi> insertInterval(vector<vi> &intervals, vi newInterval) {
+    vector<vi> result;
+    int i = 0, n = intervals.size();
+    // 1. Add all intervals ending before newInterval starts
+    while (i < n && intervals[i][1] < newInterval[0]) {
+        result.push_back(intervals[i++]);
+    }
+    // 2. Merge all overlapping intervals with newInterval
+    while (i < n && intervals[i][0] <= newInterval[1]) {
+        newInterval[0] = min(newInterval[0], intervals[i][0]);
+        newInterval[1] = max(newInterval[1], intervals[i][1]);
+        i++;
+    }
+    result.push_back(newInterval);
+    // 3. Add all remaining intervals after newInterval
+    while (i < n) {
+        result.push_back(intervals[i++]);
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Insert newInterval into a sorted non-overlapping intervals list and merge if necessary (LeetCode 57).
+// - Approach: 3-Phase Single Pass (Left non-overlapping, Merging overlap, Right non-overlapping).
+// - Intuition: Accumulate min start and max end during overlapping phase, inserting modified `newInterval` in linear time without full re-sorting.
+// - Complexity: Time: O(N), Space: O(N).
 
-// 1. Sweep-Line: Maximum Concurrent Events (Restaurant Customers / Meeting Rooms II)
+
+// 3. Non-overlapping Intervals / Minimum Removals (LeetCode 435)
+int eraseOverlapIntervals(vector<vi> &intervals) {
+    if (intervals.empty()) return 0;
+    sort(intervals.begin(), intervals.end(), [](const vi &a, const vi &b) {
+        return a[1] < b[1]; // Sort by finish time
+    });
+    int count = 0, prevEnd = intervals[0][1];
+    for (size_t i = 1; i < intervals.size(); i++) {
+        if (intervals[i][0] < prevEnd) {
+            count++; // Overlap detected, remove current interval
+        } else {
+            prevEnd = intervals[i][1];
+        }
+    }
+    return count;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum number of intervals to remove to make the rest non-overlapping (LeetCode 435).
+// - Approach: Greedy Activity Selection sorting by end time.
+// - Intuition: Retaining the interval that ends earliest leaves maximum room for future intervals, minimizing required removals.
+// - Complexity: Time: O(N \log N), Space: O(1).
+
+
+// 4. Sweep-Line: Maximum Concurrent Events (Meeting Rooms II)
 int maxConcurrentEvents(const vector<pii> &intervals) {
     vector<pii> events;
     for (auto &[start, finish] : intervals) {
-        events.push_back({start, 1});    // Arrival
-        events.push_back({finish, -1});  // Departure
+        events.push_back({start, 1});
+        events.push_back({finish, -1});
     }
-    // If departure and arrival coincide, process departure first by sorting (-1 before 1)
     sort(events.begin(), events.end());
     int current = 0, maxConcurrent = 0;
     for (auto &[time, delta] : events) {
@@ -667,73 +689,13 @@ int maxConcurrentEvents(const vector<pii> &intervals) {
     }
     return maxConcurrent;
 }
-// Interview Explanation:
-// - Problem Statement: Find the maximum number of overlapping intervals / concurrent customers at any point in time.
-// - Approach: Sweep-Line algorithm mapping intervals into arrival (+1) and departure (-1) events.
-// - Intuition: Sorting events chronologically lets a running counter track active overlaps, recording the peak counter value.
-// - Complexity: Time: O(N \log N) sorting, Space: O(N) events array.
-
-
-// 2. Activity Selection: Maximum Non-Overlapping Meetings
-int maxNonOverlappingMeetings(vector<pii> &meetings) {
-    // Sort meetings strictly by finish time
-    sort(meetings.begin(), meetings.end(), [](const pii &a, const pii &b) {
-        return a.second < b.second;
-    });
-    int count = 0, lastEnd = -1;
-    for (const auto &[start, finish] : meetings) {
-        if (start > lastEnd) {
-            count++;
-            lastEnd = finish;
-        }
-    }
-    return count;
-}
-// Interview Explanation:
-// - Problem Statement: Find the maximum number of meetings that can be scheduled in a single room without overlap.
-// - Approach: Greedy Activity Selection sorting by earliest finish time.
-// - Intuition: Choosing the meeting that finishes earliest leaves the maximal remaining time for future meetings.
-// - Complexity: Time: O(N \log N), Space: O(1) auxiliary.
-
-
-// 3. Job Sequencing with Deadlines via DSU (O(N * alpha(M)))
-struct Job { char id; int deadline; int profit; };
-struct DSU_Slots {
-    vi parent;
-    DSU_Slots(int n) : parent(n + 1) { iota(parent.begin(), parent.end(), 0); }
-    int find(int i) { return (parent[i] == i) ? i : (parent[i] = find(parent[i])); }
-    void merge(int u, int v) { parent[v] = u; }
-};
-
-pair<int, int> jobSequencingDSU(vector<Job> &jobs) {
-    sort(jobs.begin(), jobs.end(), [](const Job &a, const Job &b) { return a.profit > b.profit; });
-    int maxDeadline = 0;
-    for (const auto &j : jobs) maxDeadline = max(maxDeadline, j.deadline);
-
-    DSU_Slots dsu(maxDeadline);
-    int countJobs = 0, totalProfit = 0;
-    for (const auto &job : jobs) {
-        int availableSlot = dsu.find(job.deadline);
-        if (availableSlot > 0) {
-            dsu.merge(dsu.find(availableSlot - 1), availableSlot);
-            countJobs++;
-            totalProfit += job.profit;
-        }
-    }
-    return {countJobs, totalProfit};
-}
-// Interview Explanation:
-// - Problem Statement: Schedule jobs with deadlines and profits to maximize total profit, each job taking 1 unit of time.
-// - Approach: Greedy sorting by descending profit + Disjoint Set Union (DSU) to find latest available slot <= deadline.
-// - Intuition: Greedily place high-profit jobs at their latest possible valid slot; DSU points each filled slot to the next free left slot.
-// - Complexity: Time: O(N \log N + N \alpha(\text{maxDeadline})), Space: O(\text{maxDeadline}) DSU table.
 
 
 // ====================================================================================================
 // SECTION 6: ADVANCED GREEDY & SEARCHING INVARIANTS
 // ====================================================================================================
 
-// 1. Meet-in-the-Middle (Partition Array to Minimize Difference - LeetCode 2035)
+// 1. Meet-in-the-Middle (LeetCode 2035)
 int minPartitionDifference(vi nums) {
     int n = nums.size() / 2;
     vi left(nums.begin(), nums.begin() + n), right(nums.begin() + n, nums.end());
@@ -763,14 +725,8 @@ int minPartitionDifference(vi nums) {
     }
     return ans;
 }
-// Interview Explanation:
-// - Problem Statement: Partition 2N integers into two arrays of size N minimizing the absolute difference of their sums.
-// - Approach: Meet-in-the-Middle generation of subset sums + Binary Search (`lower_bound`).
-// - Intuition: Splitting array into two halves of size N allows computing subset sums in O(2^N) instead of O(2^{2N}); binary search matches best halves.
-// - Complexity: Time: O(N \cdot 2^N), Space: O(2^N).
 
-
-// 2. Smallest Impossible Subset Sum (CSES Missing Coin Sum)
+// 2. Smallest Impossible Subset Sum
 ll smallestImpossibleSubsetSum(vi coins) {
     sort(coins.begin(), coins.end());
     ll target = 1;
@@ -780,14 +736,8 @@ ll smallestImpossibleSubsetSum(vi coins) {
     }
     return target;
 }
-// Interview Explanation:
-// - Problem Statement: Find the smallest positive integer sum that cannot be formed by any subset of coin values.
-// - Approach: Greedy sorting and prefix reachability invariant.
-// - Intuition: If sorted coins can form every sum in [1, target-1], adding coin c extends reach to [1, target + c - 1] iff c <= target.
-// - Complexity: Time: O(N \log N) sorting, Space: O(1).
 
-
-// 3. Candy Distribution (LeetCode 135 - Two-Pass Slope Greedy)
+// 3. Candy Distribution (LeetCode 135)
 int candy(const vi &ratings) {
     int n = ratings.size();
     vi candies(n, 1);
@@ -799,19 +749,12 @@ int candy(const vi &ratings) {
     }
     return accumulate(candies.begin(), candies.end(), 0);
 }
-// Interview Explanation:
-// - Problem Statement: Distribute candies to children such that each child has at least 1, and higher rated children get more candies than neighbors.
-// - Approach: Two-Pass Greedy (Left-to-Right and Right-to-Left).
-// - Intuition: Forward pass satisfies left-neighbor condition; backward pass satisfies right-neighbor condition while taking max to satisfy both.
-// - Complexity: Time: O(N) two linear passes, Space: O(N) candies array.
 
-
-// 4. Longest Consecutive Sequence (LeetCode 128 - O(N) Hash Set)
+// 4. Longest Consecutive Sequence (LeetCode 128)
 int longestConsecutive(const vi &nums) {
     unordered_set<int> s(nums.begin(), nums.end());
     int longest = 0;
     for (int x : s) {
-        // Only start sequence if x is the beginning (x-1 is not in set)
         if (!s.count(x - 1)) {
             int curr = x, len = 1;
             while (s.count(curr + 1)) { curr++; len++; }
@@ -820,79 +763,6 @@ int longestConsecutive(const vi &nums) {
     }
     return longest;
 }
-// Interview Explanation:
-// - Problem Statement: Find the length of the longest consecutive elements sequence in an unsorted array in O(N) time.
-// - Approach: Hash Set lookup anchored at sequence beginnings (`!set.count(x - 1)`).
-// - Intuition: Only numbers that start a streak are traversed; each number is visited at most twice (once in outer loop, once in inner loop).
-// - Complexity: Time: O(N) average, Space: O(N) hash set.
-
-
-// 5. CSES Reading Books Invariant
-ll readingBooksTotalTime(const vi &books) {
-    ll totalSum = 0, maxTime = 0;
-    for (int t : books) {
-        totalSum += t;
-        maxTime = max(maxTime, (ll)t);
-    }
-    return max(2 * maxTime, totalSum);
-}
-// Interview Explanation:
-// - Problem Statement: Find minimum total time for two people to read n books where each book can be read by only one person at a time.
-// - Approach: Maximum element vs. sum of remaining elements comparison.
-// - Intuition: If maxTime > sum - maxTime, one person is bottlenecked on the largest book while the other finishes all other books (taking 2 * maxTime); else totalSum.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// 6. Dynamic Street Intervals (CSES Traffic Lights)
-vi trafficLights(int x, const vi &positions) {
-    set<int> lights = {0, x};
-    multiset<int> lengths = {x};
-    vi ans;
-    for (int p : positions) {
-        auto it = lights.upper_bound(p);
-        int r = *it, l = *prev(it);
-        lengths.erase(lengths.find(r - l));
-        lengths.insert(p - l);
-        lengths.insert(r - p);
-        lights.insert(p);
-        ans.push_back(*lengths.rbegin());
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find the longest street segment after each new traffic light is sequentially added.
-// - Approach: Ordered set for light coordinates + multiset for active segment lengths.
-// - Intuition: Upper_bound locates the enclosing interval [l, r]; remove old length r - l and insert split lengths p - l and r - p in O(log N).
-// 7. CSES Collecting Numbers II (Inversion Tracking under Element Swaps)
-bool isBadPair(int x, const vi &pos, int n) {
-    if (x < 1 || x >= n) return false;
-    return pos[x] > pos[x + 1];
-}
-
-vi collectingNumbersQueries(int n, vi a, const vector<pii> &swaps) {
-    vi pos(n + 1);
-    for (int i = 1; i <= n; i++) pos[a[i]] = i;
-    int rounds = 1;
-    for (int x = 1; x < n; x++) {
-        if (pos[x] > pos[x + 1]) rounds++;
-    }
-    vi result;
-    for (auto &[p, q] : swaps) {
-        int u = a[p], v = a[q];
-        set<int> affected = {u - 1, u, v - 1, v};
-        for (int x : affected) rounds -= isBadPair(x, pos, n);
-        swap(a[p], a[q]);
-        swap(pos[u], pos[v]);
-        for (int x : affected) rounds += isBadPair(x, pos, n);
-        result.push_back(rounds);
-    }
-    return result;
-}
-// Interview Explanation:
-// - Problem Statement: Track the number of rounds needed to collect numbers 1..n sequentially when pairs of array elements are swapped dynamically.
-// - Approach: Position array inversion checking before and after swap on affected pairs.
-// - Intuition: Swapping elements at indices p and q only alters the relative order of adjacent values {u-1, u, v-1, v}; update rounds in O(1) per query.
-// - Complexity: Time: O(N + Q), Space: O(N).
 
 /*
  ====================================================================================================
@@ -913,20 +783,15 @@ vi collectingNumbersQueries(int n, vi a, const vector<pii> &swaps) {
     Counting Sort   | O(N + K)    | O(N + K)    | O(N + K)    | O(N + K)    | Yes    | No
     -------------------------------------------------------------------------------------------------
 
- 2. BINARY SEARCH ON ANSWER (THE 3 TEMPLATES):
-    • Minimize the Maximum (e.g. House Robber IV, Painter's Partition, Ship Packages):
-      - Invariant: `check(mid) == true` means mid is feasible, so search left: `high = mid;` else `low = mid + 1;`
-    • Maximize the Minimum (e.g. Aggressive Cows, Magnetic Force):
-      - Invariant: `check(mid) == true` means mid is feasible, so record and search right: `ans = mid; low = mid + 1;`
-    • Monotonic Property Check:
-      - Always ensure `check(x)` is monotonic: F F F F T T T (first true) or T T T T F F F (last true).
+ 2. BINARY SEARCH ON ANSWER & DUAL ARRAYS:
+    • Median / K-th Element of 2 Sorted Arrays: Binary search cut1 in smaller array; cut2 = (N+M+1)/2 - cut1.
+    • Minimize Maximum Subarray Sum (Split Array / Ship Packages): Binary search range [max, sum].
+    • Maximize Minimum Distance (Aggressive Cows): Binary search range [1, max_stalls].
 
- 3. SWEEP-LINE & GREEDY RULES OF THUMB:
-    • Concurrent Interval Overlap: Split into events `(start, +1)` and `(end, -1)`. If interval boundaries are
-      touching (e.g. [1, 2] and [2, 3]), decide whether departure happens BEFORE arrival (use -1 before +1 in sort).
-    • Activity Selection (Max Non-Overlapping): Always sort by END TIME (`finish`).
-    • Interval Covering (Min Arrows to burst balloons): Always sort by END TIME (`finish`).
-    • Job Sequencing with Deadlines: Sort by PROFIT descending; assign latest free slot using DSU.
+ 3. INTERVAL ALGORITHMS MATRIX:
+    • Merge Overlapping: Sort by START time -> merge if `next.start <= prev.end`.
+    • Insert Interval: 3-phase pass (Left non-overlap, Overlap min/max merge, Right non-overlap).
+    • Minimum Removals (Non-overlapping): Sort by END time -> greedily retain earliest ending interval.
  ====================================================================================================
 */
 

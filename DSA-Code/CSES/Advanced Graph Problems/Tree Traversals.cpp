@@ -1,122 +1,46 @@
-// CSES Problem: <problem name>
-// https://cses.fi/problemset/task/<id>
-
-#include <algorithm>
-#include <array>
-#include <climits>
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <iostream>
-#include <map>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <stack>
-#include <string>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
+// Link: https://cses.fi/problemset/task/1702
+#include <bits/stdc++.h>
 using namespace std;
-using ll  = long long;
-using ull = unsigned long long;
-using pii = pair<int, int>;
-using pll = pair<ll, ll>;
-using vi  = vector<int>;
-using vll = vector<ll>;
 
-#define all(x)   (x).begin(), (x).end()
-#define rall(x)  (x).rbegin(), (x).rend()
-#define pb       push_back
-#define ff       first
-#define ss       second
-
-const int INF  = INT_MAX;
-const ll  LINF = LLONG_MAX;
-const ll  MOD  = 1e9 + 7;
-
-// ─────────────────────────────────────────────────────────────────────────────
 struct Node {
-    int val;
-    Node* left;
-    Node* right;
-    Node(int v) : val(v), left(nullptr), right(nullptr) {}
+    int val; Node *left = nullptr, *right = nullptr;
+    Node(int v) : val(v) {}
 };
 
-Node* buildTree(const vector<int>& preorder, const vector<int>& inorder, int inStart, int inEnd, int& preIndex, const map<int, int>& inMap) {
+Node* buildTree(const vector<int>& pre, const vector<int>& in, int inStart, int inEnd, int& preIdx, const unordered_map<int, int>& inMap) {
     if (inStart > inEnd) return nullptr;
-
-    Node* node = new Node(preorder[preIndex++]);
-
+    Node* node = new Node(pre[preIdx++]);
     if (inStart == inEnd) return node;
-
-    int inIndex = inMap.at(node->val);
-
-    node->left = buildTree(preorder, inorder, inStart, inIndex - 1, preIndex, inMap);
-    node->right = buildTree(preorder, inorder, inIndex + 1, inEnd, preIndex, inMap);
-
+    int inIdx = inMap.at(node->val);
+    node->left = buildTree(pre, in, inStart, inIdx - 1, preIdx, inMap);
+    node->right = buildTree(pre, in, inIdx + 1, inEnd, preIdx, inMap);
     return node;
 }
 
-vector<int> postorderTraversal(Node* root) {
-    vector<int> result;
-    if (!root) return result;
-
-    stack<Node*> s;
-    Node* current = root;
-
-    while (current || !s.empty()) {
-        while (current) {
-            s.push(current);
-            current = current->left;
-        }
-        Node* temp = s.top()->right;
-        if (!temp) {
-            temp = s.top();
-            s.pop();
-            result.push_back(temp->val);
-            while (!s.empty() && temp == s.top()->right) {
-                temp = s.top();
-                s.pop();
-                result.push_back(temp->val);
-            }
-        } else {
-            current = temp;
-        }
-    }
-
-    return result;
+void printPostOrder(Node* root) {
+    if (!root) return;
+    printPostOrder(root->left);
+    printPostOrder(root->right);
+    cout << root->val << " ";
 }
+
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<int> pre(n), in(n);
+    for (int i = 0; i < n; i++) cin >> pre[i];
+    unordered_map<int, int> inMap;
+    for (int i = 0; i < n; i++) { cin >> in[i]; inMap[in[i]] = i; }
 
-    int n;
-    cin >> n;
-    vector<int> preorder(n), inorder(n);
-    for (int i = 0; i < n; i++) {
-        cin >> preorder[i];
-    }
-    for (int i = 0; i < n; i++) {
-        cin >> inorder[i];
-    }
-
-
-    int preIndex = 0;
-    map<int, int> inMap;
-    for (int i = 0; i < n; i++) {
-        inMap[inorder[i]] = i;
-    }
-    Node* root = buildTree(preorder, inorder, 0, n - 1, preIndex, inMap);
-    vector<int> postorder = postorderTraversal(root);
-
-    for (int val : postorder) {
-        cout << val << " ";
-    }
-    cout << "\n";
-
+    int preIdx = 0;
+    Node* root = buildTree(pre, in, 0, n - 1, preIdx, inMap);
+    printPostOrder(root);
+    cout << '\n';
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Reconstruct a binary tree given its preorder and inorder traversals, and output its postorder traversal (CSES 1702).
+// - Approach: Divide & Conquer Tree Reconstruction + Postorder DFS.
+// - Intuition: The first element of preorder is the root; locating its index in the inorder traversal partitions left and right subtrees.
+// - Complexity: Time: O(N), Space: O(N).

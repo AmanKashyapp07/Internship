@@ -1,94 +1,48 @@
 // Link: https://cses.fi/problemset/task/1649
-
-#include <algorithm>
-#include <climits>
-#include <cmath>
-#include <iostream>
-#include <vector>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Segment Tree template configured for Range Minimum Query and Point Update
-struct SegmentTree {
-    int n;
-    vector<int> tree;
-    const int INF_VAL = INT_MAX;
-
-    SegmentTree(vector<int>& a) {
-        n = a.size();
-        tree.assign(4 * n, INF_VAL);
-        build(1, 0, n - 1, a);
+struct SegTree {
+    int n; vector<int> t;
+    SegTree(int n, vector<int>& a) : n(n), t(4*n) { build(1, 0, n-1, a); }
+    void build(int v, int l, int r, vector<int>& a) {
+        if (l == r) { t[v] = a[l]; return; }
+        int m = (l+r)/2;
+        build(2*v, l, m, a); build(2*v+1, m+1, r, a);
+        t[v] = min(t[2*v], t[2*v+1]);
     }
-
-    void build(int node, int l, int r, vector<int>& a) {
-        if (l == r) {
-            tree[node] = a[l];
-            return;
-        }
-        int mid = (l + r) / 2;
-        build(2 * node, l, mid, a);
-        build(2 * node + 1, mid + 1, r, a);
-        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    void upd(int v, int l, int r, int i, int x) {
+        if (l == r) { t[v] = x; return; }
+        int m = (l+r)/2;
+        if (i <= m) upd(2*v, l, m, i, x); else upd(2*v+1, m+1, r, i, x);
+        t[v] = min(t[2*v], t[2*v+1]);
     }
-
-    int query(int node, int l, int r, int ql, int qr) {
-        if (qr < l || ql > r) return INF_VAL;      // No overlap (returns infinity)
-        if (ql <= l && r <= qr) return tree[node]; // Complete overlap
-        int mid = (l + r) / 2;                     // Partial overlap
-        return min(query(2 * node, l, mid, ql, qr),
-                   query(2 * node + 1, mid + 1, r, ql, qr));
+    int qry(int v, int l, int r, int ql, int qr) {
+        if (qr < l || ql > r) return INT_MAX;
+        if (ql <= l && r <= qr) return t[v];
+        int m = (l+r)/2;
+        return min(qry(2*v, l, m, ql, qr), qry(2*v+1, m+1, r, ql, qr));
     }
-
-    void update(int node, int l, int r, int idx, int val) {
-        if (l == r) {
-            tree[node] = val;
-            return;
-        }
-        int mid = (l + r) / 2;
-        if (idx <= mid)
-            update(2 * node, l, mid, idx, val);
-        else
-            update(2 * node + 1, mid + 1, r, idx, val);
-        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
-    }
-
-    // Public functions (0-based indexing)
-    int query(int l, int r) { return query(1, 0, n - 1, l, r); }
-    void update(int idx, int val) { update(1, 0, n - 1, idx, val); }
+    void upd(int i, int x) { upd(1, 0, n-1, i, x); }
+    int qry(int l, int r) { return qry(1, 0, n-1, l, r); }
 };
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n, q;
-    if (cin >> n >> q) {
-        vector<int> a(n);
-        for (int i = 0; i < n; i++) {
-            cin >> a[i];
-        }
-
-        // Initialize Segment Tree
-        SegmentTree st(a);
-
-        // Process Queries
-        for (int i = 0; i < q; i++) {
-            int type;
-            cin >> type;
-            if (type == 1) {
-                int k, u;
-                cin >> k >> u;
-                // Convert 1-based index to 0-based
-                st.update(k - 1, u);
-            } else if (type == 2) {
-                int l, r;
-                cin >> l >> r;
-                // Convert 1-based index to 0-based
-                cout << st.query(l - 1, r - 1) << "\n";
-            }
-        }
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; cin >> n >> q;
+    vector<int> a(n);
+    for (int& x : a) cin >> x;
+    SegTree st(n, a);
+    while (q--) {
+        int t; cin >> t;
+        if (t == 1) { int k, u; cin >> k >> u; st.upd(k-1, u); }
+        else        { int l, r; cin >> l >> r; cout << st.qry(l-1, r-1) << '\n'; }
     }
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Support point updates and range minimum queries on an array (CSES 1649).
+// - Approach: Segment Tree with point update + range min query.
+// - Intuition: Each node stores the minimum of its subtree; update touches O(log N) nodes bottom-up; query merges O(log N) nodes top-down.
+// - Complexity: Time: O((N + Q) log N), Space: O(N).

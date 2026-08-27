@@ -1,51 +1,28 @@
 // Link: https://cses.fi/problemset/task/2431
-
-#include <iostream>
-#include <string>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-void solve() {
-    long long k;
-    cin >> k;
-
-    long long length = 1;     // Tracks the number of digits (1-digit, 2-digit, etc.)
-    long long count = 9;      // How many numbers exist with the current 'length'
-    long long start = 1;      // The first number of the current length group (1, 10, 100...)
-
-    // Step 1: Identify the digit-length group that contains the k-th digit
-    while (k > length * count) {
-        k -= length * count;
-        length++;
-        count *= 10;
-        start *= 10;
-    }
-
-    // graphusting k to be 0-indexed for easier division/modulo math
-    k--; 
-
-    // Step 2: Find the exact number where the k-th digit resides
-    long long target_number = start + (k / length);
-
-    // Step 3: Find the specific digit inside target_number
-    int digit_index = k % length;
-    
-    // Convert to string to easily pick out the character by index
-    string s = to_string(target_number);
-    
-    cout << s[digit_index] << "\n";
-}
-
 int main() {
-    // Optimize standard I/O operations for performance
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int q;
-    cin >> q;
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int q; cin >> q;
     while (q--) {
-        solve();
+        long long k; cin >> k;
+        long long len = 1, count = 9, start = 1;
+        while (k > len * count) {
+            k -= len * count;
+            len++;
+            count *= 10;
+            start *= 10;
+        }
+        start += (k - 1) / len;
+        string s = to_string(start);
+        cout << s[(k - 1) % len] << '\n';
     }
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Find the digit at 1-based index k in the infinite string "123456789101112..." (CSES 2431).
+// - Approach: Digit Length Range Decompositon + Arithmetic Offset Indexing.
+// - Intuition: Determine number length range (1-digit: 9, 2-digit: 90, 3-digit: 900...), subtract full buckets, compute target number and exact digit offset.
+// - Complexity: Time: O(log_10 K) per query, Space: O(1).

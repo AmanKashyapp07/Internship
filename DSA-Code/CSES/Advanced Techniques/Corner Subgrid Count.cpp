@@ -1,42 +1,30 @@
 // Link: https://cses.fi/problemset/task/2137
-
 #pragma GCC optimize("O3,unroll-loops")
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
-
-#include <iostream>
-#include <bitset>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 const int MAXN = 3000;
-
-// Declaring globally prevents stack overflow
 bitset<MAXN> rows[MAXN];
 
 int main() {
-    // Fast I/O
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int n;
-    cin >> n;
-
-    for (int i = 0; i < n; i++) {
-        // Reads '0' and '1's directly into the bitset without string overhead
-        cin >> rows[i];
-    }
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    for (int i = 0; i < n; i++) cin >> rows[i];
 
     long long ans = 0;
-
     for (int i = 0; i < n; i++) {
         for (int j = i + 1; j < n; j++) {
-            // Hardware popcnt makes this extremely fast
-            int common = (rows[i] & rows[j]).count();
-            ans += 1LL * common * (common - 1) / 2;
+            long long common = (rows[i] & rows[j]).count();
+            ans += common * (common - 1) / 2;
         }
     }
-
     cout << ans << '\n';
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Count 2x2 subgrids with all corners set to 1 in a binary n x n grid (CSES 2137).
+// - Approach: Bitset Row AND + Popcount Pairwise Enumeration.
+// - Intuition: For row pair $(i, j)$, the number of column pairs both set to 1 is $\binom{\text{common}}{2}$ = `common*(common-1)/2`.
+// - Complexity: Time: O(N^2 \cdot N / 64), Space: O(N^2 / 8).

@@ -1,107 +1,57 @@
 // Link: https://cses.fi/problemset/task/1137
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-// Standard Fenwick Tree (BIT) for 0-indexed queries externally
 struct Fenwick {
-    int n;
-    vector<long long> bit;
+    int n; vector<long long> bit;
     Fenwick(int n) : n(n), bit(n + 1, 0) {}
-
-    void update(int i, long long val) {
-        i++; // Convert 0-indexed parameter to 1-indexed BIT internally
-        while (i <= n) {
-            bit[i] += val;
-            i += i & -i; 
-        }
-    }
-
-    long long query(int i) {
-        long long s = 0;
-        i++;
-        while (i >= 1) {
-            s += bit[i];
-            i -= i & -i;
-        }
-        return s;
-    }
-
-    long long query(int l, int r) {
-        if (l > r) return 0;
-        return query(r) - (l > 0 ? query(l - 1) : 0);
-    }
+    void add(int i, long long val) { for (i++; i <= n; i += i & -i) bit[i] += val; }
+    long long query(int i) { long long s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
+    long long rangeQuery(int l, int r) { return query(r) - (l > 0 ? query(l - 1) : 0); }
 };
 
-// Euler Tour Technique (Variant A) to map subtree of u to contiguous range [tin[u], tout[u]]
-struct EulerTour {
-    int n, timer;
-    vector<int> tin, tout;
-
-    EulerTour(int n) : n(n), timer(0), tin(n + 1, 0), tout(n + 1, 0) {}
-
-    // Subtree flattening (Size N) -> Range [tin[u], tout[u]]
-    // Maps node values directly to a 0-indexed array
-    void dfs_subtree(int u, int p, const vector<vector<int>>& g, vector<int>& flat, const vector<int>& val) {
-        tin[u] = ++timer; 
-        flat[timer - 1] = val[u];
-        
-        for (int v : g[u]) {
-            if (v != p) dfs_subtree(v, u, g, flat, val);
-        }
-        tout[u] = timer;
-    }
-};
+int timer = 0;
+vector<int> tin, tout;
+void dfsSubtree(int u, int p, const vector<vector<int>>& g, vector<int>& flat, const vector<int>& val) {
+    tin[u] = ++timer; flat[timer - 1] = val[u];
+    for (int v : g[u]) if (v != p) dfsSubtree(v, u, g, flat, val);
+    tout[u] = timer;
+}
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n, q; if (!(cin >> n >> q)) return 0;
+    vector<int> val(n + 1);
+    for (int i = 1; i <= n; i++) cin >> val[i];
+    vector<vector<int>> g(n + 1);
+    for (int i = 0; i < n - 1; i++) {
+        int u, v; cin >> u >> v; g[u].push_back(v); g[v].push_back(u);
+    }
 
-    int n, q;
-    if (cin >> n >> q) {
-        vector<int> values(n + 1);
-        for (int i = 1; i <= n; i++) cin >> values[i];
+    tin.assign(n + 1, 0); tout.assign(n + 1, 0);
+    vector<int> flat(n);
+    dfsSubtree(1, 0, g, flat, val);
 
-        vector<vector<int>> graph(n + 1);
-        for (int i = 0; i < n - 1; i++) {
-            int u, v;
-            cin >> u >> v;
-            graph[u].push_back(v);
-            graph[v].push_back(u);
-        }
+    Fenwick ft(n);
+    for (int i = 0; i < n; i++) ft.add(i, flat[i]);
 
-        // Build subtree Euler Tour (populating the flat vector directly in DFS)
-        EulerTour et(n);
-        vector<int> flat(n);
-        et.dfs_subtree(1, 0, graph, flat, values);
-
-        // Populate BIT (directly from the flat vector)
-        Fenwick ft(n);
-        for (int i = 0; i < n; i++) {
-            ft.update(i, flat[i]);
-        }
-
-        while (q--) {
-            int type;
-            cin >> type;
-            if (type == 1) {
-                int s;
-                long long x;
-                cin >> s >> x;
-                long long delta = x - values[s];
-                ft.update(et.tin[s] - 1, delta);
-                values[s] = x;
-            } else {
-                int s;
-                cin >> s;
-                // Contiguous range query over [tin[s] - 1, tout[s] - 1]
-                cout << ft.query(et.tin[s] - 1, et.tout[s] - 1) << "\n";
-            }
+    while (q--) {
+        int type; cin >> type;
+        if (type == 1) {
+            int s; long long x; cin >> s >> x;
+            long long delta = x - val[s];
+            ft.add(tin[s] - 1, delta);
+            val[s] = x;
+        } else {
+            int s; cin >> s;
+            cout << ft.rangeQuery(tin[s] - 1, tout[s] - 1) << '\n';
         }
     }
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: Process point updates and subtree sum queries on a tree (CSES 1137).
+// - Approach: Euler Tour Subtree Range Mapping (`tin[u]..tout[u]`) + Fenwick Tree range sum queries.
+// - Intuition: Flattening subtrees into contiguous 1D array ranges allows $O(\log N)$ range queries and updates via Binary Indexed Tree.
+// - Complexity: Time: O(N \log N + Q \log N), Space: O(N).

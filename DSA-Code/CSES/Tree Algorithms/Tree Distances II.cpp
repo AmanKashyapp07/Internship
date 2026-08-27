@@ -1,93 +1,46 @@
-// CSES Problem: Tree Distances II
-// https://cses.fi/problemset/task/1133
-//
-// You are given a tree consisting of n nodes.
-// For each node, determine the sum of distances from that node
-// to all other nodes.
-//
-// Input:
-// n
-// followed by n-1 edges
-//
-// Output:
-// n integers where the i-th integer is the sum of distances
-// from node i to all other nodes.
-//
-// Approach:
-// 1. Root the tree at node 1.
-// 2. First DFS:
-//    - Compute subtree sizes.
-//    - Compute answer for node 1 (sum of depths).
-// 3. Second DFS (rerooting):
-//    - If moving root from u to child v:
-//      ans[v] = ans[u] + n - 2 * subtreeSize[v]
-// 4. Complexity: O(n)
-
+// Link: https://cses.fi/problemset/task/1133
 #include <bits/stdc++.h>
 using namespace std;
 
-using ll = long long;
-
 int n;
-vector<vector<int>> graph;
-vector<ll> subtreeSize;
-vector<ll> ans;
+vector<vector<int>> g;
+vector<long long> sz, ans;
 
-void dfs1(int node, int parent, int depth)
-{
-    ans[1] += depth;
-    subtreeSize[node] = 1;
-
-    for (int child : graph[node])
-    {
-        if (child == parent)
-            continue;
-
-        dfs1(child, node, depth + 1);
-        subtreeSize[node] += subtreeSize[child];
+void dfs1(int u, int p, int d) {
+    ans[1] += d; sz[u] = 1;
+    for (int v : g[u]) {
+        if (v != p) {
+            dfs1(v, u, d + 1);
+            sz[u] += sz[v];
+        }
     }
 }
 
-void dfs2(int node, int parent)
-{
-    for (int child : graph[node])
-    {
-        if (child == parent)
-            continue;
-
-        ans[child] = ans[node] + n - 2 * subtreeSize[child];
-        dfs2(child, node);
+void dfs2(int u, int p) {
+    for (int v : g[u]) {
+        if (v != p) {
+            ans[v] = ans[u] + n - 2 * sz[v];
+            dfs2(v, u);
+        }
     }
 }
 
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
     cin >> n;
-
-    graph.resize(n + 1);
-    subtreeSize.resize(n + 1);
-    ans.resize(n + 1, 0);
-
-    for (int i = 0; i < n - 1; i++)
-    {
-        int u, v;
-        cin >> u >> v;
-
-        graph[u].push_back(v);
-        graph[v].push_back(u);
+    g.resize(n + 1); sz.resize(n + 1); ans.assign(n + 1, 0);
+    for (int i = 0; i < n - 1; i++) {
+        int u, v; cin >> u >> v; g[u].push_back(v); g[v].push_back(u);
     }
-
     dfs1(1, 0, 0);
     dfs2(1, 0);
-
-    for (int i = 1; i <= n; i++)
-    {
-        cout << ans[i] << " ";
-    }
+    for (int i = 1; i <= n; i++) cout << ans[i] << " ";
     cout << '\n';
-
     return 0;
 }
+
+// Interview Explanation:
+// - Problem Statement: For each node, find the sum of distances from that node to all other nodes in the tree (CSES 1133).
+// - Approach: Tree Rerooting DP (2-Pass DFS).
+// - Intuition: Rerooting from parent u to child v increases distance by +1 for $(N - \text{sz}[v])$ nodes and decreases distance by -1 for $\text{sz}[v]$ nodes: $\text{ans}[v] = \text{ans}[u] + N - 2 \cdot \text{sz}[v]$.
+// - Complexity: Time: O(N), Space: O(N).

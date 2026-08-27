@@ -16,23 +16,49 @@ class Solution {
 public:
 
     // =========================================================
-    // 1. 1D DP / LINEAR DP
+    // 1. BASIC 1D DP
     // =========================================================
 
-    // House Robber
-    // dp[i] = maximum money that can be robbed from houses [0..i-1].
+    // Climbing Stairs (LeetCode 70)
+    int climbStairs(int n) {
+        if (n <= 2) return n;
+        vector<int> dp(n + 1, 0);
+        dp[1] = 1; dp[2] = 2;
+        for (int i = 3; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find total distinct ways to climb n steps taking 1 or 2 steps at a time (LeetCode 70).
+    // - Approach: 1D DP tabulation storing total ways to reach step i.
+    // - Intuition: Reaching step i requires stepping from step i-1 or step i-2; `dp[i] = dp[i-1] + dp[i-2]`.
+    // - Complexity: Time: O(N), Space: O(N).
+
+    // Min Cost Climbing Stairs (LeetCode 746)
+    int minCostClimbingStairs(vector<int>& cost) {
+        int n = cost.size();
+        vector<int> dp(n + 1, 0);
+        for (int i = 2; i <= n; i++) {
+            dp[i] = min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i - 2]);
+        }
+        return dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum cost to reach the top of the floor starting at index 0 or 1 (LeetCode 746).
+    // - Approach: 1D DP tabulation tracking minimum cost to reach step i.
+    // - Intuition: Step i can be reached from step i-1 or i-2; `dp[i] = min(dp[i-1] + cost[i-1], dp[i-2] + cost[i-2])`.
+    // - Complexity: Time: O(N), Space: O(N).
+
+    // House Robber (LeetCode 198)
     int rob(vector<int>& nums) {
         int n = nums.size();
         if (n == 0) return 0;
-
         vector<int> dp(n + 1, 0);
         dp[1] = nums[0];
-
         for (int i = 2; i <= n; i++) {
-            // Skip house i-1 OR rob it and skip i-2.
             dp[i] = max(dp[i - 1], dp[i - 2] + nums[i - 1]);
         }
-
         return dp[n];
     }
     // Interview Explanation:
@@ -41,8 +67,7 @@ public:
     // - Intuition: At house i, choose max of skipping house i-1 (`dp[i-1]`) or robbing it (`dp[i-2] + nums[i-1]`).
     // - Complexity: Time: O(N), Space: O(N).
 
-    // House Robber II
-    // First and last house cannot both be selected.
+    // House Robber II (LeetCode 213)
     int robCircular(vector<int>& nums) {
         int n = nums.size();
         if (n == 0) return 0;
@@ -51,12 +76,10 @@ public:
         auto robRange = [&](int l, int r) {
             vector<int> dp(r - l + 2, 0);
             dp[1] = nums[l];
-
             for (int i = l + 1; i <= r; i++) {
                 int idx = i - l + 1;
                 dp[idx] = max(dp[idx - 1], dp[idx - 2] + nums[i]);
             }
-
             return dp.back();
         };
 
@@ -68,29 +91,19 @@ public:
     // - Intuition: First and last houses cannot both be robbed; evaluate linear DP on both ranges and take maximum.
     // - Complexity: Time: O(N), Space: O(N).
 
-    // Decode Ways
-    // dp[i] = number of ways to decode the first i characters.
+    // Decode Ways (LeetCode 91)
     int numDecodings(string s) {
         int n = s.size();
         if (n == 0) return 0;
-
         vector<int> dp(n + 1, 0);
         dp[0] = 1;
-
         for (int i = 1; i <= n; i++) {
-            // Decode s[i-1] as a single digit.
-            if (s[i - 1] != '0')
-                dp[i] += dp[i - 1];
-
-            // Decode s[i-2..i-1] as a two-digit number.
+            if (s[i - 1] != '0') dp[i] += dp[i - 1];
             if (i >= 2) {
                 int x = (s[i - 2] - '0') * 10 + (s[i - 1] - '0');
-
-                if (10 <= x && x <= 26)
-                    dp[i] += dp[i - 2];
+                if (10 <= x && x <= 26) dp[i] += dp[i - 2];
             }
         }
-
         return dp[n];
     }
     // Interview Explanation:
@@ -99,29 +112,18 @@ public:
     // - Intuition: Single digit `s[i-1] != '0'` adds `dp[i-1]`; two-digit `s[i-2..i-1]` in [10..26] adds `dp[i-2]`.
     // - Complexity: Time: O(N), Space: O(N).
 
-    // Delete and Earn
-    // Transform into House Robber:
-    // sum[x] = total value obtained by taking all occurrences of x.
+    // Delete and Earn (LeetCode 740)
     int deleteAndEarn(vector<int>& nums) {
         if (nums.empty()) return 0;
-
         int mx = *max_element(nums.begin(), nums.end());
         vector<int> sum(mx + 1, 0);
-
-        for (int x : nums)
-            sum[x] += x;
-
+        for (int x : nums) sum[x] += x;
         vector<int> dp(mx + 1, 0);
-
         for (int x = 1; x <= mx; x++) {
             dp[x] = dp[x - 1];
-
-            if (x >= 2)
-                dp[x] = max(dp[x], dp[x - 2] + sum[x]);
-            else
-                dp[x] = max(dp[x], sum[x]);
+            if (x >= 2) dp[x] = max(dp[x], dp[x - 2] + sum[x]);
+            else dp[x] = max(dp[x], sum[x]);
         }
-
         return dp[mx];
     }
     // Interview Explanation:
@@ -132,31 +134,21 @@ public:
 
 
     // =========================================================
-    // 2. KNAPSACK / SUBSET SUM DP
+    // 2. KNAPSACK / SUBSET SUM
     // =========================================================
 
     // 0/1 Knapsack
-    // dp[i][w] = maximum value using first i items with capacity w.
     int knapsack01(int W, const vector<int>& wt, const vector<int>& val) {
         int n = wt.size();
-
         vector<vector<int>> dp(n + 1, vector<int>(W + 1, 0));
-
         for (int i = 1; i <= n; i++) {
             for (int w = 0; w <= W; w++) {
-                // Do not take item i-1.
                 dp[i][w] = dp[i - 1][w];
-
-                // Take item i-1 if it fits.
                 if (wt[i - 1] <= w) {
-                    dp[i][w] = max(
-                        dp[i][w],
-                        dp[i - 1][w - wt[i - 1]] + val[i - 1]
-                    );
+                    dp[i][w] = max(dp[i][w], dp[i - 1][w - wt[i - 1]] + val[i - 1]);
                 }
             }
         }
-
         return dp[n][W];
     }
     // Interview Explanation:
@@ -165,34 +157,19 @@ public:
     // - Intuition: Item i-1 can either be excluded (`dp[i-1][w]`) or included (`dp[i-1][w-wt[i-1]] + val[i-1]`).
     // - Complexity: Time: O(N \cdot W), Space: O(N \cdot W).
 
-    // Partition Equal Subset Sum
-    // dp[i][target] = whether target can be formed using first i numbers.
+    // Partition Equal Subset Sum (LeetCode 416)
     bool canPartition(vector<int>& nums) {
         int sum = accumulate(nums.begin(), nums.end(), 0);
-
-        if (sum % 2 != 0)
-            return false;
-
-        int target = sum / 2;
-        int n = nums.size();
-
-        vector<vector<bool>> dp(
-            n + 1,
-            vector<bool>(target + 1, false)
-        );
-
-        for (int i = 0; i <= n; i++)
-            dp[i][0] = true;
-
+        if (sum % 2 != 0) return false;
+        int target = sum / 2, n = nums.size();
+        vector<vector<bool>> dp(n + 1, vector<bool>(target + 1, false));
+        for (int i = 0; i <= n; i++) dp[i][0] = true;
         for (int i = 1; i <= n; i++) {
             for (int t = 1; t <= target; t++) {
                 dp[i][t] = dp[i - 1][t];
-
-                if (nums[i - 1] <= t)
-                    dp[i][t] = dp[i][t] || dp[i - 1][t - nums[i - 1]];
+                if (nums[i - 1] <= t) dp[i][t] = dp[i][t] || dp[i - 1][t - nums[i - 1]];
             }
         }
-
         return dp[n][target];
     }
     // Interview Explanation:
@@ -201,38 +178,19 @@ public:
     // - Intuition: Problem reduces to finding if a subset sums exactly to sum/2 using 2D boolean DP table.
     // - Complexity: Time: O(N \cdot \text{sum}), Space: O(N \cdot \text{sum}).
 
-    // Target Sum
-    // Convert: P - N = target, P + N = total => P = (total + target) / 2
+    // Target Sum (LeetCode 494)
     int findTargetSumWays(vector<int>& nums, int target) {
         int total = accumulate(nums.begin(), nums.end(), 0);
-
-        if (abs(target) > total)
-            return 0;
-
-        if ((total + target) % 2 != 0)
-            return 0;
-
-        int subsetSum = (total + target) / 2;
-        int n = nums.size();
-
-        vector<vector<long long>> dp(
-            n + 1,
-            vector<long long>(subsetSum + 1, 0)
-        );
-
+        if (abs(target) > total || (total + target) % 2 != 0) return 0;
+        int subsetSum = (total + target) / 2, n = nums.size();
+        vector<vector<long long>> dp(n + 1, vector<long long>(subsetSum + 1, 0));
         dp[0][0] = 1;
-
         for (int i = 1; i <= n; i++) {
             for (int s = 0; s <= subsetSum; s++) {
-                // Do not take nums[i-1].
                 dp[i][s] = dp[i - 1][s];
-
-                // Take nums[i-1].
-                if (nums[i - 1] <= s)
-                    dp[i][s] += dp[i - 1][s - nums[i - 1]];
+                if (nums[i - 1] <= s) dp[i][s] += dp[i - 1][s - nums[i - 1]];
             }
         }
-
         return dp[n][subsetSum];
     }
     // Interview Explanation:
@@ -241,14 +199,11 @@ public:
     // - Intuition: Finding positive subset P reduces target evaluation to counting subsets summing to (total + target) / 2.
     // - Complexity: Time: O(N \cdot \text{sum}), Space: O(N \cdot \text{sum}).
 
-    // Coin Change
-    // dp[a] = minimum number of coins required to make amount a.
+    // Coin Change (LeetCode 322)
     int coinChange(vector<int>& coins, int amount) {
         const int INF = amount + 1;
-
         vector<int> dp(amount + 1, INF);
         dp[0] = 0;
-
         for (int a = 1; a <= amount; a++) {
             for (int coin : coins) {
                 if (coin <= a && dp[a - coin] != INF) {
@@ -256,7 +211,6 @@ public:
                 }
             }
         }
-
         return dp[amount] == INF ? -1 : dp[amount];
     }
     // Interview Explanation:
@@ -265,30 +219,17 @@ public:
     // - Intuition: `dp[a] = min(dp[a], dp[a - coin] + 1)` testing each coin denomination for amount a.
     // - Complexity: Time: O(N \cdot \text{amount}), Space: O(\text{amount}).
 
-    // Coin Change II
-    // dp[i][a] = number of combinations to make amount a using the first i coin types.
+    // Coin Change II (LeetCode 518)
     int change(int amount, vector<int>& coins) {
         int n = coins.size();
-
-        vector<vector<long long>> dp(
-            n + 1,
-            vector<long long>(amount + 1, 0)
-        );
-
-        for (int i = 0; i <= n; i++)
-            dp[i][0] = 1;
-
+        vector<vector<long long>> dp(n + 1, vector<long long>(amount + 1, 0));
+        for (int i = 0; i <= n; i++) dp[i][0] = 1;
         for (int i = 1; i <= n; i++) {
             for (int a = 1; a <= amount; a++) {
-                // Do not use this coin.
                 dp[i][a] = dp[i - 1][a];
-
-                // Use this coin; it can be reused.
-                if (coins[i - 1] <= a)
-                    dp[i][a] += dp[i][a - coins[i - 1]];
+                if (coins[i - 1] <= a) dp[i][a] += dp[i][a - coins[i - 1]];
             }
         }
-
         return (int)dp[n][amount];
     }
     // Interview Explanation:
@@ -297,32 +238,38 @@ public:
     // - Intuition: Outer loop over coin types ensures combinations are ordered, preventing duplicate permutations.
     // - Complexity: Time: O(N \cdot \text{amount}), Space: O(N \cdot \text{amount}).
 
-
-    // =========================================================
-    // 3. LCS / STRING DP
-    // =========================================================
-
-    // Longest Common Subsequence
-    // dp[i][j] = LCS length of first i chars of text1 and first j chars of text2.
-    int longestCommonSubsequence(string text1, string text2) {
-        int n = text1.size();
-        int m = text2.size();
-
-        vector<vector<int>> dp(
-            n + 1,
-            vector<int>(m + 1, 0)
-        );
-
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                if (text1[i - 1] == text2[j - 1]) {
-                    dp[i][j] = 1 + dp[i - 1][j - 1];
-                } else {
-                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
-                }
+    // Combination Sum IV (LeetCode 377)
+    int combinationSum4(vector<int>& nums, int target) {
+        vector<unsigned int> dp(target + 1, 0);
+        dp[0] = 1;
+        for (int i = 1; i <= target; i++) {
+            for (int x : nums) {
+                if (x <= i) dp[i] += dp[i - x];
             }
         }
+        return dp[target];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count total permutations of numbers that sum up to target (LeetCode 377).
+    // - Approach: Unbounded Knapsack permutation 1D DP (`dp[i] += dp[i - x]` with target loop outer).
+    // - Intuition: Target loop outer allows different orderings of numbers to be counted as distinct permutations.
+    // - Complexity: Time: O(N \cdot \text{target}), Space: O(\text{target}).
 
+
+    // =========================================================
+    // 3. STRING DP
+    // =========================================================
+
+    // Longest Common Subsequence (LeetCode 1143)
+    int longestCommonSubsequence(string text1, string text2) {
+        int n = text1.size(), m = text2.size();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (text1[i - 1] == text2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
+                else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
         return dp[n][m];
     }
     // Interview Explanation:
@@ -331,37 +278,18 @@ public:
     // - Intuition: If `text1[i-1] == text2[j-1]`, extend LCS by `1 + dp[i-1][j-1]`; else take `max(dp[i-1][j], dp[i][j-1])`.
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
-    // Edit Distance
-    // dp[i][j] = minimum operations to convert first i chars of word1 into first j chars of word2.
+    // Edit Distance (LeetCode 72)
     int minDistance(string word1, string word2) {
-        int n = word1.size();
-        int m = word2.size();
-
-        vector<vector<int>> dp(
-            n + 1,
-            vector<int>(m + 1, 0)
-        );
-
-        for (int i = 0; i <= n; i++)
-            dp[i][0] = i;
-
-        for (int j = 0; j <= m; j++)
-            dp[0][j] = j;
-
+        int n = word1.size(), m = word2.size();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+        for (int i = 0; i <= n; i++) dp[i][0] = i;
+        for (int j = 0; j <= m; j++) dp[0][j] = j;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                if (word1[i - 1] == word2[j - 1]) {
-                    dp[i][j] = dp[i - 1][j - 1];
-                } else {
-                    dp[i][j] = 1 + min({
-                        dp[i - 1][j],     // delete
-                        dp[i][j - 1],     // insert
-                        dp[i - 1][j - 1]  // replace
-                    });
-                }
+                if (word1[i - 1] == word2[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+                else dp[i][j] = 1 + min({dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]});
             }
         }
-
         return dp[n][m];
     }
     // Interview Explanation:
@@ -370,31 +298,17 @@ public:
     // - Intuition: If characters match, `dp[i][j] = dp[i-1][j-1]`; else 1 + min(delete: `dp[i-1][j]`, insert: `dp[i][j-1]`, replace: `dp[i-1][j-1]`).
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
-    // Distinct Subsequences
-    // dp[i][j] = number of ways to form first j chars of t from first i chars of s.
+    // Distinct Subsequences (LeetCode 115)
     int numDistinct(string s, string t) {
-        int n = s.size();
-        int m = t.size();
-
-        vector<vector<unsigned long long>> dp(
-            n + 1,
-            vector<unsigned long long>(m + 1, 0)
-        );
-
-        for (int i = 0; i <= n; i++)
-            dp[i][0] = 1;
-
+        int n = s.size(), m = t.size();
+        vector<vector<unsigned long long>> dp(n + 1, vector<unsigned long long>(m + 1, 0));
+        for (int i = 0; i <= n; i++) dp[i][0] = 1;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                // Skip s[i-1].
                 dp[i][j] = dp[i - 1][j];
-
-                // Match s[i-1] with t[j-1].
-                if (s[i - 1] == t[j - 1])
-                    dp[i][j] += dp[i - 1][j - 1];
+                if (s[i - 1] == t[j - 1]) dp[i][j] += dp[i - 1][j - 1];
             }
         }
-
         return (int)dp[n][m];
     }
     // Interview Explanation:
@@ -403,25 +317,81 @@ public:
     // - Intuition: Always add `dp[i-1][j]` (skipping s[i-1]); if `s[i-1] == t[j-1]`, also add `dp[i-1][j-1]`.
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
+    // Word Break (LeetCode 139)
+    bool wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> dict(wordDict.begin(), wordDict.end());
+        int n = s.size();
+        vector<bool> dp(n + 1, false);
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (dp[j] && dict.count(s.substr(j, i - j))) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Check if string s can be segmented into dictionary words (LeetCode 139).
+    // - Approach: 1D DP `dp[i]` tracking segmentability of prefix s[0..i-1].
+    // - Intuition: Prefix s[0..i-1] is valid if there exists split point j where s[0..j-1] is valid (`dp[j] == true`) and substring s[j..i-1] is in dict.
+    // - Complexity: Time: O(N^2 \cdot L) where L is max word length, Space: O(N + \text{dict}).
+
+    // Interleaving String (LeetCode 97)
+    bool isInterleave(string s1, string s2, string s3) {
+        int n = s1.size(), m = s2.size();
+        if (n + m != (int)s3.size()) return false;
+        vector<vector<bool>> dp(n + 1, vector<bool>(m + 1, false));
+        dp[0][0] = true;
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (i > 0 && s1[i - 1] == s3[i + j - 1]) dp[i][j] = dp[i][j] || dp[i - 1][j];
+                if (j > 0 && s2[j - 1] == s3[i + j - 1]) dp[i][j] = dp[i][j] || dp[i][j - 1];
+            }
+        }
+        return dp[n][m];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Check if s3 is formed by interleaving s1 and s2 preserving character order (LeetCode 97).
+    // - Approach: 2D Grid DP `dp[i][j]` matching s1[0..i-1] and s2[0..j-1] against s3[0..i+j-1].
+    // - Intuition: Transition matches `s1[i-1] == s3[i+j-1]` from top OR `s2[j-1] == s3[i+j-1]` from left.
+    // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
+
+    // Longest Palindromic Subsequence (LeetCode 516)
+    int longestPalindromeSubseq(string s) {
+        int n = s.size();
+        vector<vector<int>> dp(n, vector<int>(n, 0));
+        for (int i = 0; i < n; i++) dp[i][i] = 1;
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len <= n; i++) {
+                int j = i + len - 1;
+                if (s[i] == s[j]) dp[i][j] = 2 + (len == 2 ? 0 : dp[i + 1][j - 1]);
+                else dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+        return dp[0][n - 1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find length of longest palindromic subsequence in string s (LeetCode 516).
+    // - Approach: Interval DP `dp[i][j]` over substring range s[i..j].
+    // - Intuition: If `s[i] == s[j]`, `dp[i][j] = 2 + dp[i+1][j-1]`; else take `max(dp[i+1][j], dp[i][j-1])`.
+    // - Complexity: Time: O(N^2), Space: O(N^2).
+
 
     // =========================================================
-    // 4. LIS / SEQUENCE DP
+    // 4. LIS / SEQUENCE
     // =========================================================
 
-    // O(N log N) LIS.
-    // tails[len-1] = smallest possible tail for an increasing subsequence of length len.
+    // Longest Increasing Subsequence (LeetCode 300)
     int lengthOfLIS(vector<int>& nums) {
         vector<int> tails;
-
         for (int x : nums) {
             auto it = lower_bound(tails.begin(), tails.end(), x);
-
-            if (it == tails.end())
-                tails.push_back(x);
-            else
-                *it = x;
+            if (it == tails.end()) tails.push_back(x);
+            else *it = x;
         }
-
         return tails.size();
     }
     // Interview Explanation:
@@ -430,30 +400,22 @@ public:
     // - Intuition: `lower_bound` finds first tail >= x and replaces it to maintain smallest possible tail values for future extensions.
     // - Complexity: Time: O(N \log N), Space: O(N).
 
-    // Longest String Chain
+    // Longest String Chain (LeetCode 1048)
     int longestStrChain(vector<string>& words) {
-        sort(words.begin(), words.end(),
-             [](const string& a, const string& b) {
-                 return a.size() < b.size();
-             });
-
+        sort(words.begin(), words.end(), [](const string& a, const string& b) {
+            return a.size() < b.size();
+        });
         unordered_map<string, int> dp;
         int ans = 0;
-
         for (const string& word : words) {
             int best = 1;
-
             for (int i = 0; i < (int)word.size(); i++) {
                 string prev = word.substr(0, i) + word.substr(i + 1);
-
-                if (dp.count(prev))
-                    best = max(best, dp[prev] + 1);
+                if (dp.count(prev)) best = max(best, dp[prev] + 1);
             }
-
             dp[word] = best;
             ans = max(ans, best);
         }
-
         return ans;
     }
     // Interview Explanation:
@@ -462,19 +424,12 @@ public:
     // - Intuition: For each word, remove 1 character at position i to generate predecessor `prev` and update `dp[word] = max(dp[prev] + 1)`.
     // - Complexity: Time: O(N \log N + N \cdot L^2) where L is word length, Space: O(N).
 
-    // Largest Divisible Subset
+    // Largest Divisible Subset (LeetCode 368)
     vector<int> largestDivisibleSubset(vector<int>& nums) {
         if (nums.empty()) return {};
-
         sort(nums.begin(), nums.end());
-
-        int n = nums.size();
-        int bestLen = 1;
-        int bestIdx = 0;
-
-        vector<int> dp(n, 1);
-        vector<int> parent(n, -1);
-
+        int n = nums.size(), bestLen = 1, bestIdx = 0;
+        vector<int> dp(n, 1), parent(n, -1);
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < i; j++) {
                 if (nums[i] % nums[j] == 0 && dp[j] + 1 > dp[i]) {
@@ -482,18 +437,10 @@ public:
                     parent[i] = j;
                 }
             }
-
-            if (dp[i] > bestLen) {
-                bestLen = dp[i];
-                bestIdx = i;
-            }
+            if (dp[i] > bestLen) { bestLen = dp[i]; bestIdx = i; }
         }
-
         vector<int> ans;
-
-        for (int cur = bestIdx; cur != -1; cur = parent[cur])
-            ans.push_back(nums[cur]);
-
+        for (int cur = bestIdx; cur != -1; cur = parent[cur]) ans.push_back(nums[cur]);
         return ans;
     }
     // Interview Explanation:
@@ -504,37 +451,38 @@ public:
 
 
     // =========================================================
-    // 5. GRID / MATRIX DP
+    // 5. GRID DP
     // =========================================================
 
-    // Unique Paths II
-    // dp[i][j] = number of ways to reach cell (i,j).
-    long long uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
-        int n = obstacleGrid.size();
-        int m = obstacleGrid[0].size();
-
-        vector<vector<long long>> dp(n, vector<long long>(m, 0));
-
-        if (obstacleGrid[0][0] == 1 || obstacleGrid[n - 1][m - 1] == 1)
-            return 0;
-
-        dp[0][0] = 1;
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (obstacleGrid[i][j] == 1) {
-                    dp[i][j] = 0;
-                    continue;
-                }
-
-                if (i > 0)
-                    dp[i][j] += dp[i - 1][j];
-
-                if (j > 0)
-                    dp[i][j] += dp[i][j - 1];
+    // Unique Paths (LeetCode 62)
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> dp(m, vector<int>(n, 1));
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
             }
         }
+        return dp[m - 1][n - 1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count total unique paths from top-left (0,0) to bottom-right (m-1, n-1) in an m x n grid (LeetCode 62).
+    // - Approach: 2D Grid DP table `dp[i][j]`.
+    // - Intuition: Cell (i, j) can only be reached from top `dp[i-1][j]` or left `dp[i][j-1]`; `dp[i][j] = dp[i-1][j] + dp[i][j-1]`.
+    // - Complexity: Time: O(M \cdot N), Space: O(M \cdot N).
 
+    // Unique Paths II (LeetCode 63)
+    long long uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int n = obstacleGrid.size(), m = obstacleGrid[0].size();
+        vector<vector<long long>> dp(n, vector<long long>(m, 0));
+        if (obstacleGrid[0][0] == 1 || obstacleGrid[n - 1][m - 1] == 1) return 0;
+        dp[0][0] = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (obstacleGrid[i][j] == 1) { dp[i][j] = 0; continue; }
+                if (i > 0) dp[i][j] += dp[i - 1][j];
+                if (j > 0) dp[i][j] += dp[i][j - 1];
+            }
+        }
         return dp[n - 1][m - 1];
     }
     // Interview Explanation:
@@ -543,27 +491,18 @@ public:
     // - Intuition: Obstacle sets `dp[i][j] = 0`; otherwise sum paths coming from top (`dp[i-1][j]`) and left (`dp[i][j-1]`).
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
-    // Minimum Path Sum
+    // Minimum Path Sum (LeetCode 64)
     int minPathSum(vector<vector<int>>& grid) {
-        int n = grid.size();
-        int m = grid[0].size();
-
+        int n = grid.size(), m = grid[0].size();
         vector<vector<int>> dp(n, vector<int>(m, 0));
-
         dp[0][0] = grid[0][0];
-
-        for (int i = 1; i < n; i++)
-            dp[i][0] = dp[i - 1][0] + grid[i][0];
-
-        for (int j = 1; j < m; j++)
-            dp[0][j] = dp[0][j - 1] + grid[0][j];
-
+        for (int i = 1; i < n; i++) dp[i][0] = dp[i - 1][0] + grid[i][0];
+        for (int j = 1; j < m; j++) dp[0][j] = dp[0][j - 1] + grid[0][j];
         for (int i = 1; i < n; i++) {
             for (int j = 1; j < m; j++) {
                 dp[i][j] = grid[i][j] + min(dp[i - 1][j], dp[i][j - 1]);
             }
         }
-
         return dp[n - 1][m - 1];
     }
     // Interview Explanation:
@@ -572,18 +511,11 @@ public:
     // - Intuition: `dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1])` taking minimum incoming path cost.
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
-    // Maximal Square
-    // dp[i][j] = largest square side ending at (i-1,j-1).
+    // Maximal Square (LeetCode 221)
     int maximalSquare(vector<vector<char>>& matrix) {
-        if (matrix.empty() || matrix[0].empty())
-            return 0;
-
-        int n = matrix.size();
-        int m = matrix[0].size();
-        int best = 0;
-
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        int n = matrix.size(), m = matrix[0].size(), best = 0;
         vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
-
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
                 if (matrix[i - 1][j - 1] == '1') {
@@ -592,7 +524,6 @@ public:
                 }
             }
         }
-
         return best * best;
     }
     // Interview Explanation:
@@ -601,67 +532,76 @@ public:
     // - Intuition: `dp[i][j] = 1 + min(top, left, top-left)`; a square of side k can only be formed if all 3 neighbor sub-squares are at least side k-1.
     // - Complexity: Time: O(N \cdot M), Space: O(N \cdot M).
 
+    // Maximal Rectangle (LeetCode 85)
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        int n = matrix.size(), m = matrix[0].size(), maxArea = 0;
+        vector<int> heights(m, 0);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                heights[j] = (matrix[i][j] == '1') ? heights[j] + 1 : 0;
+            }
+            stack<int> stk;
+            for (int j = 0; j <= m; j++) {
+                int h = (j == m) ? 0 : heights[j];
+                while (!stk.empty() && heights[stk.top()] >= h) {
+                    int height = heights[stk.top()]; stk.pop();
+                    int width = stk.empty() ? j : (j - stk.top() - 1);
+                    maxArea = max(maxArea, height * width);
+                }
+                stk.push(j);
+            }
+        }
+        return maxArea;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find largest rectangle containing only 1s in a 2D binary grid (LeetCode 85).
+    // - Approach: Dynamic row histogram construction + Monotonic Stack Largest Rectangle in Histogram solver.
+    // - Intuition: Each row forms a histogram of contiguous '1' heights; running histogram max area per row finds global maximum rectangle.
+    // - Complexity: Time: O(N \cdot M), Space: O(M).
+
 
     // =========================================================
-    // 6. INTERVAL / PARTITION DP
+    // 6. PARTITION / INTERVAL DP
     // =========================================================
 
-    // Minimum Cost to Cut a Stick
-    // dp[i][j] = minimum cost to perform all cuts between cuts[i] and cuts[j].
-    int minCostCutStick(int n, vector<int>& cuts) {
-        vector<int> c = cuts;
-        c.push_back(0);
-        c.push_back(n);
-
-        sort(c.begin(), c.end());
-
-        int m = c.size();
-
-        vector<vector<int>> dp(m, vector<int>(m, 0));
-
-        for (int len = 2; len < m; len++) {
-            for (int i = 0; i + len < m; i++) {
-                int j = i + len;
+    // Matrix Chain Multiplication (MCM Template)
+    int matrixChainMultiplication(const vector<int>& p) {
+        int n = p.size() - 1;
+        vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
+        for (int len = 2; len <= n; len++) {
+            for (int i = 1; i <= n - len + 1; i++) {
+                int j = i + len - 1;
                 dp[i][j] = INT_MAX;
-
-                for (int k = i + 1; k < j; k++) {
-                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j] + c[j] - c[i]);
+                for (int k = i; k < j; k++) {
+                    int cost = dp[i][k] + dp[k + 1][j] + p[i - 1] * p[k] * p[j];
+                    dp[i][j] = min(dp[i][j], cost);
                 }
             }
         }
-
-        return dp[0][m - 1];
+        return dp[1][n];
     }
     // Interview Explanation:
-    // - Problem Statement: Find minimum cost to cut a stick of length n at given cut positions (LeetCode 1547).
-    // - Approach: Interval MCM DP over sorted cut positions including endpoints 0 and n.
-    // - Intuition: `dp[i][j]` is min cost to cut segment between cuts[i] and cuts[j]; test all intermediate cut choices k.
-    // - Complexity: Time: O(M^3) where M is number of cuts, Space: O(M^2).
+    // - Problem Statement: Find minimum scalar multiplications needed to multiply n matrices with dimensions array p.
+    // - Approach: Classic Interval MCM DP over subsegment range [i..j].
+    // - Intuition: Split matrix multiplication range [i..j] at position k; `dp[i][j] = min(dp[i][k] + dp[k+1][j] + p[i-1]*p[k]*p[j])`.
+    // - Complexity: Time: O(N^3), Space: O(N^2).
 
-    // Burst Balloons
-    // Think of k as the LAST balloon burst in interval (i,j).
+    // Burst Balloons (LeetCode 312)
     int maxCoinsBurstBalloons(vector<int>& nums) {
         int n = nums.size();
-
         vector<int> b(n + 2, 1);
-
-        for (int i = 0; i < n; i++)
-            b[i + 1] = nums[i];
-
+        for (int i = 0; i < n; i++) b[i + 1] = nums[i];
         int sz = n + 2;
-
         vector<vector<int>> dp(sz, vector<int>(sz, 0));
-
         for (int len = 2; len < sz; len++) {
             for (int i = 0; i + len < sz; i++) {
                 int j = i + len;
-
                 for (int k = i + 1; k < j; k++) {
                     dp[i][j] = max(dp[i][j], dp[i][k] + dp[k][j] + b[i] * b[k] * b[j]);
                 }
             }
         }
-
         return dp[0][sz - 1];
     }
     // Interview Explanation:
@@ -670,38 +610,47 @@ public:
     // - Intuition: If k is burst last in (i, j), its remaining neighbors are b[i] and b[j], yielding coins `b[i]*b[k]*b[j] + dp[i][k] + dp[k][j]`.
     // - Complexity: Time: O(N^3), Space: O(N^2).
 
-    // Palindrome Partitioning II
+    // Minimum Cost to Cut a Stick (LeetCode 1547)
+    int minCostCutStick(int n, vector<int>& cuts) {
+        vector<int> c = cuts;
+        c.push_back(0); c.push_back(n);
+        sort(c.begin(), c.end());
+        int m = c.size();
+        vector<vector<int>> dp(m, vector<int>(m, 0));
+        for (int len = 2; len < m; len++) {
+            for (int i = 0; i + len < m; i++) {
+                int j = i + len;
+                dp[i][j] = INT_MAX;
+                for (int k = i + 1; k < j; k++) {
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j] + c[j] - c[i]);
+                }
+            }
+        }
+        return dp[0][m - 1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum cost to cut a stick of length n at given cut positions (LeetCode 1547).
+    // - Approach: Interval MCM DP over sorted cut positions including endpoints 0 and n.
+    // - Intuition: `dp[i][j]` is min cost to cut segment between cuts[i] and cuts[j]; test all intermediate cut choices k.
+    // - Complexity: Time: O(M^3) where M is number of cuts, Space: O(M^2).
+
+    // Palindrome Partitioning II (LeetCode 132)
     int minCutPalindromePartitioning(string s) {
         int n = s.size();
         if (n <= 1) return 0;
-
-        // pal[i][j] = whether s[i..j] is a palindrome.
         vector<vector<bool>> pal(n, vector<bool>(n, false));
-
         for (int i = n - 1; i >= 0; i--) {
             for (int j = i; j < n; j++) {
-                if (s[i] == s[j] && (j - i <= 2 || pal[i + 1][j - 1])) {
-                    pal[i][j] = true;
-                }
+                if (s[i] == s[j] && (j - i <= 2 || pal[i + 1][j - 1])) pal[i][j] = true;
             }
         }
-
-        // dp[i] = minimum cuts needed for prefix s[0..i].
         vector<int> dp(n, INT_MAX);
-
         for (int i = 0; i < n; i++) {
-            if (pal[0][i]) {
-                dp[i] = 0;
-                continue;
-            }
-
+            if (pal[0][i]) { dp[i] = 0; continue; }
             for (int j = 0; j < i; j++) {
-                if (pal[j + 1][i]) {
-                    dp[i] = min(dp[i], dp[j] + 1);
-                }
+                if (pal[j + 1][i]) dp[i] = min(dp[i], dp[j] + 1);
             }
         }
-
         return dp[n - 1];
     }
     // Interview Explanation:
@@ -715,23 +664,16 @@ public:
     // 7. TREE DP
     // =========================================================
 
-    // Maximum Path Sum
-    // Returns maximum downward path starting from root.
-    // Updates answer with a path passing through current node.
+    // Maximum Path Sum (LeetCode 124)
     pair<int, int> maxPathSumHelper(TreeNode* root) {
-        if (!root)
-            return {0, INT_MIN};
-
+        if (!root) return {0, INT_MIN};
         auto left = maxPathSumHelper(root->left);
         auto right = maxPathSumHelper(root->right);
-
         int leftGain = max(0, left.first);
         int rightGain = max(0, right.first);
-
         int bestDown = root->val + max(leftGain, rightGain);
         int bestThrough = root->val + leftGain + rightGain;
         int bestSubtree = max({left.second, right.second, bestThrough});
-
         return {bestDown, bestSubtree};
     }
 
@@ -744,18 +686,13 @@ public:
     // - Intuition: At each node, compute max gain from left and right subtrees (pruning negative gains); update best path through root (`val + left + right`).
     // - Complexity: Time: O(N), Space: O(H) call stack.
 
-    // House Robber III
-    // returns {rob current node, skip current node}.
+    // House Robber III (LeetCode 337)
     pair<int, int> robTreeHelper(TreeNode* root) {
-        if (!root)
-            return {0, 0};
-
+        if (!root) return {0, 0};
         auto left = robTreeHelper(root->left);
         auto right = robTreeHelper(root->right);
-
         int robNode = root->val + left.second + right.second;
         int skipNode = max(left.first, left.second) + max(right.first, right.second);
-
         return {robNode, skipNode};
     }
 
@@ -774,24 +711,19 @@ public:
     // 8. STATE MACHINE DP
     // =========================================================
 
-    // Stock with Cooldown
-    // State: 0 = holding, 1 = just sold, 2 = resting / not holding.
+    // Stock with Cooldown (LeetCode 309)
     int maxProfitWithCooldown(vector<int>& prices) {
         int n = prices.size();
         if (n == 0) return 0;
-
         vector<vector<int>> dp(n, vector<int>(3, 0));
-
         dp[0][0] = -prices[0];
         dp[0][1] = INT_MIN / 2;
         dp[0][2] = 0;
-
         for (int i = 1; i < n; i++) {
             dp[i][0] = max(dp[i - 1][0], dp[i - 1][2] - prices[i]);
             dp[i][1] = dp[i - 1][0] + prices[i];
             dp[i][2] = max(dp[i - 1][2], dp[i - 1][1]);
         }
-
         return max(dp[n - 1][1], dp[n - 1][2]);
     }
     // Interview Explanation:
@@ -800,22 +732,17 @@ public:
     // - Intuition: Holding transitions from prev hold or rest - price; just sold transitions from hold + price; resting transitions from prev sold or rest.
     // - Complexity: Time: O(N), Space: O(N).
 
-    // Stock with Transaction Fee
-    // State: 0 = holding, 1 = cash / not holding.
+    // Stock with Transaction Fee (LeetCode 714)
     int maxProfitWithFee(vector<int>& prices, int fee) {
         int n = prices.size();
         if (n == 0) return 0;
-
         vector<vector<int>> dp(n, vector<int>(2, 0));
-
         dp[0][0] = -prices[0];
         dp[0][1] = 0;
-
         for (int i = 1; i < n; i++) {
             dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i]);
             dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i] - fee);
         }
-
         return dp[n - 1][1];
     }
     // Interview Explanation:
@@ -824,33 +751,52 @@ public:
     // - Intuition: Cash (not holding) updates by selling `hold + price - fee`; holding updates by buying `cash - price`.
     // - Complexity: Time: O(N), Space: O(N).
 
+    // Stock IV - At Most K Transactions (LeetCode 188)
+    int maxProfitK(int k, vector<int>& prices) {
+        int n = prices.size();
+        if (n == 0 || k == 0) return 0;
+        if (k >= n / 2) {
+            int profit = 0;
+            for (int i = 1; i < n; i++) if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];
+            return profit;
+        }
+        vector<vector<int>> dp(k + 1, vector<int>(n, 0));
+        for (int t = 1; t <= k; t++) {
+            int maxDiff = -prices[0];
+            for (int i = 1; i < n; i++) {
+                dp[t][i] = max(dp[t][i - 1], prices[i] + maxDiff);
+                maxDiff = max(maxDiff, dp[t - 1][i] - prices[i]);
+            }
+        }
+        return dp[k][n - 1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum profit completing at most k stock transactions (LeetCode 188).
+    // - Approach: 2D State Machine DP `dp[t][i]` tracking transaction count t and day i with `maxDiff` optimization.
+    // - Intuition: `dp[t][i] = max(dp[t][i-1], prices[i] + maxDiff)` where `maxDiff = max(dp[t-1][j] - prices[j])` avoids an inner O(N) loop.
+    // - Complexity: Time: O(K \cdot N), Space: O(K \cdot N).
+
 
     // =========================================================
-    // 9. DIGIT DP / BITMASK DP
+    // 9. DIGIT DP
     // =========================================================
 
-    // Digit DP: Count total occurrences of digit '1' in [0..n].
-    // State: pos = position, count = 1s chosen, started = non-leading zero appeared, tight = prefix limit.
+    // Count Digit One (LeetCode 233)
     string digitStr;
     long long digitMemo[20][20][2][2];
 
     long long countDigitOneDFS(int pos, int count, bool started, bool tight) {
-        if (pos == (int)digitStr.size())
-            return count;
-
+        if (pos == (int)digitStr.size()) return count;
         long long &memo = digitMemo[pos][count][started][tight];
         if (memo != -1) return memo;
-
         int limit = tight ? digitStr[pos] - '0' : 9;
         long long ans = 0;
-
         for (int d = 0; d <= limit; d++) {
             bool nextStarted = started || d != 0;
             int nextCount = count + (nextStarted && d == 1);
             bool nextTight = tight && (d == limit);
             ans += countDigitOneDFS(pos + 1, nextCount, nextStarted, nextTight);
         }
-
         return memo = ans;
     }
 
@@ -866,37 +812,31 @@ public:
     // - Intuition: `tight` restricts digits to prefix limit; `started` distinguishes leading zeros from valid digit 0.
     // - Complexity: Time: O(\log_{10} N \cdot \text{digits}), Space: O(\log_{10} N).
 
-    // Smallest Sufficient Team
-    // dp[mask] = minimum team covering exactly the skills in mask.
-    vector<int> smallestSufficientTeam(vector<string>& req_skills, vector<vector<string>>& people) {
-        int m = req_skills.size();
-        int n = people.size();
 
+    // =========================================================
+    // 10. BITMASK DP
+    // =========================================================
+
+    // Smallest Sufficient Team (LeetCode 1125)
+    vector<int> smallestSufficientTeam(vector<string>& req_skills, vector<vector<string>>& people) {
+        int m = req_skills.size(), n = people.size();
         unordered_map<string, int> skillId;
         for (int i = 0; i < m; i++) skillId[req_skills[i]] = i;
-
         vector<int> personMask(n, 0);
         for (int i = 0; i < n; i++) {
             for (const string& skill : people[i]) {
-                if (skillId.count(skill))
-                    personMask[i] |= 1 << skillId[skill];
+                if (skillId.count(skill)) personMask[i] |= 1 << skillId[skill];
             }
         }
-
-        int states = 1 << m;
-        int target = states - 1;
-
+        int states = 1 << m, target = states - 1;
         vector<vector<int>> dp(states);
         vector<bool> reachable(states, false);
         reachable[0] = true;
-
         for (int mask = 0; mask < states; mask++) {
             if (!reachable[mask]) continue;
-
             for (int i = 0; i < n; i++) {
                 int nextMask = mask | personMask[i];
                 if (nextMask == mask) continue;
-
                 if (!reachable[nextMask] || dp[nextMask].size() > dp[mask].size() + 1) {
                     reachable[nextMask] = true;
                     dp[nextMask] = dp[mask];
@@ -904,7 +844,6 @@ public:
                 }
             }
         }
-
         return dp[target];
     }
     // Interview Explanation:
@@ -915,26 +854,20 @@ public:
 
 
     // =========================================================
-    // 10. GAME THEORY / MINIMAX DP
+    // 11. GAME / MINIMAX DP
     // =========================================================
 
-    // Removal Game / Stone Game
-    // dp[i][j] = maximum score difference current player can obtain from nums[i..j].
+    // Removal Game / Stone Game (CSES / LeetCode 877)
     long long removalGame(vector<int>& nums) {
         int n = nums.size();
-
         vector<vector<long long>> dp(n, vector<long long>(n, 0));
-
-        for (int i = 0; i < n; i++)
-            dp[i][i] = nums[i];
-
+        for (int i = 0; i < n; i++) dp[i][i] = nums[i];
         for (int len = 2; len <= n; len++) {
             for (int i = 0; i + len <= n; i++) {
                 int j = i + len - 1;
                 dp[i][j] = max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1]);
             }
         }
-
         long long total = accumulate(nums.begin(), nums.end(), 0LL);
         return (total + dp[0][n - 1]) / 2;
     }
@@ -943,6 +876,86 @@ public:
     // - Approach: Minimax Interval DP calculating relative score difference `player1 - player2`.
     // - Intuition: `dp[i][j] = max(nums[i] - dp[i+1][j], nums[j] - dp[i][j-1])`; absolute score for player 1 is `(totalSum + maxDiff) / 2`.
     // - Complexity: Time: O(N^2), Space: O(N^2).
+
+
+    // =========================================================
+    // 12. ADVANCED DP
+    // =========================================================
+
+    // Super Egg Drop (LeetCode 887)
+    int superEggDrop(int k, int n) {
+        vector<int> dp(k + 1, 0);
+        int moves = 0;
+        while (dp[k] < n) {
+            moves++;
+            for (int i = k; i >= 1; i--) {
+                dp[i] = dp[i] + dp[i - 1] + 1;
+            }
+        }
+        return moves;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum moves to determine critical floor with k eggs and n floors (LeetCode 887).
+    // - Approach: Dual inversion DP: `dp[moves][eggs]` = max floors checkable with given moves and eggs.
+    // - Intuition: Dropping an egg at move m splits floors into egg-broken (`dp[i-1]`) and egg-intact (`dp[i]`); total floors checkable is `1 + dp[i-1] + dp[i]`.
+    // - Complexity: Time: O(K \log N), Space: O(K).
+
+    // Decode Ways II with Wildcards '*' (LeetCode 639)
+    int numDecodings2(string s) {
+        int n = s.size();
+        if (n == 0) return 0;
+        const int MOD = 1e9 + 7;
+        vector<long long> dp(n + 1, 0);
+        dp[0] = 1;
+        dp[1] = (s[0] == '*') ? 9 : (s[0] == '0' ? 0 : 1);
+        for (int i = 2; i <= n; i++) {
+            char c1 = s[i - 1], c2 = s[i - 2];
+            if (c1 == '*') dp[i] = (dp[i] + 9 * dp[i - 1]) % MOD;
+            else if (c1 != '0') dp[i] = (dp[i] + dp[i - 1]) % MOD;
+
+            if (c2 == '*') {
+                if (c1 == '*') dp[i] = (dp[i] + 15 * dp[i - 2]) % MOD;
+                else if (c1 <= '6') dp[i] = (dp[i] + 2 * dp[i - 2]) % MOD;
+                else dp[i] = (dp[i] + dp[i - 2]) % MOD;
+            } else if (c2 == '1') {
+                if (c1 == '*') dp[i] = (dp[i] + 9 * dp[i - 2]) % MOD;
+                else dp[i] = (dp[i] + dp[i - 2]) % MOD;
+            } else if (c2 == '2') {
+                if (c1 == '*') dp[i] = (dp[i] + 6 * dp[i - 2]) % MOD;
+                else if (c1 <= '6') dp[i] = (dp[i] + dp[i - 2]) % MOD;
+            }
+        }
+        return dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Decode digit string containing wildcard '*' matching '1'-'9' (LeetCode 639).
+    // - Approach: 1D DP tabulation considering single-character and double-character wildcard expansion cases modulo 10^9+7.
+    // - Intuition: '*' contributes 9 single-digit choices, 15 choices for '**' (11-19, 21-26), 9 choices for '1*', and 6 choices for '2*'.
+    // - Complexity: Time: O(N), Space: O(N).
+
+    // Minimum Cost For Tickets / Travel Tickets (LeetCode 983)
+    int mincostTickets(vector<int>& days, vector<int>& costs) {
+        int lastDay = days.back();
+        vector<int> dp(lastDay + 1, 0);
+        unordered_set<int> travel(days.begin(), days.end());
+        for (int i = 1; i <= lastDay; i++) {
+            if (!travel.count(i)) {
+                dp[i] = dp[i - 1];
+            } else {
+                dp[i] = min({
+                    dp[i - 1] + costs[0],
+                    dp[max(0, i - 7)] + costs[1],
+                    dp[max(0, i - 30)] + costs[2]
+                });
+            }
+        }
+        return dp[lastDay];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum cost to cover travel on given days using 1-day, 7-day, and 30-day passes (LeetCode 983).
+    // - Approach: 1D Calendar DP up to `lastDay`.
+    // - Intuition: Non-travel days carry forward `dp[i-1]`; travel days test purchasing 1-day, 7-day, or 30-day pass ending on day i.
+    // - Complexity: Time: O(\text{lastDay}), Space: O(\text{lastDay}).
 };
 
 /*
@@ -950,99 +963,52 @@ public:
                     DYNAMIC PROGRAMMING — INTERVIEW CHEAT SHEET
 ================================================================================
 
-1. DP RECOGNITION
+1. DP RECOGNITION MATRIX (12 CORE CATEGORIES)
 
-| Pattern | Typical State | Key Idea |
-|--------|---------------|----------|
-| Pick / Skip | dp[i] | take current vs skip current |
-| 0/1 Knapsack | dp[i][w] | item used at most once |
-| Unbounded Knapsack | dp[i][w] | item can be reused |
-| Subset Sum | dp[i][sum] | can we form this sum? |
-| Count Ways | dp[i][state] | number of valid ways |
-| LCS | dp[i][j] | compare two prefixes |
-| Edit Distance | dp[i][j] | insert/delete/replace |
-| LIS | dp[i] / tails | best increasing sequence |
-| Grid DP | dp[i][j] | transition from neighbors |
-| Interval DP | dp[l][r] | split interval at k |
-| Tree DP | return state from child | combine subtree states |
-| State Machine | dp[i][state] | model current condition |
-| Digit DP | dp[pos][...] | build number digit by digit |
-| Bitmask DP | dp[mask] | subset of small universe |
-| Minimax DP | dp[l][r] | best relative score |
+| Pattern                  | Typical State            | Key Transition / Idea                     |
+|--------------------------|--------------------------|-------------------------------------------|
+| 1. Basic 1D DP           | dp[i]                    | dp[i] = max(dp[i-1], dp[i-2] + val)       |
+| 2. Knapsack / Subset Sum | dp[i][w]                 | dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])|
+| 3. String DP             | dp[i][j]                 | s1[i]==s2[j] ? 1+dp[i-1][j-1] : max/min   |
+| 4. LIS / Sequence        | tails[mid] lower_bound   | replace first tail >= x in O(N log N)     |
+| 5. Grid DP               | dp[i][j]                 | dp[i][j] = val + min(dp[i-1][j], dp[i][j-1])|
+| 6. Partition / Interval  | dp[i][j]                 | dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost)|
+| 7. Tree DP               | return pair{take, skip}  | Post-order combine children states        |
+| 8. State Machine DP      | dp[i][state]             | hold, sold, rest scalar variables         |
+| 9. Digit DP              | dp(pos, count, tight)    | build number digit by digit with prefix limit|
+| 10. Bitmask DP           | dp[mask]                 | mask | personSkill subset representation   |
+| 11. Game / Minimax DP    | dp[i][j]                 | dp[i][j] = max(nums[i]-dp[i+1][j], nums[j]-dp[i][j-1])|
+| 12. Advanced DP          | dp[moves][eggs] / calendar| inverse DP / multi-day pass choices      |
 
 2. THE INTERVIEW DP PROTOCOL
 
-Step 1:
-Define exactly what dp[state] means.
+Step 1: Define exactly what `dp[state]` means out loud.
+Step 2: Identify choices / transitions and base cases.
+Step 3: State time & space complexity before coding:
+        Time = Number of States x Transition Cost per State
+        Space = Number of Stored States (+ Call Stack if recursive)
 
-Step 2:
-Identify the choices/transitions.
-
-Step 3:
-Write the recurrence.
-
-Step 4:
-Identify base cases.
-
-Step 5:
-Choose:
-    - Memoization when recursive choices are natural.
-    - Tabulation when dependency order is obvious.
-
-Step 6:
-State:
-    Time = number of states × transitions per state
-    Space = number of stored states + recursion stack (if memoized)
-
-3. KNAPSACK LOOP RULE
-
-For 0/1 Knapsack:
-    process each item once
-    capacity goes backwards in 1D optimization
-
-For Unbounded Knapsack:
-    same item may be reused
-    capacity goes forwards in 1D optimization
+3. KNAPSACK LOOP DIRECTION RULE
+- 0/1 Knapsack (1D Space): Iterate capacity loop BACKWARDS (`for w = W down to wt`) to prevent item reuse.
+- Unbounded Knapsack (1D Space): Iterate capacity loop FORWARDS (`for w = wt to W`) to allow item reuse.
+- Permutations vs Combinations:
+  - Outer Coins Loop = Combinations (Coin Change II - LeetCode 518).
+  - Outer Amount Loop = Permutations (Combination Sum IV - LeetCode 377).
 
 4. INTERVAL DP TEMPLATE
-
-for (int len = smallest; len <= n; len++) {
-    for (int l = 0; l + len - 1 < n; l++) {
-        int r = l + len - 1;
-
-        for (int k = l; k < r; k++) {
-            // combine left interval + right interval
+for (int len = 2; len <= n; len++) {
+    for (int i = 0; i + len - 1 < n; i++) {
+        int j = i + len - 1;
+        for (int k = i; k < j; k++) {
+            dp[i][j] = min/max(dp[i][j], dp[i][k] + dp[k+1][j] + cost);
         }
     }
 }
-
-5. COMMON INTERVIEW TRAPS
-
-- 0/1 vs unbounded knapsack: loop direction matters in 1D DP.
-- Coin Change II counts combinations, not permutations.
-- LCS is subsequence; substring must be contiguous.
-- LIS uses lower_bound for strictly increasing subsequence.
-- Interval DP usually becomes easy after deciding what k represents.
-- Tree DP often returns multiple states from each subtree.
-- State-machine DP: define the meaning of every state before coding.
-- Digit DP: `tight` and `started` are different concepts.
-- Target Sum requires checking feasibility before converting to subset sum.
-- Always check integer overflow when DP counts ways.
-
-6. GOLDEN RULE
-
-Do not start by writing `dp`.
-
-First answer:
-    "What does dp[state] represent?"
-
-If that sentence is precise, the transition usually becomes straightforward.
 ================================================================================
 */
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-
     return 0;
 }
