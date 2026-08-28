@@ -7,13 +7,39 @@
  * Sweep-Line, Merge/Insert/Non-overlapping Intervals, and Greedy Invariants.
  */
 
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
 
 using ll = long long;
 using pii = pair<int, int>;
 using vi = vector<int>;
+using vl = vector<ll>;
 using vll = vector<ll>;
+using vvi = vector<vector<int>>;
+using vvl = vector<vector<ll>>;
+
 
 // ====================================================================================================
 // SECTION 1: CLASSIC SORTING ALGORITHMS
@@ -794,6 +820,192 @@ int longestConsecutive(const vi &nums) {
     • Minimum Removals (Non-overlapping): Sort by END time -> greedily retain earliest ending interval.
  ====================================================================================================
 */
+
+
+// ====================================================================================================
+// SECTION: ARRAYS, HASHING & TWO POINTER INTERVIEW SUITE
+// ====================================================================================================
+
+// 1. Two Sum (LeetCode 1)
+vi twoSum(const vi& nums, int target) {
+    unordered_map<int, int> seen;
+    for (int i = 0; i < (int)nums.size(); ++i) {
+        int complement = target - nums[i];
+        if (seen.count(complement)) return {seen[complement], i};
+        seen[nums[i]] = i;
+    }
+    return {};
+}
+
+// 2. Group Anagrams (LeetCode 49)
+vvi groupAnagrams(vector<string>& strs) {
+    unordered_map<string, vi> map;
+    for (int i = 0; i < (int)strs.size(); ++i) {
+        string key = strs[i];
+        sort(key.begin(), key.end());
+        map[key].push_back(i);
+    }
+    vvi res;
+    for (auto& [_, indices] : map) {
+        vi group;
+        for (int idx : indices) group.push_back(idx);
+        res.push_back(group);
+    }
+    return res;
+}
+
+// 3. Product of Array Except Self (LeetCode 238 - O(1) Extra Space)
+vi productExceptSelf(const vi& nums) {
+    int n = nums.size();
+    vi res(n, 1);
+    int prefix = 1;
+    for (int i = 0; i < n; ++i) {
+        res[i] = prefix;
+        prefix *= nums[i];
+    }
+    int suffix = 1;
+    for (int i = n - 1; i >= 0; --i) {
+        res[i] *= suffix;
+        suffix *= nums[i];
+    }
+    return res;
+}
+
+// 4. Find All Duplicates in Array (LeetCode 442 - In-Place Sign Marking)
+vi findDuplicates(vi& nums) {
+    vi duplicates;
+    for (int i = 0; i < (int)nums.size(); ++i) {
+        int index = abs(nums[i]) - 1;
+        if (nums[index] < 0) duplicates.push_back(index + 1);
+        else nums[index] = -nums[index];
+    }
+    return duplicates;
+}
+
+// 5. Valid Sudoku (LeetCode 36)
+bool isValidSudoku(const vector<vector<char>>& board) {
+    int rowMask[9] = {0}, colMask[9] = {0}, boxMask[9] = {0};
+    for (int r = 0; r < 9; ++r) {
+        for (int c = 0; c < 9; ++c) {
+            if (board[r][c] == '.') continue;
+            int bit = 1 << (board[r][c] - '1');
+            int b = (r / 3) * 3 + (c / 3);
+            if ((rowMask[r] & bit) || (colMask[c] & bit) || (boxMask[b] & bit)) return false;
+            rowMask[r] |= bit;
+            colMask[c] |= bit;
+            boxMask[b] |= bit;
+        }
+    }
+    return true;
+}
+
+// 6. Rotate Array by K (LeetCode 189 - Triple Reverse)
+void rotateArray(vi& nums, int k) {
+    int n = nums.size();
+    k %= n;
+    reverse(nums.begin(), nums.end());
+    reverse(nums.begin(), nums.begin() + k);
+    reverse(nums.begin() + k, nums.end());
+}
+
+// 7. Container With Most Water (LeetCode 11)
+int maxArea(const vi& height) {
+    int left = 0, right = (int)height.size() - 1, maxWater = 0;
+    while (left < right) {
+        int currentWater = min(height[left], height[right]) * (right - left);
+        maxWater = max(maxWater, currentWater);
+        if (height[left] < height[right]) left++;
+        else right--;
+    }
+    return maxWater;
+}
+
+// 8. 3Sum (LeetCode 15)
+vvi threeSum(vi& nums) {
+    vvi res;
+    int n = nums.size();
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < n - 2; ++i) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            int sum = nums[i] + nums[left] + nums[right];
+            if (sum == 0) {
+                res.push_back({nums[i], nums[left], nums[right]});
+                while (left < right && nums[left] == nums[left + 1]) left++;
+                while (left < right && nums[right] == nums[right - 1]) right--;
+                left++; right--;
+            } else if (sum < 0) left++;
+            else right--;
+        }
+    }
+    return res;
+}
+
+// 9. 4Sum (LeetCode 18)
+vvi fourSum(vi& nums, int target) {
+    vvi res;
+    int n = nums.size();
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < n; ++i) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        for (int j = i + 1; j < n; ++j) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+            int left = j + 1, right = n - 1;
+            while (left < right) {
+                ll sum = (ll)nums[i] + nums[j] + nums[left] + nums[right];
+                if (sum == target) {
+                    res.push_back({nums[i], nums[j], nums[left], nums[right]});
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++; right--;
+                } else if (sum < target) left++;
+                else right--;
+            }
+        }
+    }
+    return res;
+}
+
+// 10. Shortest Unsorted Continuous Subarray (LeetCode 581)
+int findUnsortedSubarray(const vi& nums) {
+    int n = nums.size(), maxSeen = INT_MIN, minSeen = INT_MAX;
+    int rightBound = -1, leftBound = -1;
+    for (int i = 0; i < n; ++i) {
+        maxSeen = max(maxSeen, nums[i]);
+        if (nums[i] < maxSeen) rightBound = i;
+    }
+    for (int i = n - 1; i >= 0; --i) {
+        minSeen = min(minSeen, nums[i]);
+        if (nums[i] > minSeen) leftBound = i;
+    }
+    return (rightBound == -1) ? 0 : (rightBound - leftBound + 1);
+}
+
+// 11. Time Based Key-Value Store (LeetCode 981)
+class TimeMap {
+    unordered_map<string, vector<pair<int, string>>> store;
+public:
+    TimeMap() {}
+    void set(string key, string value, int timestamp) {
+        store[key].push_back({timestamp, value});
+    }
+    string get(string key, int timestamp) {
+        if (!store.count(key)) return "";
+        auto& list = store[key];
+        int low = 0, high = (int)list.size() - 1, bestIdx = -1;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (list[mid].first <= timestamp) {
+                bestIdx = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return (bestIdx == -1) ? "" : list[bestIdx].second;
+    }
+};
 
 int main() {
     ios::sync_with_stdio(false);

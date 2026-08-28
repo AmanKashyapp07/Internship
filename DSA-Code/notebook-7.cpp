@@ -33,6 +33,15 @@ struct TreeNode {
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
 
+struct NodeWithParent {
+    int val;
+    NodeWithParent* left;
+    NodeWithParent* right;
+    NodeWithParent* parent;
+    NodeWithParent(int x = 0, NodeWithParent* l = nullptr, NodeWithParent* r = nullptr, NodeWithParent* p = nullptr)
+        : val(x), left(l), right(r), parent(p) {}
+};
+
 class Solution {
 public:
 
@@ -40,12 +49,18 @@ public:
     // 1. DFS TRAVERSALS
     // =========================================================
 
-    // Inorder: Left -> Root -> Right
+    // Inorder: Left -> Root -> Right (Recursive)
     void inorder(TreeNode* root, vector<int>& ans) {
         if (!root) return;
         inorder(root->left, ans);
         ans.push_back(root->val);
         inorder(root->right, ans);
+    }
+
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        inorder(root, ans);
+        return ans;
     }
     // Interview Explanation:
     // - Problem Statement: Perform Inorder traversal of a binary tree (Left -> Root -> Right).
@@ -53,12 +68,18 @@ public:
     // - Intuition: Recursively visit left child, record current node value, then visit right child; produces ascending sorted order in a BST.
     // - Complexity: Time: O(N) visiting every node once, Space: O(H) recursion stack where H is tree height.
 
-    // Preorder: Root -> Left -> Right
+    // Preorder: Root -> Left -> Right (Recursive)
     void preorder(TreeNode* root, vector<int>& ans) {
         if (!root) return;
         ans.push_back(root->val);
         preorder(root->left, ans);
         preorder(root->right, ans);
+    }
+
+    vector<int> preorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        preorder(root, ans);
+        return ans;
     }
     // Interview Explanation:
     // - Problem Statement: Perform Preorder traversal of a binary tree (Root -> Left -> Right).
@@ -66,12 +87,18 @@ public:
     // - Intuition: Process current root first before descending into left and right subtrees; useful for duplicating trees and prefix expressions.
     // - Complexity: Time: O(N) visiting every node once, Space: O(H) recursion call stack.
 
-    // Postorder: Left -> Right -> Root
+    // Postorder: Left -> Right -> Root (Recursive)
     void postorder(TreeNode* root, vector<int>& ans) {
         if (!root) return;
         postorder(root->left, ans);
         postorder(root->right, ans);
         ans.push_back(root->val);
+    }
+
+    vector<int> postorderTraversal(TreeNode* root) {
+        vector<int> ans;
+        postorder(root, ans);
+        return ans;
     }
     // Interview Explanation:
     // - Problem Statement: Perform Postorder traversal of a binary tree (Left -> Right -> Root).
@@ -264,6 +291,15 @@ public:
         TreeNode* right = lowestCommonAncestor(root->right, p, q);
         if (left && right) return root;
         return left ? left : right;
+    }
+
+    NodeWithParent* lowestCommonAncestorWithParent(NodeWithParent* p, NodeWithParent* q) {
+        NodeWithParent *a = p, *b = q;
+        while (a != b) {
+            a = a->parent ? a->parent : q;
+            b = b->parent ? b->parent : p;
+        }
+        return a;
     }
     // Interview Explanation:
     // - Problem Statement: Find the lowest common ancestor (LCA) of two given nodes p and q in a general binary tree.
@@ -564,7 +600,7 @@ public:
 
 
     // =========================================================
-    // 24. PATH SUM
+    // 24. PATH SUM (I, II & BINARY TREE PATHS)
     // =========================================================
 
     bool hasPathSum(TreeNode* root, int targetSum) {
@@ -572,11 +608,48 @@ public:
         if (!root->left && !root->right) return targetSum == root->val;
         return hasPathSum(root->left, targetSum - root->val) || hasPathSum(root->right, targetSum - root->val);
     }
+
+    void dfsPathSumII(TreeNode* node, int targetSum, vector<int>& currPath, vector<vector<int>>& res) {
+        if (!node) return;
+        currPath.push_back(node->val);
+        if (!node->left && !node->right && targetSum == node->val) {
+            res.push_back(currPath);
+        } else {
+            dfsPathSumII(node->left, targetSum - node->val, currPath, res);
+            dfsPathSumII(node->right, targetSum - node->val, currPath, res);
+        }
+        currPath.pop_back();
+    }
+
+    vector<vector<int>> pathSumII(TreeNode* root, int targetSum) {
+        vector<vector<int>> res;
+        vector<int> currPath;
+        dfsPathSumII(root, targetSum, currPath, res);
+        return res;
+    }
+
+    void dfsTreePaths(TreeNode* node, string path, vector<string>& res) {
+        if (!node) return;
+        path += to_string(node->val);
+        if (!node->left && !node->right) {
+            res.push_back(path);
+            return;
+        }
+        path += "->";
+        if (node->left) dfsTreePaths(node->left, path, res);
+        if (node->right) dfsTreePaths(node->right, path, res);
+    }
+
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> res;
+        if (root) dfsTreePaths(root, "", res);
+        return res;
+    }
     // Interview Explanation:
-    // - Problem Statement: Determine if the tree has a root-to-leaf path such that adding all values along the path equals targetSum.
-    // - Approach: Recursive DFS with target reduction.
-    // - Intuition: At leaf node, check if `targetSum == root->val`; for internal nodes, recursively check left or right with `targetSum - root->val`.
-    // - Complexity: Time: O(N) in worst case visiting all nodes, Space: O(H) recursion stack space.
+    // - Problem Statement: Path Sum I (boolean existence), Path Sum II (all matching paths), and Binary Tree Paths (all root-to-leaf string representations).
+    // - Approach: Backtracking DFS with path accumulation and target reduction.
+    // - Intuition: Push current node, recurse children; on reaching leaf with remaining target == 0, record path; backtrack on return.
+    // - Complexity: Time: O(N), Space: O(H) recursion stack and path buffer.
 
 
     // =========================================================

@@ -1400,41 +1400,41 @@ The following problems are covered in other dedicated files in the DSA suite:
 +------------------------------------------------------------------+-------------------------------------------------------------+
 | PROBLEM NAME & LEETCODE NUMBER                                   | PRIMARY LOCATION(S) IN REPOSITORY                           |
 +------------------------------------------------------------------+-------------------------------------------------------------+
-| All Tree Traversals, Views, LCA, Paths, Width, Morris, BST (1..43)| DSA-Code/notebook-7.cpp (Problems 1 to 43)                 |
+| All Tree Traversals, Views, LCA, Paths, Width, Morris, BST       | DSA-Code/notebook-7.cpp (Problems 1 to 43)                  |
 | Next Permutation (LeetCode 31)                                   | DSA-Code/notebook-4.cpp (Problem 2), interview.cpp          |
 | 3 Sum (LeetCode 15)                                              | DSA-Code/sorting_template.cpp, interview.cpp                |
-| Kadane's Algorithm - Maximum Subarray (LeetCode 53)              | DSA-Code/notebook-2.cpp (Problem 8), last-moment.cpp         |
+| Kadane's Algorithm - Maximum Subarray (LeetCode 53)              | DSA-Code/notebook-2.cpp (Problem 8), last-moment.cpp        |
 | Count Inversions                                                 | DSA-Code/sorting_template.cpp, interview.cpp                |
 | Maximum Product Subarray (LeetCode 152)                          | DSA-Code/notebook-10.cpp, last-moment.cpp                   |
-| Find Peak Element (LeetCode 162)                                 | DSA-Code/sorting_template.cpp, last-moment.cpp               |
-| Koko Eating Bananas (LeetCode 875)                               | DSA-Code/sorting_template.cpp, interview.cpp                 |
+| Find Peak Element (LeetCode 162)                                 | DSA-Code/sorting_template.cpp, last-moment.cpp              |
+| Koko Eating Bananas (LeetCode 875)                               | DSA-Code/sorting_template.cpp, interview.cpp                |
 | Aggressive Cows (SPOJ / GFG)                                     | DSA-Code/sorting_template.cpp                               |
 | Median of 2 Sorted Arrays (LeetCode 4)                           | DSA-Code/notebook-4.cpp (Problem 1), interview.cpp          |
-| Power Set / All Subsets (LeetCode 78)                            | DSA-Code/recursion_template.cpp, notebook-2.cpp              |
+| Power Set / All Subsets (LeetCode 78)                            | DSA-Code/recursion_template.cpp, notebook-2.cpp             |
 | Combination Sum I (LeetCode 39)                                  | DSA-Code/recursion_template.cpp, heap_interval_template.cpp |
 | N Queen (LeetCode 51)                                            | DSA-Code/recursion_template.cpp, interview.cpp              |
 | Sudoku Solver (LeetCode 37)                                      | DSA-Code/recursion_template.cpp, interview.cpp              |
 | Word Search (LeetCode 79)                                        | DSA-Code/recursion_template.cpp, interview.cpp              |
-| Next Greater Element (LeetCode 496 / 503)                         | DSA-Code/stack_template.cpp, notebook-4.cpp                 |
-| Trapping Rainwater (LeetCode 42)                                 | DSA-Code/stack_template.cpp, interview.cpp                 |
-| Largest Rectangle in a Histogram (LeetCode 84)                  | DSA-Code/stack_template.cpp, last-moment.cpp                |
+| Next Greater Element (LeetCode 496 / 503)                        | DSA-Code/stack_template.cpp, notebook-4.cpp                 |
+| Trapping Rainwater (LeetCode 42)                                 | DSA-Code/stack_template.cpp, interview.cpp                  |
+| Largest Rectangle in a Histogram (LeetCode 84)                   | DSA-Code/stack_template.cpp, last-moment.cpp                |
 | Asteroid Collision (LeetCode 735)                                | DSA-Code/stack_template.cpp                                 |
-| Sliding Window Maximum (LeetCode 239)                            | DSA-Code/notebook-2.cpp (Problem 7), stack_template.cpp      |
+| Sliding Window Maximum (LeetCode 239)                            | DSA-Code/notebook-2.cpp (Problem 7), stack_template.cpp     |
 | LRU Cache (LeetCode 146)                                         | DSA-Code/notebook-5.cpp, stack_template.cpp                 |
-| K-th Largest Element in an Array (LeetCode 215)                  | DSA-Code/notebook-4.cpp (QuickSelect), sorting_template.cpp  |
-| Dijkstra's Algorithm (Single Source Shortest Path)               | DSA-Code/notebook-8.cpp (Problem 10), notebook-3.cpp         |
+| K-th Largest Element in an Array (LeetCode 215)                  | DSA-Code/notebook-4.cpp (QuickSelect), sorting_template.cpp |
+| Dijkstra's Algorithm (Single Source Shortest Path)               | DSA-Code/notebook-8.cpp (Problem 10), notebook-3.cpp        |
 | Bellman Ford Algorithm                                           | DSA-Code/notebook-8.cpp, notebook-3.cpp                     |
 | Floyd Warshall Algorithm                                         | DSA-Code/notebook-8.cpp, notebook-3.cpp                     |
-| Find MST Weight (Prim's & Kruskal's Algorithm)                  | DSA-Code/notebook-1.cpp (Prob 5 & 6), notebook-8.cpp (16&17) |
+| Find MST Weight (Prim's & Kruskal's Algorithm)                   | DSA-Code/notebook-1.cpp (Prob 5 & 6), notebook-8.cpp (16&17)|
 | Longest Increasing Subsequence (LeetCode 300)                    | DSA-Code/notebook-2.cpp (Problem 9), notebook-10.cpp        |
-| Longest Common Subsequence (LeetCode 1143)                       | DSA-Code/notebook-2.cpp (Problem 10), notebook-10.cpp        |
+| Longest Common Subsequence (LeetCode 1143)                       | DSA-Code/notebook-2.cpp (Problem 10), notebook-10.cpp       |
 | Edit Distance (LeetCode 72)                                      | DSA-Code/notebook-10.cpp, interview.cpp                     |
 | Best Time to Buy and Sell Stock (LeetCode 121)                   | DSA-Code/notebook-10.cpp, interview.cpp                     |
-| Best Time to Buy and Sell Stock IV (LeetCode 188)                | DSA-Code/notebook-10.cpp, heap_interval_template.cpp         |
+| Best Time to Buy and Sell Stock IV (LeetCode 188)                | DSA-Code/notebook-10.cpp, heap_interval_template.cpp        |
 | Burst Balloons (LeetCode 312)                                    | DSA-Code/notebook-10.cpp, interview.cpp                     |
-| Trie Implementation & Search (LeetCode 208)                      | DSA-Code/alphabet_trie.cpp, binary_trie.cpp                  |
-| Maximum XOR of 2 Numbers & with Element (LC 421 & 1707)          | DSA-Code/alphabet_trie.cpp, binary_trie.cpp                  |
-| Coin Change I & II (LeetCode 322 & 518)                          | DSA-Code/notebook-10.cpp                                     |
-| Super Egg Drop (LeetCode 887)                                    | DSA-Code/notebook-10.cpp                                     |
+| Trie Implementation & Search (LeetCode 208)                      | DSA-Code/alphabet_trie.cpp, binary_trie.cpp                 |
+| Maximum XOR of 2 Numbers & with Element (LC 421 & 1707)          | DSA-Code/alphabet_trie.cpp, binary_trie.cpp                 |
+| Coin Change I & II (LeetCode 322 & 518)                          | DSA-Code/notebook-10.cpp                                    |
+| Super Egg Drop (LeetCode 887)                                    | DSA-Code/notebook-10.cpp                                    |
 +------------------------------------------------------------------+-------------------------------------------------------------+
 */

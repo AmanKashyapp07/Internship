@@ -7,13 +7,38 @@
  * Room Allocation, and Interval Coverage.
  */
 
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
 
 using ll = long long;
 using pii = pair<int, int>;
 using vi = vector<int>;
+using vl = vector<ll>;
 using vvi = vector<vector<int>>;
+using vvl = vector<vector<ll>>;
+
 
 const ll MOD = 1e9 + 7;
 
@@ -360,6 +385,121 @@ int minMeetingRooms(const vector<pii> &intervals) {
     - Min Interval to Include Query: Sort queries & intervals + Min-Heap active range length.
  ====================================================================================================
 */
+
+
+// ====================================================================================================
+// SECTION: ADVANCED HEAP & INTERVAL INTERVIEW EXTENSIONS
+// ====================================================================================================
+
+// 1. Top K Frequent Words (LeetCode 692)
+vector<string> topKFrequentWords(vector<string>& words, int k) {
+    unordered_map<string, int> freq;
+    for (const string& w : words) freq[w]++;
+
+    auto comp = [](const pair<int, string>& a, const pair<int, string>& b) {
+        if (a.first != b.first) return a.first > b.first;
+        return a.second < b.second;
+    };
+    priority_queue<pair<int, string>, vector<pair<int, string>>, decltype(comp)> pq(comp);
+
+    for (auto& [w, f] : freq) {
+        pq.push({f, w});
+        if ((int)pq.size() > k) pq.pop();
+    }
+    vector<string> res(k);
+    for (int i = k - 1; i >= 0; --i) {
+        res[i] = pq.top().second;
+        pq.pop();
+    }
+    return res;
+}
+
+// 2. Sliding Window Median (LeetCode 480 - Two Multisets)
+vector<double> medianSlidingWindow(vi& nums, int k) {
+    multiset<int> low, high;
+    vector<double> medians;
+
+    auto balance = [&]() {
+        while (low.size() > high.size() + 1) {
+            auto it = prev(low.end());
+            high.insert(*it);
+            low.erase(it);
+        }
+        while (high.size() > low.size()) {
+            auto it = high.begin();
+            low.insert(*it);
+            high.erase(it);
+        }
+    };
+
+    auto add = [&](int num) {
+        if (low.empty() || num <= *prev(low.end())) low.insert(num);
+        else high.insert(num);
+        balance();
+    };
+
+    auto remove = [&](int num) {
+        auto it = low.find(num);
+        if (it != low.end()) low.erase(it);
+        else high.erase(high.find(num));
+        balance();
+    };
+
+    for (int i = 0; i < (int)nums.size(); ++i) {
+        add(nums[i]);
+        if (i >= k - 1) {
+            if (k % 2 == 1) medians.push_back((double)*prev(low.end()));
+            else medians.push_back(((double)*prev(low.end()) + *high.begin()) / 2.0);
+            remove(nums[i - k + 1]);
+        }
+    }
+    return medians;
+}
+
+// 3. Meeting Rooms I (LeetCode 252 - Can Attend All Meetings)
+bool canAttendMeetings(vvi& intervals) {
+    sort(intervals.begin(), intervals.end());
+    for (int i = 1; i < (int)intervals.size(); ++i) {
+        if (intervals[i][0] < intervals[i - 1][1]) return false;
+    }
+    return true;
+}
+
+// 4. Employee Free Time (LeetCode 759)
+vvi employeeFreeTime(vector<vvi>& schedule) {
+    vvi intervals;
+    for (auto& emp : schedule) {
+        for (auto& iv : emp) intervals.push_back(iv);
+    }
+    sort(intervals.begin(), intervals.end());
+
+    vvi freeTime;
+    int end = intervals[0][1];
+    for (int i = 1; i < (int)intervals.size(); ++i) {
+        if (intervals[i][0] > end) {
+            freeTime.push_back({end, intervals[i][0]});
+        }
+        end = max(end, intervals[i][1]);
+    }
+    return freeTime;
+}
+
+// 5. Minimum Number of Arrows to Burst Balloons (LeetCode 452)
+int findMinArrowShots(vvi& points) {
+    if (points.empty()) return 0;
+    sort(points.begin(), points.end(), [](const vi& a, const vi& b) {
+        return a[1] < b[1];
+    });
+    int arrows = 1;
+    int firstEnd = points[0][1];
+    for (int i = 1; i < (int)points.size(); ++i) {
+        if (points[i][0] > firstEnd) {
+            arrows++;
+            firstEnd = points[i][1];
+        }
+    }
+    return arrows;
+}
 
 int main() {
     ios::sync_with_stdio(false);

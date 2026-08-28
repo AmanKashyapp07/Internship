@@ -23,6 +23,14 @@
 #endif
 using namespace std;
 
+using ll = long long;
+using pii = pair<int, int>;
+using vi = vector<int>;
+using vl = vector<ll>;
+using vvi = vector<vector<int>>;
+using vvl = vector<vector<ll>>;
+
+
 
 struct TreeNode {
     int val;
@@ -979,6 +987,66 @@ public:
     // - Approach: 1D Calendar DP up to `lastDay`.
     // - Intuition: Non-travel days carry forward `dp[i-1]`; travel days test purchasing 1-day, 7-day, or 30-day pass ending on day i.
     // - Complexity: Time: O(\text{lastDay}), Space: O(\text{lastDay}).
+
+    // Dungeon Game (LeetCode 174 - Bottom-Up Health Calculation)
+    int calculateMinimumHP(vvi& dungeon) {
+        int m = dungeon.size(), n = dungeon[0].size();
+        vvi dp(m + 1, vi(n + 1, 1e9));
+        dp[m][n - 1] = dp[m - 1][n] = 1;
+
+        for (int i = m - 1; i >= 0; --i) {
+            for (int j = n - 1; j >= 0; --j) {
+                int minHealth = min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j];
+                dp[i][j] = max(1, minHealth);
+            }
+        }
+        return dp[0][0];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum initial health to rescue princess (LeetCode 174).
+    // - Approach: Backwards Grid DP from destination (m-1, n-1) to start (0, 0).
+    // - Intuition: `minHealth = min(dp[i+1][j], dp[i][j+1]) - dungeon[i][j]`; health at any point cannot drop below 1.
+    // - Complexity: Time: O(M * N), Space: O(M * N).
+
+    // Cherry Pickup (LeetCode 741 - Simultaneous 2-Path DP)
+    int cherryPickup(vvi& grid) {
+        int n = grid.size();
+        vvi dp(n, vi(n, -1));
+        dp[0][0] = grid[0][0];
+
+        for (int step = 1; step <= 2 * n - 2; ++step) {
+            vvi nextDP(n, vi(n, -1));
+            for (int r1 = max(0, step - (n - 1)); r1 <= min(n - 1, step); ++r1) {
+                int c1 = step - r1;
+                for (int r2 = max(0, step - (n - 1)); r2 <= min(n - 1, step); ++r2) {
+                    int c2 = step - r2;
+                    if (grid[r1][c1] == -1 || grid[r2][c2] == -1) continue;
+
+                    int maxPrev = -1;
+                    for (int dr1 : {0, -1}) {
+                        for (int dr2 : {0, -1}) {
+                            int pr1 = r1 + dr1, pr2 = r2 + dr2;
+                            if (pr1 >= 0 && pr2 >= 0 && dp[pr1][pr2] != -1) {
+                                maxPrev = max(maxPrev, dp[pr1][pr2]);
+                            }
+                        }
+                    }
+                    if (maxPrev == -1) continue;
+
+                    int cherries = maxPrev + grid[r1][c1];
+                    if (r1 != r2) cherries += grid[r2][c2];
+                    nextDP[r1][r2] = cherries;
+                }
+            }
+            dp = std::move(nextDP);
+        }
+        return max(0, dp[n - 1][n - 1]);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Collect maximum cherries going from (0,0) to (n-1,n-1) and returning back (LeetCode 741).
+    // - Approach: Synchronous 2-Agent Manhattan Distance Step DP ($r_1 + c_1 = r_2 + c_2 = 	ext{step}$).
+    // - Complexity: Time: O(N^3), Space: O(N^2).
+
 };
 
 /*

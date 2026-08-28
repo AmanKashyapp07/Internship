@@ -6,13 +6,38 @@
  * Grid Pathfinding, N-Queens, Sudoku Solver, Graph M-Coloring, and Bitmask Memoization.
  */
 
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
 
 using ll = long long;
 using pii = pair<int, int>;
 using vi = vector<int>;
+using vl = vector<ll>;
 using vvi = vector<vector<int>>;
+using vvl = vector<vector<ll>>;
+
 
 const ll MOD = 1e9 + 7;
 const ll P = 31;
@@ -453,6 +478,46 @@ public:
     Choose -> Explore -> Unchoose.
  ====================================================================================================
 */
+
+
+// ====================================================================================================
+// SECTION: ADVANCED BACKTRACKING EXTENSIONS
+// ====================================================================================================
+
+// 1. Next Permutation (LeetCode 31)
+void nextPermutation(vi& nums) {
+    int n = nums.size(), i = n - 2;
+    while (i >= 0 && nums[i] >= nums[i + 1]) i--;
+    if (i >= 0) {
+        int j = n - 1;
+        while (nums[j] <= nums[i]) j--;
+        swap(nums[i], nums[j]);
+    }
+    reverse(nums.begin() + i + 1, nums.end());
+}
+
+// 2. Restore IP Addresses (LeetCode 93)
+class RestoreIPSolver {
+    void dfs(int idx, int dots, string& s, string curr, vector<string>& ans) {
+        if (dots == 4 && idx == (int)s.size()) {
+            curr.pop_back(); // Remove trailing dot
+            ans.push_back(curr);
+            return;
+        }
+        if (dots > 4) return;
+        for (int len = 1; len <= 3 && idx + len <= (int)s.size(); ++len) {
+            string segment = s.substr(idx, len);
+            if ((segment.size() > 1 && segment[0] == '0') || stoi(segment) > 255) continue;
+            dfs(idx + len, dots + 1, s, curr + segment + ".", ans);
+        }
+    }
+public:
+    vector<string> restoreIpAddresses(string s) {
+        vector<string> ans;
+        dfs(0, 0, s, "", ans);
+        return ans;
+    }
+};
 
 int main() {
     ios::sync_with_stdio(false);
