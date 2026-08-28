@@ -519,6 +519,64 @@ public:
     }
 };
 
+
+// ====================================================================================================
+// SECTION 6: STRIVER SDE SHEET RECURSION ALGORITHMS (CATEGORY 4)
+// ====================================================================================================
+
+// 1. Subset Sums (GFG / Striver SDE #47)
+void subsetSumsHelper(int idx, int sum, const vi& arr, vi& ans) {
+    if (idx == (int)arr.size()) {
+        ans.push_back(sum);
+        return;
+    }
+    subsetSumsHelper(idx + 1, sum + arr[idx], arr, ans); // Pick
+    subsetSumsHelper(idx + 1, sum, arr, ans);            // Non-pick
+}
+
+vi subsetSums(const vi& arr) {
+    vi ans;
+    subsetSumsHelper(0, 0, arr, ans);
+    sort(ans.begin(), ans.end());
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Calculate sum of all possible subsets of an array and return in sorted order.
+// - Approach: Pick / Non-Pick Binary Tree Recursion.
+// - Intuition: Each element has two choices (include or exclude in current subset sum).
+// - Complexity: Time: O(2^N + 2^N \log(2^N)) = O(2^N \cdot N), Space: O(N) recursion stack.
+
+// 2. M-Coloring Problem (GFG / Striver SDE #57)
+bool isColorSafe(int node, int col, const vector<int>& color, const vector<vector<int>>& graph) {
+    for (int neighbor : graph[node]) {
+        if (color[neighbor] == col) return false;
+    }
+    return true;
+}
+
+bool solveMColoring(int node, vector<int>& color, int m, int n, const vector<vector<int>>& graph) {
+    if (node == n) return true;
+
+    for (int col = 1; col <= m; col++) {
+        if (isColorSafe(node, col, color, graph)) {
+            color[node] = col;
+            if (solveMColoring(node + 1, color, m, n, graph)) return true;
+            color[node] = 0; // backtrack
+        }
+    }
+    return false;
+}
+
+bool graphColoring(vector<vector<int>>& graph, int m, int n) {
+    vector<int> color(n, 0);
+    return solveMColoring(0, color, m, n, graph);
+}
+// Interview Explanation:
+// - Problem Statement: Determine if an undirected graph can be colored with at most M colors such that no adjacent vertices share the same color.
+// - Approach: Backtracking vertex assignment from 1 to M.
+// - Intuition: Try colors 1..M on vertex `node`; if safe, recursively color `node + 1`. If no color works, backtrack.
+// - Complexity: Time: O(M^N), Space: O(N) recursion stack and color array.
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);

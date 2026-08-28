@@ -204,6 +204,34 @@ public:
     // - Intuition: Color start node 0; alternate neighbor colors to `1 - color[node]`; if an adjacent node shares the same color, graph is not bipartite.
     // - Complexity: Time: O(V + E) visiting all vertices and edges, Space: O(V) for queue and color array.
 
+    bool dfsCheckBipartite(int node, int col, vector<int>& color, const vector<vector<int>>& graph) {
+        color[node] = col;
+        for (int neighbor : graph[node]) {
+            if (color[neighbor] == -1) {
+                if (!dfsCheckBipartite(neighbor, 1 - col, color, graph)) return false;
+            } else if (color[neighbor] == col) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool isBipartiteDFS(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<int> color(n, -1);
+        for (int i = 0; i < n; i++) {
+            if (color[i] == -1) {
+                if (!dfsCheckBipartite(i, 0, color, graph)) return false;
+            }
+        }
+        return true;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Check if graph is bipartite using Depth-First Search (DFS) 2-coloring (LeetCode 785).
+    // - Approach: Recursive DFS 2-Coloring alternate assignment `(1 - col)`.
+    // - Intuition: If an adjacent neighbor already has the same color as current node, the graph contains an odd-length cycle and is NOT bipartite.
+    // - Complexity: Time: O(V + E), Space: O(V) for recursion stack and color array.
+
 
     // =========================================================
     // 7. TOPOLOGICAL SORT - KAHN'S ALGORITHM (BFS)
@@ -336,6 +364,42 @@ public:
     // - Approach: Greedy shortest path using Min-Heap Priority Queue (`std::greater`).
     // - Intuition: Greedily process node with minimum provisional distance; relax outgoing edges and discard outdated stale heap entries.
     // - Complexity: Time: O((V + E) \log V) heap operations, Space: O(V + E) for adjacency list, distance array, and priority queue.
+
+    // Print Shortest Path in Weighted Graph (GFG / Striver SDE)
+    vector<int> dijkstraPrintPath(int n, vector<vector<pair<int, int>>>& graph, int src, int dest) {
+        const int INF = 1e9;
+        vector<int> dist(n, INF), parent(n);
+        iota(parent.begin(), parent.end(), 0);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+        dist[src] = 0;
+        pq.push({0, src});
+
+        while (!pq.empty()) {
+            auto [distance, node] = pq.top(); pq.pop();
+            if (distance != dist[node]) continue;
+
+            for (auto [neighbor, weight] : graph[node]) {
+                if (distance + weight < dist[neighbor]) {
+                    dist[neighbor] = distance + weight;
+                    parent[neighbor] = node;
+                    pq.push({dist[neighbor], neighbor});
+                }
+            }
+        }
+
+        if (dist[dest] == INF) return {-1};
+        vector<int> path;
+        for (int curr = dest; curr != src; curr = parent[curr]) path.push_back(curr);
+        path.push_back(src);
+        reverse(path.begin(), path.end());
+        return path;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Print the shortest path vertices from source to destination in a weighted graph.
+    // - Approach: Dijkstra with parent pointer tracking + Backtracking path reconstruction.
+    // - Intuition: Record `parent[neighbor] = node` on every edge relaxation. Backtrack from `dest` to `src` using parent array and reverse.
+    // - Complexity: Time: O((V + E) \log V), Space: O(V) for parent and distance arrays.
 
 
     // =========================================================
@@ -1358,6 +1422,158 @@ public:
     // - Approach: 4-directional Depth-First Search (DFS) / BFS.
     // - Intuition: Mutate matching neighboring pixels to `newColor` in-place, preventing infinite cycles.
     // - Complexity: Time: O(M * N), Space: O(M * N) recursion stack in worst case.
+
+
+    // =========================================================
+    // 36. PACIFIC ATLANTIC WATER FLOW (LEETCODE 417)
+    // =========================================================
+
+    void dfsPacificAtlantic(const vector<vector<int>>& heights, vector<vector<bool>>& visited, int r, int c, int m, int n) {
+        visited[r][c] = true;
+        int dr[] = {-1, 1, 0, 0};
+        int dc[] = {0, 0, -1, 1};
+        for (int i = 0; i < 4; i++) {
+            int nr = r + dr[i], nc = c + dc[i];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && !visited[nr][nc] && heights[nr][nc] >= heights[r][c]) {
+                dfsPacificAtlantic(heights, visited, nr, nc, m, n);
+            }
+        }
+    }
+
+    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
+        if (heights.empty()) return {};
+        int m = heights.size(), n = heights[0].size();
+        vector<vector<bool>> pacific(m, vector<bool>(n, false));
+        vector<vector<bool>> atlantic(m, vector<bool>(n, false));
+
+        for (int i = 0; i < m; i++) {
+            dfsPacificAtlantic(heights, pacific, i, 0, m, n);
+            dfsPacificAtlantic(heights, atlantic, i, n - 1, m, n);
+        }
+        for (int j = 0; j < n; j++) {
+            dfsPacificAtlantic(heights, pacific, 0, j, m, n);
+            dfsPacificAtlantic(heights, atlantic, m - 1, j, m, n);
+        }
+
+        vector<vector<int>> result;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (pacific[i][j] && atlantic[i][j]) result.push_back({i, j});
+            }
+        }
+        return result;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all grid coordinates where water can flow to both the Pacific and Atlantic oceans (LeetCode 417).
+    // - Approach: Reverse Uphill DFS/BFS from ocean borders (`heights[nr][nc] >= heights[r][c]`).
+    // - Intuition: Water flowing downhill to both oceans is equivalent to water flowing uphill from the Pacific and Atlantic boundaries simultaneously. Intersection of reachable cells gives the answer.
+    // - Complexity: Time: O(M * N), Space: O(M * N) for boolean visited matrices.
+
+
+    // =========================================================
+    // 37. EULERIAN PATH / CIRCUIT (HIERHOLZER'S ALGORITHM)
+    // =========================================================
+
+    vector<string> findItinerary(vector<vector<string>>& tickets) {
+        unordered_map<string, priority_queue<string, vector<string>, greater<string>>> graph;
+        for (auto& t : tickets) graph[t[0]].push(t[1]);
+
+        vector<string> route;
+        function<void(string)> dfs = [&](string airport) {
+            while (!graph[airport].empty()) {
+                string next = graph[airport].top();
+                graph[airport].pop();
+                dfs(next);
+            }
+            route.push_back(airport);
+        };
+
+        dfs("JFK");
+        reverse(route.begin(), route.end());
+        return route;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Reconstruct itinerary / find Eulerian path visiting all directed edges in lexical order (LeetCode 332).
+    // - Approach: Hierholzer's Algorithm using Post-order DFS and Min-Heaps.
+    // - Intuition: Greedily follow edges in lexicographical order. When reaching a dead end with no outgoing edges left, append node to route; finally reverse route to obtain valid Eulerian path.
+    // - Complexity: Time: O(E \log E), Space: O(V + E) for adjacency list and recursion stack.
+
+
+    // =========================================================
+    // 38. TARJAN'S STRONGLY CONNECTED COMPONENTS (SCC)
+    // =========================================================
+
+    void tarjanSCCDFS(int u, int& timer, const vector<vector<int>>& graph, vector<int>& disc,
+                      vector<int>& low, vector<bool>& inStack, stack<int>& st, vector<vector<int>>& sccs) {
+        disc[u] = low[u] = ++timer;
+        st.push(u);
+        inStack[u] = true;
+
+        for (int v : graph[u]) {
+            if (disc[v] == 0) {
+                tarjanSCCDFS(v, timer, graph, disc, low, inStack, st, sccs);
+                low[u] = min(low[u], low[v]);
+            } else if (inStack[v]) {
+                low[u] = min(low[u], disc[v]);
+            }
+        }
+
+        if (low[u] == disc[u]) {
+            vector<int> scc;
+            while (true) {
+                int node = st.top(); st.pop();
+                inStack[node] = false;
+                scc.push_back(node);
+                if (node == u) break;
+            }
+            sccs.push_back(scc);
+        }
+    }
+
+    vector<vector<int>> tarjanSCC(int n, const vector<vector<int>>& graph) {
+        vector<int> disc(n, 0), low(n, 0);
+        vector<bool> inStack(n, false);
+        stack<int> st;
+        vector<vector<int>> sccs;
+        int timer = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (disc[i] == 0) tarjanSCCDFS(i, timer, graph, disc, low, inStack, st, sccs);
+        }
+        return sccs;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all Strongly Connected Components (SCCs) in a directed graph in a single DFS pass.
+    // - Approach: Tarjan's Single-Pass Low-Link Algorithm with an explicit recursion stack.
+    // - Intuition: Maintain discovery times `disc` and lowest reachable ancestor `low`. When DFS finishes exploring `u` and `low[u] == disc[u]`, `u` is the head of an SCC; pop all nodes from stack down to `u`.
+    // - Complexity: Time: O(V + E) single DFS pass, Space: O(V) for recursion stack, discovery arrays, and inStack tracking.
+
+
+    // =========================================================
+    // 39. DISTINCT NUMBERS IN EACH SUBARRAY (SLIDING WINDOW)
+    // =========================================================
+
+    vector<int> distinctNumbersInWindow(const vector<int>& nums, int k) {
+        int n = nums.size();
+        if (k > n || k <= 0) return {};
+        unordered_map<int, int> freq;
+        vector<int> ans;
+
+        for (int i = 0; i < k; i++) freq[nums[i]]++;
+        ans.push_back(freq.size());
+
+        for (int i = k; i < n; i++) {
+            if (--freq[nums[i - k]] == 0) freq.erase(nums[i - k]);
+            freq[nums[i]]++;
+            ans.push_back(freq.size());
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count distinct elements in every sliding window of size k in an array (GFG / Striver SDE #149).
+    // - Approach: Sliding Window with Hash Map frequency tracking.
+    // - Intuition: Maintain frequency map for window of size k. When sliding, decrement frequency of exiting element (removing key if 0) and increment entering element; `freq.size()` directly gives distinct element count.
+    // - Complexity: Time: O(N) single pass, Space: O(K) hash map capacity.
 };
 
 /*

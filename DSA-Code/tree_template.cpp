@@ -106,6 +106,81 @@ public:
     // - Intuition: Process both children fully before visiting the root; essential for bottom-up computations (e.g., node deletion, tree height).
     // - Complexity: Time: O(N) visiting every node once, Space: O(H) recursion call stack.
 
+    // Iterative Inorder Traversal using 1 Stack (LeetCode 94)
+    vector<int> inorderIterative(TreeNode* root) {
+        vector<int> ans;
+        stack<TreeNode*> st;
+        TreeNode* curr = root;
+
+        while (curr != nullptr || !st.empty()) {
+            while (curr != nullptr) {
+                st.push(curr);
+                curr = curr->left;
+            }
+            curr = st.top();
+            st.pop();
+            ans.push_back(curr->val);
+            curr = curr->right;
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Iterative Inorder traversal of a binary tree without recursion.
+    // - Approach: Explicit Stack simulating call stack.
+    // - Intuition: Drill down to leftmost leaf pushing nodes to stack. Pop, record value, and transition to right child.
+    // - Complexity: Time: O(N) visiting each node, Space: O(H) stack space.
+
+    // Iterative Preorder Traversal using 1 Stack (LeetCode 144)
+    vector<int> preorderIterative(TreeNode* root) {
+        if (!root) return {};
+        vector<int> ans;
+        stack<TreeNode*> st;
+        st.push(root);
+
+        while (!st.empty()) {
+            TreeNode* curr = st.top();
+            st.pop();
+            ans.push_back(curr->val);
+
+            if (curr->right) st.push(curr->right); // push right first so left is popped first
+            if (curr->left) st.push(curr->left);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Iterative Preorder traversal of a binary tree without recursion.
+    // - Approach: Explicit Stack pushing right child before left child.
+    // - Intuition: LIFO stack pops top element (root), records it, and pushes right then left child so left is processed next.
+    // - Complexity: Time: O(N), Space: O(H) stack space.
+
+    // Iterative Postorder Traversal using 2 Stacks (LeetCode 145)
+    vector<int> postorderIterative2Stacks(TreeNode* root) {
+        if (!root) return {};
+        vector<int> ans;
+        stack<TreeNode*> s1, s2;
+        s1.push(root);
+
+        while (!s1.empty()) {
+            TreeNode* curr = s1.top();
+            s1.pop();
+            s2.push(curr);
+
+            if (curr->left) s1.push(curr->left);
+            if (curr->right) s1.push(curr->right);
+        }
+
+        while (!s2.empty()) {
+            ans.push_back(s2.top()->val);
+            s2.pop();
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Iterative Postorder traversal using two stacks.
+    // - Approach: Reverse modified preorder `(Root -> Right -> Left)` into second stack.
+    // - Intuition: Pushing `Root -> Left -> Right` onto stack 1 and transferring popped nodes to stack 2 reverses order to `Left -> Right -> Root`.
+    // - Complexity: Time: O(N), Space: O(N) for two stacks.
+
 
     // =========================================================
     // 2. LEVEL ORDER / BFS
@@ -1364,6 +1439,84 @@ public:
     // - Approach: Recursive Search & Replace with Inorder Successor.
     // - Intuition: Node with two children is replaced with its inorder successor (minimum element in right subtree), then the successor node is recursively deleted from right subtree.
     // - Complexity: Time: O(H) search and splice, Space: O(H) recursion stack.
+
+
+    // =========================================================
+    // 44. CONVERT SORTED ARRAY TO BST (LEETCODE 108)
+    // =========================================================
+
+    TreeNode* sortedArrayToBSTHelper(const vector<int>& nums, int l, int r) {
+        if (l > r) return nullptr;
+        int mid = l + (r - l) / 2;
+        TreeNode* root = new TreeNode(nums[mid]);
+        root->left = sortedArrayToBSTHelper(nums, l, mid - 1);
+        root->right = sortedArrayToBSTHelper(nums, mid + 1, r);
+        return root;
+    }
+
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        return sortedArrayToBSTHelper(nums, 0, (int)nums.size() - 1);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Convert a sorted array into a height-balanced Binary Search Tree (BST) (LeetCode 108).
+    // - Approach: Divide and Conquer (Binary Search Midpoint Splitting).
+    // - Intuition: Picking middle element `nums[mid]` as subtree root guarantees equal distribution of remaining elements to left and right subtrees, ensuring minimal height O(log N).
+    // - Complexity: Time: O(N) creating each node once, Space: O(\log N) recursion stack.
+
+
+    // =========================================================
+    // 45. CONSTRUCT BST FROM PREORDER TRAVERSAL (LEETCODE 1008)
+    // =========================================================
+
+    TreeNode* bstFromPreorderHelper(const vector<int>& preorder, int& idx, long long bound) {
+        if (idx >= (int)preorder.size() || preorder[idx] > bound) return nullptr;
+
+        TreeNode* root = new TreeNode(preorder[idx++]);
+        root->left = bstFromPreorderHelper(preorder, idx, root->val);
+        root->right = bstFromPreorderHelper(preorder, idx, bound);
+        return root;
+    }
+
+    TreeNode* bstFromPreorder(vector<int>& preorder) {
+        int idx = 0;
+        return bstFromPreorderHelper(preorder, idx, LLONG_MAX);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Construct Binary Search Tree from given preorder traversal in O(N) time (LeetCode 1008).
+    // - Approach: Upper-Bound DFS traversal (passing upper limit bound).
+    // - Intuition: In preorder traversal `(Root, Left, Right)`, elements `< root->val` belong to left subtree and elements `<= bound` belong to right subtree. Advancing single index pointer `idx` constructs tree in O(N) linear time.
+    // - Complexity: Time: O(N) strictly linear single pass, Space: O(H) recursion stack.
+
+
+    // =========================================================
+    // 46. BINARY TREE TO DOUBLY LINKED LIST (IN-PLACE DLL)
+    // =========================================================
+
+    void bToDLLHelper(TreeNode* root, TreeNode*& head, TreeNode*& prev) {
+        if (!root) return;
+        bToDLLHelper(root->left, head, prev);
+
+        if (!prev) {
+            head = root; // leftmost node is head of DLL
+        } else {
+            root->left = prev;
+            prev->right = root;
+        }
+        prev = root;
+
+        bToDLLHelper(root->right, head, prev);
+    }
+
+    TreeNode* bToDLL(TreeNode* root) {
+        TreeNode *head = nullptr, *prev = nullptr;
+        bToDLLHelper(root, head, prev);
+        return head;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Convert a binary tree to a doubly linked list in-place according to inorder traversal (GFG / Striver SDE #146).
+    // - Approach: Inorder DFS with running `prev` pointer.
+    // - Intuition: Inorder traversal visits nodes in sequential DLL order. Connect `root->left = prev` and `prev->right = root`, updating `prev = root`.
+    // - Complexity: Time: O(N) single pass, Space: O(H) recursion stack.
 };
 
 /*

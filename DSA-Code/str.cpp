@@ -1362,34 +1362,6 @@ int ninjaTraining(int n, vvi &points) {
     return prev[3];
 }
 
-void setZeroes(vvi &matrix) {
-    int m = matrix.size(), n = matrix[0].size();
-    int col0 = 1;
-
-    for (int i = 0; i < m; ++i) {
-        if (matrix[i][0] == 0) col0 = 0;
-        for (int j = 1; j < n; ++j) {
-            if (matrix[i][j] == 0) {
-                matrix[i][0] = 0;
-                matrix[0][j] = 0;
-            }
-        }
-    }
-
-    for (int i = m - 1; i >= 0; --i) {
-        for (int j = n - 1; j >= 1; --j) {
-            if (matrix[i][0] == 0 || matrix[0][j] == 0) {
-                matrix[i][j] = 0;
-            }
-        }
-        if (col0 == 0) matrix[i][0] = 0;
-    }
-}
-// Interview Explanation:
-// - Problem Statement: Maximize points in Ninja's Training without repeating consecutive day tasks, and set matrix zeroes in-place in O(1) space.
-// - Approach: 1D Space Optimized State Machine DP & First Row/Col Marker Tracking.
-// - Complexity: Time: O(N) & O(M * N), Space: O(1) in-place auxiliary memory.
-
 
 // ============================================================================
 // CONSOLIDATION INDEX: DEDUPLICATED SDE SHEET PROBLEMS & THEIR LOCATIONS

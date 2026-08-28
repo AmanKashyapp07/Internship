@@ -480,6 +480,54 @@ public:
     // - Intuition: Sorting guarantees if `nums[i] % nums[j] == 0`, then `nums[i]` is divisible by all elements in `nums[j]`'s chain.
     // - Complexity: Time: O(N^2), Space: O(N).
 
+    // Maximum Sum Increasing Subsequence (MSIS - GFG / Striver SDE)
+    int maxSumIS(vector<int>& arr) {
+        int n = arr.size();
+        vector<int> dp = arr; // dp[i] stores max sum increasing subsequence ending at index i
+        int maxSum = *max_element(arr.begin(), arr.end());
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (arr[j] < arr[i] && dp[j] + arr[i] > dp[i]) {
+                    dp[i] = dp[j] + arr[i];
+                }
+            }
+            maxSum = max(maxSum, dp[i]);
+        }
+        return maxSum;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find the maximum sum subsequence such that elements are strictly increasing (MSIS).
+    // - Approach: LIS DP variation tracking sum instead of length.
+    // - Intuition: For element `arr[i]`, transition: `dp[i] = max(arr[i], dp[j] + arr[i])` for all `j < i` where `arr[j] < arr[i]`.
+    // - Complexity: Time: O(N^2), Space: O(N).
+
+    // Maximum Profit in Job Scheduling (LeetCode 1235 / Striver SDE)
+    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
+        int n = startTime.size();
+        vector<tuple<int, int, int>> jobs(n);
+        for (int i = 0; i < n; i++) {
+            jobs[i] = {endTime[i], startTime[i], profit[i]};
+        }
+        sort(jobs.begin(), jobs.end()); // sort by end time
+
+        vector<int> endTimes(n);
+        for (int i = 0; i < n; i++) endTimes[i] = get<0>(jobs[i]);
+
+        vector<int> dp(n + 1, 0); // dp[i] = max profit considering first i jobs
+        for (int i = 1; i <= n; i++) {
+            auto [e, s, p] = jobs[i - 1];
+            // Binary search for latest non-conflicting job ending <= s
+            int idx = upper_bound(endTimes.begin(), endTimes.end(), s) - endTimes.begin();
+            dp[i] = max(dp[i - 1], dp[idx] + p);
+        }
+        return dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum profit scheduling non-overlapping jobs with given start, end times and profits (LeetCode 1235).
+    // - Approach: Weighted Interval Scheduling with DP + Binary Search (`upper_bound`).
+    // - Intuition: Sort jobs by end time. For job i, either skip it (`dp[i-1]`) or take it (`profit + dp[idx]`), where `idx` is the latest job finishing before job i starts.
+    // - Complexity: Time: O(N \log N), Space: O(N).
+
 
     // =========================================================
     // 5. GRID DP
@@ -888,7 +936,7 @@ public:
     // 11. GAME / MINIMAX DP
     // =========================================================
 
-    // Removal Game / Stone Game (CSES / LeetCode 877)
+    // Removal Game / Stone Game I (CSES / LeetCode 877)
     long long removalGame(vector<int>& nums) {
         int n = nums.size();
         vector<vector<long long>> dp(n, vector<long long>(n, 0));
@@ -907,6 +955,139 @@ public:
     // - Approach: Minimax Interval DP calculating relative score difference `player1 - player2`.
     // - Intuition: `dp[i][j] = max(nums[i] - dp[i+1][j], nums[j] - dp[i][j-1])`; absolute score for player 1 is `(totalSum + maxDiff) / 2`.
     // - Complexity: Time: O(N^2), Space: O(N^2).
+
+    // Predict the Winner (LeetCode 486)
+    bool predictTheWinner(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp = nums;
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len <= n; i++) {
+                int j = i + len - 1;
+                dp[i] = max(nums[i] - dp[i + 1], nums[j] - dp[i]);
+            }
+        }
+        return dp[0] >= 0;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Determine if Player 1 can win picking numbers from ends of array (LeetCode 486).
+    // - Approach: 1D Space-Optimized Interval Minimax DP tracking relative score advantage.
+    // - Intuition: At interval [i, j], current player can take nums[i] leaving -dp[i+1][j], or nums[j] leaving -dp[i][j-1]. Player 1 wins if final relative score >= 0.
+    // - Complexity: Time: O(N^2), Space: O(N).
+
+    // Can I Win (LeetCode 464 - Minimax with Bitmask Memoization)
+    bool canIWin(int maxChoosableInteger, int desiredTotal) {
+        int totalSum = (maxChoosableInteger * (maxChoosableInteger + 1)) / 2;
+        if (totalSum < desiredTotal) return false;
+        if (desiredTotal <= 0) return true;
+
+        unordered_map<int, bool> memo;
+        function<bool(int, int)> dfs = [&](int mask, int total) -> bool {
+            if (memo.count(mask)) return memo[mask];
+            for (int i = 1; i <= maxChoosableInteger; i++) {
+                int bit = 1 << i;
+                if (!(mask & bit)) {
+                    if (total + i >= desiredTotal || !dfs(mask | bit, total + i)) {
+                        return memo[mask] = true;
+                    }
+                }
+            }
+            return memo[mask] = false;
+        };
+
+        return dfs(0, 0);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Determine if first player can force a win reaching desiredTotal picking unique numbers 1..maxChoosableInteger (LeetCode 464).
+    // - Approach: Minimax Game DP with Bitmask State Memoization.
+    // - Intuition: Bitmask tracks which numbers 1..N have been used. A player wins if choosing number `i` immediately reaches desiredTotal, or forces opponent into a losing state (`!dfs(next_mask)`).
+    // - Complexity: Time: O(2^N \cdot N), Space: O(2^N) memoization table where N = maxChoosableInteger <= 20.
+
+    // Guess Number Higher or Lower II (LeetCode 375 - Interval Minimax DP)
+    int getMoneyAmount(int n) {
+        vvi dp(n + 2, vi(n + 2, 0));
+        for (int len = 2; len <= n; len++) {
+            for (int i = 1; i + len - 1 <= n; i++) {
+                int j = i + len - 1;
+                int minCost = INT_MAX;
+                for (int k = i; k <= j; k++) {
+                    int cost = k + max(dp[i][k - 1], dp[k + 1][j]);
+                    minCost = min(minCost, cost);
+                }
+                dp[i][j] = minCost;
+            }
+        }
+        return dp[1][n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum money needed to guarantee a win guessing number between 1 and n (LeetCode 375).
+    // - Approach: Interval Minimax DP (`min` of worst-case `max`).
+    // - Intuition: Guessing number k costs $k and splits range into [i, k-1] (too high) and [k+1, j] (too low). Worst case payoff is `k + max(dp[i][k-1], dp[k+1][j])`; we minimize this cost over all choices k in [i, j].
+    // - Complexity: Time: O(N^3), Space: O(N^2).
+
+    // Stone Game II (LeetCode 1140 - Game DP with Dynamic M Parameter)
+    int stoneGameII(vector<int>& piles) {
+        int n = piles.size();
+        vi suffixSum(n + 1, 0);
+        for (int i = n - 1; i >= 0; i--) suffixSum[i] = suffixSum[i + 1] + piles[i];
+
+        vvi dp(n + 1, vi(n + 1, 0)); // dp[i][M] = max stones obtainable from pile i with parameter M
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int m = 1; m <= n; m++) {
+                if (i + 2 * m >= n) {
+                    dp[i][m] = suffixSum[i]; // can take all remaining stones
+                } else {
+                    for (int x = 1; x <= 2 * m; x++) {
+                        dp[i][m] = max(dp[i][m], suffixSum[i] - dp[i + x][max(m, x)]);
+                    }
+                }
+            }
+        }
+
+        return dp[0][1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum stones Alice can get starting with M = 1 where player can take 1 <= X <= 2M piles (LeetCode 1140).
+    // - Approach: 2D Suffix Sum Minimax DP on `(index, M)`.
+    // - Intuition: Total stones taken from index i is `suffixSum[i] - dp[i + X][max(M, X)]` (total remaining minus opponent's best score from next state).
+    // - Complexity: Time: O(N^3), Space: O(N^2).
+
+    // Stone Game III (LeetCode 1406 - 1D Suffix Minimax DP)
+    string stoneGameIII(vector<int>& stoneValue) {
+        int n = stoneValue.size();
+        vi dp(n + 1, 0); // dp[i] = max relative score difference player can get from index i
+
+        for (int i = n - 1; i >= 0; i--) {
+            int take = 0, best = INT_MIN;
+            for (int k = 0; k < 3 && i + k < n; k++) {
+                take += stoneValue[i + k];
+                best = max(best, take - dp[i + k + 1]);
+            }
+            dp[i] = best;
+        }
+
+        if (dp[0] > 0) return "Alice";
+        if (dp[0] < 0) return "Bob";
+        return "Tie";
+    }
+    // Interview Explanation:
+    // - Problem Statement: Return winner ("Alice", "Bob", "Tie") when players take 1, 2, or 3 stones from start (LeetCode 1406).
+    // - Approach: 1D Suffix DP tracking relative score difference `(Alice - Bob)`.
+    // - Intuition: Current player takes sum of first `k+1` stones (`k in {0, 1, 2}`) minus opponent's optimal advantage from `i + k + 1`: `dp[i] = max(take - dp[i + k + 1])`.
+    // - Complexity: Time: O(N), Space: O(N) or O(1) keeping last 3 states.
+
+    // Divisor Game (LeetCode 1025) & Nim Game (LeetCode 292)
+    bool divisorGame(int n) {
+        return n % 2 == 0;
+    }
+    bool canWinNim(int n) {
+        return n % 4 != 0;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Mathematical Game Theory / Subtraction Games (LeetCode 1025 & 292).
+    // - Approach: Parity / Modulo State Analysis or 1D Boolean DP.
+    // - Intuition: In Divisor Game, even numbers always have odd divisors (like 1), allowing player to force opponent to an odd number (which only has odd divisors, always returning even). In Nim, multiples of 4 are losing positions.
+    // - Complexity: Time: O(1), Space: O(1).
 
 
     // =========================================================

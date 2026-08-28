@@ -3,6 +3,7 @@
 #else
 #include <iostream>
 #include <vector>
+#include <list>
 #include <string>
 #include <algorithm>
 #include <cmath>
@@ -691,6 +692,269 @@ public:
 // - Problem Statement: Design a stack supporting push, pop, top, and retrieving the minimum element in O(1) time.
 // - Approach: Auxiliary tracking stack or mathematical encoding $2v - 	ext{minVal}$ for true $O(1)$ extra space.
 // - Complexity: Time: O(1) all operations, Space: O(N) / O(1) extra space.
+
+
+// =========================================================
+// 22. ARRAY IMPLEMENTATION OF STACK & QUEUE
+// =========================================================
+
+class ArrayStack {
+    int topIndex;
+    int capacity;
+    int *arr;
+public:
+    ArrayStack(int cap = 1000) : topIndex(-1), capacity(cap) {
+        arr = new int[capacity];
+    }
+    void push(int x) {
+        if (topIndex < capacity - 1) arr[++topIndex] = x;
+    }
+    int pop() {
+        if (topIndex >= 0) return arr[topIndex--];
+        return -1;
+    }
+    int top() {
+        if (topIndex >= 0) return arr[topIndex];
+        return -1;
+    }
+    bool empty() { return topIndex == -1; }
+};
+
+class ArrayQueue {
+    int frontIndex, rearIndex, count, capacity;
+    int *arr;
+public:
+    ArrayQueue(int cap = 1000) : frontIndex(0), rearIndex(0), count(0), capacity(cap) {
+        arr = new int[capacity];
+    }
+    void push(int x) {
+        if (count < capacity) {
+            arr[rearIndex % capacity] = x;
+            rearIndex++;
+            count++;
+        }
+    }
+    int pop() {
+        if (count == 0) return -1;
+        int val = arr[frontIndex % capacity];
+        frontIndex++;
+        count--;
+        return val;
+    }
+    int front() {
+        if (count == 0) return -1;
+        return arr[frontIndex % capacity];
+    }
+    bool empty() { return count == 0; }
+};
+// Interview Explanation:
+// - Problem Statement: Implement Stack and Queue data structures using fixed-size arrays.
+// - Approach: Pointer index tracking (`topIndex` for stack, circular modular arithmetic for queue).
+// - Complexity: Time: O(1) all operations, Space: O(capacity).
+
+
+// =========================================================
+// 23. STACK USING QUEUE & QUEUE USING STACK (LEETCODE 225 & 232)
+// =========================================================
+
+class MyStack {
+    queue<int> q;
+public:
+    MyStack() {}
+    void push(int x) {
+        q.push(x);
+        for (int i = 0; i < (int)q.size() - 1; i++) {
+            q.push(q.front());
+            q.pop();
+        }
+    }
+    int pop() {
+        int val = q.front(); q.pop();
+        return val;
+    }
+    int top() { return q.front(); }
+    bool empty() { return q.empty(); }
+};
+
+class MyQueue {
+    stack<int> input, output;
+    void transfer() {
+        if (output.empty()) {
+            while (!input.empty()) {
+                output.push(input.top());
+                input.pop();
+            }
+        }
+    }
+public:
+    MyQueue() {}
+    void push(int x) { input.push(x); }
+    int pop() {
+        transfer();
+        int val = output.top(); output.pop();
+        return val;
+    }
+    int peek() {
+        transfer();
+        return output.top();
+    }
+    bool empty() { return input.empty() && output.empty(); }
+};
+// Interview Explanation:
+// - Problem Statement: Implement Stack using a single Queue and Queue using two Stacks.
+// - Approach: Circular rotation upon push for Stack; Amortized O(1) lazy transfer between input/output stacks for Queue.
+// - Complexity: Stack: Push O(N), Pop O(1); Queue: Push O(1), Pop Amortized O(1), Space: O(N).
+
+
+// =========================================================
+// 24. RECURSIVE STACK SORTING (GFG / STRIVER SDE)
+// =========================================================
+
+void insertSorted(stack<int>& st, int x) {
+    if (st.empty() || st.top() <= x) {
+        st.push(x);
+        return;
+    }
+    int topVal = st.top(); st.pop();
+    insertSorted(st, x);
+    st.push(topVal);
+}
+
+void sortStack(stack<int>& st) {
+    if (st.empty()) return;
+    int topVal = st.top(); st.pop();
+    sortStack(st);
+    insertSorted(st, topVal);
+}
+// Interview Explanation:
+// - Problem Statement: Sort a stack in ascending order using recursion (no extra data structures).
+// - Approach: Two-level recursive backtracking.
+// - Intuition: Recursively pop elements until stack is empty, then insert each element back into its correct sorted position using helper `insertSorted`.
+// - Complexity: Time: O(N^2), Space: O(N) recursion call stack.
+
+
+// =========================================================
+// 25. LFU CACHE (LEETCODE 460)
+// =========================================================
+
+class LFUCache {
+    struct Node {
+        int key, val, freq;
+        Node(int k, int v) : key(k), val(v), freq(1) {}
+    };
+
+    int cap, minFreq;
+    unordered_map<int, list<Node>::iterator> keyMap;
+    unordered_map<int, list<Node>> freqMap;
+
+public:
+    LFUCache(int capacity) : cap(capacity), minFreq(0) {}
+
+    int get(int key) {
+        if (!keyMap.count(key)) return -1;
+        auto it = keyMap[key];
+        int val = it->val, f = it->freq;
+        freqMap[f].erase(it);
+        if (freqMap[f].empty() && minFreq == f) minFreq++;
+
+        freqMap[f + 1].push_front(Node(key, val));
+        freqMap[f + 1].front().freq = f + 1;
+        keyMap[key] = freqMap[f + 1].begin();
+        return val;
+    }
+
+    void put(int key, int value) {
+        if (cap <= 0) return;
+        if (get(key) != -1) {
+            keyMap[key]->val = value;
+            return;
+        }
+
+        if ((int)keyMap.size() >= cap) {
+            auto evictNode = freqMap[minFreq].back();
+            keyMap.erase(evictNode.key);
+            freqMap[minFreq].pop_back();
+        }
+
+        minFreq = 1;
+        freqMap[1].push_front(Node(key, value));
+        keyMap[key] = freqMap[1].begin();
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Design a Least Frequently Used (LFU) cache supporting get and put in O(1) time.
+// - Approach: Hash Map + Doubly Linked Lists per frequency (`freqMap`) + `minFreq` tracker.
+// - Intuition: When item is accessed, increment its frequency and move to `freqMap[f+1]`. If capacity is exceeded, evict the least recently used node in `freqMap[minFreq]`.
+// - Complexity: Time: O(1) for both get and put, Space: O(capacity).
+
+
+// =========================================================
+// 26. THE CELEBRITY PROBLEM (LEETCODE 277 / GFG)
+// =========================================================
+
+int findCelebrity(int n, function<bool(int, int)> knows) {
+    int candidate = 0;
+    for (int i = 1; i < n; i++) {
+        if (knows(candidate, i)) {
+            candidate = i;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (i != candidate) {
+            if (knows(candidate, i) || !knows(i, candidate)) return -1;
+        }
+    }
+    return candidate;
+}
+// Interview Explanation:
+// - Problem Statement: Find celebrity at a party who is known by everyone but knows no one (return -1 if none).
+// - Approach: Elimination pass + Verification pass.
+// - Intuition: If `knows(a, b)` is true, `a` cannot be celebrity. If false, `b` cannot be celebrity. Candidate remains after N-1 steps; verify against all other N-1 people.
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// =========================================================
+// 27. MAXIMUM OF MINIMUMS FOR EVERY WINDOW SIZE (GFG / STRIVER SDE)
+// =========================================================
+
+vi maxOfMinWindow(const vi& arr) {
+    int n = arr.size();
+    vi left(n, -1), right(n, n);
+    stack<int> st;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && arr[st.top()] >= arr[i]) st.pop();
+        if (!st.empty()) left[i] = st.top();
+        st.push(i);
+    }
+
+    while (!st.empty()) st.pop();
+
+    for (int i = n - 1; i >= 0; i--) {
+        while (!st.empty() && arr[st.top()] >= arr[i]) st.pop();
+        if (!st.empty()) right[i] = st.top();
+        st.push(i);
+    }
+
+    vi ans(n + 1, 0);
+    for (int i = 0; i < n; i++) {
+        int windowLen = right[i] - left[i] - 1;
+        ans[windowLen] = max(ans[windowLen], arr[i]);
+    }
+
+    for (int i = n - 1; i >= 1; i--) {
+        ans[i] = max(ans[i], ans[i + 1]);
+    }
+
+    ans.erase(ans.begin());
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find maximum of minimums for every window size from 1 to n (GFG / Striver SDE #90).
+// - Approach: Monotonic Stack (PSE & NSE) + Window aggregation.
+// - Intuition: Element `arr[i]` is minimum in a window of size `len = right[i] - left[i] - 1`. Populate `ans[len] = max(ans[len], arr[i])` and propagate backwards `ans[i] = max(ans[i], ans[i+1])`.
+// - Complexity: Time: O(N) linear time, Space: O(N).
 
 
 /*

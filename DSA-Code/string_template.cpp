@@ -453,6 +453,173 @@ bool isIsomorphic(string s, string t) {
     return true;
 }
 
+
+// ====================================================================================================
+// SECTION 5: STRIVER SDE SHEET CLASSIC STRING ALGORITHMS
+// ====================================================================================================
+
+// 1. Reverse Words in a String (LeetCode 151)
+string reverseWords(string s) {
+    reverse(s.begin(), s.end());
+    int n = s.size(), idx = 0;
+
+    for (int start = 0; start < n; start++) {
+        if (s[start] != ' ') {
+            if (idx != 0) s[idx++] = ' ';
+            int end = start;
+            while (end < n && s[end] != ' ') end++;
+            reverse(s.begin() + idx, s.begin() + idx + (end - start));
+            for (int i = start; i < end; i++) s[idx++] = s[i];
+            start = end;
+        }
+    }
+    s.resize(idx);
+    return s;
+}
+// Interview Explanation:
+// - Problem Statement: Reverse the order of words in string s with normalized single whitespace (LeetCode 151).
+// - Approach: Reverse full string, then reverse individual words in-place.
+// - Intuition: Reversing entire string puts words in correct reversed position but characters reversed; reversing characters in each word restores word spelling.
+// - Complexity: Time: O(N) two passes, Space: O(1) in-place.
+
+// 2. Roman to Integer (LeetCode 13)
+int romanToInt(string s) {
+    unordered_map<char, int> val = {
+        {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50},
+        {'C', 100}, {'D', 500}, {'M', 1000}
+    };
+    int ans = 0, n = s.size();
+    for (int i = 0; i < n; i++) {
+        if (i + 1 < n && val[s[i]] < val[s[i + 1]]) {
+            ans -= val[s[i]]; // subtractive notation e.g. IV = 4, IX = 9
+        } else {
+            ans += val[s[i]];
+        }
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Convert Roman numeral string to an integer (LeetCode 13).
+// - Approach: Greedy symbol mapping with subtractive lookahead.
+// - Intuition: If current numeral is smaller than the next (`val[s[i]] < val[s[i+1]]`), subtract current value; otherwise add it.
+// - Complexity: Time: O(N), Space: O(1).
+
+// 3. String to Integer / ATOI (LeetCode 8)
+int myAtoi(string s) {
+    int i = 0, n = s.size();
+    while (i < n && s[i] == ' ') i++; // skip leading whitespace
+    if (i == n) return 0;
+
+    int sign = 1;
+    if (s[i] == '+' || s[i] == '-') {
+        sign = (s[i] == '-') ? -1 : 1;
+        i++;
+    }
+
+    long long ans = 0;
+    while (i < n && isdigit(s[i])) {
+        int digit = s[i] - '0';
+        ans = ans * 10 + digit;
+        if (sign == 1 && ans > INT_MAX) return INT_MAX;
+        if (sign == -1 && -ans < INT_MIN) return INT_MIN;
+        i++;
+    }
+    return (int)(sign * ans);
+}
+// Interview Explanation:
+// - Problem Statement: Convert string to 32-bit signed integer with whitespace, sign, and clamping rules (LeetCode 8).
+// - Approach: Linear state parser with 32-bit boundary clamp checks.
+// - Intuition: Parse leading spaces, extract sign, process digit sequence clamping overflow immediately against `INT_MAX` and `INT_MIN`.
+// - Complexity: Time: O(N) single pass, Space: O(1).
+
+// 4. Longest Common Prefix (LeetCode 14)
+string longestCommonPrefix(vector<string>& strs) {
+    if (strs.empty()) return "";
+    sort(strs.begin(), strs.end());
+    string first = strs.front(), last = strs.back();
+    int len = 0;
+    while (len < (int)first.size() && len < (int)last.size() && first[len] == last[len]) {
+        len++;
+    }
+    return first.substr(0, len);
+}
+// Interview Explanation:
+// - Problem Statement: Find longest common prefix among an array of strings (LeetCode 14).
+// - Approach: Sort strings and compare only the first and last lexicographical strings.
+// - Intuition: Sorting orders strings lexicographically; the common prefix shared across all strings is precisely the prefix shared between the first and last strings.
+// - Complexity: Time: O(N \log N \cdot L), Space: O(1) auxiliary space.
+
+// 5. Minimum Insertion Steps to Make a String Palindrome (LeetCode 1312)
+int minInsertionsToPalindrome(string s) {
+    int n = s.size();
+    string rev = s;
+    reverse(rev.begin(), rev.end());
+
+    vector<int> dp(n + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        vector<int> curr(n + 1, 0);
+        for (int j = 1; j <= n; j++) {
+            if (s[i - 1] == rev[j - 1]) curr[j] = 1 + dp[j - 1];
+            else curr[j] = max(dp[j], curr[j - 1]);
+        }
+        dp = curr;
+    }
+    int lps = dp[n];
+    return n - lps;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum insertions to make string a palindrome (LeetCode 1312).
+// - Approach: Reduction to Longest Palindromic Subsequence (LPS).
+// - Intuition: Keep the longest palindromic subsequence intact (length `lps`), and insert matching characters for all remaining `n - lps` characters.
+// - Complexity: Time: O(N^2), Space: O(N) 1D DP table.
+
+// 6. Count and Say (LeetCode 38)
+string countAndSay(int n) {
+    if (n == 1) return "1";
+    string s = "1";
+    for (int i = 2; i <= n; i++) {
+        string next = "";
+        int len = s.size();
+        for (int j = 0; j < len; ) {
+            int count = 1;
+            while (j + 1 < len && s[j] == s[j + 1]) {
+                count++;
+                j++;
+            }
+            next += to_string(count) + s[j];
+            j++;
+        }
+        s = next;
+    }
+    return s;
+}
+// Interview Explanation:
+// - Problem Statement: Generate the n-th term of the Count and Say sequence (LeetCode 38).
+// - Approach: Iterative Run-Length Encoding (RLE) simulation.
+// - Intuition: Count consecutive identical character runs and serialize as `<count><digit>`. Repeat n-1 times.
+// - Complexity: Time: O(N \cdot L), Space: O(L) for string buffer.
+
+// 7. Compare Version Numbers (LeetCode 165)
+int compareVersion(string version1, string version2) {
+    int i = 0, j = 0, n1 = version1.size(), n2 = version2.size();
+    while (i < n1 || j < n2) {
+        long long num1 = 0, num2 = 0;
+        while (i < n1 && version1[i] != '.') num1 = num1 * 10 + (version1[i++] - '0');
+        while (j < n2 && version2[j] != '.') num2 = num2 * 10 + (version2[j++] - '0');
+
+        if (num1 < num2) return -1;
+        if (num1 > num2) return 1;
+
+        i++; j++; // skip '.'
+    }
+    return 0;
+}
+// Interview Explanation:
+// - Problem Statement: Compare two version numbers version1 and version2 (LeetCode 165).
+// - Approach: Two-Pointer parsing by '.' delimiters.
+// - Intuition: Parse integer revision between dots; missing revisions default to 0. Compare revision by revision from left to right.
+// - Complexity: Time: O(N + M) single pass, Space: O(1).
+
 /*
  ====================================================================================================
              ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: STRING ALGORITHMS & HASHING

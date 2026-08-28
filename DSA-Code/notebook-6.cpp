@@ -433,3 +433,72 @@ public:
 // - Approach: Use an array of linked lists (buckets) to handle collisions via chaining.
 // - Intuition: The hash function maps keys to bucket indices. Each bucket is a linked list that stores key-value pairs. When inserting, we check if the key exists to update; otherwise, we append. For retrieval and removal, we traverse the linked list in the corresponding bucket.
 // - Complexity: Time: O(1) average for put/get/remove, O(N) worst-case if all keys collide, Space: O(N) for storing key-value pairs.
+
+int median(vector<vector<int>>& mat) {
+    int r = mat.size(), c = mat[0].size();
+
+    int lo = mat[0][0], hi = mat[0][c - 1];
+
+    for (auto& row : mat) {
+        lo = min(lo, row[0]);
+        hi = max(hi, row[c - 1]);
+    }
+
+    int need = (r * c) / 2 + 1;
+
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+
+        int cnt = 0;
+        for (auto& row : mat)
+            cnt += upper_bound(row.begin(), row.end(), mid) - row.begin();
+
+        if (cnt >= need)
+            hi = mid;
+        else
+            lo = mid + 1;
+    }
+
+    return lo;
+}
+
+// Interview Explanation:
+// - Problem Statement: Find the median of a row-wise sorted matrix.
+// - Approach: Binary search on the value range (lo, hi) and count elements less than or equal to mid using upper_bound in each row.
+// - Intuition: The median is the element that has half of the elements less than or equal to it. By performing a binary search on the possible value range and counting how many elements are less than or equal to mid, we can narrow down to the median value.
+// - Complexity: Time: O(R * log C * log(max - min)), Space: O(1) auxiliary space.
+
+int findPeakGrid(vector<vector<int>>& mat) {
+    int m = mat.size(), n = mat[0].size();
+    int lo = 0, hi = n - 1;
+
+    while (lo <= hi) {
+        int col = lo + (hi - lo) / 2;
+
+        // Maximum element in this column
+        int row = 0;
+        for (int i = 1; i < m; i++)
+            if (mat[i][col] > mat[row][col])
+                row = i;
+
+        int left  = col ? mat[row][col - 1] : -1;
+        int right = col + 1 < n ? mat[row][col + 1] : -1;
+
+        if (mat[row][col] > left && mat[row][col] > right)
+            return row * n + col;
+
+        if (left > mat[row][col])
+            hi = col - 1;
+        else
+            lo = col + 1;
+    }
+
+    return -1;
+}
+
+// Interview Explanation:
+// - Problem Statement: Find a peak element in a 2D grid where a peak is defined as an element that is strictly greater than its neighbors (up, down, left, right).
+// - Approach: Binary search on columns, finding the maximum in the middle column and checking its neighbors to decide which half to continue searching.
+// - Intuition: By always moving towards a neighbor that is greater, we are guaranteed to eventually find a peak. The maximum in the middle column is a good candidate to check against its neighbors.
+// - Complexity: Time: O(M log N) where M is the number of rows and N is the number of columns, Space: O(1) auxiliary space.
+

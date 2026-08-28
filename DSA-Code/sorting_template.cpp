@@ -608,6 +608,11 @@ void sortColors(vi &nums) {
         }
     }
 }
+// Interview Explanation:
+// - Problem Statement: Sort an array with 0s, 1s, and 2s in-place in a single pass (LeetCode 75).
+// - Approach: Dutch National Flag Algorithm (3-way partitioning with low, mid, high pointers).
+// - Intuition: Invariants: [0..low-1] are 0s, [low..mid-1] are 1s, [high+1..n-1] are 2s. Process `nums[mid]` and shrink unsorted partition [mid..high].
+// - Complexity: Time: O(N) single pass, Space: O(1) in-place.
 
 // 2. Boyer-Moore Majority Element
 int majorityElementHalf(const vi &nums) {
@@ -1006,6 +1011,327 @@ public:
         return (bestIdx == -1) ? "" : list[bestIdx].second;
     }
 };
+
+
+// ====================================================================================================
+// SECTION: STRIVER SDE SHEET ARRAYS & TWO POINTERS (CATEGORY 1)
+// ====================================================================================================
+
+// 1. Pascal's Triangle (LeetCode 118)
+vvi generatePascalTriangle(int numRows) {
+    vvi triangle(numRows);
+    for (int i = 0; i < numRows; i++) {
+        triangle[i].resize(i + 1, 1);
+        for (int j = 1; j < i; j++) {
+            triangle[i][j] = triangle[i - 1][j - 1] + triangle[i - 1][j];
+        }
+    }
+    return triangle;
+}
+// Interview Explanation:
+// - Problem Statement: Generate the first numRows of Pascal's Triangle (LeetCode 118).
+// - Approach: Dynamic Programming row-by-row simulation.
+// - Intuition: Boundary elements are 1; interior element `triangle[i][j] = triangle[i-1][j-1] + triangle[i-1][j]`.
+// - Complexity: Time: O(N^2), Space: O(1) auxiliary space (excluding returned triangle).
+
+// 2. Merge Two Sorted Arrays Without Extra Space (LeetCode 88)
+void mergeSortedArrays(vi& nums1, int m, vi& nums2, int n) {
+    int p1 = m - 1, p2 = n - 1, p = m + n - 1;
+    while (p1 >= 0 && p2 >= 0) {
+        if (nums1[p1] > nums2[p2]) {
+            nums1[p--] = nums1[p1--];
+        } else {
+            nums1[p--] = nums2[p2--];
+        }
+    }
+    while (p2 >= 0) nums1[p--] = nums2[p2--];
+}
+// Interview Explanation:
+// - Problem Statement: Merge sorted array nums2 into nums1 in-place in non-decreasing order (LeetCode 88).
+// - Approach: Three Pointers working backwards from index m + n - 1.
+// - Intuition: Populating largest elements from the back avoids overwriting elements in nums1 that haven't been processed yet.
+// - Complexity: Time: O(M + N), Space: O(1) in-place.
+
+// 4. Find the Duplicate Number (LeetCode 287)
+int findDuplicateNumber(const vi& nums) {
+    int slow = nums[0], fast = nums[0];
+    do {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+    } while (slow != fast);
+
+    slow = nums[0];
+    while (slow != fast) {
+        slow = nums[slow];
+        fast = nums[fast];
+    }
+    return slow;
+}
+// Interview Explanation:
+// - Problem Statement: Find duplicate number in array of n+1 integers in range [1, n] in O(1) extra space without modifying array (LeetCode 287).
+// - Approach: Floyd's Tortoise and Hare (Cycle Detection on Functional Graph `i -> nums[i]`).
+// - Intuition: Duplicate value creates multiple incoming edges to the same node, forming a cycle entrance. Phase 1 finds collision point; Phase 2 finds cycle entrance.
+// - Complexity: Time: O(N), Space: O(1) in-place.
+
+// 5. Pow(x, n) - Binary Exponentiation (LeetCode 50)
+double myPow(double x, int n) {
+    long long N = n;
+    if (N < 0) {
+        x = 1.0 / x;
+        N = -N;
+    }
+    double ans = 1.0;
+    while (N > 0) {
+        if (N & 1) ans *= x;
+        x *= x;
+        N >>= 1;
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Calculate x raised to power n (LeetCode 50).
+// - Approach: Binary Exponentiation (Exponent squaring).
+// - Intuition: Halve power N at each step while squaring base x; multiply `ans` when lowest bit of N is 1. Handles negative N using `1.0 / x` and `long long` to prevent `INT_MIN` overflow.
+// - Complexity: Time: O(\log N), Space: O(1).
+
+// 6. Reverse Pairs (LeetCode 493)
+int mergeCountReversePairs(vi& nums, int low, int mid, int high) {
+    int count = 0, j = mid + 1;
+    for (int i = low; i <= mid; i++) {
+        while (j <= high && (ll)nums[i] > 2LL * nums[j]) j++;
+        count += (j - (mid + 1));
+    }
+
+    vi temp;
+    int left = low, right = mid + 1;
+    while (left <= mid && right <= high) {
+        if (nums[left] <= nums[right]) temp.push_back(nums[left++]);
+        else temp.push_back(nums[right++]);
+    }
+    while (left <= mid) temp.push_back(nums[left++]);
+    while (right <= high) temp.push_back(nums[right++]);
+    for (int i = low; i <= high; i++) nums[i] = temp[i - low];
+    return count;
+}
+
+int countReversePairs(vi& nums, int low, int high) {
+    if (low >= high) return 0;
+    int mid = low + (high - low) / 2;
+    int count = countReversePairs(nums, low, mid) + countReversePairs(nums, mid + 1, high);
+    count += mergeCountReversePairs(nums, low, mid, high);
+    return count;
+}
+
+int reversePairs(vi& nums) {
+    return countReversePairs(nums, 0, (int)nums.size() - 1);
+}
+// Interview Explanation:
+// - Problem Statement: Return number of reverse pairs where `i < j` and `nums[i] > 2 * nums[j]` (LeetCode 493).
+// - Approach: Modified Merge Sort with two-pointer condition counting.
+// - Intuition: During merge sort, both left and right halves are sorted. Two pointers count valid pairs `nums[i] > 2 * nums[j]` in O(N) per merge step before standard merging.
+// - Complexity: Time: O(N \log N), Space: O(N) temporary merge array.
+
+// 7. Largest Subarray with 0 Sum (GFG / Striver SDE #22)
+int maxLenZeroSum(const vi& arr) {
+    unordered_map<ll, int> prefixMap;
+    ll sum = 0;
+    int maxLen = 0;
+    for (int i = 0; i < (int)arr.size(); i++) {
+        sum += arr[i];
+        if (sum == 0) maxLen = i + 1;
+        else if (prefixMap.count(sum)) maxLen = max(maxLen, i - prefixMap[sum]);
+        else prefixMap[sum] = i;
+    }
+    return maxLen;
+}
+// Interview Explanation:
+// - Problem Statement: Find length of largest subarray with sum equal to 0.
+// - Approach: Prefix Sum with Hash Map storing earliest index of each prefix sum.
+// - Intuition: If prefix sum `sum` repeats at index `i` (earliest seen at index `j`), subarray `[j+1..i]` sums to 0 with length `i - j`.
+// - Complexity: Time: O(N), Space: O(N).
+
+// 8. Remove Duplicates from Sorted Array (LeetCode 26)
+int removeDuplicates(vi& nums) {
+    if (nums.empty()) return 0;
+    int k = 1;
+    for (int i = 1; i < (int)nums.size(); i++) {
+        if (nums[i] != nums[i - 1]) {
+            nums[k++] = nums[i];
+        }
+    }
+    return k;
+}
+// Interview Explanation:
+// - Problem Statement: Remove duplicates from sorted array in-place and return number of unique elements (LeetCode 26).
+// - Approach: Two Pointers (Slow write pointer `k`, Fast read pointer `i`).
+// - Intuition: Whenever `nums[i] != nums[i-1]`, copy unique element to `nums[k]` and increment `k`.
+// - Complexity: Time: O(N) single pass, Space: O(1) in-place.
+
+// 9. Max Consecutive Ones (LeetCode 485)
+int findMaxConsecutiveOnes(const vi& nums) {
+    int maxCount = 0, curr = 0;
+    for (int x : nums) {
+        if (x == 1) {
+            curr++;
+            maxCount = max(maxCount, curr);
+        } else {
+            curr = 0;
+        }
+    }
+    return maxCount;
+}
+// Interview Explanation:
+// - Problem Statement: Find maximum number of consecutive 1s in a binary array (LeetCode 485).
+// - Approach: Single-pass running counter.
+// - Intuition: Increment count on 1 and maximize result; reset counter on 0.
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// ====================================================================================================
+// SECTION: STRIVER SDE SHEET GREEDY ALGORITHMS (CATEGORY 3)
+// ====================================================================================================
+
+// 1. N Meetings in One Room (GFG / Striver SDE #43)
+int maxMeetings(vi& start, vi& end) {
+    int n = start.size();
+    vector<pii> meetings(n);
+    for (int i = 0; i < n; i++) meetings[i] = {end[i], start[i]};
+    sort(meetings.begin(), meetings.end());
+
+    int count = 0, lastEnd = -1;
+    for (auto& [e, s] : meetings) {
+        if (s > lastEnd) {
+            count++;
+            lastEnd = e;
+        }
+    }
+    return count;
+}
+// Interview Explanation:
+// - Problem Statement: Maximize number of non-overlapping meetings in a single meeting room.
+// - Approach: Activity Selection / Greedy Scheduling by earliest end time.
+// - Intuition: Greedily pick meeting with earliest end time to free up the room as early as possible for subsequent meetings.
+// - Complexity: Time: O(N \log N) sorting, Space: O(N).
+
+// 2. Minimum Platforms Required for Railway (GFG / Striver SDE #44)
+int findPlatform(vi& arr, vi& dep) {
+    sort(arr.begin(), arr.end());
+    sort(dep.begin(), dep.end());
+
+    int n = arr.size(), platforms = 0, maxPlatforms = 0;
+    int i = 0, j = 0;
+
+    while (i < n && j < n) {
+        if (arr[i] <= dep[j]) {
+            platforms++;
+            maxPlatforms = max(maxPlatforms, platforms);
+            i++;
+        } else {
+            platforms--;
+            j++;
+        }
+    }
+    return maxPlatforms;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum number of platforms required at railway station to prevent train collisions.
+// - Approach: Two Pointers on independently sorted arrival and departure times.
+// - Intuition: When arrival time <= departure time, an overlapping train requires an extra platform (`platforms++`). Otherwise, a platform is vacated (`platforms--`).
+// - Complexity: Time: O(N \log N) sorting, Space: O(1) auxiliary space.
+
+// 3. Job Sequencing Problem with Deadlines (GFG / Striver SDE #45)
+struct Job {
+    int id, dead, profit;
+};
+
+pair<int, int> jobSequencing(vector<Job>& jobs) {
+    sort(jobs.begin(), jobs.end(), [](const Job& a, const Job& b) {
+        return a.profit > b.profit;
+    });
+
+    int maxDeadline = 0;
+    for (const auto& j : jobs) maxDeadline = max(maxDeadline, j.dead);
+
+    vi slot(maxDeadline + 1, -1);
+    int totalProfit = 0, countJobs = 0;
+
+    for (const auto& j : jobs) {
+        for (int t = j.dead; t > 0; t--) {
+            if (slot[t] == -1) {
+                slot[t] = j.id;
+                countJobs++;
+                totalProfit += j.profit;
+                break;
+            }
+        }
+    }
+    return {countJobs, totalProfit};
+}
+// Interview Explanation:
+// - Problem Statement: Maximize total profit scheduling jobs with unit time duration and deadlines.
+// - Approach: Greedy allocation on latest available slot.
+// - Intuition: Sort jobs descending by profit. Greedily schedule highest profit job at the latest possible empty slot <= deadline to reserve earlier slots for tighter deadlines.
+// - Complexity: Time: O(N \log N + N \cdot D), Space: O(D).
+
+// 4. Fractional Knapsack (GFG / Striver SDE #46)
+struct Item {
+    int value, weight;
+};
+
+double fractionalKnapsack(int W, vector<Item>& items) {
+    sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
+        return (double)a.value / a.weight > (double)b.value / b.weight;
+    });
+
+    double totalVal = 0.0;
+    int currentWeight = 0;
+
+    for (const auto& item : items) {
+        if (currentWeight + item.weight <= W) {
+            currentWeight += item.weight;
+            totalVal += item.value;
+        } else {
+            int remain = W - currentWeight;
+            totalVal += ((double)item.value / item.weight) * remain;
+            break;
+        }
+    }
+    return totalVal;
+}
+// Interview Explanation:
+// - Problem Statement: Maximize total value in knapsack of capacity W allowing fractional items.
+// - Approach: Greedy sorting by value-to-weight ratio.
+// - Intuition: Greedily pick items with highest value-per-weight density; take whole item if capacity allows, otherwise take exact fractional fraction remaining.
+// - Complexity: Time: O(N \log N) sorting, Space: O(1) auxiliary space.
+
+
+// ====================================================================================================
+// SECTION: STRIVER SDE SHEET BINARY SEARCH (CATEGORY 5)
+// ====================================================================================================
+
+// 1. N-th Root of an Integer (GFG / Striver SDE #61)
+int nthRoot(int n, int m) {
+    int low = 1, high = m;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        ll power = 1;
+        bool overflow = false;
+        for (int i = 0; i < n; i++) {
+            power *= mid;
+            if (power > m) { overflow = true; break; }
+        }
+
+        if (!overflow && power == m) return mid;
+        if (overflow || power > m) high = mid - 1;
+        else low = mid + 1;
+    }
+    return -1;
+}
+// Interview Explanation:
+// - Problem Statement: Find integer n-th root of integer m (return -1 if non-integer).
+// - Approach: Binary Search on Answer in range [1, m].
+// - Intuition: Function mid^n monotonically increases with mid. Binary search for value satisfying mid^n == m, guarding against integer overflow during power multiplication.
+// - Complexity: Time: O(N \cdot \log M), Space: O(1).
 
 int main() {
     ios::sync_with_stdio(false);

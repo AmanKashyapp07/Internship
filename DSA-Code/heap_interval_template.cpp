@@ -501,6 +501,95 @@ int findMinArrowShots(vvi& points) {
     return arrows;
 }
 
+
+// ====================================================================================================
+// SECTION 5: STRIVER SDE SHEET HEAP ALGORITHMS (CATEGORY 6)
+// ====================================================================================================
+
+// 1. Maximum Sum Combinations (InterviewBit / Striver SDE #68)
+vi maxSumCombinations(vi& A, vi& B, int C) {
+    sort(A.begin(), A.end(), greater<int>());
+    sort(B.begin(), B.end(), greater<int>());
+    int n = A.size(), m = B.size();
+
+    priority_queue<pair<int, pii>> pq;
+    set<pii> visited;
+
+    pq.push({A[0] + B[0], {0, 0}});
+    visited.insert({0, 0});
+
+    vi result;
+    while (C-- > 0 && !pq.empty()) {
+        auto [sum, indices] = pq.top();
+        pq.pop();
+        result.push_back(sum);
+
+        int i = indices.first, j = indices.second;
+
+        if (i + 1 < n && !visited.count({i + 1, j})) {
+            pq.push({A[i + 1] + B[j], {i + 1, j}});
+            visited.insert({i + 1, j});
+        }
+        if (j + 1 < m && !visited.count({i, j + 1})) {
+            pq.push({A[i] + B[j + 1], {i, j + 1}});
+            visited.insert({i, j + 1});
+        }
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Find top C maximum valid sum combinations formed by pair A[i] + B[j].
+// - Approach: Sort descending + Max-Heap tracking adjacent index candidates.
+// - Intuition: Largest sum is A[0] + B[0]. Popping pair (i, j) generates candidates (i+1, j) and (i, j+1); using a set prevents duplicate states.
+// - Complexity: Time: O(N \log N + C \log C), Space: O(C).
+
+// 2. Kth Largest Element in a Stream (LeetCode 703)
+class KthLargest {
+    priority_queue<int, vector<int>, greater<int>> minHeap;
+    int kSize;
+public:
+    KthLargest(int k, vector<int>& nums) : kSize(k) {
+        for (int x : nums) add(x);
+    }
+
+    int add(int val) {
+        minHeap.push(val);
+        if ((int)minHeap.size() > kSize) minHeap.pop();
+        return minHeap.top();
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Design a class to find the k-th largest element in a continuous data stream (LeetCode 703).
+// - Approach: Min-Heap bounded to size k.
+// - Intuition: Heap of size k maintains the top k largest elements seen so far; heap top is the smallest among the top k, which is the k-th largest.
+// - Complexity: Time: O(\log K) per add operation, Space: O(K).
+
+// 3. Kth Largest Element in an Array (LeetCode 215 - QuickSelect O(N) Avg)
+int quickSelectKthLargest(vi& nums, int k) {
+    int target = (int)nums.size() - k;
+    int low = 0, high = (int)nums.size() - 1;
+
+    while (low <= high) {
+        int pivot = nums[high], pIndex = low;
+        for (int i = low; i < high; i++) {
+            if (nums[i] <= pivot) {
+                swap(nums[i], nums[pIndex++]);
+            }
+        }
+        swap(nums[pIndex], nums[high]);
+
+        if (pIndex == target) return nums[pIndex];
+        if (pIndex < target) low = pIndex + 1;
+        else high = pIndex - 1;
+    }
+    return -1;
+}
+// Interview Explanation:
+// - Problem Statement: Find k-th largest element in unsorted array in O(N) average time (LeetCode 215).
+// - Approach: QuickSelect (Hoare's Partitioning).
+// - Intuition: Partition array around pivot; discard unused half; expected recurrence T(N) = T(N/2) + O(N) solves to O(N).
+// - Complexity: Time: O(N) average, O(N^2) worst case, Space: O(1) in-place.
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
