@@ -1,5 +1,28 @@
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
+
 
 class Solution {
 public:
@@ -410,7 +433,7 @@ public:
 
 
     // =========================================================
-    // 14. DISJOINT SET UNION (DSU)
+    // 11. DISJOINT SET UNION (DSU)
     // =========================================================
 
     class DSU {
@@ -444,7 +467,7 @@ public:
 
 
     // =========================================================
-    // 15. CYCLE DETECTION USING DSU
+    // 12. CYCLE DETECTION USING DSU
     // =========================================================
 
     bool hasCycleDSU(int n, vector<vector<int>>& edges) {
@@ -462,7 +485,7 @@ public:
 
 
     // =========================================================
-    // 16. KRUSKAL'S MST
+    // 13. KRUSKAL'S MST
     // =========================================================
 
     int kruskal(int n, vector<vector<int>>& edges) {
@@ -486,7 +509,7 @@ public:
 
 
     // =========================================================
-    // 17. PRIM'S MST
+    // 14. PRIM'S MST
     // =========================================================
 
     int prim(int n, vector<vector<pair<int, int>>>& graph) {
@@ -546,7 +569,7 @@ public:
 
 
     // =========================================================
-    // 19. SHORTEST PATH IN BINARY MATRIX
+    // 15. SHORTEST PATH IN BINARY MATRIX
     // =========================================================
 
     int shortestPathBinaryMatrix(vector<vector<int>>& grid) {
@@ -581,7 +604,7 @@ public:
 
 
     // =========================================================
-    // 20. WORD LADDER - BFS
+    // 16. WORD LADDER - BFS
     // =========================================================
 
     int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
@@ -622,7 +645,7 @@ public:
 
 
     // =========================================================
-    // 21. MULTI-SOURCE BFS
+    // 17. MULTI-SOURCE BFS
     // =========================================================
 
     vector<int> multiSourceBFS(int n, vector<vector<int>>& graph, vector<int>& sources) {
@@ -651,7 +674,7 @@ public:
 
 
     // =========================================================
-    // 22. K SHORTEST PATHS
+    // 18. K SHORTEST PATHS
     // =========================================================
 
     vector<long long> kShortestPaths(int n, vector<vector<pair<int, int>>>& graph, int src, int dest, int k) {
@@ -681,7 +704,7 @@ public:
 
 
     // =========================================================
-    // 23. EVENTUAL SAFE STATES
+    // 19. EVENTUAL SAFE STATES
     // =========================================================
 
     vector<int> eventualSafeNodes(int V, vector<vector<int>>& graph) {
@@ -715,7 +738,7 @@ public:
 
 
     // =========================================================
-    // 24. SHORTEST PATH IN DAG VIA TOPO SORT
+    // 20. SHORTEST PATH IN DAG VIA TOPO SORT
     // =========================================================
 
     vector<int> shortestPathDAG(int V, const vector<vector<pair<int, int>>>& graph, int src) {
@@ -756,7 +779,7 @@ public:
 
 
     // =========================================================
-    // 25. PATH WITH MINIMUM EFFORT
+    // 21. PATH WITH MINIMUM EFFORT
     // =========================================================
 
     int minimumEffortPath(vector<vector<int>>& heights) {
@@ -792,7 +815,7 @@ public:
 
 
     // =========================================================
-    // 26. NETWORK DELAY TIME
+    // 22. NETWORK DELAY TIME
     // =========================================================
 
     int networkDelayTime(vector<vector<int>>& times, int n, int k) {
@@ -827,7 +850,7 @@ public:
 
 
     // =========================================================
-    // 27. NUMBER OF WAYS TO ARRIVE AT DESTINATION
+    // 23. NUMBER OF WAYS TO ARRIVE AT DESTINATION
     // =========================================================
 
     int countPaths(int n, vector<vector<int>>& roads) {
@@ -867,7 +890,7 @@ public:
 
 
     // =========================================================
-    // 28. NUMBER OF OPERATIONS TO MAKE NETWORK CONNECTED
+    // 24. NUMBER OF OPERATIONS TO MAKE NETWORK CONNECTED
     // =========================================================
 
     int makeConnected(int n, vector<vector<int>>& connections) {
@@ -886,7 +909,7 @@ public:
 
 
     // =========================================================
-    // 29. MOST STONES REMOVED WITH SAME ROW OR COLUMN
+    // 25. MOST STONES REMOVED WITH SAME ROW OR COLUMN
     // =========================================================
 
     int removeStones(vector<vector<int>>& stones) {
@@ -915,7 +938,7 @@ public:
 
 
     // =========================================================
-    // 30. NUMBER OF ISLANDS II (DYNAMIC LAND ADDITION)
+    // 26. NUMBER OF ISLANDS II (DYNAMIC LAND ADDITION)
     // =========================================================
 
     vector<int> numIslandsII(int n, int m, vector<vector<int>>& queries) {
@@ -946,6 +969,395 @@ public:
     // - Approach: DSU dynamic component merging with 2D-to-1D index mapping (`r * m + c`).
     // - Intuition: Adding land increments island count by 1; merging with adjacent land cells decrements count whenever `ds.unite` merges two distinct sets.
     // - Complexity: Time: O(Q \cdot \alpha(N \cdot M)), Space: O(N \cdot M).
+
+    // =========================================================
+    // 27. BRIDGES IN GRAPH / CRITICAL CONNECTIONS (LEETCODE 1192)
+    // =========================================================
+
+    void tarjanBridgeDFS(int node, int parent, int &timer, vector<int> &tin, vector<int> &low,
+                         vector<int> &vis, vector<vector<int>> &adj, vector<vector<int>> &bridges) {
+        vis[node] = 1;
+        tin[node] = low[node] = timer++;
+        for (int neighbor : adj[node]) {
+            if (neighbor == parent) continue;
+            if (!vis[neighbor]) {
+                tarjanBridgeDFS(neighbor, node, timer, tin, low, vis, adj, bridges);
+                low[node] = min(low[node], low[neighbor]);
+                if (low[neighbor] > tin[node]) {
+                    bridges.push_back({node, neighbor});
+                }
+            } else {
+                low[node] = min(low[node], tin[neighbor]);
+            }
+        }
+    }
+
+    vector<vector<int>> criticalConnections(int n, vector<vector<int>> &connections) {
+        vector<vector<int>> adj(n);
+        for (auto &edge : connections) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        vector<int> tin(n, -1), low(n, -1), vis(n, 0);
+        vector<vector<int>> bridges;
+        int timer = 0;
+        tarjanBridgeDFS(0, -1, timer, tin, low, vis, adj, bridges);
+        return bridges;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all critical connections (bridges) whose removal disconnects the graph.
+    // - Approach: Tarjan's Low-Link Depth-First Search ($low[v] > tin[u]$).
+    // - Intuition: Track insertion time `tin` and lowest reachable time `low`. If child `v` cannot reach ancestor of `u` via back-edge, edge `(u, v)` is a bridge.
+    // - Complexity: Time: O(V + E) single DFS traversal, Space: O(V + E) adjacency graph & recursion stack.
+
+
+    // =========================================================
+    // 28. ARTICULATION POINTS IN GRAPH (TARJAN'S ALGORITHM)
+    // =========================================================
+
+    void tarjanAPDFS(int node, int parent, int &timer, vector<int> &tin, vector<int> &low,
+                     vector<int> &vis, vector<int> &isAP, vector<vector<int>> &adj) {
+        vis[node] = 1;
+        tin[node] = low[node] = timer++;
+        int children = 0;
+
+        for (int neighbor : adj[node]) {
+            if (neighbor == parent) continue;
+            if (!vis[neighbor]) {
+                children++;
+                tarjanAPDFS(neighbor, node, timer, tin, low, vis, isAP, adj);
+                low[node] = min(low[node], low[neighbor]);
+                if (low[neighbor] >= tin[node] && parent != -1) {
+                    isAP[node] = 1;
+                }
+            } else {
+                low[node] = min(low[node], tin[neighbor]);
+            }
+        }
+        if (parent == -1 && children > 1) {
+            isAP[node] = 1;
+        }
+    }
+
+    vector<int> articulationPoints(int V, vector<vector<int>> &adj) {
+        vector<int> tin(V, -1), low(V, -1), vis(V, 0), isAP(V, 0);
+        int timer = 0;
+        for (int i = 0; i < V; ++i) {
+            if (!vis[i]) {
+                tarjanAPDFS(i, -1, timer, tin, low, vis, isAP, adj);
+            }
+        }
+        vector<int> ans;
+        for (int i = 0; i < V; ++i) if (isAP[i]) ans.push_back(i);
+        return ans.empty() ? vector<int>{-1} : ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all articulation points (cut vertices) whose removal increases connected components.
+    // - Approach: Tarjan's Low-Link DFS with root degree and subtree reachability conditions.
+    // - Intuition: Non-root node $u$ is AP if $low[v] \ge tin[u]$ for some child $v$; Root is AP if it has $> 1$ independent DFS children.
+    // - Complexity: Time: O(V + E), Space: O(V) tracking arrays.
+
+
+    // =========================================================
+    // 29. STRONGLY CONNECTED COMPONENTS (KOSARAJU'S ALGORITHM)
+    // =========================================================
+
+    void kosarajuDFS1(int node, vector<int> &vis, stack<int> &st, vector<vector<int>> &adj) {
+        vis[node] = 1;
+        for (int neighbor : adj[node]) {
+            if (!vis[neighbor]) kosarajuDFS1(neighbor, vis, st, adj);
+        }
+        st.push(node);
+    }
+
+    void kosarajuDFS2(int node, vector<int> &vis, vector<vector<int>> &adjT, vector<int> &component) {
+        vis[node] = 1;
+        component.push_back(node);
+        for (int neighbor : adjT[node]) {
+            if (!vis[neighbor]) kosarajuDFS2(neighbor, vis, adjT, component);
+        }
+    }
+
+    vector<vector<int>> kosarajuSCC(int V, vector<vector<int>> &adj) {
+        stack<int> st;
+        vector<int> vis(V, 0);
+
+        // Step 1: Sort nodes by finishing time
+        for (int i = 0; i < V; ++i) {
+            if (!vis[i]) kosarajuDFS1(i, vis, st, adj);
+        }
+
+        // Step 2: Transpose graph (reverse all directed edges)
+        vector<vector<int>> adjT(V);
+        for (int i = 0; i < V; ++i) {
+            for (int neighbor : adj[i]) {
+                adjT[neighbor].push_back(i);
+            }
+        }
+
+        // Step 3: DFS on transposed graph in order of decreasing finish time
+        fill(vis.begin(), vis.end(), 0);
+        vector<vector<int>> sccList;
+        while (!st.empty()) {
+            int node = st.top(); st.pop();
+            if (!vis[node]) {
+                vector<int> component;
+                kosarajuDFS2(node, vis, adjT, component);
+                sccList.push_back(component);
+            }
+        }
+        return sccList;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all Strongly Connected Components (SCCs) in a directed graph.
+    // - Approach: Kosaraju's Two-Pass DFS with Graph Transposition.
+    // - Intuition: Transposing graph prevents cross-component DFS leakage; processing in decreasing finish time extracts each SCC cleanly.
+    // - Complexity: Time: O(V + E) two linear traversals, Space: O(V + E) for transposed graph and stack.
+
+
+    
+
+    
+
+    // =========================================================
+    // 30. CHEAPEST FLIGHTS WITHIN K STOPS (LEETCODE 787)
+    // =========================================================
+
+    int findCheapestPrice(int n, vector<vector<int>> &flights, int src, int dst, int k) {
+        vector<vector<pair<int, int>>> adj(n);
+        for (auto &f : flights) {
+            adj[f[0]].push_back({f[1], f[2]});
+        }
+
+        queue<tuple<int, int, int>> q; // {stops, node, cost}
+        q.push({0, src, 0});
+        vector<int> dist(n, 1e9);
+        dist[src] = 0;
+
+        while (!q.empty()) {
+            auto [stops, node, cost] = q.front();
+            q.pop();
+
+            if (stops > k) continue;
+
+            for (auto &[neighbor, price] : adj[node]) {
+                if (cost + price < dist[neighbor] && stops <= k) {
+                    dist[neighbor] = cost + price;
+                    q.push({stops + 1, neighbor, cost + price});
+                }
+            }
+        }
+        return dist[dst] == 1e9 ? -1 : dist[dst];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find cheapest flight price from src to dst with at most K intermediate stops.
+    // - Approach: BFS Level Queue (incrementing stops by 1 per level) with cost relaxation.
+    // - Intuition: Standard Dijkstra prioritizes cost over stops which can prune valid K-stop paths; BFS guarantees monotonic stop progression.
+    // - Complexity: Time: O(K * E), Space: O(V + E) adjacency list.
+
+
+    // =========================================================
+    // 31. ALIEN DICTIONARY (LEETCODE 269 / GFG)
+    // =========================================================
+
+    string findAlienOrder(vector<string> &words, int k) {
+        vector<vector<int>> adj(k);
+        vector<int> indegree(k, 0);
+
+        for (int i = 0; i < (int)words.size() - 1; ++i) {
+            string w1 = words[i], w2 = words[i + 1];
+            int len = min(w1.size(), w2.size());
+            bool foundDiff = false;
+            for (int j = 0; j < len; ++j) {
+                if (w1[j] != w2[j]) {
+                    adj[w1[j] - 'a'].push_back(w2[j] - 'a');
+                    indegree[w2[j] - 'a']++;
+                    foundDiff = true;
+                    break;
+                }
+            }
+            if (!foundDiff && w1.size() > w2.size()) return ""; // Invalid prefix order
+        }
+
+        queue<int> q;
+        for (int i = 0; i < k; ++i) if (indegree[i] == 0) q.push(i);
+        string order = "";
+
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            order += (char)(u + 'a');
+            for (int v : adj[u]) {
+                if (--indegree[v] == 0) q.push(v);
+            }
+        }
+        return (int)order.size() == k ? order : "";
+    }
+    // Interview Explanation:
+    // - Problem Statement: Reconstruct the lexicographical character ordering of an alien language from a sorted dictionary of words.
+    // - Approach: Directed Graph Construction + Kahn's BFS Topological Sort.
+    // - Intuition: Compare adjacent words to find first differing character $c_1 	o c_2$. Topo sort gives valid linear precedence.
+    // - Complexity: Time: O(N * |word| + K), Space: O(K) alphabet graph.
+
+
+    // =========================================================
+    // 32. COURSE SCHEDULE I & II (LEETCODE 207 & 210)
+    // =========================================================
+
+    bool canFinishCourses(int numCourses, vector<vector<int>> &prerequisites) {
+        vector<vector<int>> adj(numCourses);
+        vector<int> indegree(numCourses, 0);
+        for (auto &p : prerequisites) {
+            adj[p[1]].push_back(p[0]);
+            indegree[p[0]]++;
+        }
+        queue<int> q;
+        for (int i = 0; i < numCourses; ++i) if (indegree[i] == 0) q.push(i);
+        int count = 0;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            count++;
+            for (int v : adj[u]) {
+                if (--indegree[v] == 0) q.push(v);
+            }
+        }
+        return count == numCourses;
+    }
+
+    vector<int> findOrderCourses(int numCourses, vector<vector<int>> &prerequisites) {
+        vector<vector<int>> adj(numCourses);
+        vector<int> indegree(numCourses, 0);
+        for (auto &p : prerequisites) {
+            adj[p[1]].push_back(p[0]);
+            indegree[p[0]]++;
+        }
+        queue<int> q;
+        for (int i = 0; i < numCourses; ++i) if (indegree[i] == 0) q.push(i);
+        vector<int> order;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            order.push_back(u);
+            for (int v : adj[u]) {
+                if (--indegree[v] == 0) q.push(v);
+            }
+        }
+        return (int)order.size() == numCourses ? order : vector<int>{};
+    }
+    // Interview Explanation:
+    // - Problem Statement: Detect if course prerequisite cycle exists, and generate valid course completion order.
+    // - Approach: Kahn's Algorithm (BFS Topological Sort) on prerequisite graph.
+    // - Intuition: Indegree 0 indicates courses with no prerequisites; processing and decrementing neighbor indegrees detects cycles when processed count < V.
+    // - Complexity: Time: O(V + E), Space: O(V + E) adjacency graph & indegree array.
+
+
+    // =========================================================
+    // 33. ACCOUNTS MERGE (LEETCODE 721)
+    // =========================================================
+
+    vector<vector<string>> accountsMerge(vector<vector<string>> &accounts) {
+        int n = accounts.size();
+        DSU ds(n);
+        unordered_map<string, int> mapMailNode;
+
+        for (int i = 0; i < n; ++i) {
+            for (int j = 1; j < (int)accounts[i].size(); ++j) {
+                string mail = accounts[i][j];
+                if (mapMailNode.find(mail) == mapMailNode.end()) {
+                    mapMailNode[mail] = i;
+                } else {
+                    ds.unite(i, mapMailNode[mail]);
+                }
+            }
+        }
+
+        vector<vector<string>> mergedMail(n);
+        for (auto &[mail, id] : mapMailNode) {
+            int root = ds.find(id);
+            mergedMail[root].push_back(mail);
+        }
+
+        vector<vector<string>> ans;
+        for (int i = 0; i < n; ++i) {
+            if (mergedMail[i].empty()) continue;
+            sort(mergedMail[i].begin(), mergedMail[i].end());
+            vector<string> temp;
+            temp.push_back(accounts[i][0]);
+            for (auto &mail : mergedMail[i]) temp.push_back(mail);
+            ans.push_back(temp);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Merge accounts sharing the same email under common user names.
+    // - Approach: Disjoint Set Union (DSU) mapping emails to account indices.
+    // - Intuition: Connect account IDs sharing identical emails via DSU; group emails by parent component root and sort alphabetically.
+    // - Complexity: Time: O(N * M \log(NM)), Space: O(N * M).
+
+
+    // =========================================================
+    // 34. M-COLORING PROBLEM (GFG)
+    // =========================================================
+
+    bool isColorSafe(int node, vector<int> &color, vector<vector<int>> &graph, int n, int col) {
+        for (int k = 0; k < n; ++k) {
+            if (k != node && graph[k][node] == 1 && color[k] == col) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool solveMColoring(int node, vector<int> &color, int m, int n, vector<vector<int>> &graph) {
+        if (node == n) return true;
+        for (int i = 1; i <= m; ++i) {
+            if (isColorSafe(node, color, graph, n, i)) {
+                color[node] = i;
+                if (solveMColoring(node + 1, color, m, n, graph)) return true;
+                color[node] = 0; // backtrack
+            }
+        }
+        return false;
+    }
+
+    bool graphColoring(vector<vector<int>> &graph, int m, int n) {
+        vector<int> color(n, 0);
+        return solveMColoring(0, color, m, n, graph);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Determine if an undirected graph can be colored with at most M colors such that no adjacent vertices share the same color.
+    // - Approach: Backtracking vertex assignment from 1 to M.
+    // - Intuition: Try colors 1..M on vertex `node`; if safe, recursively color `node + 1`. If no color works, backtrack.
+    // - Complexity: Time: O(M^N), Space: O(N) recursion stack and color array.
+
+
+    // =========================================================
+    // 35. FLOOD FILL (LEETCODE 733)
+    // =========================================================
+
+    void floodFillDFS(int r, int c, vector<vector<int>> &image, int initialColor, int newColor, int dr[], int dc[]) {
+        image[r][c] = newColor;
+        int m = image.size(), n = image[0].size();
+        for (int i = 0; i < 4; ++i) {
+            int nr = r + dr[i], nc = c + dc[i];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && image[nr][nc] == initialColor) {
+                floodFillDFS(nr, nc, image, initialColor, newColor, dr, dc);
+            }
+        }
+    }
+
+    vector<vector<int>> floodFill(vector<vector<int>> &image, int sr, int sc, int color) {
+        int initialColor = image[sr][sc];
+        if (initialColor != color) {
+            int dr[] = {-1, 1, 0, 0};
+            int dc[] = {0, 0, -1, 1};
+            floodFillDFS(sr, sc, image, initialColor, color, dr, dc);
+        }
+        return image;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Perform flood fill on an image starting from pixel (sr, sc) replacing connected matching pixels with newColor.
+    // - Approach: 4-directional Depth-First Search (DFS) / BFS.
+    // - Intuition: Mutate matching neighboring pixels to `newColor` in-place, preventing infinite cycles.
+    // - Complexity: Time: O(M * N), Space: O(M * N) recursion stack in worst case.
 };
 
 /*

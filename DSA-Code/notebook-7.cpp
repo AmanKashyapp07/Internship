@@ -1,5 +1,28 @@
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
+
 
 struct TreeNode {
     int val;
@@ -592,6 +615,682 @@ public:
     // - Approach: Preorder DFS with delimiter (',') and null markers ('#') using `stringstream`.
     // - Intuition: Preorder traversal uniquely determines tree structure when null pointers are explicitly serialized; deserializer consumes token-by-token.
     // - Complexity: Time: O(N) for both serialize and deserialize, Space: O(N) for string representation and recursion stack.
+
+    // =========================================================
+    // 26. MORRIS INORDER TRAVERSAL
+    // =========================================================
+
+    vector<int> morrisInorder(TreeNode* root) {
+        vector<int> inorder;
+        TreeNode* curr = root;
+        while (curr) {
+            if (!curr->left) {
+                inorder.push_back(curr->val);
+                curr = curr->right;
+            } else {
+                TreeNode* prev = curr->left;
+                while (prev->right && prev->right != curr) {
+                    prev = prev->right;
+                }
+                if (!prev->right) {
+                    prev->right = curr; // make temporary thread
+                    curr = curr->left;
+                } else {
+                    prev->right = nullptr; // remove temporary thread
+                    inorder.push_back(curr->val);
+                    curr = curr->right;
+                }
+            }
+        }
+        return inorder;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Perform Inorder traversal of a binary tree in O(1) auxiliary space without recursion or stack.
+    // - Approach: Morris Traversal using Threaded Binary Tree pointers.
+    // - Intuition: Link rightmost node of left subtree to current root; visiting root when returning via thread before restoring nullptr restores original tree structure.
+    // - Complexity: Time: O(N) amortized (each edge traversed at most 3 times), Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 27. MORRIS PREORDER TRAVERSAL
+    // =========================================================
+
+    vector<int> morrisPreorder(TreeNode* root) {
+        vector<int> preorder;
+        TreeNode* curr = root;
+        while (curr) {
+            if (!curr->left) {
+                preorder.push_back(curr->val);
+                curr = curr->right;
+            } else {
+                TreeNode* prev = curr->left;
+                while (prev->right && prev->right != curr) {
+                    prev = prev->right;
+                }
+                if (!prev->right) {
+                    preorder.push_back(curr->val); // record on first visit
+                    prev->right = curr;            // establish thread
+                    curr = curr->left;
+                } else {
+                    prev->right = nullptr;         // remove thread
+                    curr = curr->right;
+                }
+            }
+        }
+        return preorder;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Perform Preorder traversal of a binary tree in O(1) auxiliary space without recursion or stack.
+    // - Approach: Morris Preorder Traversal with Threaded Binary Tree links.
+    // - Intuition: Record current node value immediately upon establishing thread before descending to left subtree; remove thread upon returning.
+    // - Complexity: Time: O(N) amortized, Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 28. TOP VIEW OF BINARY TREE
+    // =========================================================
+
+    vector<int> topView(TreeNode* root) {
+        vector<int> ans;
+        if (!root) return ans;
+        map<int, int> topNodeMap; // hd -> node->val
+        queue<pair<TreeNode*, int>> q; // {node, hd}
+        q.push({root, 0});
+
+        while (!q.empty()) {
+            auto [node, hd] = q.front();
+            q.pop();
+            if (topNodeMap.find(hd) == topNodeMap.end()) {
+                topNodeMap[hd] = node->val;
+            }
+            if (node->left) q.push({node->left, hd - 1});
+            if (node->right) q.push({node->right, hd + 1});
+        }
+
+        for (auto& [hd, val] : topNodeMap) {
+            ans.push_back(val);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Return the values of nodes visible when looking at the tree from top to bottom.
+    // - Approach: BFS Level Order Traversal with Horizontal Distance (HD) mapping.
+    // - Intuition: Root is HD=0; left child HD-1, right child HD+1. Level-order ensures the first node encountered at each HD is the topmost node.
+    // - Complexity: Time: O(N log N) with ordered map (or O(N) with min/max HD tracking), Space: O(N) for queue and map.
+
+
+    // =========================================================
+    // 29. BOTTOM VIEW OF BINARY TREE
+    // =========================================================
+
+    vector<int> bottomView(TreeNode* root) {
+        vector<int> ans;
+        if (!root) return ans;
+        map<int, int> bottomNodeMap; // hd -> node->val
+        queue<pair<TreeNode*, int>> q; // {node, hd}
+        q.push({root, 0});
+
+        while (!q.empty()) {
+            auto [node, hd] = q.front();
+            q.pop();
+            bottomNodeMap[hd] = node->val; // overwrite with lowest level node at horizontal distance
+            if (node->left) q.push({node->left, hd - 1});
+            if (node->right) q.push({node->right, hd + 1});
+        }
+
+        for (auto& [hd, val] : bottomNodeMap) {
+            ans.push_back(val);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Return the values of nodes visible when looking at the tree from bottom to top.
+    // - Approach: BFS Level Order Traversal continuously overwriting Horizontal Distance (HD) entries.
+    // - Intuition: Overwriting map entry at each HD ensures the node processed in the deepest level remains as the bottom-most visible value.
+    // - Complexity: Time: O(N log N), Space: O(N) for queue and coordinate map.
+
+
+    // =========================================================
+    // 30. PREORDER, INORDER, AND POSTORDER IN ONE TRAVERSAL
+    // =========================================================
+
+    void allThreeTraversals(TreeNode* root, vector<int>& pre, vector<int>& in, vector<int>& post) {
+        if (!root) return;
+        stack<pair<TreeNode*, int>> st; // {node, visitState: 1=pre, 2=in, 3=post}
+        st.push({root, 1});
+
+        while (!st.empty()) {
+            auto& [node, state] = st.top();
+            if (state == 1) {
+                pre.push_back(node->val);
+                state++;
+                if (node->left) st.push({node->left, 1});
+            } else if (state == 2) {
+                in.push_back(node->val);
+                state++;
+                if (node->right) st.push({node->right, 1});
+            } else {
+                post.push_back(node->val);
+                st.pop();
+            }
+        }
+    }
+    // Interview Explanation:
+    // - Problem Statement: Compute Preorder, Inorder, and Postorder traversals of a binary tree in a single pass.
+    // - Approach: Stack-based state machine tracking visit counts per node (1, 2, 3).
+    // - Intuition: State 1 records Preorder and descends Left; State 2 records Inorder and descends Right; State 3 records Postorder and pops.
+    // - Complexity: Time: O(N) each node visited 3 times, Space: O(H) stack frames.
+
+
+    // =========================================================
+    // 31. BOUNDARY TRAVERSAL OF BINARY TREE
+    // =========================================================
+
+    bool isLeaf(TreeNode* node) {
+        return !node->left && !node->right;
+    }
+
+    void addLeftBoundary(TreeNode* root, vector<int>& res) {
+        TreeNode* curr = root->left;
+        while (curr) {
+            if (!isLeaf(curr)) res.push_back(curr->val);
+            if (curr->left) curr = curr->left;
+            else curr = curr->right;
+        }
+    }
+
+    void addLeaves(TreeNode* root, vector<int>& res) {
+        if (isLeaf(root)) {
+            res.push_back(root->val);
+            return;
+        }
+        if (root->left) addLeaves(root->left, res);
+        if (root->right) addLeaves(root->right, res);
+    }
+
+    void addRightBoundary(TreeNode* root, vector<int>& res) {
+        TreeNode* curr = root->right;
+        vector<int> tmp;
+        while (curr) {
+            if (!isLeaf(curr)) tmp.push_back(curr->val);
+            if (curr->right) curr = curr->right;
+            else curr = curr->left;
+        }
+        for (int i = (int)tmp.size() - 1; i >= 0; --i) {
+            res.push_back(tmp[i]);
+        }
+    }
+
+    vector<int> boundaryTraversal(TreeNode* root) {
+        vector<int> res;
+        if (!root) return res;
+        if (!isLeaf(root)) res.push_back(root->val);
+        addLeftBoundary(root, res);
+        addLeaves(root, res);
+        addRightBoundary(root, res);
+        return res;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Return boundary nodes of a binary tree in anti-clockwise direction starting from root.
+    // - Approach: Decomposition into Root -> Left Boundary -> All Leaf Nodes -> Reversed Right Boundary.
+    // - Intuition: Exclude leaves during boundary walks to avoid double counting; reverse right boundary to ensure anti-clockwise order.
+    // - Complexity: Time: O(N) visiting each node at most twice, Space: O(H) auxiliary recursion/buffer space.
+
+
+    // =========================================================
+    // 32. MAXIMUM WIDTH OF BINARY TREE
+    // =========================================================
+
+    int widthOfBinaryTree(TreeNode* root) {
+        if (!root) return 0;
+        long long maxWidth = 0;
+        queue<pair<TreeNode*, unsigned long long>> q; // {node, index}
+        q.push({root, 0});
+
+        while (!q.empty()) {
+            int size = q.size();
+            unsigned long long minIdx = q.front().second;
+            unsigned long long first = 0, last = 0;
+
+            for (int i = 0; i < size; ++i) {
+                unsigned long long currIdx = q.front().second - minIdx; // normalize to prevent 64-bit overflow
+                TreeNode* node = q.front().first;
+                q.pop();
+
+                if (i == 0) first = currIdx;
+                if (i == size - 1) last = currIdx;
+
+                if (node->left) q.push({node->left, 2 * currIdx + 1});
+                if (node->right) q.push({node->right, 2 * currIdx + 2});
+            }
+            maxWidth = max(maxWidth, (long long)(last - first + 1));
+        }
+        return (int)maxWidth;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum width among all levels where width is defined as distance between leftmost and rightmost non-null nodes.
+    // - Approach: BFS Level Order Traversal with normalized binary heap indexing.
+    // - Intuition: Level indexing gives left child = 2*i + 1, right child = 2*i + 2. Subtracting first index of each level resets base and prevents integer overflow on skewed deep trees.
+    // - Complexity: Time: O(N) one pass BFS, Space: O(W) queue space.
+
+
+    // =========================================================
+    // 33. CHILDREN SUM PROPERTY IN BINARY TREE
+    // =========================================================
+
+    void reorderChildrenSum(TreeNode* root) {
+        if (!root) return;
+        int childSum = 0;
+        if (root->left) childSum += root->left->val;
+        if (root->right) childSum += root->right->val;
+
+        if (childSum >= root->val) {
+            root->val = childSum;
+        } else {
+            if (root->left) root->left->val = root->val;
+            if (root->right) root->right->val = root->val;
+        }
+
+        reorderChildrenSum(root->left);
+        reorderChildrenSum(root->right);
+
+        int total = 0;
+        if (root->left) total += root->left->val;
+        if (root->right) total += root->right->val;
+        if (root->left || root->right) root->val = total;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Modify binary tree node values such that every node equals the sum of its left and right children values.
+    // - Approach: Top-down value propagation + Bottom-up sum consolidation DFS.
+    // - Intuition: Increase children to parent's value on descent to guarantee sufficient child values; on backtrack, set parent = sum(children).
+    // - Complexity: Time: O(N) single postorder traversal, Space: O(H) recursion stack.
+
+
+    // =========================================================
+    // 34. CONSTRUCT BINARY TREE FROM POSTORDER AND INORDER TRAVERSAL
+    // =========================================================
+
+    TreeNode* buildTreePostInHelper(const vector<int>& inorder, int inStart, int inEnd,
+                                    const vector<int>& postorder, int postStart, int postEnd,
+                                    unordered_map<int, int>& inMap) {
+        if (inStart > inEnd || postStart > postEnd) return nullptr;
+
+        TreeNode* root = new TreeNode(postorder[postEnd]);
+        int inRoot = inMap[root->val];
+        int numsLeft = inRoot - inStart;
+
+        root->left = buildTreePostInHelper(inorder, inStart, inRoot - 1,
+                                           postorder, postStart, postStart + numsLeft - 1, inMap);
+        root->right = buildTreePostInHelper(inorder, inRoot + 1, inEnd,
+                                            postorder, postStart + numsLeft, postEnd - 1, inMap);
+        return root;
+    }
+
+    TreeNode* buildTreePostIn(vector<int>& inorder, vector<int>& postorder) {
+        unordered_map<int, int> inMap;
+        for (int i = 0; i < (int)inorder.size(); ++i) inMap[inorder[i]] = i;
+        return buildTreePostInHelper(inorder, 0, (int)inorder.size() - 1,
+                                     postorder, 0, (int)postorder.size() - 1, inMap);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Reconstruct unique binary tree from Inorder and Postorder traversal arrays.
+    // - Approach: Divide & Conquer with Hash Map index lookup.
+    // - Intuition: Last element of Postorder is root; hash map splits Inorder into left and right subtree segments.
+    // - Complexity: Time: O(N) with O(1) hash map partition lookups, Space: O(N) map and recursion stack.
+
+
+    // =========================================================
+    // 35. FLATTEN BINARY TREE TO LINKED LIST
+    // =========================================================
+
+    void flatten(TreeNode* root) {
+        TreeNode* curr = root;
+        while (curr) {
+            if (curr->left) {
+                TreeNode* prev = curr->left;
+                while (prev->right) prev = prev->right;
+                prev->right = curr->right;
+                curr->right = curr->left;
+                curr->left = nullptr;
+            }
+            curr = curr->right;
+        }
+    }
+    // Interview Explanation:
+    // - Problem Statement: Flatten binary tree into linked list in-place according to Preorder traversal.
+    // - Approach: Morris In-Place Threading (O(1) Space).
+    // - Intuition: Attach current root's right subtree to the rightmost node of its left subtree, then shift left subtree to right.
+    // - Complexity: Time: O(N), Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 36. POPULATING NEXT RIGHT POINTERS IN EACH NODE
+    // =========================================================
+
+    struct NodeWithNext {
+        int val;
+        NodeWithNext *left, *right, *next;
+        NodeWithNext(int x) : val(x), left(nullptr), right(nullptr), next(nullptr) {}
+    };
+
+    NodeWithNext* connect(NodeWithNext* root) {
+        if (!root) return nullptr;
+        NodeWithNext* leftmost = root;
+        while (leftmost->left) {
+            NodeWithNext* curr = leftmost;
+            while (curr) {
+                curr->left->next = curr->right;
+                if (curr->next) curr->right->next = curr->next->left;
+                curr = curr->next;
+            }
+            leftmost = leftmost->left;
+        }
+        return root;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Populate each next pointer to point to its next right node in a perfect binary tree.
+    // - Approach: O(1) Space Level Traversals using already established  pointers of parent level.
+    // - Intuition: Connect siblings directly () and cousins across parents ().
+    // - Complexity: Time: O(N) visiting each node once, Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 37. INORDER SUCCESSOR AND PREDECESSOR IN BST
+    // =========================================================
+
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        TreeNode* successor = nullptr;
+        while (root) {
+            if (p->val >= root->val) {
+                root = root->right;
+            } else {
+                successor = root;
+                root = root->left;
+            }
+        }
+        return successor;
+    }
+
+    TreeNode* inorderPredecessor(TreeNode* root, TreeNode* p) {
+        TreeNode* predecessor = nullptr;
+        while (root) {
+            if (p->val <= root->val) {
+                root = root->left;
+            } else {
+                predecessor = root;
+                root = root->right;
+            }
+        }
+        return predecessor;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find inorder successor and predecessor of a given node in a BST in O(H) time without parent pointers.
+    // - Approach: Binary Search Tree Property Navigation.
+    // - Intuition: Successor is smallest node greater than p (descend left and record candidate); Predecessor is largest node smaller than p (descend right and record candidate).
+    // - Complexity: Time: O(H), Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 38. FLOOR AND CEIL IN BST
+    // =========================================================
+
+    int floorInBST(TreeNode* root, int key) {
+        int floorVal = -1;
+        while (root) {
+            if (root->val == key) return root->val;
+            if (key > root->val) {
+                floorVal = root->val; // candidate floor
+                root = root->right;
+            } else {
+                root = root->left;
+            }
+        }
+        return floorVal;
+    }
+
+    int ceilInBST(TreeNode* root, int key) {
+        int ceilVal = -1;
+        while (root) {
+            if (root->val == key) return root->val;
+            if (key < root->val) {
+                ceilVal = root->val; // candidate ceil
+                root = root->left;
+            } else {
+                root = root->right;
+            }
+        }
+        return ceilVal;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find Floor (largest value <= key) and Ceil (smallest value >= key) in a BST.
+    // - Approach: Iterative BST Descent.
+    // - Intuition: When going right for Floor or left for Ceil, record current root as best candidate so far.
+    // - Complexity: Time: O(H), Space: O(1) auxiliary space.
+
+
+    // =========================================================
+    // 39. TWO SUM IN BST / PAIR WITH SUM K
+    // =========================================================
+
+    class BSTIteratorTwoSum {
+        stack<TreeNode*> st;
+        bool reverse; // false -> normal inorder (asc), true -> reverse inorder (desc)
+        void pushAll(TreeNode* node) {
+            while (node) {
+                st.push(node);
+                node = reverse ? node->right : node->left;
+            }
+        }
+    public:
+        BSTIteratorTwoSum(TreeNode* root, bool isReverse) : reverse(isReverse) {
+            pushAll(root);
+        }
+        int next() {
+            TreeNode* tmp = st.top(); st.pop();
+            if (!reverse) pushAll(tmp->right);
+            else pushAll(tmp->left);
+            return tmp->val;
+        }
+    };
+
+    bool findTarget(TreeNode* root, int k) {
+        if (!root) return false;
+        BSTIteratorTwoSum l(root, false);
+        BSTIteratorTwoSum r(root, true);
+
+        int i = l.next();
+        int j = r.next();
+        while (i < j) {
+            if (i + j == k) return true;
+            if (i + j < k) i = l.next();
+            else j = r.next();
+        }
+        return false;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find if there exist two nodes in BST whose sum equals target K in O(H) space.
+    // - Approach: Two Pointers using Forward and Reverse BST Iterators.
+    // - Intuition: Forward iterator gives smallest ascending values; reverse iterator gives largest descending values. Two-pointer convergence achieves optimal O(H) memory.
+    // - Complexity: Time: O(N) amortized, Space: O(H) stack space.
+
+
+    // =========================================================
+    // 40. BST ITERATOR
+    // =========================================================
+
+    class BSTIterator {
+        stack<TreeNode*> st;
+        void pushAll(TreeNode* node) {
+            while (node) {
+                st.push(node);
+                node = node->left;
+            }
+        }
+    public:
+        BSTIterator(TreeNode* root) {
+            pushAll(root);
+        }
+        int next() {
+            TreeNode* node = st.top(); st.pop();
+            pushAll(node->right);
+            return node->val;
+        }
+        bool hasNext() {
+            return !st.empty();
+        }
+    };
+    // Interview Explanation:
+    // - Problem Statement: Implement an iterator over inorder traversal of a BST with next() and hasNext() in O(1) average time and O(H) space.
+    // - Approach: Controlled Stack Descent pushing left spine.
+    // - Intuition: Top of stack is next smallest element; popping it requires descending along the left spine of its right child.
+    // - Complexity: Time: O(1) amortized per next(), Space: O(H) stack depth.
+
+
+    // =========================================================
+    // 41. SIZE OF LARGEST BST IN BINARY TREE
+    // =========================================================
+
+    struct BSTNodeInfo {
+        bool isBST;
+        int size;
+        int minVal;
+        int maxVal;
+    };
+
+    BSTNodeInfo largestBSTHelper(TreeNode* root, int& maxBSTSize) {
+        if (!root) return {true, 0, INT_MAX, INT_MIN};
+
+        auto left = largestBSTHelper(root->left, maxBSTSize);
+        auto right = largestBSTHelper(root->right, maxBSTSize);
+
+        if (left.isBST && right.isBST && root->val > left.maxVal && root->val < right.minVal) {
+            int currSize = 1 + left.size + right.size;
+            maxBSTSize = max(maxBSTSize, currSize);
+            return {true, currSize, min(root->val, left.minVal), max(root->val, right.maxVal)};
+        }
+        return {false, 0, 0, 0};
+    }
+
+    int largestBST(TreeNode* root) {
+        int maxBSTSize = 0;
+        largestBSTHelper(root, maxBSTSize);
+        return maxBSTSize;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find the size (number of nodes) of the largest subtree that is a valid Binary Search Tree (BST).
+    // - Approach: Bottom-up Postorder DFS returning {isBST, size, minVal, maxVal} tuple.
+    // - Intuition: Subtree is BST if both left and right subtrees are valid BSTs and .
+    // - Complexity: Time: O(N) single pass postorder, Space: O(H) recursion stack.
+
+
+    // =========================================================
+    // 42. MINIMUM TIME TAKEN TO BURN THE BINARY TREE FROM A GIVEN NODE
+    // =========================================================
+
+    TreeNode* mapParentsAndFindTarget(TreeNode* root, unordered_map<TreeNode*, TreeNode*>& parentTrack, int startVal) {
+        queue<TreeNode*> q;
+        q.push(root);
+        TreeNode* targetNode = nullptr;
+
+        while (!q.empty()) {
+            TreeNode* curr = q.front(); q.pop();
+            if (curr->val == startVal) targetNode = curr;
+            if (curr->left) {
+                parentTrack[curr->left] = curr;
+                q.push(curr->left);
+            }
+            if (curr->right) {
+                parentTrack[curr->right] = curr;
+                q.push(curr->right);
+            }
+        }
+        return targetNode;
+    }
+
+    int minTimeToBurnTree(TreeNode* root, int startVal) {
+        unordered_map<TreeNode*, TreeNode*> parentTrack;
+        TreeNode* target = mapParentsAndFindTarget(root, parentTrack, startVal);
+        if (!target) return 0;
+
+        unordered_map<TreeNode*, bool> visited;
+        queue<TreeNode*> q;
+        q.push(target);
+        visited[target] = true;
+        int time = 0;
+
+        while (!q.empty()) {
+            int sz = q.size();
+            bool burnedAny = false;
+
+            for (int i = 0; i < sz; i++) {
+                TreeNode* curr = q.front(); q.pop();
+
+                if (curr->left && !visited[curr->left]) {
+                    visited[curr->left] = true;
+                    q.push(curr->left);
+                    burnedAny = true;
+                }
+                if (curr->right && !visited[curr->right]) {
+                    visited[curr->right] = true;
+                    q.push(curr->right);
+                    burnedAny = true;
+                }
+                if (parentTrack.count(curr) && !visited[parentTrack[curr]]) {
+                    visited[parentTrack[curr]] = true;
+                    q.push(parentTrack[curr]);
+                    burnedAny = true;
+                }
+            }
+            if (burnedAny) time++;
+        }
+        return time;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum time to burn the entire binary tree given starting infection node.
+    // - Approach: Parent pointer map construction + Multi-directional BFS spreading left, right, parent.
+    // - Intuition: Tree becomes an undirected graph. BFS level by level from the target node tracks radial burn time step by step.
+    // - Complexity: Time: O(N) two linear passes, Space: O(N) for parent map and visited tracking.
+
+
+    // =========================================================
+    // 43. DELETE A NODE IN BST
+    // =========================================================
+
+    TreeNode* findMinBST(TreeNode* root) {
+        while (root->left) root = root->left;
+        return root;
+    }
+
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if (!root) return nullptr;
+
+        if (key < root->val) {
+            root->left = deleteNode(root->left, key);
+        } else if (key > root->val) {
+            root->right = deleteNode(root->right, key);
+        } else {
+            // Case 1 & 2: 0 or 1 child
+            if (!root->left) {
+                TreeNode* temp = root->right;
+                delete root;
+                return temp;
+            } else if (!root->right) {
+                TreeNode* temp = root->left;
+                delete root;
+                return temp;
+            }
+            // Case 3: 2 children - replace with inorder successor (min of right subtree)
+            TreeNode* successor = findMinBST(root->right);
+            root->val = successor->val;
+            root->right = deleteNode(root->right, successor->val);
+        }
+        return root;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Delete a key from a Binary Search Tree while preserving BST invariant.
+    // - Approach: Recursive Search & Replace with Inorder Successor.
+    // - Intuition: Node with two children is replaced with its inorder successor (minimum element in right subtree), then the successor node is recursively deleted from right subtree.
+    // - Complexity: Time: O(H) search and splice, Space: O(H) recursion stack.
 };
 
 /*

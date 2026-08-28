@@ -1,5 +1,29 @@
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
+
 
 using ll = long long;
 using pii = pair<int, int>;
@@ -1190,7 +1214,7 @@ int longestValidParentheses(string s) {
 // - Intuition: Push index on '('; on ')', pop match and record length `i - stack.top()`; if stack becomes empty, push `i` as new base boundary.
 // - Complexity: Time: O(N) single pass, Space: O(N) auxiliary space for stack.
 
-class Solution {
+class WildcardMatching {
 public:
     bool helper(string &s, string &p, int i, int j, vector<vector<int>> &dp) {
         // Base cases
@@ -1234,7 +1258,7 @@ public:
 // - Complexity: Time: O(M \cdot N) distinct subproblems, Space: O(M \cdot N) for memoization table and call stack.
 
 
-class Solution {
+class RegularExpressionMatching {
     vector<vector<int>> dp;
     string s, p;
 
@@ -1272,7 +1296,7 @@ public:
 
 // diff between wildcard and regex problem is that wildcard uses '?' and '*' for matching, while regex uses '.' and '*' for matching. * in wildcard means any sequence of characters, while * in regex means zero or more of the preceding element.
 
-class Solution {
+class GasStationCircuit {
 public:
     int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
         int total = 0; // stores the total net gain/loss of gas after completing the circuit

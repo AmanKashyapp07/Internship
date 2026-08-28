@@ -1,5 +1,29 @@
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
+
 
 using ll = long long;
 using pii = pair<int, int>;
@@ -237,51 +261,36 @@ public:
 // - Complexity: Time: O(N^2 * L) where N = s.length() and L is substring hashing time, Space: O(N + D) for DP table and word set.
 
 class Stack {
-    private int[] arr;
-    private int top;
-    private int capacity;
+private:
+    vector<int> arr;
+    int topIndex;
+    int capacity;
+public:
+    Stack(int cap) : capacity(cap), topIndex(-1), arr(cap) {}
 
-    Stack(int capacity) {
-        this.capacity = capacity;
-        arr = new int[capacity];
-        top = -1;
-    }
-
-    // Add element
     void push(int x) {
-        if (top == capacity - 1) {
-            throw new RuntimeException("Stack Overflow");
-        }
-
-        arr[++top] = x;
+        if (topIndex == capacity - 1) throw runtime_error("Stack Overflow");
+        arr[++topIndex] = x;
     }
 
-    // Remove and return top element
     int pop() {
-        if (top == -1) {
-            throw new RuntimeException("Stack Underflow");
-        }
-
-        return arr[top--];
+        if (topIndex == -1) throw runtime_error("Stack Underflow");
+        return arr[topIndex--];
     }
 
-    // Return top without removing
     int peek() {
-        if (top == -1) {
-            throw new RuntimeException("Stack is Empty");
-        }
-
-        return arr[top];
+        if (topIndex == -1) throw runtime_error("Stack is Empty");
+        return arr[topIndex];
     }
 
-    boolean isEmpty() {
-        return top == -1;
+    bool isEmpty() {
+        return topIndex == -1;
     }
 
     int size() {
-        return top + 1;
+        return topIndex + 1;
     }
-}
+};
 
 // Interview Explanation:
 // - Problem Statement: Implement a stack with basic operations (push, pop, peek, isEmpty, size).
