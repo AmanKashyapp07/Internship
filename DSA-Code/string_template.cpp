@@ -8,8 +8,31 @@
  * Palindromic Decompositions, Distinct Subsequences DP, and Multi-Pattern String Segmentation.
  */
 
+#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
+#else
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <numeric>
+#include <climits>
+#include <cassert>
+#include <utility>
+#include <sstream>
+#include <bitset>
+#include <functional>
+#endif
 using namespace std;
+
 
 using ll = long long;
 using pii = pair<int, int>;

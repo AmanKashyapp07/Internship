@@ -23,76 +23,48 @@ using namespace std;
  * Space Complexity: O(N) where N is number of elements
  */
 
-
 // ============================================================================
 // 2. DYNAMIC RESIZING ARRAY STACK (Auto-doubles capacity)
 // ============================================================================
 class DynamicArrayStack {
 private:
     int* arr;
-    int capacity;
-    int topIndex;
+    int capacity, topIndex;
 
     void resize(int newCap) {
         int* newArr = new int[newCap];
-        for (int i = 0; i <= topIndex; i++) {
-            newArr[i] = arr[i];
-        }
+        for (int i = 0; i <= topIndex; i++) newArr[i] = arr[i];
         delete[] arr;
         arr = newArr;
         capacity = newCap;
     }
 
 public:
-    DynamicArrayStack(int initialCap = 2) {
-        capacity = initialCap;
+    DynamicArrayStack(int initialCap = 2) : capacity(initialCap), topIndex(-1) {
         arr = new int[capacity];
-        topIndex = -1;
     }
-
-    ~DynamicArrayStack() {
-        delete[] arr;
-    }
+    ~DynamicArrayStack() { delete[] arr; }
 
     // Amortized O(1) push with capacity doubling
     void push(int val) {
-        if (topIndex == capacity - 1) {
-            resize(capacity * 2); // Double capacity when full
-        }
+        if (topIndex == capacity - 1) resize(capacity * 2);
         arr[++topIndex] = val;
     }
 
     // O(1) pop with optional shrink when 1/4 full to save memory
     bool pop() {
-        if (isEmpty()) {
-            cout << "[DynamicStack Error] Stack Underflow!\n";
-            return false;
-        }
+        if (isEmpty()) { cout << "[DynamicStack Error] Stack Underflow!\n"; return false; }
         topIndex--;
-        // Shrink capacity by half if elements occupy 1/4 of array (minimum cap = 2)
-        if (topIndex >= 0 && topIndex + 1 == capacity / 4 && capacity / 2 >= 2) {
-            resize(capacity / 2);
-        }
+        if (topIndex >= 0 && topIndex + 1 == capacity / 4 && capacity / 2 >= 2) resize(capacity / 2);
         return true;
     }
 
     int top() const {
-        if (isEmpty()) {
-            throw runtime_error("[DynamicStack Error] Stack is empty!");
-        }
+        if (isEmpty()) throw runtime_error("[DynamicStack Error] Stack is empty!");
         return arr[topIndex];
     }
 
-    bool isEmpty() const {
-        return topIndex == -1;
-    }
-
-    int size() const {
-        return topIndex + 1;
-    }
-
-    int getCapacity() const {
-        return capacity;
-    }
+    bool isEmpty() const { return topIndex == -1; }
+    int size() const { return topIndex + 1; }
+    int getCapacity() const { return capacity; }
 };
-

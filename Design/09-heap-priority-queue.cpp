@@ -35,19 +35,16 @@ template <typename T, typename Compare = std::less<T>>
 class PriorityQueue {
 private:
     vector<T> heap;
-    Compare comp; // By default std::less<T> creates a Min-Heap (comp(a, b) is true if a < b)
+    Compare comp;
 
     // Helper: Sift up element at index i: O(log N)
     void siftUp(size_t i) {
         while (i > 0) {
             size_t parent = (i - 1) / 2;
-            // If child has higher priority than parent, swap
             if (comp(heap[i], heap[parent])) {
                 swap(heap[i], heap[parent]);
                 i = parent;
-            } else {
-                break;
-            }
+            } else break;
         }
     }
 
@@ -55,38 +52,24 @@ private:
     void siftDown(size_t i) {
         size_t n = heap.size();
         while (true) {
-            size_t left = 2 * i + 1;
-            size_t right = 2 * i + 2;
-            size_t best = i;
-
-            if (left < n && comp(heap[left], heap[best])) {
-                best = left;
-            }
-            if (right < n && comp(heap[right], heap[best])) {
-                best = right;
-            }
-
+            size_t left = 2 * i + 1, right = 2 * i + 2, best = i;
+            if (left < n && comp(heap[left], heap[best])) best = left;
+            if (right < n && comp(heap[right], heap[best])) best = right;
             if (best != i) {
                 swap(heap[i], heap[best]);
-                i = best; // Continue sifting down
-            } else {
-                break;
-            }
+                i = best;
+            } else break;
         }
     }
 
 public:
-    // Default Constructor
     PriorityQueue(const Compare& comparator = Compare()) : comp(comparator) {}
 
     // Constructor: O(N) Linear-Time Build Heap from raw vector
     PriorityQueue(const vector<T>& items, const Compare& comparator = Compare())
         : heap(items), comp(comparator) {
         if (heap.empty()) return;
-        // Start from last non-leaf node: (N / 2) - 1 down to index 0
-        for (int i = (int)(heap.size() / 2) - 1; i >= 0; i--) {
-            siftDown(i);
-        }
+        for (int i = (int)(heap.size() / 2) - 1; i >= 0; i--) siftDown(i);
     }
 
     // Insert new element: O(log N)
@@ -97,36 +80,21 @@ public:
 
     // Remove top priority element: O(log N)
     void pop() {
-        if (empty()) {
-            throw runtime_error("[PriorityQueue Error] Cannot pop from empty heap!");
-        }
-        // Swap root with the last leaf element
+        if (empty()) throw runtime_error("[PriorityQueue Error] Cannot pop from empty heap!");
         heap[0] = std::move(heap.back());
         heap.pop_back();
-        if (!heap.empty()) {
-            siftDown(0);
-        }
+        if (!heap.empty()) siftDown(0);
     }
 
     // Access top priority element: O(1)
     const T& top() const {
-        if (empty()) {
-            throw runtime_error("[PriorityQueue Error] Heap is empty!");
-        }
+        if (empty()) throw runtime_error("[PriorityQueue Error] Heap is empty!");
         return heap[0];
     }
 
-    size_t size() const {
-        return heap.size();
-    }
-
-    bool empty() const {
-        return heap.empty();
-    }
-
-    void clear() {
-        heap.clear();
-    }
+    size_t size() const { return heap.size(); }
+    bool empty() const { return heap.empty(); }
+    void clear() { heap.clear(); }
 };
 
 // Convenient Type Aliases:

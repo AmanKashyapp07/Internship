@@ -43,47 +43,30 @@ public:
     // Push: O(1)
     void push(int val) {
         mainStack.push(val);
-        // Push to minStack if empty or if val <= current minimum
-        if (minStack.empty() || val <= minStack.top()) {
-            minStack.push(val);
-        }
+        if (minStack.empty() || val <= minStack.top()) minStack.push(val);
     }
 
     // Pop: O(1)
     void pop() {
-        if (mainStack.empty()) {
-            throw runtime_error("[MinStack Error] Stack is empty!");
-        }
-        // If popped element was the minimum, pop from minStack as well
-        if (mainStack.top() == minStack.top()) {
-            minStack.pop();
-        }
+        if (mainStack.empty()) throw runtime_error("[MinStack Error] Stack is empty!");
+        if (mainStack.top() == minStack.top()) minStack.pop();
         mainStack.pop();
     }
 
     // Top: O(1)
     int top() const {
-        if (mainStack.empty()) {
-            throw runtime_error("[MinStack Error] Stack is empty!");
-        }
+        if (mainStack.empty()) throw runtime_error("[MinStack Error] Stack is empty!");
         return mainStack.top();
     }
 
     // GetMin: O(1)
     int getMin() const {
-        if (minStack.empty()) {
-            throw runtime_error("[MinStack Error] Stack is empty!");
-        }
+        if (minStack.empty()) throw runtime_error("[MinStack Error] Stack is empty!");
         return minStack.top();
     }
 
-    bool empty() const {
-        return mainStack.empty();
-    }
-
-    int size() const {
-        return mainStack.size();
-    }
+    bool empty() const { return mainStack.empty(); }
+    int size() const { return mainStack.size(); }
 };
 
 // ============================================================================
@@ -91,11 +74,7 @@ public:
 // ============================================================================
 class MinMaxStack {
 private:
-    struct Element {
-        int val;
-        int minSoFar;
-        int maxSoFar;
-    };
+    struct Element { int val, minSoFar, maxSoFar; };
     stack<Element> st;
 
 public:
@@ -125,4 +104,3 @@ public:
         return st.top().maxSoFar;
     }
 };
-
