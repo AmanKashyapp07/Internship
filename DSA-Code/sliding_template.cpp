@@ -30,7 +30,7 @@ using vl = vector<ll>;
 using vvi = vector<vector<int>>;
 using vvl = vector<vector<ll>>;
 
-const ll MOD = 1e9 + 7;
+[[maybe_unused]] const ll MOD = 1e9 + 7;
 
 // =========================================================
 // 1. MAXIMUM SUM SUBARRAY OF SIZE K

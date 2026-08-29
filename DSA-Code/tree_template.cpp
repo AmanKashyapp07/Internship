@@ -628,7 +628,7 @@ public:
     TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
         inorderIndex.clear();
         preIndex = 0;
-        for (int i = 0; i < inorder.size(); i++) inorderIndex[inorder[i]] = i;
+        for (int i = 0; i < (int)inorder.size(); i++) inorderIndex[inorder[i]] = i;
         return build(preorder, 0, inorder.size() - 1);
     }
     // Interview Explanation:

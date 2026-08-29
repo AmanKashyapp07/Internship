@@ -260,7 +260,7 @@ public:
                 if (--indegree[neighbor] == 0) q.push(neighbor);
             }
         }
-        return order.size() == n ? order : vector<int>{};
+        return (int)order.size() == n ? order : vector<int>{};
     }
     // Interview Explanation:
     // - Problem Statement: Find a topological ordering of vertices in a Directed Acyclic Graph (DAG) using BFS.
@@ -685,7 +685,7 @@ public:
                 string word = q.front(); q.pop();
                 if (word == endWord) return level;
 
-                for (int i = 0; i < word.size(); i++) {
+                for (int i = 0; i < (int)word.size(); i++) {
                     char original = word[i];
                     for (char c = 'a'; c <= 'z'; c++) {
                         word[i] = c;
