@@ -33,6 +33,40 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Binary Exponentiation (Modular Power)       | Bitwise Repeated Squaring         | O(log B) | O(1)     |
+ | 2  | Modular Multiplicative Inverse              | Fermat's Little Theorem (MOD - 2) | O(log MOD| O(1)     |
+ | 3  | Factorials & Combinatorics (nCr, nPr)       | Factorial & Inverse Fac Arrays    | O(N)+O(1)| O(N)     |
+ | 4  | Sieve of Eratosthenes                       | Multiples Cross-Off               | O(Nloglog| O(N)     |
+ | 5  | Prime Factorization                         | Trial Division up to sqrt(N)      | O(sqrt N)| O(log N) |
+ | 6  | Prefix XOR (1 to N)                         | Periodicity of 4 in Binary XOR    | O(1)     | O(1)     |
+ | 7  | Sliding Window Maximum & Minimum            | Monotonic Double-Ended Queue (DQ) | O(N)     | O(K)     |
+ | 8  | Max Subarray Sum of Length at Most K        | Prefix Sums + Monotonic Deque     | O(N)     | O(N)     |
+ | 9  | Longest Increasing Subsequence (LIS)        | Patience Sorting (lower_bound)    | O(N logN)| O(N)     |
+ | 10 | Longest Common Subsequence (Reconstruction) | 2D Dynamic Programming Table      | O(N * M) | O(N * M) |
+ | 11 | Interval DP Template                        | DP over Subproblem Lengths        | O(N^3)   | O(N^2)   |
+ | 12 | Subset Enumeration & Sum of All Subsets     | Bitmask Enumeration [0...2^N - 1] | O(N * 2^N| O(N * 2^N|
+ | 13 | Kadane's Max Subarray Sum with Indices      | Running Prefix Sum Reset          | O(N)     | O(1)     |
+ | 14 | Permutation Generation                      | Bitmask Backtracking              | O(N! * N)| O(N! * N)|
+ | 15 | Longest Palindromic Subsequence (LPS)       | Interval DP / LCS with Reverse    | O(N^2)   | O(N^2)   |
+ | 16 | Check Subsequence                           | Greedy Two-Pointer Linear Scan    | O(|S|)   | O(1)     |
+ | 17 | Precompute Palindromic Subarrays Table      | 2D Interval DP over Lengths       | O(N^2)   | O(N^2)   |
+ | 18 | Booth's Algorithm (Min String Rotation)     | Two-Pointer Mismatch on (S + S)   | O(N)     | O(N)     |
+ | 19 | Minimum Excluded Value (MEX)                | Hash Set Presence Lookup          | O(N)     | O(N)     |
+ | 20 | Inversion Count (a[i] > x * a[j])           | Divide & Conquer Merge Sort Count | O(N logN)| O(N)     |
+ | 21 | Matrix Multiplication & Exponentiation      | Binary Exponentiation on Matrices | O(N^3logB| O(N^2)   |
+ | 22 | N-th Fibonacci (Matrix Exponentiation)      | [[1, 1], [1, 0]] Matrix Power     | O(log N) | O(1)     |
+ | 23 | Total Area Covered by Two 2D Rectangles    | Inclusion-Exclusion Geometry      | O(1)     | O(1)     |
+ | 24 | Balanced Parentheses Count (Catalan Number) | Catalan Number Formula C_n        | O(N)     | O(N)     |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. BINARY EXPONENTIATION (MODULAR POWER)
 // =========================================================
@@ -700,31 +734,3 @@ ll countOfBalancedParentheses(int len) {
 // - Approach: Catalan Number formula C_n = (1 / (n + 1)) * (2n choose n) where n = LEN / 2.
 // - Intuition: A balanced string of length 2n corresponds to a Dyck path that never crosses below the diagonal, enumerated by the n-th Catalan number.
 // - Complexity: Time: O(N) precomputing factorials, Space: O(N) for combinatorics arrays.
-
-/*
- ====================================================================================================
-             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: MATH, STRINGS & DATA STRUCTURES
- ====================================================================================================
-
- 1. PATTERN IDENTIFICATION MATRIX:
-    | Problem Type / Clue                         | Technique / Data Structure          | Core Formula / Transition             |
-    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
-    | Modular Division / Inverse                  | Fermat's Little Theorem             | inv(x) = power(x, MOD - 2)            |
-    | Combinations / Permutations in O(1)         | Factorial & Inverse Factorial arrays| nCr = fac[n] * ifac[r] * ifac[n-r]    |
-    | Prime check / Primes up to N                | Sieve of Eratosthenes               | Cross off multiples starting at i * i  |
-    | Sliding Window Max / Min in O(1) amortized  | Monotonic Deque                     | Pop worse elements from back           |
-    | Longest Increasing Subsequence (LIS)        | Patience Sorting (lower_bound)      | O(N log N) tails array                |
-    | Linear Recurrence of order K (N <= 10^18)   | Matrix Exponentiation               | Transition matrix ^ (N - K)           |
-    | Count inversions / Reverse pairs            | Merge Sort Divide & Conquer         | Cross count during merge step          |
-    | Smallest Cyclic Shift of String             | Booth's Algorithm on s + s          | Two pointers with mismatch skipping   |
-    | Catalan Numbers (Dyck paths, BST count)     | (2n)! / ((n+1)! * n!)               | nCr(2n, n) * inv(n + 1)               |
-    | Cumulative XOR from 1 to N                  | Periodicity of 4                    | n%4 == 0: n, 1: 1, 2: n+1, 3: 0       |
-
- 2. TOP LIVE INTERVIEW & OA GOTCHAS:
-    • Modular Inverse condition: `MOD` MUST be prime for Fermat's Little Theorem (`x^(MOD-2)`). If not prime, use Extended Euclidean.
-    • Multiplication Overflow: Always cast to 64-bit (`1LL * a * b`) before applying `% MOD`.
-    • Inversion Count integer overflow: Inversion count can reach $N(N-1)/2 \approx 5 \times 10^9$; always return `long long`.
-    • Monotonic Deque bounds: Remember to pop front indices when `dq.front() < r - k + 1`.
-    • Matrix Exponentiation Identity: When exponent $B = 0$, the answer is the Identity matrix (diagonal 1s, others 0), not an all-zero matrix.
- ====================================================================================================
-*/

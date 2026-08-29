@@ -42,6 +42,36 @@ using vvl = vector<vector<ll>>;
 const ll MOD = 1e9 + 7;
 const ll P = 31;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Subsets / Power Set (LC 78)                 | Pick / Non-Pick DFS Backtracking  | O(N 2^N) | O(N)     |
+ | 2  | Subsets II with Duplicates (LC 90)          | Sort + Skip Duplicate Branches    | O(N 2^N) | O(N)     |
+ | 3  | Non-Decreasing Subsequences (LC 491)        | Hash Set per Recursion Level      | O(2^N)   | O(N)     |
+ | 4  | Combinations of K numbers (LC 77)           | Bounded Depth Backtracking        | O(C(N, K))| O(K)    |
+ | 5  | Combination Sum I (LC 39)                   | Unbounded Element Reuse Backtrack | O(2^T)   | O(T/min) |
+ | 6  | Combination Sum II (LC 40)                  | Sort + Single-Use Duplicate Skip  | O(2^N)   | O(N)     |
+ | 7  | Combination Sum III (LC 216)                | Digits 1..9 Backtracking (K nums) | O(C(9, K))| O(K)    |
+ | 8  | Permutations of Array (LC 46)               | In-Place Element Swapping DFS     | O(N! * N)| O(N)     |
+ | 9  | Permutations II with Duplicates (LC 47)     | Hash Set Swaps per Level DFS      | O(N! * N)| O(N)     |
+ | 10 | K-th Permutation Sequence (LC 60)           | Factorial Number System (Lehmer)  | O(N^2)   | O(N)     |
+ | 11 | Palindrome Partitioning (LC 131)            | 2D DP Table + DFS Backtracking    | O(N 2^N) | O(N^2)   |
+ | 12 | Word Break II (LC 140)                      | Memoized DFS + Trie/Set Lookup    | O(2^N)   | O(2^N)   |
+ | 13 | Rat in a Maze                               | 4-Directional DFS Grid Search      | O(4^(N^2))| O(N^2)   |
+ | 14 | Word Search in 2D Grid (LC 79)              | In-Place Visited Matrix DFS       | O(N*M*4^L)| O(L)    |
+ | 15 | N-Queens Problem (LC 51)                    | Column & Diagonal Bit/Array Masks | O(N!)    | O(N)     |
+ | 16 | Sudoku Solver (LC 37)                       | Row, Col & 3x3 Box Bitmasks       | O(9^(N^2))| O(1)    |
+ | 17 | Next Permutation (LC 31)                    | 3-Step Suffix Inversion Reversal   | O(N)     | O(1)     |
+ | 18 | Restore IP Addresses (LC 93)                | 4-Segment Valid Integer Parsing   | O(1)     | O(1)     |
+ | 19 | Subset Sums (GFG)                           | Binary Choice Tree Recursion      | O(2^N log)| O(N)     |
+ | 20 | Graph M-Coloring (GFG)                      | Vertex-by-Vertex Safety DFS       | O(M^N)   | O(N)     |
+ ====================================================================================================
+*/
+
+
 // ====================================================================================================
 // SECTION 1: SUBSETS & SUBSEQUENCES
 // ====================================================================================================

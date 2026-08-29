@@ -42,6 +42,40 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | K-th Largest & Smallest Elements            | Min-Heap / Max-Heap of Size K     | O(N logK)| O(K)     |
+ | 2  | Top K Frequent Elements (LC 347)            | Frequency Map + Min-Heap of Size K| O(N logK)| O(N)     |
+ | 3  | K Closest Points to Origin (LC 973)         | Max-Heap of Size K (Squared Dist) | O(N logK)| O(K)     |
+ | 4  | Find Median from Data Stream (LC 295)       | Two Heaps (Max-Left + Min-Right)  | O(log N) | O(N)     |
+ | 5  | IPO - Maximize Capital (LC 502)             | Min-Heap (Cost) + Max-Heap(Profit)| O(N logN)| O(N)     |
+ | 6  | Minimum Interval for Each Query (LC 1851)   | Offline Sorted Queries + Min-Heap | O(QlogQ) | O(N + Q) |
+ | 7  | Merge K Sorted Arrays                       | Min-Heap K-Way Expansion          | O(N logK)| O(K)     |
+ | 8  | Find K Pairs with Smallest Sums (LC 373)    | Min-Heap Frontier Expansion       | O(K logK)| O(K)     |
+ | 9  | N-th Ugly Number (LC 264)                   | 3-Pointer DP Multiples (2, 3, 5)  | O(N)     | O(N)     |
+ | 10 | Connect Ropes / Sticks (LC 1168)            | Huffman Greedy Min-Heap Reduction | O(N logN)| O(N)     |
+ | 11 | Reorganize String (LC 767)                  | Max-Heap Frequency Interleaving   | O(N logA)| O(A)     |
+ | 12 | Course Schedule III (LC 630)                | Greedy Deadline Sort + Max-Heap   | O(N logN)| O(N)     |
+ | 13 | Merge Overlapping Intervals (LC 56)         | Start-Time Sort + Linear Merge    | O(N logN)| O(N)     |
+ | 14 | Insert Interval (LC 57)                     | 3-Phase Linear Partition & Merge  | O(N)     | O(N)     |
+ | 15 | Minimum Meeting Rooms (LC 253)              | Start-Time Sort + Min-Heap End    | O(N logN)| O(N)     |
+ | 16 | Top K Frequent Words (LC 692)               | Min-Heap + Custom String Comp     | O(N logK)| O(N)     |
+ | 17 | Sliding Window Median (LC 480)              | Two Balanced Multisets            | O(N logK)| O(K)     |
+ | 18 | Meeting Rooms I (LC 252)                    | Start-Time Sort + Overlap Check   | O(N logN)| O(1)     |
+ | 19 | Employee Free Time (LC 759)                 | Interval Flatten + Gap Scanning   | O(N logN)| O(N)     |
+ | 20 | Arrows to Burst Balloons (LC 452)           | Greedy End-Coordinate Sorting     | O(N logN)| O(1)     |
+ | 21 | Maximum Sum Combinations (InterviewBit)     | Max-Heap + Visited Pair Set       | O(K logK)| O(K)     |
+ | 22 | Kth Largest in Stream (LC 703)              | Fixed Size-K Min-Heap Stream      | O(log K) | O(K)     |
+ | 23 | Kth Largest in Array (LC 215 - QuickSelect) | Lomuto Randomized QuickSelect     | O(N) avg | O(1)     |
+ ====================================================================================================
+*/
+
+
+
 // Priority Queue Alias Helpers
 using MaxHeap     = priority_queue<int>;
 using MinHeap     = priority_queue<int, vector<int>, greater<int>>;

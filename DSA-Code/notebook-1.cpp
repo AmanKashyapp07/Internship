@@ -34,6 +34,30 @@ using vvl = vector<vector<ll>>;
 const ll MOD = 1e9 + 7;
 const ll P = 31;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Tree Centroid                               | Subtree Size DFS + Heavy Descent  | O(N)     | O(N)     |
+ | 2  | Polynomial Rolling Hash of a String         | Horner's Polynomial (Base P = 31) | O(|S|)   | O(1)     |
+ | 3  | Substring Polynomial Rolling Hash           | Prefix Hash Array + Power Table   | O(N)+O(1)| O(N)     |
+ | 4  | Disjoint Set Union (DSU / Union-Find)       | Path Compression + Union by Size  | O(alpha) | O(N)     |
+ | 5  | Kruskal's Minimum Spanning Tree (MST)       | Greedy Edge Sorting + DSU         | O(E logE)| O(V + E) |
+ | 6  | Prim's Minimum Spanning Tree (MST)          | Min-Heap Vertex Expansion         | O(E logV)| O(V + E) |
+ | 7  | Kahn's Topological Sort                     | In-Degree 0 FIFO Queue (BFS)      | O(V + E) | O(V + E) |
+ | 8  | Longest Paths & Path Counts on a DAG        | Topological Sort + DP Relaxation  | O(V + E) | O(V + E) |
+ | 9  | Tree Rerooting DP (All-Nodes Distance Sum)  | 2-Pass Tree Rerooting DP          | O(N)     | O(N)     |
+ | 10 | Tree Diameter & Node Eccentricities         | 2-Pass Tree BFS/DFS               | O(N)     | O(N)     |
+ | 11 | Strongly Connected Components (Kosaraju's)  | Forward DFS + Reverse Graph DFS   | O(V + E) | O(V + E) |
+ | 12 | Functional Graph Decomposition & Queries    | Floyd's Cycle + Binary Lifting    | O(N logN)| O(N logN)|
+ | 13 | Tree Isomorphism (Double-Hashing)           | Canonical Subtree Hashing (AHU)   | O(N logN)| O(N)     |
+ | 14 | Tree Centers by Leaf Trimming               | Topological Leaf Peeling (Deg 1)  | O(N)     | O(N)     |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. TREE CENTROID
 // =========================================================
@@ -637,32 +661,3 @@ vi centers(int n, const vvi &g) {
 // - Approach: Topological Leaf Trimming (peeling leaves layer-by-layer).
 // - Intuition: Iteratively prune all degree-1 leaves until 1 or 2 nodes remain; these surviving nodes constitute the tree's topological center(s).
 // - Complexity: Time: O(N) each vertex and edge removed once, Space: O(N) for degree array and leaves queue.
-
-/*
- ====================================================================================================
-             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: ADVANCED TREES & GRAPHS
- ====================================================================================================
-
- 1. PATTERN IDENTIFICATION MATRIX:
-    | Problem Type / Clue                         | Technique / Data Structure          | Core Template / Invariant             |
-    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
-    | Divide & Conquer on Trees / Path queries    | Centroid Decomposition              | Subtree size <= N/2                   |
-    | Sum of Distances / All Roots DP             | Tree Rerooting (2 passes)           | dist[v] = dist[u] - sz[v] + (N-sz[v]) |
-    | Farthest Node / Max Distance in Tree        | Tree Diameter (2 DFS passes)        | Farthest from arbitrary node is endpt |
-    | Center of Tree / Minimum Height Tree Root   | Leaf Trimming (Degree 1 peeling)   | Prune leaves until 1 or 2 nodes remain|
-    | Tree Isomorphism (Are two trees same shape?)| Tree Hashing (Canonical sort)      | Sort child hashes + double hashing    |
-    | Successor Graph / Next pointer (outdeg = 1) | Functional Graph (Cycles + Trees)   | Binary Lifting up[u][k] + Floyd cycle |
-    | Directed Cycles / Condensed Graph           | Kosaraju's SCC (Forward + Reverse)  | Post-order finish on RG yields SCCs   |
-    | Substring Hash in O(1)                      | Polynomial Rolling Hash (Prefix)   | (h[R+1] - h[L]*P^(len)) % MOD         |
-    | Minimum Spanning Tree                       | Kruskal (Sparse) / Prim (Dense)     | Sort edges + DSU / Priority Queue     |
-
- 2. TOP LIVE INTERVIEW & OA GOTCHAS:
-    • Tree Centers: An unweighted tree has either exactly 1 or 2 centers; never 0, never >= 3.
-    • Tree Diameter: 2-DFS trick only works on trees with NON-NEGATIVE edge weights; fails if negative edges exist.
-    • Rolling Hash collisions: Single hash with MOD = 1e9 + 7 has birthday paradox collision risk around N = 10^5;
-      always mention or implement double hashing (MOD1 = 1e9+7, MOD2 = 1e9+9) in competitive environments.
-    • DSU component count: Start with N components; decrement count every time unite() successfully returns true.
-    • Functional Graph component reachability: Node a can reach node b only if comp[a] == comp[b] AND either b is on
-      the cycle or b is an ancestor of a in the tree branch feeding into the cycle.
- ====================================================================================================
-*/

@@ -33,6 +33,43 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Next Greater Element (LC 496)               | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 2  | Next Greater Element II - Circular (LC 503) | Monotonic Stack on Doubled (2N)   | O(N)     | O(N)     |
+ | 3  | Next Smaller Element (NSE)                  | Monotonic Increasing Stack        | O(N)     | O(N)     |
+ | 4  | Previous Greater & Smaller (PGE / PSE)      | Monotonic Stack Traversal         | O(N)     | O(N)     |
+ | 5  | Daily Temperatures (LC 739)                 | Monotonic Decreasing Index Stack  | O(N)     | O(N)     |
+ | 6  | 132 Pattern (LC 456)                        | Monotonic Stack + Max S3 Tracker  | O(N)     | O(N)     |
+ | 7  | Largest Rectangle in Histogram (LC 84)      | Monotonic Stack Boundary Indices  | O(N)     | O(N)     |
+ | 8  | Maximal Rectangle in Binary Grid (LC 85)    | 1D Histogram DP + Monotonic Stack | O(M * N) | O(N)     |
+ | 9  | Sum of Subarray Minimums (LC 907)           | Contribution Principle (PSE x NSE)| O(N)     | O(N)     |
+ | 10 | Sum of Subarray Ranges (LC 2104)            | Contribution: Subarray(Max - Min) | O(N)     | O(N)     |
+ | 11 | Trapping Rain Water (LC 42)                 | Inward Two Pointers / Mono Stack  | O(N)     | O(1)     |
+ | 12 | Asteroid Collision (LC 735)                 | Directional Collision Stack       | O(N)     | O(N)     |
+ | 13 | Sliding Window Maximum (LC 239)             | Monotonic Decreasing Deque        | O(N)     | O(K)     |
+ | 14 | Online Stock Span (LC 901)                  | Monotonic Stack of (Price, Span)  | O(1) avg | O(N)     |
+ | 15 | Valid Parentheses & Min Add (LC 20 & 921)   | Character Matching Stack / Counter| O(N)     | O(N)/O(1)|
+ | 16 | Remove K Digits (LC 402)                    | Monotonic Increasing String Stack | O(N)     | O(N)     |
+ | 17 | Remove Duplicate Letters (LC 316 / 1081)    | Monotonic Stack + Seen Set + Freq | O(N)     | O(1)     |
+ | 18 | Reverse Polish Notation (LC 150)            | Operand Stack Evaluation          | O(N)     | O(N)     |
+ | 19 | Basic Calculator II (LC 227)                | Precedence Stack + Accumulator    | O(N)     | O(N)     |
+ | 20 | Decode String (LC 394)                      | Count Stack + String Context Stack| O(N)     | O(N)     |
+ | 21 | Min Stack (LC 155)                          | 2*val - minVal Math / Aux Stack   | O(1) all | O(1)/O(N)|
+ | 22 | Array Stack & Queue Implementation          | Fixed Buffer + Pointer Tracking   | O(1) all | O(Cap)   |
+ | 23 | Stack via Queue & Queue via Stack (LC 225)  | 2 Stacks / 1 Queue Cost Inversion | O(1) / O(N| O(N)    |
+ | 24 | Recursive Stack Sorting                     | Two-Level Recursive Insertion Sort| O(N^2)   | O(N)     |
+ | 25 | LFU Cache (LC 460)                          | Hash Map + Freq-to-List + minFreq | O(1) all | O(Cap)   |
+ | 26 | The Celebrity Problem (LC 277)              | Two-Pointer Candidate Elimination | O(N)     | O(1)     |
+ | 27 | Max of Mins Every Window Size               | Monotonic Stack (PSE/NSE) + Suffix| O(N)     | O(N)     |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. NEXT GREATER ELEMENT (LEETCODE 496 & GENERAL NGE)
 // =========================================================
@@ -957,27 +994,3 @@ vi maxOfMinWindow(const vi& arr) {
 // - Complexity: Time: O(N) linear time, Space: O(N).
 
 
-/*
- ====================================================================================================
-             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: MONOTONIC STACK & QUEUE
- ====================================================================================================
-
- 1. MONOTONIC STACK DECISION MATRIX:
-    -------------------------------------------------------------------------------------------------
-    Query Type                      | Stack Order   | Traversal Direction  | Pop Condition
-    -------------------------------------------------------------------------------------------------
-    Next Greater Element (NGE)      | Decreasing    | Left -> Right        | incoming > stk.top()
-    Next Smaller Element (NSE)      | Increasing    | Left -> Right        | incoming < stk.top()
-    Previous Greater Element (PGE)  | Decreasing    | Left -> Right        | incoming >= stk.top()
-    Previous Smaller Element (PSE)  | Increasing    | Left -> Right        | incoming <= stk.top()
-    Sliding Window Max (LC 239)     | Decreasing Deque| Left -> Right      | pop_back if incoming >= back
-    Histogram / Matrix Area (LC 84) | Increasing    | Left -> Right        | incoming <= stk.top() + sentinel 0
-    -------------------------------------------------------------------------------------------------
-
- 2. EXPRESSION & SIMULATION STACK RULES:
-    * Postfix (RPN): Push numbers; operator pops `b` then `a`, computes `a op b`, pushes result.
-    * Precedence Parsing (Basic Calculator): High precedence operators ('*', '/') evaluated immediately; low precedence ('+', '-') stored as numbers on stack to sum at end.
-    * Collisions (Asteroids): Only collide when stack top moves RIGHT (`> 0`) and incoming moves LEFT (`< 0`).
-    * Nested Brackets (Decode String): Stack stores multiplier `k` and outer string context upon '[', merges on ']'.
- ====================================================================================================
-*/

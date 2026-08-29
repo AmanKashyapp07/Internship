@@ -29,6 +29,56 @@ using ull = unsigned long long;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | GCD & LCM                                   | Euclidean Modulo Algorithm        | O(log min| O(1)     |
+ | 2  | Primality Check                             | Trial Division up to sqrt(N)      | O(sqrt N)| O(1)     |
+ | 3  | Sieve of Eratosthenes                       | Multiples Cross-Off               | O(Nloglog| O(N)     |
+ | 4  | Prime Factorization                         | Trial Division with 2 & Odd Steps | O(sqrt N)| O(log N) |
+ | 5  | Fast Power (Binary Exponentiation)          | Bitwise Exponent Halving          | O(log B) | O(1)     |
+ | 6  | Modular Exponentiation                      | Modular Binary Exponentiation     | O(log B) | O(1)     |
+ | 7  | Modular Multiplicative Inverse              | Fermat's Little Theorem (MOD - 2) | O(log MOD| O(1)     |
+ | 8  | Factorials & Combinatorics (nCr, nPr)       | Precomputed Factorial Arrays      | O(N)+O(1)| O(N)     |
+ | 9  | Digit Operations (Sum, Reverse, Palindrome) | Base-10 Modulo & Division Loops   | O(log10 N| O(1)     |
+ | 10 | Check K-th Bit                              | Bitwise AND: (n & (1 << k)) != 0  | O(1)     | O(1)     |
+ | 11 | Set K-th Bit                                | Bitwise OR: n | (1 << k)          | O(1)     | O(1)     |
+ | 12 | Clear K-th Bit                              | Bitwise AND NOT: n & ~(1 << k)    | O(1)     | O(1)     |
+ | 13 | Toggle K-th Bit                             | Bitwise XOR: n ^ (1 << k)         | O(1)     | O(1)     |
+ | 14 | Check Power of 2                            | Bitwise AND: n & (n - 1) == 0     | O(1)     | O(1)     |
+ | 15 | Count Set Bits (Kernighan's Algorithm)      | Lowest-Bit Peeling Loop           | O(popcnt)| O(1)     |
+ | 16 | Lowest Set Bit                              | Two's Complement Isolation: n & -n| O(1)     | O(1)     |
+ | 17 | Remove Lowest Set Bit                       | Rightmost Bit Clearing: n & (n - 1| O(1)     | O(1)     |
+ | 18 | Single Number in Array                      | Cumulative Array XOR              | O(N)     | O(1)     |
+ | 19 | Two Unique Numbers                          | XOR Sum + Lowest Set Bit Partition| O(N)     | O(1)     |
+ | 20 | Missing Number                              | Expected XOR vs Actual XOR Sum    | O(N)     | O(1)     |
+ | 21 | Cumulative XOR from 1 to N                  | Periodicity of 4 in Binary XOR    | O(1)     | O(1)     |
+ | 22 | Range XOR [L, R]                            | XOR(1..R) ^ XOR(1..L-1)           | O(1)     | O(1)     |
+ | 23 | Power of 4 Check                            | Power of 2 + Odd Bitmask (0x5555) | O(1)     | O(1)     |
+ | 24 | Check Even / Odd                            | Least Significant Bit: n & 1      | O(1)     | O(1)     |
+ | 25 | Swap Using XOR                              | In-Place 3-Step Bitwise XOR Swap   | O(1)     | O(1)     |
+ | 26 | Reverse 32-Bit Integer                      | Bit-by-Bit Shift & Accumulate     | O(32)    | O(1)     |
+ | 27 | Binary String Representation                | Sequential Bit Shift to String    | O(32)    | O(1)     |
+ | 28 | Gray Code Conversion                        | Binary-to-Gray: n ^ (n >> 1)      | O(1)     | O(1)     |
+ | 29 | Generate All Subsets via Bitmask            | Bitmask Loop [0...2^N - 1]        | O(N * 2^N| O(N * 2^N|
+ | 30 | Iterate Through All Submasks                | sub = (sub - 1) & mask Trick      | O(3^N)   | O(1)     |
+ | 31 | Opposite Signs Check                        | Sign Bit XOR: (x ^ y) < 0         | O(1)     | O(1)     |
+ | 32 | Absolute Value via Bitwise Shifts           | Arithmetic Shift Sign Masking     | O(1)     | O(1)     |
+ | 33 | Next Power of 2                             | Bitwise OR Smearing (1,2,4,8,16)  | O(1)     | O(1)     |
+ | 34 | Built-in Bit Functions                      | __builtin_clz, ctz, popcount      | O(1)     | O(1)     |
+ | 35 | Perfect Square Check                        | Integer Sqrt Rounding Check       | O(1)     | O(1)     |
+ | 36 | Fast Fibonacci via Matrix Exponentiation    | [[1, 1], [1, 0]] Binary Power     | O(log N) | O(1)     |
+ | 37 | Squared Euclidean Distance                  | (x1 - x2)^2 + (y1 - y2)^2         | O(1)     | O(1)     |
+ | 38 | 2D Vector Cross Product                     | ax * by - ay * bx                 | O(1)     | O(1)     |
+ | 39 | Orientation of 3 Points                     | 2D Signed Cross Product Area      | O(1)     | O(1)     |
+ | 40 | Modulo 2^k                                  | Bitmask AND: x & ((1 << k) - 1)   | O(1)     | O(1)     |
+ ====================================================================================================
+*/
+
+
 // ============================================================
 // 1. GCD / LCM
 // ============================================================
@@ -782,40 +832,3 @@ int modPowerOfTwo(int x, int k) {
 // - Approach: Bitwise AND with mask x & ((1 << k) - 1).
 // - Intuition: The remainder modulo 2^k is represented exactly by the lower k bits; (1 << k) - 1 masks these bits in O(1).
 // - Complexity: Time: O(1), Space: O(1).
-
-/*
- ====================================================================================================
-             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: BIT MANIPULATION, MATH & GEOMETRY
- ====================================================================================================
-
- 1. BIT MANIPULATION ESSENTIAL FORMULAS:
-    | Operation                                   | Bitwise Expression                  | Meaning / Core Utility                |
-    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
-    | Check k-th bit                              | (n & (1 << k)) != 0                 | Returns true if k-th bit is set       |
-    | Set k-th bit                                | n | (1 << k)                        | Turns on bit k                        |
-    | Clear k-th bit                              | n & ~(1 << k)                       | Turns off bit k                       |
-    | Toggle k-th bit                             | n ^ (1 << k)                        | Inverts bit k                         |
-    | Power of 2 check                            | n > 0 && (n & (n - 1)) == 0         | Exactly one bit set                   |
-    | Lowest set bit                              | n & -n                              | Isolates rightmost set bit            |
-    | Remove lowest set bit                       | n & (n - 1)                         | Clears rightmost set bit              |
-    | Modulo 2^k                                  | n & ((1 << k) - 1)                  | Equivalent to n % 2^k                 |
-    | Multiply / Divide by 2^k                    | n << k / n >> k                     | Fast power-of-two scaling             |
-    | Submask enumeration                         | sub = (sub - 1) & mask              | Enumerates all subsets in O(2^popcnt) |
-    | Fast popcount (number of 1s)                | __builtin_popcount(n)               | Single CPU hardware instruction       |
-    | Trailing / Leading zeros                    | __builtin_ctz(n) / __builtin_clz(n) | Undefined if n == 0 (guard it!)       |
-
- 2. 2D COMPUTATIONAL GEOMETRY PRIMITIVES:
-    • Cross Product: `cross(A, B) = ax * by - ay * bx`
-    • Orientation of (A, B, C): `(bx - ax)*(cy - ay) - (by - ay)*(cx - ax)`
-      - Result > 0: Counter-Clockwise (Left turn)
-      - Result < 0: Clockwise (Right turn)
-      - Result == 0: Collinear points
-    • Squared Distance: Always compare `(x1-x2)^2 + (y1-y2)^2` to avoid floating-point square root errors.
-
- 3. LIVE INTERVIEW & OA GOTCHAS:
-    • Shift Overflow: `1 << k` overflows 32-bit signed integer when $k \ge 31$. ALWAYS write `1LL << k` for 64-bit bits.
-    • Builtin Zero Guard: `__builtin_clz(0)` and `__builtin_ctz(0)` cause UNDEFINED BEHAVIOR on x86/ARM CPUs. Always handle 0 explicitly!
-    • Negative Modulo: `(a % MOD + MOD) % MOD` is required in C++ because `-5 % 3 == -2` (not +1).
-    • Fermat's Little Theorem constraint: Modular inverse `a^(MOD-2)` is valid ONLY if `MOD` is prime and `gcd(a, MOD) == 1`.
- ====================================================================================================
-*/

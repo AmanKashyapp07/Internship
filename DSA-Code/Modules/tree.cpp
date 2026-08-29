@@ -42,6 +42,62 @@ struct NodeWithParent {
         : val(x), left(l), right(r), parent(p) {}
 };
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | DFS Traversals (In/Pre/Post)                | Recursive & Iterative Stack Traver| O(N)     | O(H)     |
+ | 2  | Level Order Traversal (BFS)                 | Queue-Based Level-by-Level Scan   | O(N)     | O(W)     |
+ | 3  | Maximum Depth / Height of Tree              | Bottom-Up Post-Order DFS          | O(N)     | O(H)     |
+ | 4  | Same Tree Verification                      | Dual Simultaneous Pre-Order DFS   | O(N)     | O(H)     |
+ | 5  | Symmetric Tree (Mirror Symmetry)            | Mirror Branch Pair DFS Traversal  | O(N)     | O(H)     |
+ | 6  | Diameter of Binary Tree                     | Bottom-Up Post-Order Max Diameter | O(N)     | O(H)     |
+ | 7  | Balanced Binary Tree Check                  | Height-Balanced Bottom-Up Check   | O(N)     | O(H)     |
+ | 8  | Maximum Path Sum                            | Post-Order DFS Branch Gain Tracker| O(N)     | O(H)     |
+ | 9  | Root to Node Path                           | Backtracking Pre-Order Path Vector| O(N)     | O(H)     |
+ | 10 | Lowest Common Ancestor (Binary Tree)        | Bottom-Up Node Value Bubbling DFS | O(N)     | O(H)     |
+ | 11 | Left View of Binary Tree                    | Level First-Seen Pre-Order DFS    | O(N)     | O(H)     |
+ | 12 | Right View of Binary Tree                   | Level First-Seen Reverse Pre-Order| O(N)     | O(H)     |
+ | 13 | Vertical Order Traversal                    | BFS Queue with (Col, Row) TreeMap | O(N logN)| O(N)     |
+ | 14 | Zigzag Level Order Traversal                | BFS Queue + Directional Inversion | O(N)     | O(W)     |
+ | 15 | Invert / Mirror Binary Tree                 | Recursive Left-Right Subtree Swap | O(N)     | O(H)     |
+ | 16 | Search in BST                               | Directional Key Branch Traversal  | O(H)     | O(1)     |
+ | 17 | Insert into BST                             | Directional Iterative Insertion   | O(H)     | O(1)     |
+ | 18 | Validate BST                                | Top-Down (Low, High) Range Check  | O(N)     | O(H)     |
+ | 19 | K-th Smallest Element in BST                | Inorder Traversal Stack Counting  | O(H + K) | O(H)     |
+ | 20 | Lowest Common Ancestor in BST               | Directional Range Branching       | O(H)     | O(1)     |
+ | 21 | Build Tree from Preorder & Inorder          | Divide & Conquer + Inorder Hash   | O(N)     | O(N)     |
+ | 22 | Count Complete Tree Nodes                   | Binary Search on Heights (2^H)    | O(log^2N)| O(log N) |
+ | 23 | Sum of Root-to-Leaf Numbers                 | Top-Down Base-10 Accumulation DFS | O(N)     | O(H)     |
+ | 24 | Path Sum (I, II & Tree Paths)               | Backtracking Target Path DFS      | O(N)     | O(H)     |
+ | 25 | Serialize & Deserialize Binary Tree         | Preorder DFS + String Stream Token| O(N)     | O(N)     |
+ | 26 | Morris Inorder Traversal                    | Threaded Binary Tree (O(1) Space) | O(N)     | O(1)     |
+ | 27 | Morris Preorder Traversal                   | Threaded Binary Tree (O(1) Space) | O(N)     | O(1)     |
+ | 28 | Top View of Binary Tree                     | BFS + Column First-Seen Hash Map  | O(N)     | O(N)     |
+ | 29 | Bottom View of Binary Tree                  | BFS + Column Last-Seen Hash Map   | O(N)     | O(N)     |
+ | 30 | All 3 Traversals in One Pass                | Single Stack with State Counter   | O(N)     | O(N)     |
+ | 31 | Boundary Traversal of Binary Tree           | Left Boundary + Leaves + Right Rev| O(N)     | O(H)     |
+ | 32 | Maximum Width of Binary Tree                | BFS with 0-Indexed Level Offsets  | O(N)     | O(W)     |
+ | 33 | Children Sum Property Binary Tree           | Top-Down Increment + Bottom-Up Sum| O(N)     | O(H)     |
+ | 34 | Build Tree from Postorder & Inorder         | Divide & Conquer + Inorder Hash   | O(N)     | O(N)     |
+ | 35 | Flatten Binary Tree to Linked List          | Reverse Post-Order Traversal Rewire| O(N)    | O(H)     |
+ | 36 | Populating Next Right Pointers              | Level-Order Pointer Rewiring      | O(N)     | O(1)     |
+ | 37 | Inorder Successor & Predecessor in BST      | Directional Key Comparison Search | O(H)     | O(1)     |
+ | 38 | Floor & Ceil in BST                         | Binary Search Candidate Tracking  | O(H)     | O(1)     |
+ | 39 | Two Sum in BST (Pair with Sum K)            | Dual BST Iterators (Next/Prev)    | O(N)     | O(H)     |
+ | 40 | BST Iterator (O(1) Amortized)               | Controlled Inorder Stack Push     | O(1) avg | O(H)     |
+ | 41 | Largest BST in Binary Tree                  | Post-Order Node Info Quadruple    | O(N)     | O(H)     |
+ | 42 | Minimum Time to Burn Binary Tree            | Parent Map + Multi-Source BFS     | O(N)     | O(N)     |
+ | 43 | Delete a Node in BST                        | Inorder Successor / Child Splice  | O(H)     | O(H)     |
+ | 44 | Convert Sorted Array to BST (LC 108)        | Midpoint Divide & Conquer Recursion| O(N)    | O(log N) |
+ | 45 | Construct BST from Preorder (LC 1008)       | Upper-Bound Constrained DFS       | O(N)     | O(H)     |
+ | 46 | Binary Tree to Doubly Linked List           | Inorder DFS Pointer Stitching     | O(N)     | O(H)     |
+ ====================================================================================================
+*/
+
+
 class Solution {
 public:
 
@@ -1518,71 +1574,3 @@ public:
     // - Intuition: Inorder traversal visits nodes in sequential DLL order. Connect `root->left = prev` and `prev->right = root`, updating `prev = root`.
     // - Complexity: Time: O(N) single pass, Space: O(H) recursion stack.
 };
-
-/*
- ====================================================================================================
-                    ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: TREES & BST (EXPANDED)
- ====================================================================================================
-
- 1. PROBLEM IDENTIFICATION MATRIX (EXTENDED)
-    | Pattern / Clue in Problem                   | Technique / Data Structure        | Template / Core Idea                                    |
-    |:--------------------------------------------|:----------------------------------|:--------------------------------------------------------|
-    | Level-by-level, views, width, shortest      | BFS with Queue                    | snapshot size = q.size(), iterate size--                |
-    | Path sum, root-to-leaf, validation          | Preorder / Top-down DFS           | pass state down (e.g. sum - root->val, range)           |
-    | Tree height, diameter, max path, balanced   | Postorder / Bottom-up DFS         | return values to parent, update global max              |
-    | K-th smallest/largest, sorted order         | Inorder DFS (Iterative stack)     | left-root-right stack; K pops = K-th element            |
-    | Reconstruct tree                            | Divide & Conquer + Hash Map       | Preorder root -> split Inorder via index map            |
-    | Ancestor queries (LCA in general tree)      | Postorder DFS                     | if root==p||q return root; both!=null -> root           |
-    | Ancestor queries (LCA in BST)               | Directional while loop            | p,q < root -> left; p,q > root -> right; else root      |
-    | Ancestor queries (LCA, repeated, static)    | Binary Lifting                    | up[node][k] = up[up[node][k-1]][k-1]                    |
-    | Serialize / Deserialize                     | Preorder DFS + '#' null sentinel  | comma-separated tokens via stringstream                 |
-    | Tree with Parent Pointers / Node to Node    | Convert Tree to Graph (Hash Map)  | BFS from start node with visited set                    |
-    | Vertical order / column traversal           | BFS + (col, row) map              | col-- for left, col++ for right, group by col           |
-    | Boundary / left-right view                  | DFS with (depth, level) tracking  | first node at depth = left view, last = right           |
-    | Flatten to linked list                      | Preorder Morris-style / recursion | rewire right pointer, set left = null                   |
-    | Lowest cost to connect / build              | Huffman-style greedy + min-heap   | pop 2 smallest, merge, push back                        |
-    | Tree DP (max independent set, rob houses)   | Postorder returning a pair        | {include, exclude} per subtree                          |
-    | Rerooting (answer differs per root)         | Two-pass DFS (down then up)       | 1st pass: subtree info, 2nd: parent contribution        |
-    | Trie-style prefix tree problems             | Trie (array[26] / hashmap kids)   | not binary tree — insert/search per character           |
-    | Segment tree / range queries                | Segment Tree / BIT                | build O(N), query/update O(log N)                       |
-    | N-ary tree traversal                        | DFS/BFS over children vector      | for (auto* child : node->children)                      |
-
- 2. TOP-DOWN VS. BOTTOM-UP DFS (THE #1 INTERVIEW DECISION)
-    • Top-Down (Preorder): Pass information from parent to children via parameters.
-      - Use when: Problem asks about root-to-node path, prefix sums, depth from root, or valid range (e.g. Validate BST).
-      - Signature pattern: void dfs(TreeNode* node, int currState, ...)
-      - Nothing is returned — answer is recorded into a shared/global structure during traversal.
-    • Bottom-Up (Postorder): Return aggregated values from children to parent.
-      - Use when: Problem asks about subtree properties, tree height, diameter, maximum path sum, balance, or deleting nodes.
-      - Signature pattern: ReturnType dfs(TreeNode* node) -> compute left, right, update ans, return to parent.
-    • Rule of thumb: If the answer at a node needs info from BELOW it -> bottom-up. If the answer at a node needs info from ABOVE it (ancestors) -> top-down. Complex problems (rerooting, diameter with path reconstruction) combine both passes.
-
- 3. BST SPECIFIC GOLDEN RULES
-    • Inorder traversal of ANY valid BST is strictly increasing (strictly sorted, no duplicates unless explicitly allowed).
-    • Validate BST: NEVER compare only node->left->val < node->val. MUST pass (low, high) range down to all descendants — a right-left grandchild can violate an ancestor's bound even if it satisfies its immediate parent.
-    • Searching / Inserting in BST is O(H): if val < root->val go left; if val > root->val go right.
-    • Predecessor: Rightmost node of left subtree (or nearest ancestor for which node is in the right subtree, if no left subtree exists).
-    • Successor: Leftmost node of right subtree (or nearest ancestor for which node is in the left subtree, if no right subtree exists).
-    • Deleting a node with two children: Replace value with inorder successor (or predecessor), then recursively delete that successor from the right subtree.
-    • Balanced BST guarantee (AVL / Red-Black) applies only if explicitly stated — otherwise assume worst-case skewed input (H = N).
-
- 4. LIVE INTERVIEW EXECUTION PROTOCOL (WHAT TO SAY & DO)
-    • Step 1 — Clarify edge cases: Empty root nullptr? Single node? Negative values? Duplicate keys? Guaranteed valid tree (acyclic), or can input be malformed?
-    • Step 2 — State traversal choice out loud: "I will use bottom-up postorder DFS because the parent needs aggregated values from subtrees."
-    • Step 3 — Identify Return Value vs Global Tracker: e.g., in Diameter / MaxPathSum, recursive step returns single branch gain upward to parent, while global tracker evaluates combined path (left + right at the same node).
-    • Step 4 — Write base cases first: `if (!root) return ...;` — decide what empty returns before recursive logic (0 for height, INT_MIN for max path, true for validity, etc.).
-    • Step 5 — State complexity clearly: "Time is O(N) since each node is visited once; auxiliary space is O(H) on recursion stack, where H = log N for balanced trees and O(N) worst-case for skewed trees."
-    • Step 6 — Narrate the recursive contract before coding: "dfs(node) returns X, and assumes dfs(node->left) and dfs(node->right) already correctly return X for their subtrees."
-    • Step 7 — Watch for silent global-state bugs: Initialize global/member trackers before the initial DFS call, not inside the base case.
-    • Step 8 — Dry-run on a 3-4 node skewed tree AND a small balanced tree — skewed trees expose recursion-order and stack-depth bugs that balanced trees hide.
-
- 5. COMPLEXITY & PITFALL QUICK-REFERENCE
-    • DFS/BFS on a tree: Always O(N) time — every node visited once; no visited set required because trees are acyclic by definition.
-    • Recursion space is O(H), not O(N) — state "H, which degrades to N on a skewed tree" to show mastery of both average balanced and worst-case scenarios.
-    • Off-by-one in range validation: Using <= / >= vs < / > at BST boundaries silently allows duplicates — verify with interviewer whether duplicates are permitted.
-    • Return value vs Global tracker confusion: Diameter and max path sum evaluate both children locally, but return only the single best branch upward.
-    • Integer overflow in Validate BST: Node values can equal INT_MIN / INT_MAX — always use `long long` for lower and upper bounds.
-    • Iterative traversals: In iterative preorder stack traversal, push right child BEFORE left child (LIFO stack reverses order).
-    • Morris Traversal: O(1) space traversal with no stack or recursion — prime follow-up answer when asked to optimize auxiliary space.
- ====================================================================================================
-*/

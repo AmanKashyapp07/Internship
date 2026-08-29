@@ -33,6 +33,43 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | K-th Element & Median of 2 Sorted Arrays    | Binary Search on Partition Cut    | O(log min| O(1)     |
+ | 2  | Next Greater Permutation                    | 3-Step Suffix Inversion Reversal   | O(N)     | O(1)     |
+ | 3  | Longest Substring Without Repeating Chars   | Sliding Window + Last Seen Map    | O(N)     | O(min N) |
+ | 4  | Min Moves to Gather K Consecutive Ones      | Shifted Index + Median Prefix Sum | O(N)     | O(N)     |
+ | 5  | 2D Prefix Sum Matrix                        | 2D Inclusion-Exclusion Prefix DP   | O(M * N) | O(M * N) |
+ | 6  | Count Subarrays with Bitwise AND Equal to K | Hash Map DP on Frontier Values    | O(N * 30)| O(N)     |
+ | 7  | Multiply Two 2D Matrices                    | 3-Nested Loop Dot Products         | O(M*N*P) | O(M * P) |
+ | 8  | Count Subsequences with Sum Equal to K      | 1D 0/1 Knapsack DP (Backwards)    | O(N * K) | O(K)     |
+ | 9  | Row with Maximum 1s in Binary Matrix        | Top-Right Corner Staircase Scan   | O(N + M) | O(1)     |
+ | 10 | Max Components Tree Split with Equal Sum    | Divisors + Subtree DFS Cuts       | O(N*div) | O(N)     |
+ | 11 | Wildcard Pattern Matching                   | 2D DP Memoization ('?' and '*')   | O(\|S\|\|P\|) | O(\|S\|\|P\|)|
+ | 12 | Next Greater Element                        | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 13 | Next Smaller Element                        | Monotonic Increasing Stack        | O(N)     | O(N)     |
+ | 14 | Previous Greater Element                    | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 15 | Previous Smaller Element                    | Monotonic Increasing Stack        | O(N)     | O(N)     |
+ | 16 | Stock Span Problem                          | Monotonic Stack of Indices        | O(N)     | O(N)     |
+ | 17 | Next Greater Element in Circular Array      | Monotonic Stack on Doubled (2N)   | O(N)     | O(N)     |
+ | 18 | Sum of Subarray Minimums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
+ | 19 | Maximum Score of Good Subarray              | Monotonic Stack Range Bounds (K)  | O(N)     | O(N)     |
+ | 20 | Sum of Subarray Maximums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
+ | 21 | Max of Minimums for Every Window Size       | Monotonic Stack + Suffix Max      | O(N)     | O(N)     |
+ | 22 | Array Median using Quickselect              | Randomized QuickSelect (Lomuto)   | O(N) avg | O(1)     |
+ | 23 | N x N MEX Grid Construction                 | Bitwise XOR Matrix (i ^ j)        | O(N^2)   | O(N^2)   |
+ | 24 | Binary Lifting (LCA, K-th Ancestor)         | Ancestor Doubling Table up[u][j]  | O(N logN)| O(N logN)|
+ | 25 | Digit DP Template                           | Digit Memo (pos,start,tight,state)| O(dig*st)| O(dig*st)|
+ | 26 | Cycle Detection & Reconstruction            | DFS Parent Trace / Bellman-Ford   | O(V+E)/VE| O(V)     |
+ | 27 | Make Array Non-Decreasing (Slope Trick)     | Greedy Max-Heap Slope Inflection  | O(N logN)| O(N)     |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. K-TH ELEMENT & MEDIAN OF TWO SORTED ARRAYS
 // =========================================================
@@ -195,7 +232,7 @@ ll countSubarraysWithAND(const vi &nums, int k) {
             cur[v & x] += cnt;
         }
         ans += cur[k];
-        prev = move(cur);
+        prev = std::move(cur);
     }
     return ans;
 }
@@ -955,30 +992,3 @@ ll makeArrayNonDecreasing(const vi &nums) {
 // - Intuition: If current element x < heap.top(), moving top down to x minimizes cost; push x twice (once for slope inflection point, once for value adjustment).
 // - Complexity: Time: O(N \log N) heap operations, Space: O(N) for priority queue.
 
-/*
- ====================================================================================================
-     ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: MONOTONIC STACKS, BINARY SEARCH & ADVANCED TECHNIQUES
- ====================================================================================================
-
- 1. PATTERN IDENTIFICATION MATRIX:
-    | Problem Type / Clue                         | Technique / Data Structure          | Core Transition / State               |
-    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
-    | Next Greater Element                        | Monotonic Decreasing Stack          | while (!st.empty() && nums[top] < x)  |
-    | Next Smaller Element                        | Monotonic Increasing Stack          | while (!st.empty() && nums[top] > x)  |
-    | Sum of Subarray Minimums                    | Contribution: (i - l) * (r - i)     | Stack finds previous & next smaller   |
-    | Maximum of Minimums for every window        | Monotonic Stack + Suffix Max        | ans[r - l - 1] = max(ans[...], a[i])  |
-    | K-th element in 2 sorted arrays             | Binary Search on partition cut      | l1 <= r2 && l2 <= r1                  |
-    | Longest substring without repeating chars   | Sliding Window + last seen map      | l = max(l, last_seen[c] + 1)          |
-    | Minimum moves to gather K 1s                | Shifted index p_i - i + median pref | cost around median index              |
-    | 2D Prefix Sum Submatrix                     | Inclusion-Exclusion                 | pref[r][c] - up - left + diag         |
-    | K-th Ancestor / LCA in Tree                 | Binary Lifting up[u][j]             | up[u][j] = up[up[u][j-1]][j-1]        |
-    | Digit properties <= N                       | Digit DP memo[pos][started][tight]  | tight restricts digit range to s[pos] |
-    | Slope Trick / Non-decreasing cost           | Max-Heap slope inflection           | total_cost += max_heap.top() - x      |
-
- 2. TOP INTERVIEW & OA GOTCHAS:
-    • Monotonic Stack boundaries: Use index -1 and n as virtual sentinels for previous and next bounds.
-    • Duplicate handling in Contribution technique: Use strict < on one side and <= on the other to avoid double counting.
-    • Modulo arithmetic on subtraction: ALWAYS add MOD before modulo: `(ans % MOD + MOD) % MOD`.
-    • Binary Lifting log bound: Ensure `MAXLOG` (e.g. 21) covers tree size $2^{20} \approx 10^6$.
- ====================================================================================================
-*/

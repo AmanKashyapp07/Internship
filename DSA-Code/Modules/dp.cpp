@@ -30,6 +30,64 @@ using vl = vector<ll>;
 using vvi = vector<vector<int>>;
 using vvl = vector<vector<ll>>;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Climbing Stairs (LC 70)                     | Fibonacci 1D Space DP             | O(N)     | O(1)     |
+ | 2  | Min Cost Climbing Stairs (LC 746)           | Rolling 2-State Minimum DP        | O(N)     | O(1)     |
+ | 3  | House Robber (LC 198)                       | Rob / Skip Alternating DP         | O(N)     | O(1)     |
+ | 4  | House Robber II - Circular (LC 213)         | Dual Pass: [0..N-2] & [1..N-1]    | O(N)     | O(1)     |
+ | 5  | Decode Ways (LC 91)                         | 1-Digit / 2-Digit Branching DP    | O(N)     | O(1)     |
+ | 6  | Delete and Earn (LC 740)                    | Frequency Transform + House Robber| O(N + Max| O(MaxVal)|
+ | 7  | Partition Equal Subset Sum (LC 416)         | 1D 0/1 Knapsack (Backwards Loop)  | O(N*Sum) | O(Sum)   |
+ | 8  | Target Sum (LC 494)                         | Subset Sum Partition Reduction    | O(N*Sum) | O(Sum)   |
+ | 9  | Coin Change (LC 322)                        | 1D Unbounded Knapsack (Min Coins) | O(N*Amt) | O(Amt)   |
+ | 10 | Coin Change II (LC 518)                     | 1D Unbounded (Combinations Outer) | O(N*Amt) | O(Amt)   |
+ | 11 | Combination Sum IV (LC 377)                 | 1D Unbounded (Permutations Outer) | O(N*Amt) | O(Amt)   |
+ | 12 | Longest Common Subsequence (LC 1143)        | 2D DP Table / Rolling Row DP      | O(N * M) | O(min M) |
+ | 13 | Edit Distance (LC 72)                       | 2D Levenshtein Distance Matrix    | O(N * M) | O(N * M) |
+ | 14 | Distinct Subsequences (LC 115)              | 1D Space-Optimized DP (Backwards) | O(N * M) | O(M)     |
+ | 15 | Word Break (LC 139)                         | 1D Prefix DP + Trie/Set Lookup    | O(N^2 * L)| O(N + D) |
+ | 16 | Interleaving String (LC 97)                 | 2D Grid DP Match Propagation      | O(N * M) | O(M)     |
+ | 17 | Longest Palindromic Subsequence (LC 516)    | 2D Interval DP / LCS with Reverse | O(N^2)   | O(N)     |
+ | 18 | Longest Increasing Subsequence (LC 300)     | Patience Sorting (lower_bound)    | O(N logN)| O(N)     |
+ | 19 | Longest String Chain (LC 1048)              | Length-Sorted DP + Predecessor Map| O(N*L^2) | O(N)     |
+ | 20 | Largest Divisible Subset (LC 368)           | Sorted 1D LIS Variant + Parent DP | O(N^2)   | O(N)     |
+ | 21 | Job Scheduling Max Profit (LC 1235)         | End-Time Sort + DP + Binary Search| O(N logN)| O(N)     |
+ | 22 | Unique Paths (LC 62)                        | Combinatorics / 1D Grid DP Roll   | O(M * N) | O(N)     |
+ | 23 | Unique Paths II - Obstacles (LC 63)         | 1D Space-Optimized Grid DP        | O(M * N) | O(N)     |
+ | 24 | Minimum Path Sum (LC 64)                    | 1D Grid DP In-Place Accumulation  | O(M * N) | O(N)     |
+ | 25 | Maximal Square (LC 221)                     | 2D DP: min(up, left, diag) + 1    | O(M * N) | O(N)     |
+ | 26 | Maximal Rectangle in Binary Grid (LC 85)    | Row Heights Histogram + MonoStack | O(M * N) | O(N)     |
+ | 27 | Burst Balloons (LC 312)                     | Interval DP (Last Balloon Picked) | O(N^3)   | O(N^2)   |
+ | 28 | Minimum Cost to Cut a Stick (LC 1547)       | Interval DP on Sorted Cut Points  | O(C^3)   | O(C^2)   |
+ | 29 | Palindrome Partitioning II (LC 132)         | Precomputed Palindrome + 1D Min Cut| O(N^2)  | O(N^2)   |
+ | 30 | Binary Tree Maximum Path Sum (LC 124)       | Post-Order DFS Gain Calculation   | O(N)     | O(H)     |
+ | 31 | House Robber III - Tree (LC 337)            | Post-Order DFS pair{rob, notRob}  | O(N)     | O(H)     |
+ | 32 | Best Time to Buy Stock Cooldown (LC 309)    | 3-State FSM (hold, sold, rest)    | O(N)     | O(1)     |
+ | 33 | Stock with Transaction Fee (LC 714)         | 2-State FSM (hold, cash)          | O(N)     | O(1)     |
+ | 34 | Stock IV - At Most K Trans (LC 188)         | 2K-State FSM / Min-Cost DP        | O(N * K) | O(K)     |
+ | 35 | Count Digit One (LC 233)                    | Positional Power-of-10 Math       | O(log10 N| O(1)     |
+ | 36 | Smallest Sufficient Team (LC 1125)          | Bitmask DP (Subset Skill Cover)   | O(M 2^N) | O(2^N)   |
+ | 37 | Removal Game / Stone Game I (CSES / LC 877) | 2D Interval Minimax DP            | O(N^2)   | O(N)     |
+ | 38 | Predict the Winner (LC 486)                 | 1D Interval Minimax Net Score DP  | O(N^2)   | O(N)     |
+ | 39 | Can I Win (LC 464)                          | Bitmask Memoization Minimax       | O(2^N)   | O(2^N)   |
+ | 40 | Guess Number Higher or Lower II (LC 375)    | Interval Minimax Cost DP          | O(N^3)   | O(N^2)   |
+ | 41 | Stone Game II (LC 1140)                     | Memoized Suffix Minimax (i, M)    | O(N^3)   | O(N^2)   |
+ | 42 | Stone Game III (LC 1406)                    | 1D Suffix Minimax 3-Step Choice   | O(N)     | O(1)     |
+ | 43 | Divisor Game & Nim Game (LC 1025 / 292)     | Mathematical Parity Invariant     | O(1)     | O(1)     |
+ | 44 | Super Egg Drop (LC 887)                     | Inverse DP: moves & eggs          | O(K logN)| O(K)     |
+ | 45 | Decode Ways II with Wildcards (LC 639)      | 1D DP Multi-Case Transition Mod   | O(N)     | O(1)     |
+ | 46 | Minimum Cost For Tickets (LC 983)           | 1D Travel Day Reachability DP     | O(365)   | O(365)   |
+ | 47 | Dungeon Game (LC 174)                       | Bottom-Up Reverse Knight Health DP| O(M * N) | O(M * N) |
+ | 48 | Cherry Pickup (LC 741)                      | Synchronous 2-Agent Manhattan DP  | O(N^3)   | O(N^2)   |
+ ====================================================================================================
+*/
+
+
 
 
 struct TreeNode {
@@ -1230,57 +1288,9 @@ public:
 
 };
 
-/*
-================================================================================
-                    DYNAMIC PROGRAMMING — INTERVIEW CHEAT SHEET
-================================================================================
-
-1. DP RECOGNITION MATRIX (12 CORE CATEGORIES)
-
-| Pattern                  | Typical State            | Key Transition / Idea                     |
-|--------------------------|--------------------------|-------------------------------------------|
-| 1. Basic 1D DP           | dp[i]                    | dp[i] = max(dp[i-1], dp[i-2] + val)       |
-| 2. Knapsack / Subset Sum | dp[i][w]                 | dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])|
-| 3. String DP             | dp[i][j]                 | s1[i]==s2[j] ? 1+dp[i-1][j-1] : max/min   |
-| 4. LIS / Sequence        | tails[mid] lower_bound   | replace first tail >= x in O(N log N)     |
-| 5. Grid DP               | dp[i][j]                 | dp[i][j] = val + min(dp[i-1][j], dp[i][j-1])|
-| 6. Partition / Interval  | dp[i][j]                 | dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost)|
-| 7. Tree DP               | return pair{take, skip}  | Post-order combine children states        |
-| 8. State Machine DP      | dp[i][state]             | hold, sold, rest scalar variables         |
-| 9. Digit DP              | dp(pos, count, tight)    | build number digit by digit with prefix limit|
-| 10. Bitmask DP           | dp[mask]                 | mask | personSkill subset representation   |
-| 11. Game / Minimax DP    | dp[i][j]                 | dp[i][j] = max(nums[i]-dp[i+1][j], nums[j]-dp[i][j-1])|
-| 12. Advanced DP          | dp[moves][eggs] / calendar| inverse DP / multi-day pass choices      |
-
-2. THE INTERVIEW DP PROTOCOL
-
-Step 1: Define exactly what `dp[state]` means out loud.
-Step 2: Identify choices / transitions and base cases.
-Step 3: State time & space complexity before coding:
-        Time = Number of States x Transition Cost per State
-        Space = Number of Stored States (+ Call Stack if recursive)
-
-3. KNAPSACK LOOP DIRECTION RULE
-- 0/1 Knapsack (1D Space): Iterate capacity loop BACKWARDS (`for w = W down to wt`) to prevent item reuse.
-- Unbounded Knapsack (1D Space): Iterate capacity loop FORWARDS (`for w = wt to W`) to allow item reuse.
-- Permutations vs Combinations:
-  - Outer Coins Loop = Combinations (Coin Change II - LeetCode 518).
-  - Outer Amount Loop = Permutations (Combination Sum IV - LeetCode 377).
-
-4. INTERVAL DP TEMPLATE
-for (int len = 2; len <= n; len++) {
-    for (int i = 0; i + len - 1 < n; i++) {
-        int j = i + len - 1;
-        for (int k = i; k < j; k++) {
-            dp[i][j] = min/max(dp[i][j], dp[i][k] + dp[k+1][j] + cost);
-        }
-    }
-}
-================================================================================
-*/
-
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     return 0;
 }
+

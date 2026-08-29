@@ -40,6 +40,71 @@ using vll = vector<ll>;
 using vvi = vector<vector<int>>;
 using vvl = vector<vector<ll>>;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Bubble Sort                                 | Adjacent Inversion Swaps          | O(N^2)   | O(1)     |
+ | 2  | Selection Sort                              | Minimum Element Position Swap     | O(N^2)   | O(1)     |
+ | 3  | Insertion Sort                              | Sorted Prefix Key Shift           | O(N^2)   | O(1)     |
+ | 4  | Merge Sort & Inversion Counting             | Divide & Conquer Merge Counting   | O(N logN)| O(N)     |
+ | 5  | Quick Sort                                  | Randomized Pivot Partitioning     | O(N logN)| O(log N) |
+ | 6  | Quick Select (Kth Smallest Element)         | Lomuto In-Place Partitioning      | O(N) avg | O(1)     |
+ | 7  | Heap Sort                                   | Max-Heap In-Place Sifting         | O(N logN)| O(1)     |
+ | 8  | Cycle Sort                                  | In-Place Index Mapping Swap       | O(N)     | O(1)     |
+ | 9  | Counting Sort                               | Non-Comparison Frequency Array    | O(N + K) | O(N + K) |
+ | 10 | Lower Bound & Upper Bound                   | Binary Search Range Halving       | O(log N) | O(1)     |
+ | 11 | Median of Two Sorted Arrays (LC 4)          | Binary Search on Partition Cut    | O(log min| O(1)     |
+ | 12 | K-th Element of Two Sorted Arrays           | Binary Search on Partition Cut    | O(log min| O(1)     |
+ | 13 | Search in Rotated Sorted Array I (LC 33)    | Half-Sorted Binary Search         | O(log N) | O(1)     |
+ | 14 | Search in Rotated Sorted Array II (LC 81)   | Boundary Duplicate Trimming       | O(N) wrst| O(1)     |
+ | 15 | Find Minimum in Rotated Sorted Array (LC153)| Binary Search Inflection Point    | O(log N) | O(1)     |
+ | 16 | Single Element in Sorted Array (LC 540)     | Even-Odd Index Parity Binary Srch | O(log N) | O(1)     |
+ | 17 | Find Peak Element (LC 162)                  | Gradient Ascent Binary Search     | O(log N) | O(1)     |
+ | 18 | Search in 2D Matrix I & II (LC 74 / 240)    | Staircase Top-Right Corner Scan   | O(M + N) | O(1)     |
+ | 19 | Matrix Median (Row-Wise Sorted)             | Binary Search on Range + UB Count | O(32*Rlog| O(1)     |
+ | 20 | Split Array Largest Sum (LC 410 / 1011)     | Binary Search on Answer + Greedy  | O(N logS)| O(1)     |
+ | 21 | Aggressive Cows (Max Min Distance)          | Binary Search on Answer + Greedy  | O(N logS)| O(1)     |
+ | 22 | House Robber IV (Min Max Capability)        | Binary Search on Answer + Greedy  | O(N logS)| O(1)     |
+ | 23 | Dutch National Flag (LC 75)                 | 3-Pointer In-Place Partitioning   | O(N)     | O(1)     |
+ | 24 | Boyer-Moore Majority Element (LC 169)       | Vote Cancellation Algorithm       | O(N)     | O(1)     |
+ | 25 | Merge Overlapping Intervals (LC 56)         | Start-Time Sort + Linear Merge    | O(N logN)| O(N)     |
+ | 26 | Insert Interval (LC 57)                     | 3-Phase Linear Partition & Merge  | O(N)     | O(N)     |
+ | 27 | Non-overlapping Intervals (LC 435)          | Earliest End-Time Sorting         | O(N logN)| O(1)     |
+ | 28 | Sweep-Line Concurrent Events (LC 253)       | Chronological Endpoint Sorting    | O(N logN)| O(N)     |
+ | 29 | Meet-in-the-Middle (LC 2035)                | Split 2^(N/2) + Binary Search     | O(N 2^N/2| O(2^(N/2)|
+ | 30 | Smallest Impossible Subset Sum              | Greedy Running Reachable Frontier | O(N logN)| O(1)     |
+ | 31 | Candy Distribution (LC 135)                 | 2-Pass Greedy Rating Synchronization| O(N)   | O(N)     |
+ | 32 | Longest Consecutive Sequence (LC 128)       | Hash Set Boundary (x - 1 lookup)  | O(N)     | O(N)     |
+ | 33 | Two Sum (LC 1)                              | Hash Map Complement Lookup        | O(N)     | O(N)     |
+ | 34 | Group Anagrams (LC 49)                      | Sorted String / Count Hash Bucket | O(N KlogK| O(N * K) |
+ | 35 | Product of Array Except Self (LC 238)       | Prefix & Suffix Products In-Place | O(N)     | O(1)     |
+ | 36 | Find All Duplicates in Array (LC 442)       | In-Place Sign Inversion Hashing   | O(N)     | O(1)     |
+ | 37 | Valid Sudoku (LC 36)                        | Bitmask / Set Validation          | O(1)     | O(1)     |
+ | 38 | Rotate Array by K (LC 189)                  | 3-Step Range Reversal Algorithm   | O(N)     | O(1)     |
+ | 39 | Container With Most Water (LC 11)           | Inward Converging Two Pointers    | O(N)     | O(1)     |
+ | 40 | 3Sum & 4Sum (LC 15 / 18)                    | Sorting + Two-Pointer Shrinking   | O(N^2)/N^3| O(1)   |
+ | 41 | Shortest Unsorted Subarray (LC 581)         | Running Prefix Max & Suffix Min   | O(N)     | O(1)     |
+ | 42 | Time Based Key-Value Store (LC 981)         | Hash Map + Binary Search UB       | O(log N) | O(N)     |
+ | 43 | Pascal's Triangle (LC 118)                  | Dynamic Programming Row Building  | O(N^2)   | O(N^2)   |
+ | 44 | Merge Two Sorted Arrays In-Place (LC 88)    | Backwards 3-Pointer Placement     | O(N + M) | O(1)     |
+ | 45 | Find Duplicate Number (LC 287)              | Floyd's Tortoise & Hare Cycle Det | O(N)     | O(1)     |
+ | 46 | Pow(x, n) (LC 50)                           | Binary Exponentiation (Squaring)  | O(log N) | O(1)     |
+ | 47 | Reverse Pairs (LC 493)                      | Merge Sort Inversion Counting     | O(N logN)| O(N)     |
+ | 48 | Largest Subarray with 0 Sum (GFG)           | Prefix Sum + Earliest Index Map   | O(N)     | O(N)     |
+ | 49 | Remove Duplicates from Sorted Array (LC 26) | Two Pointers (Slow Write / Fast)  | O(N)     | O(1)     |
+ | 50 | Max Consecutive Ones (LC 485)               | Single-Pass Linear Counter        | O(N)     | O(1)     |
+ | 51 | N Meetings in One Room (GFG)                | Greedy Earliest Finish Time       | O(N logN)| O(N)     |
+ | 52 | Minimum Platforms for Railway (GFG)         | Event Chronological Sort (2 Ptr)  | O(N logN)| O(1)     |
+ | 53 | Job Sequencing with Deadlines (GFG)         | Profit Sorting + Slot Allocation  | O(N^2)   | O(MaxD)  |
+ | 54 | Fractional Knapsack (GFG)                   | Value-to-Weight Ratio Sorting     | O(N logN)| O(1)     |
+ | 55 | N-th Root of an Integer (GFG)               | Binary Search on Answer [1, M]    | O(N logM)| O(1)     |
+ ====================================================================================================
+*/
+
+
 
 // ====================================================================================================
 // SECTION 1: CLASSIC SORTING ALGORITHMS

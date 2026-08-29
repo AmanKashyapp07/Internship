@@ -34,6 +34,50 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Modular Exponentiation                      | Binary Exponentiation (Squaring)  | O(log B) | O(1)     |
+ | 2  | Matrix Multiplication Modulo MOD           | 3-Nested Loop Dot Product (K x K) | O(K^3)   | O(K^2)   |
+ | 3  | Square Matrix Exponentiation                | Binary Exponentiation on Matrices | O(K^3logP| O(K^2)   |
+ | 4  | Number of Paths of Length K on Graph        | Adjacency Matrix Exponentiation   | O(V^3logK| O(V^2)   |
+ | 5  | N-th Fibonacci via Matrix Exponentiation    | [[1, 1], [1, 0]] Matrix Power     | O(log N) | O(1)     |
+ | 6  | Max Subarray Sum of Length at Most K        | Monotonic Deque on Prefix Sums    | O(N)     | O(N)     |
+ | 7  | K-th Lexicographical Permutation            | Factorial Number System (Lehmer)  | O(N^2)   | O(N)     |
+ | 8  | Lexicographical Rank of a Permutation       | Factorial Positional Weighting    | O(N^2)   | O(N)     |
+ | 9  | Next Greater Permutation                    | 3-Step Suffix Inversion Reversal   | O(N)     | O(1)     |
+ | 10 | LCM of Array Elements Modulo MOD            | Prime Factorization + Max Powers  | O(NsqrtV)| O(U)     |
+ | 11 | Permutation Rounds (LCM of Cycles)          | Disjoint Cycle Decomposition + LCM| O(N+sqrt)| O(N)     |
+ | 12 | Min Arbitrary Swaps to Sort Permutation     | Permutation Cycles (N - cycles)   | O(N)     | O(N)     |
+ | 13 | Min Move-to-Anywhere Operations             | Longest Increasing Subseq (N-LIS) | O(N logN)| O(N)     |
+ | 14 | Min Move-to-Front Operations                | Greedy Backwards Suffix Matching  | O(N)     | O(1)     |
+ | 15 | Repeated Substring Pattern                  | String Doubling: (S+S)[1...2N-2]   | O(N)     | O(N)     |
+ | 16 | Min Subarrays with Sum <= K                 | Greedy Running Sum Partitioning   | O(N)     | O(1)     |
+ | 17 | K-th Smallest via QuickSelect               | Lomuto Partition QuickSelect      | O(N) avg | O(1)     |
+ | 18 | Bidirectional BFS                           | Two-Ended BFS (Smaller Frontier)  | O(B^(D/2)| O(B^(D/2)|
+ | 19 | Valid Parentheses with Wildcard '*'         | Greedy Min-Max Bounds (cmin, cmax)| O(N)     | O(1)     |
+ | 20 | Count Reverse Pairs (a[i] > x * a[j])       | Modified Merge Sort Counting      | O(N logN)| O(N)     |
+ | 21 | Find Median via std::nth_element            | QuickSelect Median via STL        | O(N) avg | O(1)     |
+ | 22 | Sort 0s, 1s, and 2s (Dutch National Flag)   | 3-Way In-Place Partitioning       | O(N)     | O(1)     |
+ | 23 | Merge Two Sorted Arrays                     | Two-Pointer Merge Step            | O(N + M) | O(N + M) |
+ | 24 | Merge Sort                                  | Divide-and-Conquer Merge Sort     | O(N logN)| O(N)     |
+ | 25 | Longest Substring with At Least K Frequency | Sliding Window per Unique Target  | O(26 * N)| O(1)     |
+ | 26 | 3-Way QuickSort (DNF Partition)             | Dutch National Flag QuickSort     | O(N logN)| O(log N) |
+ | 27 | Cyclic Right and Left Rotation              | 3-Step Range Reversal Algorithm   | O(N)     | O(1)     |
+ | 28 | Cyclic Sort [1 to N]                        | In-Place Index Mapping Swap       | O(N)     | O(1)     |
+ | 29 | Largest Number from Concatenation           | Custom String Comparator Sorting  | O(N logN)| O(N)     |
+ | 30 | Running K-th Element Stream                 | Two Heaps (Max-Heap + Min-Heap)   | O(log K) | O(N)     |
+ | 31 | Wiggle Sort II                              | Median + DNF 3-Way + Interleaving | O(N)     | O(N)     |
+ | 32 | LRU Cache                                   | Hash Map + Doubly Linked List     | O(1)     | O(Cap)   |
+ | 33 | LFU Cache                                   | Hash Map + Freq-to-List + minFreq | O(1)     | O(Cap)   |
+ | 34 | Gas Station Circuit                         | Greedy Net Surplus & Tank Reset   | O(N)     | O(1)     |
+ ====================================================================================================
+*/
+
+
 // Modular exponentiation (a^b) % mod
 // Time: O(log B), Space: O(1)
 
@@ -442,7 +486,7 @@ int bidirectionalBFS(const string &start, const string &target) {
                 }
             }
         }
-        fwd = move(nxt_set);
+        fwd = std::move(nxt_set);
     }
     return -1;
 }
@@ -1322,5 +1366,5 @@ public:
 // Interview Explanation:
 // - Problem Statement: Find the starting gas station index to complete a circular circuit, or -1 if impossible.
 // - Approach: Greedy single-pass tracking total surplus and running tank balance.
-// - Intuition: If overall gas $\ge$ cost, a unique valid start exists; if running `tank < 0`, no station in current window can start, so reset `start = i + 1`.
+// - Intuition: If overall gas \ge cost, a unique valid start exists; if running `tank < 0`, no station in current window can start, so reset `start = i + 1`.
 // - Complexity: Time: O(N) single linear pass, Space: O(1) auxiliary space.

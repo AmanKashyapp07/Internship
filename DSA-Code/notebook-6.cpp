@@ -34,6 +34,32 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Container With Most Water                   | Inward Converging Two Pointers    | O(N)     | O(1)     |
+ | 2  | Spiral Matrix Traversal                     | Layer Boundary Simulation         | O(M * N) | O(1)     |
+ | 3  | Merge Two Sorted Arrays                     | Two-Pointer Linear Merge Step     | O(N + M) | O(N + M) |
+ | 4  | Longest Consecutive Sequence                | Hash Set Boundary (count(x - 1))  | O(N)     | O(N)     |
+ | 5  | Row with Maximum 1s in Binary Matrix        | Top-Right Corner Staircase Scan   | O(N + M) | O(1)     |
+ | 6  | Find Median from Data Stream (MedianFinder) | Two Heaps (Max-Heap + Min-Heap)   | O(log N) | O(N)     |
+ | 7  | First Missing Positive                      | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
+ | 8  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2 * L)| O(N + D) |
+ | 9  | Array Stack Implementation                  | Array with Top Index              | O(1) all | O(Cap)   |
+ | 10 | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK)| O(K)     |
+ | 11 | Longest Valid Parentheses                   | Stack of Indices (Base -1)        | O(N)     | O(N)     |
+ | 12 | Move Zeroes                                 | Two-Pointer In-Place Swap         | O(N)     | O(1)     |
+ | 13 | Majority Element (Boyer-Moore Voting)       | Candidate & Count Cancellation    | O(N)     | O(1)     |
+ | 14 | Design HashMap (MyHashMap)                  | Separate Chaining (Bucket Lists)  | Avg O(1) | O(N)     |
+ | 15 | Median of Row-Wise Sorted Matrix            | Binary Search on Range + UB       | O(RlogC) | O(1)     |
+ | 16 | Find Peak Element in 2D Grid                | Column Binary Search + Column Max | O(M logN)| O(1)     |
+ ====================================================================================================
+*/
+
+
 struct TreeNode {
     int val;
     TreeNode *left;

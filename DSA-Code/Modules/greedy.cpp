@@ -32,6 +32,55 @@ using vvl = vector<vector<ll>>;
 
 [[maybe_unused]] const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Non-overlapping Intervals (LC 435)          | Earliest End-Time Sorting         | O(N logN)| O(1)     |
+ | 2  | Minimum Arrows to Burst Balloons (LC 452)   | End-Coordinate Interval Shooting  | O(N logN)| O(1)     |
+ | 3  | Merge Intervals (LC 56)                     | Start-Time Sort + Linear Merge    | O(N logN)| O(N)     |
+ | 4  | Insert Interval (LC 57)                     | 3-Phase Linear Partition & Merge  | O(N)     | O(N)     |
+ | 5  | Meeting Rooms II (LC 253)                   | Two-Pointer Chronological Scan    | O(N logN)| O(N)     |
+ | 6  | N Meetings in One Room (GFG)                | Greedy Earliest Finish Time       | O(N logN)| O(N)     |
+ | 7  | Minimum Platforms for Railway (GFG)         | Event Chronological Sort (2 Ptr)  | O(N logN)| O(1)     |
+ | 8  | Jump Game I (LC 55)                         | Max Reachable Index Tracker       | O(N)     | O(1)     |
+ | 9  | Jump Game II (LC 45)                        | BFS Range Expansion [curEnd, fwd] | O(N)     | O(1)     |
+ | 10 | Video Stitching (LC 1024)                   | Furthest Reachable Extension Jump | O(N logN)| O(1)     |
+ | 11 | Min Taps to Water Garden (LC 1326)          | Interval Max Reach Jump Game II   | O(N)     | O(N)     |
+ | 12 | Candy (LC 135)                              | 2-Pass Greedy Rating Neighbor Sync| O(N)     | O(N)     |
+ | 13 | Gas Station / Circular Tour (LC 134)        | Net Surplus Sum + Tank Reset      | O(N)     | O(1)     |
+ | 14 | Valid Parenthesis String '*' (LC 678)       | Min-Max Open Bracket Range Track  | O(N)     | O(1)     |
+ | 15 | Min Deletions for Balanced String (LC 1653) | Running 'b' Count vs Deletion DP  | O(N)     | O(1)     |
+ | 16 | Break a Palindrome (LC 1328)                | First Non-'a' Prefix Mutation     | O(N)     | O(1)     |
+ | 17 | Partition Labels (LC 763)                   | Last-Seen Index Boundary Expansion| O(N)     | O(1)     |
+ | 18 | Queue Reconstruction by Height (LC 406)     | Descending Height + K-Index Insert| O(N^2)   | O(N)     |
+ | 19 | Assign Cookies (LC 455)                     | Greedy Two-Pointer Size Matching  | O(N logN)| O(1)     |
+ | 20 | Boats to Save People (LC 881)               | Inward Converging Two Pointers    | O(N logN)| O(1)     |
+ | 21 | Two City Scheduling (LC 1029)               | Cost Delta (costA - costB) Sorting| O(N logN)| O(1)     |
+ | 22 | Bag of Tokens (LC 948)                      | Two Pointers: Buy Low, Sell High  | O(N logN)| O(1)     |
+ | 23 | Task Scheduler (LC 621)                     | Max Frequency Frame Geometry      | O(N)     | O(1)     |
+ | 24 | Reorganize String (LC 767)                  | Max-Heap Frequency Interleaving   | O(N logA)| O(A)     |
+ | 25 | Largest Number (LC 179)                     | Custom String Concatenation Sort  | O(N logN)| O(N)     |
+ | 26 | Min Deletions for Unique Freqs (LC 1647)    | Hash Set Seen Frequency Decrement | O(N)     | O(1)     |
+ | 27 | Min Swaps to Make Strings Equal (LC 1247)   | XY and YX Mismatch Pair Counting  | O(N)     | O(1)     |
+ | 28 | Shortest Unsorted Subarray (LC 581)         | Running Prefix Max & Suffix Min   | O(N)     | O(1)     |
+ | 29 | Fractional Knapsack (GFG)                   | Value-to-Weight Ratio Sorting     | O(N logN)| O(1)     |
+ | 30 | Job Sequencing with Deadlines (GFG)         | Profit Sorting + Slot Allocation  | O(N^2)   | O(MaxD)  |
+ | 31 | Lemonade Change (LC 860)                    | Greedy Bill Register Tracking     | O(N)     | O(1)     |
+ | 32 | Maximum Units on a Truck (LC 1710)          | Units-Per-Box Descending Greedy   | O(N logN)| O(1)     |
+ | 33 | Wiggle Subsequence (LC 376)                 | Local Peak & Valley Count Tracker | O(N)     | O(1)     |
+ | 34 | Max Bags With Full Rocks (LC 2279)          | Capacity Deficit Sorting          | O(N logN)| O(N)     |
+ | 35 | Course Schedule III (LC 630)                | Deadline Sort + Max-Heap Regret   | O(N logN)| O(N)     |
+ | 36 | IPO - Maximize Capital (LC 502)             | Min-Heap Capital + Max-Heap Profit| O(N logN)| O(N)     |
+ | 37 | Connect Sticks / Huffman (LC 1167)          | Min-Heap Pairwise Merge Reduction | O(N logN)| O(N)     |
+ | 38 | Advantage Shuffle (LC 870)                  | Tian Ji Horse Racing Two Pointers | O(N logN)| O(N)     |
+ | 39 | Min Increments to Form Target (LC 1526)     | Positive Delta Level Accumulation | O(N)     | O(1)     |
+ ====================================================================================================
+*/
+
+
 class Solution {
 public:
 
@@ -998,38 +1047,3 @@ public:
     // - Complexity: Time: O(N), Space: O(1).
 };
 
-/*
-====================================================================================================
-                    ULTIMATE LIVE INTERVIEW CHEAT SHEET: GREEDY ALGORITHMS
-====================================================================================================
-
- 1. THE GREEDY CHOICE PRINCIPLE:
-    - A problem exhibits the Greedy Choice Property if locally optimal choices lead to a globally optimal solution.
-    - If a greedy choice ever requires backtracking or regret, the problem is DYNAMIC PROGRAMMING, not Greedy.
-
- 2. INTERVAL PROBLEMS SORTING GOLDEN RULES:
-    | Goal                                        | Sort Order                | Key Condition                           |
-    |:--------------------------------------------|:--------------------------|:----------------------------------------|
-    | Max non-overlapping intervals (LC 435)      | Sort by END TIME          | if start[i] >= lastEnd: pick           |
-    | Min arrows to burst balloons (LC 452)       | Sort by END TIME          | if start[i] > arrowPos: shoot new arrow |
-    | Merge overlapping intervals (LC 56)         | Sort by START TIME        | if start[i] <= end[last]: extend end    |
-    | Insert interval (LC 57)                     | Already sorted by START   | 3 phases: before, overlap merge, after  |
-    | Min conference rooms / platforms (LC 253)   | Chronological Start & End | if start[i] < end[j]: room++; else j++  |
-    | N meetings in one room (GFG / SDE)          | Sort by END TIME          | if start[i] > lastEnd: pick             |
-
- 3. HEAP REPLACEMENT / REGRET GREEDY (COURSE SCHEDULE III / IPO):
-    - When greedy selection encounters a future constraint violation, evict the WORST past decision (max duration / highest cost) using a Max-Heap to free up budget.
-
- 4. TWO-PASS GREEDY (CANDY PATTERN):
-    - When an element's optimal value depends on BOTH its left and right neighbors:
-      Pass 1 (Left to Right): Resolve left neighbor constraint.
-      Pass 2 (Right to Left): Resolve right neighbor constraint while preserving left with `max()`.
-
- 5. BALANCE / GAS TANK GREEDY:
-    - If total sum >= 0, a valid starting index is GUARANTEED to exist.
-    - If running tank drops below 0 at station B starting from A, NO station in [A..B] can be a valid start. Reset to B + 1.
-
- 6. MATCHING & COOLDOWN (TASK SCHEDULER):
-    - Most frequent element dictates frame size: `(maxFreq - 1) * (n + 1) + countOfMaxFreq`.
-====================================================================================================
-*/

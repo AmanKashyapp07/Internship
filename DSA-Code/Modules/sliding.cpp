@@ -32,6 +32,30 @@ using vvl = vector<vector<ll>>;
 
 [[maybe_unused]] const ll MOD = 1e9 + 7;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Maximum Sum Subarray of Size K              | Fixed-Size Sliding Window         | O(N)     | O(1)     |
+ | 2  | Longest Substring Without Repeating (LC 3)  | Variable Window + ASCII Direct Map| O(N)     | O(1)     |
+ | 3  | Minimum Size Subarray Sum (LC 209)          | Variable Window + Left Shrinking  | O(N)     | O(1)     |
+ | 4  | Longest Substring At Most K Distinct (LC340)| Sliding Window + Frequency Table  | O(N)     | O(K)     |
+ | 5  | Minimum Window Substring (LC 76)            | Sliding Window + Missing Match Cnt| O(S + T) | O(1)     |
+ | 6  | Subarrays with K Distinct Integers (LC 992) | Exactly(K) = AtMost(K)-AtMost(K-1)| O(N)     | O(K)     |
+ | 7  | Anagrams (LC 438) & Permutation (LC 567)    | Fixed-Size Window Freq Matching   | O(S)     | O(1)     |
+ | 8  | Longest Repeating Char Replacement (LC 424) | Window - MaxFreq <= K Condition   | O(N)     | O(1)     |
+ | 9  | Max Consecutive Ones III (LC 1004)          | Sliding Window Zero Counter <= K  | O(N)     | O(1)     |
+ | 10 | Fruit Into Baskets (LC 904)                 | At Most 2 Types Sliding Window    | O(N)     | O(1)     |
+ | 11 | Subarray Sum Equals K (LC 560)              | Prefix Sum + Frequency Hash Map   | O(N)     | O(N)     |
+ | 12 | Contiguous Array - Equal 0s & 1s (LC 525)   | Cumulative Balance + First-Seen Map| O(N)    | O(N)     |
+ | 13 | Subarray Sums Divisible by K (LC 974)       | Normalized Modulo Remainder Map   | O(N)     | O(K)     |
+ | 14 | Difference Array / Range Addition (LC 370)  | Sweep-Line Prefix Difference Array| O(N + Q) | O(N)     |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. MAXIMUM SUM SUBARRAY OF SIZE K
 // =========================================================

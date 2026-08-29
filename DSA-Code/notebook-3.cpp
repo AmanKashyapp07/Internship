@@ -45,6 +45,52 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | Reconstruct Cycle                           | Predecessor Backtracking Traversal| O(V)     | O(V)     |
+ | 2  | Shortest Cycle Length (Girth)               | Multi-Source BFS on All Vertices  | O(V(V+E))| O(V)     |
+ | 3  | Nodes in Cycles (Topological Peeling)       | In-Degree 0 Queue Cascade (Kahn)  | O(V + E) | O(V)     |
+ | 4  | Bipartite Graph Check (DFS 2-Coloring)      | Alternating DFS 2-Coloring        | O(V + E) | O(V)     |
+ | 5  | Shortest Path on Weighted DAG               | TopoSort + Linear Edge Relaxation | O(V + E) | O(V)     |
+ | 6  | Range Bitwise AND                           | Binary Prefix Bit-Shifts          | O(log R) | O(1)     |
+ | 7  | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
+ | 8  | Subarray Bitwise ORs                        | Set DP / Monotonic Frontier Values| O(N * 30)| O(N * 30)|
+ | 9  | Count Total Set Bits (1 to N)               | Periodic Bit Position Math        | O(log N) | O(1)     |
+ | 10 | Count Subsets with Sum K                    | 1D 0/1 Knapsack DP (Backwards)    | O(N * K) | O(K)     |
+ | 11 | Minimum Subset Sum Difference               | Subset Sum DP <= Total / 2        | O(N*Total| O(Total) |
+ | 12 | Get Money Sums                              | Reachable Subset Sums Boolean DP  | O(N*Total| O(Total) |
+ | 13 | Count of Longest Increasing Subsequences    | 1D DP (Length & Count Arrays)     | O(N^2)   | O(N)     |
+ | 14 | Dijkstra's Shortest Path                    | Min-Heap Priority Queue           | O(E logV)| O(V + E) |
+ | 15 | Bellman-Ford Algorithm                      | DP Edge Relaxation (V - 1 Passes) | O(V * E) | O(V)     |
+ | 16 | Shortest Path on Unweighted Graph (BFS)     | BFS Queue Level-by-Level Scan     | O(V + E) | O(V)     |
+ | 17 | Floyd-Warshall All-Pairs Shortest Path      | Intermediate Vertex DP (k-loop)   | O(V^3)   | O(V^2)   |
+ | 18 | Negative Cycle Detection (Floyd-Warshall)   | Diagonal Self-Distance Inspection | O(V^3)   | O(V^2)   |
+ | 19 | Lexicographical Topological Sort            | Min-Heap Kahn's BFS               | O(VlogV+E| O(V)     |
+ | 20 | Shortest Path on DAG via Topo Order         | TopoSort Sequential Relaxation    | O(V + E) | O(V)     |
+ | 21 | Graph M-Coloring (Backtracking)             | Backtracking DFS with Safety Check| O(M^V)   | O(V)     |
+ | 22 | Cheapest Flights within K Stops             | State-Extended Dijkstra (stops)   | O(E * K) | O(V * K) |
+ | 23 | Shortest Path Visiting All Nodes            | Multi-Source Bitmask BFS          | O(V 2^V) | O(V 2^V) |
+ | 24 | Shortest Common Supersequence (SCS) Length  | Reduction: \|S1\|+\|S2\| - LCS(S1,S2) | O(\|S1\|\|S2\|)| O(\|S1\|\|S2\|)|
+ | 25 | Reconstruct Shortest Common Supersequence   | 2D LCS Table Backtracking         | O(\|S1\|\|S2\|)| O(\|S1\|\|S2\|)|
+ | 26 | Minimum Window Subsequence                  | Forward Match + Backward Shrink   | O(\|S\|\|T\|)  | O(1)     |
+ | 27 | Minimum Window Substring                    | Sliding Window with Match Counter | O(\|S\|+\|T\|) | O(\|S\|+\|T\|)|
+ | 28 | Matrix Chain Multiplication                 | Interval DP over Chain Lengths    | O(N^3)   | O(N^2)   |
+ | 29 | Distinct Subsequences                       | 1D Space-Optimized DP (Backwards) | O(\|S\|\|T\|)  | O(\|T\|) |
+ | 30 | Maximum Sum BST in Binary Tree              | Post-Order Bottom-Up DFS          | O(N)     | O(H)     |
+ | 31 | Remove Leaf Nodes with Target Value         | Post-Order Recursive Tree Pruning | O(N)     | O(H)     |
+ | 32 | Minimum Extra Characters in String          | 1D Memoized DP + Hash Set         | O(N^2)   | O(N + D) |
+ | 33 | Bounded Knapsack (Binary Power Split)       | Binary Split + 1D 0/1 Knapsack    | O(WlogK) | O(W)     |
+ | 34 | LCS Length of 2 Permutations                | Index Map + Patience Sorting LIS  | O(N logN)| O(N)     |
+ | 35 | Longest Common Increasing Subseq (LCIS)     | 1D DP with Optimal Prefix Tracker | O(N * M) | O(M)     |
+ | 36 | Possible Path Lengths in DAG                | TopoSort + 2D Reachability DP     | O(VN+EN) | O(V * N) |
+ ====================================================================================================
+*/
+
+
 // =========================================================
 // 1. RECONSTRUCT CYCLE
 // =========================================================
@@ -1137,35 +1183,3 @@ vi possibleLengths(int n, const vvi &g) {
 // - Approach: Topological Sort + 2D Reachability DP dp[node][len].
 // - Intuition: Transition dp[v][len + 1] = true if dp[u][len] is true for edge (u, v); processing in topological order guarantees optimal DP propagation.
 // - Complexity: Time: O(V * N + E * N) bitset/boolean transitions, Space: O(V * N) for DP state matrix.
-
-/*
- ====================================================================================================
-             ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: DP, STRINGS & ADVANCED GRAPHS
- ====================================================================================================
-
- 1. PATTERN IDENTIFICATION MATRIX:
-    | Problem Type / Clue                         | Technique / Data Structure          | Core Transition / State               |
-    |:--------------------------------------------|:------------------------------------|:--------------------------------------|
-    | 0/1 Knapsack / Subset Sum                   | 1D DP (iterate backwards)           | dp[w] = max(dp[w], dp[w - wt] + val)  |
-    | Unbounded Knapsack / Coin Change            | 1D DP (iterate forward)             | dp[w] = min(dp[w], dp[w - coin] + 1)  |
-    | Bounded Knapsack (count k_i)                | Binary Powers Splitting (1,2,4,rem) | Reduces O(N*K*W) to O(N log K * W)     |
-    | Longest Common Subsequence (LCS)            | 2D DP table                         | match: 1 + dp[i-1][j-1], else max(...) |
-    | Shortest Common Supersequence (SCS)         | |S1| + |S2| - LCS(S1, S2)           | Backtrack LCS table to build string    |
-    | Matrix Chain Multiplication / Balloon Burst | Interval DP (outer loop: length)    | dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost)|
-    | Distinct Subsequences (s contains t)        | 1D DP backwards                     | dp[j] += dp[j-1] when s[i-1] == t[j-1]|
-    | Shortest Path in DAG                        | Topological Sort + Linear Relax     | dist[v] = min(dist[v], dist[u] + wt)  |
-    | State-extended Shortest Path (<= K stops)   | Dijkstra on (node, stops)           | dist[v][stops+1] = min(...)           |
-    | TSP / Visit all nodes (N <= 15-20)          | Bitmask BFS / DP                    | dist[node][mask]                      |
-    | Girth (Shortest Cycle in unweighted graph)  | BFS from every node                 | min_cycle = min(dist[u] + dist[v] + 1)|
-    | Cycle nodes identification                  | Topological Peeling (Kahn's BFS)    | In-degree 0 cascade leaves cycle nodes|
-    | Range Bitwise AND [L, R]                    | Bit shifts                          | while (L != R) L >>= 1, R >>= 1       |
-    | Pairwise Bitwise AND = 0 Subarray           | Sliding window + OR bitmask         | shrink left when (mask & nums[r]) != 0|
-
- 2. TOP DP MISTAKES IN INTERVIEWS & OAs:
-    • Forgetting to iterate backwards in 0/1 Knapsack: causes items to be counted multiple times (unbounded).
-    • Negative cycle loop in Bellman-Ford: must check for dist[u] != INF before relaxing to avoid overflow.
-    • Modulo arithmetic: (a + b) % MOD; (a - b + MOD) % MOD; (1LL * a * b) % MOD.
-    • LCS Reconstruction: remember to append leftover characters of s1 and s2 after the main while loop finishes.
-    • Bitmask constraints: 1 << N is undefined behavior if N >= 31 in standard int; use 1LL << N.
- ====================================================================================================
-*/

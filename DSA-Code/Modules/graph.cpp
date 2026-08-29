@@ -23,6 +23,59 @@
 #endif
 using namespace std;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | DFS Traversal                               | Recursive Adjacency Traversal     | O(V + E)  | O(V)     |
+ | 2  | BFS Traversal                               | Level-by-Level Queue Traversal    | O(V + E)  | O(V)     |
+ | 3  | Number of Connected Components              | Unvisited Component DFS / BFS     | O(V + E)  | O(V)     |
+ | 4  | Cycle Detection (Undirected Graph)          | Parent-Tracking DFS / BFS         | O(V + E)  | O(V)     |
+ | 5  | Cycle Detection (Directed Graph)            | 3-Color / Recursion Path Set DFS  | O(V + E)  | O(V)     |
+ | 6  | Bipartite Graph Check (BFS / DFS)           | 2-Color Alternate Parity Check    | O(V + E)  | O(V)     |
+ | 7  | Topological Sort (Kahn's Algorithm)         | In-Degree 0 Queue Reduction (BFS) | O(V + E)  | O(V)     |
+ | 8  | Topological Sort (DFS)                      | Post-Order DFS Reverse Order      | O(V + E)  | O(V)     |
+ | 9  | Shortest Path in Unweighted Graph           | Unit-Edge BFS Distance Array      | O(V + E)  | O(V)     |
+ | 10 | Dijkstra's Shortest Path (Positive Weights) | Min-Heap Priority Queue (Greedy)  | O((V+E)lgV| O(V)     |
+ | 11 | 0-1 BFS                                     | Double-Ended Queue (push_front/back)| O(V + E)| O(V)     |
+ | 12 | Bellman-Ford Algorithm                      | (V - 1) Edge Relaxation + Cycle Det| O(V * E) | O(V)     |
+ | 13 | Floyd-Warshall All-Pairs Shortest Path      | 3D Matrix DP Relaxation (k, i, j) | O(V^3)    | O(V^2)   |
+ | 14 | Disjoint Set Union (DSU / Union-Find)       | Path Compression & Union by Rank  | O(alpha(N)| O(N)     |
+ | 15 | Cycle Detection using DSU                   | Dynamic Edge Component Find Check | O(E alpha)| O(V)     |
+ | 16 | Kruskal's Minimum Spanning Tree (MST)       | Edge Weight Sort + DSU Cycle Avoid| O(E logE) | O(V)     |
+ | 17 | Prim's Minimum Spanning Tree (MST)          | Cut-Property Min-Heap Expansion   | O((V+E)lgV| O(V)     |
+ | 18 | Number of Islands (LC 200)                  | 2D Grid DFS / BFS Flood Fill      | O(R * C)  | O(R * C) |
+ | 19 | Shortest Path in Binary Matrix (LC 1091)    | 8-Directional Grid BFS Queue       | O(R * C)  | O(R * C) |
+ | 20 | Word Ladder (LC 127)                        | BFS Shortest Transformation Path   | O(N*L*26) | O(N * L) |
+ | 21 | Multi-Source BFS (Rotting Oranges / 0-1 Mat)| Multi-Queue Seeded BFS Expansion  | O(R * C)  | O(R * C) |
+ | 22 | K Shortest Paths                            | Min-Heap Dijkstra with K-Visits   | O(K E logV| O(K * V) |
+ | 23 | Eventual Safe States (LC 802)               | Reverse Graph Kahn's Topo Sort    | O(V + E)  | O(V)     |
+ | 24 | Shortest Path in DAG via Topo Sort          | Linear Topo Order Edge Relaxation | O(V + E)  | O(V)     |
+ | 25 | Path with Minimum Effort (LC 1631)          | Minimax Height Delta Dijkstra     | O(RC logRC| O(R * C) |
+ | 26 | Network Delay Time (LC 743)                 | Single-Source Dijkstra Min-Heap   | O(E logV) | O(V)     |
+ | 27 | Number of Ways to Arrive at Destination     | Dijkstra + Combinatorial Path DP  | O(E logV) | O(V)     |
+ | 28 | Number of Operations to Connect Network     | DSU Redundant Edge Surplus Count  | O(V + E)  | O(V)     |
+ | 29 | Most Stones Removed with Same Row/Col       | Row & Col Coordinate Component DSU| O(N alpha)| O(N)     |
+ | 30 | Number of Islands II (Dynamic Land)         | Online 2D Grid DSU Union Merging  | O(K alpha)| O(R * C) |
+ | 31 | Critical Connections / Bridges (LC 1192)    | Tarjan's Low-Link DFS (low[v]>tin) | O(V + E)  | O(V)     |
+ | 32 | Articulation Points (Cut Vertices)          | Tarjan's Low-Link (low[v]>=tin[u])| O(V + E)  | O(V)     |
+ | 33 | Strongly Connected Components (Kosaraju)    | 2-Pass DFS + Transpose Graph Stack| O(V + E)  | O(V)     |
+ | 34 | Cheapest Flights Within K Stops (LC 787)    | Bellman-Ford / BFS with Stop Budget| O(K * E) | O(V)     |
+ | 35 | Alien Dictionary (LC 269)                   | Lexicographical DAG Topo Sort     | O(N*L + A)| O(A)     |
+ | 36 | Course Schedule I & II (LC 207 & 210)       | Kahn's Algorithm / Cycle Topo Sort| O(V + E)  | O(V)     |
+ | 37 | Accounts Merge (LC 721)                     | Email-to-Owner DSU Component Group| O(N alpha)| O(N)     |
+ | 38 | M-Coloring Problem (GFG)                    | Backtracking Vertex Color Assign  | O(M^V)    | O(V)     |
+ | 39 | Flood Fill (LC 733)                         | Connected Component Color Replace | O(R * C)  | O(R * C) |
+ | 40 | Pacific Atlantic Water Flow (LC 417)        | Reverse Ocean Boundary DFS / BFS  | O(R * C)  | O(R * C) |
+ | 41 | Eulerian Path / Circuit (Hierholzer)        | Hierholzer's In-Out Degree Stack  | O(V + E)  | O(V + E) |
+ | 42 | Tarjan's Strongly Connected Components      | Single-Pass Low-Link & Stack SCC  | O(V + E)  | O(V)     |
+ | 43 | Distinct Numbers in Sliding Window          | Sliding Window Hash Map Frequencies| O(N)     | O(K)     |
+ ====================================================================================================
+*/
+
+
 
 class Solution {
 public:
@@ -1575,111 +1628,3 @@ public:
     // - Intuition: Maintain frequency map for window of size k. When sliding, decrement frequency of exiting element (removing key if 0) and increment entering element; `freq.size()` directly gives distinct element count.
     // - Complexity: Time: O(N) single pass, Space: O(K) hash map capacity.
 };
-
-/*
- ====================================================================================================
-                    ULTIMATE LIVE INTERVIEW & OA CHEAT SHEET: GRAPHS (EXPANDED)
- ====================================================================================================
-
- 1. ALGORITHM SELECTION MATRIX (EXTENDED)
-    | Problem Type / Constraints                  | Algorithm / Data Structure          | Time Complexity       |
-    |:--------------------------------------------|:------------------------------------|:----------------------|
-    | Shortest path, unweighted                   | BFS (Queue)                         | O(V + E)              |
-    | Shortest path, 0-1 edge weights             | 0-1 BFS (Deque: push_front/back)    | O(V + E)              |
-    | Shortest path, non-negative weights         | Dijkstra (Min-Heap Priority Queue)  | O((V + E) log V)      |
-    | Shortest path, small weight range [0..W]    | Dial's Algorithm (Bucket Queue)     | O(V + E + W*V)        |
-    | Shortest path with negative weights         | Bellman-Ford (Relax edges V-1 times)| O(V * E)              |
-    | Detect negative cycle                       | Bellman-Ford (Extra V-th pass)      | O(V * E)              |
-    | SPFA (Queue-optimized Bellman-Ford)         | SPFA (Avoid in adversarial OAs)     | O(V * E) worst case   |
-    | All-pairs shortest path (V <= 400-500)      | Floyd-Warshall (3 nested loops)     | O(V^3)                |
-    | DAG shortest / longest path                 | Topo Sort + relax in order          | O(V + E)              |
-    | Connected components / flood-fill           | DFS / BFS / DSU                     | O(V + E) or O(R * C)  |
-    | Cycle detection (Undirected)                | DFS (track parent) OR DSU           | O(V + E)              |
-    | Cycle detection (Directed)                  | DFS (3 states) OR Kahn's            | O(V + E)              |
-    | Dependency resolution / Task ordering       | Topological Sort (Kahn's / DFS)     | O(V + E)              |
-    | Count topological orders / detect unique    | Kahn's (Check queue size == 1 step) | O(V + E)              |
-    | MST (sparse graph, E small)                 | Kruskal's (Sort edges + DSU)        | O(E log E)            |
-    | MST (dense graph, E large)                  | Prim's (Min-Heap Priority Queue)    | O((V + E) log V)      |
-    | Second-best MST / MST verification          | Kruskal + Binary Lifting on tree    | O(E log E + Q log V)  |
-    | Dynamic connectivity / Merge components     | Disjoint Set Union (DSU / UF)       | O(alpha(N)) ~ O(1)    |
-    | Bipartite check / 2-coloring                | BFS / DFS coloring (0 and 1)        | O(V + E)              |
-    | Strongly Connected Components (SCC)         | Tarjan's (Single-pass, low-link)    | O(V + E)              |
-    | SCC (alternative, easier to explain live)   | Kosaraju's (2 passes + transpose)   | O(V + E)              |
-    | Bridges & Articulation Points               | Tarjan's low-link DFS               | O(V + E)              |
-    | Max flow / min cut                          | Edmonds-Karp (BFS augmenting paths) | O(V * E^2)            |
-    | Max flow, dense / large capacity graphs     | Dinic's Algorithm                   | O(V^2 * E)            |
-    | Bipartite matching                          | Hopcroft-Karp OR Kuhn's Algorithm   | O(E * sqrt(V)) / O(VE)|
-    | Eulerian path / circuit                     | Hierholzer's Algorithm              | O(E)                  |
-    | LCA queries (static tree)                   | Binary Lifting OR Euler Tour + RMQ  | O((V log V) + log V)  |
-    | Multi-source shortest distance              | Multi-source BFS / Dijkstra         | O(V + E)              |
-    | K-shortest paths                            | Yen's Algorithm                     | O(K * V * (E+V log V))|
-
- 2. GRID AS GRAPH TRANSLATION RULES
-    • Cell (r, c) is a vertex with 4 neighbors: (r+1,c), (r-1,c), (r,c+1), (r,c-1).
-    • 8-directional: add diagonals (r+1,c+1), (r+1,c-1), (r-1,c+1), (r-1,c-1).
-    • Boundary check: `r >= 0 && r < R && c >= 0 && c < C`.
-    • In-place marking: overwrite '1' with '0' or store distance directly for O(1) extra space
-      (only do this if the interviewer says mutating input is OK — ask first).
-    • Direction array trick for cleaner code:
-        int dr[] = {-1, 1, 0, 0};
-        int dc[] = {0, 0, -1, 1};
-        for (int d = 0; d < 4; d++) {
-            int nr = r + dr[d], nc = c + dc[d];
-            if (nr >= 0 && nr < R && nc >= 0 && nc < C && !visited[nr][nc]) { ... }
-        }
-    • Encode (r, c) as a single integer `id = r * C + c` when you need a 1D visited/dist array or DSU.
-
- 3. CYCLE DETECTION CHECKLIST
-    • Undirected: `if (visited[neighbor] && neighbor != parent) -> CYCLE!`
-      Watch out for multigraphs / parallel edges — track edge index, not just parent node, if
-      duplicate edges are allowed.
-    • Directed: DFS requires 3 states: 0 = unvisited, 1 = in current recursion call stack (path),
-      2 = completely processed.
-      `if (state[neighbor] == 1) -> CYCLE!`
-      `if (state[neighbor] == 2) -> already resolved, skip`
-    • Kahn's algorithm: if `topoOrder.size() != V` -> Directed cycle exists among remaining nodes.
-    • DSU cycle detection (undirected only): if `find(u) == find(v)` before union -> adding edge
-      (u, v) creates a cycle. Great for "redundant connection" style problems.
-
- 4. LIVE INTERVIEW & OA SURVIVAL PROTOCOL
-    • Step 1 — Clarify constraints before writing code:
-        - Directed vs undirected?
-        - Weighted vs unweighted? Can weights be negative?
-        - Is the graph guaranteed connected, or could it be disconnected/have isolated nodes?
-        - Self-loops or multi-edges possible?
-        - Is it given as edge list, adjacency matrix, or adjacency list? (Changes setup cost.)
-        - What are V and E bounds? (Drives algorithm choice — e.g. V^2 matrix DP only ok if V small.)
-    • Step 2 — Pick representation:
-        vector<vector<int>> graph(n);                       // unweighted
-        vector<vector<pair<int,int>>> graph(n);              // weighted: {neighbor, weight}
-        Adjacency matrix only when V is small (<= ~500) or graph is dense.
-    • Step 3 — Always handle disconnected components:
-        for (int i = 0; i < n; i++) if (!visited[i]) bfs(i);
-    • Step 4 — Dijkstra stale entry guard: ALWAYS write
-        if (d > dist[node]) continue;
-        immediately after popping from the heap — lazy deletion is standard and expected.
-    • Step 5 — Multi-source BFS: push ALL source vertices into the queue at depth 0 BEFORE the
-      main loop starts (e.g. Rotting Oranges, 0-1 Matrix, Walls and Gates).
-    • Step 6 — State your complexity out loud once the approach is agreed, before coding — this
-      is often what interviewers are silently grading, and it catches wrong-algorithm choices early.
-    • Step 7 — Narrate edge cases while coding: empty graph, single node, disconnected graph,
-      negative weight when Dijkstra was assumed, self-loop counted as a cycle incorrectly.
-    • Step 8 — Test on paper with a tiny example (3-4 nodes) before claiming "done" — traces
-      dry-run bugs like off-by-one boundary checks or wrong initial distance (0 vs INF).
-
- 5. COMPLEXITY & PITFALL QUICK-REFERENCE
-    • BFS/DFS: O(V + E). Adjacency matrix instead of list silently makes this O(V^2) — mention it.
-    • Forgetting `visited` check before pushing (not just before popping) in BFS -> duplicate
-      queue entries, wrong distances, sometimes infinite loop on cyclic graphs.
-    • Recursive DFS on large graphs (V > ~10^4-10^5) can stack-overflow — mention iterative DFS
-      with explicit stack as a fallback.
-    • Floyd-Warshall loop order MUST be `for k { for i { for j } } }` — k (intermediate node)
-      outermost, or the DP is wrong.
-    • Bellman-Ford: relax all edges exactly V-1 times; a Vth pass that still relaxes something
-      signals a negative cycle.
-    • Dijkstra does NOT work with negative edge weights — falls back to Bellman-Ford if negatives
-      are possible, even just one edge.
-    • DSU without path compression + union by rank degrades toward O(V) per op on adversarial
-      inputs — always include both optimizations in an interview.
- ====================================================================================================
-*/

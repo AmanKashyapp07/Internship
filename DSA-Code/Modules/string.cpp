@@ -42,6 +42,41 @@ using vll = vector<ll>;
 const ll MOD = 1e9 + 7;
 const ll P = 31;
 
+/*
+ ====================================================================================================
+                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+ ====================================================================================================
+ | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
+ |----|---------------------------------------------|-----------------------------------|----------|----------|
+ | 1  | FastHash Infrastructure                     | Polynomial Prefix Rolling Hash    | O(N)+O(1)| O(N)     |
+ | 2  | Rabin-Karp String Matching                  | Rolling Hash Substring Match      | O(N + M) | O(N)     |
+ | 3  | Finding Borders (Prefix == Suffix)          | Hash Verification of Pref/Suff    | O(N)     | O(N)     |
+ | 4  | Finding String Periods                      | Rolling Hash Substring Periodicity| O(N)     | O(N)     |
+ | 5  | O(1) Palindrome Range Queries               | Forward & Backward Hash Arrays    | O(N)+O(1)| O(N)     |
+ | 6  | Minimum Window Substring (LC 76)            | Sliding Window + Match Counter    | O(S + T) | O(1)     |
+ | 7  | Longest Substring Without Repeating (LC 3)  | Sliding Window + Direct Array Map | O(N)     | O(1)     |
+ | 8  | Group Anagrams (LC 49)                      | Sorted String / Count Hash Bucket | O(N KlogK| O(N * K) |
+ | 9  | Trie Prefix Tree (LC 208)                   | Array-Based Trie Node Traversal   | O(L) per | O(Sigma*N|
+ | 10 | KMP Algorithm (Prefix Function Pi)          | Failure Table State Transitions   | O(N)     | O(N)     |
+ | 11 | Z-Algorithm (Longest Common Prefix)         | Sliding Box [L, R] Segment Match  | O(N)     | O(N)     |
+ | 12 | Manacher's Algorithm (Palindromic Radii)    | Symmetry Center & Boundary Jump   | O(N)     | O(N)     |
+ | 13 | Longest Palindromic Substring (LC 5)        | Expand Around Centers (2N - 1)    | O(N^2)   | O(1)     |
+ | 14 | Booth's Algorithm (Min String Rotation)     | Modified KMP on Doubled (S + S)   | O(N)     | O(N)     |
+ | 15 | Shortest Palindrome (LC 214)                | KMP Pi Table on (S + '#' + revS)  | O(N)     | O(N)     |
+ | 16 | Word Break Counting (CSES / LC 139)         | 1D DP + Trie Multi-Pattern Match  | O(N * L) | O(TotalL)|
+ | 17 | Substring Concatenation All Words (LC 30)   | Multi-Offset Fixed Window HashMap | O(N * K) | O(Words) |
+ | 18 | Isomorphic Strings (LC 205)                 | Dual 256-ASCII Mapping Arrays     | O(N)     | O(1)     |
+ | 19 | Reverse Words in a String (LC 151)          | Word Tokenization & Suffix Build  | O(N)     | O(N)     |
+ | 20 | Roman to Integer (LC 13)                    | Right-to-Left Value Subtraction   | O(N)     | O(1)     |
+ | 21 | String to Integer / ATOI (LC 8)             | Whitespace Strip + Overflow Clamp | O(N)     | O(1)     |
+ | 22 | Longest Common Prefix (LC 14)               | Horizontal / Vertical Scan Match  | O(N * L) | O(1)     |
+ | 23 | Min Insertions for Palindrome (LC 1312)     | |S| - LCS(S, reverse(S)) DP       | O(N^2)   | O(N^2)   |
+ | 24 | Count and Say (LC 38)                       | Run-Length Encoding Simulation    | O(2^N)   | O(2^N)   |
+ | 25 | Compare Version Numbers (LC 165)            | Dot-Separated Numerical Parsing   | O(N + M) | O(1)     |
+ ====================================================================================================
+*/
+
+
 // ====================================================================================================
 // SECTION 1: POLYNOMIAL ROLLING HASH INFRASTRUCTURE (FASTHASH)
 // ====================================================================================================
