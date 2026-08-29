@@ -84,7 +84,7 @@ int compare_and_swap(int *ptr, int expected, int new_val) {
 |                      | (Lock/Unlock by SAME thread) | (Thread moves to Wait Queue)| structures in user-space |
 +---------------------------------------------------------------------------------------------------+
 | Counting Semaphore   | NO        | Sleep / Context Switch   | Resource pool management            |
-| (Signaling Token)    | (Thread A can signal Thread B) | (Tracks integer resource count)| (e.g. max 10 DB connections) |
+| (Signaling Tokenn)    | (Thread A can signal Thread B) | (Tracks integer resource count)| (e.g. max 10 DB connections) |
 +---------------------------------------------------------------------------------------------------+
 | Binary Semaphore     | NO        | Sleep / Context Switch   | Signaling events between threads    |
 |                      | (No ownership required)   | (Can be unlocked by anyone)  | (Task completion notifications)     |

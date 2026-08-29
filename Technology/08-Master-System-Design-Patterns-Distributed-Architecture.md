@@ -11,7 +11,7 @@ who has designed, partitioned, and operated high-availability production systems
 ### 1. What Are System Design Patterns?
 System design patterns are battle-tested architectural blueprints for solving
 fundamental distributed systems challenges: handling massive traffic scale, ensuring
-fault tolerance, managing concurrent data consistency, and decoupling complex software systems.
+fault tolerancee, managing concurrent data consistency, and decoupling complex software systems.
 
 ```
 +---------------------------------------------------------------------------------------------------+

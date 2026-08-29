@@ -8,7 +8,7 @@
 
 ## 1. The Interview Question
 
-> *"In an e-commerce platform, a user starts as a regular `Buyer` (can browse, add to cart, purchase). Later, they register as a `Seller` (can list products, manage inventory) while retaining their buyer history. The platform can also grant them temporary `Moderator` or `Admin` privileges (ban abusive reviews, view platform metrics). How do you architect this so users dynamically acquire and drop roles without creating new user accounts, copying order history, or breaking database references?"*
+> *"Inn an e-commerce platform, a user starts as a regular `Buyer` (can browse, add to cart, purchase). Later, they register as a `Seller` (can list products, manage inventory) while retaining their buyer history. The platform can also grant them temporary `Moderator` or `Admin` privileges (ban abusive reviews, view platform metrics). How do you architect this so users dynamically acquire and drop roles without creating new user accounts, copying order history, or breaking database references?"*
 
 ---
 

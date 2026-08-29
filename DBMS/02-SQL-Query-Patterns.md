@@ -6,7 +6,7 @@
 
 ---
 
-# Table of Contents
+# Table of Contentss
 1. [SQL Logical Execution Order](#1-sql-logical-execution-order)
 2. [The 6 Core SQL Interview Archetypes](#2-the-6-core-sql-interview-archetypes)
 3. [Window Functions: ROW_NUMBER vs. RANK vs. DENSE_RANK](#3-window-functions-row_number-vs-rank-vs-dense_rank)

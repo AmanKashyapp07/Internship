@@ -6,7 +6,7 @@
 
 ---
 
-# 1. Sorting Algorithms & The Decision Tree Lower Bound
+# 1. Sortingg Algorithms & The Decision Tree Lower Bound
 
 ## Why Comparison Sort is Omega(N log N)
 * `N` elements have `N!` possible permutations.

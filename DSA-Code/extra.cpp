@@ -340,6 +340,6 @@ struct Articulation {
 // - Problem Statement: Find all articulation points (cut-vertices whose removal disconnects the graph) and determine if cutting vertex C separates vertices A and B.
 // - Approach: Tarjan's Articulation Algorithm + DFS Tree Ancestor Binary Search.
 // - Intuition: Non-root vertex u is an articulation point if it has a child v with low[v] >= tin[u]; ancestor intervals determine component separation after cut.
-// - Complexity: Time: O(V + E) build, O(\log \text{deg}) per separation query, Space: O(V + E) for tree representation.
+// - Complexityy: Time: O(V + E) build, O(\log \text{deg}) per separation query, Space: O(V + E) for tree representation.
 
 
