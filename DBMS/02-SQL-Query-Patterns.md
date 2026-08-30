@@ -1,68 +1,93 @@
-# Master Guide 02: SQL Query Patterns & Archetypes
+# SQL Query Engine & Relational Execution Semantics
 
-> **Focus:** The 6 Classic SQL Interview Archetypes (Nth Highest, Duplicates, Running Sums, Streaks/Gaps, Top-N Per Group, Anti-Joins), Window Functions, WHERE vs. HAVING, and Self-Joins.
-> 
-> *Targeted for Top-Tier Tech System & Backend Engineering Interviews.*
+> **Scope:** SQL Logical Evaluation Order, Window Functions, Ranking Algorithms, Relational Set Operations, Anti-Joins, Three-Valued Logic, and Hierarchical Self-Joins.
 
 ---
 
-# Table of Contentss
-1. [SQL Logical Execution Order](#1-sql-logical-execution-order)
-2. [The 6 Core SQL Interview Archetypes](#2-the-6-core-sql-interview-archetypes)
-3. [Window Functions: ROW_NUMBER vs. RANK vs. DENSE_RANK](#3-window-functions-row_number-vs-rank-vs-dense_rank)
-4. [WHERE vs. HAVING: The Classic Trap](#4-where-vs-having-the-classic-trap)
-5. [Self-Joins & Hierarchical Queries](#5-self-joins--hierarchical-queries)
-6. [High-Frequency Interview Drill & Verbal Q&A](#6-high-frequency-interview-drill--verbal-qa)
+# Table of Contents
+1. [SQL Logical Query Processing Pipeline](#1-sql-logical-query-processing-pipeline)
+2. [Window Functions & Ranking Mechanics](#2-window-functions--ranking-mechanics)
+3. [Foundational Relational Query Patterns](#3-foundational-relational-query-patterns)
+4. [WHERE vs. HAVING: Filtering Semantics](#4-where-vs-having-filtering-semantics)
+5. [Three-Valued Logic & NULL Handling in Set Operations](#5-three-valued-logic--null-handling-in-set-operations)
+6. [Hierarchical Queries & Self-Joins](#6-hierarchical-queries--self-joins)
+7. [Query Engine Execution Principles](#7-query-engine-execution-principles)
 
 ---
 
-# 1. SQL Logical Execution Order
+# 1. SQL Logical Query Processing Pipeline
+
+SQL is a declarative language where queries specify *what* data to retrieve, while the database query optimizer builds the physical execution plan. Logically, clauses are evaluated in a strict eight-step sequence:
 
 ```
 Logical Evaluation Sequence:
 [ 1. FROM & JOINs ] ---> [ 2. WHERE Filters ] ---> [ 3. GROUP BY ] ---> [ 4. HAVING Filters ]
                                                                                |
-[ 8. LIMIT / OFFSET ] <-- [ 7. ORDER BY ] <--- [ 6. DISTINCT ] <--- [ 5. SELECT (Columns/Aliases) ]
+[ 8. LIMIT / OFFSET ] <-- [ 7. ORDER BY ] <--- [ 6. DISTINCT ] <--- [ 5. SELECT (Columns/Expressions) ]
 ```
 
-- **The Interview Trap:** Referencing a column alias declared in the `SELECT` clause inside the `WHERE` or `GROUP BY` clause. Because `WHERE` and `GROUP BY` are evaluated **before `SELECT`**, the alias does not exist yet and causes a SQL syntax error.
+### Logical Processing Implications:
+1. **Column Aliasing Visibility:** Expressions defined in the `SELECT` clause (Step 5) cannot be referenced in `WHERE` (Step 2) or `GROUP BY` (Step 3) because those stages execute before column projection occurs.
+2. **Aggregation Scoping:** Aggregation functions (`SUM`, `AVG`, `COUNT`) operate on groups formed during Step 3, meaning they are accessible in `HAVING` (Step 4) and `SELECT` (Step 5), but cannot be evaluated in `WHERE` (Step 2).
 
 ---
 
-# 2. The 6 Core SQL Interview Archetypes
+# 2. Window Functions & Ranking Mechanics
 
-### Archetype 1: N-th Highest Salary (e.g. 2nd Highest)
+Unlike `GROUP BY`, which collapses input rows into a single aggregated row per group, **Window Functions** compute values across a partition of rows while preserving the identity and cardinality of every individual input row.
+
+### Ranking Function Comparison:
+Given a partitioned set of salary values: `[100, 100, 80, 70]`
+
+```
++--------+------------+------+------------+---------------------------------------------------------+
+| SALARY | ROW_NUMBER | RANK | DENSE_RANK | MATHEMATICAL BEHAVIOR                                   |
++--------+------------+------+------------+---------------------------------------------------------+
+| 100    | 1          | 1    | 1          | All start at rank 1                                     |
+| 100    | 2          | 1    | 1          | ROW_NUMBER breaks ties arbitrarily; RANK/DENSE tie at 1 |
+| 80     | 3          | 3    | 2          | RANK skips rank 2 (1,1,3); DENSE_RANK produces (1,1,2)  |
+| 70     | 4          | 4    | 3          | DENSE_RANK maintains gapless sequential rankings        |
++--------+------------+------+------------+---------------------------------------------------------+
+```
+
+### Value Offset Navigation (`LEAD` & `LAG`):
 ```sql
--- Solution A: Modern SQL with DENSE_RANK (Handles duplicate salary ties safely)
+-- Computes day-over-day price changes within a partition
+SELECT 
+    stock_date,
+    price,
+    LAG(price, 1) OVER (ORDER BY stock_date) AS prev_day_price,
+    price - LAG(price, 1) OVER (ORDER BY stock_date) AS daily_change
+FROM StockPrices;
+```
+
+---
+
+# 3. Foundational Relational Query Patterns
+
+### Pattern 1: N-th Highest Value (Handling Duplicate Ties)
+```sql
 WITH RankedSalaries AS (
     SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rank_val
     FROM Employees
 )
-SELECT salary AS SecondHighestSalary
-FROM RankedSalaries
+SELECT salary AS NthHighestSalary
+    FROM RankedSalaries
 WHERE rank_val = 2
 LIMIT 1;
-
--- Solution B: LIMIT with OFFSET (Simple, but returns empty set instead of NULL if < 2 rows)
-SELECT (
-    SELECT DISTINCT salary
-    FROM Employees
-    ORDER BY salary DESC
-    LIMIT 1 OFFSET 1
-) AS SecondHighestSalary;
 ```
 
 ---
 
-### Archetype 2: Duplicate Record Detection & Deletion
+### Pattern 2: Duplicate Record Identification & Retention
 ```sql
--- Step A: Find Duplicate Emails
-SELECT email, COUNT(*) AS cnt
+-- Step A: Identify duplicate groups
+SELECT email, COUNT(*) AS count_val
 FROM Users
 GROUP BY email
 HAVING COUNT(*) > 1;
 
--- Step B: Delete Duplicates keeping only the MIN(id)
+-- Step B: Retain minimum identifier per duplicate group
 DELETE FROM Users
 WHERE id NOT IN (
     SELECT min_id FROM (
@@ -75,9 +100,8 @@ WHERE id NOT IN (
 
 ---
 
-### Archetype 3: Running Total / Cumulative Sum
+### Pattern 3: Cumulative Running Aggregations
 ```sql
--- Cumulative revenue per customer over time
 SELECT 
     customer_id,
     order_date,
@@ -92,10 +116,10 @@ FROM Orders;
 
 ---
 
-### Archetype 4: Consecutive Streaks (3+ Consecutive Active Days)
+### Pattern 4: Island & Gap Detection (Consecutive Streak Analysis)
 ```sql
--- The "Date Subtraction Island" Trick:
--- If dates are consecutive, (order_date - row_number * 1 day) produces a CONSTANT date group!
+-- Date Subtraction Island Algorithm:
+-- For consecutive dates, (activity_date - ROW_NUMBER() * 1 day) generates an invariant group key.
 WITH GroupedActivity AS (
     SELECT 
         user_id,
@@ -111,7 +135,7 @@ HAVING COUNT(*) >= 3;
 
 ---
 
-### Archetype 5: Top-N Records Per Category (e.g. Top 3 Earners per Dept)
+### Pattern 5: Top-N Elements per Partition
 ```sql
 WITH RankedEmployees AS (
     SELECT 
@@ -129,78 +153,69 @@ WHERE rnk <= 3;
 
 ---
 
-### Archetype 6: Anti-Join (Records in Table A NOT in Table B)
+### Pattern 6: Relational Anti-Join (Set Difference $A \setminus B$)
 ```sql
--- Option A (RECOMMENDED): LEFT JOIN with IS NULL (Fast with indexes)
+-- Approach A: LEFT JOIN with IS NULL check (Optimized via index lookups)
 SELECT c.customer_id, c.name
 FROM Customers c
 LEFT JOIN Orders o ON c.customer_id = o.customer_id
 WHERE o.customer_id IS NULL;
 
--- Option B: NOT EXISTS (Safe with NULL values)
+-- Approach B: NOT EXISTS Subquery (Correlated subquery evaluation)
 SELECT c.customer_id, c.name
 FROM Customers c
 WHERE NOT EXISTS (
     SELECT 1 FROM Orders o WHERE o.customer_id = c.customer_id
 );
-
--- THE TRAP: Never use `WHERE id NOT IN (SELECT id FROM Orders)` if Orders.id contains NULL!
--- If the subquery returns even ONE NULL, `NOT IN` evaluates to UNKNOWN and returns 0 rows!
 ```
 
 ---
 
-# 3. Window Functions: ROW_NUMBER vs. RANK vs. DENSE_RANK
-
-Given Salaries: `[100, 100, 80, 70]`
-
-```
-+--------+------------+------+------------+---------------------------------------------------------+
-| SALARY | ROW_NUMBER | RANK | DENSE_RANK | BEHAVIORAL DIFFERENCE                                   |
-+--------+------------+------+------------+---------------------------------------------------------+
-| 100    | 1          | 1    | 1          | All start at 1                                          |
-| 100    | 2          | 1    | 1          | ROW_NUMBER breaks ties arbitrarily; RANK/DENSE assign 1 |
-| 80     | 3          | 3    | 2          | RANK skips rank 2 (1,1,3); DENSE_RANK preserves (1,1,2) |
-| 70     | 4          | 4    | 3          | DENSE_RANK produces continuous sequential rankings      |
-+--------+------------+------+------------+---------------------------------------------------------+
-```
-
-### LEAD() and LAG() Value Offset Queries:
-```sql
--- Compare each day's price to the previous day's price
-SELECT 
-    stock_date,
-    price,
-    LAG(price, 1) OVER (ORDER BY stock_date) AS prev_day_price,
-    price - LAG(price, 1) OVER (ORDER BY stock_date) AS daily_change
-FROM StockPrices;
-```
-
----
-
-# 4. WHERE vs. HAVING: The Classic Trap
+# 4. WHERE vs. HAVING: Filtering Semantics
 
 ```sql
--- INCORRECT QUERY (Compile Error):
-SELECT dept_id, AVG(salary) AS avg_sal
+-- WHERE filters individual tuples BEFORE grouping.
+-- HAVING filters aggregated groups AFTER group formation.
+SELECT dept_id, AVG(salary) AS avg_salary
 FROM Employees
-WHERE AVG(salary) > 50000 -- ERROR: Cannot use aggregate functions in WHERE clause!
-GROUP BY dept_id;
-
--- CORRECT QUERY (WHERE filters rows BEFORE grouping; HAVING filters groups AFTER):
-SELECT dept_id, AVG(salary) AS avg_sal
-FROM Employees
-WHERE status = 'Active'   -- Filters individual employee rows first
+WHERE status = 'Active'         -- Predicate applied to base tuples
 GROUP BY dept_id
-HAVING AVG(salary) > 50000; -- Filters grouped department aggregates
+HAVING AVG(salary) > 50000;     -- Predicate applied to grouped aggregate result
 ```
 
 ---
 
-# 5. Self-Joins & Hierarchical Queries
+# 5. Three-Valued Logic & NULL Handling in Set Operations
+
+SQL implements Kleene's Three-Valued Logic (`TRUE`, `FALSE`, `UNKNOWN`).
+
+### The `NOT IN` with `NULL` Semantics:
+```sql
+-- Given: Orders table contains a row where customer_id IS NULL
+SELECT * FROM Customers 
+WHERE customer_id NOT IN (SELECT customer_id FROM Orders);
+```
+- In three-valued logic, `x NOT IN (1, 2, NULL)` expands to:
+  `x != 1 AND x != 2 AND x != NULL`
+- Since `x != NULL` evaluates to `UNKNOWN`, the entire conjunction evaluates to `UNKNOWN` or `FALSE`.
+- **Result:** The query returns 0 rows. Use `NOT EXISTS` or `LEFT JOIN ... WHERE ... IS NULL` to safely handle nullable foreign keys.
+
+### `UNION` vs. `UNION ALL`:
+- **`UNION`:** Performs set union with deduplication via implicit sort or hash aggregation.
+- **`UNION ALL`:** Concatenates relations without deduplication, avoiding sorting and hashing CPU overhead.
+
+### Aggregate Counting Behavior:
+- **`COUNT(*)`:** Computes the total number of tuples in a relation or group, including rows containing `NULL` values.
+- **`COUNT(column_name)`:** Computes only tuples where `column_name` is explicitly `NOT NULL`.
+
+---
+
+# 6. Hierarchical Queries & Self-Joins
+
+A self-join joins a relation with itself, modeling unary relationships and recursive hierarchical data structures (e.g. employee-manager hierarchies, graph adjacency lists).
 
 ```sql
--- Find Employees earning strictly MORE than their direct Manager
+-- Query: Find all employees earning more than their immediate managers
 SELECT 
     e.name AS employee_name,
     e.salary AS employee_salary,
@@ -213,19 +228,8 @@ WHERE e.salary > m.salary;
 
 ---
 
-# 6. High-Frequency Interview Drill & Verbal Q&A
+# 7. Query Engine Execution Principles
 
-### Q1: Why does `NOT IN` return 0 rows when the subquery contains a `NULL`?
-> **Answer:** In SQL three-valued logic (`TRUE`, `FALSE`, `UNKNOWN`), `x NOT IN (1, 2, NULL)` expands to `x != 1 AND x != 2 AND x != NULL`. Comparing anything to `NULL` yields `UNKNOWN`, making the entire `AND` condition evaluate to `UNKNOWN` and filtering out all candidate rows.
-
-### Q2: What is the difference between `UNION` and `UNION ALL`?
-> **Answer:** **`UNION`** removes duplicate rows by executing an expensive implicit sort or hash distinct operation in memory/disk. **`UNION ALL`** concatenates the result sets directly without deduplication, making it significantly faster.
-
-### Q3: When does an index fail to optimize a `LIKE` query?
-> **Answer:** Standard B+ Tree indexes only support prefix lookups (`LIKE 'Alice%'`). Wildcards at the beginning (`LIKE '%Alice'`) or middle (`LIKE '%Alice%'`) **force a full table scan** because the leftmost characters cannot be matched against the index tree.
-
-### Q4: What is the difference between `COUNT(*)` and `COUNT(column_name)`?
-> **Answer:** **`COUNT(*)`** counts total rows in the table or group, including rows containing `NULL` values. **`COUNT(column_name)`** counts only rows where `column_name` is **strictly `NOT NULL`**.
-
-### Q5: How do Window Functions differ from `GROUP BY`?
-> **Answer:** `GROUP BY` collapses multiple rows into a single summary output row per group. Window Functions calculate aggregate/ranking values across defined partitions while **retaining individual row identities and returning the original row count**.
+1. **Window Function Execution:** Window operations run during Step 5 (`SELECT`) after `WHERE`, `GROUP BY`, and `HAVING` filters are complete.
+2. **Index-Aware Predicates:** B+ Tree indexes accelerate equality (`=`), range (`BETWEEN`, `<`, `>`), and prefix pattern matching (`LIKE 'prefix%'`). Leading wildcards (`LIKE '%suffix'`) negate index tree traversals, forcing full relation scans.
+3. **Set Operations:** Prefer `UNION ALL` over `UNION` whenever duplicates are impossible or acceptable, eliminating intermediate sort/hash phases in the query execution engine.

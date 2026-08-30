@@ -1,296 +1,269 @@
-# Master Guide 03: Distributed Tradeoffs, Reliability & Security
+# Distributed Systems Tradeoffs, Fault Tolerance & Reliability Engineering
 
-> **Focus:** Horizontal vs. Vertical Scaling, CAP & PACELC Theorems, Consistency Models, Latency vs. Throughput (p99 Tail Latency), High Availability SLAs, Rate Limiting Algorithms, Circuit Breakers, and SQL vs. NoSQL vs. NewSQL.
-> 
-> *Targeted for Top-Tier Tech Engineering & Internship Interviews.*
+> **Scope:** Horizontal vs. Vertical Elastic Scaling, CAP Theorem Formal Proofs & PACELC Taxonomy, Distributed Consistency Spectrum, Latency vs. Throughput & Microservice Tail Latency Amplification ($p99$), High Availability SLA Mathematical Models, Rate Limiting Algorithms & Distributed Lua Evaluators, Fault-Tolerance State Machines (Circuit Breakers, Exponential Backoff with Jitter, Bulkheads), Database Taxonomy (SQL, NoSQL, NewSQL Distributed Spanner Consensus), and Service Topology Tradeoffs.
 
 ---
 
 # Table of Contents
-1. [Horizontal vs. Vertical Scaling](#1-horizontal-vs-vertical-scaling)
-2. [CAP Theorem & The PACELC Extension](#2-cap-theorem--the-pacelc-extension)
-3. [Consistency Models: Strong vs. Eventual](#3-consistency-models-strong-vs-eventual)
-4. [Latency vs. Throughput & Tail Latency (p99)](#4-latency-vs-throughput--tail-latency-p99)
-5. [High Availability & The "Nines" of Uptime](#5-high-availability--the-nines-of-uptime)
-6. [Rate Limiting Algorithms & Redis Implementation](#6-rate-limiting-algorithms--redis-implementation)
-7. [Resiliency Patterns: Circuit Breakers & Backoff](#7-resiliency-patterns-circuit-breakers--backoff)
-8. [SQL vs. NoSQL vs. NewSQL Master Decision Matrix](#8-sql-vs-nosql-vs-newsql-master-decision-matrix)
-9. [Monolith vs. Microservices vs. Serverless](#9-monolith-vs-microservices-vs-serverless)
-10. [Glanceable Summary Matrix](#10-glanceable-summary-matrix)
+1. [Horizontal vs. Vertical Elastic Scaling Models](#1-horizontal-vs-vertical-elastic-scaling-models)
+2. [CAP Theorem Formalism & The PACELC Framework](#2-cap-theorem-formalism--the-pacelc-framework)
+3. [The Distributed Consistency Spectrum](#3-the-distributed-consistency-spectrum)
+4. [Latency, Throughput & Tail Latency Amplification ($p99$)](#4-latency-throughput--tail-latency-amplification-p99)
+5. [High Availability SLAs & Uptime Mathematics](#5-high-availability-slas--uptime-mathematics)
+6. [Rate Limiting Algorithms & Distributed Token Buckets](#6-rate-limiting-algorithms--distributed-token-buckets)
+7. [Distributed Fault-Tolerance Patterns & State Machines](#7-distributed-fault-tolerance-patterns--state-machines)
+8. [Database Engine Taxonomy: SQL vs. NoSQL vs. NewSQL](#8-database-engine-taxonomy-sql-vs-nosql-vs-newsql)
+9. [Service Architecture Topologies: Monolith vs. Microservices vs. Serverless](#9-service-architecture-topologies-monolith-vs-microservices-vs-serverless)
+10. [Core Architectural Summary Matrix](#10-core-architectural-summary-matrix)
 
 ---
 
-# 1. Horizontal vs. Vertical Scaling
+# 1. Horizontal vs. Vertical Elastic Scaling Models
 
-### 1. The "Aha!" Intuition
-- **Vertical Scaling (Scale Up):** Buying a faster Ferrari to carry packages. Fast and simple, but eventually you hit the laws of physics and Ferrari maxes out.
-- **Horizontal Scaling (Scale Out):** Hiring a fleet of 50 delivery vans. If package volume doubles, you simply hire 50 more vans.
-
-### 2. ASCII Architecture Flowchart
 ```
-VERTICAL SCALING (Scale Up):
-[ Server: 4 Core, 16GB RAM ] ---> (Upgrade!) ---> [ Monster Server: 128 Core, 1TB RAM ]
-                                                   (Hits Hardware Limit & Exponential Cost!)
+Vertical Scaling (Scale-Up):
+[ Host: 4 Cores, 16GB RAM ] ---> [ Hardware Upgrade ] ---> [ Host: 128 Cores, 2TB RAM ]
+                                                            (Bounded by motherboard limits)
 
-HORIZONTAL SCALING (Scale Out):
-                                  +---> [ Node 1 (8 Core) ]
-[ Traffic Spikes 10x ] ---> [ LB ] ---> [ Node 2 (8 Core) ] ---> [ Auto-Scale to 50 Nodes ]
-                                  +---> [ Node 3 (8 Core) ]
+Horizontal Scaling (Scale-Out):
+                                     +---> [ Compute Node 1 ]
+[ Ingress Traffic ] ---> [ L4/L7 LB ] ---> [ Compute Node 2 ] ---> [ Dynamic Elastic Expansion ]
+                                     +---> [ Compute Node 3 ]
 ```
 
-### 3. Comparison Matrix
 ```
-+---------------------------------------------------------------------------------------------------+
-| ATTRIBUTE            | VERTICAL SCALING (SCALE UP)           | HORIZONTAL SCALING (SCALE OUT)     |
-+---------------------------------------------------------------------------------------------------+
-| Mechanics            | Upgrade CPU/RAM of a single machine   | Add more commodity machines to pool|
-| Downtime Required    | Usually requires hardware reboot      | Zero downtime (Add nodes live)     |
-| Complexity           | Zero code change (Monolith friendly)  | Requires stateless architecture    |
-| Hard Scaling Limit   | Physical hardware & motherboard ceiling| Infinite linear scaling in theory  |
-| Cost Curve           | Exponentially expensive at high specs | Linear, predictable cloud cost     |
-| Best Use Case        | Early stage MVPs, Relational DBs      | Web application tiers, NoSQL nodes |
-+---------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| ATTRIBUTE            | VERTICAL SCALING (Scale-Up)          | HORIZONTAL SCALING (Scale-Out)       |
++----------------------------------------------------------------------------------------------------+
+| Scaling Vector       | Expand CPU, RAM, and NVMe on 1 node  | Add commodity compute nodes to pool  |
+| Hardware Limit       | Rigid physical motherboard ceiling   | Practically unbounded linear scaling |
+| Downtime Requirement | Hardware replacement reboot cycles   | Zero downtime via rolling deployments|
+| Architectural Impact | Trivial (Retains single-node state)  | Requires stateless service instances |
+| Cost Trajectory      | Superlinear (Exponential at top spec)| Linear predictable commodity scaling |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 2. CAP Theorem & The PACELC Extension
+# 2. CAP Theorem Formalism & The PACELC Framework
 
-### 1. The "Aha!" Intuition
-Imagine two bank branches in New York and London. A storm cuts the transatlantic undersea cable between them (**Network Partition**). A customer walks into the London branch to withdraw money. The London branch has two choices:
-1. **Refuse the withdrawal (Consistency / CP):** "The network is down; I cannot verify your balance in NY. Transaction blocked!"
-2. **Hand over the cash (Availability / AP):** "Here is your money! We will reconcile with NY when the storm clears (even if you overdraw)."
-
-### 2. ASCII Architecture Flowchart: The CAP Triangle
-```
-                                  [ Consistency (C) ]
-                                      /         \
-                                     /           \
-                                    /      P      \  (Partitions are INEVITABLE on real networks!)
-                                   /               \
-                 [ Availability (A) ] ----------- [ Partition Tolerance (P) ]
-
-CHOICE DURING A NETWORK SPLIT:
-* CP (Consistency): Picked by Stripe, Banking Ledgers, Google Spanner (Errors returned to preserve state).
-* AP (Availability): Picked by Cassandra, TikTok Likes, DNS, Social Feeds (Always returns data, syncs later).
-```
-
-### 3. The PACELC Theorem (Beyond Network Partitions)
-- **If Partition ($P$):** Choose between **Availability ($A$)** or **Consistency ($C$)**.
-- **Else ($E$ - Normal operation):** Choose between **Latency ($L$)** or **Consistency ($C$)**.
-  - *Example (MongoDB / DynamoDB):* In normal state, waiting for all replicas to acknowledge a write adds **Latency** to achieve **Consistency** ($PA/EL$ vs $PC/EC$).
-
----
-
-# 3. Consistency Models: Strong vs. Eventual
+The **CAP Theorem** dictates that in the presence of an asynchronous network partition ($P$), a distributed system must trade off between Consistency ($C$) and Availability ($A$).
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| CONSISTENCY MODEL    | HOW IT BEHAVES                       | REAL-WORLD PRODUCT EXAMPLE          |
-+---------------------------------------------------------------------------------------------------+
-| Strong Consistency   | Every read is guaranteed to return   | Bank account balance transfer,      |
-| (Linearizable)       | the most recent write immediately    | Airline seat reservation checkout   |
-+---------------------------------------------------------------------------------------------------+
-| Eventual Consistency | Reads may return stale data briefly; | YouTube video view count,           |
-|                      | all replicas converge in seconds     | Twitter follower count, Reddit upvotes
-+---------------------------------------------------------------------------------------------------+
-| Read-Your-Own-Writes | A user is guaranteed to see their own| Posting a tweet or editing your own |
-| Consistency          | updates immediately after submitting | profile biography                   |
-+---------------------------------------------------------------------------------------------------+
-| Monotonic Reads      | Once a user reads version V2, they   | Reading an online chat transcript   |
-|                      | will never observe an older version V1| without messages disappearing       |
-+---------------------------------------------------------------------------------------------------+
+Distributed Partition Split Scenario:
+[ Node Group East ] <======== Network Split (Partition P) ========> [ Node Group West ]
+- CP Option: Reject writes on minority partition to guarantee global data consistency.
+- AP Option: Accept writes on all nodes; resolve data diverges asynchronously post-heal.
+```
+
+### The PACELC Extension (Abadi's Formulation):
+The CAP theorem evaluates system behavior strictly during abnormal network partitions. The **PACELC Theorem** models trade-offs across all operating conditions:
+- **If Partition ($P$):** Choose between **Availability ($A$)** or **Consistency ($C$)**;
+- **Else ($E$ - Normal State):** Choose between **Latency ($L$)** or **Consistency ($C$)**.
+
+```
++----------------------------------------------------------------------------------------------------+
+| PACELC CLASS         | SYSTEM BEHAVIOR                      | EXEMPLAR ENGINES                     |
++----------------------------------------------------------------------------------------------------+
+| PC / EC              | Guarantees consistency during splits | Google Spanner, CockroachDB,         |
+|                      | and waits for replica sync normally  | PostgreSQL Synchronous Multi-Node    |
+| PA / EL              | Yields availability during splits and| Apache Cassandra, Amazon DynamoDB,   |
+|                      | optimizes for latency in normal state| ScyllaDB, Couchbase                  |
+| PC / EL              | Consistent during partitions, but    | MongoDB (Configured with primary     |
+|                      | optimizes for read latency normally  | write concern and secondary reads)   |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 4. Latency vs. Throughput & Tail Latency (p99)
+# 3. The Distributed Consistency Spectrum
 
-### 1. The "Aha!" Intuition
-- **Latency:** How long it takes a single bullet train to travel from Tokyo to Osaka ($2\text{ hours}$).
-- **Throughput:** How many total passengers the rail system delivers per hour ($50,000\text{ passengers/hr}$).
-- **Tail Latency (p99):** The 1 passenger out of 100 whose ticket gets jammed at the turnstile, causing a 5-minute delay.
-
-### 2. ASCII Architecture Flowchart: The Tail Latency Curve
 ```
-Number of
-Requests
++----------------------------------------------------------------------------------------------------+
+| CONSISTENCY MODEL    | FORMAL BEHAVIORAL GUARANTEE          | DISTRIBUTED PRIMITIVE                |
++----------------------------------------------------------------------------------------------------+
+| Linearizable         | Every operation appears to execute   | Paxos / Raft State Machine           |
+| (Strict / Strong)    | instantaneously at a global timestamp| Replication with synchronous barriers|
+| Sequential           | Operations take effect in an order   | Lamport Logical Timestamps           |
+|                      | consistent across all observer nodes |                                      |
+| Causal               | Causally related operations appear in| Vector Clocks and Version Vectors    |
+|                      | identical order to all participants  |                                      |
+| Read-Your-Own-Writes | A client process will always observe | Primary routing windows or           |
+|                      | the effects of its own prior writes  | client-tracked mutation timestamps   |
+| Monotonic Reads      | Repeated reads by a client observe   | Deterministic session-to-replica     |
+|                      | monotonically non-decreasing states  | affinity routing                     |
+| Eventual             | Given zero new mutations, all replica| Anti-Entropy Gossip protocols &      |
+|                      | states converge to identical values  | Last-Write-Wins (LWW) resolution     |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 4. Latency, Throughput & Tail Latency Amplification ($p99$)
+
+### Latency vs. Throughput:
+- **Latency:** Time interval required to execute a single atomic computation or network roundtrip ($ms$ or $\mu s$).
+- **Throughput:** Cumulative units of computation, transactions, or bytes processed per second ($\text{RPS} / \text{QPS}$).
+
+```
+Tail Latency Probability Distribution:
+Request
+Volume
    ^
-   |        [ 50% of users: 5ms (p50) ]
-   |            /\
-   |           /  \      [ 90% of users: 20ms (p90) ]
-   |          /    \          /\
-   |         /      \        /  \            [ 1% of users: 800ms (p99 Tail Latency!) ]
-   |        /        \______/    \_____________________/\___
-   +----------------------------------------------------------> Latency (ms)
+   |        [ p50 Median: 4ms ]
+   |             /\
+   |            /  \      [ p95: 18ms ]
+   |           /    \         /\
+   |          /      \_______/  \                    [ p99 Tail Spike: 650ms ]
+   |         /                   \___________________________/\___
+   +----------------------------------------------------------------> Latency (ms)
 ```
 
-### 3. Why p99 Latency Dictates Large System Performance
-In a microservices architecture (like Amazon.com), rendering one homepage makes **150 parallel backend API calls**. If each individual API call has a $1\%$ chance of an 800ms tail latency spike, the probability that your page load hits a slow call is:
-$$1 - (0.99)^{150} \approx 78\%$$
-**78% of all homepage visits will feel the slow p99 latency unless tail latency is aggressively optimized!**
+### Microservice Tail Latency Amplification Law:
+In a distributed fan-out architecture where a single root request executes $M$ parallel downstream RPC calls, each having a tail latency spike probability $p = 1 - 0.99 = 0.01$ ($p99$):
+$$P(\text{At least 1 slow downstream call}) = 1 - (1 - p)^M$$
+- For $M = 100$ parallel microservice RPCs:
+  $$P(\text{Root request encounters } p99) = 1 - (0.99)^{100} = 1 - 0.366 = \mathbf{63.4\%}$$
+- For $M = 150$ parallel microservice RPCs:
+  $$P(\text{Root request encounters } p99) = 1 - (0.99)^{150} = \mathbf{77.9\%}$$
+
+### Mitigations:
+1. **Hedged Requests:** Issue duplicate read requests to secondary replicas if the primary does not respond within the $p95$ threshold, utilizing whichever returns first.
+2. **Tied Requests & Speculative Cancellation:** Enqueue request simultaneously in multiple worker queues; when execution begins on one node, broadcast cancellations to the rest.
 
 ---
 
-# 5. High Availability & The "Nines" of Uptime
+# 5. High Availability SLAs & Uptime Mathematics
+
+$$\text{Availability } A = \frac{\text{MTBF}}{\text{MTBF} + \text{MTTR}} \times 100\%$$
+- **MTBF:** Mean Time Between Failures.
+- **MTTR:** Mean Time To Recovery.
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| AVAILABILITY LEVEL   | PERCENTAGE UPTIME | ALLOWABLE DOWNTIME PER YEAR  | WHERE IT IS USED        |
-+---------------------------------------------------------------------------------------------------+
-| 2 Nines              | 99.0%             | 3.65 Days                    | Internal dev tools      |
-+---------------------------------------------------------------------------------------------------+
-| 3 Nines (Industry Std)| 99.9%            | 8.76 Hours                   | Standard SaaS web apps  |
-+---------------------------------------------------------------------------------------------------+
-| 4 Nines (High Avail) | 99.99%            | 52.6 Minutes                 | E-Commerce checkout, AWS|
-+---------------------------------------------------------------------------------------------------+
-| 5 Nines (Mission-Crit)| 99.999%          | 5.26 Minutes                 | Telecoms, Stock Exch.   |
-+---------------------------------------------------------------------------------------------------+
-```
-
-### Eliminating Single Points of Failure (SPOF):
-- **Active-Passive (Warm Standby):** Secondary backup server sits idle; heartbeats monitor primary; takes 30 seconds to fail over via DNS/IP swap.
-- **Active-Active:** Both servers actively process traffic simultaneously; if one dies, the load balancer shifts 100% traffic to the survivor with zero downtime.
-
----
-
-# 6. Rate Limiting Algorithms & Redis Implementation
-
-### 1. The "Aha!" Intuition
-Think of a nightclub with a velvet rope. The bouncer has a bucket filled with 10 entry tokens. Every 6 seconds, the club owner drops 1 new token into the bucket. When a guest arrives, they hand 1 token to the bouncer. If the bucket is empty, guests must wait outside.
-
-### 2. Algorithm Comparison Matrix
-```
-+---------------------------------------------------------------------------------------------------+
-| ALGORITHM            | HOW IT WORKS                         | PROS                 | CONS                |
-+---------------------------------------------------------------------------------------------------+
-| Token Bucket         | Tokens refill at constant rate; each | Handles short bursty | Requires lock/sync  |
-|                      | request consumes 1 token from bucket | traffic smoothly     | in distributed state|
-+---------------------------------------------------------------------------------------------------+
-| Leaky Bucket         | Requests enter a queue and leak out  | Smooths output rate  | Drops bursts if the |
-|                      | at a strict constant processing speed| to a constant flow   | bucket queue fills  |
-+---------------------------------------------------------------------------------------------------+
-| Fixed Window Counter | Resets request counter every fixed   | Low memory overhead  | Boundary burst: 2x  |
-|                      | minute (e.g. max 100 req per minute) |                      | limit at edge of min|
-+---------------------------------------------------------------------------------------------------+
-| Sliding Window       | Stores every request timestamp in a  | 100% accurate edge   | High memory: stores |
-| Log                  | sorted set; counts timestamps in 60s | boundary enforcement | every timestamp     |
-+---------------------------------------------------------------------------------------------------+
-| Sliding Window       | Interpolates previous minute count + | Low memory + smooth  | Small probabilistic |
-| Counter (BEST!)      | current minute count mathematically  | boundary enforcement | approximation (99%) |
-+---------------------------------------------------------------------------------------------------+
-```
-
-### 3. Distributed Redis Rate Limiter via Atomic Lua Scripts
-```
-[ Client Request: IP = 1.2.3.4 ] ---> [ API Gateway ]
-                                             |
-                                             v
-                      [ Execute Redis Lua Script (Atomic Execution!) ]
-                      1. Remove timestamps older than 60 seconds (ZREMRANGEBYSCORE)
-                      2. Count remaining elements in sorted set (ZCARD)
-                      3. If count < Limit (100) -> ZADD current_timestamp -> Allow (HTTP 200)
-                      4. Else -> Reject with HTTP 429 Too Many Requests
++----------------------------------------------------------------------------------------------------+
+| AVAILABILITY LEVEL   | PERCENTAGE UPTIME | MAXIMUM PERMISSIBLE DOWNTIME PER CALENDAR YEAR          |
++----------------------------------------------------------------------------------------------------+
+| 2 Nines              | 99.0%             | 3 days, 15 hours, 39 minutes                            |
+| 3 Nines (Standard)   | 99.9%             | 8 hours, 45 minutes, 57 seconds                         |
+| 4 Nines (High Avail) | 99.99%            | 52 minutes, 35 seconds                                  |
+| 5 Nines (Fault-Tol)  | 99.999%           | 5 minutes, 15 seconds                                   |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 7. Resiliency Patterns: Circuit Breakers & Backoff
-
-### 1. The "Aha!" Intuition
-Your home electrical panel has a **circuit breaker**. If a faulty microwave draws too much current, the breaker trips open, shutting off power to that single room before the entire house catches on fire.
-
-### 2. ASCII Architecture Flowchart: The Circuit Breaker State Machine
-```
-              +-------------------------------------------------------+
-              |                                                       |
-              v                                                       |
-      [ CLOSED (Normal) ] ---(50% Requests Fail)----> [ OPEN (Broken) ]
-              ^                                               |
-              |                                     (Wait 30s Timeout)
-              |                                               |
-              |                                               v
-              +-----(Test Pass!)--- [ HALF-OPEN (Testing) ] <-+
-                                         |
-                                   (Test Fail?)
-                                         |
-                                         +--------------------> [ Back to OPEN ]
-```
-
-### 3. Exponential Backoff with Jitter
-When retrying a failed network request, never retry immediately every 1 second (which creates a retry stampede that kills the recovering server).
-$$\text{Retry Delay} = 2^{\text{attempt}} + \text{Random Jitter}(0\text{--}500\text{ms})$$
-- **Attempt 1:** Wait $2\text{s} + 120\text{ms}$
-- **Attempt 2:** Wait $4\text{s} + 350\text{ms}$
-- **Attempt 3:** Wait $8\text{s} + 50\text{ms}$
-
----
-
-# 8. SQL vs. NoSQL vs. NewSQL Master Decision Matrix
+# 6. Rate Limiting Algorithms & Distributed Token Buckets
 
 ```
-+--------------------------------------------------------------------------------------------------------------------+
-| DATABASE FAMILY      | POPULAR ENGINES            | PRIMARY DATA MODEL           | BEST INTERVIEW USE CASE         |
-+--------------------------------------------------------------------------------------------------------------------+
-| Relational (SQL)     | PostgreSQL, MySQL          | Structured Tables, ACID joins| Financial ledgers, E-commerce   |
-|                      |                            | B+ Tree On-Disk Indexing     | orders, strict schemas          |
-+--------------------------------------------------------------------------------------------------------------------+
-| Document (NoSQL)     | MongoDB, Couchbase         | JSON / BSON Hierarchical     | Catalogs, Content Management,   |
-|                      |                            | Semi-structured payloads     | User profiles with dynamic keys |
-+--------------------------------------------------------------------------------------------------------------------+
-| Key-Value (NoSQL)    | Redis, Memcached, DynamoDB | In-Memory Hash Maps, SkipList| Fast session stores, Caching,   |
-|                      |                            | Key -> String / Binary Blob  | Real-time leaderboards          |
-+--------------------------------------------------------------------------------------------------------------------+
-| Wide-Column (NoSQL)  | Cassandra, ScyllaDB        | LSM-Trees, SSTables, Sparse  | High-throughput time-series,    |
-|                      |                            | Multi-dimensional Tables     | Chat logs, IoT sensor telemetry |
-+--------------------------------------------------------------------------------------------------------------------+
-| Graph (NoSQL)        | Neo4j, Amazon Neptune      | Nodes, Edges, Adjacency lists| Social networks, Fraud rings,   |
-|                      |                            | Zero-Index pointer traversal | Recommendation engines          |
-+---------------------------------------------------------------------------------------------------+----------------+
-| Distributed SQL      | Google Spanner, CockroachDB| Raft Consensus + TrueTime    | Global banking requiring ACID   |
-| (NewSQL)             |                            | Relational tables over Paxos | across multi-region datacenters |
-+--------------------------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM            | BEHAVIORAL MECHANICS                 | MEMORY & COMPLEXITY  | BURST CAPACITY|
++----------------------------------------------------------------------------------------------------+
+| Token Bucket         | Tokens refill at constant rate $r$;  | O(1) space per key   | Configurable  |
+|                      | request consumes 1 token from bucket | (Tokens + LastUpdate)| burst capacity|
+| Leaky Bucket         | Requests enter FIFO buffer; leak out | O(QueueSize) space   | Zero burst;   |
+|                      | at constant smooth egress rate       | per consumer         | strict outflow|
+| Fixed Window         | Increments counter for time block;   | Minimal O(1) space   | Boundary spike|
+|                      | resets at start of every window      | per window interval  | allows 2x QPS |
+| Sliding Window Log   | Retains exact timestamps in sorted   | High O(N) memory     | Perfect edge  |
+|                      | set; counts entries in past interval | proportional to reqs | precision     |
+| Sliding Window       | Computes weighted sum of previous    | Low O(1) memory      | Smooth burst  |
+| Counter (Approx)     | and current window counters          | footprint per key    | mitigation    |
++----------------------------------------------------------------------------------------------------+
+```
+
+```
+Distributed Redis Rate Limiting (Atomic Sliding Log Lua Script):
+1. Key = "ratelimit:" .. client_ip
+2. redis.call('ZREMRANGEBYSCORE', Key, 0, current_time - window_size)
+3. local current_requests = redis.call('ZCARD', Key)
+4. if current_requests < max_limit then
+       redis.call('ZADD', Key, current_time, current_time)
+       redis.call('EXPIRE', Key, window_size)
+       return 1 -- Request Approved (HTTP 200)
+   else
+       return 0 -- Rate Limit Exceeded (HTTP 429)
+   end
 ```
 
 ---
 
-# 9. Monolith vs. Microservices vs. Serverless
+# 7. Distributed Fault-Tolerance Patterns & State Machines
+
+### 1. The Circuit Breaker Finite State Machine (Martin Fowler Model)
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| ARCHITECTURE         | CORE MECHANICS                       | PROS                 | CONS                |
-+---------------------------------------------------------------------------------------------------+
-| Monolith             | Single unified codebase and single   | Easy testing, simple | Slow deployments,   |
-|                      | shared relational database           | deployments, fast dev| scaling bottleneck  |
-+---------------------------------------------------------------------------------------------------+
-| Microservices        | Distributed independent services     | Autonomous teams,    | Network latency,    |
-|                      | communicating over REST/gRPC         | independent scaling  | distributed tracing |
-+---------------------------------------------------------------------------------------------------+
-| Serverless           | Event-driven functions (AWS Lambda)  | Zero server managemnt| Cold start latency, |
-|                      | running only on demand per request   | pay-per-execution    | 15-min timeout limit|
-+---------------------------------------------------------------------------------------------------+
+        +----------------------------------------------------------------+
+        |                                                                |
+        v                                                                |
+[ CLOSED (Normal) ] ---(Failure Rate >= Threshold)---> [ OPEN (Fail Fast) ]
+        ^                                                        |
+        |                                                (Sleep Window Expired)
+        |                                                        |
+        |                                                        v
+        +-----(Success >= Threshold)----- [ HALF-OPEN (Canary Trial) ] <+
+                                                 |
+                                         (Single Failure)
+                                                 |
+                                                 +-----------------------+
+```
+
+### 2. Exponential Backoff with Decorrelated Jitter
+Retrying failed network requests requires randomized exponential spacing to avoid synchronization stampedes:
+$$t_{\text{backoff}} = \min(t_{\text{max}}, \, 2^{\text{attempt}} \times t_{\text{base}}) + \text{rand}(0, \, J)$$
+
+---
+
+# 8. Database Engine Taxonomy: SQL vs. NoSQL vs. NewSQL
+
+```
++----------------------------------------------------------------------------------------------------+
+| DATABASE FAMILY      | STORAGE ENGINE & INDEXING            | SCHEMA & CONSTRAINTS | CONSENSUS / ACID     |
++----------------------------------------------------------------------------------------------------+
+| Relational SQL       | B+ Trees, WAL, Heap Files            | Strict relational    | Single-node ACID /   |
+| (Postgres, MySQL)    | (Page-oriented on-disk blocks)       | schema with FK joins | 2PC distributed joins|
+| Document NoSQL       | B-Trees / WiredTiger                 | Dynamic hierarchical | Single-document ACID;|
+| (MongoDB)            | (Compressed JSON/BSON records)       | JSON schema          | multi-node Raft elect|
+| Key-Value NoSQL      | In-memory hash tables, SkipLists     | Schemaless binary or | In-memory atomic ops;|
+| (Redis, DynamoDB)    | (Volatile RAM or SSD LSM log)        | string value payloads| quorum replication   |
+| Wide-Column NoSQL    | LSM-Trees with SSTables & MemTables  | Multi-dimensional map| Tunable quorum; no   |
+| (Cassandra, Scylla)  | (Append-only write optimization)     | (Partition + Cluster)| cross-row ACID joins |
+| Graph Database       | Direct memory pointer arrays         | Graph topology       | ACID transactional   |
+| (Neo4j)              | (Index-free pointer adjacency)       | (Nodes, Edges, Props)| graph traversals     |
+| Distributed NewSQL   | Multi-Paxos / Raft + TrueTime atomic | Strict relational    | Globally distributed |
+| (Google Spanner)     | clock synchronization engines        | schema with SQL joins| ACID transactions    |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 10. Glanceable Summary Matrix
+# 9. Service Architecture Topologies: Monolith vs. Microservices vs. Serverless
 
 ```
-+--------------------------------------------------------------------------------------------------------------------+
-| CONCEPT / TRADEOFF   | THE PLAIN-ENGLISH MEANING        | WHEN TO PICK IN SYSTEM DESIGN INTERVIEW                  |
-+--------------------------------------------------------------------------------------------------------------------+
-| Horizontal Scaling   | Fleet of delivery vans           | Scaling stateless compute tiers to infinite traffic      |
-+--------------------------------------------------------------------------------------------------------------------+
-| CP (Consistency)     | Strict banking verification      | Financial ledgers, stock transactions, double-booking    |
-+--------------------------------------------------------------------------------------------------------------------+
-| AP (Availability)    | Show content now, reconcile later| Social media feeds, tweet likes, video view counts       |
-+--------------------------------------------------------------------------------------------------------------------+
-| p99 Tail Latency     | Slowest 1% request bottleneck    | Microservices where 1 slow API call delays full page     |
-+--------------------------------------------------------------------------------------------------------------------+
-| Token Bucket         | Nightclub token bucket           | Distributed rate limiting allowing small traffic bursts  |
-+--------------------------------------------------------------------------------------------------------------------+
-| Circuit Breaker      | Home electrical fuse             | Stopping cascading microservice crashes when downstream  |
-+--------------------------------------------------------------------------------------------------------------------+
-| Wide-Column (NoSQL)  | Write-optimized append log       | High-throughput IoT telemetry and Discord chat histories |
-+--------------------------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| PARADIGM             | STRUCTURAL MODEL                     | ADVANTAGES           | SYSTEM OVERHEAD      |
++----------------------------------------------------------------------------------------------------+
+| Modular Monolith     | Single process, unified memory       | Simple deployments,  | Scaling bottleneck   |
+|                      | space, shared relational database    | zero network latency | across single DB     |
+| Microservices        | Loosely coupled services interacting | Independent scaling, | Network latency,     |
+|                      | via RPC / REST / Message Queues      | decoupled deploy     | distributed tracing  |
+| Serverless / FaaS    | Ephemeral event-triggered worker     | Automatic scaling,   | Cold start latencies,|
+| (AWS Lambda)         | containers spun up on-demand         | zero idle compute fee| stateless constraints|
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 10. Core Architectural Summary Matrix
+
+```
++----------------------------------------------------------------------------------------------------+
+| ARCHITECTURAL CONCEPT| CORE MATHEMATICAL / SYSTEM PROPERTY  | PRIMARY APPLICATION DOMAIN           |
++----------------------------------------------------------------------------------------------------+
+| PACELC Formalism     | Models partition trade-offs vs normal| Distributed database engine selection|
+| Tail Amplification   | P(Slow) = 1 - (1-p)^M                | Microservice fan-out optimization    |
+| Availability Nines   | SLA = MTBF / (MTBF + MTTR)           | Fault tolerance & HA engineering     |
+| Token Bucket Limiter | Uniform rate fill with burst capacity| Ingress DDoS & API quota enforcement |
+| Circuit Breaker      | Closed -> Open -> Half-Open FSM      | Cascading service failure mitigation |
+| Distributed NewSQL   | Raft/Paxos + Hardware TrueTime clocks| Global multi-region ACID consistency |
++----------------------------------------------------------------------------------------------------+
 ```

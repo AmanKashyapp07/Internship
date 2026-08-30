@@ -1,255 +1,227 @@
-# Algorithms, Design Paradigms & System-Adjacent Theory — Interview Master Guide
+# Algorithm Design Paradigms, Computational Complexity & Systems Theory
 
-**Target:** Google, Microsoft, Meta, Amazon, Apple, NVIDIA, Uber, Bloomberg, Atlassian, Adobe, Salesforce, Goldman Sachs, Rubrik, Databricks, etc.
-
-**Priority:** Interview patterns > complexity > behavior > internals > implementation-specific details.
+> **Scope:** Comparison Sorting Lower Bound Proofs, Linear-Time Sorting, Monotonic Binary Search Predicates, Two-Pointer & Sliding Window Mathematical Reductions, Greedy Choice Invariants, Dynamic Programming Substructure & Formulations, Backtracking State-Space Pruning, Hardware Memory Hierarchy Latency & Cache Locality, Storage Engine Topologies (B+ Trees vs. LSM-Trees), and Probabilistic Set Membership (Bloom Filters).
 
 ---
 
-# 1. Sortingg Algorithms & The Decision Tree Lower Bound
-
-## Why Comparison Sort is Omega(N log N)
-* `N` elements have `N!` possible permutations.
-* A comparison-based sort forms a binary decision tree of height `h`.
-* `2^h >= N!` ==> `h >= log2(N!) = Omega(N log N)` (via Stirling's approximation).
-* **Takeaway:** No comparison sort can ever beat `O(N log N)` in the worst case.
-
-## Comparison Sorting Matrix
-
-| Algorithm | Best | Average | Worst | Space | Stable? | Key Interview Insight |
-|---|---|---|---|---|---|---|
-| **Merge Sort** | `O(N log N)` | `O(N log N)` | `O(N log N)` | `O(N)` | **Yes** | Divide & Conquer; preferred for Linked Lists (no random access needed). |
-| **Quick Sort** | `O(N log N)` | `O(N log N)` | `O(N^2)` | `O(log N)` | **No** | Cache-friendly in-place partitioning; worst case occurs on already sorted array with naive pivot. |
-| **Heap Sort** | `O(N log N)` | `O(N log N)` | `O(N log N)` | `O(1)` | **No** | In-place, guaranteed `O(N log N)`, but poorer cache locality than QuickSort. |
-| **Insertion Sort**| `O(N)` | `O(N^2)` | `O(N^2)` | `O(1)` | **Yes** | Blazing fast on small (`N <= 16`) or nearly-sorted arrays. Used in `std::sort` (Introsort). |
-
-## Non-Comparison Sorting (O(N))
-* **Counting Sort:** `O(N + K)` where `K` is the range of keys. Optimal when `K ~ N`.
-* **Radix Sort:** `O(d * (N + b))` sorting digit-by-digit from LSD to MSD using stable counting sort.
+# Table of Contents
+1. [Comparison Sorting Lower Bound & Sorting Taxonomy](#1-comparison-sorting-lower-bound--sorting-taxonomy)
+2. [Monotonic Predicates & Binary Search on Solution Spaces](#2-monotonic-predicates--binary-search-on-solution-spaces)
+3. [Two-Pointer & Sliding Window Formalisms](#3-two-pointer--sliding-window-formalisms)
+4. [Greedy Choice Property & Interval Scheduling Proofs](#4-greedy-choice-property--interval-scheduling-proofs)
+5. [Dynamic Programming Mathematical Formulations](#5-dynamic-programming-mathematical-formulations)
+6. [Backtracking State-Space Traversal & Branch Pruning](#6-backtracking-state-space-traversal--branch-pruning)
+7. [Hardware Memory Hierarchy & Cache Locality Physics](#7-hardware-memory-hierarchy--cache-locality-physics)
+8. [Storage Engine Topologies: B+ Trees vs. LSM-Trees](#8-storage-engine-topologies-b-trees-vs-lsm-trees)
+9. [Probabilistic Data Structures: Bloom Filter Theory](#9-probabilistic-data-structures-bloom-filter-theory)
+10. [Core Theoretical Summary Principles](#10-core-theoretical-summary-principles)
 
 ---
 
-# 2. Binary Search & Monotonic Predicates
+# 1. Comparison Sorting Lower Bound & Sorting Taxonomy
 
-## The Universal Binary Search on Answer Template
-Whenever looking for the **minimum valid** or **maximum valid** value in a monotonic search space:
+### The $\Omega(N \log N)$ Decision Tree Lower Bound Proof
+1. A comparison-based sorting algorithm determines the relative order of elements strictly via pairwise comparisons ($a_i \le a_j$).
+2. For an array of size $N$, there are $N!$ distinct possible permutations.
+3. Every execution path corresponds to a root-to-leaf path in a binary decision tree of height $h$.
+4. A binary tree of height $h$ contains at most $2^h$ leaves:
+   $$2^h \ge N! \implies h \ge \log_2(N!)$$
+5. Applying Stirling's Approximation ($\ln(N!) \approx N \ln N - N$):
+   $$h \ge \Omega(N \log N)$$
+- **Theorem:** No comparison-based sorting algorithm can achieve an asymptotic worst-case time complexity strictly better than $\Omega(N \log N)$.
+
+```
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM      | BEST TIME    | AVERAGE TIME | WORST TIME   | AUX SPACE | STABILITY | CACHE LOCALITY   |
++----------------------------------------------------------------------------------------------------+
+| Merge Sort     | O(N log N)   | O(N log N)   | O(N log N)   | O(N)      | Stable    | Moderate (Copies)|
+| Quick Sort     | O(N log N)   | O(N log N)   | O(N^2)       | O(log N)  | Unstable  | Optimal (In-Place|
+| Heap Sort      | O(N log N)   | O(N log N)   | O(N log N)   | O(1)      | Unstable  | Poor (Random hops|
+| Insertion Sort | O(N)         | O(N^2)       | O(N^2)       | O(1)      | Stable    | Optimal (Local)  |
+| Counting Sort  | O(N + K)     | O(N + K)     | O(N + K)     | O(K)      | Stable    | High             |
+| Radix Sort     | O(d * (N+b)) | O(d * (N+b)) | O(d * (N+b)) | O(N + b)  | Stable    | High             |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 2. Monotonic Predicates & Binary Search on Solution Spaces
+
+Binary search applies to any discrete or continuous domain mapped through a monotonic boolean predicate function $f: S \to \{0, 1\}$.
+
+```
+Monotonicity Property:
+Search Domain: [  x0,   x1,   x2,   x3,   x4,   x5,   x6,   x7  ]
+Predicate f(x): [   0,    0,    0,    0,    1,    1,    1,    1  ]
+                                            ^
+                                     First True (Infimum)
+```
+
+### Algorithmic Template:
+```cpp
+int findMinimumFeasible(int low, int high) {
+    int result = -1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2; // Prevents 32-bit signed integer overflow
+        if (isValidPredicate(mid)) {
+            result = mid;       // Record feasible candidate
+            high = mid - 1;     // Contract search space to find smaller valid candidates
+        } else {
+            low = mid + 1;      // Infeasible; advance lower bound
+        }
+    }
+    return result;
+}
+```
+
+---
+
+# 3. Two-Pointer & Sliding Window Formalisms
+
+### The 4 Canonical Pointer Archetypes:
+1. **Inward Converging:** Pointers initialize at boundaries ($L=0, R=N-1$) and converge monotonically based on sorted ordering ($O(N)$ sum checks, container bounding).
+2. **Fast & Slow (Floyd's Cycle Finding):** Two pointers advancing at rates $v$ and $2v$ ($O(N)$ cycle detection in linked lists and sequence state spaces).
+3. **Fixed Window:** Window of fixed width $K$ sliding across a sequence with $O(1)$ state updates upon element entry and exit.
+4. **Variable Window:** Monotonically expanding right boundary ($R++$) paired with conditionally contracting left boundary ($L++$) to maintain a state invariant.
+
+### Exact-$K$ Subarray Reduction Theorem:
+For any monotonic counting condition, the number of contiguous subarrays satisfying **exactly $K$** instances of a property equals the difference between two monotonic prefix windows:
+$$\text{Count}(\text{Exactly } K) = \text{Count}(\text{At Most } K) - \text{Count}(\text{At Most } K - 1)$$
+
+---
+
+# 4. Greedy Choice Property & Interval Scheduling Proofs
+
+A problem exhibits the **Greedy Choice Property** if a globally optimal solution can be assembled by iteratively making locally optimal choices without backtracking:
+
+### Interval Scheduling Optimization Rules:
+1. **Maximum Non-Overlapping Intervals:** Sort intervals by **End Time** ($f_i$). Always select the compatible interval with the earliest finish time, leaving maximal remaining time capacity for subsequent selections.
+2. **Interval Union Merging:** Sort intervals by **Start Time** ($s_i$). Maintain active interval $[S, E]$; expand $E = \max(E, e_{\text{curr}})$ if $s_{\text{curr}} \le E$, else finalize active segment and reset.
+3. **Minimum Concurrent Resource Capacity:** Transform intervals into discrete point events $(t_{\text{start}}, +1)$ and $(t_{\text{end}}, -1)$; evaluate a prefix sum sweep over sorted timestamps to find peak concurrent concurrency.
+
+---
+
+# 5. Dynamic Programming Mathematical Formulations
+
+Dynamic Programming applies to problems satisfying **Optimal Substructure** and **Overlapping Subproblems**:
+
+```
++---------------------------------------------------------------------------------------------------+
+| DP ARCHETYPE         | RECURRENCE FORMULATION EXAMPLE                                             |
++---------------------------------------------------------------------------------------------------+
+| 1. 1D Linear State   | dp[i] = max(dp[i-1], dp[i-2] + value[i])                                   |
+| 2. 2D Grid / Matrix  | dp[i][j] = cost[i][j] + min(dp[i-1][j], dp[i][j-1])                       |
+| 3. Sequence / LCS    | dp[i][j] = (s1[i]==s2[j]) ? 1 + dp[i-1][j-1] : max(dp[i-1][j], dp[i][j-1])|
+| 4. Interval DP       | dp[i][j] = min_{i <= k < j} (dp[i][k] + dp[k+1][j] + cost(i, k, j))        |
+| 5. 0/1 Knapsack      | dp[w] = max(dp[w], dp[w - weight[i]] + value[i]) (Reverse inner loop)      |
+| 6. Unbounded Knapsack| dp[w] = max(dp[w], dp[w - weight[i]] + value[i]) (Forward inner loop)      |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 6. Backtracking State-Space Traversal & Branch Pruning
+
+Backtracking traverses a combinatorial state-space tree using Depth-First Search (DFS) with programmatic branch pruning:
+
+```
+                          [ Root State ]
+                         /      |       \
+                   [ Choice A ] [ B ]  [ C (Pruned: Infeasible) ]
+                     /    \
+               [ Goal ]  [ Dead End ]
+```
 
 ```cpp
-int low = minPossible, high = maxPossible, ans = -1;
-while (low <= high) {
-    int mid = low + (high - low) / 2;
-    if (isValid(mid)) {
-        ans = mid;
-        high = mid - 1; // Or low = mid + 1 for maximization
-    } else {
-        low = mid + 1;  // Or high = mid - 1
-    }
-}
-return ans;
-```
-
-### Classic Interview Problems
-* Capacity To Ship Packages Within D Days (LC 1011)
-* Koko Eating Bananas (LC 875)
-* Split Array Largest Sum (LC 410)
-* Search in Rotated Sorted Array (LC 33 - Identify which half is sorted!).
-
----
-
-# 3. Two Pointers & Sliding Window
-
-## The 4 Archetypes
-
-```text
-1. Inward Converging:   [ Left --->        <--- Right ]  (2Sum, Container With Most Water)
-2. Fast & Slow:         [ Slow ->  Fast ------>       ]  (Linked list cycle, Remove duplicates)
-3. Fixed Window:        [ <--- Size K ---> ] --------->   (Max sum subarray of size K)
-4. Variable Window:     [ Left ...... Right ] -------->  (Longest substring without repeats)
-```
-
-### Exact-K Subarrays Reduction (Universal Trick)
-`Count of Subarrays with Exactly K = atMost(K) - atMost(K - 1)`
-
-Applies to: Subarrays with `K` Different Integers (LC 992), Binary Subarrays With Sum (LC 930), Nice Subarrays (LC 1248).
-
----
-
-# 4. Greedy Algorithms Paradigm
-
-## The Greedy Choice Property
-* Make the locally optimal choice at each step; prove it leads to a globally optimal solution.
-* **If a choice requires regret or backtracking ==> Dynamic Programming, not Greedy.**
-
-### Interval Scheduling Golden Rules
-* **Max Non-Overlapping Intervals (LC 435):** Sort by **End Time** (earliest finish leaves most room).
-* **Merge Overlapping Intervals (LC 56):** Sort by **Start Time** (extend `end = max(end, curr.end)`).
-* **Min Meeting Rooms / Platforms (LC 253):** Chronological Two-Pointer Sweep of start and end times.
-
----
-
-# 5. Dynamic Programming Master Mental Model
-
-## When is a Problem DP?
-1. **Optimal Substructure:** Optimal solution of size `N` is built from optimal solutions of subproblems (`N-1, N-2, ...`).
-2. **Overlapping Subproblems:** The same subproblems are solved repeatedly across recursive branches.
-
-## The 5 Core DP Archetypes
-
-```text
-1. 1D Linear DP:       dp[i] = max(dp[i-1], dp[i-2] + val)      (House Robber, Climb Stairs, Decode Ways)
-2. 2D Grid DP:         dp[i][j] = val + min(dp[i-1][j], dp[i][j-1]) (Unique Paths, Min Path Sum, Maximal Square)
-3. String / LCS DP:    dp[i][j] = s1[i]==s2[j] ? 1+dp[i-1][j-1] : max(...) (LCS, Edit Distance, Interleaving)
-4. Interval DP:        dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost) (Burst Balloons, Matrix Chain Mult)
-5. Knapsack Suite:     0/1 Knapsack (Backwards loop), Unbounded Knapsack (Forwards loop)
-```
-
----
-
-# 6. Backtracking & State-Space Search
-
-```text
-The Standard Backtracking Skeleton:
-void backtrack(State& state, int startIdx) {
-    if (isGoal(state)) {
-        result.push_back(state);
+void exploreStateSpace(State& state, int depth) {
+    if (isGoalState(state)) {
+        recordSolution(state);
         return;
     }
-    for (int i = startIdx; i < choices.size(); i++) {
-        if (!isValid(choices[i])) continue; // PRUNING
-        
-        makeChoice(state, choices[i]);      // CHOOSE
-        backtrack(state, i + 1);             // EXPLORE
-        undoChoice(state, choices[i]);      // UNCHOOSE (Backtrack)
+    for (const auto& candidate : generateCandidates(state, depth)) {
+        if (!isFeasibleConstraint(state, candidate)) {
+            continue; // Subtree pruning: Discards exponential search branches
+        }
+        applyMutation(state, candidate);     // Transition state
+        exploreStateSpace(state, depth + 1); // Recurse
+        revertMutation(state, candidate);    // Backtrack (Restore invariant)
     }
 }
 ```
 
 ---
 
-# 7. Real-World Systems & Hardware Theory
+# 7. Hardware Memory Hierarchy & Cache Locality Physics
 
-## Latency Numbers Every Engineer Must Know
+```
++---------------------------------------------------------------------------------------------------+
+| HARDWARE COMPONENT                   | ACCESS LATENCY           | RELATIVE SCALE FACTOR           |
++---------------------------------------------------------------------------------------------------+
+| L1 CPU Cache Reference               | 0.5 ns - 1.0 ns          | 1.0x (Baseline)                 |
+| Branch Misprediction Penalty         | 3.0 ns - 5.0 ns          | 5.0x                            |
+| L2 CPU Cache Reference               | 3.0 ns - 7.0 ns          | 7.0x                            |
+| L3 CPU Shared Cache Reference        | 10.0 ns - 20.0 ns        | 20.0x                           |
+| Main Memory DRAM Reference           | 50.0 ns - 100.0 ns       | 100.0x                          |
+| Solid State Disk (SSD) I/O           | 50.0 us - 150.0 us       | 150,000.0x                      |
+| Rotational Hard Drive (HDD) Seek     | 5.0 ms - 10.0 ms         | 10,000,000.0x                   |
++---------------------------------------------------------------------------------------------------+
+```
 
-| Operation | Latency | Real-World Scale Analogy |
-|---|---|---|
-| **L1 Cache Reference** | **0.5 ns** | 1 heart beat |
-| **Branch Mispredict** | **5 ns** | 10 heart beats |
-| **L2 Cache Reference** | **7 ns** | 14 heart beats |
-| **Mutex Lock / Unlock** | **25 ns** | 50 heart beats |
-| **Main Memory (RAM) Access** | **100 ns** | 3.3 minutes |
-| **SSD Random Read** | **150 us** | 3.5 days |
-| **Data Center Roundtrip (LAN)** | **500 us** | 1.6 weeks |
-| **HDD Seek** | **10 ms** | 7.7 months |
-| **Internet Packet (SF to NYC)** | **40 ms** | 2.5 years |
-
-### Spatial & Temporal Cache Locality
-* **Temporal Locality:** If a memory address is accessed, it will likely be accessed again soon (keep in L1/L2 cache).
-* **Spatial Locality:** If a memory address is accessed, nearby addresses will likely be accessed soon (fetch full 64-byte cache line).
-* **Why Vector Outperforms Linked List:** Sequential array elements are contiguous ==> 100% cache line hits ==> no pointer chasing stalls.
+### Locality Principles:
+1. **Temporal Locality:** Memory addresses accessed recently are likely to be accessed again in the immediate future (retained in high-speed hardware caches).
+2. **Spatial Locality:** Accessing memory address $A$ triggers hardware prefetching of contiguous cache lines (typically 64 bytes). Sequential array traversals maximize cache line utilization, whereas pointer-linked node traversals incur memory stall bubbles.
 
 ---
 
-# 8. Storage Engines: B+ Trees vs LSM-Trees
+# 8. Storage Engine Topologies: B+ Trees vs. LSM-Trees
 
-```text
-B+ Tree (Read-Heavy / In-Place Updates):
-[ Internal Node: Routing Keys ] ---> [ Leaf Node: [Key, Val] <-> [Key, Val] ] (Linked Leaf Chain)
+```
+B+ Tree (In-Place Mutation / Read-Optimized):
+[ Internal Routing Nodes ] ---> [ Contiguous Doubly-Linked Leaf Pages on Disk ]
 
-LSM-Tree (Write-Heavy / Append-Only):
-Write -> [ In-Memory MemTable (SkipList) ] ---> Flush to Disk ---> [ SSTable (Immutable Sorted File) ]
+Log-Structured Merge-Tree (Append-Only / Write-Optimized):
+[ In-Memory MemTable (SkipList) ] --Flush--> [ L0 SSTable ] --Compaction--> [ L1 SSTable ]
 ```
 
-| Dimension | B+ Tree (Postgres, MySQL InnoDB) | LSM-Tree (Cassandra, RocksDB, BigTable) |
-|---|---|---|
-| **Primary Architecture** | Self-balancing tree with linked leaves | In-memory MemTable + On-disk SSTables |
-| **Write Cost** | High (Random in-place page writes) | **Low (Sequential append-only writes)** |
-| **Read Cost** | **Low (O(log N) point lookups)** | Higher (Check MemTable + Bloom Filters + SSTables) |
-| **Range Queries** | Excellent (Scan leaf node linked list) | Merges multiple SSTables |
+```
++---------------------------------------------------------------------------------------------------+
+| ARCHITECTURAL METRIC | B+ TREE (PostgreSQL, MySQL InnoDB)    | LSM-TREE (RocksDB, Cassandra)      |
++---------------------------------------------------------------------------------------------------+
+| Storage Engine Model | Balanced multi-way tree               | Log-structured append runs         |
+| Write Complexity     | High: In-place random disk writes     | Low: Sequential append to WAL/MemT |
+| Read Complexity      | Optimal: O(log N) point lookup        | Variable: Checks MemTable + SSTable|
+| Range Scan Mechanism | Sequential leaf node scan             | Multi-way merge across SSTables    |
+| Compaction Overhead  | Page split rebalancing                | Background merge compaction runs   |
++---------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-# 9. Probabilistic Data Structures: Bloom Filters
+# 9. Probabilistic Data Structures: Bloom Filter Theory
 
-## Architecture
-* A bit array of size `M` initialized to all 0s + `k` independent hash functions.
-* **Insertion:** Hash key with `k` hash functions; set all `k` bit positions to 1.
-* **Membership Query:**
-  - If **ANY** of the `k` bits is 0 ==> **Definitively NOT in Set** (Zero False Negatives).
-  - If **ALL** `k` bits are 1 ==> **PROBABLY in Set** (Possible False Positive).
-* **Use Cases:** Database read optimization (skip checking SSTable if Bloom filter returns false), CDN caching, URL blacklist checking.
+A **Bloom Filter** is a space-efficient probabilistic data structure used to test set membership with zero false negatives:
+
+```
+Bit Array of Size M (Initialized to 0):
+Index:  [ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 ]
+          0   1   0   1   0   0   1   0   1   0
+              ^       ^           ^       ^
+              |       |           |       |
+            h1(x)   h2(x)       h3(x)   h1(y)...
+```
+
+### Mathematical Invariants:
+1. **Zero False Negatives:** If an element $x$ was inserted, all $k$ hash positions $h_1(x), \dots, h_k(x)$ are guaranteed to be 1. If any $h_i(x) == 0$, $x$ is **definitively not in the set**.
+2. **Bounded False Positives:** If all $h_i(x) == 1$, $x$ is **probably in the set**. The false positive probability $p$ is parameterized by bit array size $M$, element count $N$, and hash count $k$:
+   $$p \approx \left(1 - e^{-kN/M}\right)^k$$
+   Optimal hash functions: $k = \frac{M}{N} \ln 2$.
 
 ---
 
-# 10. Top Interview Questions
+# 10. Core Theoretical Summary Principles
 
-## Tier 1 — Must Know
-1. Why is comparison-based sorting bounded by `Omega(N log N)`?
-2. Compare QuickSort vs MergeSort across stability, in-place behavior, and cache locality.
-3. How does the "Binary Search on Answer" pattern work?
-4. When does a Greedy approach fail, requiring Dynamic Programming?
-5. What is the difference between Memoization (Top-Down) and Tabulation (Bottom-Up)?
-6. Explain the Exact-K reduction technique in sliding window problems.
-7. Why is row-major matrix traversal faster than column-major in C++?
-
-## Tier 2 — Strong Candidate
-8. Explain the Master Theorem and how it applies to Merge Sort and Binary Search.
-9. How does Introsort work in standard libraries (C++ `std::sort`)?
-10. How does a Bloom Filter guarantee zero false negatives?
-11. Compare B+ Trees vs LSM-Trees for read vs write heavy database workloads.
-12. What causes branch misprediction in hardware and how does sorting input reduce it?
-
-## Tier 3 — Advanced / Systems
-13. How does Quickselect find the `K`-th largest element in `O(N)` average time?
-14. Explain memory hierarchy latency differences between L1 cache, RAM, and Disk.
-15. What are write amplification and compaction in LSM-tree based databases?
-
----
-
-# 11. Pattern Recognition Guide
-
-| Clue in Problem Statement | Target Paradigm / Technique |
-|---|---|
-| Find min/max value satisfying a monotonic condition | **Binary Search on Answer** |
-| Subarray sum, substring with at most / exact K characters | **Sliding Window / Two Pointers** |
-| Overlapping subproblems, choice sequence, max/min cost | **Dynamic Programming** |
-| All permutations, combinations, N-Queens, grid search | **Backtracking** |
-| Interval merging, activity selection, non-overlapping tasks | **Greedy (Sort by start/end)** |
-| Fast approximate set membership with minimal RAM | **Bloom Filter** |
-| High write throughput database storage | **LSM-Tree / SSTables** |
-
----
-
-# 12. Interview Priority
-
-## P0 — Absolutely Master
-```text
-Binary Search on Answer predicate template
-Dynamic Programming 5 Core Archetypes
-Sliding Window (Fixed, Variable, Exact-K Reduction)
-Two Pointers (Inward, Fast & Slow)
-QuickSort vs MergeSort mechanics & trade-offs
-Greedy Interval Scheduling rules
-```
-
-## P1 — Strongly Know
-```text
-Backtracking standard template & pruning
-Kadane's algorithm & variants
-Hardware cache locality (Row vs Col major)
-Quickselect O(N) Kth element finding
-Counting sort & Radix sort linear mechanics
-```
-
-## P2 — Know Conceptually
-```text
-B+ Trees vs LSM-Trees (Database storage trade-offs)
-Bloom Filters mechanics & False Positive property
-Latency numbers hierarchy (L1 vs RAM vs Disk)
-```
-
-## P3 — Don't Waste Time Memorizing
-```text
-Mathematical proofs of Stirling's approximation
-Bit-level details of IEEE 754 floating point mantissas
-Obscure sorting algorithms (TimSort internals, ShellSort gap sequences)
-```
+1. **Sorting Lower Bound:** Any comparison-based sorting algorithm requires at least $\Omega(N \log N)$ worst-case operations based on decision tree height.
+2. **Monotonic Binary Partitioning:** Monotonicity enables logarithmic space partitioning to locate extrema in $O(\log N)$ evaluations.
+3. **Exact-$K$ Difference Invariant:** Calculating intervals matching exact criteria is solved by subtracting two monotonic bounded prefix queries.
+4. **Greedy vs. DP Boundary:** Greedy algorithms require the optimal choice at step $k$ to never require retrospective revision; otherwise, dynamic programming is mandatory.
+5. **Memory Hierarchy Dominance:** Hardware cache line locality (64 bytes) dictates that contiguous arrays outperform linked node structures by orders of magnitude due to cache miss stall latency.

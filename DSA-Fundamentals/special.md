@@ -1,35 +1,34 @@
-# Deep Dive & Advanced Concepts: Special Notes — Interview Master Guide
+# Advanced Data Structures, Algorithmic Proofs & Systems Theory
 
-**Target:** Google, Microsoft, Meta, Amazon, Apple, NVIDIA, Uber, Bloomberg, Atlassian, Adobe, Salesforce, Goldman Sachs, Rubrik, Databricks, Citadel, Jane Street, Two Sigma, etc.
-
-**Priority:** Core conceptual intuition > proof sketches > interview articulation > practical trade-offs.
+> **Scope:** Self-Balancing Tree Invariants (Red-Black vs. AVL & 2-3-4 B-Tree Isomorphism), Pointer Arithmetic Proofs, Formal Amortized Complexity Frameworks (Aggregate, Accounting, Potential), Morris In-Order Tree Threading, Tarjan's Low-Link Graph Algorithms, Disjoint Set Union (DSU) Inverse Ackermann Derivations, Knuth-Morris-Pratt (KMP) Automata, Storage Engine Layouts, Probabilistic Hashing (Bloom Filters, Count-Min Sketch), and Linear-Time Order Statistics (BFPRT).
 
 ---
 
 # Table of Contents
-1. [Special Note 1: Red-Black Trees vs AVL Trees](#1-special-note-1-red-black-trees-vs-avl-trees)
-2. [Special Note 2: Floyd's Cycle Detection Mathematical Proof](#2-special-note-2-floyds-cycle-detection-mathematical-proof)
-3. [Special Note 3: Amortized Analysis (The 3 Formal Frameworks)](#3-special-note-3-amortized-analysis-the-3-formal-frameworks)
-4. [Special Note 4: Morris Inorder & Preorder Traversal (O(1) Space)](#4-special-note-4-morris-inorder--preorder-traversal-o1-space)
-5. [Special Note 5: Tarjan's Bridge, Articulation Point & SCC Theory](#5-special-note-5-tarjans-bridge-articulation-point--scc-theory)
-6. [Special Note 6: Disjoint Set Union (DSU) & The Inverse Ackermann Function alpha(N)](#6-special-note-6-disjoint-set-union-dsu--the-inverse-ackermann-function-alphan)
-7. [Special Note 7: KMP String Matching & The LPS Array](#7-special-note-7-kmp-string-matching--the-lps-array)
-8. [Special Note 8: Database Storage Internals (B+ Trees vs LSM-Trees)](#8-special-note-8-database-storage-internals-b-trees-vs-lsm-trees)
-9. [Special Note 9: Bloom Filters & Count-Min Sketch](#9-special-note-9-bloom-filters--count-min-sketch)
-10. [Special Note 10: Linear-Time Selection (Quickselect vs Median-of-Medians)](#10-special-note-10-linear-time-selection-quickselect-vs-median-of-medians)
+1. [Red-Black Trees vs. AVL Trees & 2-3-4 B-Tree Isomorphism](#1-red-black-trees-vs-avl-trees--2-3-4-b-tree-isomorphism)
+2. [Floyd's Cycle Detection Algebraic Proof](#2-floyds-cycle-detection-algebraic-proof)
+3. [Amortized Analysis: The Three Formal Frameworks](#3-amortized-analysis-the-three-formal-frameworks)
+4. [Morris In-Order & Pre-Order Traversal ($O(1)$ Auxiliary Space)](#4-morris-in-order--pre-order-traversal-o1-auxiliary-space)
+5. [Tarjan's Low-Link Graph Theory (Bridges, Articulation Points, SCCs)](#5-tarjans-low-link-graph-theory-bridges-articulation-points-sccs)
+6. [Disjoint Set Union (DSU) & The Inverse Ackermann Function $\alpha(N)$](#6-disjoint-set-union-dsu--the-inverse-ackermann-function-alphan)
+7. [Knuth-Morris-Pratt (KMP) String Search & The LPS Automaton](#7-knuth-morris-pratt-kmp-string-search--the-lps-automaton)
+8. [Database Storage Engines: B+ Trees vs. LSM-Trees](#8-database-storage-engines-b-trees-vs-lsm-trees)
+9. [Probabilistic Data Structures: Bloom Filters & Count-Min Sketch](#9-probabilistic-data-structures-bloom-filters--count-min-sketch)
+10. [Linear-Time Selection: Quickselect vs. Median-of-Medians (BFPRT)](#10-linear-time-selection-quickselect-vs-median-of-medians-bfprt)
+11. [Core Theoretical Summary Principles](#11-core-theoretical-summary-principles)
 
 ---
 
-# 1. Special Note 1: Red-Black Trees vs AVL Trees
+# 1. Red-Black Trees vs. AVL Trees & 2-3-4 B-Tree Isomorphism
 
-## The 5 Red-Black Tree Invariants
-1. **Node Color:** Every node is either **RED** or **BLACK**.
-2. **Root Property:** The root is always **BLACK**.
-3. **Leaf Property:** Every leaf (NIL sentinel node) is **BLACK**.
-4. **Red Property:** If a node is **RED**, both its children must be **BLACK** (No two consecutive RED nodes on any path).
-5. **Black-Height Property:** For every node X, all paths from X to descendant leaves contain the **exact same number of BLACK nodes** (bh(X)).
+### The 5 Red-Black Tree Structural Invariants:
+1. **Node Coloring:** Every node is either **RED** or **BLACK**.
+2. **Root Invariant:** The root node is **BLACK**.
+3. **Leaf Invariant:** Every external leaf node (NIL sentinel) is **BLACK**.
+4. **Red Non-Consecutiveness:** If a node is **RED**, both of its children must be **BLACK** (No adjacent red nodes along any path).
+5. **Black-Height Invariant:** For every node $X$, all paths from $X$ to descendant leaves contain the **exact same number of BLACK nodes** ($\text{bh}(X)$).
 
-```text
+```
                   [ 10 (Black) ]
                  /              \
          [ 5 (Red) ]          [ 20 (Black) ]
@@ -37,141 +36,121 @@
   [ 2 (Black) ]   [ 8 (Black) ]
 ```
 
-### Why Red-Black Trees Guarantee O(log N) Height
-* Let `bh` be the black-height of the root.
-* By Invariant 4, on any path from root to leaf, red nodes cannot be adjacent. Therefore, the longest possible path has at most `2 * bh` edges (alternating Black-Red-Black-Red).
-* The shortest possible path has length `bh` (all Black).
-* **Maximum Height:** `h <= 2 * log2(N + 1) = O(log N)`.
+### Height Bound Derivation:
+- Let $\text{bh}$ be the black-height of the root.
+- Because red nodes cannot be adjacent, the longest possible path alternates between Black and Red nodes, having at most $2 \cdot \text{bh}$ edges.
+- The shortest possible path contains strictly Black nodes of length $\text{bh}$.
+- A subtree with black-height $\text{bh}$ contains at least $2^{\text{bh}} - 1$ internal nodes.
+- Therefore, $N \ge 2^{\text{bh}} - 1 \implies \text{bh} \le \log_2(N + 1)$, guaranteeing maximum height:
+  $$h \le 2 \log_2(N + 1) = \mathbf{O(\log N)}$$
 
-### Equivalence to 2-3-4 B-Trees (The Ultimate Intuition)
-* Think of every **RED** node as being glued horizontally into its **BLACK** parent to form a single multi-key node:
-  - Black node with 0 Red children <==> **2-node** (1 key, 2 children).
-  - Black node with 1 Red child <==> **3-node** (2 keys, 3 children).
-  - Black node with 2 Red children <==> **4-node** (3 keys, 4 children).
-* Red-Black tree insertion color-flipping is simply a **2-3-4 tree node split**!
+### 2-3-4 Tree Isomorphism:
+Every Red-Black tree maps directly to an equivalent balanced 2-3-4 B-Tree:
+- Black node with 0 Red children $\iff$ **2-node** (1 key, 2 children).
+- Black node with 1 Red child $\iff$ **3-node** (2 keys, 3 children).
+- Black node with 2 Red children $\iff$ **4-node** (3 keys, 4 children).
+- Red-Black tree color-flipping corresponds directly to a **2-3-4 node split**.
 
-### AVL vs Red-Black Tree: The Engineering Trade-Off
-
-| Feature | AVL Tree | Red-Black Tree |
-|---|---|---|
-| **Balance Strictness** | Strict (`\|h_L - h_R\| <= 1`) | Relaxed (`h_max <= 2 * h_min`) |
-| **Max Height** | ~ 1.44 log2(N) | ~ 2.0 log2(N) |
-| **Lookup Speed** | **Faster** (Shorter average path length) | Slightly slower (~ 20-30% more hops) |
-| **Insertion Rotations** | At most 2 rotations | **At most 2 rotations** |
-| **Deletion Rotations** | Up to O(log N) rotations | **At most 3 rotations** |
-| **Primary Industry Use** | Read-heavy in-memory lookups | General-purpose STL (`std::map`, `std::set`, Linux `rbtree`, Java `TreeMap`) |
-
-> **Interview Summary:** *"C++ STL uses Red-Black trees because real-world workloads involve mixed insertions and deletions. Red-Black trees guarantee at most O(1) tree rotations per mutation, whereas AVL trees may trigger up to O(log N) rotations on deletion."*
-
----
-
-# 2. Special Note 2: Floyd's Cycle Detection Mathematical Proof
-
-```text
-Linked List Layout:
-Head -----( L )-----> [ Cycle Start ] ------( k )------> [ Meeting Point ]
-                           ^                                    |
-                           |----------------( C - k )-----------|
+```
++----------------------------------------------------------------------------------------------------+
+| METRIC             | AVL TREE                                | RED-BLACK TREE                      |
++----------------------------------------------------------------------------------------------------+
+| Balance Strictness | Strict: |h_L - h_R| <= 1                | Relaxed: h_max <= 2 * h_min         |
+| Maximum Height     | ~ 1.44 log2(N)                          | ~ 2.00 log2(N)                      |
+| Lookup Latency     | Optimal (Shorter path lengths)          | Slightly higher (~20-30% more hops) |
+| Insert Rotations   | At most 2 rotations                     | At most 2 rotations                 |
+| Deletion Rotations | Up to O(log N) rotations                | At most 3 rotations                 |
+| Primary Domain     | Read-intensive lookup tables            | General-purpose associative maps    |
++----------------------------------------------------------------------------------------------------+
 ```
 
-## The Mathematical Derivation
-* Let `L` = distance from `head` to `Cycle Start`.
-* Let `C` = length of the cycle.
-* Let `k` = distance from `Cycle Start` to the `Meeting Point` where `slow` and `fast` meet.
+---
 
-### Step 1: Prove they meet
-* `slow` speed = 1 node/step.
-* `fast` speed = 2 nodes/step.
-* Relative speed = 1 node/step.
-* Once both enter the cycle, `fast` reduces distance by 1 node each step, guaranteeing they collide in at most `C` steps inside the cycle.
+# 2. Floyd's Cycle Detection Algebraic Proof
 
-### Step 2: Distance Equations
-When they meet:
-- Distance traveled by slow = `L + k`
-- Distance traveled by fast = `L + k + n * C` (for some integer `n >= 1`)
+```
+Linked List Structure:
+[ Head ] -----( L )-----> [ Cycle Entry ] ------( k )------> [ Meeting Point ]
+                               ^                                    |
+                               |----------------( C - k )-----------|
+```
 
-Since `fast` travels twice as fast as `slow`:
-- `Distance(fast) = 2 * Distance(slow)`
-- `L + k + n * C = 2 * (L + k)`
-- `n * C = L + k` ==> `L = n * C - k = (n - 1) * C + (C - k)`
-
-### Step 3: Why resetting `slow` to `head` works
-* The distance from `head` to `Cycle Start` is `L`.
-* The distance from `Meeting Point` to `Cycle Start` (moving forward along the cycle) is `(C - k)`.
-* Since `L = (n - 1) * C + (C - k)`, moving one pointer from `head` and one pointer from `Meeting Point` at equal speed (1 step/time) guarantees they will meet **precisely at the Cycle Start** after traveling `L` steps!
+### Derivation:
+1. Let $L$ be the distance from `Head` to `Cycle Entry`.
+2. Let $C$ be the cycle length, and $k$ be the distance from `Cycle Entry` to the `Meeting Point`.
+3. Let $v_{\text{slow}} = 1$ node/step and $v_{\text{fast}} = 2$ nodes/step.
+4. When pointers collide at `Meeting Point`:
+   $$D_{\text{slow}} = L + k$$
+   $$D_{\text{fast}} = L + k + n C \quad (n \ge 1)$$
+5. Since $D_{\text{fast}} = 2 D_{\text{slow}}$:
+   $$L + k + n C = 2(L + k) \implies n C = L + k$$
+   $$L = n C - k = (n - 1) C + (C - k)$$
+- **Theorem:** Resetting `slow` to `Head` while holding `fast` at `Meeting Point` and advancing both at 1 node/step causes them to traverse $L$ nodes simultaneously, meeting precisely at `Cycle Entry`.
 
 ---
 
-# 3. Special Note 3: Amortized Analysis (The 3 Formal Frameworks)
+# 3. Amortized Analysis: The Three Formal Frameworks
 
-Amortized analysis guarantees the **average performance per operation in the worst-case sequence of operations**.
+Amortized analysis establishes worst-case bounds over a continuous sequence of $N$ operations.
 
-## 1. The Aggregate Method
-Compute total cost `T(N)` for a sequence of `N` operations, then divide by `N`:
-`Amortized Cost = T(N) / N`
-* **Dynamic Array Doubling:**
-  - `N` insertions take `N` regular writes (`O(1)` each) plus copy costs at sizes `1, 2, 4, 8, ..., N`:
-  - Total copy cost = `1 + 2 + 4 + ... + N = 2N - 1`.
-  - Total time `T(N) = N + (2N - 1) = 3N - 1`.
-  - Amortized cost = `(3N - 1) / N ~ 3 = O(1)`.
+### 1. The Aggregate Method
+Computes the total execution cost $T(N)$ across a sequence of $N$ operations, evaluating the average cost per operation:
+$$\text{Amortized Cost } a = \frac{T(N)}{N}$$
+- For a dynamic array with doubling, copy operations occur at capacities $1, 2, 4, \dots, N$.
+- $T(N) = N \text{ (inserts)} + \sum_{i=0}^{\log_2 N} 2^i = N + (2N - 1) < 3N \implies a = O(1)$.
 
-## 2. The Accounting (Banker's) Method
-Assign an amortized charge (credit) to each operation. Cheap operations overcharge and store credits in a "bank account". Expensive operations withdraw accumulated credits to pay for themselves.
-* **Dynamic Array:** Charge **$3 per insertion**:
-  - $1 pays for the immediate write into array memory.
-  - $1 credit stored with current element to pay for its future move when array doubles.
-  - $1 credit stored with an older element that has already moved to pay for its next move.
-  - When capacity doubles, every element has $1 credit saved, meaning the copy is fully prepaid. Bank balance never drops below 0!
+### 2. The Accounting (Banker's) Method
+Assigns an amortized charge (credit) to each operation. Low-cost operations overcharge and deposit surplus credits into a conceptual bank. High-cost operations consume stored credits:
+- Dynamic array insertion assigns a charge of **$3 per element**:
+  - $1 pays for the immediate memory store.
+  - $1 credit stored with the element to pay for its relocation upon capacity doubling.
+  - $1 credit stored with an earlier unshifted element to pay for its relocation.
+- When capacity doubles, every element has pre-allocated credits, guaranteeing the bank balance remains non-negative.
 
-## 3. The Potential (Physicist's) Method
-Define a potential function `Phi(D_i)` mapping data structure state `D_i` to a non-negative real number (`Phi(D_i) >= 0`, `Phi(D_0) = 0`).
-`Amortized Cost a_i = c_i + Phi(D_i) - Phi(D_{i-1})`
-* If operation is cheap, potential `Phi` increases (energy stored).
-* If operation is expensive, potential `Phi` drops drastically (`Delta Phi < 0`), canceling out the large actual cost `c_i`.
-* **Dynamic Array:** Let `Phi(D_i) = 2 * size - capacity`.
-  - Immediately after doubling (`capacity = 2 * size`): `Phi = 2 * size - 2 * size = 0`.
-  - Right before doubling (`size = capacity`): `Phi = 2 * size - size = size`.
-  - When doubling occurs: actual cost `c_i = size + 1`, potential drops by `size` ==> `a_i = (size + 1) - size = O(1)`.
+### 3. The Potential (Physicist's) Method
+Defines a state potential function $\Phi(D_i) \ge 0$ over data structure state $D_i$ with $\Phi(D_0) = 0$:
+$$a_i = c_i + \Phi(D_i) - \Phi(D_{i-1})$$
+- For a dynamic array, choose $\Phi(D_i) = 2 \cdot \text{size} - \text{capacity}$.
+- Immediately after doubling ($\text{capacity} = 2 \cdot \text{size}$): $\Phi = 0$.
+- Immediately before doubling ($\text{size} = \text{capacity}$): $\Phi = \text{size}$.
+- During doubling: $c_i = \text{size} + 1$, and $\Delta \Phi = 0 - \text{size} = -\text{size}$:
+  $$a_i = (\text{size} + 1) - \text{size} = 1 = \mathbf{O(1)}$$
 
 ---
 
-# 4. Special Note 4: Morris Inorder & Preorder Traversal (O(1) Space)
+# 4. Morris In-Order & Pre-Order Traversal ($O(1)$ Auxiliary Space)
 
-Standard DFS uses `O(H)` stack space. Morris Traversal achieves **O(N) time and O(1) auxiliary space** without modifying tree nodes or allocating memory.
+Morris Traversal evaluates binary tree traversals in $O(N)$ time and $O(1)$ auxiliary space without recursive call stacks or parent pointer nodes by creating temporary **Threaded Predecessor Links**:
 
-## The Mechanism (Threaded Predecessor Links)
-For current node `curr`:
-1. If `curr->left == nullptr`: visit `curr`, move to `curr->right`.
-2. Else, find `curr`'s **Inorder Predecessor** (rightmost node in `curr`'s left subtree):
-   - **Case A (Thread creation):** If `predecessor->right == nullptr`, point `predecessor->right = curr` (create temporary thread), and move `curr = curr->left`.
-   - **Case B (Thread removal & Visit):** If `predecessor->right == curr`, restore tree by setting `predecessor->right = nullptr`, visit `curr`, and move `curr = curr->right`.
-
-```text
-Morris Inorder Step:
+```
+Morris Threading Step:
          ( curr )
          /
        ...
          \
-      ( predecessor ) ----[ Temp Thread ]----> ( curr )
+      ( In-Order Predecessor ) ----[ Temporary Thread ]----> ( curr )
 ```
 
 ```cpp
-void morrisInorder(TreeNode* root) {
+void morrisInorderTraversal(TreeNode* root) {
     TreeNode* curr = root;
     while (curr) {
         if (!curr->left) {
-            cout << curr->val << " ";
+            visitNode(curr);
             curr = curr->right;
         } else {
+            // Find in-order predecessor
             TreeNode* pred = curr->left;
-            while (pred->right && pred->right != curr) pred = pred->right;
+            while (pred->right && pred->right != curr) {
+                pred = pred->right;
+            }
 
             if (!pred->right) {
-                pred->right = curr; // Create thread
+                pred->right = curr; // Establish thread
                 curr = curr->left;
             } else {
-                pred->right = nullptr; // Remove thread (restore tree)
-                cout << curr->val << " ";
+                pred->right = nullptr; // Dissolve thread (Restore tree structure)
+                visitNode(curr);
                 curr = curr->right;
             }
         }
@@ -179,178 +158,129 @@ void morrisInorder(TreeNode* root) {
 }
 ```
 
-* **Why is Time O(N)?** Every edge in the tree is traversed at most 3 times (once to find predecessor, once to establish thread, once to remove thread).
-
 ---
 
-# 5. Special Note 5: Tarjan's Bridge, Articulation Point & SCC Theory
+# 5. Tarjan's Low-Link Graph Theory (Bridges, Articulation Points, SCCs)
 
-## The 2 Core Arrays
-1. `tin[u]`: Discovery time when node `u` is first visited in DFS timer.
-2. `low[u]`: Lowest `tin` reachable from `u` via at most one back-edge.
+Tarjan's graph algorithms maintain two structural arrays across Depth-First Search traversals:
+1. `tin[u]`: Discovery timestamp when vertex $u$ is visited by the DFS clock.
+2. `low[u]`: Earliest discovery timestamp reachable from $u$ via tree edges and at most one back-edge.
 
-```text
-DFS Tree Edge (u -> v): Normal forward tree exploration.
-Back Edge (u -> ancestor): Edge to an already visited ancestor (creates cycle).
+```
+DFS Tree Edge (u -> v): Forward branch exploration in DFS tree.
+Back-Edge (u -> ancestor): Non-tree edge connecting u to an already-active ancestor.
 ```
 
-### 1. Bridges (Critical Edges)
-An undirected edge `(u, v)` is a **Bridge** if and only if:
-`low[v] > tin[u]`
-* **Meaning:** Subtree at `v` has NO back-edge to `u` or any ancestor above `u`. Removing `(u, v)` disconnects `v`'s component.
-
-### 2. Articulation Points (Cut Vertices)
-A vertex `u` is an **Articulation Point** if:
-* **Root of DFS tree:** Has >= 2 independent children in DFS tree.
-* **Non-root node:** Has a child `v` such that `low[v] >= tin[u]`.
-
-### 3. Tarjan's Strongly Connected Components (SCCs in Directed Graphs)
-* Uses a DFS stack. Push `u` to stack on entry.
-* If `low[u] == tin[u]`, `u` is the **root of an SCC** ==> pop nodes from stack until `u` is popped to form the complete SCC component.
-* Time: Strictly `O(V + E)` in a single DFS pass!
+### Graph Properties:
+- **Bridge Edge Identification:** An undirected edge $(u, v)$ is a Bridge if and only if:
+  $$\text{low}[v] > \text{tin}[u]$$
+- **Articulation Point (Cut Vertex):** Vertex $u$ is an articulation point if:
+  1. $u$ is the root of the DFS tree and has $\ge 2$ independent child branches.
+  2. $u$ is a non-root vertex and has a child $v$ satisfying $\text{low}[v] \ge \text{tin}[u]$.
+- **Strongly Connected Components (Directed Graphs):** If $\text{low}[u] == \text{tin}[u]$, vertex $u$ is the root of an SCC. Popping nodes from the traversal stack up to $u$ isolates the complete component.
 
 ---
 
-# 6. Special Note 6: Disjoint Set Union (DSU) & The Inverse Ackermann Function alpha(N)
+# 6. Disjoint Set Union (DSU) & The Inverse Ackermann Function $\alpha(N)$
 
-```text
+```
 Path Compression:                          Union by Rank:
      ( 4 )                                    ( Root 1, Rank 2 )
      /                                               /      \
    ( 3 )                                    ( Root 2, Rank 1 ) ...
    /       ===>  [ 1 ] <- (2), (3), (4)
- ( 2 )           (Direct parent pointers)
+ ( 2 )           (Direct root pointers)
  /
 ( 1 )
 ```
 
-## The 2 Optimizations
-1. **Path Compression:** During `find(x)`, make every visited node point directly to root: `parent[x] = find(parent[x])`.
-2. **Union by Rank / Size:** Always attach the shallower tree under the deeper tree root.
-
-### Why alpha(N) <= 4 in Practice
-* The Ackermann function `A(m, n)` grows at a colossal rate:
-  - `A(1, 1) = 3`
-  - `A(2, 2) = 7`
-  - `A(3, 3) = 61`
-  - `A(4, 4) = 2^(2^(2^65536)) - 3` (Number of atoms in observable universe is merely ~ 10^80).
-* `alpha(N)` is the inverse: the value of `k` such that `A(k, k) >= N`.
-* For all practical inputs `N <= 10^80`, **alpha(N) <= 4**. DSU operations are practically **O(1)**.
+### Ackermann Growth & Inversion:
+The Ackermann function $A(m, n)$ exhibits non-primitive recursive growth:
+- $A(1, 1) = 3$
+- $A(2, 2) = 7$
+- $A(3, 3) = 61$
+- $A(4, 4) = 2^{2^{2^{65536}}} - 3$
+- $\alpha(N)$ is defined as the functional inverse: $\alpha(N) = \min \{k \mid A(k, k) \ge N\}$.
+- Because $A(4, 4)$ exceeds the estimated number of particles in the universe ($10^{80}$), $\alpha(N) \le 4$ for all computable input domains, yielding effectively $O(1)$ amortized disjoint set operations.
 
 ---
 
-# 7. Special Note 7: KMP String Matching & The LPS Array
+# 7. Knuth-Morris-Pratt (KMP) String Search & The LPS Automaton
 
-## The Longest Proper Prefix which is Suffix (LPS)
-Given pattern `P` of length `M`:
-`lps[i]` = length of the longest proper prefix of `P[0...i]` that is also a suffix of `P[0...i]`.
+The **Longest Proper Prefix which is also a Suffix (LPS)** array $\pi$ eliminates redundant character comparisons by precomputing state transitions:
+$$\pi[i] = \max \{k \mid P[0 \dots k-1] = P[i-k+1 \dots i] \text{ and } k \le i\}$$
 
-```text
+```
 Pattern: "A B A B C"
-i = 0: "A"       -> lps[0] = 0
-i = 1: "AB"      -> lps[1] = 0
-i = 2: "ABA"     -> lps[2] = 1 ("A")
-i = 3: "ABAB"    -> lps[3] = 2 ("AB")
-i = 4: "ABABC"   -> lps[4] = 0
-LPS Array: [ 0, 0, 1, 2, 0 ]
+i=0: "A"     -> pi[0] = 0
+i=1: "AB"    -> pi[1] = 0
+i=2: "ABA"   -> pi[2] = 1 ("A")
+i=3: "ABAB"  -> pi[3] = 2 ("AB")
+i=4: "ABABC" -> pi[4] = 0
+pi Array: [ 0, 0, 1, 2, 0 ]
 ```
 
-### Why KMP is O(N + M)
-* In naive string matching, a mismatch resets the text pointer back, causing `O(N * M)` worst case.
-* KMP **never backtracks the text pointer `i`**!
-* When mismatch occurs at `P[j]`, text pointer `i` stays fixed, and pattern pointer resets to `j = lps[j - 1]`.
+### Invariant:
+When a character mismatch occurs at index $j$ in pattern $P$, the text pointer $i$ **never decrements or backtracks**. The pattern pointer shifts directly to index $j = \pi[j - 1]$, executing string search in strict $O(N + M)$ time.
 
 ---
 
-# 8. Special Note 8: Database Storage Internals (B+ Trees vs LSM-Trees)
+# 8. Database Storage Engines: B+ Trees vs. LSM-Trees
 
-```text
-B+ Tree: In-Place Node Updates (Pages on Disk)
-         [ Internal Node ]
-         /               \
-   [ Leaf Node ] <---> [ Leaf Node ]  (Doubly linked for O(1) sequential range scans)
-
-LSM-Tree: Append-Only Sequential Writes
-   Write ---> [ WAL (Disk) ] + [ MemTable (RAM - SkipList) ]
-                                    | (When MemTable full)
-                                    v
-                               [ SSTable Level 0 (Disk) ]
-                                    | (Compaction)
-                                    v
-                               [ SSTable Level 1 (Disk) ]
+```
++----------------------------------------------------------------------------------------------------+
+| DIMENSION          | B+ TREE (In-Place Relational Engines)   | LSM-TREE (Append-Only Log Stores)   |
++----------------------------------------------------------------------------------------------------+
+| Primary Data Path  | Disk Pages (4KB-16KB frames)            | MemTable (RAM) -> Immutable SSTables|
+| Write Model        | In-place random page modification       | Sequential append-only disk logging |
+| Write Throughput   | Bounded by random disk I/O & page write amp| High (Buffered sequential flushes)  |
+| Read Latency       | Deterministic O(log_B N) page lookups   | Multi-tier check (MemTable, Bloom, SST)|
+| Storage Efficiency | ~67% page fill factor (Fragmentation)   | Fully compacted dense sorted runs   |
+| Background Work    | Page splitting / Root rebalancing       | Background merge compaction         |
++----------------------------------------------------------------------------------------------------+
 ```
 
-### The Architectural Comparison
+---
 
-| Dimension | B+ Tree (Postgres, MySQL InnoDB) | LSM-Tree (Cassandra, RocksDB, LevelDB) |
-|---|---|---|
-| **Write Model** | Random in-place page writes (4KB - 16KB pages) | **Append-only sequential disk writes** |
-| **Write Throughput** | Lower (Random I/O + Page write amplification) | **Extremely High (Sequential I/O)** |
-| **Read Latency** | **Fast (O(log_B N) page fetches)** | Slower (Checks MemTable, Bloom Filter, multiple SSTable levels) |
-| **Storage Fragmentation** | Internal page fragmentation (~ 67% average fill) | Zero fragmentation (SSTables are packed immutable files) |
-| **Background Overhead** | Minimal | **Compaction** (merging sorted runs in background consumes CPU/Disk I/O) |
+# 9. Probabilistic Data Structures: Bloom Filters & Count-Min Sketch
+
+### 1. Bloom Filter False Positive Probability
+For an array of $M$ bits, $k$ independent hash functions, and $N$ inserted elements:
+1. Probability a specific bit remains 0 after $N$ insertions:
+   $$P(\text{bit} = 0) = \left(1 - \frac{1}{M}\right)^{k N} \approx e^{-k N / M}$$
+2. Probability of a false positive ($k$ bits independently set to 1):
+   $$p \approx \left(1 - e^{-k N / M}\right)^k$$
+3. Minimizing $p$ with respect to $k$ yields:
+   $$k = \frac{M}{N} \ln 2 \approx 0.693 \frac{M}{N}$$
+
+### 2. Count-Min Sketch (Frequency Approximation)
+Maintains a 2D array of counters $D \times W$ with $D$ independent hash functions.
+- **Update:** For incoming item $x$, increment $\text{table}[i][h_i(x)]$ for each row $i \in [0, D-1]$.
+- **Point Query:** $\hat{f}(x) = \min_{0 \le i < D} \text{table}[i][h_i(x)]$.
+- **Guarantee:** $\hat{f}(x) \ge f(x)$ (Never underestimates true frequency). Error is bounded by $\epsilon N$ with probability $1 - \delta$ by sizing $W = \lceil e/\epsilon \rceil$ and $D = \lceil \ln(1/\delta) \rceil$.
 
 ---
 
-# 9. Special Note 9: Bloom Filters & Count-Min Sketch
+# 10. Linear-Time Selection: Quickselect vs. Median-of-Medians (BFPRT)
 
-## 1. Bloom Filter Math
-* **Array size:** `m` bits.
-* **Hash functions:** `k` independent uniform hash functions.
-* **Elements inserted:** `n`.
+### 1. Quickselect (Average $O(N)$)
+Partitions around a pivot and recurses strictly into the single partition containing target rank $K$:
+$$T(N) = N + \frac{N}{2} + \frac{N}{4} + \dots = N \sum_{i=0}^{\infty} \left(\frac{1}{2}\right)^i = \mathbf{2N = O(N)}$$
+- Degenerates to $O(N^2)$ if pivot selection is consistently adversarial.
 
-### Probability of False Positive (p)
-The probability that a specific bit is still 0 after `n` insertions:
-`P(bit = 0) = (1 - 1/m)^(k * n) ~ e^(-k * n / m)`
-
-The probability of a false positive (all `k` bits are 1 for an absent element):
-`p ~ (1 - e^(-k * n / m))^k`
-
-* **Optimal number of hash functions:** `k = (m / n) * ln(2) ~ 0.693 * (m / n)`.
-* **Rule of Thumb:** `m = 10 * n` bits with `k = 7` hash functions yields **~ 1% false positive rate**!
-
-## 2. Count-Min Sketch (Frequency Estimation)
-* A 2D array of counters `d * w` with `d` hash functions.
-* On `add(x)`: for each row `i`, compute `h_i(x)` and increment `table[i][h_i(x)]++`.
-* On `query(x)`: return `min_{i=0}^{d-1} table[i][h_i(x)]`.
-* **Guarantee:** Never underestimates frequency. Overestimates are bounded mathematically.
+### 2. Median-of-Medians (BFPRT Algorithm - Strict Worst-Case $O(N)$)
+1. Partition $N$ elements into groups of 5.
+2. Compute medians of each 5-element group in $O(1)$ per group ($O(N)$ total).
+3. Recursively compute median of the $N/5$ medians ($M^*$).
+4. Use $M^*$ as partition pivot. At least $30\%$ of elements are strictly smaller than $M^*$, and $30\%$ are strictly larger, bounding recursive subproblem size to $\le \frac{7}{10} N$.
+$$T(N) \le T\left(\frac{N}{5}\right) + T\left(\frac{7N}{10}\right) + O(N) \implies \mathbf{T(N) = O(N)}$$
 
 ---
 
-# 10. Special Note 10: Linear-Time Selection (Quickselect vs Median-of-Medians)
+# 11. Core Theoretical Summary Principles
 
-## Quickselect (Hoare's Selection)
-* Finds K-th smallest/largest element in **Average O(N) time** and `O(1)` space.
-* **Why Average is O(N):**
-  - Partition array around pivot in `O(N)`.
-  - Recurse into **only the single side containing index K** (unlike QuickSort which recurses into both sides):
-  `T(N) = N + N/2 + N/4 + N/8 + ... = N * (1 + 1/2 + 1/4 + ...) = 2N = O(N)`
-* **Worst Case:** `O(N^2)` (if chosen pivot is consistently the maximum or minimum).
-
-## Median-of-Medians (BFPRT Algorithm)
-Guarantees **Strict O(N) Worst-Case** time:
-1. Divide `N` elements into groups of 5.
-2. Find the median of each 5-element group (takes `O(1)` per group ==> `O(N)` total).
-3. Recursively find the median of the `N/5` medians (call it `M*`).
-4. Use `M*` as the pivot for partitioning.
-* **Guarantee:** At least 30% of elements are strictly smaller than `M*`, and at least 30% are strictly larger ==> worst-case partition size is at most `70% N`.
-* Recurrence: `T(N) <= T(N/5) + T(7N/10) + O(N)` ==> `T(N) = O(N)`.
-
----
-
-# Summary: The Master Interview Concept Map
-
-```text
-Concept                         Core Mental Anchor                                      Interview Question Answer
------------------------------------------------------------------------------------------------------------------------------
-Red-Black Trees                 2-3-4 Tree Equivalence; Max Height <= 2*log(N)          "STL chooses RB-tree for O(1) rotation on delete"
-Floyd's Cycle Proof             L = (n-1)C + (C - k)                                    "Resetting slow to head syncs at cycle entry"
-Amortized Analysis              Aggregate / Banker's / Potential                        "Vector doubling cost = 3N amortized O(1)"
-Morris Traversal                Threaded predecessor link                               "Inorder tree traversal in O(1) auxiliary space"
-Tarjan's Bridge                 low[v] > tin[u]                                         "Subtree at v cannot reach above u"
-DSU alpha(N)                    Inverse Ackermann function <= 4                         "Union by rank + Path compression = near O(1)"
-KMP LPS                         Never backtrack text pointer i                          "Reset pattern pointer j to lps[j-1] on mismatch"
-B+ Trees vs LSM-Trees           Page updates (Read-heavy) vs Append-only (Write-heavy)  "LSM achieves high write throughput via sequential I/O"
-Bloom Filters                   Zero false negatives; k = (m/n) * ln(2)                 "Definitively not in set if any bit is 0"
-Quickselect                     Recurse single partition half -> N + N/2 + N/4 = 2N    "Average O(N) vs Worst O(N^2)"
-```
+1. **Red-Black 2-3-4 Equivalence:** Red-Black tree color updates directly map to node splitting in multi-way 2-3-4 B-trees.
+2. **Floyd's Cycle Proof:** Algebraic distance modeling proves pointer collision occurs at identical offsets from the cycle entry point.
+3. **Formal Amortization:** The Aggregate, Accounting, and Potential methods evaluate average computational costs over worst-case execution sequences.
+4. **Threaded Morris Navigation:** Leverages null right-child pointers of in-order predecessors to traverse binary trees in $O(1)$ auxiliary space.
+5. **Deterministic Linear Selection:** BFPRT Median-of-Medians guarantees strict $O(N)$ worst-case order statistic selection by bounding partition imbalance.

@@ -1,255 +1,208 @@
-# Master Guide 02: Databases, Storage & Async Systems
+# Distributed Databases, Storage Partitioning & Asynchronous Event Systems
 
-> **Focus:** Database Replication Topologies, Replication Lag & Read-Your-Own-Writes, Sharding Strategies, Consistent Hashing Rings, Distributed Transactions (2PC vs. Sagas), and Message Queues (Kafka vs. RabbitMQ).
-> 
-> *Targeted for Top-Tier Tech Engineering & Internship Interviews.*
+> **Scope:** Distributed Database Replication Models (Single-Leader, Multi-Leader, Leaderless Dynamo Quorums), Replication Lag & Consistency Guarantees, Horizontal Partitioning & Sharding Architectures, Consistent Hashing Rings with Virtual Nodes, Distributed Transaction Processing (Two-Phase Commit vs. Saga Orchestration), and Asynchronous Message Brokering (AMQP vs. Distributed Partitioned Logs).
 
 ---
 
 # Table of Contents
-1. [Database Replication Topologies](#1-database-replication-topologies)
-2. [Replication Lag & Read-Your-Own-Writes Consistency](#2-replication-lag--read-your-own-writes-consistency)
-3. [Database Partitioning & Sharding Strategies](#3-database-partitioning--sharding-strategies)
-4. [Consistent Hashing: The Circular Ring Solution](#4-consistent-hashing-the-circular-ring-solution)
-5. [Cross-Shard Challenges: 2PC vs. The Saga Pattern](#5-cross-shard-challenges-2pc-vs-the-saga-pattern)
-6. [Message Queues & Event Streaming: Kafka vs. RabbitMQ](#6-message-queues--event-streaming-kafka-vs-rabbitmq)
-7. [Glanceable Summary Matrix](#7-glanceable-summary-matrix)
+1. [Distributed Database Replication Topologies](#1-distributed-database-replication-topologies)
+2. [Replication Lag & Client-Side Consistency Guarantees](#2-replication-lag--client-side-consistency-guarantees)
+3. [Database Partitioning & Horizontal Sharding Models](#3-database-partitioning--horizontal-sharding-models)
+4. [Consistent Hashing & Virtual Node Topology](#4-consistent-hashing--virtual-node-topology)
+5. [Distributed Transaction Coordination: 2PC vs. Saga Pattern](#5-distributed-transaction-coordination-2pc-vs-saga-pattern)
+6. [Asynchronous Message Queues & Distributed Event Streaming](#6-asynchronous-message-queues--distributed-event-streaming)
+7. [Core Architectural Summary Matrix](#7-core-architectural-summary-matrix)
 
 ---
 
-# 1. Database Replication Topologies
+# 1. Distributed Database Replication Topologies
 
-### 1. The "Aha!" Intuition
-Think of a master novelist writing new chapters of a book (Primary Leader). Five copyists sit next to him, rapidly printing copies of finished pages to hand to a crowd of 5,000 eager readers (Read Replicas). The author handles the **writes**; the copyists handle the **reads**.
+Database replication distributes duplicate copies of data across physically isolated compute nodes to enhance read capacity, provide fault tolerance, and reduce geographic latency.
 
-### 2. ASCII Architecture Flowchart
 ```
-SINGLE-LEADER (MASTER-SLAVE) WITH READ REPLICAS:
-[ Client Writes ] ---> [ Primary Leader (Read/Write) ]
-                                 |
-                +----------------+----------------+ (Async Replication Stream)
-                |                                 |
-                v                                 v
-   [ Read Replica 1 (Read-Only) ]    [ Read Replica 2 (Read-Only) ]
-                ^                                 ^
-                +------------ [ 10,000 Client Reads ] ------------+
+Single-Leader Replication Architecture:
+[ Ingress Writes ] ---> [ Primary Node (R/W) ]
+                                |
+                +---------------+---------------+ (Asynchronous WAL Stream)
+                |                               |
+                v                               v
+    [ Read Replica 1 (RO) ]          [ Read Replica 2 (RO) ]
+                ^                               ^
+                +---- [ Ingress Read Traffic ] -+
 ```
 
-### 3. Replication Topologies Comparison
 ```
-+---------------------------------------------------------------------------------------------------+
-| TOPOLOGY             | WRITE HANDLING                       | READ HANDLING         | TRADEOFF            |
-+---------------------------------------------------------------------------------------------------+
-| Single-Leader        | 1 designated Primary node handles    | Spread across 10+     | Primary is a write  |
-| (Master-Slave)       | 100% of writes                       | Read Replicas         | bottleneck          |
-+---------------------------------------------------------------------------------------------------+
-| Multi-Leader         | Multiple Primary nodes in different  | Local datacenter reads| Complex write-write |
-| (Active-Active)      | geographic datacenters accept writes | with near-zero latency| conflict resolution |
-+---------------------------------------------------------------------------------------------------+
-| Leaderless           | Any node accepts writes; writes/reads| Read Quorum (R) and   | Eventual consistency|
-| (Dynamo / Cassandra) | require Quorum ($W + R > N$)         | Write Quorum (W)      | without ACID joins  |
-+---------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| REPLICATION MODEL    | WRITE INGRESS                       | READ INGRESS          | CONCURRENCY TRADEOFF |
++----------------------------------------------------------------------------------------------------+
+| Single-Leader        | 1 designated Primary node processes | Distributed across N  | Primary write I/O is |
+| (Master-Replica)     | all write mutations sequentially    | read-only replicas    | a scaling ceiling    |
+| Multi-Leader         | Multiple Primary nodes across       | Local datacenter reads| Cross-datacenter     |
+| (Active-Active)      | geographic regions accept writes    | with minimal latency  | conflict resolution  |
+| Leaderless           | Any node accepts writes; evaluated  | Quorum evaluation:    | Eventual consistency;|
+| (Dynamo / Cassandra) | via distributed quorum consensus    | Read quorum (R)       | absence of ACID joins|
++----------------------------------------------------------------------------------------------------+
 ```
 
-### 4. The Leaderless Dynamo Quorum Formula
-For a cluster of $N$ replicas, if you write to $W$ nodes and read from $R$ nodes:
-$$W + R > N \implies \text{Guaranteed Strong Consistency (Overlapping Replicas)}$$
-- **Example:** $N = 3, W = 2, R = 2 \implies 2 + 2 = 4 > 3$. At least one node in your read quorum is guaranteed to contain the latest write from the write quorum.
-
-### 5. The Interview Trap
-Assuming Read Replicas increase write throughput. **Read replicas only scale READ throughput.** In fact, adding 10 read replicas slightly *slows down* the primary leader because it must replicate change logs across more network streams.
-
-### 6. 30-Second Verbal Script
-> **"Database replication copies data across multiple servers to increase read throughput, enhance fault tolerance, and reduce geographic latency. In Single-Leader replication, all writes go to a single primary node and stream asynchronously to read replicas. Leaderless architectures use Quorum consensus ($W + R > N$) to allow high-throughput writes across all nodes without a single point of failure."**
-
-### 7. Real-World Product Example
-**Instagram:** The Instagram feed is $99\%$ reads and $1\%$ writes. Instagram routes all photo likes and comments to a Primary PostgreSQL database, which streams changes to 50+ read replicas that serve the feed to millions of scrolling users.
+### The Leaderless Dynamo Quorum Invariant:
+For a replication cluster of $N$ nodes, configuring write quorum $W$ and read quorum $R$:
+$$W + R > N$$
+- **Theorem:** The pigeonhole principle guarantees that the set of nodes responding to a read operation ($R$) intersects with the set of nodes that acknowledged the latest write ($W$) by at least one overlapping replica node, ensuring strong consistency when paired with version timestamps.
 
 ---
 
-# 2. Replication Lag & Read-Your-Own-Writes Consistency
+# 2. Replication Lag & Client-Side Consistency Guarantees
 
-### 1. The "Aha!" Intuition
-You edit your profile name from "Alice" to "Alicia" and click Save. The app reloads, but your screen still says "Alice"! You freak out and think the website is broken. Two seconds later, you refresh and it says "Alicia". That 2-second delay is **Replication Lag**.
+In asynchronous replication, mutations take non-zero time ($\Delta t$) to propagate from the Primary WAL to Read Replicas, resulting in **Replication Lag**:
 
-### 2. ASCII Architecture Flowchart: The Read-Your-Own-Writes Fix
 ```
-THE PROBLEM:
-User updates profile -> Writes to Leader -> Page reloads -> Reads from Replica (Lagging!) -> Sees Old Data!
-
-THE SOLUTION (Read-Your-Own-Writes Routing):
-[ User Updates Profile ] ---> 1. Write to Primary Leader (Records Timestamp: t = 0)
-                                          |
-[ User Reloads Page ]    ---> 2. Gateway checks: Did user write in last 5 seconds?
-                                     |
-             +-----------------------+-----------------------+
-             | (YES - User just wrote!)                      | (NO - Regular read)
-             v                                               v
-  [ Route Read to PRIMARY LEADER ]              [ Route Read to READ REPLICA ]
-   (Guaranteed Fresh Data!)                      (Conserves Primary capacity)
+Replication Lag Inconsistency Cycle:
+1. Client mutates entity E on Primary (t = 0)
+2. Application redirects immediate read request to Read Replica (t = 10ms)
+3. Replica WAL stream lags by 50ms -> Returns stale record!
 ```
 
-### 3. Core Solutions for Replication Lag
-1. **Read-Your-Own-Writes Routing:** Route a user's reads to the **Primary Leader for 5-10 seconds** after they perform any write operation.
-2. **Monotonic Reads:** Guarantee that if a user reads version $V_2$, they will never subsequently read an older version $V_1$ by consistently hashing their user ID to the same replica.
-3. **Semi-Synchronous Replication:** Primary waits for at least 1 replica to acknowledge writing to its relay log before returning success to the client.
-
----
-
-# 3. Database Partitioning & Sharding Strategies
-
-### 1. The "Aha!" Intuition
-If you have a 50,000-page city directory, it's impossible to bind into one book. You split it into 26 volumes: Volume A, Volume B... Volume Z. Now, 26 people can look up numbers simultaneously. **Sharding is splitting a giant table across multiple independent database servers.**
-
-### 2. ASCII Architecture Flowchart
 ```
-[ Incoming Request: User 1042 ]
-              |
-              v
-     [ Sharding Router ] ---> Calculates: hash(user_id) % 3
-              |
-    +---------+---------+
-    | (Shard 0)         | (Shard 1)         | (Shard 2)
-    v                   v                   v
-[ DB Shard A ]      [ DB Shard B ]      [ DB Shard C ]
-(Users 1..1M)       (Users 1M..2M)      (Users 2M..3M)
-```
-
-### 3. Sharding Strategies Comparison
-```
-+---------------------------------------------------------------------------------------------------+
-| STRATEGY             | HOW DATA IS SPLIT                    | PROS                 | CONS                |
-+---------------------------------------------------------------------------------------------------+
-| Range-Based          | Shard by alphabetical or numeric     | Efficient range scans| Hotspotting on      |
-|                      | ranges (e.g. A-F, G-M, N-Z)          | (`BETWEEN 10 AND 20`)| current dates/keys  |
-+---------------------------------------------------------------------------------------------------+
-| Hash-Based           | Shard ID = `hash(shard_key) % N`     | Uniform, even data   | Range queries force |
-|                      |                                      | distribution         | scatter-gather scans|
-+---------------------------------------------------------------------------------------------------+
-| Directory-Based      | Lookup service maps keys to physical | Flexible dynamic     | Lookup table is a   |
-|                      | shard IDs in database table          | shard rebalancing    | single point of failure
-+---------------------------------------------------------------------------------------------------+
-```
-
-### 4. Choosing the Golden Shard Key
-- **High Cardinality:** Pick a key with millions of distinct values (e.g. `user_id` or `tenant_id`, NOT `gender` or `country`).
-- **Even Distribution:** Avoid keys that cause 90% of traffic to hit one shard (Celebrity problem).
-- **Query Co-location:** Ensure the 3 most frequent queries can be satisfied from a **single shard without cross-shard joins**.
-
----
-
-# 4. Consistent Hashing: The Circular Ring Solution
-
-### 1. The "Aha!" Intuition
-In simple modulo hashing (`hash(key) % N`), if you have 4 servers and add 1 more ($N=5$), the math changes for **nearly 100% of all keys**, causing a massive cluster-wide data reshuffle. **Consistent Hashing maps servers and keys onto a 360-degree circular ring**, so adding a new server moves **only $1/N$th of the data**.
-
-### 2. ASCII Architecture Flowchart: The Consistent Hashing Ring
-```
-                                 [ Shard Node A (0 deg) ]
-                                      /            \
-                       Key 101       /              \     Key 205
-                          *         /                \       *
-                                   /                  \
-             [ Shard Node C (240 deg) ] ----------- [ Shard Node B (120 deg) ]
-                                          *
-                                       Key 309
-  (Rule: Walk clockwise around the ring until you hit the first server node!)
-```
-
-### 3. Why Virtual Nodes (V-Nodes) Are Mandatory
-- **The Problem (Hotspots):** 3 physical nodes might land on positions 0, 10, and 20 degrees, leaving Node C with 90% of the ring!
-- **The Fix (Virtual Nodes):** Assign each physical server 100-200 random virtual positions across the ring (`NodeA_1`, `NodeA_2`, `NodeB_1`...). This mathematically guarantees an **ultra-uniform, balanced data distribution**.
-
----
-
-# 5. Cross-Shard Challenges: 2PC vs. The Saga Pattern
-
-### 1. The "Aha!" Intuition
-- **Two-Phase Commit (2PC):** A strict wedding ceremony. The priest asks both partners: "Do you agree?" If one says no, the entire wedding is canceled immediately. Everyone must stand frozen waiting for the answer.
-- **The Saga Pattern:** A travel itinerary. You book the flight, then book the hotel, then book the rental car. If the hotel is sold out, you don't freeze the universe—you execute a **compensating transaction** that cancels your flight ticket.
-
-### 2. ASCII Architecture Flowchart: The Saga Pattern
-```
-SAGA EXECUTION (Orchestration):
-[ Order Placed ] ---> 1. Deduct Inventory (Success)
-                             |
-                             v
-                      2. Charge Credit Card (FAILED! Card Expired)
-                             |
-                             v (Trigger Compensating Transaction!)
-                      3. ROLLBACK: Restock Inventory -> Mark Order Failed
-```
-
-### 3. Comparison Matrix: 2PC vs. Sagas
-```
-+---------------------------------------------------------------------------------------------------+
-| ATTRIBUTE            | TWO-PHASE COMMIT (2PC)                | SAGA PATTERN                       |
-+---------------------------------------------------------------------------------------------------+
-| Consistency Model    | ACID (Immediate Strong Consistency)   | BASE (Eventual Consistency)        |
-| Locking Behavior     | Heavy blocking row locks across nodes | Zero cross-service database locks  |
-| Performance / Scale  | Poor scalability (Latency spikes)     | High scalability & throughput      |
-| Rollback Mechanism   | Automatic database transaction abort  | Explicit Compensating Actions      |
-| Real-World Use       | Financial ledger internal balances    | Microservice e-commerce checkout   |
-+---------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| CONSISTENCY MODEL    | OPERATIONAL GUARANTEE                | SYSTEM IMPLEMENTATION                |
++----------------------------------------------------------------------------------------------------+
+| Read-Your-Own-Writes | A user always observes their own     | Route client reads to Primary for a  |
+| Consistency          | latest updates immediately           | fixed duration ($\Delta t$) post-write|
+| Monotonic Reads      | Once a client observes version $V_k$,| Deterministically bind user sessions |
+|                      | they will never observe $V_{k-1}$    | to a specific replica via IP hash    |
+| Consistent Prefix    | Causally related writes are observed | Enforce single-partition ordering or |
+| Reads                | in their exact chronological order   | attach Lamport logical timestamps    |
++----------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 6. Message Queues & Event Streaming: Kafka vs. RabbitMQ
+# 3. Database Partitioning & Horizontal Sharding Models
 
-### 1. The "Aha!" Intuition
-Think of a restaurant order carousel. Waiters (Producers) pin food orders onto a spinning wheel. Chefs (Consumers) pluck orders and cook them at their own pace. If 100 customers walk in at once, the kitchen doesn't crash; the orders just line up on the carousel.
+Horizontal partitioning (sharding) divides large relational tables or document collections into independent physical database instances:
 
-### 2. ASCII Architecture Flowchart
 ```
-                                                        +---> [ Email Worker ]
-                                                        |
-[ Web App ] ---> [ Message Queue / Kafka ] ---> [ Worker Pool ] ---> [ Payment Worker ]
-(Producer)         (Buffers Traffic Spikes)     (Consumers)     |
-                                                                +---> [ Push Notification ]
-                                                                |
-                                             (Failed 3x?) ------> [ Dead-Letter Queue (DLQ) ]
-```
-
-### 3. Kafka vs. RabbitMQ vs. SQS Comparison Matrix
-```
-+---------------------------------------------------------------------------------------------------+
-| ATTRIBUTE            | RABBITMQ                             | APACHE KAFKA                        |
-+---------------------------------------------------------------------------------------------------+
-| Architecture Model   | Smart Broker / Dumb Consumer         | Dumb Broker / Smart Consumer        |
-| Storage Mechanism    | In-Memory Queue (Deletes after ACK)  | Distributed Append-Only Disk Log    |
-| Message Replay       | No (Once read, message is gone)      | Yes (Can rewind offset to replay)   |
-| Throughput           | Moderate (~50k messages/sec)         | Massive (> 1 Million events/sec)    |
-| Routing Logic        | Complex routing (Topic exchanges)    | Partition-based sequential streams  |
-| Best Use Case        | Task worker queues, complex routing  | Real-time analytics, event streaming|
-+---------------------------------------------------------------------------------------------------+
+[ Request: Record ID 4021 ] ---> [ Sharding Router / Coordinator ]
+                                                |
+                                      Calculates: hash(Key) % N
+                                                |
+                        +-----------------------+-----------------------+
+                        | (Shard 0)             | (Shard 1)             | (Shard 2)
+                        v                       v                       v
+                 [ DB Node 0 ]           [ DB Node 1 ]           [ DB Node 2 ]
+                 (Range: 0-1M)           (Range: 1M-2M)          (Range: 2M-3M)
 ```
 
-### 4. Essential Queue Concepts
-- **Backpressure:** Preventing fast producers from exhausting consumer memory by buffering messages on disk.
-- **Dead-Letter Queue (DLQ):** A quarantine queue where messages that fail processing 3 times are sent for debugging, preventing malformed messages from blocking the entire pipeline.
-- **Idempotency Keys:** Attaching a unique UUID to every message so duplicate deliveries (due to network retries) are safely ignored by the consumer.
+```
++----------------------------------------------------------------------------------------------------+
+| SHARDING STRATEGY    | PARTITIONING LOGIC                   | PROS                 | CONS                 |
++----------------------------------------------------------------------------------------------------+
+| Range-Based          | Partitions by contiguous key ranges  | Optimized sequential | Write hotspotting on |
+|                      | (e.g. `[2026-01-01, 2026-02-01)`)    | range query scans    | current timestamp tip|
+| Hash-Based           | Partitions by mathematical hash:     | Uniform data and     | Scatter-gather scans |
+|                      | `hash(shard_key) % ShardCount`       | traffic distribution | on all range queries |
+| Directory-Based      | Central lookup service maps keys to  | Dynamic partition    | Lookup directory is a|
+|                      | physical database shard endpoints    | migration & resizing | bottleneck & SPOF    |
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-# 7. Glanceable Summary Matrix
+# 4. Consistent Hashing & Virtual Node Topology
+
+Modulo hashing ($h(k) \pmod N$) forces a complete cluster remapping ($100\%$ key migration) upon adding or removing nodes. **Consistent Hashing** maps keys and servers onto a circular integer space $[0, 2^{32}-1]$:
 
 ```
-+--------------------------------------------------------------------------------------------------------------------+
-| STORAGE / ASYNC CONCEPT | THE FUN MENTAL MODEL             | WHEN TO PICK IN SYSTEM DESIGN INTERVIEW               |
-+--------------------------------------------------------------------------------------------------------------------+
-| Read Replicas           | Copyists printing book copies    | Scaling 100:1 read-heavy relational databases         |
-+--------------------------------------------------------------------------------------------------------------------+
-| Read-Your-Own-Writes    | Bypassing copyists for the author| Preventing user confusion immediately after a profile |
-+--------------------------------------------------------------------------------------------------------------------+
-| Database Sharding       | Splitting phonebook into volumes | Splitting single database beyond physical disk limits |
-+--------------------------------------------------------------------------------------------------------------------+
-| Consistent Hashing      | 360-degree circular ring toss    | Minimizing data movement ($K/N$) on cluster resizing  |
-+--------------------------------------------------------------------------------------------------------------------+
-| Saga Pattern            | Flight and hotel booking refund  | Managing distributed transactions across microservices|
-+--------------------------------------------------------------------------------------------------------------------+
-| Apache Kafka            | Append-only recording tape       | High-throughput event streaming & message replay      |
-+--------------------------------------------------------------------------------------------------------------------+
-| RabbitMQ / SQS          | Restaurant kitchen ticket wheel  | Decoupling background workers & smoothing spikes      |
-+--------------------------------------------------------------------------------------------------------------------+
+Consistent Hashing Ring Topology:
+                            [ Node A (Offset: 0) ]
+                                 /          \
+                  Key 101       /            \     Key 205
+                     *         /              \       *
+                              /                \
+         [ Node C (Offset: 240) ] ------------ [ Node B (Offset: 120) ]
+                                     *
+                                  Key 309
+  (Rule: Map key to ring coordinate; assign to first server clockwise)
+```
+
+### Properties & Virtual Nodes:
+1. **Minimal Disruption Property:** Scaling a cluster from $N$ to $N+1$ nodes migrates on average only $K / N$ keys, leaving all other assignments intact.
+2. **Virtual Nodes (V-Nodes):** Physical servers are assigned $V$ distinct pseudorandom coordinates across the ring (e.g. $V = 128$). This prevents hot spot clustering and guarantees uniform distribution across heterogeneous hardware.
+
+---
+
+# 5. Distributed Transaction Coordination: 2PC vs. Saga Pattern
+
+```
+Two-Phase Commit (2PC - Centralized Synchronous):
+Coordinator ---> Phase 1: Prepare (Acquires locks on all nodes) ---> (All YES?)
+            ---> Phase 2: Commit  (Flushes write on all nodes)
+
+Saga Pattern (Decentralized Asynchronous with Compensations):
+[ Step 1: Reserve Stock ] ---> [ Step 2: Authorize Payment (FAIL!) ]
+                                               |
+                                               v (Trigger Compensating Transaction)
+                               [ Compensate 1: Release Stock ]
+```
+
+```
++----------------------------------------------------------------------------------------------------+
+| DIMENSION            | TWO-PHASE COMMIT (2PC)               | SAGA PATTERN (Orchestration/Choreog) |
++----------------------------------------------------------------------------------------------------+
+| Consistency Model    | ACID (Immediate Strong Consistency)  | BASE (Eventual Consistency)          |
+| Locking Strategy     | Blocking pessimistic locks held      | Zero cross-service database locks;   |
+|                      | across all participant nodes         | local atomic transactions only       |
+| Latency Profile      | High latency; scales poorly over WAN | Low latency; high parallel throughput|
+| Failure Rollback     | Automated coordinator rollback abort | Explicit compensating transactions   |
+| Primary Domain       | Core financial ledger reconciliations| Distributed microservice workflows   |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 6. Asynchronous Message Queues & Distributed Event Streaming
+
+```
+Distributed Event Log Architecture (Apache Kafka):
+Topic: [ Order-Events ]
+  Partition 0: [ Msg 0 | Msg 1 | Msg 2 | Msg 3 (Offset: 3) ] ---> Consumer Group A (Worker 1)
+  Partition 1: [ Msg 0 | Msg 1 | Msg 2 (Offset: 2)         ] ---> Consumer Group A (Worker 2)
+
+Message Broker Queue Architecture (RabbitMQ / AMQP):
+[ Producer ] ---> [ Exchange ] ---> [ In-Memory FIFO Queue ] ---> [ Consumer ACK ] -> (Message Purged)
+```
+
+```
++----------------------------------------------------------------------------------------------------+
+| ATTRIBUTE            | AMQP BROKER (RabbitMQ)               | DISTRIBUTED LOG (Apache Kafka)       |
++----------------------------------------------------------------------------------------------------+
+| Model Architecture   | Smart broker / Dumb consumer         | Dumb broker / Smart consumer         |
+| Persistence Model    | In-memory queue (Purged post-ACK)    | Sequential append-only disk segments |
+| Message Replay       | Non-supported (Ephemeral messages)   | Supported via consumer offset rewind |
+| Throughput Scale     | Tens of thousands of msgs/sec        | Millions of events/sec per cluster   |
+| Ordering Guarantee   | Per-queue FIFO                       | Strictly ordered per partition       |
+| Consumer Model       | Push-based delivery                  | Pull-based polling model             |
++----------------------------------------------------------------------------------------------------+
+```
+
+### Operational Resilience Primitives:
+- **Dead-Letter Queue (DLQ):** Quarantine buffer for malformed payloads that exceed retry thresholds, preventing head-of-line blocking.
+- **Idempotency Deduplication:** Attaching deterministic idempotency tokens (UUIDs) to ensure safe consumer retries under at-least-once delivery guarantees.
+
+---
+
+# 7. Core Architectural Summary Matrix
+
+```
++----------------------------------------------------------------------------------------------------+
+| SYSTEM COMPONENT     | STRUCTURAL ROLE                      | PRIMARY GOVERNING INVARIANT          |
++----------------------------------------------------------------------------------------------------+
+| Single-Leader DB     | Centralized write sequencing         | Asynchronous replica WAL streaming   |
+| Leaderless Quorum    | High-availability decentralized writes| Quorum intersection: W + R > N       |
+| Database Sharding    | Horizontal storage partitioning      | High cardinality shard key selection |
+| Consistent Hashing   | Topology-resilient key assignment    | Minimal migration: K/N keys moved    |
+| Two-Phase Commit     | Distributed ACID consensus           | Blocking coordinator lock evaluation |
+| Saga Architecture    | Distributed eventual consistency     | Compensating rollback actions        |
+| Partitioned Log      | Ordered asynchronous event streams   | Append-only disk log with offsets    |
++----------------------------------------------------------------------------------------------------+
 ```

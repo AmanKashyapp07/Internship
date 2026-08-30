@@ -1,147 +1,123 @@
-# Trees, Graphs & Bit Manipulation — Interview Master Guide
+# Trees, Graph Algorithms & Bitwise Computational Theory
 
-**Target:** Google, Microsoft, Meta, Amazon, Apple, NVIDIA, Uber, Bloomberg, Atlassian, Adobe, Salesforce, Goldman Sachs, Rubrik, Databricks, etc.
-
-**Priority:** Interview patterns > complexity > behavior > internals > implementation-specific details.
+> **Scope:** Binary Tree Structural Bounds, Tree Traversal Paradigms (DFS, BFS, Morris Threading), Binary Search Tree Invariants, Binary Heap Array Mappings, Prefix & Bitwise Tries, Graph Representations, Topological Sorting Algorithms, Shortest Path Formulations, Minimum Spanning Trees (Kruskal, Prim), and Low-Level Bit Manipulation Physics.
 
 ---
 
-# 1. Binary Trees & Core Properties
+# Table of Contents
+1. [Binary Tree Classifications & Mathematical Properties](#1-binary-tree-classifications--mathematical-properties)
+2. [Tree Traversal Paradigms & Space Complexity](#2-tree-traversal-paradigms--space-complexity)
+3. [Binary Search Trees (BST) & Node Deletion Mechanics](#3-binary-search-trees-bst--node-deletion-mechanics)
+4. [Complete Binary Heaps & Array Serialization](#4-complete-binary-heaps--array-serialization)
+5. [Trie (Prefix Tree) & Bitwise XOR Search](#5-trie-prefix-tree--bitwise-xor-search)
+6. [Graph Storage Representations & Complexity](#6-graph-storage-representations--complexity)
+7. [Graph Traversal: BFS, 0-1 BFS & DFS](#7-graph-traversal-bfs-0-1-bfs--dfs)
+8. [Topological Sorting & Cycle Detection Protocols](#8-topological-sorting--cycle-detection-protocols)
+9. [Shortest Path Algorithm Taxonomies](#9-shortest-path-algorithm-taxonomies)
+10. [Disjoint Set Union & Minimum Spanning Trees](#10-disjoint-set-union--minimum-spanning-trees)
+11. [Low-Level Bit Manipulation & Two's Complement Physics](#11-low-level-bit-manipulation--twos-complement-physics)
+12. [Core Theoretical Summary Principles](#12-core-theoretical-summary-principles)
 
-## The 4 Classifications
+---
 
-```text
+# 1. Binary Tree Classifications & Mathematical Properties
+
+```
 Full Binary Tree:        Complete Binary Tree:      Perfect Binary Tree:
        ( 1 )                     ( 1 )                      ( 1 )
       /     \                   /     \                    /     \
     ( 2 )   ( 3 )             ( 2 )   ( 3 )              ( 2 )   ( 3 )
     /   \                     /   \   /                  /   \   /   \
   (4)   (5)                 (4)   (5)(6)               (4)   (5)(6)  (7)
-(0 or 2 children)      (Filled left-to-right)       (All leaves same level)
+(Every node 0 or 2)     (Left-aligned contiguous)   (All leaves at same level)
 ```
 
-### Must-Know Formulas
-* Total nodes in perfect tree of height `h`: `N = 2^(h+1) - 1` ==> `h = Theta(log N)`.
-* Nodes at level `L`: `2^(L-1)` (1-indexed level).
-* Min height for `N` nodes: `ceil(log2(N + 1)) - 1`.
-* Max height (skewed tree): `N - 1` (degenerates into linked list).
-
-### The 2 Tree Recursion Paradigms
-1. **Top-Down (Pass values down via arguments):** Path sum from root, depth tracking, ancestor constraints.
-2. **Bottom-Up (Combine child return values):** Max path sum, subtree sizes, tree height, LCA, serialize/deserialize.
+### Mathematical Invariants:
+1. **Total Nodes in Perfect Tree of Height $h$:** $N = 2^{h+1} - 1 \implies h = \Theta(\log N)$.
+2. **Nodes at Depth $d$ (0-indexed):** Exactly $2^d$ nodes.
+3. **Minimum Height for $N$ Nodes:** $h_{\min} = \lceil \log_2(N + 1) \rceil - 1$.
+4. **Maximum Height for $N$ Nodes (Skewed Path):** $h_{\max} = N - 1$.
 
 ---
 
-# 2. Tree Traversals
+# 2. Tree Traversal Paradigms & Space Complexity
 
-| Traversal | Order | Interview Use Case |
-|---|---|---|
-| **Inorder** | Left -> Root -> Right | Yields **strictly sorted order** on BSTs. |
-| **Preorder** | Root -> Left -> Right | Tree serialization, cloning, prefix expressions. |
-| **Postorder** | Left -> Right -> Root | Bottom-up aggregation (height, diameter, subtree DP, node deletion). |
-| **Level-Order (BFS)** | Level by level | Shortest path from root, zigzag views, vertical/top/bottom views. |
-
-### Space Complexity Trap
-* Recursive DFS Space is `O(H)` (Call Stack), where `H = log N` (balanced) or `H = N` (skewed).
-* **Morris Traversal:** Inorder traversal in `O(1)` auxiliary space by creating temporary threaded pointers from inorder predecessors.
-
----
-
-# 3. Binary Search Trees (BST)
-
-## The BST Invariant
-For every node `X`:
-`All keys in Left Subtree < X.val < All keys in Right Subtree`
-
-```text
-         ( 8 )
-        /     \
-      ( 3 )   ( 10 )
-      /   \        \
-    ( 1 ) ( 6 )    ( 14 )
+```
++----------------------------------------------------------------------------------------------------+
+| TRAVERSAL ORDER      | RECURSIVE SEQUENCE                    | CANONICAL APPLICATION DOMAIN        |
++----------------------------------------------------------------------------------------------------+
+| In-Order             | Left Subtree -> Node -> Right Subtree | Monotonically sorted order on BSTs  |
+| Pre-Order            | Node -> Left Subtree -> Right Subtree | Serialization, prefix expressions   |
+| Post-Order           | Left Subtree -> Right Subtree -> Node | Subtree DP, height, diameter, free  |
+| Level-Order (BFS)    | Layer-by-layer sequence (Queue)       | Shortest distance, boundary views   |
++----------------------------------------------------------------------------------------------------+
 ```
 
-### Complexity
-
-| Operation | Balanced BST | Skewed BST (Worst Case) |
-|---|---|---|
-| Search | `O(log N)` | `O(N)` |
-| Insert | `O(log N)` | `O(N)` |
-| Delete | `O(log N)` | `O(N)` |
-| Inorder Traversal | `Theta(N)` | `Theta(N)` |
-
-### BST Interview Must-Know
-* **LCA in BST:** If `p.val < root.val && q.val < root.val`, go left. If `p.val > root.val && q.val > root.val`, go right. Otherwise, current `root` is the LCA (`O(H)` time).
-* **Node Deletion (3 cases):**
-  1. Leaf node: simply delete.
-  2. 1 child: replace node with its child.
-  3. 2 children: replace node value with **Inorder Successor** (smallest node in right subtree), then recursively delete that successor.
+### Call Stack Footprint:
+Standard recursive Depth-First Search consumes $O(H)$ auxiliary memory, where $H \in [\log N, N]$. **Morris In-Order Traversal** eliminates stack allocation entirely, achieving $O(N)$ runtime in strict $O(1)$ auxiliary memory by utilizing threaded predecessor pointers.
 
 ---
 
-# 4. Balanced Trees (AVL & Red-Black Trees)
+# 3. Binary Search Trees (BST) & Node Deletion Mechanics
 
-### Why Balance Matters
-* Unbalanced BST degrades to a linked list with `O(N)` lookups.
-* **AVL Tree:** Strictly balanced (`|height(left) - height(right)| <= 1`). Faster lookups, slower insertions (more rotations).
-* **Red-Black Tree:** Relaxed balance (`longest path <= 2 * shortest path`). Fewer rotations on insert/delete. Backs `std::map`, `std::set`, and Java `TreeMap`.
+### The BST Invariant:
+For every node $X$ in the tree:
+$$\forall u \in \text{LeftSubtree}(X), \, \text{val}(u) < \text{val}(X) \quad \text{and} \quad \forall v \in \text{RightSubtree}(X), \, \text{val}(v) > \text{val}(X)$$
+
+### Node Deletion Protocol (3 Disjoint Cases):
+1. **Node is a Leaf (0 Children):** Nullify parent pointer and deallocate node.
+2. **Node has 1 Child:** Link parent directly to the single descendant child.
+3. **Node has 2 Children:** Replace target node's value with its **In-Order Successor** (the minimal node in its right subtree, found by traversing left from `node->right`), then delete that successor node recursively.
 
 ---
 
-# 5. Heaps & Priority Queues
+# 4. Complete Binary Heaps & Array Serialization
 
-## Complete Binary Tree in an Array
+A **Complete Binary Tree** maps directly into a flat contiguous array with zero pointer overhead:
 
-```text
-Index:    [ 0 | 1 | 2 | 3 | 4 | 5 ]
-Values:   [50 | 30| 40| 10| 20| 35]
+```
+Array Indices:  [ 0 | 1 | 2 | 3 | 4 | 5 ]
+Element Values: [ 50 | 30 | 40 | 10 | 20 | 35 ]
 
-Children of index i:
-  Left  = 2*i + 1
-  Right = 2*i + 2
-Parent of index i:
-  Parent = (i - 1) / 2
+Index Offsets for Node at Index i:
+- Parent Index:       floor((i - 1) / 2)
+- Left Child Index:   2 * i + 1
+- Right Child Index:  2 * i + 2
 ```
 
-### Complexity & Operations
-
-| Operation | Complexity | Note |
-|---|---|---|
-| `top()` | `O(1)` | Root element (`arr[0]`). |
-| `push()` | `O(log N)` | Append to end, sift up. |
-| `pop()` | `O(log N)` | Swap root with end, pop back, sift down. |
-| **`build_heap` (Heapify)** | **`O(N)`** | Bottom-up sift-down of all non-leaf nodes. (High-yield interview question!). |
-
-### Why Heapify is O(N) (Not O(N log N))
-* `N/2` nodes at height 0 take 0 operations.
-* `N/4` nodes at height 1 take 1 operation.
-* `N/8` nodes at height 2 take 2 operations.
-* Sum: `S = sum (N / 2^(h+1)) * h = N * sum (h / 2^(h+1)) = O(N)`.
+```
++----------------------------------------------------------------------------------------------------+
+| OPERATION            | COMPLEXITY         | THEORETICAL MECHANISM                                  |
++----------------------------------------------------------------------------------------------------+
+| `top()` (Peak)       | O(1)               | Reads root value at array index 0                      |
+| `push(x)`            | O(log N)           | Appends to array end, executes sift-up comparisons     |
+| `pop()`              | O(log N)           | Swaps root with tail, truncates, executes sift-down    |
+| `build_heap`         | O(N)               | Bottom-up sift-down across non-leaf nodes N/2 down to 0|
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-# 6. Tries (Prefix Trees)
+# 5. Trie (Prefix Tree) & Bitwise XOR Search
 
-## Architecture
-
-```text
+```
+Alphabet Prefix Trie:
 Root
-  |-- 'a' -> 'p' -> 'p' -> 'l' -> 'e' (isWord = true)
+  |-- 'a' -> 'p' -> 'p' -> 'l' -> 'e' (Terminal)
   |                  |
-  |                 's' (isWord = true)
-  |-- 'b' -> 'a' -> 't' (isWord = true)
+  |                 's' (Terminal)
+  |-- 'b' -> 'a' -> 't' (Terminal)
 ```
 
-### Must Know
-* **Insert / Search Word:** `O(L)` where `L` is word length.
-* **Prefix Search (`startsWith`):** `O(L)`.
-* **Bitwise Trie:** Insert 32-bit binary representations to solve **Maximum XOR Pair** in `O(32 * N) = O(N)` time!
+### Bitwise Maximum XOR Trie:
+- Stores 32-bit binary representations of integers from Most Significant Bit (bit 31) down to Least Significant Bit (bit 0).
+- To maximize $X \oplus Y$, traverse the trie taking the **opposite bit branch** ($1 \oplus 0 = 1$) whenever available, resolving optimal XOR pairs in deterministic $O(32 \cdot N) = O(N)$ time.
 
 ---
 
-# 7. Graph Representations & Taxonomy
+# 6. Graph Storage Representations & Complexity
 
-```text
+```
 Adjacency Matrix (V x V):       Adjacency List:
    0  1  2                         [0] -> [1, 2]
 0 [0, 1, 1]                        [1] -> [0, 2]
@@ -149,225 +125,107 @@ Adjacency Matrix (V x V):       Adjacency List:
 2 [1, 1, 0]
 ```
 
-### Complexity Trade-Offs
-
-| Representation | Space | Edge Lookup (`u -> v`) | Iterate Neighbors of `u` | Best For |
-|---|---|---|---|---|
-| **Adjacency List** | `O(V + E)` | `O(deg(u))` | `O(deg(u))` | **Sparse Graphs** (`E << V^2`) - 95% of interviews |
-| **Adjacency Matrix** | `Theta(V^2)` | `O(1)` | `Theta(V)` | **Dense Graphs** (`E ~ V^2`), Floyd-Warshall |
-
----
-
-# 8. Graph Traversal: BFS vs DFS
-
-## Breadth-First Search (BFS)
-* **Underlying Engine:** FIFO Queue.
-* **Time Complexity:** `O(V + E)`
-* **Space Complexity:** `O(V)`
-* **Golden Rule:** Finds **Shortest Path in Unweighted Graphs**. Mark nodes visited *immediately upon pushing to queue*.
-* **Multi-Source BFS:** Push all source nodes into queue at step 0 (e.g. Rotting Oranges, 01 Matrix).
-* **0-1 BFS:** Deque-based shortest path for edge weights `in {0, 1}` in strictly `O(V + E)` without Dijkstra log factor.
-
-## Depth-First Search (DFS)
-* **Underlying Engine:** System Call Stack / Explicit Stack.
-* **Time Complexity:** `O(V + E)`
-* **Space Complexity:** `O(V)`
-* **Use Cases:** Connected components, cycle detection, path existence, topological sorting, backtracking (mazes, word search).
-
----
-
-# 9. Topological Sort & Cycle Detection
-
-## Directed Acyclic Graphs (DAGs)
-
-```text
-Topological Ordering: Linear ordering of vertices such that for every directed edge u -> v, u comes before v.
+```
++----------------------------------------------------------------------------------------------------+
+| ATTRIBUTE            | ADJACENCY MATRIX                      | ADJACENCY LIST                     |
++----------------------------------------------------------------------------------------------------+
+| Memory Footprint     | Theta(V^2)                            | Theta(V + E)                       |
+| Edge Existence Check | O(1) direct coordinate lookup         | O(deg(u)) list search              |
+| Iterate Neighbors    | Theta(V) row scan                     | O(deg(u)) direct vector scan       |
+| Optimal Topology     | Dense Graphs (E ~ V^2)                | Sparse Graphs (E << V^2)           |
++----------------------------------------------------------------------------------------------------+
 ```
 
-### 1. Kahn's Algorithm (BFS In-Degree 0)
-1. Calculate in-degree for all vertices.
-2. Push all vertices with `inDegree == 0` into a Queue.
-3. Pop `u`, append to topo order. For each neighbor `v`: decrement `inDegree[v]`. If `inDegree[v] == 0`, push to Queue.
-4. **Cycle Invariant:** If `topoOrder.size() != V`, the graph has a **Cycle**!
+---
 
-### 2. DFS 3-Color Cycle Detection
-* `0 (White / Unvisited)`: Not yet visited.
-* `1 (Gray / Visiting)`: Currently on recursion stack. If encountered again -> **Cycle Detected**!
-* `2 (Black / Visited)`: Fully explored and safe.
+# 7. Graph Traversal: BFS, 0-1 BFS & DFS
+
+### 1. Breadth-First Search (BFS)
+- **Engine:** FIFO Queue.
+- **Complexity:** $O(V + E)$ time, $O(V)$ auxiliary space.
+- **Invariant:** Explores vertices in strictly non-decreasing path distance order; guarantees **minimal edge distance** on unweighted graphs.
+
+### 2. 0-1 BFS (Double-Ended Queue)
+- Computes single-source shortest paths on graphs with edge weights $w \in \{0, 1\}$ in $O(V + E)$ time.
+- Weight 0 edge relaxations push to the **front** of the deque (`push_front`); Weight 1 edge relaxations push to the **back** (`push_back`), preserving monotonic priority without logarithmic heap overhead.
+
+### 3. Depth-First Search (DFS)
+- **Engine:** LIFO Call Stack.
+- **Complexity:** $O(V + E)$ time, $O(V)$ space.
+- **Applications:** Strongly connected components, topological sort, bipartite graph coloring.
 
 ---
 
-# 10. Shortest Path Algorithms Matrix
+# 8. Topological Sorting & Cycle Detection Protocols
 
-| Algorithm | Graph Type | Time Complexity | Space Complexity | Failure Mode |
-|---|---|---|---|---|
-| **BFS** | Unweighted | `O(V + E)` | `O(V)` | Fails on weighted graphs |
-| **0-1 BFS** | Edge weights `in {0, 1}` | `O(V + E)` | `O(V)` | Fails on arbitrary weights |
-| **Dijkstra** | Non-negative weights | `O((V + E) log V)` | `O(V)` | **Fails on negative weight edges** |
-| **Bellman-Ford** | Negative weights allowed | `O(V * E)` | `O(V)` | **Detects negative weight cycles** |
-| **Floyd-Warshall** | All-pairs shortest path | `Theta(V^3)` | `Theta(V^2)` | Intermediate `k` loop MUST be outermost |
+A **Topological Ordering** is a linear permutation of vertices in a Directed Acyclic Graph (DAG) such that for every directed edge $u \to v$, $u$ appears before $v$.
 
----
+### 1. Kahn's Algorithm (In-Degree BFS Protocol):
+1. Compute in-degree $\text{deg}^-(u)$ for all vertices $u \in V$.
+2. Enqueue all vertices with $\text{deg}^-(u) == 0$.
+3. While queue is non-empty: pop $u$, record in topological order, and decrement in-degree for all out-neighbors $v$. If $\text{deg}^-(v) == 0$, enqueue $v$.
+4. **Cycle Invariant:** If the number of processed vertices $< |V|$, the graph contains at least one **directed cycle**.
 
-# 11. Disjoint Set Union (DSU) & MST
-
-## DSU (Union-Find)
-* **Path Compression:** `parent[x] = find(parent[x])` flattens tree on lookup.
-* **Union by Rank / Size:** Attach smaller tree under root of larger tree.
-* **Amortized Time per Op:** `O(alpha(N)) ~ O(1)` (Inverse Ackermann function).
-
-### Kruskal's vs Prim's MST
-
-| Feature | Kruskal's Algorithm | Prim's Algorithm |
-|---|---|---|
-| **Strategy** | Greedy Edge Selection via DSU | Greedy Vertex Expansion via Min-Heap |
-| **Time Complexity** | `O(E log E)` (Sorting edges) | `O(E log V)` |
-| **Best For** | Sparse Graphs (`E << V^2`) | Dense Graphs (`E ~ V^2`) |
+### 2. DFS 3-Color State Machine:
+- **White (0):** Unvisited vertex.
+- **Gray (1):** Active on current recursion path. Encountering a Gray neighbor confirms a **back-edge / cycle**.
+- **Black (2):** Fully explored vertex and subtree.
 
 ---
 
-# 12. Bit Manipulation Fundamentals
+# 9. Shortest Path Algorithm Taxonomies
 
-## Core Operations
-
-```text
-AND (&):  1 & 1 = 1, else 0     (Masking / Clearing bits)
-OR  (|):  0 | 0 = 0, else 1     (Setting bits)
-XOR (^):  Diff = 1, Same = 0    (Toggling / Canceling identical pairs)
-NOT (~):  Inverts all bits      (~x = -x - 1 in Two's Complement)
-Left (<<):  x << k = x * 2^k
-Right (>>): x >> k = x / 2^k
+```
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM            | EDGE WEIGHT CONSTRAINTS               | TIME COMPLEXITY    | SPACE COMPLEXITY|
++----------------------------------------------------------------------------------------------------+
+| Breadth-First (BFS)  | Uniform Unweighted (w = 1)            | O(V + E)           | O(V)            |
+| 0-1 BFS              | Binary weights in {0, 1}              | O(V + E)           | O(V)            |
+| Dijkstra's (Heap)    | Strictly non-negative (w >= 0)        | O(E log V)         | O(V)            |
+| Bellman-Ford         | Negative weights allowed (Cycle det)  | O(V * E)           | O(V)            |
+| Floyd-Warshall       | Dense All-Pairs (Negative allowed)    | Theta(V^3)         | Theta(V^2)      |
++----------------------------------------------------------------------------------------------------+
 ```
 
-### Essential Bit Hacks (MUST KNOW)
+---
+
+# 10. Disjoint Set Union & Minimum Spanning Trees
+
+### Kruskal's vs. Prim's MST Algorithms:
+- **Kruskal's Algorithm:** Greedily sorts all edges $E$ in ascending weight order ($O(E \log E)$) and iterates through them, adding edge $(u, v)$ to the spanning forest if `dsu.find(u) != dsu.find(v)`. Optimal for sparse topologies.
+- **Prim's Algorithm:** Initializes at an arbitrary root vertex and greedily expands the cut by extracting the minimal incident edge via a Min-Heap ($O(E \log V)$). Optimal for dense topologies.
+
+---
+
+# 11. Low-Level Bit Manipulation & Two's Complement Physics
+
+### Two's Complement Representation:
+$$-x = \sim x + 1$$
 
 ```cpp
-// 1. Check if k-th bit is set
-bool isSet = (x & (1 << k)) != 0;
+// 1. Bit Testing & Toggling
+bool isKthBitSet   = (x & (1 << k)) != 0;
+int setKthBit      = x | (1 << k);
+int clearKthBit    = x & ~(1 << k);
+int toggleKthBit   = x ^ (1 << k);
 
-// 2. Set k-th bit
-x |= (1 << k);
+// 2. Lowest Set Bit (LSB) Extraction & Brian Kernighan Invariant
+int isolateLSB     = x & (-x);       // e.g. (1100)_2 & (0100)_2 = (0100)_2
+int clearLowestBit = x & (x - 1);    // Resets lowest set bit to 0
 
-// 3. Clear k-th bit
-x &= ~(1 << k);
+// 3. Power of Two Invariant
+bool isPowerOfTwo  = (x > 0) && ((x & (x - 1)) == 0);
 
-// 4. Toggle k-th bit
-x ^= (1 << k);
-
-// 5. Clear lowest set bit (Brian Kernighan's Algorithm)
-x = x & (x - 1); // e.g. 1100 & 1011 = 1000
-
-// 6. Isolate lowest set bit (LSB)
-int lsb = x & (-x); // e.g. 1100 & 0100 = 0100
-
-// 7. Check if x is a power of 2
-bool isPowerOfTwo = (x > 0) && ((x & (x - 1)) == 0);
-
-// 8. Count set bits
-int count = __builtin_popcount(x); // GCC intrinsic, single CPU instruction
-```
-
-### XOR Properties & Patterns
-* `x ^ x = 0`
-* `x ^ 0 = x`
-* Associative & Commutative: order does not matter.
-* **Single Number I (LC 136):** XOR all elements -> duplicate pairs cancel out, leaving the unique element.
-* **Single Number III (LC 260):** XOR all -> gives `a ^ b`. Find lowest set bit in `a ^ b` to partition numbers into two groups and isolate `a` and `b`.
-
----
-
-# 13. Bitmasking & Subsets
-
-```text
-For N elements, there are 2^N subsets (masks from 0 to (1 << N) - 1).
-
-Iterate all subsets of size N:
-for (int mask = 0; mask < (1 << N); mask++) {
-    for (int i = 0; i < N; i++) {
-        if (mask & (1 << i)) {
-            // Element i is included in subset
-        }
-    }
-}
+// 4. In-Place Hardware Popcount
+int totalOnes      = __builtin_popcount(x);
 ```
 
 ---
 
-# 14. Top Interview Questions
+# 12. Core Theoretical Summary Principles
 
-## Tier 1 — Must Know
-1. How do you find the Lowest Common Ancestor (LCA) in a Binary Tree vs BST?
-2. Explain the difference between DFS preorder, inorder, and postorder with use cases.
-3. Why is `build_heap` (heapify) `O(N)` instead of `O(N log N)`?
-4. How do you detect a cycle in a Directed Graph vs an Undirected Graph?
-5. Explain Kahn's Algorithm for Topological Sort.
-6. How does Dijkstra's Algorithm work and why does it fail on negative edge weights?
-7. Explain DSU (Disjoint Set Union) with Path Compression and Union by Rank.
-8. How does `x & (x - 1)` work and what are its applications?
-
-## Tier 2 — Strong Candidate
-9. How does 0-1 BFS work and why is it faster than Dijkstra for binary weights?
-10. How do you find Bridges and Articulation Points in a graph (Tarjan's Low-Link)?
-11. How do you implement a Trie and use it for Prefix Matching?
-12. How does Bitmask Dynamic Programming work (e.g. Traveling Salesman / Smallest Sufficient Team)?
-13. Compare Kruskal's vs Prim's algorithm for Minimum Spanning Trees.
-
-## Tier 3 — Advanced
-14. Explain Segment Trees vs Binary Indexed Trees (Fenwick Trees) for range update and point query.
-15. Explain Kosaraju's and Tarjan's algorithms for Strongly Connected Components (SCCs).
-16. How does Morris Inorder Traversal achieve `O(1)` auxiliary space?
-
----
-
-# 15. Pattern Recognition Guide
-
-| Clue in Problem Statement | Target Data Structure / Technique |
-|---|---|
-| Shortest path unweighted graph / grid | **BFS** |
-| Shortest path with non-negative edge costs | **Dijkstra** |
-| Course prerequisites, build dependencies, task scheduling | **Topological Sort (Kahn's BFS)** |
-| Connected components, dynamic connectivity, cycle detection undirected | **DSU (Union-Find)** |
-| Kth largest / smallest, running median, top-K streams | **Priority Queue (Min/Max Heap)** |
-| Word dictionary, auto-complete, prefix search, max XOR pair | **Trie** |
-| Subsets combination (`N <= 20`), states representation | **Bitmask DP / Bitwise operations** |
-| Finding single unpaired number | **XOR cancellation** |
-
----
-
-# 16. Interview Priority
-
-## P0 — Absolutely Master
-```text
-Binary Tree traversals (DFS Pre/In/Post, BFS Level-order)
-LCA in Binary Tree & BST
-Kahn's Topological Sort & Cycle Detection
-Dijkstra's Algorithm & BFS Shortest Path
-Min/Max Heap operations & Top-K pattern
-DSU with Path Compression
-Core bit hacks: x & (x - 1), x & (-x), XOR cancellation
-```
-
-## P1 — Strongly Know
-```text
-Trie (Prefix Tree)
-0-1 BFS with Deque
-Bellman-Ford & Negative Cycle Detection
-Kruskal's MST
-Bitmask subset iteration
-Tree serialization / deserialization
-```
-
-## P2 — Know Conceptually
-```text
-Tarjan's Bridges & Articulation Points
-Segment Tree & Fenwick Tree (BIT)
-Floyd-Warshall all-pairs shortest path
-Morris Traversal
-```
-
-## P3 — Don't Waste Time Memorizing
-```text
-Fibonacci Heap mathematical proofs
-Heavy-Light Decomposition unless applying to specialized competitive roles
-Exact Red-Black tree rebalancing case-1/2/3 rotations
-```
+1. **Tree Height Bounds:** Balanced binary trees guarantee $h = \Theta(\log N)$, whereas skewed degenerations reach $h = N - 1$.
+2. **In-Order BST Invariance:** An in-order traversal of a valid Binary Search Tree generates a monotonically increasing sequence.
+3. **Array-Heap Indexing:** Contiguous binary heaps eliminate pointer storage overhead using algebraic index calculations ($2i + 1, 2i + 2$).
+4. **Topological Invariant:** Kahn's in-degree zero reduction terminates prematurely if and only if a directed dependency cycle exists.
+5. **Two's Complement LSB Isolation:** The identity $x \, \& \, (-x)$ isolates the least significant active bit in $O(1)$ hardware execution time.

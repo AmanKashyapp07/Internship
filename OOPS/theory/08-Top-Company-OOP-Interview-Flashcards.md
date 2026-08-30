@@ -1,246 +1,241 @@
-# Master Guide 08: Top 40 C++ OOP Spoken Flashcards & Trap Questions
+# Advanced Object-Oriented Concepts & Systems Deep-Dives
 
-> **Focus:** 40 High-Yield Spoken Flashcards for C++ Object-Oriented Programming and Low-Level Design interviews at Google, Meta, Amazon, Microsoft, Uber, and High-Frequency Trading (HFT) firms.
-> 
-> *The 15-minute complete verbal drill to read one day before any tech interview.*
+> **Scope:** Detailed Theoretical Deep-Dives across Encapsulation & RAII, Memory Layouts & Object Slicing, Dynamic Dispatch & Virtual Tables, Static Polymorphism (CRTP), SOLID Behavioral Subtyping, Object Lifetime Models, and Modern C++ Resource Management Idioms.
 
 ---
 
 # Table of Contents
-1. [Core OOP Pillars & C++ Encapsulation (Cards 1–8)](#1-core-oop-pillars--c-encapsulation-cards-18)
-2. [Inheritance, Memory Layout & Slicing (Cards 9–16)](#2-inheritance-memory-layout--slicing-cards-916)
-3. [Polymorphism, Virtual Tables & RTTI (Cards 17–24)](#3-polymorphism-virtual-tables--rtti-cards-1724)
-4. [SOLID Principles & Architecture (Cards 25–30)](#4-solid-principles--architecture-cards-2530)
-5. [Composition, Smart Pointers & Modern C++ Idioms (Cards 31–40)](#5-composition-smart-pointers--modern-c-idioms-cards-3140)
+1. [Encapsulation Mechanics, RAII & Class Invariant Protection](#1-encapsulation-mechanics-raii--class-invariant-protection)
+2. [Inheritance Hierarchies, Object Slicing & Memory Offsets](#2-inheritance-hierarchies-object-slicing--memory-offsets)
+3. [Dynamic Dispatch, Virtual Tables, CRTP & Devirtualization](#3-dynamic-dispatch-virtual-tables-crtp--devirtualization)
+4. [SOLID Contract Formalisms & Architectural Decoupling](#4-solid-contract-formalisms--architectural-decoupling)
+5. [Object Lifecycles, Smart Pointer Semantics & Resource Idioms](#5-object-lifecycles-smart-pointer-semantics--resource-idioms)
 
 ---
 
-# 1. Core OOP Pillars & C++ Encapsulation (Cards 1–8)
+# 1. Encapsulation Mechanics, RAII & Class Invariant Protection
 
-### Card 1: "What is the core difference between Encapsulation and Abstraction?"
-> **Spoken Answer:** **Encapsulation** is data hiding and boundary enforcement: packaging data members and member functions into an isolated unit and restricting direct external mutation via access specifiers (`private`). **Abstraction** is complexity hiding: defining high-level contracts (via pure virtual interfaces) so callers interact with *what* the module does rather than *how* it does it.
-
----
-
-### Card 2: "What is the difference between `struct` and `class` in C++?"
-> **Spoken Answer:** In C++, `struct` and `class` are completely identical with only two default visibility differences:
-> 1. In a `struct`, members and base class inheritance default to **`public`**.
-> 2. In a `class`, members and base class inheritance default to **`private`**.
-> In modern C++, idiomatic style uses `struct` for passive data holders with no invariant logic (Plain Old Data / POD) and `class` for objects that encapsulate invariant-enforcing behavior.
+### 1. Encapsulation vs. Abstraction Formal Boundary
+**Encapsulation** is data hiding and boundary enforcement: packaging data members and member functions into an isolated unit and restricting direct external mutation via access specifiers (`private`). **Abstraction** is complexity hiding: defining high-level contracts (via pure virtual interfaces) so callers interact with *what* the module does rather than *how* it executes.
 
 ---
 
-### Card 3: "What is an invariant in class design and how is it maintained?"
-> **Spoken Answer:** An **invariant** is a condition or business rule that must always hold true throughout the lifetime of a valid object (e.g. `balance >= 0` or `capacity >= size`). It is established in the constructor, validated inside every mutating public method, and protected by keeping underlying member fields strictly `private`.
+### 2. `struct` vs. `class` Access Defaults
+In C++, `struct` and `class` are functionally identical with two default visibility differences:
+- In a `struct`, members and base class inheritance default to **`public`**.
+- In a `class`, members and base class inheritance default to **`private`**.
+Idiomatic C++ employs `struct` for passive Plain Old Data (POD) holders without invariant logic, and `class` for structures encapsulating invariant-enforcing behavior.
 
 ---
 
-### Card 4: "What does the `explicit` keyword on a constructor do?"
-> **Spoken Answer:** `explicit` prevents the compiler from performing **implicit type conversions** or copy-initialization when passing arguments. For example, without `explicit`, `Complex c = 5;` silently calls `Complex(int)`, which can cause subtle runtime bugs; marking it `explicit Complex(int r)` forces explicit construction `Complex c(5);`.
+### 3. Class Invariants & State Validation
+A **class invariant** is an immutable condition or business rule that must hold true throughout the entire lifecycle of an object (e.g. `balance >= 0` or `capacity >= size`). It is established in the constructor, validated inside every state-mutating public member function, and protected by keeping underlying member attributes `private`.
 
 ---
 
-### Card 5: "What is the `friend` keyword in C++ and does it violate encapsulation?"
-> **Spoken Answer:** `friend` grants a specific external function or class access to `private` and `protected` members. When used judiciously (such as for `operator<<` stream formatting or tight factory-product pairings), it **enhances encapsulation** by granting selective access without forcing the class to expose public getter/setter methods to the entire global codebase.
+### 4. Explicit Constructor Conversion Prevention
+The `explicit` specifier prevents the compiler from performing implicit type conversions or copy-initializations on single-argument constructors. Without `explicit`, `Complex c = 5;` silently invokes `Complex(int)`; marking the constructor `explicit Complex(int r)` forces explicit construction syntax `Complex c(5);`.
 
 ---
 
-### Card 6: "What is the difference between Shallow Copy and Deep Copy?"
-> **Spoken Answer:** **Shallow Copy** duplicates only the top-level member fields (copying raw pointer addresses so both objects point to the same memory block, causing double-free crashes on destruction). **Deep Copy** allocates a separate, distinct memory buffer on the heap and duplicates the actual pointed-to values.
+### 5. `friend` Declarations & Encapsulation
+The `friend` keyword grants a designated external function or class access to `private` and `protected` members. When applied judiciously (e.g. `operator<<` stream formatting or tight factory-product pairings), it enhances encapsulation by providing selective access without forcing the class to expose public getter/setter methods globally.
 
 ---
 
-### Card 7: "Why is the Copy Constructor parameter always passed by `const ClassName&`?"
-> **Spoken Answer:** If it were passed by value (`ClassName(ClassName other)`), invoking the copy constructor would require making a copy of `other`, which would invoke the copy constructor again, resulting in an **infinite recursive compilation error**. Passing by `const` reference avoids copying and protects the source object from accidental mutation.
+### 6. Shallow vs. Deep Copy Mechanics
+**Shallow Copy** duplicates top-level member fields (copying pointer addresses so both object instances reference identical memory blocks, risking double-free errors upon destruction). **Deep Copy** allocates an independent memory buffer on the heap and duplicates the underlying data values.
 
 ---
 
-### Card 8: "What does the `mutable` keyword do in C++?"
-> **Spoken Answer:** `mutable` allows a specific member variable to be modified even inside `const` member functions. It is used for variables that represent internal implementation details rather than observable logical state, such as **caching variables, hit counters, and `std::mutex` instances**.
+### 7. Copy Constructor Signature Constraint
+A copy constructor is defined as `ClassName(const ClassName& other)`. Passing by value (`ClassName(ClassName other)`) would require copying the argument `other`, which invokes the copy constructor recursively, resulting in infinite compilation recursion. Passing by `const` reference avoids copying and enforces read-only source access.
 
 ---
 
-# 2. Inheritance, Memory Layout & Slicing (Cards 9–16)
-
-### Card 9: "What is Object Slicing in C++ and how do you prevent it?"
-> **Spoken Answer:** **Object Slicing** occurs when a derived class object is assigned or passed by value to a base class parameter (`void func(Base b)`). The compiler allocates space only for the `Base` sub-object, physically chopping off all derived member variables and resetting the `vptr` to the base class vtable. It is prevented by **always passing polymorphic objects by reference (`const Base&`) or by pointer (`std::unique_ptr<Base>`)**.
+### 8. `mutable` Member Attributes
+The `mutable` specifier permits a specific member variable to be modified inside `const` member functions. It is deployed for variables that track internal implementation state rather than observable logical state, such as caching counters, transient computation buffers, and `std::mutex` instances.
 
 ---
 
-### Card 10: "What is the difference between `public`, `protected`, and `private` inheritance?"
-> **Spoken Answer:**
-> - **`public` inheritance:** Models strict "is-a" subtyping; base public/protected members retain their visibility in Derived.
-> - **`protected` inheritance:** Base public/protected members become `protected` in Derived (hidden from clients, visible to children).
-> - **`private` inheritance:** Models "has-a" implementation reuse; base public/protected members become `private` in Derived.
+# 2. Inheritance Hierarchies, Object Slicing & Memory Offsets
+
+### 9. Object Slicing Mechanics
+**Object Slicing** occurs when a derived class instance is assigned or passed by value to a base class parameter (`void func(Base b)`). The compiler allocates space only for the `Base` sub-object, stripping all derived member variables and resetting the `vptr` to the base class `vtable`. It is prevented by passing polymorphic objects via reference (`const Base&`) or smart pointer (`std::unique_ptr<Base>`).
 
 ---
 
-### Card 11: "What is the Diamond Problem in C++ and how does Virtual Inheritance solve it?"
-> **Spoken Answer:** The Diamond Problem occurs in multiple inheritance when class $D$ inherits from $B$ and $C$, which both inherit from base $A$, causing duplicate copies of $A$'s member variables in memory and compiler ambiguity on member access. C++ solves it via **Virtual Inheritance (`class B : virtual public A`)**, which stores a single shared $A$ sub-object at the end of the object layout and inserts a Virtual Base Pointer (`vbptr`) in $B$ and $C$ to compute offsets at runtime.
+### 10. Inheritance Access Visibility Modes
+- **`public` inheritance:** Models strict "is-a" subtyping; base public/protected members retain their visibility in the derived class.
+- **`protected` inheritance:** Base public and protected members become `protected` in the derived class.
+- **`private` inheritance:** Models "has-a" implementation reuse; base public and protected members become `private` in the derived class.
 
 ---
 
-### Card 12: "How does Virtual Inheritance alter object memory layout?"
-> **Spoken Answer:** Without virtual inheritance, class $D$ contains two complete $A$ sub-objects in its memory footprint. With virtual inheritance, the compiler collapses $A$ into a **single shared sub-object at the very end of $D$**, inserting a **`vbptr` (Virtual Base Pointer)** into each intermediate sub-object ($B$ and $C$) that indexes a `vbtable` offset at runtime to locate $A$.
+### 11. Diamond Problem Topology & Virtual Inheritance
+The Diamond Problem occurs in multiple inheritance when class $D$ inherits from $B$ and $C$, which both inherit from base $A$, causing duplicate copies of $A$'s member variables in memory and compiler ambiguity on member access. Virtual inheritance (`class B : virtual public A`) eliminates duplication by placing a single shared $A$ sub-object at the end of the object layout and inserting Virtual Base Pointers (`vbptr`) in $B$ and $C$ to compute offsets dynamically at runtime.
 
 ---
 
-### Card 13: "In Virtual Inheritance, who is responsible for invoking the virtual base constructor?"
-> **Spoken Answer:** The **most derived class ($D$) is directly responsible** for initializing the virtual base class ($A$) in its constructor initialization list. Constructor calls to $A$ from intermediate base classes ($B$ and $C$) are completely ignored by the compiler.
+### 12. Memory Layout with Virtual Inheritance
+Without virtual inheritance, class $D$ contains two complete $A$ sub-objects in its memory footprint. With virtual inheritance, the compiler collapses $A$ into a **single shared sub-object at the end of $D$**, embedding a `vbptr` (Virtual Base Pointer) in each intermediate sub-object that indexes a `vbtable` offset at runtime to locate $A$.
 
 ---
 
-### Card 14: "What is the size of an empty class in C++?"
-> **Spoken Answer:** **1 byte** (e.g. `sizeof(Empty) == 1`). The C++ standard mandates that every distinct object instance must have a unique, non-zero memory address. If the class has virtual functions, its size becomes **8 bytes** on 64-bit systems to accommodate the hidden `vptr`.
+### 13. Virtual Base Constructor Invocation Rule
+The **most derived class ($D$) is directly responsible** for initializing the virtual base class ($A$) in its constructor initialization list. Constructor invocations targeting $A$ within intermediate base classes ($B$ and $C$) are silently ignored by the compiler when instantiating $D$.
 
 ---
 
-### Card 15: "What is the exact order of construction and destruction in C++ inheritance?"
-> **Spoken Answer:**
-> - **Construction:** Virtual base classes first $\to$ Non-virtual base classes in declaration order $\to$ Non-static member fields in declaration order $\to$ Derived constructor body.
-> - **Destruction:** Exact reverse of construction: Derived destructor body $\to$ Member destructors $\to$ Non-virtual base destructors $\to$ Virtual base destructors.
+### 14. Empty Class Memory Sizing
+An empty class in C++ occupies **1 byte** (`sizeof(Empty) == 1`) to ensure distinct object instances obtain unique, non-zero memory addresses. If the class declares any virtual functions, its footprint expands to **8 bytes** on 64-bit architectures to accommodate the hidden virtual table pointer (`vptr`).
 
 ---
 
-### Card 16: "Why MUST a base class with virtual functions always have a `virtual` destructor?"
-> **Spoken Answer:** If a derived class object allocated on the heap is deleted through a base class pointer (`Base* p = new Derived(); delete p;`) and the base destructor is non-virtual, the compiler performs static binding and **invokes only `~Base()`**. The derived class destructor `~Derived()` is completely bypassed, leaking memory and dynamically allocated handles, resulting in **Undefined Behavior**. Declaring `virtual ~Base() = default;` ensures the derived destructor executes first before chaining to the base destructor.
+### 15. Construction and Destruction Sequencing
+- **Construction Order:** Virtual base classes first $\to$ Non-virtual base classes in declaration order $\to$ Member fields in declaration order $\to$ Derived constructor body.
+- **Destruction Order:** Exact reverse order of construction: Derived destructor body $\to$ Member destructors $\to$ Non-virtual base destructors $\to$ Virtual base destructors.
 
 ---
 
-# 3. Polymorphism, Virtual Tables & RTTI (Cards 17–24)
-
-### Card 17: "How does C++ dynamic virtual dispatch work under the hood (`vptr` & `vtable`)?"
-> **Spoken Answer:** For every class containing virtual functions, the compiler generates a static **Virtual Method Table (`vtable`)** in read-only memory containing function pointers to its virtual methods. Each object instance of that class contains a hidden 8-byte pointer called **`vptr` (Virtual Table Pointer)** inserted in its memory layout. When calling `ptr->virtualMethod()`, the CPU reads `ptr->__vptr`, indexes the method's fixed offset in the vtable, and jumps to that function pointer.
+### 16. Virtual Destructor Requirement
+Deleting a derived instance through a base pointer (`Base* p = new Derived(); delete p;`) when the base destructor is non-virtual performs static binding, executing only `~Base()`. The derived destructor `~Derived()` is skipped, leaking derived resources and invoking undefined behavior. Declaring `virtual ~Base() = default;` ensures the derived destructor executes first before chaining to the base destructor.
 
 ---
 
-### Card 18: "Can a Constructor be `virtual` in C++?"
-> **Spoken Answer:** **No.** A constructor cannot be virtual because to create an object, the compiler must know its exact concrete type at compile time to allocate the appropriate memory buffer and initialize the `vptr`. Virtual dispatch cannot occur until the `vptr` is set up inside the constructor.
+# 3. Dynamic Dispatch, Virtual Tables, CRTP & Devirtualization
+
+### 17. Virtual Table Dispatch Mechanics
+For every class containing virtual functions, the compiler constructs a static **Virtual Method Table (`vtable`)** in read-only data containing pointers to its virtual methods. Each instance embeds a hidden 8-byte pointer called **`vptr` (Virtual Table Pointer)**. Invoking `ptr->virtualMethod()` reads `ptr->__vptr`, indexes the method's fixed offset in the `vtable`, and jumps to that function pointer.
 
 ---
 
-### Card 19: "Can a Virtual Function be inlined by the C++ compiler?"
-> **Spoken Answer:** **Yes, under two conditions:**
-> 1. When invoked directly on an object value rather than a pointer/reference (`Dog d; d.speak();`).
-> 2. When the compiler's optimizer can perform **devirtualization**, proving at compile time that a pointer or reference points to an exact concrete class (e.g. on `final` methods/classes).
+### 18. Virtual Constructor Infeasibility
+A constructor cannot be virtual because instantiating an object requires the compiler to know its exact concrete type at compile-time to allocate memory and initialize the `vptr`. Virtual dispatch cannot execute until the `vptr` is established during constructor invocation.
 
 ---
 
-### Card 20: "What is a Pure Virtual Function and what is an Abstract Class?"
-> **Spoken Answer:** A **Pure Virtual Function** is a virtual method declared with `= 0` (`virtual void execute() = 0;`), indicating it has no default implementation (though one can be defined). A class with at least one pure virtual function becomes an **Abstract Class**, which cannot be directly instantiated.
+### 19. Virtual Function Inlining & Devirtualization
+A virtual function can be inlined by the compiler under two conditions:
+1. When invoked directly on an object value rather than a pointer or reference (`Object obj; obj.method();`).
+2. When the compiler's optimizer performs **devirtualization**, proving at compile time that a pointer or reference references an exact concrete type (e.g. on `final` methods or classes).
 
 ---
 
-### Card 21: "What is the difference between Function Overloading and Function Overriding?"
-> **Spoken Answer:** **Overloading** occurs at compile time within the *same scope*, where multiple functions share the same name but have different parameter types/counts. **Overriding** occurs at runtime across *base and derived scopes*, where a derived class provides a new implementation for a base class `virtual` method with an identical signature.
+### 20. Pure Virtual Functions & Abstract Classes
+A **Pure Virtual Function** is declared with `= 0` (`virtual void execute() = 0;`), indicating derived classes must provide an override. A class declaring at least one pure virtual function is an **Abstract Class**, which cannot be instantiated directly.
 
 ---
 
-### Card 22: "What do the `override` and `final` specifiers do in C++11?"
-> **Spoken Answer:** **`override`** forces the compiler to verify that a method is overriding a base virtual method with an identical signature, preventing silent bugs from mismatched parameter types. **`final`** specifies that a virtual method cannot be overridden in derived classes, or that a class cannot be inherited, allowing the compiler to perform **devirtualization optimizations** (converting virtual calls to direct static calls).
+### 21. Function Overloading vs. Overriding
+- **Overloading:** Occurs at compile time within the *same scope*, where multiple functions share an identifier with differing parameter types or counts.
+- **Overriding:** Occurs at runtime across *base and derived scopes*, where a derived class implements a base `virtual` function with an identical signature.
 
 ---
 
-### Card 23: "What is CRTP (Curiously Recurring Template Pattern) and why is it used?"
-> **Spoken Answer:** CRTP is a static polymorphism idiom where a class inherits from a templated base class parameterized by the derived class itself (`class Derived : public Base<Derived>`). It achieves **polymorphic method dispatch at compile-time with zero vtable/vptr overhead and full compiler inlining**, heavily used in High-Frequency Trading (HFT).
+### 22. `override` and `final` Compiler Specifiers
+- **`override`:** Instructs the compiler to verify that a method overrides an exact matching virtual base method, preventing signature mismatch bugs.
+- **`final`:** Specifies that a virtual method cannot be overridden in derived classes, or that a class cannot be inherited, enabling compiler devirtualization optimizations.
 
 ---
 
-### Card 24: "What is RTTI in C++ and what is its performance overhead?"
-> **Spoken Answer:** **Run-Time Type Information (RTTI)** is the mechanism that powers `dynamic_cast` and `typeid`. It stores type descriptor metadata alongside the class `vtable`. `dynamic_cast` traverses the class inheritance tree at runtime, incurring non-negligible CPU overhead in performance-critical inner loops.
+### 23. Curiously Recurring Template Pattern (CRTP)
+CRTP is a static polymorphism idiom where a class inherits from a templated base class parameterized by the derived class itself (`class Derived : public Base<Derived>`). It resolves polymorphic method dispatch at compile-time with zero virtual table overhead, enabling full compiler inlining.
 
 ---
 
-# 4. SOLID Principles & Architecture (Cards 25–30)
-
-### Card 25: "What is the Single Responsibility Principle (SRP) and how do you spot its violation?"
-> **Spoken Answer:** SRP states that a class should have **one, and only one, reason to change**. You spot a violation when a single class combines multiple disparate concerns, such as parsing user input, executing SQL database persistence, and formatting outbound notification emails. The fix is to decouple these concerns into cohesive services and repositories (`UserService`, `UserRepository`, `EmailService`).
+### 24. Run-Time Type Information (RTTI) & `dynamic_cast`
+**Run-Time Type Information (RTTI)** powers `dynamic_cast` and `typeid` by storing type descriptor metadata alongside the class `vtable`. `dynamic_cast` traverses the class inheritance tree at runtime, adding minor CPU overhead relative to compile-time `static_cast`.
 
 ---
 
-### Card 26: "How does the Open/Closed Principle (OCP) eliminate `switch(type)` statements?"
-> **Spoken Answer:** OCP states that software entities should be **open for extension but closed for modification**. When you see a `switch(shapeType)` statement, adding a new shape requires modifying existing battle-tested code. OCP replaces the switch statement with a polymorphic base class (`IShape::calculateArea()`), allowing new shapes to be introduced in separate translation units without touching existing calculator logic.
+# 4. SOLID Contract Formalisms & Architectural Decoupling
+
+### 25. Single Responsibility Principle (SRP)
+SRP asserts that a class should possess a single reason to change, encapsulating a cohesive responsibility. Mixing concerns (such as input validation, SQL persistence, and email formatting) couples distinct axes of change into a single module, which should be decoupled into dedicated services.
 
 ---
 
-### Card 27: "Why does the Square-Rectangle inheritance hierarchy violate the Liskov Substitution Principle (LSP)?"
-> **Spoken Answer:** Mathematically, a square is a rectangle. However, in object-oriented contracts, a `Rectangle` guarantees the invariant that setting width and height vary independently. In a `Square`, setting `setWidth()` must also alter `height`. If a client passes a `Square` to a function expecting a `Rectangle` and sets width to 5 and height to 4, expecting an area of 20, the square produces 16, **breaking client assumptions and violating LSP**.
+### 26. Open/Closed Principle (OCP)
+OCP dictates that software entities should be open for extension but closed for modification. Conditional `switch(type)` constructs require source modification upon introducing new variants; OCP replaces them with polymorphic interfaces (`IShape::calculateArea()`), allowing new subclasses to be introduced without modifying existing calculation engines.
 
 ---
 
-### Card 28: "What is the Interface Segregation Principle (ISP)?"
-> **Spoken Answer:** ISP states that **clients should not be forced to depend on interfaces they do not use**. Instead of creating one monolithic "fat" interface containing methods for printing, scanning, and faxing, ISP decomposes it into small, cohesive interfaces (`IPrinter`, `IScanner`). Classes implement only the interfaces relevant to their capabilities, avoiding dummy no-op or exception-throwing overrides.
+### 27. Liskov Substitution Principle (LSP) Invariants
+LSP requires that subtypes be substitutable for their base types without altering program correctness. In the Square-Rectangle problem, modifying a `Square`'s width mutates its height, violating the `Rectangle` invariant where dimensions vary independently, which breaks client code expecting rectangular behavior.
 
 ---
 
-### Card 29: "What is the Dependency Inversion Principle (DIP) and how does it relate to Dependency Injection?"
-> **Spoken Answer:** **DIP is the architectural principle** stating that high-level modules should depend on abstractions (interfaces) rather than concrete low-level implementations. **Dependency Injection (DI)** is the software pattern used to fulfill DIP by supplying concrete instances (e.g. passing `std::unique_ptr<IPaymentGateway>` into a class constructor) rather than letting the class instantiate dependencies with raw `new` calls.
+### 28. Interface Segregation Principle (ISP)
+ISP states that clients should not be forced to depend on interface methods they do not consume. Monolithic interfaces should be decomposed into cohesive, client-specific role interfaces (`IPrinter`, `IScanner`), allowing classes to implement only relevant capabilities.
 
 ---
 
-### Card 30: "What is the difference between a Pure Interface and an Abstract Base Class in C++?"
-> **Spoken Answer:** A **Pure Interface** in C++ is a class that contains **only pure virtual functions (`= 0`) and a virtual destructor**, with zero member variables and zero concrete implementations. An **Abstract Base Class** contains at least one pure virtual function, but may also store member variables (state) and provide shared concrete helper methods (such as in the Template Method pattern).
+### 29. Dependency Inversion Principle (DIP) & Dependency Injection
+**DIP** is the architectural rule requiring high-level modules to depend on abstract contracts rather than concrete implementations. **Dependency Injection (DI)** is the software pattern used to satisfy DIP by passing dependencies into constructors (`std::unique_ptr<IPaymentGateway>`) rather than instantiating them internally via `new`.
 
 ---
 
-# 5. Composition, Smart Pointers & Modern C++ Idioms (Cards 31–40)
-
-### Card 31: "Why should you Favor Object Composition over Class Inheritance?"
-> **Spoken Answer:** Inheritance creates tight, rigid compile-time coupling where derived classes depend on the internal implementation details of the base class (white-box reuse), exposing them to the **Fragile Base Class problem**. Composition builds systems by combining loosely coupled objects behind interfaces (black-box reuse), allowing **dynamic runtime behavior swapping (Strategy Pattern)**, preserving encapsulation, and eliminating Object Slicing.
-
----
-
-### Card 32: "What is the Fragile Base Class problem?"
-> **Spoken Answer:** A fundamental architectural flaw where seemingly innocuous modifications to a base class (such as altering internal method delegation or adding new virtual methods that shift vtable index offsets) **unintentionally break the runtime invariants or binary ABI compatibility of derived subclasses across large codebases**.
+### 30. Pure Interfaces vs. Abstract Base Classes
+- **Pure Interface:** Contains strictly pure virtual functions (`= 0`) and a virtual destructor, with zero state and no concrete method bodies.
+- **Abstract Base Class:** Contains at least one pure virtual function, but may also store member state and define concrete methods (e.g. in the Template Method pattern).
 
 ---
 
-### Card 33: "What is the difference between Association, Aggregation, and Composition?"
-> **Spoken Answer:**
-> - **Association ("Uses-a"):** Weakest relationship where independent objects interact (Driver uses a Car).
-> - **Aggregation ("Has-a"):** Shared ownership with independent lifecycles; child outlives the container (Department has Employees).
-> - **Composition ("Part-of"):** Exclusive, strong ownership with coupled lifecycles; child is destroyed when the parent dies (House has Rooms).
+# 5. Object Lifecycles, Smart Pointer Semantics & Resource Idioms
+
+### 31. Composition vs. Inheritance Tradeoffs
+Inheritance creates tight compile-time coupling where derived classes depend on base implementation details (white-box reuse), risking the Fragile Base Class problem. Composition combines loosely coupled objects behind interfaces (black-box reuse), enabling dynamic runtime strategy swapping, preserving encapsulation, and eliminating object slicing.
 
 ---
 
-### Card 34: "How do C++ Smart Pointers map to OOP relationships?"
-> **Spoken Answer:**
-> - **Composition:** Expressed via **`std::unique_ptr<Child>`** (or direct value embedding `Child child;`) representing exclusive ownership.
-> - **Aggregation:** Expressed via **`std::shared_ptr<Child>`** representing shared co-ownership.
-> - **Association:** Expressed via non-owning raw pointers (`Target*`), references (`const Target&`), or **`std::weak_ptr<Target>`** to break cyclic dependencies.
+### 32. The Fragile Base Class Problem
+An architectural defect where modifications to a base class (such as altering internal method delegation or adding virtual methods that modify `vtable` offsets) unintentionally invalidate the runtime behavior or binary ABI compatibility of derived subclasses.
 
 ---
 
-### Card 35: "How does `std::weak_ptr` break Cyclic Reference memory leaks?"
-> **Spoken Answer:** If two objects hold strong `std::shared_ptr` references to each other, their reference counts can never drop to 0, resulting in a permanent memory leak. `std::weak_ptr` holds a non-owning observing reference that does not increment the strong reference count, allowing the parent object to be destroyed normally when out of scope.
+### 33. Association vs. Aggregation vs. Composition
+- **Association ("Uses-a"):** Independent entities interact structurally (Driver interacts with Car).
+- **Aggregation ("Has-a"):** Shared ownership with independent lifecycles; child outlives container (Department aggregates Employees).
+- **Composition ("Part-of"):** Exclusive ownership with coupled lifecycles; child is destroyed with parent (House composes Rooms).
 
 ---
 
-### Card 36: "What is the Rule of 0 / 3 / 5 in modern C++?"
-> **Spoken Answer:**
-> - **Rule of 0:** Prefer classes that rely on standard resource-managing types (`std::vector`, `std::unique_ptr`), requiring **no custom destructor, copy, or move operations**.
-> - **Rule of 3 (C++98):** If a class manages raw resources and defines a Destructor, it must also define a Copy Constructor and Copy Assignment Operator.
-> - **Rule of 5 (Modern C++):** If custom resource management is needed, define all 5 special member functions: Destructor, Copy Constructor, Copy Assignment, **Move Constructor (`noexcept`)**, and **Move Assignment (`noexcept`)**.
+### 34. Smart Pointer Relationship Mapping
+- **Composition:** Modeled via `std::unique_ptr<Child>` (or inline member value embedding) for exclusive ownership.
+- **Aggregation:** Modeled via `std::shared_ptr<Child>` for shared reference-counted ownership.
+- **Association:** Modeled via non-owning raw pointers (`Target*`), references (`const Target&`), or `std::weak_ptr<Target>`.
 
 ---
 
-### Card 37: "What does `std::move` actually do under the hood?"
-> **Spoken Answer:** `std::move` **does NOT move anything**. It is an unconditional compile-time cast that converts an lvalue expression into an rvalue reference (`static_cast<T&&>(var)`). The actual transfer of resource ownership is performed by the invoked **Move Constructor or Move Assignment Operator**.
+### 35. Cyclic References & `std::weak_ptr`
+Cyclic ownership loops of `std::shared_ptr` prevent reference counts from reaching zero, causing memory leaks. `std::weak_ptr` provides a non-owning observer reference that does not increment the strong reference count, allowing parent objects to be destroyed when leaving scope.
 
 ---
 
-### Card 38: "What is the difference between `std::make_unique` and `std::make_shared`?"
-> **Spoken Answer:** `std::make_unique` allocates the managed object on the heap and wraps it in an exclusive pointer. `std::make_shared` allocates the managed object **AND the reference-counting control block together in a single contiguous memory buffer**, saving one memory allocation and improving CPU cache locality.
+### 36. The Rule of 0 / 3 / 5
+- **Rule of 0:** Rely on standard RAII types (`std::vector`, `std::unique_ptr`), declaring no custom destructors, copy, or move operations.
+- **Rule of 3 (C++98):** If defining a custom destructor, define both a Copy Constructor and Copy Assignment Operator.
+- **Rule of 5 (Modern C++):** If custom resource management is needed, define all five special member functions: Destructor, Copy Constructor, Copy Assignment, Move Constructor (`noexcept`), and Move Assignment (`noexcept`).
 
 ---
 
-### Card 39: "What is the difference between `static_cast`, `dynamic_cast`, and `reinterpret_cast`?"
-> **Spoken Answer:**
-> - **`static_cast`:** Performs compile-time type conversions between related types (numeric types, upcasting base pointers) with **zero runtime overhead**.
-> - **`dynamic_cast`:** Safely downcasts base pointers to derived types at runtime by checking RTTI metadata in the vtable, returning `nullptr` (or throwing for references) on failure.
-> - **`reinterpret_cast`:** Reinterprets the raw binary bit-pattern of a pointer to an unrelated type with no safety checks, used primarily in low-level systems programming.
+### 37. `std::move` Casting Semantics
+`std::move` does not execute data movement. It is an unconditional compile-time static cast converting an lvalue expression into an rvalue reference (`static_cast<T&&>(var)`). Resource transfer is executed by the invoked Move Constructor or Move Assignment Operator.
 
 ---
 
-### Card 40: "What is the Copy-and-Swap idiom in C++?"
-> **Spoken Answer:** It is an idiomatic implementation of the assignment operator (`T& operator=(T other)`) that takes its argument by value (reusing the copy constructor) and swaps internal state with `std::swap`. It provides **strong exception safety** and completely eliminates duplicate code between copy constructors and assignment operators.
+### 38. `std::make_unique` vs. `std::make_shared` Allocation Layouts
+`std::make_unique` allocates the object on the heap and wraps it in an exclusive pointer. `std::make_shared` allocates the managed object and the reference-counting control block together in a single contiguous memory block, reducing heap allocations and improving cache locality.
+
+---
+
+### 39. Explicit Type Casting Mechanics
+- **`static_cast`:** Performs compile-time type conversions between related types (numeric types, upcasts) with zero runtime overhead.
+- **`dynamic_cast`:** Performs runtime polymorphic downcasting by inspecting `vtable` RTTI metadata, returning `nullptr` (or throwing on references) on type mismatch.
+- **`reinterpret_cast`:** Reinterprets the raw binary bit pattern of a pointer to an unrelated type without safety validation.
+
+---
+
+### 40. Copy-and-Swap Strong Exception Safety
+The Copy-and-Swap idiom implements the assignment operator (`T& operator=(T other)`) by accepting parameters by value (reusing the copy constructor) and swapping internal state with `std::swap`. It provides strong exception safety and eliminates code duplication across copy and assignment operations.

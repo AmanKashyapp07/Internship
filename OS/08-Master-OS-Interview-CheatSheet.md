@@ -1,26 +1,49 @@
-# Master Guide 08: OS Interview Cheat Sheet & Rapid-Fire Q&A
+# Core Operating Systems Theorems, Formulas & Architecture Reference
 
-> **Focus:** 50 High-Yield Rapid-Fire Verbal Questions & Bold Answers, Complete Unified OS Formula Card, and the Top 10 Red Flag Misconceptions to Avoid.
-> 
-> *The 10-Minute Pre-Interview Revision Document for FAANG/Tier-1 Tech Interviews.*
+> **Scope:** Unified OS Architecture Matrix, Mathematical Formulas & Relational Bounds, 50 Foundational Operating Systems Principles, and Kernel Subsystem Failure Modes & Pitfalls.
 
 ---
 
 # Table of Contents
-1. [The Unified OS Formula Card](#1-the-unified-os-formula-card)
-2. [50 Rapid-Fire Interview Questions & Bold Answers](#2-50-rapid-fire-interview-questions--bold-answers)
-3. [Top 10 Red Flag Mistakes That Sound Junior](#3-top-10-red-flag-mistakes-that-sound-junior)
+1. [Unified OS Architecture & Subsystems Matrix](#1-unified-os-architecture--subsystems-matrix)
+2. [Mathematical Formulas & Theoretical Quick-Reference](#2-mathematical-formulas--theoretical-quick-reference)
+3. [50 Foundational Operating Systems Principles](#3-50-foundational-operating-systems-principles)
+4. [Critical Kernel & Concurrency Failure Modes](#4-critical-kernel--concurrency-failure-modes)
 
 ---
 
-# 1. The Unified OS Formula Card
+# 1. Unified OS Architecture & Subsystems Matrix
+
+```
++--------------------------------------------------------------------------------------------------------------------+
+| OS SUBSYSTEM         | CORE KERNEL DATA STRUCTURE       | ARCHITECTURAL RESPONSIBILITY & ENGINE MECHANISM   |
++--------------------------------------------------------------------------------------------------------------------+
+| Process Management   | `task_struct`, Process Table     | Address space isolation, context switching, signals|
++--------------------------------------------------------------------------------------------------------------------+
+| CPU Scheduling       | Red-Black Tree (`cfs_rq`), Queues| Proportional CPU fairness, vruntime tracking, PIP  |
++--------------------------------------------------------------------------------------------------------------------+
+| Concurrency Control  | Mutexes, Semaphores, `futex`     | Mutual exclusion, atomics (CAS), monitor condition |
++--------------------------------------------------------------------------------------------------------------------+
+| Deadlock Subsystem   | Wait-For Graph, Allocation Matrix| Coffman condition breaking, Banker's safe sequence |
++--------------------------------------------------------------------------------------------------------------------+
+| Virtual Memory       | Multi-Level Page Tables, PTEs    | MMU translation, demand paging, COW page faults    |
++--------------------------------------------------------------------------------------------------------------------+
+| Page Replacement     | Clock Circular Buffer, LRU Lists | Working set maintenance, thrashing avoidance       |
++--------------------------------------------------------------------------------------------------------------------+
+| Inter-Process Comm.  | Ring Buffers, Shared Memory Maps | Zero-copy data streaming, DMA engine transfers     |
++--------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 2. Mathematical Formulas & Theoretical Quick-Reference
 
 ```
 +---------------------------------------------------------------------------------------------------+
 | 1. CPU SCHEDULING FORMULAS                                                                        |
 |    * Turnaround Time (TAT) = Completion Time (CT) - Arrival Time (AT)                             |
 |    * Waiting Time (WT)    = Turnaround Time (TAT) - Burst Time (BT)                               |
-|    * Response Time (RT)   = First Time Process gets CPU - Arrival Time (AT)                       |
+|    * Response Time (RT)   = First Execution Time - Arrival Time (AT)                              |
 |    * Exponential Burst Prediction: tau_{n+1} = alpha * t_n + (1 - alpha) * tau_n                  |
 +---------------------------------------------------------------------------------------------------+
 | 2. PAGING & ADDRESS TRANSLATION SIZING                                                            |
@@ -33,183 +56,116 @@
 |    * 1-Level Paging: EMAT = h * (t_tlb + t_mem) + (1 - h) * (t_tlb + 2 * t_mem)                   |
 |    * k-Level Paging: EMAT = h * (t_tlb + t_mem) + (1 - h) * (t_tlb + (k + 1) * t_mem)             |
 +---------------------------------------------------------------------------------------------------+
-| 4. DEADLOCK (BANKER'S ALGORITHM)                                                                  |
-|    * Need Matrix Calculation: Need[i][j] = Max[i][j] - Allocation[i][j]                           |
-|    * Safety Condition: Find sequence where Need_i <= Available, then Available += Allocation_i    |
-|    * Safe State => NO DEADLOCK GUARANTEED                                                         |
+| 4. DEADLOCK AVOIDANCE (BANKER'S ALGORITHM)                                                         |
+|    * Need Matrix Equation: Need[i][j] = Max[i][j] - Allocation[i][j]                              |
+|    * Safety Invariant: Need_i <= Available -> Available += Allocation_i -> Safe Sequence Exists   |
 +---------------------------------------------------------------------------------------------------+
-| 5. VIRTUAL MEMORY & WORKING SET                                                                   |
-|    * Thrashing Invariant: Sum of all Process Working Sets > Total Physical Memory Frames          |
-|    * Belady's Anomaly Counterexample (FIFO): 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5 (3 frames=9, 4=10)  |
+| 5. VIRTUAL MEMORY & WORKING SET DYNAMICS                                                          |
+|    * Thrashing Invariant: Sum of all Active Working Sets > Total Physical Frame Allocation        |
+|    * Stack Algorithm Inclusion Property: S(N, t) subset of S(N + 1, t) -> Immune to Belady's     |
 +---------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-# 2. 50 Rapid-Fire Interview Questions & Bold Answers
+# 3. 50 Foundational Operating Systems Principles
 
-### Topic 1: Processes, Threads & Context Switching
-1. **What is the fundamental difference between a process and a thread?**
-   - **A process is an isolated container of resources with its own private address space; a thread is the unit of CPU execution sharing memory with other threads in the same process.**
-2. **What memory regions are private to each thread?**
-   - **Stack, CPU Registers, Program Counter (PC), and Thread-Local Storage (TLS).**
-3. **What memory regions are shared across all threads of a process?**
-   - **Code (.text), Initialized Data (.data), Uninitialized Data (.bss), Heap, and open File Descriptors.**
-4. **Why is a process context switch heavier than a thread context switch?**
-   - **Because a process context switch requires changing the page table pointer (CR3) and invalidating/tagging TLB entries, causing severe L1/L2 cache misses.**
-5. **How does the CPU switch between User Mode and Kernel Mode?**
-   - **Via hardware traps, interrupts, or `syscall` instructions, transitioning the CPU from Ring 3 to Ring 0 and swapping to the kernel stack.**
-6. **What is a Zombie Process and how do you fix it?**
-   - **A terminated child whose exit status has not been read by its parent via `wait()`; fixed by having the parent call `wait()` or killing the parent so `init` (PID 1) reaps it.**
-7. **What is an Orphan Process?**
-   - **An executing process whose parent died; it is automatically adopted and reaped by PID 1 (`init` / `systemd`).**
-8. **What does `fork()` return?**
-   - **Returns `0` to the child process, the child's `PID` to the parent process, and `-1` on failure.**
-9. **How does Copy-on-Write (COW) optimize `fork()`?**
-   - **`fork()` copies only page table references marked read-only; physical pages are duplicated only when a write operation triggers a page fault.**
-10. **What is the difference between User-Level Threads (M:1) and Kernel-Level Threads (1:1)?**
-    - **User-level threads switch in user-space without syscalls but cannot run across multiple CPU cores; kernel-level threads allow true multi-core parallel execution.**
+### Category A: Processes, Threads & Context Switching
+1. **Process vs. Thread Distinction:** A process is an isolated resource allocation boundary with private virtual memory; a thread is an independent stream of CPU execution sharing heap and text.
+2. **Private Thread Regions:** Each thread maintains its own Program Counter (PC), CPU registers, Stack, and Thread-Local Storage (TLS).
+3. **Shared Thread Regions:** All threads within a process share the Code (`.text`), Initialized Data (`.data`), Uninitialized Data (`.bss`), Heap, and Open File Descriptors.
+4. **Context Switch Performance Cost:** Direct cost involves register save/restore; dominant indirect cost stems from TLB invalidation and L1/L2 cache cold misses.
+5. **Mode Transition:** Transitioning from User Mode (Ring 3) to Kernel Mode (Ring 0) occurs via hardware traps, interrupts, or `syscall` instructions.
+6. **Zombie Process:** A terminated child process whose exit code has not been collected by its parent via `wait()`, holding a slot in the process table.
+7. **Orphan Process:** A running process whose parent has terminated; adopted and reaped by `init` (PID 1 / `systemd`).
+8. **`fork()` Return Values:** Returns `0` to the child process, the child's `PID` to the parent, and `-1` on allocation failure.
+9. **Copy-on-Write (COW):** Defers physical frame copying on `fork()`, marking pages read-only until a write triggers a page fault.
+10. **Thread Models (1:1 vs. M:1):** 1:1 maps user threads directly to kernel schedulable entities for multi-core parallelism; M:1 executes in user space without multi-core capability.
 
 ---
 
-### Topic 2: CPU Scheduling
-11. **Which CPU scheduling algorithm gives the minimum average waiting time?**
-    - **Shortest Job First (SJF) / Shortest Remaining Time First (SRTF).**
-12. **Why isn't SJF used in general-purpose desktop operating systems?**
-    - **Because the exact future CPU burst time of arbitrary user programs cannot be known in advance.**
-13. **What is the Convoy Effect?**
-    - **A performance bottleneck in FCFS where short I/O-bound processes are blocked waiting behind a massive CPU-bound process.**
-14. **How do you choose the Time Quantum $q$ in Round Robin?**
-    - **Size $q$ such that $80\%$ of CPU bursts are shorter than $q$ (typically 10-50ms) to balance response time against context-switch overhead.**
-15. **What happens if Round Robin's quantum $q$ is extremely large?**
-    - **It degenerates into First-Come, First-Served (FCFS).**
-16. **What happens if Round Robin's quantum $q$ is extremely small?**
-    - **Excessive context-switching overhead stalls the CPU, reducing net system throughput toward zero.**
-17. **What is Starvation and how is it solved?**
-    - **When low-priority jobs never run due to a steady stream of high-priority jobs; solved by Aging (gradually increasing waiting jobs' priority).**
-18. **How does the Linux Completely Fair Scheduler (CFS) select the next task to run?**
-    - **It picks the task with the smallest `vruntime` in $O(1)$ time from the leftmost node of a Red-Black Tree.**
-19. **What does a negative `nice` value mean in Linux?**
-    - **Higher priority (nice values range from -20 highest to +19 lowest).**
+### Category B: CPU Scheduling & Dispatch
+11. **Average Waiting Time Minimization:** SRTF mathematically minimizes average waiting time by executing shortest remaining bursts first.
+12. **SJF Practical Infeasibility:** Requires future knowledge of arbitrary user burst lengths, which is unknown in general-purpose computing.
+13. **Convoy Effect:** Occurs under non-preemptive FCFS when short I/O tasks are blocked behind long CPU-bound tasks.
+14. **Time Quantum Sizing:** In Round Robin, $q$ should be sized so 70-80% of bursts complete within one slice (10-50ms) to minimize context switch overhead.
+15. **Quantum Degradation:** As $q \to \infty$, Round Robin degenerates into FCFS; as $q \to 0$, context switch costs dominate the CPU.
+16. **Starvation & Aging:** Starvation occurs when low-priority jobs are delayed indefinitely; Aging solves this by monotonically increasing priority over wait duration.
+17. **Linux CFS Selection:** Dispatches the task with the smallest `vruntime` in $O(1)$ time from the leftmost node of a Red-Black Tree.
+18. **Nice Value Mechanics:** Nice values $[-20, 19]$ scale `vruntime` accumulation inversely relative to task priority.
 
 ---
 
-### Topic 3: Deadlocks & Banker's Algorithm
-20. **What are the 4 Coffman conditions for deadlock?**
-    - **Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait (Acronym: MHNC).**
-21. **Does a cycle in a Resource Allocation Graph always mean deadlock?**
-    - **Only for single-instance resources. For multi-instance resources, a cycle is a necessary condition, but not sufficient.**
-22. **What is the most practical Deadlock Prevention technique?**
-    - **Enforcing a strict Global Linear Resource Ordering to eliminate Circular Wait.**
-23. **What is the difference between Deadlock Prevention and Deadlock Avoidance?**
-    - **Prevention constrains requests statically to make deadlocks impossible; Avoidance dynamically checks for a Safe State before granting requests.**
-24. **What is a Safe State in Banker's Algorithm?**
-    - **A state where at least one execution sequence exists that allows all processes to finish without deadlock.**
-25. **What is the difference between Deadlock and Livelock?**
-    - **Deadlocked processes are asleep/blocked waiting for resources; livelocked processes are actively running/spinning, changing states with zero forward progress.**
+### Category C: Deadlocks & Banker's Algorithm
+19. **The 4 Coffman Conditions:** Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait must all hold simultaneously for deadlock.
+20. **RAG Cycle Interpretation:** A cycle in a Resource Allocation Graph proves deadlock only for single-instance resource systems.
+21. **Deadlock Prevention via Ordering:** Imposing a strict global total order $F(R)$ on resources mathematically eliminates circular wait.
+22. **Prevention vs. Avoidance:** Prevention restricts resource acquisition rules statically; Avoidance dynamically checks for safe states prior to granting requests.
+23. **Safe State Definition:** A state is safe if there exists at least one execution ordering allowing all processes to complete without deadlock.
+24. **Livelock vs. Deadlock:** Deadlocked processes are sleeping/blocked; livelocked processes are actively executing, altering state with zero progress.
 
 ---
 
-### Topic 4: Process Synchronization & Concurrency
-26. **What are the 3 requirements for solving the Critical Section problem?**
-    - **Mutual Exclusion, Progress (no deadlock on entry), and Bounded Waiting (no starvation).**
-27. **What is the difference between a Mutex and a Binary Semaphore?**
-    - **A Mutex has ownership (only the locking thread can unlock); a Semaphore has no ownership and is used for event signaling.**
-28. **When should you use a Spinlock instead of a Mutex?**
-    - **On multi-core systems when the critical section is extremely short ($< 1\text{--}2\mu\text{s}$), avoiding the cost of a full thread sleep/wake context switch.**
-29. **Why must Condition Variable wait be wrapped in a `while` loop instead of `if`?**
-    - **To guard against Spurious Wakeups and race conditions where another thread claims the condition before the waking thread acquires the lock (Mesa semantics).**
-30. **What is Priority Inversion and how is it fixed?**
-    - **When a medium-priority task preempts a low-priority task holding a lock needed by a high-priority task; fixed via Priority Inheritance Protocol (PIP).**
-31. **What is the Producer-Consumer problem's synchronization setup?**
-    - **Two counting semaphores (`emptySlots = N`, `fullSlots = 0`) and one mutex for buffer access.**
-32. **What is a Race Condition?**
-    - **A concurrent bug where the final state of shared data depends on the unpredictable execution order of multiple threads.**
-33. **What is a Futex in Linux?**
-    - **Fast User-space Mutex: acquires locks in user-space via atomic CAS, trapping into the kernel only when lock contention occurs.**
+### Category D: Process Synchronization & Concurrency
+25. **Critical Section Requirements:** Mutual Exclusion, Progress, and Bounded Waiting must be satisfied concurrently.
+26. **Mutex vs. Semaphore:** Mutexes enforce strict thread ownership (lock and unlock by the same thread); Semaphores operate as arbitrary signaling counters.
+27. **Spinlock Deployment:** Optimal on multi-core systems when critical sections are shorter than context switch latencies ($< 1\text{--}2\mu\text{s}$).
+28. **Condition Variable While Loop:** Re-evaluating condition predicates inside `while` loops protects against spurious wakeups and Mesa scheduling semantics.
+29. **Priority Inversion & PIP:** Priority Inheritance temporarily elevates the lock-holder's priority to match that of the highest blocked waiting task.
+30. **Producer-Consumer Setup:** Implemented via two counting semaphores (`empty = N`, `full = 0`) and one mutual exclusion lock.
+31. **Race Conditions:** Occur when unsynchronized concurrent writes yield non-deterministic final state depending on thread interleaving.
+32. **Linux Futex:** Fast User-space Mutex optimizes uncontended locks using user-space atomic CAS, sleeping in kernel space only on contention.
 
 ---
 
-### Topic 5: Memory Management & Paging
-34. **What is the difference between Internal and External Fragmentation?**
-    - **Internal is wasted space inside a fixed allocated block (Paging); External is scattered free space between blocks that cannot fit a contiguous request (Segmentation).**
-35. **What is the role of the MMU?**
-    - **Hardware chip that dynamically translates virtual addresses from the CPU into physical RAM addresses using page tables.**
-36. **What is the Translation Lookaside Buffer (TLB)?**
-    - **An on-chip associative hardware cache inside the MMU that stores recent virtual-to-physical address translations.**
-37. **Why do 64-bit operating systems use Multi-Level Paging?**
-    - **To save memory by creating a sparse tree structure where page tables are allocated only for active virtual address ranges.**
-38. **What does the Dirty bit in a Page Table Entry mean?**
-    - **It indicates the page was modified in RAM and must be written back to disk before eviction.**
-39. **What happens during a TLB Miss?**
-    - **The MMU (or OS) walks the multi-level page table in RAM to find the physical frame, loads it into the TLB, and restarts the translation.**
-40. **What are Huge Pages and why are they used?**
-    - **Pages sized 2 MB or 1 GB that reduce page table walks and maximize TLB coverage for large-memory applications like databases.**
+### Category E: Memory Management & Paging
+33. **Internal vs. External Fragmentation:** Internal is unutilized space inside a fixed page frame; External is scattered unallocated memory unable to satisfy contiguous requests.
+34. **Role of the MMU:** Hardware processor translating CPU virtual addresses to physical RAM addresses via page tables.
+35. **Translation Lookaside Buffer (TLB):** Fully-associative hardware cache storing active virtual-to-physical address translations.
+36. **Multi-Level Paging:** Hierarchical tree structure saving physical memory by instantiating page tables only for allocated virtual regions.
+37. **Dirty Bit Invariant:** Indicates a memory page was modified and must be synchronized with backing storage before eviction.
+38. **TLB Miss Handling:** Hardware or OS walks the multi-level page table in RAM, populates the TLB, and resumes translation.
+39. **Huge Pages:** Sized at 2 MB or 1 GB to reduce TLB miss rates and page table memory consumption for large-memory workloads.
 
 ---
 
-### Topic 6: Virtual Memory & Page Replacement
-41. **What is Demand Paging?**
-    - **A virtual memory scheme where pages are loaded from disk into RAM only when referenced.**
-42. **What is a Page Fault?**
-    - **A hardware trap triggered when the CPU accesses a virtual page whose Present bit in the PTE is 0.**
-43. **What is Belady's Anomaly?**
-    - **The counter-intuitive phenomenon where allocating more physical frames causes more page faults (occurs in FIFO, not in LRU).**
-44. **Why is LRU immune to Belady's Anomaly?**
-    - **Because LRU is a Stack Algorithm: the set of pages resident in $N$ frames is always a strict subset of pages in $N+1$ frames.**
-45. **How does the Clock (Second Chance) Page Replacement algorithm work?**
-    - **A circular pointer inspects reference bits; if 1, clears to 0 and advances; if 0, evicts that frame immediately.**
-46. **What is Thrashing?**
-    - **A state where the system spends more time swapping pages in/out of disk than executing instructions, dropping CPU utilization to near zero.**
-47. **What is the Working Set Model?**
-    - **Peter Denning's model tracking the set of pages referenced in the last $\Delta$ time units to ensure a process is allocated enough frames to prevent thrashing.**
+### Category F: Virtual Memory & Page Replacement
+40. **Demand Paging:** Loads virtual pages from backing disk into physical RAM exclusively upon initial memory access.
+41. **Page Fault Exception:** Hardware trap generated by the MMU when accessing a page entry whose Present bit is `0`.
+42. **Belady's Anomaly:** The phenomenon where increasing physical frame allocation increases total page faults under FIFO replacement.
+43. **LRU Anomaly Immunity:** Stack algorithms are immune to Belady's Anomaly because page sets for $N$ frames are strictly subsets of $N+1$ frames.
+44. **Clock Replacement Algorithm:** Cycles a hand pointer across frames, clearing reference bits from 1 to 0 and evicting the first page with bit 0.
+45. **Thrashing Invariant:** System spends more cycles servicing page faults than executing instructions, dropping CPU utilization to near zero.
+46. **Working Set Model:** Defines memory demand as the distinct pages referenced within sliding window $\Delta$, ensuring $\sum |W_i| \le \text{Frames}$.
 
 ---
 
-### Topic 7: Inter-Process Communication (IPC)
-48. **What is the fastest IPC mechanism on a single Linux machine?**
-    - **Shared Memory (`shm_open` + `mmap`), because reads and writes bypass the kernel entirely.**
-49. **Why are UNIX Domain Sockets faster than TCP sockets on localhost?**
-    - **Because they bypass the entire TCP/IP network stack, packet framing, and checksum calculations.**
-50. **What is Zero-Copy I/O and which syscall enables it?**
-    - **Direct data transfer from page cache to network card via DMA without copying to user-space, enabled by `sendfile()`.**
+### Category G: Inter-Process Communication (IPC)
+47. **Shared Memory Throughput:** Fastest single-host IPC mechanism, operating at direct hardware RAM bus speeds via `mmap`.
+48. **UNIX Domain Sockets:** Provides high-speed single-host IPC by bypassing network protocol encapsulation and checksum overhead.
+49. **File Descriptor Transfer:** `AF_UNIX` sockets pass open file descriptors across process boundaries via `sendmsg()` with `SCM_RIGHTS`.
+50. **Zero-Copy I/O:** `sendfile()` streams data directly from kernel page cache to network interface buffers via DMA, bypassing user memory.
 
 ---
 
-# 3. Top 10 Red Flag Mistakes That Sound Junior
+# 4. Critical Kernel & Concurrency Failure Modes
 
 ```
 +---------------------------------------------------------------------------------------------------+
-| #  | THE JUNIOR MISTAKE                     | THE SENIOR CORRECTION / INTERVIEW PIVOT             |
+| #  | KERNEL SUBSYSTEM PITFALL               | ROOT CAUSE & THEORETICAL MITIGATION                 |
 +---------------------------------------------------------------------------------------------------+
-| 1  | "Threads don't have their own stack."  | Threads ALWAYS have their own stack to execute      |
-|    |                                        | independent function calls.                         |
+| 1  | Unreaped Zombie Accumulation           | Parent fails to call wait(); causes PID exhaustion. |
 +---------------------------------------------------------------------------------------------------+
-| 2  | "You can kill a Zombie with kill -9."  | Zombies are ALREADY dead. You must make the parent  |
-|    |                                        | call wait() or kill the parent so init reaps it.    |
+| 2  | Non-Reentrant Signal Handlers          | Calling malloc()/printf() inside handlers deadlocks.|
 +---------------------------------------------------------------------------------------------------+
-| 3  | "SJF is used in standard desktop OS."  | SJF requires knowing future burst lengths; real OSs |
-|    |                                        | use Round Robin, MLFQ, or CFS.                      |
+| 3  | Spinlocks on Uniprocessors             | Starves lock-holding thread; use sleeping mutexes.  |
 +---------------------------------------------------------------------------------------------------+
-| 4  | "A cycle in a RAG always means         | A cycle indicates deadlock ONLY for single-instance |
-|    | deadlock."                             | resources; for multi-instance it's not sufficient.  |
+| 4  | Priority Inversion Watchdog Resets     | Medium task preempts low task; apply PIP protocol.  |
 +---------------------------------------------------------------------------------------------------+
-| 5  | "A Mutex and a Binary Semaphore are    | A Mutex enforces strict OWNERSHIP (lock/unlock by   |
-|    | identical."                            | same thread); a Semaphore is for signaling.         |
+| 5  | Condition Variable `if` Evaluations    | Spurious wakeups violate invariant; wrap in while.  |
 +---------------------------------------------------------------------------------------------------+
-| 6  | "Use an `if` statement to check a      | ALWAYS use a `while` loop to guard against spurious |
-|    | Condition Variable."                   | wakeups and race conditions in Mesa monitors.       |
+| 6  | Thrashing under Over-Subscription      | Working sets exceed RAM; suspend tasks via PFF.     |
 +---------------------------------------------------------------------------------------------------+
-| 7  | "Paging causes external fragmentation."| Paging ELIMINATES external fragmentation; it suffers|
-|    |                                        | only from internal fragmentation.                   |
-+---------------------------------------------------------------------------------------------------+
-| 8  | "More RAM frames always reduces page   | FIFO can suffer from Belady's Anomaly where more    |
-|    | faults."                               | frames cause MORE page faults.                      |
-+---------------------------------------------------------------------------------------------------+
-| 9  | "Spinlocks are always faster than      | Spinlocks are catastrophic on single-core CPUs and  |
-|    | Mutexes."                              | waste 100% CPU on long critical sections.           |
-+---------------------------------------------------------------------------------------------------+
-| 10 | "Shared memory is thread-safe."        | Shared memory provides ZERO built-in synchronization|
-|    |                                        | and requires explicit semaphores or mutexes.        |
+| 7  | Shared Memory Race Conditions          | Shared memory has zero sync; apply POSIX semaphores.|
 +---------------------------------------------------------------------------------------------------+
 ```

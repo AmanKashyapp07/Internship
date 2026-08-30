@@ -1,248 +1,251 @@
-# Master Guide 06: Top 40 DBMS Spoken Flashcards & Trap Questions
+# Advanced DBMS Concepts & Systems Deep-Dives
 
-> **Focus:** 40 High-Yield Spoken Flashcards for Database Engineering interviews at Google, Meta, Amazon, Microsoft, Stripe, and FinTech/HFT firms.
-> 
-> *The 15-minute complete verbal drill to read one day before any tech interview.*
+> **Scope:** Detailed Theoretical Deep-Dives across Storage Engine Page Layouts, MVCC Mechanics, Indexing Physical Access Paths, Relational Query Processing, Two-Phase Locking & Deadlocks, and Distributed Consensus & Sharding.
 
 ---
 
 # Table of Contents
-1. [ACID, Storage Engines & MVCC Internals (Cards 1–8)](#1-acid-storage-engines--mvcc-internals-cards-18)
-2. [Indexing, B+ Trees & Query Optimization (Cards 9–16)](#2-indexing-b-trees--query-optimization-cards-916)
-3. [SQL Query Archetypes & Logic Traps (Cards 17–24)](#3-sql-query-archetypes--logic-traps-cards-1724)
-4. [Normalization, Locking & Concurrency Control (Cards 25–32)](#4-normalization-locking--concurrency-control-cards-2532)
-5. [Distributed Databases, Sharding & NoSQL (Cards 33–40)](#5-distributed-databases-sharding--nosql-cards-3340)
+1. [ACID Implementation, Storage Engine Page Layouts & MVCC Internals](#1-acid-implementation-storage-engine-page-layouts--mvcc-internals)
+2. [Indexing Data Structures, Physical Access Paths & Query Optimization](#2-indexing-data-structures-physical-access-paths--query-optimization)
+3. [Relational Query Processing, Window Functions & Kleene Logic](#3-relational-query-processing-window-functions--kleene-logic)
+4. [Normalization Theory, Two-Phase Locking & Deadlock Resolution](#4-normalization-theory-two-phase-locking--deadlock-resolution)
+5. [Distributed Consistency Models, Quorum Protocols & Horizontal Sharding](#5-distributed-consistency-models-quorum-protocols--horizontal-sharding)
 
 ---
 
-# 1. ACID, Storage Engines & MVCC Internals (Cards 1–8)
+# 1. ACID Implementation, Storage Engine Page Layouts & MVCC Internals
 
-### Card 1: "What is the fundamental difference between Atomicity and Isolation?"
-> **Spoken Answer:** **Atomicity** guarantees that all operations within a single transaction complete or all roll back via Undo logs (dealing with single-transaction failure). **Isolation** guarantees that concurrently executing transactions do not observe each other's in-flight uncommitted state (dealing with concurrency). A system can have 100% Atomicity with 0% Isolation (e.g. Read Uncommitted).
-
----
-
-### Card 2: "What is Write Skew, and why doesn't Snapshot Isolation prevent it?"
-> **Spoken Answer:** **Write Skew** occurs under Snapshot Isolation when two concurrent transactions read overlapping data, validate business constraints independently, and update disjoint rows that together violate a global invariant (e.g. withdrawing from checking and savings simultaneously until total balance $< 0$). Snapshot Isolation only detects concurrent writes to the *exact same row*, so it fails to catch Write Skew. Fix: Use Serializable isolation or explicit row locks (`SELECT ... FOR UPDATE`).
+### 1. Atomicity vs. Isolation
+**Atomicity** guarantees all-or-nothing execution for an individual transaction, restoring pre-transaction state via Undo logs if execution fails or aborts. **Isolation** governs the visibility of concurrent transactions executing simultaneously, preventing transactions from observing intermediate uncommitted states of others. A system can provide full atomicity while executing under relaxed isolation (e.g. Read Uncommitted).
 
 ---
 
-### Card 3: "How does MVCC eliminate read-write locking contention?"
-> **Spoken Answer:** Instead of updating rows in-place under locks, Multi-Version Concurrency Control creates new timestamped versions of rows on update. Readers read a consistent historical snapshot corresponding to their transaction start time without acquiring locks. Therefore, **readers never block writers, and writers never block readers**.
+### 2. Write Skew under Snapshot Isolation
+**Write Skew** occurs when concurrent transactions read overlapping datasets, validate invariant constraints independently, and subsequently modify disjoint tuples that collectively violate a global multi-tuple constraint (e.g. withdrawing from checking and savings balances simultaneously such that the total sum drops below zero). Because Snapshot Isolation only detects concurrent write-write conflicts on identical rows, Write Skew is permitted. Mitigation requires Serializable isolation or explicit row locks (`SELECT ... FOR UPDATE`).
 
 ---
 
-### Card 4: "What is the Golden Rule of Write-Ahead Logging (WAL)?"
-> **Spoken Answer:** A dirty data page in the RAM Buffer Pool can **never be flushed to disk** until the corresponding Redo Log (WAL) record describing the modification has been flushed to disk (`fsync`). This ensures that if the system crashes, the database can replay the WAL during ARIES recovery to restore committed state.
+### 3. Non-Blocking Reads under MVCC
+Multi-Version Concurrency Control maintains timestamped tuple versions on update rather than modifying data in-place under locks. Readers read consistent historical snapshots corresponding to their transaction start watermark without acquiring shared read locks. Consequently, **readers never block writers, and writers never block readers**.
 
 ---
 
-### Card 5: "What is XID Wraparound in PostgreSQL and how is it prevented?"
-> **Spoken Answer:** PostgreSQL uses 32-bit transaction IDs (XIDs), which wrap around after 4.2 billion transactions. If left unchecked, past historical transactions would appear in the future and become invisible. PostgreSQL's background `VACUUM` process prevents this by **freezing old tuple XIDs** (marking them with a special `FrozenXID` bit), treating them as permanently in the past.
+### 4. Write-Ahead Logging (WAL) Invariant
+A dirty data page in the memory Buffer Pool can **never be written to persistent non-volatile storage until the corresponding Redo Log (WAL) record describing the modification has been flushed to disk (`fsync`)**. This ensures the system can replay committed modifications during ARIES crash recovery.
 
 ---
 
-### Card 6: "How does Postgres SSI (Serializable Snapshot Isolation) achieve serializability without 2PL locks?"
-> **Spoken Answer:** SSI tracks non-blocking SIREAD locks in RAM and constructs an in-memory dependency graph of read-write anti-dependencies ($rw$-antidependencies). If the engine detects two consecutive $rw$-antidependency edges in a cycle ($T_1 \xrightarrow{rw} T_2 \xrightarrow{rw} T_3$), it automatically aborts one transaction with a serialization error, eliminating Write Skew with zero lock contention.
+### 5. PostgreSQL Transaction ID (XID) Wraparound
+PostgreSQL utilizes 32-bit transaction identifiers (`XID`), which wrap around after $2^{32} \approx 4.29$ billion transactions. Left unchecked, historical transactions would appear to exist in the future, rendering tuples invisible. PostgreSQL's background `VACUUM` process prevents this by freezing old tuple versions (setting a special `FrozenXID` bit in the tuple header), marking them as permanently committed in the past.
 
 ---
 
-### Card 7: "What is the Slotted Page storage architecture and why is it used?"
-> **Spoken Answer:** Disk pages are partitioned into a header at the top storing an array of slot pointers and actual row payloads growing upward from the bottom. Secondary indexes store pointers to `(PageID, SlotNumber)` rather than direct byte offsets, allowing rows inside a page to be rearranged or compacted without updating external secondary index pointers.
+### 6. Serializable Snapshot Isolation (SSI) & Dependency Graphs
+PostgreSQL SSI provides serializable isolation without traditional two-phase locking by tracking non-blocking `SIREAD` lock tags in memory and maintaining a dependency graph of read-write anti-dependencies ($rw$-antidependencies). If the engine detects a cycle of two consecutive $rw$-antidependency edges ($T_1 \xrightarrow{rw} T_2 \xrightarrow{rw} T_3$), it aborts one participating transaction with a serialization failure.
 
 ---
 
-### Card 8: "What is the difference between Write-Ahead Logging (Redo) and Undo Logging?"
-> **Spoken Answer:** **Redo Logs (WAL)** record the new state to replay committed transactions that were not yet flushed from the RAM Buffer Pool to disk before a crash (**Durability**). **Undo Logs** record the original old state to roll back uncommitted transactions that aborted or crashed halfway through execution (**Atomicity**).
+### 7. Slotted Page Storage Architecture
+Disk pages are organized into a header containing an array of slot pointers at the top of the page, with row byte payloads growing upward from the bottom. Secondary indexes reference tuple identifiers `(PageID, SlotNumber)` rather than direct byte offsets, allowing tuples to be defragmented or compacted within a page without updating external secondary index pointers.
 
 ---
 
-# 2. Indexing, B+ Trees & Query Optimization (Cards 9–16)
-
-### Card 9: "Why do databases use B+ Trees instead of Binary Search Trees (BST) or standard B-Trees?"
-> **Spoken Answer:** BSTs have small nodes (~24 bytes) that waste 99.7% of an 8KB disk page and yield tall tree heights (~30 disk seeks). B+ Trees store *only routing keys* in internal nodes, yielding massive fan-out ($M > 100$) and keeping height $\le 3$ for 1 billion rows. Additionally, B+ Tree leaves store all data payloads and are doubly linked together for $O(1)$ sequential range scans (`BETWEEN A AND B`).
+### 8. Write-Ahead Logging (Redo) vs. Undo Logging
+**Redo Logs (WAL)** record newly modified states to replay committed transactions whose dirty buffer pool pages were not yet persisted before a crash (**Durability**). **Undo Logs** record inverse operations to roll back in-flight, uncommitted modifications when a transaction aborts or fails (**Atomicity**).
 
 ---
 
-### Card 10: "What is the InnoDB Double Lookup Penalty and how do you eliminate it?"
-> **Spoken Answer:** In MySQL InnoDB, secondary indexes store the Primary Key as their pointer payload. Querying via a secondary index performs a first B+ Tree seek to find the Primary Key, followed by a second B+ Tree seek on the Clustered Index to retrieve full row data. This double lookup is eliminated using a **Covering Index** that includes all requested columns in the secondary index leaf node.
+# 2. Indexing Data Structures, Physical Access Paths & Query Optimization
+
+### 9. B+ Tree Physical Layout Advantages
+Binary Search Trees allocate small nodes (~24 bytes) that waste disk page space and produce deep tree hierarchies ($O(\log_2 N)$ seeks). B+ Trees store only search keys and child page pointers in internal nodes, yielding massive fan-out ($M > 100$) and shallow tree heights ($\le 3$ for millions of tuples). Leaf pages store all data records and are doubly linked for $O(1)$ sequential range scans.
 
 ---
 
-### Card 11: "What is the Leftmost Prefix Rule in Composite Indexes `(A, B, C)`?"
-> **Spoken Answer:** A composite index on `(A, B, C)` sorts data lexicographically starting from `A`. Queries can only utilize the index for binary search tree seeks if their filters match columns sequentially starting from the leftmost column `A` with no gaps. A query on `WHERE B = 2 AND C = 3` cannot utilize the index for seeks and triggers a full table scan.
+### 10. Secondary Index Clustered Traversal
+In clustered engines (e.g. MySQL InnoDB), secondary indexes store the Primary Key value as their tuple reference. Accessing non-indexed attributes requires traversing the secondary index tree to find the Primary Key, followed by a secondary traversal of the Clustered Index tree. This is bypassed using **Covering Indexes** that include all queried attributes in the secondary index leaf node (**Index-Only Scan**).
 
 ---
 
-### Card 12: "When should you prefer an LSM-Tree over a B+ Tree?"
-> **Spoken Answer:** Prefer **LSM-Trees (RocksDB, Cassandra)** for **write-heavy workloads**. LSM-Trees convert random writes into sequential in-memory appends (MemTable) that flush sequentially to disk (SSTables), minimizing SSD write amplification. Prefer **B+ Trees (PostgreSQL, InnoDB)** for **read-heavy transactional OLTP workloads** requiring fast point lookups and range scans.
+### 11. Leftmost Prefix Rule for Composite Indexes
+A composite index on attributes `(A, B, C)` sorts tuples lexicographically by $A$, then $B$, then $C$. The query engine can only execute binary search index seeks if predicates specify attributes sequentially starting with the leftmost column $A$. Predicates on `(B, C)` omit the leading sorting key and force full relation scans.
 
 ---
 
-### Card 13: "Why is a BRIN index ideal for time-series data in PostgreSQL?"
-> **Spoken Answer:** Time-series data is naturally inserted in chronological order. A Block Range Index (BRIN) stores only the minimum and maximum values for blocks of 128 disk pages rather than indexing every single row, taking up a few kilobytes of RAM instead of gigabytes.
+### 12. Log-Structured Merge-Trees (LSM-Trees) vs. B+ Trees
+**LSM-Trees (RocksDB, Cassandra)** optimize for **write-heavy workloads** by buffering incoming mutations sequentially in an in-memory MemTable and flushing sorted immutable runs (SSTables) to disk, eliminating random disk I/O. **B+ Trees** optimize for **read-heavy transactional OLTP workloads** requiring fast point lookups and range scans.
 
 ---
 
-### Card 14: "Why is random UUIDv4 disastrous for B+ Tree Primary Keys?"
-> **Spoken Answer:** Random UUIDv4 values scatter inserts uniformly across the entire B+ Tree. This forces frequent **leaf page splits**, reduces page fill factors to ~50%, evicts hot pages from the buffer pool, and causes massive random disk I/O. Use time-ordered **UUIDv7 or `BIGINT AUTO_INCREMENT`** instead.
+### 13. Block Range Indexing (BRIN)
+For relations with naturally sorted or time-series data, a Block Range Index (BRIN) stores only the minimum and maximum attribute values for physical ranges of disk pages (e.g. 128 pages per block range) rather than indexing individual tuples, consuming orders of magnitude less memory and storage than B-Trees.
 
 ---
 
-### Card 15: "What is Index Condition Pushdown (ICP)?"
-> **Spoken Answer:** ICP is an execution optimization where the database engine evaluates `WHERE` filter conditions directly inside the storage engine's index scanning loop, avoiding the overhead of fetching full table rows into server memory for records that will ultimately be discarded.
+### 14. Non-Sequential Key Fragmentation in B+ Trees
+Inserting uniformly distributed random keys (e.g. UUIDv4) forces random writes across leaf pages, triggering frequent **leaf page splits**, reducing leaf page fill factors to ~50%, and causing excessive random I/O. Timestamp-ordered keys (UUIDv7, BIGINT) ensure sequential append-only page inserts.
 
 ---
 
-### Card 16: "Why does `SELECT * FROM Users WHERE email LIKE '%gmail.com'` ignore the index on `email`?"
-> **Spoken Answer:** B+ Tree string indexes sort strings from left to right. A leading wildcard (`%gmail.com`) prevents the engine from performing binary search prefix matching, forcing a **full table scan**. To optimize suffix queries, store reversed strings and index `REVERSE(email)` or use Trigram / GIN indexes.
+### 15. Index Condition Pushdown (ICP)
+ICP is an access path optimization where the storage engine evaluates applicable `WHERE` filter predicates directly during index leaf traversal, discarding non-matching index entries before fetching complete heap/clustered table rows into server memory.
 
 ---
 
-# 3. SQL Query Archetypes & Logic Traps (Cards 17–24)
-
-### Card 17: "Explain SQL Logical Execution Order in 15 seconds."
-> **Spoken Answer:** **`FROM` and `JOINs`** assemble the dataset $\to$ **`WHERE`** filters candidate rows $\to$ **`GROUP BY`** groups rows $\to$ **`HAVING`** filters aggregated groups $\to$ **`SELECT`** projects columns and aliases $\to$ **`DISTINCT`** deduplicates $\to$ **`ORDER BY`** sorts $\to$ **`LIMIT/OFFSET`** truncates the output.
+### 16. Leading Wildcard Predicates & Index Scans
+B+ Tree string indexes order characters lexicographically from left to right. A filter with a leading wildcard (`LIKE '%suffix'`) prevents binary search prefix seeks, forcing a **full relation scan**. Resolving suffix lookups requires reverse indexing (`REVERSE(col)`) or Trigram/GIN indexing.
 
 ---
 
-### Card 18: "What is the difference between `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()`?"
-> **Spoken Answer:** For tie values `[100, 100, 80]`:
-> - `ROW_NUMBER()` assigns arbitrary unique numbers: `1, 2, 3`.
-> - `RANK()` assigns identical ranks with gaps: `1, 1, 3` (skips rank 2).
-> - `DENSE_RANK()` assigns identical ranks without gaps: `1, 1, 2`.
+# 3. Relational Query Processing, Window Functions & Kleene Logic
+
+### 17. SQL Logical Evaluation Sequence
+1. `FROM` & `JOIN`: Construct and join Cartesian source datasets.
+2. `WHERE`: Filters base tuples.
+3. `GROUP BY`: Groups tuples by distinct attribute sets.
+4. `HAVING`: Filters aggregated groups.
+5. `SELECT`: Evaluates projections, expressions, and window functions.
+6. `DISTINCT`: Deduplicates output tuples.
+7. `ORDER BY`: Sorts the result set.
+8. `LIMIT` / `OFFSET`: Truncates output window.
 
 ---
 
-### Card 19: "Why does `WHERE id NOT IN (SELECT id FROM Orders)` fail if `Orders.id` contains a `NULL`?"
-> **Spoken Answer:** In SQL three-valued logic, `x NOT IN (1, 2, NULL)` expands to `x != 1 AND x != 2 AND x != NULL`. Comparing anything to `NULL` yields `UNKNOWN`, making the entire `AND` expression evaluate to `UNKNOWN` and filtering out 100% of candidate rows. Always use **`NOT EXISTS` or `LEFT JOIN ... WHERE id IS NULL`**.
+### 18. Window Ranking Functions (`ROW_NUMBER`, `RANK`, `DENSE_RANK`)
+For tied attribute values `[100, 100, 80]`:
+- `ROW_NUMBER()`: Assigns arbitrary sequential integers: `1, 2, 3`.
+- `RANK()`: Assigns identical ranks with gaps: `1, 1, 3` (rank 2 is skipped).
+- `DENSE_RANK()`: Assigns identical ranks without gaps: `1, 1, 2`.
 
 ---
 
-### Card 20: "What is the difference between `WHERE` and `HAVING`?"
-> **Spoken Answer:** **`WHERE`** filters individual rows *before* grouping occurs and cannot accept aggregate functions (`WHERE salary > 50000`). **`HAVING`** filters grouped summary records *after* the `GROUP BY` clause and operates directly on aggregate values (`HAVING AVG(salary) > 50000`).
+### 19. Three-Valued Logic in `NOT IN` Subqueries
+Under SQL three-valued logic (`TRUE`, `FALSE`, `UNKNOWN`), `x NOT IN (1, 2, NULL)` evaluates to `x != 1 AND x != 2 AND x != NULL`. Because equality with `NULL` yields `UNKNOWN`, the entire logical conjunction evaluates to `UNKNOWN` or `FALSE`, causing the query to return zero rows. Safe set differences require `NOT EXISTS` or `LEFT JOIN ... WHERE ... IS NULL`.
 
 ---
 
-### Card 21: "How do you find the N-th Highest Salary in SQL handling duplicate ties?"
-> **Spoken Answer:** Using a CTE with `DENSE_RANK()`:
-> ```sql
-> WITH Ranked AS (
->     SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk FROM Employees
-> )
-> SELECT salary FROM Ranked WHERE rnk = N LIMIT 1;
-> ```
+### 20. WHERE vs. HAVING Filtering Phases
+`WHERE` predicates filter candidate tuples *prior* to group formation and cannot evaluate aggregate functions. `HAVING` predicates filter summary records *after* group aggregation and evaluate directly on aggregate expressions.
 
 ---
 
-### Card 22: "What is the Date-Subtraction Island Trick for finding consecutive active login streaks?"
-> **Spoken Answer:** By subtracting `ROW_NUMBER() * INTERVAL '1 day'` from the `login_date` (`login_date - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date)`), consecutive dates produce an identical constant anchor date. Grouping by this calculated date reveals the streak length via `COUNT(*)`.
+### 21. N-th Highest Ranking Formulation
+Calculated deterministically using window CTEs:
+```sql
+WITH Ranked AS (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk FROM Employees
+)
+SELECT salary FROM Ranked WHERE rnk = N LIMIT 1;
+```
 
 ---
 
-### Card 23: "Why should you prefer `UNION ALL` over `UNION`?"
-> **Spoken Answer:** `UNION` executes an expensive deduplication sort or hash distinct operation in memory/disk across the entire combined dataset. `UNION ALL` concatenates datasets directly without deduplication, executing in fraction of the time.
+### 22. Island Grouping via Date Arithmetic
+Consecutive temporal events are identified by computing `(event_date - ROW_NUMBER() * 1 day)`. For continuous consecutive dates, this subtraction produces an invariant anchor date, enabling streak aggregation via `GROUP BY`.
 
 ---
 
-### Card 24: "Why should you use Partial Indexes for Soft-Deleted tables?"
-> **Spoken Answer:** In soft-deleted tables (`deleted_at IS NOT NULL`), 95%+ of active queries filter for `WHERE deleted_at IS NULL`. A partial index (`CREATE INDEX idx_active ON Users(email) WHERE deleted_at IS NULL`) indexes only live active rows, keeping the index small, cache-resident, and lightning-fast.
+### 23. `UNION` vs. `UNION ALL` Execution Mechanics
+`UNION` performs set union with duplicate elimination via memory/disk sorting or hash distinct operations. `UNION ALL` performs direct relational concatenation without deduplication overhead.
 
 ---
 
-# 4. Normalization, Locking & Concurrency Control (Cards 25–32)
-
-### Card 25: "What are the 1NF, 2NF, 3NF, and BCNF normalization rules in 30 seconds?"
-> **Spoken Answer:**
-> - **1NF:** Atomic scalar values only (no arrays or repeating groups).
-> - **2NF:** 1NF + No partial dependencies (non-key columns depend on the entire composite primary key).
-> - **3NF:** 2NF + No transitive dependencies (non-key columns depend *only* on candidate keys).
-> - **BCNF:** 3NF + For every dependency $X \to Y$, $X$ must be a strict Super Key.
+### 24. Partial Indexes for Filtered Domains
+Partial indexes (`CREATE INDEX idx_active ON Users(email) WHERE deleted_at IS NULL`) index exclusively the subset of tuples matching a predicate, reducing index footprint and memory buffer churn for skewed access patterns.
 
 ---
 
-### Card 26: "What is the difference between Optimistic and Pessimistic Locking?"
-> **Spoken Answer:** **Pessimistic Locking (`SELECT ... FOR UPDATE`)** locks rows upfront on read, blocking other transactions until commit (ideal for high-contention banking/seats). **Optimistic Locking** does not acquire database locks; it reads a `version` column and checks `WHERE version = old_version` on update, rolling back/retrying if another transaction updated the row first.
+# 4. Normalization Theory, Two-Phase Locking & Deadlock Resolution
+
+### 25. The Normalization Progression
+- **1NF:** Atomic scalar attribute domains without repeating groups.
+- **2NF:** 1NF with zero partial functional dependencies on composite candidate keys.
+- **3NF:** 2NF with zero transitive functional dependencies between non-prime attributes.
+- **BCNF:** 3NF where every determinant $X$ in non-trivial dependency $X \to Y$ is a super key.
 
 ---
 
-### Card 27: "What is a Dirty Read vs. a Non-Repeatable Read vs. a Phantom Read?"
-> **Spoken Answer:**
-> - **Dirty Read:** Reading uncommitted changes made by another transaction that later rolls back.
-> - **Non-Repeatable Read:** Re-reading the same single row and finding updated/deleted column values.
-> - **Phantom Read:** Re-executing a range query (`WHERE age > 20`) and finding brand new rows inserted by another committed transaction.
+### 26. Optimistic vs. Pessimistic Locking
+**Pessimistic Locking (`SELECT ... FOR UPDATE`)** acquires exclusive row locks upfront, blocking concurrent access until transaction termination. **Optimistic Locking** avoids database-level locks, verifying an attribute version (`WHERE version = old_version`) at update time and aborting on concurrent modification.
 
 ---
 
-### Card 28: "How does MySQL InnoDB prevent Phantom Reads in Repeatable Read isolation?"
-> **Spoken Answer:** Using **Next-Key Locking**, which locks both the physical index record and the "gap" in the index space before and after the record, preventing concurrent transactions from inserting new phantom rows into the scanned range.
+### 27. Concurrency Anomaly Definitions
+- **Dirty Read ($G_1$):** Reading uncommitted data from a concurrent transaction that subsequently rolls back.
+- **Non-Repeatable Read ($G_{2a}$):** Re-reading a row and observing committed column modifications made by another transaction.
+- **Phantom Read ($A_3$):** Re-executing a range query and observing newly inserted rows committed by another transaction.
 
 ---
 
-### Card 29: "What is Two-Phase Locking (2PL) and does it prevent deadlocks?"
-> **Spoken Answer:** 2PL is a concurrency protocol with a **Growing Phase** (acquiring locks without releasing any) and a **Shrinking Phase** (releasing locks without acquiring new ones), guaranteeing conflict serializability. **2PL DOES NOT prevent deadlocks**; transactions can still wait circularly for locks, requiring deadlock detection engines.
+### 28. Next-Key Locking in MySQL InnoDB
+InnoDB prevents Phantom Reads under Repeatable Read by combining record locks with **Gap Locks** on the open intervals before, between, and after index records, blocking concurrent inserts into the scanned index range.
 
 ---
 
-### Card 30: "How do relational databases detect and recover from deadlocks?"
-> **Spoken Answer:** The engine constructs an in-memory **Wait-For Graph (WFG)** and periodically runs cycle detection (Tarjan's algorithm / DFS). When a cycle is detected, it selects a victim transaction (the one with the fewest mutations/locks held), aborts it, and rolls back its changes to break the cycle.
+### 29. Two-Phase Locking (2PL) Protocol
+2PL divides lock management into a **Growing Phase** (locks are acquired, none released) and a **Shrinking Phase** (locks are released, none acquired). Strict 2PL holds all exclusive locks until transaction commit/abort, guaranteeing conflict serializability. 2PL does not prevent deadlocks.
 
 ---
 
-### Card 31: "Why does an unindexed Foreign Key cause database lock escalation?"
-> **Spoken Answer:** When a row in the parent table is deleted or updated, the database must verify referential integrity by checking the child table. Without an index on the child's foreign key, the engine must perform a **full table scan or acquire table-level locks**, stalling all concurrent writes on the child table.
+### 30. Deadlock Detection via Wait-For Graphs
+The database engine maintains an in-memory directed **Wait-For Graph (WFG)** where nodes represent transactions and edges represent lock wait dependencies. Periodic cycle detection (DFS / Tarjan's algorithm) identifies deadlocks, aborting the minimum-cost victim transaction to break the cycle.
 
 ---
 
-### Card 32: "When is Denormalization justified in database system design?"
-> **Spoken Answer:** When read throughput and latency requirements outweigh write complexity (e.g. read-heavy OLAP analytics, e-commerce product pages). Storing redundant pre-joined attributes eliminates expensive multi-table joins at the expense of write amplification and potential consistency anomalies.
+### 31. Lock Escalation on Unindexed Foreign Keys
+Deleting or updating parent relation rows forces the engine to verify referential integrity on child relations. If the child foreign key column is unindexed, the engine must perform full child relation scans or acquire table-level locks, causing concurrency contention.
 
 ---
 
-# 5. Distributed Databases, Sharding & NoSQL (Cards 33–40)
-
-### Card 33: "What does the CAP Theorem state?"
-> **Spoken Answer:** In the presence of a **Network Partition ($P$)**, which is unavoidable in distributed physical networks, a system must choose between **Consistency ($C$)** (returning errors or waiting to ensure linearizable reads) or **Availability ($A$)** (returning stale data from surviving partitioned nodes).
+### 32. Denormalization Performance Rationale
+Denormalization intentionally introduces redundant attributes to eliminate multi-table join overhead in high-throughput read workloads, accepting write amplification and requiring application-level consistency controls.
 
 ---
 
-### Card 34: "What is the PACELC Theorem?"
-> **Spoken Answer:** An extension to CAP: If there is a Partition ($P$), trade off Availability ($A$) or Consistency ($C$). **Else ($E$)**, under normal execution with no partition, trade off **Latency ($L$)** or **Consistency ($C$)**.
+# 5. Distributed Consistency Models, Quorum Protocols & Horizontal Sharding
+
+### 33. CAP Theorem Formulation
+During an inevitable network partition ($P$), a distributed data store must choose between **Consistency ($C$)** (returning linearizable data or an error) versus **Availability ($A$)** (returning non-error responses from accessible partition nodes).
 
 ---
 
-### Card 35: "What is the Dynamo Quorum consistency formula?"
-> **Spoken Answer:** For $N$ replicas, write quorum $W$, and read quorum $R$, if **$W + R > N$**, the read quorum and write quorum are guaranteed to overlap on at least one node containing the latest timestamped write, ensuring strong read-after-write consistency.
+### 34. PACELC Theorem
+If partitioned ($P$), trade off Availability ($A$) vs. Consistency ($C$). **Else ($E$)**, under normal non-partitioned operation, trade off **Latency ($L$)** vs. **Consistency ($C$)**.
 
 ---
 
-### Card 36: "What is Replication Lag and how do you achieve Read-Your-Own-Writes consistency?"
-> **Spoken Answer:** **Replication Lag** is the asynchronous delay for committed leader writes to propagate to read replicas. To guarantee a user sees their own update immediately after submitting a form, route their read requests to the **Primary Leader for a few seconds** before switching back to read replicas.
+### 35. Dynamo Quorum Consensus Equation
+For $N$ total replicas, write quorum size $W$, and read quorum size $R$:
+
+$$W + R > N \implies \text{Overlapping Quorum with Guaranteed Linearizable Read}$$
 
 ---
 
-### Card 37: "What is Database Sharding and what is the Cross-Shard Join Penalty?"
-> **Spoken Answer:** Sharding splits a table horizontally by rows across independent physical database servers using a **Shard Key**. Joining tables across different physical shards requires fetching datasets over the network into application memory to execute distributed joins, degrading performance from milliseconds to seconds.
+### 36. Read-Your-Own-Writes Consistency
+In asynchronous single-leader replication, replication lag can cause clients to observe stale state immediately following a write. Systems achieve Read-Your-Own-Writes consistency by pinning a user's read requests to the primary leader for a bounded temporal duration following an update.
 
 ---
 
-### Card 38: "Why is Consistent Hashing critical for distributed databases and caches?"
-> **Spoken Answer:** In standard modulo hashing (`hash(key) % N`), adding or removing a server changes the hash slot for nearly 100% of keys, causing massive data movement and cache stampedes. Consistent Hashing maps keys and servers to a circular ring, ensuring adding or removing a node migrates **only $K/N$ keys on average**.
+### 37. Horizontal Sharding & Cross-Shard Joins
+Sharding partitions relation rows across independent physical nodes using a Shard Key. Cross-shard joins require distributed scatter-gather queries and coordinator-node hash joins over the network.
 
 ---
 
-### Card 39: "When should you choose a Document Store vs. Wide-Column vs. Key-Value vs. Graph DB?"
-> **Spoken Answer:**
-> - **Document (MongoDB):** Polymorphic JSON payloads and rapid schema evolution.
-> - **Key-Value (Redis):** Sub-millisecond caching, rate limiters, and session storage.
-> - **Wide-Column (Cassandra):** High-throughput append-only time-series telemetry and chat logs.
-> - **Graph (Neo4j):** Highly interconnected networks with complex multi-hop relationship traversals (fraud rings, social graphs).
+### 38. Consistent Hashing Topology
+Maps keys and database nodes to a circular 360-degree hash ring. Adding or removing nodes migrates only $K/N$ keys on average, avoiding cluster-wide data re-shuffling.
 
 ---
 
-### Card 40: "What is the 4-step playbook for scaling a bottlenecked relational database?"
-> **Spoken Answer:**
-> 1. **Optimize Queries & Indexes:** Analyze slow query logs, add covering indexes, remove unindexed full table scans.
-> 2. **Add Read Replicas:** Separate read and write traffic, routing all analytical/read queries to replicas.
-> 3. **Introduce a Caching Layer:** Deploy Redis (Cache-Aside pattern) for hot read keys and session data.
-> 4. **Shard Horizontally:** Partition database tables across physical nodes based on a clean Shard Key (`tenant_id`/`user_id`).
+### 39. Non-Relational Storage Model Selection
+- **Document (MongoDB):** Polymorphic entities, nested hierarchical schemas, single-document ACID transactions.
+- **Key-Value (Redis):** Low-latency caching, ephemeral sessions, in-memory state primitives.
+- **Wide-Column (Cassandra):** High-throughput append workloads, time-series metrics, multi-datacenter replication.
+- **Graph (Neo4j):** Index-free adjacency graph traversals across highly interconnected entities.
+
+---
+
+### 40. Multi-Tier Scaling Architecture Progression
+1. **Query & Index Tuning:** Profiling slow query logs, adding covering indexes, and eliminating unindexed table scans.
+2. **Read Replication:** Routing read workloads across asynchronous read replicas, reserving the primary leader for writes.
+3. **In-Memory Caching:** Inserting cache-aside / write-through Redis caching layers for high-frequency read paths.
+4. **Horizontal Sharding:** Partitioning data across physical nodes via a balanced Shard Key.

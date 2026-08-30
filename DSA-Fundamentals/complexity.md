@@ -1,142 +1,140 @@
-# Core DSA Algorithms Complexities & Interview Flashcards — Interview Master Guide
+# Data Structure Operations, Graph Algorithms & Asymptotic Complexity Reference
 
-**Target:** Google, Microsoft, Meta, Amazon, Apple, NVIDIA, Uber, Bloomberg, Atlassian, Adobe, Salesforce, Goldman Sachs, Rubrik, Databricks, etc.
-
-**Priority:** Interview patterns > complexity > behavior > internals > implementation-specific details.
+> **Scope:** Unified Computational Complexity Matrices across Graph Algorithms, Comparison & Non-Comparison Sorting, Linear & Tree Data Structures, Formal Asymptotic Derivations ($O(N)$ Bottom-Up Heapify, Inverse Ackermann Bounds in DSU, Negative-Cycle Detection in Bellman-Ford), and Algorithmic Paradigm Selection Trees.
 
 ---
 
-# 1. Master Graph Algorithms Matrix
-
-| Algorithm | Graph Type | Time (Best) | Time (Avg) | Time (Worst) | Space | Failure Mode / Caveats |
-|---|---|---|---|---|---|---|
-| **BFS** | Unweighted | `O(V + E)` | `O(V + E)` | `O(V + E)` | `O(V)` | Fails to find shortest path on weighted graphs. |
-| **0-1 BFS** | Weights in `{0, 1}` | `O(V + E)` | `O(V + E)` | `O(V + E)` | `O(V)` | Deque-based; fails on arbitrary weights. |
-| **DFS** | General | `O(V + E)` | `O(V + E)` | `O(V + E)` | `O(V)` | Call stack overflows on deep skewed graphs. |
-| **Dijkstra** | Non-negative weights | `O(E log V)` | `O(E log V)` | `O(E log V)` | `O(V)` | **Fails on graphs with negative edge weights.** |
-| **Bellman-Ford**| General (Negative allowed) | `O(E)` | `O(V * E)` | `O(V * E)` | `O(V)` | Relaxes `V-1` times; detects negative cycles on `V`-th pass. |
-| **Floyd-Warshall**| All-Pairs Shortest Path | `Theta(V^3)` | `Theta(V^3)` | `Theta(V^3)` | `Theta(V^2)` | Intermediate `k` loop MUST be outermost. |
-| **Kruskal's MST**| Undirected Weighted | `O(E log E)` | `O(E log E)` | `O(E log E)` | `O(V)` | Sorts edges + uses DSU with Path Compression. |
-| **Prim's MST** | Undirected Weighted | `O(E log V)` | `O(E log V)` | `O(E log V)` | `O(V)` | Min-Heap vertex expansion; faster on dense graphs (`E ~ V^2`). |
-| **Kahn's TopoSort**| Directed Acyclic (DAG) | `O(V + E)` | `O(V + E)` | `O(V + E)` | `O(V)` | In-degree 0 BFS; cycle exists if output size != `V`. |
-| **Tarjan's Bridges**| Undirected | `O(V + E)` | `O(V + E)` | `O(V + E)` | `O(V)` | DFS Low-link values; bridge if `low[v] > tin[u]`. |
+# Table of Contents
+1. [Graph Algorithms Complexity Matrix](#1-graph-algorithms-complexity-matrix)
+2. [Sorting Algorithms Complexity Matrix](#2-sorting-algorithms-complexity-matrix)
+3. [Data Structure Operations & Space Complexity Matrix](#3-data-structure-operations--space-complexity-matrix)
+4. [Theoretical Proofs & Foundational Derivations](#4-theoretical-proofs--foundational-derivations)
+5. [Universal Algorithmic Paradigm Selector Tree](#5-universal-algorithmic-paradigm-selector-tree)
+6. [Core Theoretical Summary Principles](#6-core-theoretical-summary-principles)
 
 ---
 
-# 2. Master Sorting Algorithms Matrix
+# 1. Graph Algorithms Complexity Matrix
 
-| Algorithm | Best Time | Average Time | Worst Time | Space | Stable? | Key Interview Insight |
-|---|---|---|---|---|---|---|
-| **Merge Sort** | `O(N log N)` | `O(N log N)` | `O(N log N)` | `O(N)` | **Yes** | Divide & Conquer; standard for Linked Lists. |
-| **Quick Sort** | `O(N log N)` | `O(N log N)` | `O(N^2)` | `O(log N)` | **No** | In-place partitioning; high cache locality. |
-| **Heap Sort** | `O(N log N)` | `O(N log N)` | `O(N log N)` | `O(1)` | **No** | Guaranteed `O(N log N)` in-place, but non-contiguous jumps. |
-| **Insertion Sort** | `O(N)` | `O(N^2)` | `O(N^2)` | `O(1)` | **Yes** | Fastest for small `N <= 16` or nearly-sorted arrays. |
-| **Counting Sort** | `O(N + K)` | `O(N + K)` | `O(N + K)` | `O(K)` | **Yes** | Non-comparison sort; optimal when key range `K ~ N`. |
-| **Radix Sort** | `O(d * (N + b))` | `O(d * (N + b))` | `O(d * (N + b))` | `O(N + b)` | **Yes** | Stable counting sort per digit position. |
-| **Quickselect** | `O(N)` | `O(N)` | `O(N^2)` | `O(1)` | **No** | Finds `K`-th largest element in `O(N)` average time. |
-
----
-
-# 3. Master Data Structure Operations Matrix
-
-| Data Structure | Access | Search | Insert | Delete | Space Overhead |
-|---|---|---|---|---|---|
-| **Array / Vector** | `O(1)` | `O(N)` | Amortized `O(1)` at end / `O(N)` mid | `O(1)` at end / `O(N)` mid | Contiguous (0 node overhead) |
-| **Doubly Linked List** | `O(N)` | `O(N)` | `O(1)` at known node | `O(1)` at known node | 16-24 bytes pointer overhead per node |
-| **Stack / Queue** | `O(1)` top/front | `O(N)` | `O(1)` | `O(1)` | Minimal |
-| **Binary Heap (PQ)** | `O(1)` top | `O(N)` | `O(log N)` | `O(log N)` | Contiguous array (0 node overhead) |
-| **BST (Balanced)** | N/A | `O(log N)` | `O(log N)` | `O(log N)` | 32-40 bytes per node |
-| **Hash Table** | N/A | Avg `O(1)` / Worst `O(N)` | Avg `O(1)` / Worst `O(N)` | Avg `O(1)` / Worst `O(N)` | Bucket vector + node pointers |
-| **Trie** | N/A | `O(L)` (word length) | `O(L)` | `O(L)` | 26 pointers per node |
-| **DSU (Union-Find)** | N/A | `O(alpha(N)) ~ O(1)` | `O(alpha(N)) ~ O(1)` | N/A | `2N` integers (parent & rank arrays) |
-| **Segment Tree** | N/A | `O(log N)` (Range Query) | `O(log N)` (Point Update) | N/A | `4N` array size |
-| **Fenwick Tree (BIT)** | N/A | `O(log N)` (Prefix Sum) | `O(log N)` (Point Update) | N/A | `N` array size |
-
----
-
-# 4. Top 20 Rapid-Fire Interview Flashcards
-
-### 1. Why does Dijkstra fail on negative edge weights?
-> **Answer:** Dijkstra greedily marks a node's distance as finalized the first time it is popped from the priority queue. A negative weight edge encountered later could provide a shorter path, which Dijkstra will never re-evaluate.
-
-### 2. Why is Heapify O(N) while N insertions take O(N log N)?
-> **Answer:** Heapify works bottom-up: the vast majority of nodes reside near the bottom leaves where height is small (`N/2` nodes take 0 operations, `N/4` take 1). In contrast, inserting `N` times inserts into the leaves and sifts up all the way to the root each time (`O(log N)` per element).
-
-### 3. What is the difference between Kahn's TopoSort and DFS TopoSort?
-> **Answer:** Kahn's uses BFS with in-degree counters (naturally detects cycles if output size != `V`). DFS postorder traversal reverses the finishing times (requires explicit 3-color visiting state to detect cycles).
-
-### 4. What is the amortized cost of DSU operations with Path Compression and Union by Rank?
-> **Answer:** `O(alpha(N))` per operation, where `alpha` is the Inverse Ackermann function (`alpha(N) < 5` for any physical universe input size).
-
-### 5. Why is MergeSort preferred over QuickSort for Linked Lists?
-> **Answer:** Linked lists do not support `O(1)` random access (needed for QuickSort partitioning). MergeSort accesses list nodes sequentially and merges in-place with `O(1)` pointer manipulations and zero extra array allocation.
-
-### 6. What causes a Hash Map to degrade to O(N)?
-> **Answer:** Hash collisions forcing all keys into the same bucket list (either due to a poor hash function, small bucket capacity, or an adversarial collision test).
-
-### 7. What is the difference between `lower_bound` and `upper_bound`?
-> **Answer:** `lower_bound(k)` returns an iterator to the **first element >= k**. `upper_bound(k)` returns an iterator to the **first element > k**.
-
-### 8. What is the Exact-K reduction pattern in Sliding Window?
-> **Answer:** `Count(Exact K) = atMost(K) - atMost(K - 1)`. Used because "at most K" has a monotonic sliding window property while "exact K" does not.
-
-### 9. Why is `std::vector` faster than `std::list` in practice even for frequent insertions?
-> **Answer:** Spatial cache locality. Vectors store elements in contiguous memory (64-byte cache lines loaded into L1 cache). Linked lists allocate nodes scattered across heap memory, causing CPU cache misses and pointer-chasing stalls.
-
-### 10. What is the Monotonic Stack invariant?
-> **Answer:** Elements in the stack are kept in strictly increasing (or decreasing) order. When a new element violates the order, existing elements are popped and resolved.
-
-### 11. How does Floyd's Cycle Detection find the cycle starting node?
-> **Answer:** When slow and fast meet at distance `k` inside a cycle of length `C`, the distance from the head to the cycle start equals the remaining distance from the meeting point to the cycle start modulo `C`. Resetting slow to head and advancing both 1 step at a time guarantees they meet at the cycle entry.
-
-### 12. What is the difference between 0/1 Knapsack and Unbounded Knapsack loops?
-> **Answer:** In 1D space-optimized DP, 0/1 Knapsack iterates capacity **backwards** (`W down to wt`) to prevent using the same item multiple times. Unbounded Knapsack iterates capacity **forwards** (`wt to W`) to allow item reuse.
-
-### 13. How does Quickselect find the K-th largest element in O(N) average time?
-> **Answer:** It uses QuickSort partitioning around a pivot. Unlike QuickSort, it only recurses into the **single partition half** containing index `K`, discarding the other half. Work: `N + N/2 + N/4 + ... = 2N = O(N)`.
-
-### 14. What are the 3 cases of the Master Theorem?
-> **Answer:** Compare `f(n) = n^c` with `n^(log_b a)`. Case 1: `log_b a > c` ==> `Theta(n^(log_b a))`. Case 2: `log_b a = c` ==> `Theta(n^c log n)`. Case 3: `log_b a < c` ==> `Theta(n^c)`.
-
-### 15. What is a Sentinel Dummy Node and why is it used?
-> **Answer:** A temporary dummy node placed before the head of a linked list (`dummy.next = head`). It eliminates edge cases when deleting the head node or inserting into an empty list.
-
-### 16. How does 0-1 BFS achieve O(V + E) time?
-> **Answer:** It uses a Deque instead of a priority queue. Weight 0 edges are pushed to the front (`push_front`), and Weight 1 edges are pushed to the back (`push_back`), maintaining monotonic distance order in `O(1)` per edge.
-
-### 17. How does a Bloom Filter guarantee zero false negatives?
-> **Answer:** If an element was inserted, all its `k` hashed bits were set to 1. If any of the `k` bits is 0 during lookup, the element definitively was never inserted.
-
-### 18. What is the time complexity of building a Trie with N words of average length L?
-> **Answer:** Time is `O(N * L)`, and space is `O(N * L * Sigma)` where `Sigma` is the alphabet size (e.g. 26).
-
-### 19. How do you clear the lowest set bit in an integer in O(1)?
-> **Answer:** `x = x & (x - 1)`. Used in Brian Kernighan's bit counting algorithm and Fenwick Tree updates.
-
-### 20. When should you use a B+ Tree vs an LSM-Tree?
-> **Answer:** Use B+ Trees for read-heavy workloads requiring fast point lookups and range scans (e.g. relational databases like Postgres). Use LSM-Trees for write-heavy workloads requiring maximum write throughput via sequential append-only writes (e.g. Cassandra, RocksDB).
-
----
-
-# 5. The Universal Decision Matrix
-
-```text
-Problem asks for:
-|-- Shortest path unweighted                    ---> BFS (Queue)
-|-- Shortest path 0/1 weights                   ---> 0-1 BFS (Deque)
-|-- Shortest path non-negative weights          ---> Dijkstra (Priority Queue)
-|-- Shortest path negative weights / cycle check ---> Bellman-Ford
-|-- All-pairs shortest path                     ---> Floyd-Warshall
-|-- Prerequisite / Dependency resolution        ---> Kahn's TopoSort (BFS)
-|-- Dynamic connectivity / Components           ---> DSU (Union-Find)
-|-- Minimum Spanning Tree                       ---> Kruskal (DSU) or Prim (Heap)
-|-- Top K / Running Median                      ---> Heap (Priority Queue)
-|-- Prefix search / Dictionary / Max XOR        ---> Trie
-|-- Next Greater / Histogram / Subarray bounds  ---> Monotonic Stack
-|-- Moving window min/max                       ---> Monotonic Deque
-|-- Subarray sum count / Pair sum lookup        ---> Hash Map / Prefix Sum
-|-- Range min/max with updates                  ---> Segment Tree / Fenwick Tree
-|-- Optimization with subproblem choices        ---> Dynamic Programming
-|-- Min/Max monotonic answer space              ---> Binary Search on Answer
-`-- State exploration with backtracking         ---> DFS / Backtracking + Pruning
 ```
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM          | GRAPH TOPOLOGY        | TIME COMPLEXITY | SPACE COMPLEXITY | OPERATIONAL CONSTRAINTS |
++----------------------------------------------------------------------------------------------------+
+| Breadth-First (BFS)| Unweighted Graph      | O(V + E)        | O(V)             | Shortest path on unweighted|
+| 0-1 BFS (Deque)    | Edge weights in {0, 1}| O(V + E)        | O(V)             | Push 0 front, 1 back    |
+| Depth-First (DFS)  | General Graph         | O(V + E)        | O(V)             | Recursion stack depth V |
+| Dijkstra's (Heap)  | Non-negative weights  | O(E log V)      | O(V)             | Fails on negative edges |
+| Bellman-Ford       | Directed with neg wts | O(V * E)        | O(V)             | Detects negative cycles |
+| Floyd-Warshall     | All-Pairs Dense Graph | Theta(V^3)      | Theta(V^2)       | Dynamic programming matrix|
+| Kruskal's MST      | Undirected Weighted   | O(E log E)      | O(V)             | Edge sort + DSU cycles  |
+| Prim's MST (Heap)  | Undirected Weighted   | O(E log V)      | O(V)             | Priority queue expansion|
+| Kahn's TopoSort    | Directed Acyclic (DAG)| O(V + E)        | O(V)             | In-degree zero BFS      |
+| Tarjan's Bridges   | Undirected Connected  | O(V + E)        | O(V)             | DFS tree low-link values|
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 2. Sorting Algorithms Complexity Matrix
+
+```
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM          | BEST TIME     | AVERAGE TIME  | WORST TIME    | AUX SPACE | STABILITY | PARADIGM      |
++----------------------------------------------------------------------------------------------------+
+| Merge Sort         | O(N log N)    | O(N log N)    | O(N log N)    | O(N)      | Stable    | Divide/Conquer|
+| Quick Sort         | O(N log N)    | O(N log N)    | O(N^2)        | O(log N)  | Unstable  | Partitioning  |
+| Heap Sort          | O(N log N)    | O(N log N)    | O(N log N)    | O(1)      | Unstable  | Binary Heap   |
+| Insertion Sort     | O(N)          | O(N^2)        | O(N^2)        | O(1)      | Stable    | Incremental   |
+| Counting Sort      | O(N + K)      | O(N + K)      | O(N + K)      | O(K)      | Stable    | Non-Comparison|
+| Radix Sort         | O(d * (N + b))| O(d * (N + b))| O(d * (N + b))| O(N + b)  | Stable    | Digit-by-Digit|
+| Quickselect        | O(N)          | O(N)          | O(N^2)        | O(1)      | Unstable  | Selection     |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 3. Data Structure Operations & Space Complexity Matrix
+
+```
++----------------------------------------------------------------------------------------------------+
+| DATA STRUCTURE     | ACCESS        | SEARCH        | INSERTION     | DELETION      | SPACE FOOTPRINT  |
++----------------------------------------------------------------------------------------------------+
+| Dynamic Array      | O(1)          | O(N)          | Amortized O(1)| O(N) mid / O(1)| Contiguous RAM   |
+| Doubly Linked List | O(N)          | O(N)          | O(1) (at node)| O(1) (at node)| 24 B ptrs/node   |
+| Stack / Queue      | O(1) top/front| O(N)          | O(1)          | O(1)          | O(N) capacity    |
+| Binary Heap (PQ)   | O(1) peak     | O(N)          | O(log N)      | O(log N)      | Flat contiguous  |
+| Red-Black Tree     | N/A           | O(log N)      | O(log N)      | O(log N)      | 32 B node struct |
+| Hash Table         | N/A           | Avg O(1)/O(N) | Avg O(1)/O(N) | Avg O(1)/O(N) | Bucket + pointers|
+| Prefix Trie        | N/A           | O(L) (length) | O(L)          | O(L)          | Alphabet * N * L |
+| Disjoint Set (DSU) | N/A           | O(alpha(N))   | O(alpha(N))   | N/A           | 2N array space   |
+| Segment Tree       | N/A           | O(log N) range| O(log N) point| N/A           | 4N tree nodes    |
+| Fenwick Tree (BIT) | N/A           | O(log N) pref | O(log N) point| N/A           | N integer array  |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+# 4. Theoretical Proofs & Foundational Derivations
+
+### 1. $O(N)$ Bottom-Up Heap Construction Derivation
+Constructing a binary heap bottom-up via `build_heap` evaluates sift-down operations starting from level $h = \lfloor \log_2 N \rfloor - 1$ down to root level $0$.
+- At height $h$, there are at most $\lceil N / 2^{h+1} \rceil$ nodes.
+- Total comparison work $S$:
+  $$S = \sum_{h=0}^{\lfloor \log N \rfloor} \frac{N}{2^{h+1}} \cdot O(h) = \frac{N}{2} \sum_{h=0}^{\infty} \frac{h}{2^h}$$
+- Using the standard geometric progression identity $\sum_{h=0}^{\infty} h x^h = \frac{x}{(1-x)^2}$ for $x = 1/2$:
+  $$\sum_{h=0}^{\infty} \frac{h}{2^h} = \frac{1/2}{(1 - 1/2)^2} = 2 \implies S = \frac{N}{2} \cdot 2 = \mathbf{O(N)}$$
+
+---
+
+### 2. Disjoint Set Union (DSU) Inverse Ackermann Bound
+Combining **Path Compression** with **Union by Rank** guarantees that any sequence of $M$ operations on $N$ elements executes in:
+$$T(M, N) = O(M \cdot \alpha(N))$$
+where $\alpha(N)$ is the **Inverse Ackermann Function**, which satisfies $\alpha(N) < 5$ for all values of $N \le 10^{80}$ (the estimated number of atoms in the observable universe), yielding effectively constant amortized runtime ($O(1)$).
+
+---
+
+### 3. Dijkstra's Algorithm Invariant Failure on Negative Edges
+Dijkstra's algorithm relies on the monotonic property that whenever a vertex $u$ is extracted from the priority queue, its path distance $d[u]$ represents the definitive shortest path. A negative edge $(u, v)$ with weight $w < 0$ encountered subsequently violates this greedy invariant, as a previously relaxed node cannot be revisited without unbounded re-relaxations (degenerating into Bellman-Ford).
+
+---
+
+### 4. The Master Theorem Formulation
+For divide-and-conquer recurrences of the form $T(N) = a T(N / b) + f(N)$, let $c_{\text{crit}} = \log_b a$:
+1. **Case 1:** $f(N) = O(N^c)$ where $c < c_{\text{crit}} \implies T(N) = \mathbf{\Theta(N^{\log_b a})}$.
+2. **Case 2:** $f(N) = \Theta(N^{c_{\text{crit}}} \log^k N) \implies T(N) = \mathbf{\Theta(N^{\log_b a} \log^{k+1} N)}$.
+3. **Case 3:** $f(N) = \Omega(N^c)$ where $c > c_{\text{crit}}$ and regularity condition holds $\implies T(N) = \mathbf{\Theta(f(N))}$.
+
+---
+
+# 5. Universal Algorithmic Paradigm Selector Tree
+
+```
+Computational Objective:
+|-- Pathfinding / Shortest Distance:
+|   |-- Unweighted graph -----------------------------------> Breadth-First Search (Queue)
+|   |-- Edge weights in {0, 1} -----------------------------> 0-1 BFS (Double-Ended Queue)
+|   |-- Non-negative arbitrary weights ---------------------> Dijkstra's Algorithm (Min-Heap)
+|   |-- Negative edge weights / cycle detection ------------> Bellman-Ford Algorithm
+|   `-- All-pairs dense shortest path ----------------------> Floyd-Warshall Algorithm
+|-- Structural Connectivity / Spanning Subgraphs:
+|   |-- Dependency / Prerequisite DAG ordering -------------> Kahn's Topological Sort (In-Degree BFS)
+|   |-- Dynamic connected components -----------------------> Disjoint Set Union (Path Compression + Rank)
+|   `-- Minimum Spanning Tree ------------------------------> Kruskal's (DSU) or Prim's (Heap)
+|-- Sequential & Sequence Optimization:
+|   |-- Monotonic extrema search space ---------------------> Binary Search on Solution Space
+|   |-- Subarray aggregation / Bound maintenance -----------> Sliding Window / Two Pointers
+|   |-- Next greater / Boundary span evaluation ------------> Monotonic Stack
+|   |-- Sliding window minimum / maximum -------------------> Monotonic Deque
+|   `-- Overlapping subproblems with optimal substructure --> Dynamic Programming
+`-- Combinatorial Search:
+    `-- Permutation / Combination state-space --------------> Backtracking + Branch Pruning
+```
+
+---
+
+# 6. Core Theoretical Summary Principles
+
+1. **Comparison Lower Bound:** $\Omega(N \log N)$ lower bound is mathematically mandated by decision tree height $h \ge \log_2(N!)$.
+2. **Bottom-Up Heap Construction:** `build_heap` runs in $O(N)$ because the majority of nodes reside at low tree heights.
+3. **Inverse Ackermann Bound:** DSU with path compression and union by rank achieves $O(\alpha(N))$ amortized operation time.
+4. **Greedy Invariant Violation:** Dijkstra requires non-negative edge weights to guarantee that extracted vertex distances are globally optimal.
