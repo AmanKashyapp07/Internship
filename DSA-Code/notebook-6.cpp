@@ -24,7 +24,6 @@
 #endif
 using namespace std;
 
-
 using ll = long long;
 using pii = pair<int, int>;
 using vi = vector<int>;
@@ -47,7 +46,7 @@ const ll MOD = 1e9 + 7;
  | 5  | Row with Maximum 1s in Binary Matrix        | Top-Right Corner Staircase Scan   | O(N + M) | O(1)     |
  | 6  | Find Median from Data Stream (MedianFinder) | Two Heaps (Max-Heap + Min-Heap)   | O(log N) | O(N)     |
  | 7  | First Missing Positive                      | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
- | 8  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2 * L)| O(N + D) |
+ | 8  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2*L) | O(N + D) |
  | 9  | Array Stack Implementation                  | Array with Top Index              | O(1) all | O(Cap)   |
  | 10 | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK)| O(K)     |
  | 11 | Longest Valid Parentheses                   | Stack of Indices (Base -1)        | O(N)     | O(N)     |
@@ -56,475 +55,617 @@ const ll MOD = 1e9 + 7;
  | 14 | Design HashMap (MyHashMap)                  | Separate Chaining (Bucket Lists)  | Avg O(1) | O(N)     |
  | 15 | Median of Row-Wise Sorted Matrix            | Binary Search on Range + UB       | O(RlogC) | O(1)     |
  | 16 | Find Peak Element in 2D Grid                | Column Binary Search + Column Max | O(M logN)| O(1)     |
+ | 17 | Kth Missing Positive Number                 | Binary Search on Missing Count    | O(log N) | O(1)     |
+ | 18 | Summary Ranges                              | Sorted Set Range Traversal        | O(log N) | O(N)     |
+ | 19 | Design Twitter                              | Multi-Way Heap Merge + Hash Map   | O(N logK)| O(U + T) |
+ | 20 | Water and Jug Problem (BFS)                 | BFS 6-State Graph Traversal       | O(X * Y) | O(X * Y) |
+ | 21 | Wiggle Subsequence                          | Greedy / DP Peak-Valley Tracking  | O(N)     | O(1)     |
+ | 22 | Run-Length Encoding (Compress)              | Two-Pointer Suffix Counter Scan   | O(N)     | O(N)     |
+ | 23 | Decode String                               | Nested Number & String Stacks     | O(N)     | O(N)     |
+ | 24 | 132 Pattern                                 | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 25 | Find All Numbers Disappeared in Array       | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
+ | 26 | Kth Smallest in Lexicographical Order       | Trie Prefix Tree Level Skipping   | O(log^2N)| O(1)     |
+ | 27 | Kth Smallest Element in Sorted Matrix       | Binary Search on Value Range + UB | O(NlogM) | O(1)     |
+ | 28 | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
  ====================================================================================================
 */
 
-
 struct TreeNode {
     int val;
-    TreeNode *left;
-    TreeNode *right;
+    TreeNode *left, *right;
     TreeNode() : val(0), left(nullptr), right(nullptr) {}
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
- };
+};
 
+// =========================================================
+// 1. CONTAINER WITH MOST WATER
+// =========================================================
 
 int maxArea(vector<int>& height) {
-    int l = 0, r = height.size() - 1;
-    int ans = 0;
-
+    int l = 0, r = height.size() - 1, ans = 0;
     while (l < r) {
         ans = max(ans, min(height[l], height[r]) * (r - l));
-        if (height[l] < height[r]) l++;
-        else r--;
+        if (height[l] < height[r]) l++; else r--;
     }
-
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Container with most water leetcode problem
+// - Problem Statement: Find two lines that together with the x-axis form a container holding the most water.
 // - Approach: Two pointers starting from outermost boundaries (l = 0, r = n - 1) moving inward.
-// - Intuition: Area is limited by the shorter line; shrinking width can only yield a larger area if height increases, so greedily advance the shorter line.
+// - Intuition: Area is limited by the shorter line; shrinking width can only improve area if height increases, so advance the shorter line.
 // - Complexity: Time: O(N) single pass, Space: O(1) auxiliary space.
+
+// =========================================================
+// 2. SPIRAL MATRIX TRAVERSAL
+// =========================================================
 
 vi spiralOrder(vvi &matrix) {
     if (matrix.empty()) return {};
-    int m = matrix.size(), n = matrix[0].size();
+    int m = matrix.size(), n = matrix[0].size(), top = 0, bottom = m - 1, left = 0, right = n - 1;
     vi ans;
-    int top = 0, bottom = m - 1, left = 0, right = n - 1;
-
     while (top <= bottom && left <= right) {
         for (int j = left; j <= right; j++) ans.push_back(matrix[top][j]);
         top++;
         for (int i = top; i <= bottom; i++) ans.push_back(matrix[i][right]);
         right--;
-        if (top <= bottom) { // this is because we need to check if there are still rows left to traverse after moving the top pointer down
-            for (int j = right; j >= left; j--) ans.push_back(matrix[bottom][j]);
-            bottom--;
-        }
-        if (left <= right) { // this is because we need to check if there are still columns left to traverse after moving the right pointer left
-            for (int i = bottom; i >= top; i--) ans.push_back(matrix[i][left]);
-            left++;
-        }
+        if (top <= bottom) { for (int j = right; j >= left; j--) ans.push_back(matrix[bottom][j]); bottom--; }
+        if (left <= right) { for (int i = bottom; i >= top; i--) ans.push_back(matrix[i][left]); left++; }
     }
-
     return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Return all elements of an m x n matrix in spiral order traversal.
-// - Approach: Boundary simulation maintaining four pointers: top, bottom, left, and right.
-// - Intuition: Traverse the perimeter layer-by-layer (L->R, T->B, R->L, B->T), shrinking boundaries after each row/col; guard with (top <= bottom) & (left <= right) before reverse traversals.
-// - Complexity: Time: O(M * N) visiting each cell once, Space: O(1) auxiliary space (excluding result vector).
+// - Approach: Layer boundary simulation maintaining four pointers: top, bottom, left, and right.
+// - Intuition: Traverse perimeter layer-by-layer; shrink boundaries and guard with (top <= bottom) & (left <= right).
+// - Complexity: Time: O(M * N), Space: O(1) auxiliary space.
+
+// =========================================================
+// 3. MERGE TWO SORTED ARRAYS
+// =========================================================
 
 vi merge2sortedarrays(vi& a, vi& b) {
-    int n = a.size(), m = b.size();
+    int n = a.size(), m = b.size(), i = 0, j = 0, k = 0;
     vi merged(n + m);
-    int i = 0, j = 0, k = 0;
-
-    while (i < n && j < m) {
-        if (a[i] <= b[j]) {
-            merged[k++] = a[i++];
-        } else {
-            merged[k++] = b[j++];
-        }
-    }
-
-    while (i < n) {
-        merged[k++] = a[i++];
-    }
-
-    while (j < m) {
-        merged[k++] = b[j++];
-    }
-
+    while (i < n && j < m) merged[k++] = (a[i] <= b[j]) ? a[i++] : b[j++];
+    while (i < n) merged[k++] = a[i++];
+    while (j < m) merged[k++] = b[j++];
     return merged;
 }
 // Interview Explanation:
 // - Problem Statement: Merge two already sorted arrays into a single sorted array.
 // - Approach: Two-pointer merge technique (standard merge step of Merge Sort).
-// - Intuition: Compare elements at current pointers, push the smaller one into the merged array, and advance its pointer; append leftover elements once one array is exhausted.
-// - Complexity: Time: O(N + M) linear scan, Space: O(N + M) for the merged array (or O(1) extra if merging in-place from back).
+// - Intuition: Compare elements at current pointers, append the smaller one, and advance; flush leftovers.
+// - Complexity: Time: O(N + M), Space: O(N + M).
+
+// =========================================================
+// 4. LONGEST CONSECUTIVE SEQUENCE
+// =========================================================
 
 int longestConsecutive(vector<int>& nums) {
-    unordered_set<int> st(nums.begin(), nums.end());
-    int longest_streak = 0;
-
+    unordered_set<int> st(nums.begin(), nums.end()); int longest_streak = 0;
     for (int x : st) {
-        if (!st.count(x - 1)) { // only start counting if 'x' is the start of a sequence
-            int current_num = x;
-            int current_streak = 1;
-
-            while (st.count(current_num + 1)) {
-                current_num++;
-                current_streak++;
-            }
-
+        if (!st.count(x - 1)) {
+            int current_num = x, current_streak = 1;
+            while (st.count(current_num + 1)) { current_num++; current_streak++; }
             longest_streak = max(longest_streak, current_streak);
         }
     }
-
     return longest_streak;
 }
 // Interview Explanation:
 // - Problem Statement: Find the length of the longest consecutive elements sequence in an unsorted array in O(N) time.
 // - Approach: Hash Set lookup for O(1) average membership checking.
-// - Intuition: Only start streak exploration from `x` if `x - 1` is not in the set (ensuring `x` is the true start); ensures each number is visited at most twice.
-// - Complexity: Time: O(N) amortized linear time, Space: O(N) auxiliary space to store elements in unordered_set.
+// - Intuition: Only start streak exploration from `x` if `x - 1` is not in set (ensuring true streak start).
+// - Complexity: Time: O(N) amortized linear time, Space: O(N) auxiliary space.
+
+// =========================================================
+// 5. ROW WITH MAXIMUM 1s IN BINARY MATRIX
+// =========================================================
 
 int rowWithMax1s(vector<vector<int>>& mat) {
-    int n = mat.size();
-    int m = mat[0].size();
-
-    int i = 0, j = m - 1;
-    int ans = -1;
-
+    int n = mat.size(), m = mat[0].size(), i = 0, j = m - 1, ans = -1;
     while (i < n && j >= 0) {
-        if (mat[i][j] == 1) {
-            ans = i;
-            j--;          // look for an earlier 1
-        } else {
-            i++;          // current row can't improve
-        }
+        if (mat[i][j] == 1) { ans = i; j--; }
+        else i++;
     }
-
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Find the index of the row with the maximum number of 1s in a row-sorted binary matrix.
-// - Approach: Top-right staircase traversal exploiting row-sorted binary properties.
-// - Intuition: Start at top-right (0, M - 1); if mat[i][j] == 1, record row and move left (j--) to check for more 1s; if 0, move down (i++) since current row cannot beat the record.
-// - Complexity: Time: O(N + M) traversing at most N rows and M cols, Space: O(1) auxiliary space (optimal vs O(N log M) binary search).
+// - Problem Statement: Find the row index with the maximum number of 1s in a row-sorted binary matrix.
+// - Approach: Top-right staircase traversal exploiting row-sorted properties.
+// - Intuition: Start at top-right (0, M - 1); if 1 move left (j--), if 0 move down (i++).
+// - Complexity: Time: O(N + M), Space: O(1).
+
+// =========================================================
+// 6. FIND MEDIAN FROM DATA STREAM (MEDIANFINDER)
+// =========================================================
 
 class MedianFinder {
-private:
-    priority_queue<int> left; // Max heap (smaller half)
-    priority_queue<int, vector<int>, greater<int>> right; // Min heap (larger half)
-
+    priority_queue<int> left;
+    priority_queue<int, vector<int>, greater<int>> right;
 public:
-    MedianFinder() {
-    }
-
+    MedianFinder() {}
     void addNum(int num) {
-        left.push(num);
-
-        // Move the largest element from left to right
-        right.push(left.top());
-        left.pop();
-
-        // Ensure left has at least as many elements as right
-        if (right.size() > left.size()) {
-            left.push(right.top());
-            right.pop();
-        }
+        left.push(num); right.push(left.top()); left.pop();
+        if (right.size() > left.size()) { left.push(right.top()); right.pop(); }
     }
-
     double findMedian() {
-        if (left.size() > right.size()) {
-            return left.top();
-        }
-        return (left.top() + right.top()) / 2.0;
+        return left.size() > right.size() ? left.top() : (left.top() + right.top()) / 2.0;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Design a data structure supporting adding numbers from a data stream and finding the current median.
 // - Approach: Two Heaps (Max-Heap `left` for lower half, Min-Heap `right` for upper half).
-// - Intuition: Maintain balance invariant: size(left) == size(right) (+1 if odd) and max(left) <= min(right); median is left.top() or the average of both heap tops.
-// - Complexity: Time: O(log N) for addNum, O(1) for findMedian, Space: O(N) to store incoming elements.
+// - Intuition: Maintain balance: size(left) == size(right) (+1 if odd) and max(left) <= min(right).
+// - Complexity: Time: O(log N) for addNum, O(1) for findMedian, Space: O(N).
+
+// =========================================================
+// 7. FIRST MISSING POSITIVE
+// =========================================================
 
 int firstMissingPositive(vector<int>& nums) {
     int n = nums.size();
-
-    for (int i = 0; i < n; ++i) {
-        while (nums[i] > 0 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {
-            swap(nums[i], nums[nums[i] - 1]);
-        }
-    }
-
-    for (int i = 0; i < n; ++i) {
-        if (nums[i] != i + 1) {
-            return i + 1;
-        }
-    }
-
+    for (int i = 0; i < n; ++i)
+        while (nums[i] > 0 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) swap(nums[i], nums[nums[i] - 1]);
+    for (int i = 0; i < n; ++i) if (nums[i] != i + 1) return i + 1;
     return n + 1;
 }
 // Interview Explanation:
-// - Problem Statement: Find the smallest missing positive integer from an unsorted array in O(N) time and O(1) extra space.
-// - Approach: Cyclic Sort / in-place array hashing (values in [1, N] mapped to indices [0, N - 1]).
-// - Intuition: Answer must lie in [1, N + 1]. Repeatedly swap positive numbers x in [1, N] to index x - 1; first index i where nums[i] != i + 1 reveals the missing integer i + 1.
-// - Complexity: Time: O(N) as each swap places at least one number in its correct bucket, Space: O(1) auxiliary in-place.
+// - Problem Statement: Find smallest missing positive integer from unsorted array in O(N) time and O(1) space.
+// - Approach: Cyclic Sort / in-place array hashing (value x mapped to index x - 1).
+// - Intuition: Swap numbers x in [1, N] to index x - 1; first index i where nums[i] != i + 1 gives missing i + 1.
+// - Complexity: Time: O(N), Space: O(1).
+
+// =========================================================
+// 8. WORD BREAK
+// =========================================================
 
 class Solution {
 public:
     bool wordBreak(string s, vector<string>& wordDict) {
         unordered_set<string> dict(wordDict.begin(), wordDict.end());
-
-        int n = s.size();
-        vector<bool> dp(n + 1, false);
-
-        // Empty string can always be segmented
-        dp[0] = true;
-
-        for (int i = 1; i <= n; i++) {
-            for (int j = 0; j < i; j++) {
-                // s[0...j-1] is segmentable
-                // and s[j...i-1] is a dictionary word
-                if (dp[j] && dict.count(s.substr(j, i - j))) {
-                    dp[i] = true;
-                    break;
-                }
-            }
-        }
-
+        int n = s.size(); vector<bool> dp(n + 1, false); dp[0] = true;
+        for (int i = 1; i <= n; i++)
+            for (int j = 0; j < i; j++)
+                if (dp[j] && dict.count(s.substr(j, i - j))) { dp[i] = true; break; }
         return dp[n];
     }
 };
 // Interview Explanation:
-// - Problem Statement: Determine if a string can be segmented into a space-separated sequence of dictionary words.
+// - Problem Statement: Determine if a string can be segmented into a sequence of dictionary words.
 // - Approach: Bottom-up 1D Dynamic Programming with Hash Set for dictionary lookup.
-// - Intuition: dp[i] is true if prefix s[0...i-1] can be segmented; find a split point j < i where dp[j] is true and substring s[j...i-1] exists in the dictionary.
-// - Complexity: Time: O(N^2 * L) where N = s.length() and L is substring hashing time, Space: O(N + D) for DP table and word set.
+// - Intuition: dp[i] is true if prefix s[0...i-1] can be segmented via split point j < i with dp[j] true and s[j...i-1] in dict.
+// - Complexity: Time: O(N^2 * L), Space: O(N + D).
+
+// =========================================================
+// 9. ARRAY STACK IMPLEMENTATION
+// =========================================================
 
 class Stack {
-private:
-    vector<int> arr;
-    int topIndex;
-    int capacity;
+    vector<int> arr; int topIndex, capacity;
 public:
     Stack(int cap) : capacity(cap), topIndex(-1), arr(cap) {}
-
-    void push(int x) {
-        if (topIndex == capacity - 1) throw runtime_error("Stack Overflow");
-        arr[++topIndex] = x;
-    }
-
-    int pop() {
-        if (topIndex == -1) throw runtime_error("Stack Underflow");
-        return arr[topIndex--];
-    }
-
-    int peek() {
-        if (topIndex == -1) throw runtime_error("Stack is Empty");
-        return arr[topIndex];
-    }
-
-    bool isEmpty() {
-        return topIndex == -1;
-    }
-
-    int size() {
-        return topIndex + 1;
-    }
+    void push(int x) { if (topIndex == capacity - 1) throw runtime_error("Overflow"); arr[++topIndex] = x; }
+    int pop() { if (topIndex == -1) throw runtime_error("Underflow"); return arr[topIndex--]; }
+    int peek() { if (topIndex == -1) throw runtime_error("Empty"); return arr[topIndex]; }
+    bool isEmpty() { return topIndex == -1; }
+    int size() { return topIndex + 1; }
 };
-
 // Interview Explanation:
 // - Problem Statement: Implement a stack with basic operations (push, pop, peek, isEmpty, size).
-// - Approach: Use an array to store elements and maintain a top index.
-// - Complexity: Time: O(1) for all operations, Space: O(N) where N is the capacity of the stack.
-// - Intuition: Stack is a LIFO data structure; array provides contiguous memory for efficient access, and top index tracks the current top element.
+// - Approach: Array with top index pointer.
+// - Intuition: LIFO structure using contiguous memory with direct index tracking.
+// - Complexity: Time: O(1) all operations, Space: O(Cap).
+
+// =========================================================
+// 10. KTH LARGEST ELEMENT IN ARRAY
+// =========================================================
 
 int kthLargest(vector<int>& nums, int k) {
     priority_queue<int, vector<int>, greater<int>> minHeap;
-
     for (int num : nums) {
         minHeap.push(num);
-        if (minHeap.size() > k) {
-            minHeap.pop();
-        }
+        if (minHeap.size() > k) minHeap.pop();
     }
-
     return minHeap.top();
 }
 // Interview Explanation:
 // - Problem Statement: Find the k-th largest element in an unsorted array.
-// - Approach: Min-Heap of size k to maintain the k largest elements seen so far.
-// - Intuition: The top of the min-heap will always be the k-th largest element after processing all elements; if the heap exceeds size k, remove the smallest to keep only the k largest.
-// - Complexity: Time: O(N log K) for N elements, Space: O(K) for the heap.
+// - Approach: Min-Heap of size k.
+// - Intuition: Min-heap of size k retains the k largest elements; top holds the k-th largest.
+// - Complexity: Time: O(N log K), Space: O(K).
+
+// =========================================================
+// 11. LONGEST VALID PARENTHESES
+// =========================================================
 
 int longestValidParenthesis(string s) {
-    stack<int> st; // stack stores the indices of characters in the string, it stores the index of the last unmatched '(' or the base index for valid substrings
-    st.push(-1);  // base index
-
-    int ans = 0;
-
+    stack<int> st; st.push(-1); int ans = 0;
     for (int i = 0; i < s.size(); i++) {
-        if (s[i] == '(') {
-            st.push(i);
-        } else {
-            st.pop(); // if s[i] == ')', pop the last index, because we are trying to find a matching '(' for this ')'
-            if (st.empty()) st.push(i); // if stack becomes empty, push the current index as a new base for future valid substrings
-            else ans = max(ans, i - st.top());
+        if (s[i] == '(') st.push(i);
+        else {
+            st.pop();
+            if (st.empty()) st.push(i); else ans = max(ans, i - st.top());
         }
     }
-
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Find the length of the longest valid (well-formed) parentheses substring.
-// - Approach: Stack of indices initialized with base boundary `-1`.
-// - Intuition: We will push the index of '(' onto the stack. When we encounter a ')', we pop the top index (which should be the matching '('). If the stack becomes empty after popping, it means we have found a valid substring, and we can calculate its length by subtracting the current index from the new top of the stack. If the stack is not empty, we continue to check for longer valid substrings.
-// - Complexity: Time: O(N) single pass, Space: O(N) auxiliary space for stack.
+// - Problem Statement: Find the length of the longest valid parentheses substring.
+// - Approach: Stack of indices initialized with base boundary -1.
+// - Intuition: Push '(' indices; on ')' pop match; if empty push new base, else record length `i - st.top()`.
+// - Complexity: Time: O(N), Space: O(N).
+
+// =========================================================
+// 12. MOVE ZEROES
+// =========================================================
 
 void moveZeroes(vector<int>& nums) {
-    int lastNonZeroFoundAt = 0;
-
-    for (int i = 0; i < nums.size(); i++) {
-        if (nums[i] != 0) {
-            swap(nums[lastNonZeroFoundAt++], nums[i]);
-        }
-    }
+    int lastNonZero = 0;
+    for (int i = 0; i < nums.size(); i++) if (nums[i] != 0) swap(nums[lastNonZero++], nums[i]);
 }
 // Interview Explanation:
-// - Problem Statement: Move all zeroes in an array to the end while maintaining the relative order of non-zero elements.
-// - Approach: Two-pointer technique where one pointer iterates through the array and the other keeps track of the position to place the next non-zero element.
-// - Intuition: When a non-zero element is found, it is swapped with the element at the last non-zero index, effectively moving all zeroes to the end while preserving the order of non-zero elements.
-// - Complexity: Time: O(N) single pass, Space: O(1) auxiliary space in-place.
+// - Problem Statement: Move all zeroes to the end while maintaining relative order of non-zero elements.
+// - Approach: Two-pointer in-place swap.
+// - Intuition: Swap non-zero elements into `lastNonZero` pointer position and advance.
+// - Complexity: Time: O(N), Space: O(1).
+
+// =========================================================
+// 13. MAJORITY ELEMENT (BOYER-MOORE VOTING)
+// =========================================================
 
 int majorityElement(vi &nums) {
     int count = 0, candidate = 0;
-
     for (int num : nums) {
-        if (count == 0) {
-            candidate = num;
-        }
-        if(num == candidate) {
-            count++;
-        } else {
-            count--;
-        }
+        if (count == 0) candidate = num;
+        count += (num == candidate) ? 1 : -1;
     }
-
     return candidate;
 }
 // Interview Explanation:
-// - Problem Statement: Find the majority element in an array (the element that appears more than n/2 times).
+// - Problem Statement: Find majority element (> n/2 occurrences).
 // - Approach: Boyer-Moore Voting Algorithm.
-// - Intuition: The algorithm maintains a count of the current candidate for majority element. When the count drops to zero, a new candidate is chosen. The majority element will always be the last candidate standing after processing the entire array.
-// - Complexity: Time: O(N) single pass, Space: O(1) auxiliary space.
+// - Intuition: Increment count on match, decrement on mismatch; majority candidate survives cancellations.
+// - Complexity: Time: O(N), Space: O(1).
 
+// =========================================================
+// 14. DESIGN HASHMAP (MYHASHMAP)
+// =========================================================
 
 class MyHashMap {
-private:
     static const int SIZE = 1000;
     vector<list<pair<int, int>>> buckets;
-
-    int hash(int key) {
-        return key % SIZE;
-    }
-
+    int hash(int key) { return key % SIZE; }
 public:
     MyHashMap() : buckets(SIZE) {}
-
     void put(int key, int value) {
         int idx = hash(key);
-
-        // If key exists, update its value
-        for (auto& [k, v] : buckets[idx]) {
-            if (k == key) {
-                v = value;
-                return;
-            }
-        }
-
-        // Otherwise insert new key-value pair
+        for (auto& [k, v] : buckets[idx]) if (k == key) { v = value; return; }
         buckets[idx].push_back({key, value});
     }
-
     int get(int key) {
-        int idx = hash(key);
-
-        for (auto& [k, v] : buckets[idx]) {
-            if (k == key)
-                return v;
-        }
-
+        for (auto& [k, v] : buckets[hash(key)]) if (k == key) return v;
         return -1;
     }
-
     void remove(int key) {
         int idx = hash(key);
-
-        for (auto it = buckets[idx].begin(); it != buckets[idx].end(); ++it) {
-            if (it->first == key) {
-                buckets[idx].erase(it);
-                return;
-            }
-        }
+        for (auto it = buckets[idx].begin(); it != buckets[idx].end(); ++it)
+            if (it->first == key) { buckets[idx].erase(it); return; }
     }
 };
-
 // Interview Explanation:
 // - Problem Statement: Implement a basic HashMap with put, get, and remove operations.
-// - Approach: Use an array of linked lists (buckets) to handle collisions via chaining.
-// - Intuition: The hash function maps keys to bucket indices. Each bucket is a linked list that stores key-value pairs. When inserting, we check if the key exists to update; otherwise, we append. For retrieval and removal, we traverse the linked list in the corresponding bucket.
-// - Complexity: Time: O(1) average for put/get/remove, O(N) worst-case if all keys collide, Space: O(N) for storing key-value pairs.
+// - Approach: Chaining via array of linked lists (buckets).
+// - Intuition: Hash function maps keys to bucket indices; separate chaining handles collisions.
+// - Complexity: Time: O(1) average, Space: O(N).
+
+// =========================================================
+// 15. MEDIAN OF ROW-WISE SORTED MATRIX
+// =========================================================
 
 int median(vector<vector<int>>& mat) {
-    int r = mat.size(), c = mat[0].size();
-
-    int lo = mat[0][0], hi = mat[0][c - 1];
-
-    for (auto& row : mat) {
-        lo = min(lo, row[0]);
-        hi = max(hi, row[c - 1]);
-    }
-
+    int r = mat.size(), c = mat[0].size(), lo = mat[0][0], hi = mat[0][c - 1];
+    for (auto& row : mat) { lo = min(lo, row[0]); hi = max(hi, row[c - 1]); }
     int need = (r * c) / 2 + 1;
-
     while (lo < hi) {
-        int mid = lo + (hi - lo) / 2;
-
-        int cnt = 0;
-        for (auto& row : mat)
-            cnt += upper_bound(row.begin(), row.end(), mid) - row.begin();
-
-        if (cnt >= need)
-            hi = mid;
-        else
-            lo = mid + 1;
+        int mid = lo + (hi - lo) / 2, cnt = 0;
+        for (auto& row : mat) cnt += upper_bound(row.begin(), row.end(), mid) - row.begin();
+        if (cnt >= need) hi = mid; else lo = mid + 1;
     }
-
     return lo;
 }
-
 // Interview Explanation:
 // - Problem Statement: Find the median of a row-wise sorted matrix.
-// - Approach: Binary search on the value range (lo, hi) and count elements less than or equal to mid using upper_bound in each row.
-// - Intuition: The median is the element that has half of the elements less than or equal to it. By performing a binary search on the possible value range and counting how many elements are less than or equal to mid, we can narrow down to the median value.
-// - Complexity: Time: O(R * log C * log(max - min)), Space: O(1) auxiliary space.
+// - Approach: Binary search on value range [lo, hi] + upper_bound count per row.
+// - Intuition: Count elements <= mid across all rows; binary search narrow down to the element with >= (r*c)/2 + 1 elements.
+// - Complexity: Time: O(R * log C * log(max - min)), Space: O(1).
+
+// =========================================================
+// 16. FIND PEAK ELEMENT IN 2D GRID
+// =========================================================
 
 int findPeakGrid(vector<vector<int>>& mat) {
-    int m = mat.size(), n = mat[0].size();
-    int lo = 0, hi = n - 1;
-
+    int m = mat.size(), n = mat[0].size(), lo = 0, hi = n - 1;
     while (lo <= hi) {
-        int col = lo + (hi - lo) / 2;
-
-        // Maximum element in this column
-        int row = 0;
-        for (int i = 1; i < m; i++)
-            if (mat[i][col] > mat[row][col])
-                row = i;
-
-        int left  = col ? mat[row][col - 1] : -1;
-        int right = col + 1 < n ? mat[row][col + 1] : -1;
-
-        if (mat[row][col] > left && mat[row][col] > right)
-            return row * n + col;
-
-        if (left > mat[row][col])
-            hi = col - 1;
-        else
-            lo = col + 1;
+        int col = lo + (hi - lo) / 2, row = 0;
+        for (int i = 1; i < m; i++) if (mat[i][col] > mat[row][col]) row = i;
+        int left = col ? mat[row][col - 1] : -1, right = col + 1 < n ? mat[row][col + 1] : -1;
+        if (mat[row][col] > left && mat[row][col] > right) return row * n + col;
+        if (left > mat[row][col]) hi = col - 1; else lo = col + 1;
     }
-
     return -1;
 }
-
 // Interview Explanation:
-// - Problem Statement: Find a peak element in a 2D grid where a peak is defined as an element that is strictly greater than its neighbors (up, down, left, right).
-// - Approach: Binary search on columns, finding the maximum in the middle column and checking its neighbors to decide which half to continue searching.
-// - Intuition: By always moving towards a neighbor that is greater, we are guaranteed to eventually find a peak. The maximum in the middle column is a good candidate to check against its neighbors.
-// - Complexity: Time: O(M log N) where M is the number of rows and N is the number of columns, Space: O(1) auxiliary space.
+// - Problem Statement: Find a peak element in a 2D grid strictly greater than 4 neighbors.
+// - Approach: Binary search on columns + Column-maximum search.
+// - Intuition: Find maximum of middle column; move towards strictly greater neighbor to find a 2D peak.
+// - Complexity: Time: O(M log N), Space: O(1).
 
+// =========================================================
+// 17. KTH MISSING POSITIVE NUMBER
+// =========================================================
+
+int kthMissingPositive(vector<int>& arr, int k) {
+    int low = 0, high = arr.size() - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (arr[mid] - (mid + 1) < k) low = mid + 1; else high = mid - 1;
+    }
+    return low + k;
+}
+// Interview Explanation:
+// - Problem Statement: Find the k-th missing positive integer in a sorted array.
+// - Approach: Binary search on missing count `arr[mid] - (mid + 1)`.
+// - Intuition: If missing count < k, search right half; final answer is low + k.
+// - Complexity: Time: O(log N), Space: O(1).
+
+// =========================================================
+// 18. SUMMARY RANGES
+// =========================================================
+
+class SummaryRanges {
+    set<int> nums;
+public:
+    SummaryRanges() {}
+    void addNum(int val) { nums.insert(val); }
+    vector<vector<int>> getIntervals() {
+        if (nums.empty()) return {};
+        vector<vector<int>> intervals;
+        int start = *nums.begin(), end = start;
+        for (int x : nums) {
+            if (x == end + 1) end = x;
+            else if (x != start) { intervals.push_back({start, end}); start = end = x; }
+        }
+        intervals.push_back({start, end});
+        return intervals;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Maintain disjoint intervals as numbers are added dynamically.
+// - Approach: Sorted Set + Linear Interval grouping.
+// - Intuition: Iterate through sorted unique values and group consecutive numbers into [start, end].
+// - Complexity: Time: O(log N) for addNum, O(N) for getIntervals, Space: O(N).
+
+// =========================================================
+// 19. DESIGN TWITTER
+// =========================================================
+
+class Twitter {
+    using P = pair<int, int>;
+    unordered_map<int, unordered_set<int>> followees;
+    unordered_map<int, vector<P>> tweets;
+    int timer = 0;
+public:
+    Twitter() {}
+    void postTweet(int userId, int tweetId) { tweets[userId].push_back({timer++, tweetId}); }
+    vector<int> getNewsFeed(int userId) {
+        priority_queue<tuple<int, int, int>> pq;
+        if (!tweets[userId].empty()) pq.push({tweets[userId].back().first, userId, (int)tweets[userId].size() - 1});
+        for (int f : followees[userId])
+            if (!tweets[f].empty()) pq.push({tweets[f].back().first, f, (int)tweets[f].size() - 1});
+        vector<int> res;
+        while (!pq.empty() && res.size() < 10) {
+            auto [time, uid, idx] = pq.top(); pq.pop();
+            res.push_back(tweets[uid][idx].second);
+            if (idx > 0) pq.push({tweets[uid][idx - 1].first, uid, idx - 1});
+        }
+        return res;
+    }
+    void follow(int followerId, int followeeId) { if (followerId != followeeId) followees[followerId].insert(followeeId); }
+    void unfollow(int followerId, int followeeId) { followees[followerId].erase(followeeId); }
+};
+// Interview Explanation:
+// - Problem Statement: Design Twitter news feed retrieval of 10 most recent tweets.
+// - Approach: Hash Maps + Multi-way Max-Heap Merge on tweet timestamp indices.
+// - Intuition: Track tweets with timestamps per user; feed merges tops of recent lists using a priority queue.
+// - Complexity: Time: O(K log F) for 10 tweets where F is followees, Space: O(Total Tweets + Follows).
+
+// =========================================================
+// 20. WATER AND JUG PROBLEM (BFS)
+// =========================================================
+
+bool canMeasureWater(int x, int y, int target) {
+    if (target > x + y) return false;
+    queue<pair<int, int>> q; set<pair<int, int>> vis;
+    q.push({0, 0}); vis.insert({0, 0});
+    while (!q.empty()) {
+        auto [a, b] = q.front(); q.pop();
+        if (a + b == target) return true;
+        vector<pair<int, int>> next = {
+            {x, b}, {a, y}, {0, b}, {a, 0},
+            {max(0, a - (y - b)), min(y, b + a)}, {min(x, a + b), max(0, b - (x - a))}
+        };
+        for (auto state : next) if (!vis.count(state)) { vis.insert(state); q.push(state); }
+    }
+    return false;
+}
+// Interview Explanation:
+// - Problem Statement: Determine if exactly target liters can be measured using two jugs.
+// - Approach: BFS state-space search over 6 transitions (fill, empty, pour).
+// - Intuition: Model each jug state as (a, b) and traverse reachable states using BFS with visited set.
+// - Complexity: Time: O(x * y), Space: O(x * y).
+
+// =========================================================
+// 21. WIGGLE SUBSEQUENCE
+// =========================================================
+
+int wiggleMaxLength(vector<int>& nums) {
+    if (nums.size() < 2) return nums.size();
+    int up = 1, down = 1;
+    for (int i = 1; i < nums.size(); i++) {
+        if (nums[i] > nums[i - 1]) up = down + 1;
+        else if (nums[i] < nums[i - 1]) down = up + 1;
+    }
+    return max(up, down);
+}
+// Interview Explanation:
+// - Problem Statement: Find the length of the longest alternating wiggle subsequence.
+// - Approach: Greedy / 1D DP tracking `up` and `down` difference transitions.
+// - Intuition: Maintain longest sequence ending with positive vs negative slope; update mutually.
+// - Complexity: Time: O(N), Space: O(1).
+
+// =========================================================
+// 22. RUN-LENGTH ENCODING (COMPRESS)
+// =========================================================
+
+string encode(string s) {
+    string res;
+    for (int i = 0; i < s.size(); ) {
+        int j = i;
+        while (j < s.size() && s[j] == s[i]) j++;
+        res += s[i] + to_string(j - i); i = j;
+    }
+    return res;
+}
+// Interview Explanation:
+// - Problem Statement: Compress a string by replacing runs of identical characters with char + count.
+// - Approach: Two-pointer run scanning.
+// - Intuition: Pointer j locates end of matching run; append char and run length.
+// - Complexity: Time: O(N), Space: O(N).
+
+// =========================================================
+// 23. DECODE STRING
+// =========================================================
+
+string decodeString(string s) {
+    stack<int> nums; stack<string> strs;
+    int num = 0; string cur;
+    for (char c : s) {
+        if (isdigit(c)) num = num * 10 + (c - '0');
+        else if (c == '[') { nums.push(num); strs.push(cur); num = 0; cur = ""; }
+        else if (c == ']') {
+            int k = nums.top(); nums.pop();
+            string prev = strs.top(); strs.pop();
+            while (k--) prev += cur;
+            cur = prev;
+        } else cur += c;
+    }
+    return cur;
+}
+// Interview Explanation:
+// - Problem Statement: Decode string format k[encoded_string].
+// - Approach: Two Stacks (repeat count stack + prefix string stack).
+// - Intuition: Push on '[', pop and repeat string on ']' to resolve nested encodings.
+// - Complexity: Time: O(N), Space: O(N).
+
+// =========================================================
+// 24. 132 PATTERN
+// =========================================================
+
+bool find132pattern(vector<int>& nums) {
+    int n = nums.size(), third = INT_MIN; stack<int> st;
+    for (int i = n - 1; i >= 0; i--) {
+        if (nums[i] < third) return true;
+        while (!st.empty() && nums[i] > st.top()) { third = st.top(); st.pop(); }
+        st.push(nums[i]);
+    }
+    return false;
+}
+// Interview Explanation:
+// - Problem Statement: Find if there exist i < j < k with nums[i] < nums[k] < nums[j].
+// - Approach: Monotonic Decreasing Stack iterating backwards to maintain candidate "2" (`third`) and "3".
+// - Intuition: When nums[i] > stack top, pop to maximize candidate `third`; if nums[i] < third, valid "1" is found.
+// - Complexity: Time: O(N), Space: O(N).
+
+// =========================================================
+// 25. FIND ALL NUMBERS DISAPPEARED IN ARRAY
+// =========================================================
+
+vi findDisappearedNumbers(vi &nums) {
+    int n = nums.size();
+    for (int i = 0; i < n; ++i)
+        while (nums[i] != nums[nums[i] - 1]) swap(nums[i], nums[nums[i] - 1]);
+    vi result;
+    for (int i = 0; i < n; ++i) if (nums[i] != i + 1) result.push_back(i + 1);
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Find all missing numbers from array in range [1, n].
+// - Approach: Cyclic Sort in-place index mapping.
+// - Intuition: Swap nums[i] to nums[i] - 1; indices where nums[i] != i + 1 reveal missing numbers.
+// - Complexity: Time: O(N), Space: O(1) auxiliary space.
+
+// =========================================================
+// 26. KTH SMALLEST IN LEXICOGRAPHICAL ORDER
+// =========================================================
+
+class LexicographicalKth {
+public:
+    int findKthNumber(int n, int k) {
+        int curr = 1; k--;
+        while (k > 0) {
+            long long steps = 0, first = curr, last = curr + 1;
+            while (first <= n) { steps += min((long long)n + 1, last) - first; first *= 10; last *= 10; }
+            if (steps <= k) { curr++; k -= steps; }
+            else { curr *= 10; k--; }
+        }
+        return curr;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find the k-th smallest integer in lexicographical order from 1 to n.
+// - Approach: Trie / Prefix Tree Level-by-Level Skipping.
+// - Intuition: Count numbers in prefix subtree [curr, curr+1); skip whole subtree if steps <= k, else go deeper.
+// - Complexity: Time: O(log^2 N), Space: O(1).
+
+// =========================================================
+// 27. KTH SMALLEST ELEMENT IN SORTED MATRIX
+// =========================================================
+
+int kthElementInSortedMatrix(vector<vector<int>>& mat, int k) {
+    int n = mat.size(), m = mat[0].size(), lo = mat[0][0], hi = mat[n - 1][m - 1];
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2, count = 0;
+        for (int i = 0; i < n; i++) count += upper_bound(mat[i].begin(), mat[i].end(), mid) - mat[i].begin();
+        if (count < k) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+}
+// Interview Explanation:
+// - Problem Statement: Find k-th smallest element in a row & column sorted matrix.
+// - Approach: Binary Search on value range + upper_bound per row.
+// - Intuition: Count elements <= mid; narrow value range until low == high.
+// - Complexity: Time: O(N log M * log(max - min)), Space: O(1).
+
+// =========================================================
+// 28. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
+// =========================================================
+
+class LongestNiceSubarray {
+public:
+    int longestNiceSubarray(vector<int>& nums) {
+        int n = nums.size(), left = 0, mask = 0, ans = 0;
+        for (int right = 0; right < n; right++) {
+            while ((mask & nums[right]) != 0) { mask ^= nums[left]; left++; }
+            mask |= nums[right];
+            ans = max(ans, right - left + 1);
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find length of longest subarray where bitwise AND of every pair is 0.
+// - Approach: Sliding Window with cumulative bitmask.
+// - Intuition: Maintain window bitmask with XOR/OR; shrink left whenever adding nums[right] introduces a bit collision.
+// - Complexity: Time: O(N), Space: O(1).
