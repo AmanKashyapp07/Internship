@@ -94,6 +94,7 @@ struct NodeWithParent {
  | 44 | Convert Sorted Array to BST (LC 108)        | Midpoint Divide & Conquer Recursion| O(N)    | O(log N) |
  | 45 | Construct BST from Preorder (LC 1008)       | Upper-Bound Constrained DFS       | O(N)     | O(H)     |
  | 46 | Binary Tree to Doubly Linked List           | Inorder DFS Pointer Stitching     | O(N)     | O(H)     |
+ | 47 | Subtree of Another Tree (LC 572)            | DFS Traversal + Same Tree Match   | O(N * M) | O(H)     |
  ====================================================================================================
 */
 
@@ -1572,5 +1573,17 @@ public:
     // - Problem Statement: Convert a binary tree to a doubly linked list in-place according to inorder traversal (GFG / Striver SDE #146).
     // - Approach: Inorder DFS with running `prev` pointer.
     // - Intuition: Inorder traversal visits nodes in sequential DLL order. Connect `root->left = prev` and `prev->right = root`, updating `prev = root`.
-    // - Complexity: Time: O(N) single pass, Space: O(H) recursion stack.
+    // =========================================================
+    // 47. SUBTREE OF ANOTHER TREE (LEETCODE 572)
+    // =========================================================
+
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        if (!root) return false;
+        if (isSameTree(root, subRoot)) return true;
+        return isSubtree(root->left, subRoot) || isSubtree(root->right, subRoot);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Check if binary tree contains subRoot as a structural subtree (LeetCode 572).
+    // - Approach: DFS tree traversal + isSameTree recursive structural comparison.
+    // - Complexity: Time: O(N * M), Space: O(H) recursion stack.
 };

@@ -39,35 +39,33 @@ const ll MOD = 1e9 + 7;
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
  | 1  | Binary Exponentiation (Modular Power)       | Bitwise Repeated Squaring         | O(log B) | O(1)     |
- | 2  | Modular Multiplicative Inverse              | Fermat's Little Theorem (MOD - 2) | O(log MOD| O(1)     |
- | 3  | Factorials & Combinatorics (nCr, nPr)       | Factorial & Inverse Fac Arrays    | O(N)+O(1)| O(N)     |
- | 4  | Sieve of Eratosthenes                       | Multiples Cross-Off               | O(Nloglog| O(N)     |
- | 5  | Prime Factorization                         | Trial Division up to sqrt(N)      | O(sqrt N)| O(log N) |
+ | 2  | Modular Multiplicative Inverse              | Fermat's Little Theorem (MOD - 2) | O(log MOD | O(1)     |
+ | 3  | Factorials & Combinatorics (nCr, nPr)       | Factorial & Inverse Fac Arrays    | O(N)+O(1) | O(N)     |
+ | 4  | Sieve of Eratosthenes                       | Multiples Cross-Off               | O(Nloglog | O(N)     |
+ | 5  | Prime Factorization                         | Trial Division up to sqrt(N)      | O(sqrt N) | O(log N) |
  | 6  | Prefix XOR (1 to N)                         | Periodicity of 4 in Binary XOR    | O(1)     | O(1)     |
  | 7  | Sliding Window Maximum & Minimum            | Monotonic Double-Ended Queue (DQ) | O(N)     | O(K)     |
- | 8  | Max Subarray Sum of Length at Most K        | Prefix Sums + Monotonic Deque     | O(N)     | O(N)     |
- | 9  | Longest Increasing Subsequence (LIS)        | Patience Sorting (lower_bound)    | O(N logN)| O(N)     |
- | 10 | Longest Common Subsequence (Reconstruction) | 2D Dynamic Programming Table      | O(N * M) | O(N * M) |
- | 11 | Interval DP Template                        | DP over Subproblem Lengths        | O(N^3)   | O(N^2)   |
- | 12 | Subset Enumeration & Sum of All Subsets     | Bitmask Enumeration [0...2^N - 1] | O(N * 2^N| O(N * 2^N|
- | 13 | Kadane's Max Subarray Sum with Indices      | Running Prefix Sum Reset          | O(N)     | O(1)     |
- | 14 | Permutation Generation                      | Bitmask Backtracking              | O(N! * N)| O(N! * N)|
- | 15 | Longest Palindromic Subsequence (LPS)       | Interval DP / LCS with Reverse    | O(N^2)   | O(N^2)   |
- | 16 | Check Subsequence                           | Greedy Two-Pointer Linear Scan    | O(|S|)   | O(1)     |
- | 17 | Precompute Palindromic Subarrays Table      | 2D Interval DP over Lengths       | O(N^2)   | O(N^2)   |
- | 18 | Booth's Algorithm (Min String Rotation)     | Two-Pointer Mismatch on (S + S)   | O(N)     | O(N)     |
- | 19 | Minimum Excluded Value (MEX)                | Hash Set Presence Lookup          | O(N)     | O(N)     |
- | 20 | Inversion Count (a[i] > x * a[j])           | Divide & Conquer Merge Sort Count | O(N logN)| O(N)     |
- | 21 | Matrix Multiplication & Exponentiation      | Binary Exponentiation on Matrices | O(N^3logB| O(N^2)   |
- | 22 | N-th Fibonacci (Matrix Exponentiation)      | [[1, 1], [1, 0]] Matrix Power     | O(log N) | O(1)     |
- | 23 | Total Area Covered by Two 2D Rectangles    | Inclusion-Exclusion Geometry      | O(1)     | O(1)     |
- | 24 | Balanced Parentheses Count (Catalan Number) | Catalan Number Formula C_n        | O(N)     | O(N)     |
+ | 8  | Longest Increasing Subsequence (LIS)        | Patience Sorting (lower_bound)    | O(N logN) | O(N)     |
+ | 9  | Longest Common Subsequence (Reconstruction) | 2D Dynamic Programming Table      | O(N * M) | O(N * M) |
+ | 10 | Interval DP Template                        | DP over Subproblem Lengths        | O(N^3)   | O(N^2)   |
+ | 11 | Subset Enumeration & Sum of All Subsets     | Bitmask Enumeration [0...2^N - 1] | O(N * 2^N | O(N * 2^N |
+ | 12 | Kadane's Max Subarray Sum with Indices      | Running Prefix Sum Reset          | O(N)     | O(1)     |
+ | 13 | Permutation Generation                      | Bitmask Backtracking              | O(N! * N) | O(N! * N) |
+ | 14 | Longest Palindromic Subsequence (LPS)       | Interval DP / LCS with Reverse    | O(N^2)   | O(N^2)   |
+ | 15 | Check Subsequence                           | Greedy Two-Pointer Linear Scan    | O(       | S        |
+ | 16 | Precompute Palindromic Subarrays Table      | 2D Interval DP over Lengths       | O(N^2)   | O(N^2)   |
+ | 17 | Booth's Algorithm (Min String Rotation)     | Two-Pointer Mismatch on (S + S)   | O(N)     | O(N)     |
+ | 18 | Minimum Excluded Value (MEX)                | Hash Set Presence Lookup          | O(N)     | O(N)     |
+ | 19 | Matrix Multiplication & Exponentiation      | Binary Exponentiation on Matrices | O(N^3logB | O(N^2)   |
+ | 20 | N-th Fibonacci (Matrix Exponentiation)      | [[1, 1], [1, 0]] Matrix Power     | O(log N) | O(1)     |
+ | 21 | Total Area Covered by Two 2D Rectangles     | Inclusion-Exclusion Geometry      | O(1)     | O(1)     |
+ | 22 | Balanced Parentheses Count (Catalan Number) | Catalan Number Formula C_n        | O(N)     | O(N)     |
  ====================================================================================================
 */
 
-// =========================================================
+// ============================================================
 // 1. BINARY EXPONENTIATION (MODULAR POWER)
-// =========================================================
+// ============================================================
 
 ll power(ll a, ll b) {
     ll res = 1; a %= MOD;
@@ -80,9 +78,9 @@ ll power(ll a, ll b) {
 // - Intuition: If current bit is set (b & 1), multiply accumulator; square base at each bit shift.
 // - Complexity: Time: O(log B), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 2. MODULAR MULTIPLICATIVE INVERSE
-// =========================================================
+// ============================================================
 
 ll inv(ll x) { return power(x, MOD - 2); }
 // Interview Explanation:
@@ -91,9 +89,9 @@ ll inv(ll x) { return power(x, MOD - 2); }
 // - Intuition: For prime MOD, x^(MOD - 1) = 1 (mod MOD), so x * x^(MOD - 2) = 1 (mod MOD).
 // - Complexity: Time: O(log MOD), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 3. FACTORIALS & COMBINATORICS (nCr, nPr)
-// =========================================================
+// ============================================================
 
 vl fac, ifac;
 
@@ -112,9 +110,9 @@ ll nPr(int n, int r) { return (r < 0 || r > n) ? 0 : fac[n] * ifac[n - r] % MOD;
 // - Intuition: Precompute factorials up to N; compute ifac[N] = inv(fac[N]), then iteratively populate backwards.
 // - Complexity: Time: O(N) build, O(1) query, Space: O(N).
 
-// =========================================================
+// ============================================================
 // 4. SIEVE OF ERATOSTHENES
-// =========================================================
+// ============================================================
 
 vi sieve(int n) {
     vector<bool> is_prime(n + 1, true); is_prime[0] = is_prime[1] = false;
@@ -129,9 +127,9 @@ vi sieve(int n) {
 // - Intuition: Cross off multiples of each prime starting at i * i; unmarked numbers are primes.
 // - Complexity: Time: O(N \log \log N), Space: O(N).
 
-// =========================================================
+// ============================================================
 // 5. PRIME FACTORIZATION
-// =========================================================
+// ============================================================
 
 vector<pii> prime_factorize(int n) {
     vector<pii> pf;
@@ -151,9 +149,9 @@ vector<pii> prime_factorize(int n) {
 // - Intuition: Composite number N must have at least one prime factor <= sqrt(N); divide out factors iteratively.
 // - Complexity: Time: O(sqrt(N)), Space: O(log N).
 
-// =========================================================
+// ============================================================
 // 6. PREFIX XOR (1 TO N)
-// =========================================================
+// ============================================================
 
 int XORupto(int n) {
     int rem = n % 4;
@@ -165,9 +163,9 @@ int XORupto(int n) {
 // - Intuition: XORing 4 consecutive numbers (4k..4k+3) yields 0; answer depends solely on N % 4.
 // - Complexity: Time: O(1), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 7. SLIDING WINDOW MAXIMUM & MINIMUM
-// =========================================================
+// ============================================================
 
 vi maxSlidingWindow(const vi &nums, int k) {
     int n = nums.size(); deque<int> dq; vi ans;
@@ -198,31 +196,9 @@ vi minSlidingWindow(const vi &nums, int k) {
 // - Intuition: Maintain indices in decreasing/increasing order; remove expired from front and suboptimal from back.
 // - Complexity: Time: O(N), Space: O(K).
 
-// =========================================================
-// 8. MAXIMUM SUBARRAY SUM OF LENGTH AT MOST K
-// =========================================================
-
-ll maxSubarraySumAtMostK(const vi &nums, int k) {
-    int n = nums.size(); vl pref(n + 1, 0); deque<int> dq; ll ans = -1e18;
-    for (int i = 0; i < n; i++) pref[i + 1] = pref[i] + nums[i];
-    for (int r = 0; r < n; r++) {
-        int l = r - k + 1;
-        while (!dq.empty() && dq.front() < l) dq.pop_front();
-        while (!dq.empty() && pref[dq.back()] >= pref[r]) dq.pop_back();
-        dq.push_back(r);
-        ans = max(ans, pref[r + 1] - pref[dq.front()]);
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find maximum subarray sum among all contiguous subarrays of length at most K.
-// - Approach: Prefix sums + Monotonic Deque.
-// - Intuition: Maximize pref[r+1] - pref[l] by finding min pref[l] in window [r - k + 1, r].
-// - Complexity: Time: O(N), Space: O(N).
-
-// =========================================================
-// 9. LONGEST INCREASING SUBSEQUENCE (LENGTH & RECONSTRUCTION)
-// =========================================================
+// ============================================================
+// 8. LONGEST INCREASING SUBSEQUENCE (LENGTH & RECONSTRUCTION)
+// ============================================================
 
 int lisLength(const vi &a) {
     vi dp;
@@ -251,9 +227,9 @@ vi lisReconstruct(const vi &a) {
 // - Intuition: Maintain smallest tail values; record predecessor index pos[j - 1] at each step.
 // - Complexity: Time: O(N \log N), Space: O(N).
 
-// =========================================================
-// 10. LONGEST COMMON SUBSEQUENCE (RECONSTRUCTION)
-// =========================================================
+// ============================================================
+// 9. LONGEST COMMON SUBSEQUENCE (RECONSTRUCTION)
+// ============================================================
 
 string lcs(const string &a, const string &b) {
     int n = a.size(), m = b.size(); vvi dp(n + 1, vi(m + 1, 0));
@@ -274,9 +250,9 @@ string lcs(const string &a, const string &b) {
 // - Intuition: Backtrack from (N, M) following match diagonals or max transitions.
 // - Complexity: Time: O(N * M), Space: O(N * M).
 
-// =========================================================
-// 11. INTERVAL DP TEMPLATE
-// =========================================================
+// ============================================================
+// 10. INTERVAL DP TEMPLATE
+// ============================================================
 
 ll solveIntervalDPBottomUp(int n) {
     vvl dp(n, vl(n, 0));
@@ -294,9 +270,9 @@ ll solveIntervalDPBottomUp(int n) {
 // - Intuition: Solve subproblems of length 2 to N; partition at k in [l, r-1]: dp[l][r] = min(dp[l][k] + dp[k+1][r]).
 // - Complexity: Time: O(N^3), Space: O(N^2).
 
-// =========================================================
-// 12. SUBSET ENUMERATION & SUM OF ALL SUBSETS
-// =========================================================
+// ============================================================
+// 11. SUBSET ENUMERATION & SUM OF ALL SUBSETS
+// ============================================================
 
 vvi generateSubsets(const vi &nums) {
     int n = nums.size(); vvi subsets;
@@ -319,9 +295,9 @@ int sumOfAllSubsets(const vi &nums) {
 // - Intuition: Bitmask integer i represents subset where j-th bit indicates inclusion of nums[j].
 // - Complexity: Time: O(N * 2^N), Space: O(N * 2^N).
 
-// =========================================================
-// 13. KADANE'S MAXIMUM SUBARRAY SUM WITH INDICES
-// =========================================================
+// ============================================================
+// 12. KADANE'S MAXIMUM SUBARRAY SUM WITH INDICES
+// ============================================================
 
 vi kadane(const vi &nums) {
     int n = nums.size(), max_sum = -2e9, cur_sum = 0, start = 0, end = 0, temp_start = 0;
@@ -338,9 +314,9 @@ vi kadane(const vi &nums) {
 // - Intuition: Accumulate sum; if current sum drops below 0, reset start pointer to next index.
 // - Complexity: Time: O(N), Space: O(1).
 
-// =========================================================
-// 14. PERMUTATION GENERATION (BITMASK BACKTRACKING)
-// =========================================================
+// ============================================================
+// 13. PERMUTATION GENERATION (BITMASK BACKTRACKING)
+// ============================================================
 
 void solvePerm(const vi &nums, vi &cur, vvi &ans, int mask) {
     if (cur.size() == nums.size()) { ans.push_back(cur); return; }
@@ -360,9 +336,9 @@ vvi generatePermutations(const vi &nums) {
 // - Intuition: Place every unused element at current position, recurse, and backtrack.
 // - Complexity: Time: O(N! * N), Space: O(N! * N).
 
-// =========================================================
-// 15. LONGEST PALINDROMIC SUBSEQUENCE (LPS)
-// =========================================================
+// ============================================================
+// 14. LONGEST PALINDROMIC SUBSEQUENCE (LPS)
+// ============================================================
 
 int lps(const string &s) {
     int n = s.size(); vvi dp(n, vi(n, 0));
@@ -381,9 +357,9 @@ int lps(const string &s) {
 // - Intuition: If s[l] == s[r], dp[l][r] = 2 + dp[l+1][r-1]; otherwise max(dp[l+1][r], dp[l][r-1]).
 // - Complexity: Time: O(N^2), Space: O(N^2).
 
-// =========================================================
-// 16. CHECK SUBSEQUENCE
-// =========================================================
+// ============================================================
+// 15. CHECK SUBSEQUENCE
+// ============================================================
 
 bool checkSubsequence(const string &s, const string &t) {
     int n = s.size(), m = t.size(), i = 0, j = 0;
@@ -396,9 +372,9 @@ bool checkSubsequence(const string &s, const string &t) {
 // - Intuition: Advance pointer in s searching for next required character of t.
 // - Complexity: Time: O(|S|), Space: O(1).
 
-// =========================================================
-// 17. PRECOMPUTE PALINDROMIC SUBARRAYS TABLE
-// =========================================================
+// ============================================================
+// 16. PRECOMPUTE PALINDROMIC SUBARRAYS TABLE
+// ============================================================
 
 vvi palindromeTable(const vi &nums) {
     int n = nums.size(); vvi is_pal(n, vi(n, 0));
@@ -416,9 +392,9 @@ vvi palindromeTable(const vi &nums) {
 // - Intuition: is_pal[l][r] = (nums[l] == nums[r]) && is_pal[l+1][r-1].
 // - Complexity: Time: O(N^2), Space: O(N^2).
 
-// =========================================================
-// 18. BOOTH'S ALGORITHM (MINIMUM STRING ROTATION)
-// =========================================================
+// ============================================================
+// 17. BOOTH'S ALGORITHM (MINIMUM STRING ROTATION)
+// ============================================================
 
 string boothAlgorithm(const string &s) {
     string t = s + s; int n = s.size(), i = 0, j = 1, k = 0;
@@ -435,9 +411,9 @@ string boothAlgorithm(const string &s) {
 // - Intuition: Compare candidate rotations i and j on s + s; skip past mismatch offset k.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
-// 19. MINIMUM EXCLUDED VALUE (MEX)
-// =========================================================
+// ============================================================
+// 18. MINIMUM EXCLUDED VALUE (MEX)
+// ============================================================
 
 int mex(const vi &nums) {
     unordered_set<int> st(nums.begin(), nums.end()); int val = 0;
@@ -450,34 +426,9 @@ int mex(const vi &nums) {
 // - Intuition: Increment counter from 0 until first missing integer in set.
 // - Complexity: Time: O(N) average, Space: O(N).
 
-// =========================================================
-// 20. INVERSION COUNT (a[i] > x * a[j])
-// =========================================================
-
-int countInversions(vi &a, int l, int r, int x) {
-    if (l >= r) return 0;
-    int m = l + (r - l) / 2;
-    int cnt = countInversions(a, l, m, x) + countInversions(a, m + 1, r, x), j = m + 1;
-    for (int i = l; i <= m; i++) {
-        while (j <= r && a[i] > 1LL * x * a[j]) j++;
-        cnt += (j - (m + 1));
-    }
-    vi temp; int i = l; j = m + 1;
-    while (i <= m && j <= r) temp.push_back((a[i] <= a[j]) ? a[i++] : a[j++]);
-    while (i <= m) temp.push_back(a[i++]);
-    while (j <= r) temp.push_back(a[j++]);
-    copy(temp.begin(), temp.end(), a.begin() + l);
-    return cnt;
-}
-// Interview Explanation:
-// - Problem Statement: Count pairs (i, j) with i < j and a[i] > x * a[j].
-// - Approach: Divide-and-Conquer Merge Sort with cross-inversion two-pointer scan.
-// - Intuition: Count cross-pairs across sorted halves in linear time before merging.
-// - Complexity: Time: O(N \log N), Space: O(N).
-
-// =========================================================
-// 21. MATRIX MULTIPLICATION & MATRIX EXPONENTIATION
-// =========================================================
+// ============================================================
+// 19. MATRIX MULTIPLICATION & MATRIX EXPONENTIATION
+// ============================================================
 
 vvi multiplyMatrices(const vvi &A, const vvi &B) {
     int n = A.size(), m = B[0].size(), p = B.size(); vvi C(n, vi(m, 0));
@@ -502,9 +453,9 @@ vvi powerMatrices(vvi A, ll b) {
 // - Intuition: Repeatedly square transformation matrix with identity base.
 // - Complexity: Time: O(N^3 \log B), Space: O(N^2).
 
-// =========================================================
-// 22. N-TH FIBONACCI (MATRIX EXPONENTIATION)
-// =========================================================
+// ============================================================
+// 20. N-TH FIBONACCI (MATRIX EXPONENTIATION)
+// ============================================================
 
 ll nthFibonacci(ll n) {
     if (n == 1) return 1 % MOD;
@@ -519,9 +470,9 @@ ll nthFibonacci(ll n) {
 // - Intuition: Recurrence [F(n), F(n-1)]^T = [[1, 1], [1, 0]]^(n-2) * [F(2), F(1)]^T.
 // - Complexity: Time: O(\log N), Space: O(1).
 
-// =========================================================
-// 23. TOTAL AREA COVERED BY TWO 2D RECTANGLES
-// =========================================================
+// ============================================================
+// 21. TOTAL AREA COVERED BY TWO 2D RECTANGLES
+// ============================================================
 
 int computeArea(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
     int area1 = (x2 - x1) * (y2 - y1), area2 = (x4 - x3) * (y4 - y3);
@@ -534,9 +485,9 @@ int computeArea(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) 
 // - Intuition: Total area = Area(A) + Area(B) - Overlap(A, B).
 // - Complexity: Time: O(1), Space: O(1).
 
-// =========================================================
-// 24. BALANCED PARENTHESES STRINGS COUNT (CATALAN NUMBER)
-// =========================================================
+// ============================================================
+// 22. BALANCED PARENTHESES STRINGS COUNT (CATALAN NUMBER)
+// ============================================================
 
 ll countOfBalancedParentheses(int len) {
     if (len % 2 != 0) return 0;

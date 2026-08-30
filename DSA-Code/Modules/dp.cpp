@@ -84,6 +84,8 @@ using vvl = vector<vector<ll>>;
  | 46 | Minimum Cost For Tickets (LC 983)           | 1D Travel Day Reachability DP     | O(365)   | O(365)   |
  | 47 | Dungeon Game (LC 174)                       | Bottom-Up Reverse Knight Health DP| O(M * N) | O(M * N) |
  | 48 | Cherry Pickup (LC 741)                      | Synchronous 2-Agent Manhattan DP  | O(N^3)   | O(N^2)   |
+ | 49 | Maximum Product Subarray (LC 152)           | 2-State Max/Min Running DP        | O(N)     | O(1)     |
+ | 50 | Ninja's Training (GeeksforGeeks)            | 2D Activity Transitions O(1) Space| O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -1285,6 +1287,48 @@ public:
     // - Problem Statement: Collect maximum cherries going from (0,0) to (n-1,n-1) and returning back (LeetCode 741).
     // - Approach: Synchronous 2-Agent Manhattan Distance Step DP ($r_1 + c_1 = r_2 + c_2 = 	ext{step}$).
     // - Complexity: Time: O(N^3), Space: O(N^2).
+
+    // 49. Maximum Product Subarray (LeetCode 152)
+    int maxProduct(vi& nums) {
+        int n = nums.size();
+        int max_prod = nums[0], min_prod = nums[0], ans = nums[0];
+        for (int i = 1; i < n; i++) {
+            if (nums[i] < 0) swap(max_prod, min_prod);
+            max_prod = max(nums[i], max_prod * nums[i]);
+            min_prod = min(nums[i], min_prod * nums[i]);
+            ans = max(ans, max_prod);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find a contiguous non-empty subarray that has the largest product (LeetCode 152).
+    // - Approach: Dynamic Programming tracking running maximum and minimum products.
+    // - Intuition: A negative number flips max and min; swap max_prod and min_prod on negative elements.
+    // - Complexity: Time: O(N), Space: O(1).
+
+    // 50. Ninja's Training (GeeksforGeeks)
+    int ninjaTraining(int n, vvi& points) {
+        vi prev(4, 0);
+        for (int last = 0; last < 4; last++) {
+            for (int task = 0; task < 3; task++) {
+                if (task != last) prev[last] = max(prev[last], points[0][task]);
+            }
+        }
+        for (int day = 1; day < n; day++) {
+            vi curr(4, 0);
+            for (int last = 0; last < 4; last++) {
+                for (int task = 0; task < 3; task++) {
+                    if (task != last) curr[last] = max(curr[last], points[day][task] + prev[task]);
+                }
+            }
+            prev = curr;
+        }
+        return prev[3];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Maximize total points over N days with 3 daily activities without performing the same activity consecutively.
+    // - Approach: 2D Dynamic Programming with space compression to O(1) size-4 array.
+    // - Complexity: Time: O(N), Space: O(1).
 
 };
 

@@ -38,39 +38,37 @@ const ll MOD = 1e9 + 7;
  ====================================================================================================
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
- | 1  | K-th Element & Median of 2 Sorted Arrays    | Binary Search on Partition Cut    | O(log min| O(1)     |
- | 2  | Next Greater Permutation                    | 3-Step Suffix Inversion Reversal   | O(N)     | O(1)     |
- | 3  | Longest Substring Without Repeating Chars   | Sliding Window + Last Seen Map    | O(N)     | O(min N) |
- | 4  | Min Moves to Gather K Consecutive Ones      | Shifted Index + Median Prefix Sum | O(N)     | O(N)     |
- | 5  | 2D Prefix Sum Matrix                        | 2D Inclusion-Exclusion Prefix DP   | O(M * N) | O(M * N) |
- | 6  | Count Subarrays with Bitwise AND Equal to K | Hash Map DP on Frontier Values    | O(N * 30)| O(N)     |
- | 7  | Multiply Two 2D Matrices                    | 3-Nested Loop Dot Products         | O(M*N*P) | O(M * P) |
- | 8  | Count Subsequences with Sum Equal to K      | 1D 0/1 Knapsack DP (Backwards)    | O(N * K) | O(K)     |
- | 9  | Row with Maximum 1s in Binary Matrix        | Top-Right Corner Staircase Scan   | O(N + M) | O(1)     |
- | 10 | Max Components Tree Split with Equal Sum    | Divisors + Subtree DFS Cuts       | O(N*div) | O(N)     |
- | 11 | Wildcard Pattern Matching                   | 2D DP Memoization ('?' and '*')   | O(|S||P|) | O(|S||P|)|
- | 12 | Next Greater Element                        | Monotonic Decreasing Stack        | O(N)     | O(N)     |
- | 13 | Next Smaller Element                        | Monotonic Increasing Stack        | O(N)     | O(N)     |
- | 14 | Previous Greater Element                    | Monotonic Decreasing Stack        | O(N)     | O(N)     |
- | 15 | Previous Smaller Element                    | Monotonic Increasing Stack        | O(N)     | O(N)     |
- | 16 | Stock Span Problem                          | Monotonic Stack of Indices        | O(N)     | O(N)     |
- | 17 | Next Greater Element in Circular Array      | Monotonic Stack on Doubled (2N)   | O(N)     | O(N)     |
- | 18 | Sum of Subarray Minimums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
- | 19 | Maximum Score of Good Subarray              | Monotonic Stack Range Bounds (K)  | O(N)     | O(N)     |
- | 20 | Sum of Subarray Maximums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
- | 21 | Max of Minimums for Every Window Size       | Monotonic Stack + Suffix Max      | O(N)     | O(N)     |
- | 22 | Array Median using Quickselect              | Randomized QuickSelect (Lomuto)   | O(N) avg | O(1)     |
- | 23 | N x N MEX Grid Construction                 | Bitwise XOR Matrix (i ^ j)        | O(N^2)   | O(N^2)   |
- | 24 | Binary Lifting (LCA, K-th Ancestor)         | Ancestor Doubling Table up[u][j]  | O(N logN)| O(N logN)|
- | 25 | Digit DP Template                           | Digit Memo (pos,start,tight,state)| O(dig*st)| O(dig*st)|
- | 26 | Cycle Detection & Reconstruction            | DFS Parent Trace / Bellman-Ford   | O(V+E)/VE| O(V)     |
- | 27 | Make Array Non-Decreasing (Slope Trick)     | Greedy Max-Heap Slope Inflection  | O(N logN)| O(N)     |
+ | 1  | K-th Element & Median of 2 Sorted Arrays    | Binary Search on Partition Cut    | O(log min | O(1)     |
+ | 2  | Longest Substring Without Repeating Chars   | Sliding Window + Last Seen Map    | O(N)     | O(min N) |
+ | 3  | Min Moves to Gather K Consecutive Ones      | Shifted Index + Median Prefix Sum | O(N)     | O(N)     |
+ | 4  | 2D Prefix Sum Matrix                        | 2D Inclusion-Exclusion Prefix DP  | O(M * N) | O(M * N) |
+ | 5  | Count Subarrays with Bitwise AND Equal to K | Hash Map DP on Frontier Values    | O(N * 30) | O(N)     |
+ | 6  | Multiply Two 2D Matrices                    | 3-Nested Loop Dot Products        | O(M*N*P) | O(M * P) |
+ | 7  | Count Subsequences with Sum Equal to K      | 1D 0/1 Knapsack DP (Backwards)    | O(N * K) | O(K)     |
+ | 8  | Max Components Tree Split with Equal Sum    | Divisors + Subtree DFS Cuts       | O(N*div) | O(N)     |
+ | 9  | Wildcard Pattern Matching                   | 2D DP Memoization ('?' and '*')   | O(       | S        |
+ | 10 | Next Greater Element                        | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 11 | Next Smaller Element                        | Monotonic Increasing Stack        | O(N)     | O(N)     |
+ | 12 | Previous Greater Element                    | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 13 | Previous Smaller Element                    | Monotonic Increasing Stack        | O(N)     | O(N)     |
+ | 14 | Stock Span Problem                          | Monotonic Stack of Indices        | O(N)     | O(N)     |
+ | 15 | Next Greater Element in Circular Array      | Monotonic Stack on Doubled (2N)   | O(N)     | O(N)     |
+ | 16 | Sum of Subarray Minimums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
+ | 17 | Maximum Score of Good Subarray              | Monotonic Stack Range Bounds (K)  | O(N)     | O(N)     |
+ | 18 | Sum of Subarray Maximums                    | Monotonic Stack Contribution      | O(N)     | O(N)     |
+ | 19 | Max of Minimums for Every Window Size       | Monotonic Stack + Suffix Max      | O(N)     | O(N)     |
+ | 20 | Array Median using Quickselect              | Randomized QuickSelect (Lomuto)   | O(N) avg | O(1)     |
+ | 21 | N x N MEX Grid Construction                 | Bitwise XOR Matrix (i ^ j)        | O(N^2)   | O(N^2)   |
+ | 22 | Binary Lifting (LCA, K-th Ancestor)         | Ancestor Doubling Table up[u][j]  | O(N logN) | O(N logN) |
+ | 23 | Digit DP Template                           | Digit Memo (pos,start,tight,state) | O(dig*st) | O(dig*st) |
+ | 24 | Cycle Detection & Reconstruction            | DFS Parent Trace / Bellman-Ford   | O(V+E)/VE | O(V)     |
+ | 25 | Make Array Non-Decreasing (Slope Trick)     | Greedy Max-Heap Slope Inflection  | O(N logN) | O(N)     |
  ====================================================================================================
 */
 
-// =========================================================
+// ============================================================
 // 1. K-TH ELEMENT & MEDIAN OF TWO SORTED ARRAYS
-// =========================================================
+// ============================================================
 
 int kthElement(const vi &nums1, const vi &nums2, int k) {
     if (nums1.size() > nums2.size()) return kthElement(nums2, nums1, k);
@@ -96,29 +94,9 @@ int median(const vi &nums1, const vi &nums2) {
 // - Intuition: Partition both arrays into left and right halves with total size k; valid partition satisfies l1 <= r2 and l2 <= r1, giving answer max(l1, l2).
 // - Complexity: Time: O(log(min(M, N))) binary search, Space: O(1) auxiliary space.
 
-// =========================================================
-// 2. NEXT GREATER PERMUTATION
-// =========================================================
-
-void nextPermutation(vi &nums) {
-    int n = nums.size(), i = n - 2;
-    while (i >= 0 && nums[i] >= nums[i + 1]) i--;
-    if (i >= 0) {
-        int j = n - 1;
-        while (nums[j] <= nums[i]) j--;
-        swap(nums[i], nums[j]);
-    }
-    reverse(nums.begin() + i + 1, nums.end());
-}
-// Interview Explanation:
-// - Problem Statement: Rearrange numbers into the lexicographically next greater permutation in-place.
-// - Approach: Standard 3-step lexicographical successor algorithm.
-// - Intuition: Find rightmost index i where nums[i] < nums[i+1], swap with smallest element to its right greater than nums[i], and reverse suffix nums[i+1...n-1].
-// - Complexity: Time: O(N) single pass and reverse, Space: O(1) in-place.
-
-// =========================================================
-// 3. LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS
-// =========================================================
+// ============================================================
+// 2. LONGEST SUBSTRING WITHOUT REPEATING CHARACTERS
+// ============================================================
 
 int lengthOfLongestSubstring(const string &s) {
     unordered_map<char, int> last_seen;
@@ -136,9 +114,9 @@ int lengthOfLongestSubstring(const string &s) {
 // - Intuition: If character at right pointer was seen inside current window, jump left pointer to last_seen[c] + 1; update max window length r - l + 1.
 // - Complexity: Time: O(N) linear scan, Space: O(min(N, alphabet)) for character map.
 
-// =========================================================
-// 4. MINIMUM MOVES TO GATHER K CONSECUTIVE ONES
-// =========================================================
+// ============================================================
+// 3. MINIMUM MOVES TO GATHER K CONSECUTIVE ONES
+// ============================================================
 
 ll minMoves(const vi &nums, int k) {
     vl pos;
@@ -160,9 +138,9 @@ ll minMoves(const vi &nums, int k) {
 // - Intuition: For 1s at positions p_0, p_1, ..., shifting by p_i - i transforms grouping adjacent elements into gathering coordinates to their median, solvable via prefix sums.
 // - Complexity: Time: O(N) single pass and sliding window, Space: O(N) for shifted coordinates and prefix array.
 
-// =========================================================
-// 5. 2D PREFIX SUM MATRIX
-// =========================================================
+// ============================================================
+// 4. 2D PREFIX SUM MATRIX
+// ============================================================
 
 vvi prefixSum2D(const vvi &matrix) {
     int m = matrix.size(), n = matrix[0].size();
@@ -180,9 +158,9 @@ vvi prefixSum2D(const vvi &matrix) {
 // - Intuition: Each cell sum is matrix[i][j] + pref[i-1][j] + pref[i][j-1] - pref[i-1][j-1], adding top and left sums and removing double-counted diagonal.
 // - Complexity: Time: O(M * N) filling 2D grid, Space: O(M * N) for prefix sum matrix.
 
-// =========================================================
-// 6. COUNT SUBARRAYS WITH BITWISE AND EQUAL TO K
-// =========================================================
+// ============================================================
+// 5. COUNT SUBARRAYS WITH BITWISE AND EQUAL TO K
+// ============================================================
 
 ll countSubarraysWithAND(const vi &nums, int k) {
     ll ans = 0;
@@ -201,9 +179,9 @@ ll countSubarraysWithAND(const vi &nums, int k) {
 // - Intuition: As elements are added, cumulative bitwise AND can change value at most 30 times; maintain counts of distinct AND values ending at previous index and transition.
 // - Complexity: Time: O(N * 30) = O(N log(max_val)), Space: O(N) for hash maps.
 
-// =========================================================
-// 7. MULTIPLY TWO 2D MATRICES
-// =========================================================
+// ============================================================
+// 6. MULTIPLY TWO 2D MATRICES
+// ============================================================
 
 vvi multiplyMatrices2D(const vvi &A, const vvi &B) {
     int m = A.size(), n = A[0].size(), p = B[0].size();
@@ -219,9 +197,9 @@ vvi multiplyMatrices2D(const vvi &A, const vvi &B) {
 // - Intuition: Each entry C[i][j] = sum(A[i][k] * B[k][j]) computes the dot product of row i of A and column j of B.
 // - Complexity: Time: O(M * N * P) triple loop, Space: O(M * P) for result matrix.
 
-// =========================================================
-// 8. COUNT SUBSEQUENCES WITH SUM EQUAL TO K
-// =========================================================
+// ============================================================
+// 7. COUNT SUBSEQUENCES WITH SUM EQUAL TO K
+// ============================================================
 
 ll countSubsequences(const vi &nums, int k) {
     vl dp(k + 1, 0); dp[0] = 1;
@@ -235,27 +213,9 @@ ll countSubsequences(const vi &nums, int k) {
 // - Intuition: dp[sum] += dp[sum - x] scanning backwards from K down to x to prevent using the same element multiple times in the same subset.
 // - Complexity: Time: O(N * K) nested loop, Space: O(K) rolling DP vector.
 
-// =========================================================
-// 9. ROW WITH MAXIMUM 1s IN BINARY MATRIX
-// =========================================================
-
-int rowWithMax1s(const vvi &mat) {
-    int n = mat.size(), m = mat[0].size(), row = 0, col = m - 1, ans = -1;
-    while (row < n && col >= 0) {
-        if (mat[row][col] == 1) { ans = row; col--; }
-        else row++;
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find the 0-based index of the row with the maximum number of 1s in a row-sorted binary matrix.
-// - Approach: Top-Right corner staircase elimination.
-// - Intuition: Start at top-right (0, m-1); if cell is 1, update best row and move left (col--); else move down (row++); each step eliminates one row or column.
-// - Complexity: Time: O(N + M) at most N down and M left steps, Space: O(1) auxiliary space.
-
-// =========================================================
-// 10. MAXIMUM COMPONENTS TREE SPLIT WITH EQUAL SUM
-// =========================================================
+// ============================================================
+// 8. MAXIMUM COMPONENTS TREE SPLIT WITH EQUAL SUM
+// ============================================================
 
 static bool ok_comp;
 ll dfsMaxComp(int u, int p, const vvi &g, const vi &val, ll target) {
@@ -285,9 +245,9 @@ int maxComponents(const vi &val, const vvi &g) {
 // - Intuition: Number of components must divide total sum; test divisors in ascending order; DFS returns 0 when subtree reaches target sum, effectively cutting the component.
 // - Complexity: Time: O(N * divisors(total_sum)), Space: O(N) for recursion stack.
 
-// =========================================================
-// 11. WILDCARD PATTERN MATCHING
-// =========================================================
+// ============================================================
+// 9. WILDCARD PATTERN MATCHING
+// ============================================================
 
 bool wildcardHelper(const string &s, const string &p, int i, int j, vvi &dp) {
     int n = s.size(), m = p.size();
@@ -314,9 +274,9 @@ bool wildcardMatch(const string &s, const string &p) {
 // - Intuition: '?' matches any single character; '*' branches into matching 0 characters (solve(i, j+1)) or 1+ characters (solve(i+1, j)).
 // - Complexity: Time: O(|S| * |P|) unique state pairs, Space: O(|S| * |P|) for DP memoization table.
 
-// =========================================================
-// 12. NEXT GREATER ELEMENT
-// =========================================================
+// ============================================================
+// 10. NEXT GREATER ELEMENT
+// ============================================================
 
 vi nextGreaterElement(const vi &nums) {
     int n = nums.size(); vi ans(n, -1); stack<int> st;
@@ -332,9 +292,9 @@ vi nextGreaterElement(const vi &nums) {
 // - Intuition: Current element resolves all smaller elements pending on top of stack; pop them, set ans[st.top()] = nums[i], then push current index.
 // - Complexity: Time: O(N) each element pushed and popped at most once, Space: O(N) for stack and result array.
 
-// =========================================================
-// 13. NEXT SMALLER ELEMENT
-// =========================================================
+// ============================================================
+// 11. NEXT SMALLER ELEMENT
+// ============================================================
 
 vi nextSmallerElement(const vi &nums) {
     int n = nums.size(); vi ans(n, -1); stack<int> st;
@@ -350,9 +310,9 @@ vi nextSmallerElement(const vi &nums) {
 // - Intuition: Current element resolves all strictly larger elements pending on top of stack; pop them and record answer.
 // - Complexity: Time: O(N) linear stack pass, Space: O(N) for stack and result vector.
 
-// =========================================================
-// 14. PREVIOUS GREATER ELEMENT
-// =========================================================
+// ============================================================
+// 12. PREVIOUS GREATER ELEMENT
+// ============================================================
 
 vi previousGreaterElement(const vi &nums) {
     int n = nums.size(); vi ans(n, -1); stack<int> st;
@@ -369,9 +329,9 @@ vi previousGreaterElement(const vi &nums) {
 // - Intuition: Pop all elements smaller than or equal to nums[i]; if stack is non-empty, top is the nearest previous greater element.
 // - Complexity: Time: O(N) single forward pass, Space: O(N) for stack.
 
-// =========================================================
-// 15. PREVIOUS SMALLER ELEMENT
-// =========================================================
+// ============================================================
+// 13. PREVIOUS SMALLER ELEMENT
+// ============================================================
 
 vi previousSmallerElement(const vi &nums) {
     int n = nums.size(); vi ans(n, -1); stack<int> st;
@@ -388,9 +348,9 @@ vi previousSmallerElement(const vi &nums) {
 // - Intuition: Pop all elements greater than or equal to nums[i]; remaining top of stack is the nearest previous smaller element.
 // - Complexity: Time: O(N) single forward pass, Space: O(N) for stack.
 
-// =========================================================
-// 16. STOCK SPAN PROBLEM
-// =========================================================
+// ============================================================
+// 14. STOCK SPAN PROBLEM
+// ============================================================
 
 vi stockSpan(const vi &prices) {
     int n = prices.size(); vi span(n); stack<int> st;
@@ -407,9 +367,9 @@ vi stockSpan(const vi &prices) {
 // - Intuition: Pop all prices smaller than or equal to today's; span is i - st.top() (or i + 1 if stack becomes empty).
 // - Complexity: Time: O(N) linear time, Space: O(N) for stack.
 
-// =========================================================
-// 17. NEXT GREATER ELEMENT IN CIRCULAR ARRAY
-// =========================================================
+// ============================================================
+// 15. NEXT GREATER ELEMENT IN CIRCULAR ARRAY
+// ============================================================
 
 vi nextGreaterCircular(const vi &nums) {
     int n = nums.size(); vi ans(n, -1); stack<int> st;
@@ -425,9 +385,9 @@ vi nextGreaterCircular(const vi &nums) {
 // - Intuition: Traversing 2N indices with modulo index i % n simulates circular wrap-around while maintaining a standard monotonic decreasing stack.
 // - Complexity: Time: O(N) two passes through array, Space: O(N) for stack.
 
-// =========================================================
-// 18. SUM OF SUBARRAY MINIMUMS
-// =========================================================
+// ============================================================
+// 16. SUM OF SUBARRAY MINIMUMS
+// ============================================================
 
 ll sumSubarrayMins(const vi &arr) {
     int n = arr.size(); stack<int> st; ll ans = 0;
@@ -447,9 +407,9 @@ ll sumSubarrayMins(const vi &arr) {
 // - Intuition: Each element a[i] is the minimum for (i - l) * (r - i) subarrays where l is previous strictly smaller and r is next smaller or equal index.
 // - Complexity: Time: O(N) single pass with monotonic stack, Space: O(N) for stack.
 
-// =========================================================
-// 19. MAXIMUM SCORE OF GOOD SUBARRAY
-// =========================================================
+// ============================================================
+// 17. MAXIMUM SCORE OF GOOD SUBARRAY
+// ============================================================
 
 int maximumScore(const vi &nums, int k) {
     int n = nums.size(); stack<int> st; ll ans = 0;
@@ -469,9 +429,9 @@ int maximumScore(const vi &nums, int k) {
 // - Intuition: For each element treated as the minimum, its validity domain is (l, r); check if index k in (l, r) and maximize nums[mid] * (r - l - 1).
 // - Complexity: Time: O(N) single pass with monotonic stack, Space: O(N) for stack.
 
-// =========================================================
-// 20. SUM OF SUBARRAY MAXIMUMS
-// =========================================================
+// ============================================================
+// 18. SUM OF SUBARRAY MAXIMUMS
+// ============================================================
 
 ll sumSubarrayMaxs(const vi &arr) {
     int n = arr.size(); stack<int> st; ll ans = 0;
@@ -491,9 +451,9 @@ ll sumSubarrayMaxs(const vi &arr) {
 // - Intuition: Each element a[i] is the maximum for (i - l) * (r - i) subarrays where l is previous strictly greater and r is next greater or equal index.
 // - Complexity: Time: O(N) linear monotonic stack pass, Space: O(N) for stack.
 
-// =========================================================
-// 21. MAXIMUM OF MINIMUMS FOR EVERY WINDOW SIZE
-// =========================================================
+// ============================================================
+// 19. MAXIMUM OF MINIMUMS FOR EVERY WINDOW SIZE
+// ============================================================
 
 vi maxOfMins(const vi &arr) {
     int n = arr.size(); vi ans(n + 1, INT_MIN); stack<int> st;
@@ -516,9 +476,9 @@ vi maxOfMins(const vi &arr) {
 // - Intuition: For each element a[i] with maximal window length L = r - l - 1 where it is the minimum, set ans[L] = max(ans[L], a[i]); then compute suffix maximums backwards.
 // - Complexity: Time: O(N) two linear passes, Space: O(N) for stack and result vectors.
 
-// =========================================================
-// 22. ARRAY MEDIAN USING QUICKSELECT
-// =========================================================
+// ============================================================
+// 20. ARRAY MEDIAN USING QUICKSELECT
+// ============================================================
 
 int quickPartition(vi &arr, int l, int r) {
     int rand_idx = l + rand() % (r - l + 1);
@@ -547,9 +507,9 @@ double findMedian(vi &arr) {
 // - Intuition: Randomly partition array; discard the irrelevant half to find the element that lands at N/2 (and N/2 - 1 for even lengths).
 // - Complexity: Time: O(N) average time (O(N^2) worst case), Space: O(1) auxiliary in-place.
 
-// =========================================================
-// 23. N x N MEX GRID CONSTRUCTION
-// =========================================================
+// ============================================================
+// 21. N x N MEX GRID CONSTRUCTION
+// ============================================================
 
 vvi mexGridConstruction(int n) {
     vvi grid(n, vi(n));
@@ -563,9 +523,9 @@ vvi mexGridConstruction(int n) {
 // - Intuition: XOR addition ensures every row and column contains a permutation of values, satisfying MEX (minimum excluded) grid properties.
 // - Complexity: Time: O(N^2) filling grid, Space: O(N^2) for grid matrix.
 
-// =========================================================
-// 24. BINARY LIFTING (LCA, K-TH ANCESTOR, PATH QUERIES)
-// =========================================================
+// ============================================================
+// 22. BINARY LIFTING (LCA, K-TH ANCESTOR, PATH QUERIES)
+// ============================================================
 
 struct BinaryLifting {
     static const int LOG = 21;
@@ -608,9 +568,9 @@ struct BinaryLifting {
 // - Intuition: Precompute 2^k-th ancestors via up[u][j] = up[up[u][j-1]][j-1]; any ancestor jump can be decomposed into binary powers of 2 in O(log N) time.
 // - Complexity: Time: O(N \log N) preprocessing, O(\log N) per query, Space: O(N \log N) table storage.
 
-// =========================================================
-// 25. DIGIT DP TEMPLATE
-// =========================================================
+// ============================================================
+// 23. DIGIT DP TEMPLATE
+// ============================================================
 
 struct DigitDP {
     string s;
@@ -637,9 +597,9 @@ struct DigitDP {
 // - Intuition: Construct numbers digit by digit from most to least significant; tight flag indicates whether choice is restricted by digits of N.
 // - Complexity: Time: O(digits * states) = O(18 * 2 * 2 * 100), Space: O(digits * states) memo table.
 
-// =========================================================
-// 26. CYCLE DETECTION & RECONSTRUCTION (UNDIRECTED / DIRECTED / NEGATIVE)
-// =========================================================
+// ============================================================
+// 24. CYCLE DETECTION & RECONSTRUCTION (UNDIRECTED / DIRECTED / NEGATIVE)
+// ============================================================
 
 vi buildCycle(int s, int e, const vi &par) {
     vi cyc; cyc.push_back(e);
@@ -704,9 +664,9 @@ vi findNegativeCycle(int n, const vector<EdgeItem> &edges) {
 // - Intuition: Back-edge collision records start and end vertices; backtracking through parent pointers recovers the exact cyclic path sequence.
 // - Complexity: Time: O(V + E) for DFS, O(V * E) for Bellman-Ford, Space: O(V) for visited and parent arrays.
 
-// =========================================================
-// 27. MAKE ARRAY NON-DECREASING (SLOPE TRICK)
-// =========================================================
+// ============================================================
+// 25. MAKE ARRAY NON-DECREASING (SLOPE TRICK)
+// ============================================================
 
 ll makeArrayNonDecreasing(const vi &nums) {
     ll total_cost = 0; priority_queue<int> max_heap;

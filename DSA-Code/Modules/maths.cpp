@@ -26,6 +26,8 @@ using namespace std;
 
 using ll = long long;
 using ull = unsigned long long;
+using pii = pair<int, int>;
+using vi = vector<int>;
 
 const ll MOD = 1e9 + 7;
 
@@ -75,6 +77,8 @@ const ll MOD = 1e9 + 7;
  | 38 | 2D Vector Cross Product                     | ax * by - ay * bx                 | O(1)     | O(1)     |
  | 39 | Orientation of 3 Points                     | 2D Signed Cross Product Area      | O(1)     | O(1)     |
  | 40 | Modulo 2^k                                  | Bitmask AND: x & ((1 << k) - 1)   | O(1)     | O(1)     |
+ | 41 | Find Missing & Repeating Number             | XOR Bucket Separation Partition   | O(N)     | O(1)     |
+ | 42 | Sum of Two Integers - Bitwise (LC 371)      | Bitwise XOR & AND Carry Shift Loop| O(1)     | O(1)     |
  ====================================================================================================
 */
 
@@ -821,14 +825,48 @@ ll orientation(ll ax, ll ay, ll bx, ll by, ll cx, ll cy) {
 
 
 // ============================================================
-// 40. Modulo 2^k
+// 41. Find Missing and Repeating Number
 // ============================================================
 
-int modPowerOfTwo(int x, int k) {
-    return x & ((1 << k) - 1);
+pii findMissingAndRepeating(const vi& arr) {
+    int n = arr.size();
+    int xor_all = 0;
+    for (int i = 0; i < n; i++) {
+        xor_all ^= arr[i];
+        xor_all ^= (i + 1);
+    }
+    int set_bit = xor_all & -xor_all;
+    int b1 = 0, b2 = 0;
+    for (int i = 0; i < n; i++) {
+        if (arr[i] & set_bit) b1 ^= arr[i];
+        else b2 ^= arr[i];
+        if ((i + 1) & set_bit) b1 ^= (i + 1);
+        else b2 ^= (i + 1);
+    }
+    for (int x : arr) {
+        if (x == b1) return {b1, b2}; // {repeating, missing}
+    }
+    return {b2, b1};
 }
 // Interview Explanation:
-// - Problem Statement: Compute x % 2^k using bitwise operations.
-// - Approach: Bitwise AND with mask x & ((1 << k) - 1).
-// - Intuition: The remainder modulo 2^k is represented exactly by the lower k bits; (1 << k) - 1 masks these bits in O(1).
-// - Complexity: Time: O(1), Space: O(1).
+// - Problem Statement: Given an array of size N containing numbers from 1 to N with one missing and one repeating, find both.
+// - Approach: XOR sum separation by rightmost set bit.
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// ============================================================
+// 42. Sum of Two Integers - Bitwise (LeetCode 371)
+// ============================================================
+
+int getSum(int a, int b) {
+    while (b != 0) {
+        unsigned int carry = (unsigned int)(a & b) << 1;
+        a = a ^ b;
+        b = carry;
+    }
+    return a;
+}
+// Interview Explanation:
+// - Problem Statement: Calculate the sum of two integers a and b without using + or -.
+// - Approach: Bitwise XOR for sum without carry, Bitwise AND shifted left by 1 for carry.
+// - Complexity: Time: O(1) (at most 32 iterations), Space: O(1).

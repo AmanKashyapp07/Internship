@@ -66,6 +66,8 @@ const ll MOD = 1e9 + 7;
  | 25 | LFU Cache (LC 460)                          | Hash Map + Freq-to-List + minFreq | O(1) all | O(Cap)   |
  | 26 | The Celebrity Problem (LC 277)              | Two-Pointer Candidate Elimination | O(N)     | O(1)     |
  | 27 | Max of Mins Every Window Size               | Monotonic Stack (PSE/NSE) + Suffix| O(N)     | O(N)     |
+ | 28 | Count Bracket Reversals for Balance (GFG)   | Counter Balance Math ((o+1)/2+(c+1)/2)| O(N)  | O(1)     |
+ | 29 | LRU Cache (LC 146)                          | Hash Map + Doubly Linked List     | O(1) get/put| O(Cap) |
  ====================================================================================================
 */
 
@@ -991,6 +993,103 @@ vi maxOfMinWindow(const vi& arr) {
 // - Problem Statement: Find maximum of minimums for every window size from 1 to n (GFG / Striver SDE #90).
 // - Approach: Monotonic Stack (PSE & NSE) + Window aggregation.
 // - Intuition: Element `arr[i]` is minimum in a window of size `len = right[i] - left[i] - 1`. Populate `ans[len] = max(ans[len], arr[i])` and propagate backwards `ans[i] = max(ans[i], ans[i+1])`.
-// - Complexity: Time: O(N) linear time, Space: O(N).
+// =========================================================
+// 28. COUNT BRACKET REVERSALS FOR BALANCE (GFG)
+// =========================================================
+
+int countBracketReversals(string s) {
+    int n = s.size();
+    if (n % 2 != 0) return -1;
+
+    int open_needed = 0, close_needed = 0;
+    for (char c : s) {
+        if (c == '{') {
+            open_needed++;
+        } else {
+            if (open_needed > 0) open_needed--;
+            else close_needed++;
+        }
+    }
+
+    return (open_needed + 1) / 2 + (close_needed + 1) / 2;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum reversals of '{' and '}' to make expression balanced.
+// - Approach: Balance simulation counting unmatched open and close brackets.
+// - Intuition: Balance remaining open and close brackets: ceil(open/2) + ceil(close/2).
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// =========================================================
+// 29. LRU CACHE (LEETCODE 146)
+// =========================================================
+
+class LRUCache {
+private:
+    struct Node {
+        int key, val;
+        Node *prev, *next;
+        Node(int k, int v) : key(k), val(v), prev(nullptr), next(nullptr) {}
+    };
+
+    int cap;
+    unordered_map<int, Node*> cache;
+    Node *head, *tail;
+
+    void addNode(Node *node) {
+        node->next = head->next;
+        node->prev = head;
+        head->next->prev = node;
+        head->next = node;
+    }
+
+    void removeNode(Node *node) {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+    }
+
+    void moveToHead(Node *node) {
+        removeNode(node);
+        addNode(node);
+    }
+
+public:
+    LRUCache(int capacity) : cap(capacity) {
+        head = new Node(0, 0);
+        tail = new Node(0, 0);
+        head->next = tail;
+        tail->prev = head;
+    }
+
+    int get(int key) {
+        if (!cache.count(key)) return -1;
+        Node *node = cache[key];
+        moveToHead(node);
+        return node->val;
+    }
+
+    void put(int key, int value) {
+        if (cache.count(key)) {
+            Node *node = cache[key];
+            node->val = value;
+            moveToHead(node);
+        } else {
+            if ((int)cache.size() == cap) {
+                Node *lru = tail->prev;
+                cache.erase(lru->key);
+                removeNode(lru);
+                delete lru;
+            }
+            Node *node = new Node(key, value);
+            cache[key] = node;
+            addNode(node);
+        }
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Design a Least Recently Used (LRU) cache with O(1) get and put operations.
+// - Approach: Hash Map + Doubly Linked List with dummy head and tail sentinel nodes.
+// - Complexity: Time: O(1) get and put, Space: O(capacity).
+
 
 

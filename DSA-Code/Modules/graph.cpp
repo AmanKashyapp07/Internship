@@ -72,10 +72,18 @@ using namespace std;
  | 41 | Eulerian Path / Circuit (Hierholzer)        | Hierholzer's In-Out Degree Stack  | O(V + E)  | O(V + E) |
  | 42 | Tarjan's Strongly Connected Components      | Single-Pass Low-Link & Stack SCC  | O(V + E)  | O(V)     |
  | 43 | Distinct Numbers in Sliding Window          | Sliding Window Hash Map Frequencies| O(N)     | O(K)     |
+ | 44 | Graph Valid Tree (LC 261)                   | DSU Edge Count & Cycle Verification| O(N a(N))| O(N)     |
+ | 45 | Clone Graph (LC 133)                        | BFS / DFS + Node Clone Hash Map    | O(V + E)  | O(V)     |
  ====================================================================================================
 */
 
-
+struct GraphNode {
+    int val;
+    vector<GraphNode*> neighbors;
+    GraphNode() : val(0), neighbors(vector<GraphNode*>()) {}
+    GraphNode(int _val) : val(_val), neighbors(vector<GraphNode*>()) {}
+    GraphNode(int _val, vector<GraphNode*> _neighbors) : val(_val), neighbors(_neighbors) {}
+};
 
 class Solution {
 public:
@@ -1626,5 +1634,63 @@ public:
     // - Problem Statement: Count distinct elements in every sliding window of size k in an array (GFG / Striver SDE #149).
     // - Approach: Sliding Window with Hash Map frequency tracking.
     // - Intuition: Maintain frequency map for window of size k. When sliding, decrement frequency of exiting element (removing key if 0) and increment entering element; `freq.size()` directly gives distinct element count.
-    // - Complexity: Time: O(N) single pass, Space: O(K) hash map capacity.
+    // =========================================================
+    // 40. GRAPH VALID TREE (LEETCODE 261)
+    // =========================================================
+
+    bool validTree(int n, vector<vector<int>>& edges) {
+        if ((int)edges.size() != n - 1) return false;
+
+        vector<int> parent(n);
+        iota(parent.begin(), parent.end(), 0);
+
+        function<int(int)> find = [&](int u) {
+            return parent[u] == u ? u : parent[u] = find(parent[u]);
+        };
+
+        for (auto& edge : edges) {
+            int rootU = find(edge[0]), rootV = find(edge[1]);
+            if (rootU == rootV) return false;
+            parent[rootU] = rootV;
+        }
+
+        return true;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Given n nodes and undirected edges, determine if graph forms a valid tree (LC 261).
+    // - Approach: Disjoint Set Union (DSU) verifying edge count == n - 1 and acyclicity.
+    // - Complexity: Time: O(N \cdot \alpha(N)), Space: O(N).
+
+
+    // =========================================================
+    // 41. CLONE GRAPH (LEETCODE 133)
+    // =========================================================
+
+    GraphNode* cloneGraph(GraphNode* node) {
+        if (!node) return nullptr;
+        unordered_map<GraphNode*, GraphNode*> copies;
+        queue<GraphNode*> q;
+
+        copies[node] = new GraphNode(node->val);
+        q.push(node);
+
+        while (!q.empty()) {
+            GraphNode* curr = q.front();
+            q.pop();
+
+            for (GraphNode* neighbor : curr->neighbors) {
+                if (!copies.count(neighbor)) {
+                    copies[neighbor] = new GraphNode(neighbor->val);
+                    q.push(neighbor);
+                }
+                copies[curr]->neighbors.push_back(copies[neighbor]);
+            }
+        }
+
+        return copies[node];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Return a deep copy (clone) of a connected undirected graph (LC 133).
+    // - Approach: BFS / DFS with Hash Map mapping original nodes to cloned nodes.
+    // - Complexity: Time: O(V + E), Space: O(V) for clone hash map and queue.
 };

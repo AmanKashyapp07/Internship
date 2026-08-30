@@ -73,6 +73,7 @@ const ll P = 31;
  | 23 | Min Insertions for Palindrome (LC 1312)     | |S| - LCS(S, reverse(S)) DP       | O(N^2)   | O(N^2)   |
  | 24 | Count and Say (LC 38)                       | Run-Length Encoding Simulation    | O(2^N)   | O(2^N)   |
  | 25 | Compare Version Numbers (LC 165)            | Dot-Separated Numerical Parsing   | O(N + M) | O(1)     |
+ | 26 | Encode and Decode Strings (LC 271)          | Length-Prefixed Framing (<len>#<str>)| O(N)   | O(1)     |
  ====================================================================================================
 */
 
@@ -678,6 +679,34 @@ int compareVersion(string version1, string version2) {
     • Choice of Constants: `MOD = 1e9 + 7`, `P = 31` (lowercase) or `P = 53` (mixed case).
  ====================================================================================================
 */
+
+// ====================================================================================================
+// 26. ENCODE AND DECODE STRINGS (LEETCODE 271)
+// ====================================================================================================
+
+string encodeStrings(const vector<string>& strs) {
+    string encoded = "";
+    for (const string& s : strs) {
+        encoded += to_string(s.size()) + "#" + s;
+    }
+    return encoded;
+}
+
+vector<string> decodeStrings(const string& s) {
+    vector<string> result;
+    int i = 0, n = s.size();
+    while (i < n) {
+        int hash_pos = s.find('#', i);
+        int len = stoi(s.substr(i, hash_pos - i));
+        result.push_back(s.substr(hash_pos + 1, len));
+        i = hash_pos + 1 + len;
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Encode a list of strings to a single string and decode back to original list.
+// - Approach: Length-prefixed string framing (<length>#<string>).
+// - Complexity: Time: O(Total Characters), Space: O(1) auxiliary space.
 
 int main() {
     ios::sync_with_stdio(false);

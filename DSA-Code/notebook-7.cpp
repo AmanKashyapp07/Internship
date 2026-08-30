@@ -63,6 +63,20 @@ const ll MOD = 1e9 + 7;
  | 22 | House Robber III (LeetCode 337)            | Post-Order Tree DP (Rob / Skip)   | O(N)     | O(H)     |
  | 23 | House Robber IV (LeetCode 2560)           | Binary Search on Min Capability   | O(N logM)| O(1)     |
  | 24 | Delete and Earn / Robber V (LeetCode 740)  | Frequency Array Reduction to DP   | O(N+maxA)| O(maxA)  |
+ | 25 | Coin Change I — Fewest (LeetCode 322)      | 1D Unbounded Knapsack DP (Min)    | O(N * A) | O(A)     |
+ | 26 | Coin Change II — Combinations (LC 518)     | 1D Unbounded Combination DP       | O(N * A) | O(A)     |
+ | 27 | Coin Change Permutations (LeetCode 377)    | 1D Unbounded Permutation DP       | O(N * A) | O(A)     |
+ | 28 | Bounded Coin Change (Limited Supply)       | Binary Splitting + 0/1 Knapsack   | O(A logK)| O(A)     |
+ | 29 | Coin Change Path Reconstruction            | DP Predecessor Pointer Traceback  | O(N * A) | O(A)     |
+ | 30 | Reachable Money Sums (CSES Money Sums)     | 0/1 Knapsack Boolean Reachability | O(N*sum) | O(sum)   |
+ | 31 | Dutch National Flag (0, 1, 2 Sort)         | 3-Way In-Place Partitioning (DNF) | O(N)     | O(1)     |
+ | 32 | Counting Sort (Stable Implementation)      | Prefix Frequency Cumulative Table | O(N + K) | O(N + K) |
+ | 33 | Radix Sort (LSD Base-10)                   | Digit-by-Digit Stable Counting DP | O(D*(N+B)| O(N + B) |
+ | 34 | Bucket Sort (Uniform Distribution)         | Range Bucketing + Local Sorting   | O(N) avg | O(N)     |
+ | 35 | Cyclic Sort [1 to N]                       | In-Place Index Mapping Swap       | O(N)     | O(1)     |
+ | 36 | Pigeonhole Sort                            | Direct Hole Placement & Retrieval | O(N+Range| O(N+Range|
+ | 37 | Patience Sorting (LIS Extraction)          | Card Pile Lower-Bound Insertion   | O(N logN)| O(N)     |
+ | 38 | 3-Way QuickSort (Bentley-McIlroy)          | DNF Partitioning for Duplicates   | O(N logN)| O(log N) |
  ====================================================================================================
 */
 
@@ -602,3 +616,297 @@ int deleteAndEarn(vector<int>& nums) {
 // - Approach: Reduction to House Robber over Value Buckets.
 // - Intuition: Group numbers into total points per value sum[v] = v * freq[v]. Since taking value v destroys v-1 and v+1, adjacent values cannot be picked—exactly House Robber I on the value domain.
 // - Complexity: Time: O(N + max(nums)), Space: O(max(nums)).
+
+// ============================================================
+// 25. COIN CHANGE I (FEWEST COINS) — LeetCode 322
+// ============================================================
+
+int coinChange(vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, 1e9);
+    dp[0] = 0;
+    for (int c : coins) {
+        for (int x = c; x <= amount; x++) dp[x] = min(dp[x], dp[x - c] + 1);
+    }
+    return dp[amount] >= 1e9 ? -1 : dp[amount];
+}
+// Interview Explanation:
+// - Problem Statement: Find fewest number of coins to make amount using infinite supply of given coin denominations (LeetCode 322).
+// - Approach: 1D Unbounded Knapsack Dynamic Programming.
+// - Intuition: For each amount x and coin c, dp[x] = min(dp[x], dp[x - c] + 1). Initialize dp[0] = 0 and rest to infinity.
+// - Complexity: Time: O(N * amount), Space: O(amount).
+
+// ============================================================
+// 26. COIN CHANGE II (UNIQUE COMBINATIONS) — LeetCode 518
+// ============================================================
+
+int change(int amount, vector<int>& coins) {
+    vector<int> dp(amount + 1, 0);
+    dp[0] = 1;
+    for (int c : coins) {
+        for (int x = c; x <= amount; x++) dp[x] = (dp[x] + dp[x - c]) % MOD;
+    }
+    return dp[amount];
+}
+// Interview Explanation:
+// - Problem Statement: Count total distinct combinations of coins that make up amount (order does not matter) (LeetCode 518).
+// - Approach: 1D Unbounded Combination DP (Outer Coin Loop).
+// - Intuition: Iterating over coins in the outer loop ensures coins are considered in fixed order, avoiding duplicate permutations like [1,2] and [2,1].
+// - Complexity: Time: O(N * amount), Space: O(amount).
+
+// ============================================================
+// 27. COIN CHANGE PERMUTATIONS (ORDERED WAYS) — CSES / LeetCode 377
+// ============================================================
+
+int combinationSum4(vector<int>& coins, int amount) {
+    vector<ll> dp(amount + 1, 0);
+    dp[0] = 1;
+    for (int x = 1; x <= amount; x++) {
+        for (int c : coins) {
+            if (x >= c) dp[x] = (dp[x] + dp[x - c]) % MOD;
+        }
+    }
+    return dp[amount];
+}
+// Interview Explanation:
+// - Problem Statement: Count total distinct ordered sequences of coins that sum to amount ([1,2] != [2,1]) (LeetCode 377).
+// - Approach: 1D Unbounded Permutation DP (Outer Amount Loop).
+// - Intuition: Iterating over target amounts in the outer loop allows any coin to be the last coin placed, counting all ordered arrangements.
+// - Complexity: Time: O(N * amount), Space: O(amount).
+
+// ============================================================
+// 28. BOUNDED COIN CHANGE (LIMITED SUPPLY)
+// ============================================================
+
+int coinChangeBounded(vector<int>& coins, vector<int>& limits, int amount) {
+    vector<int> dp(amount + 1, 1e9);
+    dp[0] = 0;
+    for (int i = 0; i < (int)coins.size(); i++) {
+        int c = coins[i], lim = limits[i];
+        for (int k = 1; lim > 0; k <<= 1) {
+            int take = min(k, lim);
+            int weight = take * c, cost = take;
+            for (int x = amount; x >= weight; x--) dp[x] = min(dp[x], dp[x - weight] + cost);
+            lim -= take;
+        }
+    }
+    return dp[amount] >= 1e9 ? -1 : dp[amount];
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum coins to make amount where denomination coins[i] has limited count limits[i].
+// - Approach: Binary Power Splitting + 0/1 Knapsack Backwards DP.
+// - Intuition: Decompose item quantities into powers of 2 (1, 2, 4, ..., remainder) to reduce O(limit) transitions to O(log limit), then perform standard 0/1 backwards DP relaxation.
+// - Complexity: Time: O(amount * sum(log(limit))), Space: O(amount).
+
+// ============================================================
+// 29. COIN CHANGE PATH RECONSTRUCTION (PRINT COINS)
+// ============================================================
+
+vector<int> reconstructCoins(vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, 1e9), parent(amount + 1, -1);
+    dp[0] = 0;
+    for (int c : coins) {
+        for (int x = c; x <= amount; x++) {
+            if (dp[x - c] + 1 < dp[x]) {
+                dp[x] = dp[x - c] + 1;
+                parent[x] = c;
+            }
+        }
+    }
+    if (dp[amount] >= 1e9) return {};
+    vector<int> res;
+    for (int curr = amount; curr > 0; curr -= parent[curr]) res.push_back(parent[curr]);
+    return res;
+}
+// Interview Explanation:
+// - Problem Statement: Reconstruct and return the exact coin denominations used to make amount with fewest coins.
+// - Approach: DP Predecessor Tracking + Backtracking Path Recovery.
+// - Intuition: Maintain parent[x] storing the last coin denomination used to achieve optimal state dp[x]. Trace back from amount to 0 subtracting parent[curr].
+// - Complexity: Time: O(N * amount), Space: O(amount).
+
+// ============================================================
+// 30. REACHABLE MONEY SUMS — CSES Money Sums
+// ============================================================
+
+vector<int> getReachableSums(vector<int>& coins) {
+    int total = accumulate(coins.begin(), coins.end(), 0);
+    vector<bool> dp(total + 1, false);
+    dp[0] = true;
+    for (int c : coins) {
+        for (int x = total; x >= c; x--) {
+            if (dp[x - c]) dp[x] = true;
+        }
+    }
+    vector<int> sums;
+    for (int x = 1; x <= total; x++) if (dp[x]) sums.push_back(x);
+    return sums;
+}
+// Interview Explanation:
+// - Problem Statement: Find all distinct possible sum values that can be formed using any subset of the coins (CSES Money Sums).
+// - Approach: 0/1 Knapsack Boolean Reachability DP (Backwards Iteration).
+// - Intuition: dp[x] is true if sum x can be formed. Transition backwards from total to c: dp[x] = dp[x] | dp[x - c]. Output all positive reachable indices.
+// - Complexity: Time: O(N * sum(coins)), Space: O(sum(coins)).
+
+// ============================================================
+// 31. DUTCH NATIONAL FLAG SORT (0, 1, 2 SORT) — LeetCode 75
+// ============================================================
+
+void sortColors(vector<int>& nums) {
+    int lo = 0, mid = 0, hi = (int)nums.size() - 1;
+    while (mid <= hi) {
+        if (nums[mid] == 0) swap(nums[lo++], nums[mid++]);
+        else if (nums[mid] == 1) mid++;
+        else swap(nums[mid], nums[hi--]);
+    }
+}
+// Interview Explanation:
+// - Problem Statement: Sort an array with elements 0, 1, and 2 in-place in a single pass (LeetCode 75).
+// - Approach: Dijkstra's 3-Way Partitioning / Dutch National Flag.
+// - Intuition: Maintain 3 pointers: lo (boundary for 0s), mid (current explorer), hi (boundary for 2s). When nums[mid]==0 swap with lo; if 2 swap with hi; if 1 just advance mid.
+// - Complexity: Time: O(N), Space: O(1).
+
+// ============================================================
+// 32. COUNTING SORT (STABLE IMPLEMENTATION)
+// ============================================================
+
+vector<int> countingSort(vector<int>& arr) {
+    if (arr.empty()) return {};
+    int minVal = *min_element(arr.begin(), arr.end());
+    int maxVal = *max_element(arr.begin(), arr.end());
+    int k = maxVal - minVal + 1;
+    vector<int> count(k, 0), output(arr.size());
+    for (int x : arr) count[x - minVal]++;
+    for (int i = 1; i < k; i++) count[i] += count[i - 1];
+    for (int i = (int)arr.size() - 1; i >= 0; i--) output[--count[arr[i] - minVal]] = arr[i];
+    return output;
+}
+// Interview Explanation:
+// - Problem Statement: Sort an integer array with bounded range [minVal, maxVal] stably in linear time.
+// - Approach: Frequency Count Accumulation + Reverse Position Placement.
+// - Intuition: Build prefix sum table of frequency counts to determine exact final output index for each key. Iterating backwards ensures stability for duplicate values.
+// - Complexity: Time: O(N + K), Space: O(N + K).
+
+// ============================================================
+// 33. RADIX SORT (LSD DIGIT BY DIGIT)
+// ============================================================
+
+void radixSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    int maxVal = *max_element(arr.begin(), arr.end());
+    for (long long exp = 1; maxVal / exp > 0; exp *= 10) {
+        vector<int> output(arr.size()), count(10, 0);
+        for (int x : arr) count[(x / exp) % 10]++;
+        for (int i = 1; i < 10; i++) count[i] += count[i - 1];
+        for (int i = (int)arr.size() - 1; i >= 0; i--)
+            output[--count[(arr[i] / exp) % 10]] = arr[i];
+        arr = output;
+    }
+}
+// Interview Explanation:
+// - Problem Statement: Sort integer array in non-comparative linear time regardless of value magnitude.
+// - Approach: Least Significant Digit (LSD) Radix Sort with Counting Sort Subroutine.
+// - Intuition: Sort stably by each digit position from least to most significant (1s, 10s, 100s...). Stability ensures higher-order sorts preserve lower-order sortedness.
+// - Complexity: Time: O(D * (N + B)), Space: O(N + B) where B=10 is base and D=digits.
+
+// ============================================================
+// 34. BUCKET SORT (UNIFORM DISTRIBUTION)
+// ============================================================
+
+void bucketSort(vector<float>& arr) {
+    int n = arr.size();
+    if (n <= 1) return;
+    vector<vector<float>> buckets(n);
+    for (float x : arr) {
+        int idx = min(n - 1, max(0, (int)(n * x)));
+        buckets[idx].push_back(x);
+    }
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        sort(buckets[i].begin(), buckets[i].end());
+        for (float x : buckets[i]) arr[k++] = x;
+    }
+}
+// Interview Explanation:
+// - Problem Statement: Sort elements uniformly distributed in range [0, 1) in expected linear time.
+// - Approach: Scatter-Gather Bucket Sorting.
+// - Intuition: Partition range into n equal sub-intervals (buckets). Distribute elements into buckets, sort individual buckets (typically with insertion sort), and concatenate.
+// - Complexity: Time: O(N) average, O(N^2) worst, Space: O(N).
+
+// ============================================================
+// 35. CYCLIC SORT [1 TO N] (IN-PLACE INDEX MAPPING)
+// ============================================================
+
+void cyclicSort(vector<int>& nums) {
+    int i = 0, n = nums.size();
+    while (i < n) {
+        int correctIdx = nums[i] - 1;
+        if (nums[i] > 0 && nums[i] <= n && nums[i] != nums[correctIdx]) swap(nums[i], nums[correctIdx]);
+        else i++;
+    }
+}
+// Interview Explanation:
+// - Problem Statement: Sort array containing integers in range [1, N] in-place in O(N) time with O(1) space.
+// - Approach: Cyclic In-Place Index Mapping Swap.
+// - Intuition: Each number x belongs at index x - 1. If nums[i] is not at its correct index, swap it there. Each swap places at least one number in its permanent position (at most N swaps).
+// - Complexity: Time: O(N), Space: O(1).
+
+// ============================================================
+// 36. PIGEONHOLE SORT (SLOT PLACEMENT)
+// ============================================================
+
+void pigeonholeSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    int minVal = *min_element(arr.begin(), arr.end());
+    int maxVal = *max_element(arr.begin(), arr.end());
+    int range = maxVal - minVal + 1;
+    vector<vector<int>> holes(range);
+    for (int x : arr) holes[x - minVal].push_back(x);
+    int idx = 0;
+    for (int i = 0; i < range; i++) {
+        for (int x : holes[i]) arr[idx++] = x;
+    }
+}
+// Interview Explanation:
+// - Problem Statement: Sort integer array where range of key values is approximately equal to the number of elements.
+// - Approach: Direct Pigeonhole / Bucket Slot Mapping.
+// - Intuition: Allocate an array of holes corresponding to each possible key value in [minVal, maxVal]. Place keys directly into their matching hole and collect sequentially.
+// - Complexity: Time: O(N + Range), Space: O(N + Range).
+
+// ============================================================
+// 37. PATIENCE SORTING (PILES & LIS EXTRACTION)
+// ============================================================
+
+vector<int> patienceSortLIS(vector<int>& arr) {
+    vector<int> topCards;
+    for (int x : arr) {
+        auto it = lower_bound(topCards.begin(), topCards.end(), x);
+        if (it == topCards.end()) topCards.push_back(x);
+        else *it = x;
+    }
+    return topCards;
+}
+// Interview Explanation:
+// - Problem Statement: Find Longest Increasing Subsequence and sort elements using card game patience mechanics.
+// - Approach: Greedy Pile Placement + Binary Search (lower_bound).
+// - Intuition: Place cards onto the leftmost pile whose top card is >= current card (or create new pile). The number of piles formed equals the length of the LIS (Greene's Theorem).
+// - Complexity: Time: O(N log N), Space: O(N).
+
+// ============================================================
+// 38. 3-WAY QUICKSORT (DUTCH NATIONAL FLAG PARTITION)
+// ============================================================
+
+void quickSort3Way(vector<int>& arr, int l, int r) {
+    if (l >= r) return;
+    int pivot = arr[l], lt = l, gt = r, i = l + 1;
+    while (i <= gt) {
+        if (arr[i] < pivot) swap(arr[lt++], arr[i++]);
+        else if (arr[i] > pivot) swap(arr[i], arr[gt--]);
+        else i++;
+    }
+    quickSort3Way(arr, l, lt - 1);
+    quickSort3Way(arr, gt + 1, r);
+}
+// Interview Explanation:
+// - Problem Statement: Sort array containing massive numbers of duplicate elements in optimal O(N log K) time.
+// - Approach: Bentley-McIlroy 3-Way Partition QuickSort.
+// - Intuition: Partition array into three subarrays: [< pivot], [== pivot], and [> pivot]. Recurse only on the strictly smaller and strictly larger segments, leaving all duplicates unvisited.
+// - Complexity: Time: O(N log N) average (O(N) with all duplicates), Space: O(log N) call stack.

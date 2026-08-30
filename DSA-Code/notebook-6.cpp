@@ -48,39 +48,30 @@ const ll MOD = 1e9 + 7;
  | 7  | First Missing Positive                      | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
  | 8  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2*L) | O(N + D) |
  | 9  | Array Stack Implementation                  | Array with Top Index              | O(1) all | O(Cap)   |
- | 10 | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK)| O(K)     |
+ | 10 | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK) | O(K)     |
  | 11 | Longest Valid Parentheses                   | Stack of Indices (Base -1)        | O(N)     | O(N)     |
  | 12 | Move Zeroes                                 | Two-Pointer In-Place Swap         | O(N)     | O(1)     |
  | 13 | Majority Element (Boyer-Moore Voting)       | Candidate & Count Cancellation    | O(N)     | O(1)     |
  | 14 | Design HashMap (MyHashMap)                  | Separate Chaining (Bucket Lists)  | Avg O(1) | O(N)     |
  | 15 | Median of Row-Wise Sorted Matrix            | Binary Search on Range + UB       | O(RlogC) | O(1)     |
- | 16 | Find Peak Element in 2D Grid                | Column Binary Search + Column Max | O(M logN)| O(1)     |
- | 17 | Kth Missing Positive Number                 | Binary Search on Missing Count    | O(log N) | O(1)     |
- | 18 | Summary Ranges                              | Sorted Set Range Traversal        | O(log N) | O(N)     |
- | 19 | Design Twitter                              | Multi-Way Heap Merge + Hash Map   | O(N logK)| O(U + T) |
- | 20 | Water and Jug Problem (BFS)                 | BFS 6-State Graph Traversal       | O(X * Y) | O(X * Y) |
- | 21 | Wiggle Subsequence                          | Greedy / DP Peak-Valley Tracking  | O(N)     | O(1)     |
- | 22 | Run-Length Encoding (Compress)              | Two-Pointer Suffix Counter Scan   | O(N)     | O(N)     |
- | 23 | Decode String                               | Nested Number & String Stacks     | O(N)     | O(N)     |
- | 24 | 132 Pattern                                 | Monotonic Decreasing Stack        | O(N)     | O(N)     |
- | 25 | Find All Numbers Disappeared in Array       | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
- | 26 | Kth Smallest in Lexicographical Order       | Trie Prefix Tree Level Skipping   | O(log^2N)| O(1)     |
- | 27 | Kth Smallest Element in Sorted Matrix       | Binary Search on Value Range + UB | O(NlogM) | O(1)     |
- | 28 | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
+ | 16 | Kth Missing Positive Number                 | Binary Search on Missing Count    | O(log N) | O(1)     |
+ | 17 | Summary Ranges                              | Sorted Set Range Traversal        | O(log N) | O(N)     |
+ | 18 | Design Twitter                              | Multi-Way Heap Merge + Hash Map   | O(N logK) | O(U + T) |
+ | 19 | Water and Jug Problem (BFS)                 | BFS 6-State Graph Traversal       | O(X * Y) | O(X * Y) |
+ | 20 | Wiggle Subsequence                          | Greedy / DP Peak-Valley Tracking  | O(N)     | O(1)     |
+ | 21 | Run-Length Encoding (Compress)              | Two-Pointer Suffix Counter Scan   | O(N)     | O(N)     |
+ | 22 | Decode String                               | Nested Number & String Stacks     | O(N)     | O(N)     |
+ | 23 | 132 Pattern                                 | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 24 | Find All Numbers Disappeared in Array       | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
+ | 25 | Kth Smallest in Lexicographical Order       | Trie Prefix Tree Level Skipping   | O(log^2N) | O(1)     |
+ | 26 | Kth Smallest Element in Sorted Matrix       | Binary Search on Value Range + UB | O(NlogM) | O(1)     |
+ | 27 | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
  ====================================================================================================
 */
 
-struct TreeNode {
-    int val;
-    TreeNode *left, *right;
-    TreeNode() : val(0), left(nullptr), right(nullptr) {}
-    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
-};
-
-// =========================================================
+// ============================================================
 // 1. CONTAINER WITH MOST WATER
-// =========================================================
+// ============================================================
 
 int maxArea(vector<int>& height) {
     int l = 0, r = height.size() - 1, ans = 0;
@@ -96,9 +87,9 @@ int maxArea(vector<int>& height) {
 // - Intuition: Area is limited by the shorter line; shrinking width can only improve area if height increases, so advance the shorter line.
 // - Complexity: Time: O(N) single pass, Space: O(1) auxiliary space.
 
-// =========================================================
+// ============================================================
 // 2. SPIRAL MATRIX TRAVERSAL
-// =========================================================
+// ============================================================
 
 vi spiralOrder(vvi &matrix) {
     if (matrix.empty()) return {};
@@ -120,9 +111,9 @@ vi spiralOrder(vvi &matrix) {
 // - Intuition: Traverse perimeter layer-by-layer; shrink boundaries and guard with (top <= bottom) & (left <= right).
 // - Complexity: Time: O(M * N), Space: O(1) auxiliary space.
 
-// =========================================================
+// ============================================================
 // 3. MERGE TWO SORTED ARRAYS
-// =========================================================
+// ============================================================
 
 vi merge2sortedarrays(vi& a, vi& b) {
     int n = a.size(), m = b.size(), i = 0, j = 0, k = 0;
@@ -138,9 +129,9 @@ vi merge2sortedarrays(vi& a, vi& b) {
 // - Intuition: Compare elements at current pointers, append the smaller one, and advance; flush leftovers.
 // - Complexity: Time: O(N + M), Space: O(N + M).
 
-// =========================================================
+// ============================================================
 // 4. LONGEST CONSECUTIVE SEQUENCE
-// =========================================================
+// ============================================================
 
 int longestConsecutive(vector<int>& nums) {
     unordered_set<int> st(nums.begin(), nums.end()); int longest_streak = 0;
@@ -159,9 +150,9 @@ int longestConsecutive(vector<int>& nums) {
 // - Intuition: Only start streak exploration from `x` if `x - 1` is not in set (ensuring true streak start).
 // - Complexity: Time: O(N) amortized linear time, Space: O(N) auxiliary space.
 
-// =========================================================
+// ============================================================
 // 5. ROW WITH MAXIMUM 1s IN BINARY MATRIX
-// =========================================================
+// ============================================================
 
 int rowWithMax1s(vector<vector<int>>& mat) {
     int n = mat.size(), m = mat[0].size(), i = 0, j = m - 1, ans = -1;
@@ -177,9 +168,9 @@ int rowWithMax1s(vector<vector<int>>& mat) {
 // - Intuition: Start at top-right (0, M - 1); if 1 move left (j--), if 0 move down (i++).
 // - Complexity: Time: O(N + M), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 6. FIND MEDIAN FROM DATA STREAM (MEDIANFINDER)
-// =========================================================
+// ============================================================
 
 class MedianFinder {
     priority_queue<int> left;
@@ -200,9 +191,9 @@ public:
 // - Intuition: Maintain balance: size(left) == size(right) (+1 if odd) and max(left) <= min(right).
 // - Complexity: Time: O(log N) for addNum, O(1) for findMedian, Space: O(N).
 
-// =========================================================
+// ============================================================
 // 7. FIRST MISSING POSITIVE
-// =========================================================
+// ============================================================
 
 int firstMissingPositive(vector<int>& nums) {
     int n = nums.size();
@@ -217,9 +208,9 @@ int firstMissingPositive(vector<int>& nums) {
 // - Intuition: Swap numbers x in [1, N] to index x - 1; first index i where nums[i] != i + 1 gives missing i + 1.
 // - Complexity: Time: O(N), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 8. WORD BREAK
-// =========================================================
+// ============================================================
 
 class Solution {
 public:
@@ -238,9 +229,9 @@ public:
 // - Intuition: dp[i] is true if prefix s[0...i-1] can be segmented via split point j < i with dp[j] true and s[j...i-1] in dict.
 // - Complexity: Time: O(N^2 * L), Space: O(N + D).
 
-// =========================================================
+// ============================================================
 // 9. ARRAY STACK IMPLEMENTATION
-// =========================================================
+// ============================================================
 
 class Stack {
     vector<int> arr; int topIndex, capacity;
@@ -258,9 +249,9 @@ public:
 // - Intuition: LIFO structure using contiguous memory with direct index tracking.
 // - Complexity: Time: O(1) all operations, Space: O(Cap).
 
-// =========================================================
+// ============================================================
 // 10. KTH LARGEST ELEMENT IN ARRAY
-// =========================================================
+// ============================================================
 
 int kthLargest(vector<int>& nums, int k) {
     priority_queue<int, vector<int>, greater<int>> minHeap;
@@ -276,9 +267,9 @@ int kthLargest(vector<int>& nums, int k) {
 // - Intuition: Min-heap of size k retains the k largest elements; top holds the k-th largest.
 // - Complexity: Time: O(N log K), Space: O(K).
 
-// =========================================================
+// ============================================================
 // 11. LONGEST VALID PARENTHESES
-// =========================================================
+// ============================================================
 
 int longestValidParenthesis(string s) {
     stack<int> st; st.push(-1); int ans = 0;
@@ -297,9 +288,9 @@ int longestValidParenthesis(string s) {
 // - Intuition: Push '(' indices; on ')' pop match; if empty push new base, else record length `i - st.top()`.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
+// ============================================================
 // 12. MOVE ZEROES
-// =========================================================
+// ============================================================
 
 void moveZeroes(vector<int>& nums) {
     int lastNonZero = 0;
@@ -311,9 +302,9 @@ void moveZeroes(vector<int>& nums) {
 // - Intuition: Swap non-zero elements into `lastNonZero` pointer position and advance.
 // - Complexity: Time: O(N), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 13. MAJORITY ELEMENT (BOYER-MOORE VOTING)
-// =========================================================
+// ============================================================
 
 int majorityElement(vi &nums) {
     int count = 0, candidate = 0;
@@ -329,9 +320,9 @@ int majorityElement(vi &nums) {
 // - Intuition: Increment count on match, decrement on mismatch; majority candidate survives cancellations.
 // - Complexity: Time: O(N), Space: O(1).
 
-// =========================================================
+// ============================================================
 // 14. DESIGN HASHMAP (MYHASHMAP)
-// =========================================================
+// ============================================================
 
 class MyHashMap {
     static const int SIZE = 1000;
@@ -360,9 +351,9 @@ public:
 // - Intuition: Hash function maps keys to bucket indices; separate chaining handles collisions.
 // - Complexity: Time: O(1) average, Space: O(N).
 
-// =========================================================
+// ============================================================
 // 15. MEDIAN OF ROW-WISE SORTED MATRIX
-// =========================================================
+// ============================================================
 
 int median(vector<vector<int>>& mat) {
     int r = mat.size(), c = mat[0].size(), lo = mat[0][0], hi = mat[0][c - 1];
@@ -381,30 +372,9 @@ int median(vector<vector<int>>& mat) {
 // - Intuition: Count elements <= mid across all rows; binary search narrow down to the element with >= (r*c)/2 + 1 elements.
 // - Complexity: Time: O(R * log C * log(max - min)), Space: O(1).
 
-// =========================================================
-// 16. FIND PEAK ELEMENT IN 2D GRID
-// =========================================================
-
-int findPeakGrid(vector<vector<int>>& mat) {
-    int m = mat.size(), n = mat[0].size(), lo = 0, hi = n - 1;
-    while (lo <= hi) {
-        int col = lo + (hi - lo) / 2, row = 0;
-        for (int i = 1; i < m; i++) if (mat[i][col] > mat[row][col]) row = i;
-        int left = col ? mat[row][col - 1] : -1, right = col + 1 < n ? mat[row][col + 1] : -1;
-        if (mat[row][col] > left && mat[row][col] > right) return row * n + col;
-        if (left > mat[row][col]) hi = col - 1; else lo = col + 1;
-    }
-    return -1;
-}
-// Interview Explanation:
-// - Problem Statement: Find a peak element in a 2D grid strictly greater than 4 neighbors.
-// - Approach: Binary search on columns + Column-maximum search.
-// - Intuition: Find maximum of middle column; move towards strictly greater neighbor to find a 2D peak.
-// - Complexity: Time: O(M log N), Space: O(1).
-
-// =========================================================
-// 17. KTH MISSING POSITIVE NUMBER
-// =========================================================
+// ============================================================
+// 16. KTH MISSING POSITIVE NUMBER
+// ============================================================
 
 int kthMissingPositive(vector<int>& arr, int k) {
     int low = 0, high = arr.size() - 1;
@@ -420,9 +390,9 @@ int kthMissingPositive(vector<int>& arr, int k) {
 // - Intuition: If missing count < k, search right half; final answer is low + k.
 // - Complexity: Time: O(log N), Space: O(1).
 
-// =========================================================
-// 18. SUMMARY RANGES
-// =========================================================
+// ============================================================
+// 17. SUMMARY RANGES
+// ============================================================
 
 class SummaryRanges {
     set<int> nums;
@@ -447,9 +417,9 @@ public:
 // - Intuition: Iterate through sorted unique values and group consecutive numbers into [start, end].
 // - Complexity: Time: O(log N) for addNum, O(N) for getIntervals, Space: O(N).
 
-// =========================================================
-// 19. DESIGN TWITTER
-// =========================================================
+// ============================================================
+// 18. DESIGN TWITTER
+// ============================================================
 
 class Twitter {
     using P = pair<int, int>;
@@ -481,9 +451,9 @@ public:
 // - Intuition: Track tweets with timestamps per user; feed merges tops of recent lists using a priority queue.
 // - Complexity: Time: O(K log F) for 10 tweets where F is followees, Space: O(Total Tweets + Follows).
 
-// =========================================================
-// 20. WATER AND JUG PROBLEM (BFS)
-// =========================================================
+// ============================================================
+// 19. WATER AND JUG PROBLEM (BFS)
+// ============================================================
 
 bool canMeasureWater(int x, int y, int target) {
     if (target > x + y) return false;
@@ -506,9 +476,9 @@ bool canMeasureWater(int x, int y, int target) {
 // - Intuition: Model each jug state as (a, b) and traverse reachable states using BFS with visited set.
 // - Complexity: Time: O(x * y), Space: O(x * y).
 
-// =========================================================
-// 21. WIGGLE SUBSEQUENCE
-// =========================================================
+// ============================================================
+// 20. WIGGLE SUBSEQUENCE
+// ============================================================
 
 int wiggleMaxLength(vector<int>& nums) {
     if (nums.size() < 2) return nums.size();
@@ -525,9 +495,9 @@ int wiggleMaxLength(vector<int>& nums) {
 // - Intuition: Maintain longest sequence ending with positive vs negative slope; update mutually.
 // - Complexity: Time: O(N), Space: O(1).
 
-// =========================================================
-// 22. RUN-LENGTH ENCODING (COMPRESS)
-// =========================================================
+// ============================================================
+// 21. RUN-LENGTH ENCODING (COMPRESS)
+// ============================================================
 
 string encode(string s) {
     string res;
@@ -544,9 +514,9 @@ string encode(string s) {
 // - Intuition: Pointer j locates end of matching run; append char and run length.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
-// 23. DECODE STRING
-// =========================================================
+// ============================================================
+// 22. DECODE STRING
+// ============================================================
 
 string decodeString(string s) {
     stack<int> nums; stack<string> strs;
@@ -569,9 +539,9 @@ string decodeString(string s) {
 // - Intuition: Push on '[', pop and repeat string on ']' to resolve nested encodings.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
-// 24. 132 PATTERN
-// =========================================================
+// ============================================================
+// 23. 132 PATTERN
+// ============================================================
 
 bool find132pattern(vector<int>& nums) {
     int n = nums.size(), third = INT_MIN; stack<int> st;
@@ -588,9 +558,9 @@ bool find132pattern(vector<int>& nums) {
 // - Intuition: When nums[i] > stack top, pop to maximize candidate `third`; if nums[i] < third, valid "1" is found.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
-// 25. FIND ALL NUMBERS DISAPPEARED IN ARRAY
-// =========================================================
+// ============================================================
+// 24. FIND ALL NUMBERS DISAPPEARED IN ARRAY
+// ============================================================
 
 vi findDisappearedNumbers(vi &nums) {
     int n = nums.size();
@@ -606,9 +576,9 @@ vi findDisappearedNumbers(vi &nums) {
 // - Intuition: Swap nums[i] to nums[i] - 1; indices where nums[i] != i + 1 reveal missing numbers.
 // - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-// =========================================================
-// 26. KTH SMALLEST IN LEXICOGRAPHICAL ORDER
-// =========================================================
+// ============================================================
+// 25. KTH SMALLEST IN LEXICOGRAPHICAL ORDER
+// ============================================================
 
 class LexicographicalKth {
 public:
@@ -629,9 +599,9 @@ public:
 // - Intuition: Count numbers in prefix subtree [curr, curr+1); skip whole subtree if steps <= k, else go deeper.
 // - Complexity: Time: O(log^2 N), Space: O(1).
 
-// =========================================================
-// 27. KTH SMALLEST ELEMENT IN SORTED MATRIX
-// =========================================================
+// ============================================================
+// 26. KTH SMALLEST ELEMENT IN SORTED MATRIX
+// ============================================================
 
 int kthElementInSortedMatrix(vector<vector<int>>& mat, int k) {
     int n = mat.size(), m = mat[0].size(), lo = mat[0][0], hi = mat[n - 1][m - 1];
@@ -648,9 +618,9 @@ int kthElementInSortedMatrix(vector<vector<int>>& mat, int k) {
 // - Intuition: Count elements <= mid; narrow value range until low == high.
 // - Complexity: Time: O(N log M * log(max - min)), Space: O(1).
 
-// =========================================================
-// 28. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
-// =========================================================
+// ============================================================
+// 27. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
+// ============================================================
 
 class LongestNiceSubarray {
 public:

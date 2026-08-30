@@ -101,6 +101,8 @@ using vvl = vector<vector<ll>>;
  | 53 | Job Sequencing with Deadlines (GFG)         | Profit Sorting + Slot Allocation  | O(N^2)   | O(MaxD)  |
  | 54 | Fractional Knapsack (GFG)                   | Value-to-Weight Ratio Sorting     | O(N logN)| O(1)     |
  | 55 | N-th Root of an Integer (GFG)               | Binary Search on Answer [1, M]    | O(N logM)| O(1)     |
+ | 56 | Majority Element II (> N/3) (LC 229)        | Extended Boyer-Moore Voting (2 Cands)| O(N)  | O(1)     |
+ | 57 | Minimize Max Distance to Gas Station (LC774)| Continuous Binary Search (eps 1e-6)| O(N logS)| O(1)   |
  ====================================================================================================
 */
 
@@ -1396,7 +1398,58 @@ int nthRoot(int n, int m) {
 // - Problem Statement: Find integer n-th root of integer m (return -1 if non-integer).
 // - Approach: Binary Search on Answer in range [1, m].
 // - Intuition: Function mid^n monotonically increases with mid. Binary search for value satisfying mid^n == m, guarding against integer overflow during power multiplication.
-// - Complexity: Time: O(N \cdot \log M), Space: O(1).
+// 2. Majority Element II (> N/3) (LeetCode 229)
+vi majorityElementII(vi& nums) {
+    int c1 = 0, c2 = 0, cnt1 = 0, cnt2 = 0, n = nums.size();
+    for (int x : nums) {
+        if (cnt1 > 0 && x == c1) cnt1++;
+        else if (cnt2 > 0 && x == c2) cnt2++;
+        else if (cnt1 == 0) { c1 = x; cnt1 = 1; }
+        else if (cnt2 == 0) { c2 = x; cnt2 = 1; }
+        else { cnt1--; cnt2--; }
+    }
+    cnt1 = cnt2 = 0;
+    for (int x : nums) {
+        if (x == c1) cnt1++;
+        else if (x == c2) cnt2++;
+    }
+    vi ans;
+    if (cnt1 > n / 3) ans.push_back(c1);
+    if (cnt2 > n / 3) ans.push_back(c2);
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find all elements appearing more than floor(N/3) times in an array.
+// - Approach: Extended Boyer-Moore Voting with 2 candidates.
+// - Complexity: Time: O(N), Space: O(1).
+
+// 3. Minimize Max Distance to Gas Station (LeetCode 774)
+bool isGasStationDistPossible(const vi& stations, int k, double max_dist) {
+    int needed = 0;
+    for (int i = 1; i < (int)stations.size(); i++) {
+        double diff = stations[i] - stations[i - 1];
+        needed += (int)(diff / max_dist);
+    }
+    return needed <= k;
+}
+
+double minMaxGasStationDistance(vi& stations, int k) {
+    double l = 0, r = 0;
+    for (int i = 1; i < (int)stations.size(); i++) {
+        r = max(r, (double)(stations[i] - stations[i - 1]));
+    }
+    double eps = 1e-6;
+    while (r - l > eps) {
+        double mid = l + (r - l) / 2.0;
+        if (isGasStationDistPossible(stations, k, mid)) r = mid;
+        else l = mid;
+    }
+    return r;
+}
+// Interview Explanation:
+// - Problem Statement: Add k new gas stations minimizing the maximum gap between adjacent stations.
+// - Approach: Continuous Binary Search on Answer [0, max_gap] with epsilon precision.
+// - Complexity: Time: O(N \cdot \log(\text{max\_dist} / \text{eps})), Space: O(1).
 
 int main() {
     ios::sync_with_stdio(false);
