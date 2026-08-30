@@ -372,6 +372,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **15** | Sliding Window Mode (CSES 3224) | Frequency Map + Ordered Set | `O(N log K)` | `O(K)` |
 | **16** | Sliding Window Mex (CSES 3219) | Frequency Array + Missing Set | `O(N log K)` | `O(K)` |
 | **17** | Sliding Window Median (CSES 1076 / LC 480) | Dual Multisets / Two Heaps | `O(N log K)` | `O(K)` |
+| **18** | Distinct Values Splits (Partition DP) | Sliding Window + Prefix Sum DP | `O(N)` | `O(N)` |
 
 ---
 

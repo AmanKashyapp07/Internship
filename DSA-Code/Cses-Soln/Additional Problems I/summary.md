@@ -1,6 +1,6 @@
 # CSES Additional Problems I - Self-Contained Interview Cheat Sheet
 
-This document contains **problem statements, interview-style explanations, intuitive breakdowns, step-by-step algorithms, structured pseudocode, and complexity analysis** for all 16 problems in the **Additional Problems I** topic.
+This document contains **problem statements, interview-style explanations, intuitive breakdowns, step-by-step algorithms, structured pseudocode, and complexity analysis** for all 20 problems in the **Additional Problems I** topic.
 
 ---
 
@@ -522,3 +522,108 @@ function max_two_array_average(A, B, K):
     return low
 ```
 - **Complexity**: Time: $\mathcal{O}(N \log N \cdot \log(\text{precision}))$, Space: $\mathcal{O}(N)$.
+---
+
+## 17. Beautiful Permutation II
+
+- **Tier**: Tier 1
+- **Link**: [Beautiful Permutation II](https://cses.fi/problemset/task/3175)
+- **Problem Statement**: Construct a permutation of $1 \dots N$ such that no two adjacent elements have an absolute difference of 1, or report that no solution exists.
+- **Interview Pattern**: Even-Odd Interleaving Construction.
+- **Intuition**:
+  - For $N = 1$, the answer is `1`. For $N = 2$ and $N = 3$, no valid permutation is possible (output `NO SOLUTION`).
+  - For $N \ge 4$, print all even numbers $2, 4, 6, \dots$ followed by all odd numbers $1, 3, 5, \dots$. Consecutive numbers within each parity differ by 2, and the jump between the last even and first odd $(N \text{ or } N-1)$ to 1 has absolute difference $\ge 2$.
+- **Step-by-Step Interview Walkthrough**:
+  1. Handle edge cases: if $N == 2$ or $N == 3$, output `NO SOLUTION`.
+  2. Iterate $i = 2, 4, 6, \dots \le N$ and print $i$.
+  3. Iterate $i = 1, 3, 5, \dots \le N$ and print $i$.
+- **Pseudocode**:
+```text
+if N == 2 or N == 3: return "NO SOLUTION"
+for i = 2 to N step 2: print i
+for i = 1 to N step 2: print i
+```
+- **Complexity**: Time: $\mathcal{O}(N)$, Space: $\mathcal{O}(1)$.
+
+---
+
+## 18. Distinct Values Splits
+
+- **Tier**: Tier 2
+- **Link**: [Distinct Values Splits](https://cses.fi/problemset/task/3190)
+- **Problem Statement**: Given an array of $N$ integers, count the number of ways to partition the array into contiguous subarrays such that every subarray contains distinct elements modulo $10^9+7$.
+- **Interview Pattern**: Sliding Window Two Pointers + Prefix-Sum Optimized 1D DP.
+- **Intuition**:
+  - Maintain the earliest valid start index `left` using a last-occurrence hash map `last[x]`.
+  - The last partition segment $[k, right]$ is valid for all $k \in [left, right]$.
+  - Therefore, $dp[right] = \sum_{k=left}^{right} dp[k-1] = prefix[right-1] - prefix[left-2] \pmod{10^9+7}$.
+- **Step-by-Step Interview Walkthrough**:
+  1. Initialize `dp[0] = 1`, `prefix[0] = 1`, `left = 1`.
+  2. For `right = 1` to $N$:
+     - If $A[right]$ was previously seen at index $p$, update `left = max(left, p + 1)`.
+     - Update `last[A[right]] = right`.
+     - Compute `dp[right] = prefix[right - 1] - (left > 1 ? prefix[left - 2] : 0)`.
+     - Update `prefix[right] = prefix[right - 1] + dp[right]`.
+  3. Return `dp[N]`.
+- **Pseudocode**:
+```text
+dp[0] = 1, prefix[0] = 1, left = 1
+for right = 1 to N:
+    if A[right] in last: left = max(left, last[A[right]] + 1)
+    last[A[right]] = right
+    dp[right] = prefix[right - 1] - (left > 1 ? prefix[left - 2] : 0)
+    prefix[right] = prefix[right - 1] + dp[right]
+
+return dp[N]
+```
+- **Complexity**: Time: $\mathcal{O}(N)$, Space: $\mathcal{O}(N)$.
+
+---
+
+## 19. Water Containers Moves
+
+- **Tier**: Tier 3
+- **Link**: [Water Containers Moves](https://cses.fi/problemset/task/3213)
+- **Problem Statement**: You have two containers with capacities $A$ and $B$. Find the minimum amount of water moved to measure exactly $X$ units in container $A$, and reconstruct the full sequence of operations (FILL, EMPTY, MOVE).
+- **Interview Pattern**: State-Space Dijkstra on Graph $(u, v)$ with Parent Operation Reconstruction.
+- **Intuition**:
+  - Each state is defined by the volume of water in containers $(u, v)$.
+  - From state $(u, v)$, there are 6 valid transitions: fill A, fill B, empty A, empty B, pour A to B, and pour B to A.
+  - The edge weight is the volume of water moved in that operation. Run Dijkstra to find the shortest path from $(0, 0)$ to $(x, v)$, breaking ties with minimum operations.
+- **Step-by-Step Interview Walkthrough**:
+  1. Check feasibility: $X \le A$ and $X \bmod \gcd(A, B) == 0$.
+  2. Use min-priority queue storing `{cost, steps, u, v}` initialized with `{0, 0, 0, 0}`.
+  3. Expand neighbor states $(u_1, v_1)$, updating distances, moves count, parent pointers, and operation labels.
+  4. Once target state $(x, v)$ is popped, backtrack through `parent` pointers to reconstruct the operation sequence.
+- **Pseudocode**:
+```text
+if x > a or x % gcd(a, b) != 0: return -1
+dijkstra from (0, 0) tracking edge costs = water moved
+backtrack parent pointers from (x, v) to (0, 0)
+return num_moves, total_water_moved, operations_list
+```
+- **Complexity**: Time: $\mathcal{O}(A \cdot B \log(A \cdot B))$, Space: $\mathcal{O}(A \cdot B)$.
+
+---
+
+## 20. Water Containers Queries
+
+- **Tier**: Tier 1
+- **Link**: [Water Containers Queries](https://cses.fi/problemset/task/3214)
+- **Problem Statement**: Given container capacities $A$ and $B$, process multiple queries answering whether it is possible to measure $X$ units of water in container $A$.
+- **Interview Pattern**: Bezout Identity and Greatest Common Divisor (GCD).
+- **Intuition**:
+  - Any linear combination of adding and subtracting full containers results in a multiple of $\gcd(A, B)$.
+  - Container $A$ can hold exactly $X$ units iff $X \le A$ and $X$ is a multiple of $\gcd(A, B)$.
+- **Step-by-Step Interview Walkthrough**:
+  1. For each query $(A, B, X)$:
+  2. Compute $g = \gcd(A, B)$.
+  3. If $X \le A$ and $X \bmod g == 0$, output `YES`; otherwise `NO`.
+- **Pseudocode**:
+```text
+for each query (a, b, x):
+    if x <= a and x % gcd(a, b) == 0: print "YES"
+    else: print "NO"
+```
+- **Complexity**: Time: $\mathcal{O}(\log(\min(A, B)))$, Space: $\mathcal{O}(1)$.
+

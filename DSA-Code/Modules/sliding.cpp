@@ -55,6 +55,7 @@ using vvl = vector<vector<ll>>;
  | 15 | Sliding Window Mode (CSES 3224)             | Frequency Map + Ordered Set       | O(N log K)| O(K)     |
  | 16 | Sliding Window Mex (CSES 3219)              | Frequency Array + Missing Set     | O(N log K)| O(K)     |
  | 17 | Sliding Window Median (CSES 1076 / LC 480)  | Dual Multisets / Two Heaps        | O(N log K)| O(K)     |
+ | 18 | Distinct Values Splits (Partition DP)       | Sliding Window + Prefix Sum DP    | O(N)      | O(N)     |
  ====================================================================================================
 */
 
@@ -544,4 +545,45 @@ vector<double> slidingWindowMedian(const vi &nums, int k) {
 // - Approach: Dual Multiset (`lo` and `hi`) with invariant `lo.size() == hi.size()` or `lo.size() == hi.size() + 1`.
 // - Intuition: `lo` stores the lower half (max-heap behavior), `hi` stores the upper half (min-heap behavior); the median is directly accessible from `*lo.rbegin()` and `*hi.begin()`.
 // - Complexity: Time: O(N log K), Space: O(K).
+
+// =========================================================
+// 18. DISTINCT VALUES SPLITS (PARTITION DP)
+// =========================================================
+
+int countDistinctValuesSplits(const vi &nums) {
+    int n = nums.size();
+    if (n == 0) return 0;
+    const ll MOD = 1e9 + 7;
+
+    // dp[i] = number of valid partitions of first i elements (1-indexed)
+    // prefix[i] = sum(dp[0...i])
+    vl dp(n + 1, 0), prefix(n + 1, 0);
+    dp[0] = 1;
+    prefix[0] = 1;
+
+    unordered_map<int, int> last;
+    int left = 1;
+
+    for (int right = 1; right <= n; right++) {
+        int val = nums[right - 1]; // 0-indexed in vector
+        if (last.count(val)) {
+            left = max(left, last[val] + 1);
+        }
+        last[val] = right;
+
+        // Last segment starts at k in [left, right], so:
+        // dp[right] = dp[left-1] + ... + dp[right-1] = prefix[right-1] - prefix[left-2]
+        dp[right] = prefix[right - 1];
+        if (left > 1) {
+            dp[right] = (dp[right] - prefix[left - 2] + MOD) % MOD;
+        }
+        prefix[right] = (prefix[right - 1] + dp[right]) % MOD;
+    }
+    return (int)dp[n];
+}
+// Interview Explanation:
+// - Problem Statement: Count ways to partition array into contiguous subarrays where each subarray has distinct elements modulo 10^9+7.
+// - Approach: Sliding Window Two Pointers + Prefix-Sum Optimized 1D DP.
+// - Intuition: `left` maintains the earliest valid start index such that nums[left..right] has unique elements; dp[right] sums dp transitions across all valid segment split points in O(1) via prefix sums.
+// - Complexity: Time: O(N), Space: O(N).
 

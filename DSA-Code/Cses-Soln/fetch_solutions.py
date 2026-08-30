@@ -17,7 +17,12 @@ BASE_URL   = "https://cses.fi/problemset/"
 CSES_DIR   = os.path.dirname(os.path.abspath(__file__))
 MAX_WORKERS = 5   # parallel tasks fetched at once
 
-FOLDER_MAP = {"Additional Problems": "Additional Problems I"}
+TARGET_CATEGORIES = {"Additional Problems I", "Additional Problems II"}
+FOLDER_MAP = {
+    "Additional Problems": "Additional Problems I",
+    "Additional Problems I": "Additional Problems I",
+    "Additional Problems II": "Additional Problems II"
+}
 LANG_EXT   = [('c++', '.cpp'), ('python', '.py'), ('java', '.java'),
               ('rust', '.rs'), (' c ', '.c')]
 
@@ -165,22 +170,22 @@ def main():
         if span and ('full' in span.get('class', []) or 'valid' in span.get('class', [])):
             h2 = a.find_previous('h2')
             category = h2.text.strip() if h2 else "General"
-            if category != "General":
+            if category in TARGET_CATEGORIES:
                 solved.append((a.text.strip(), urljoin(BASE_URL, a['href']), category))
 
     if not solved:
-        print("No solved tasks found. Check your PHPSESSID.")
+        print("No solved tasks found in Additional Problems I and II. Check your PHPSESSID.")
         return
 
     # Skip tasks already on disk
     new_tasks = [(n, u, c) for n, u, c in solved if not is_downloaded(n, c)]
 
-    print(f"Found {len(solved)} solved tasks.")
+    print(f"Found {len(solved)} solved tasks in Additional Problems I & II.")
     print(f"  → {len(solved) - len(new_tasks)} already downloaded, skipped.")
     print(f"  → {len(new_tasks)} new tasks to fetch.\n")
 
     if not new_tasks:
-        print("Everything is up to date!")
+        print("Everything in Additional Problems I & II is up to date!")
         return
 
     # Fetch new tasks concurrently

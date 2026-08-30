@@ -1,6 +1,6 @@
 # CSES Problem Solutions — Problem Summary & Complexity Reference
 
-A structured reference catalog of all **70 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
+A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
 
 ## Category-by-Category Analysis
 
@@ -44,8 +44,8 @@ A structured reference catalog of all **70 solved CSES problems** in `DSA-Code/C
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
 | **1** | Static Range Sum Queries | `T 1` | 1D Prefix Sum Array. | `O(N + Q)` | `O(N)` |
-| **2** | Static Range Minimum Queries | `T 2` | Sparse Table (\mathcal{O}(1) Overlapping Range Query). | `O(N)` | `O(N)` |
-| **3** | Dynamic Range Sum Queries | `T 2` | Fenwick Tree (BIT) / Segment Tree. | `O(N)` | `O(N)` |
+| **2** | Static Range Minimum Queries | `T 2` | Sparse Table (\mathcal{O}(1) Overlapping Range Query). | `O(N)` | `O(1)` |
+| **3** | Dynamic Range Sum Queries | `T 2` | Fenwick Tree (BIT) / Segment Tree. | `O(N)` | `O(1)` |
 | **4** | Dynamic Range Minimum Queries | `T 2` | Segment Tree (Point Update, Range Min Query). | `O((N + Q) log N)` | `O(N)` |
 | **5** | Range Update Queries | `T 2` | Fenwick Tree on Difference Array. | `O((N + Q) log N)` | `O(N)` |
 | **6** | Range Xor Queries | `T 1` | 1D Prefix XOR Array. | `O(N + Q)` | `O(N)` |
@@ -100,6 +100,10 @@ A structured reference catalog of all **70 solved CSES problems** in `DSA-Code/C
 | **14** | Subarray Sum Constraints | `T 3` | Prefix Sum Graph / Constraint Graph 2-Coloring. | `O(N + M)` | `O(N + M)` |
 | **15** | Subsets with Fixed Average | `T 3` | Target Shifted Subset Sum DP. | `O(N * MaxSum)` | `O(MaxSum)` |
 | **16** | Two Array Average | `T 3` | Binary Search on Ratio (Dinkelbach's Algorithm). | `O(N log N * log(precision))` | `O(N)` |
+| **17** | Beautiful Permutation II | `T 1` | Even-Odd Interleaving Construction. | `O(N)` | `O(1)` |
+| **18** | Distinct Values Splits | `T 2` | Sliding Window Two Pointers + Prefix-Sum Optimized 1D DP. | `O(N)` | `O(N)` |
+| **19** | Water Containers Moves | `T 3` | State-Space Dijkstra on Graph (u, v) with Parent Operation Reconstruction. | `O(A * B log(A * B))` | `O(A * B)` |
+| **20** | Water Containers Queries | `T 1` | Bezout Identity and Greatest Common Divisor (GCD). | `O(log(min(A, B)))` | `O(1)` |
 
 ---
 
@@ -109,7 +113,10 @@ A structured reference catalog of all **70 solved CSES problems** in `DSA-Code/C
 | :-: | :--- | :-: | :--- | :--- | :--- |
 | **1** | Book Shop II | `T 2` | Bounded Knapsack with Binary Decomposition. | `O(X * \sum log k_i)` | `O(X)` |
 | **2** | Coin Grid | `T 3` | Minimum Vertex Cover in Bipartite Graph (König's Theorem). | `O(V * E) = O(N^3)` | `O(N^2)` |
-| **3** | GCD Subsets | `T 3` | Inclusion-Exclusion on Multiple Counts / Mobius Inversion. | `O(MAX log MAX + N)` | `O(MAX)` |
-| **4** | Increasing Array II | `T 3` | Slope Trick / Priority Queue Greedy. | `O(N log N)` | `O(N)` |
-| **5** | School Excursion | `T 2` | DSU Component Sizes + Bitset 0/1 Subset Sum Knapsack. | `O(N + N^2 / 64)` | `O(N / 64)` |
-| **6** | Stick Divisions | `T 2` | Reverse Huffman Coding / Min-Heap Greedy. | `O(N log N)` | `O(N)` |
+| **3** | Food Division | `T 2` | Circular Flow Balance + 1D Median Minimization. | `O(N log N)` | `O(N)` |
+| **4** | GCD Subsets | `T 3` | Inclusion-Exclusion on Multiple Counts / Mobius Inversion. | `O(MAX log MAX + N)` | `O(MAX)` |
+| **5** | Increasing Array II | `T 3` | Slope Trick / Priority Queue Greedy. | `O(N log N)` | `O(N)` |
+| **6** | K Subset Sums I | `T 3` | Non-Negative Transformation + State-Branching Min-Heap. | `O(N log N + K log K)` | `O(N + K)` |
+| **7** | Programmers and Artists | `T 2` | Difference Greedy Sorting + Dual Prefix/Suffix Min-Heaps. | `O(N log N)` | `O(N)` |
+| **8** | School Excursion | `T 2` | DSU Component Sizes + Bitset 0/1 Subset Sum Knapsack. | `O(N + N^2 / 64)` | `O(N / 64)` |
+| **9** | Stick Divisions | `T 2` | Reverse Huffman Coding / Min-Heap Greedy. | `O(N log N)` | `O(N)` |
