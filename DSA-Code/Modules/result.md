@@ -102,6 +102,13 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **48** | Cherry Pickup (LC 741) | Synchronous 2-Agent Manhattan DP | `O(N^3)` | `O(N^2)` |
 | **49** | Maximum Product Subarray (LC 152) | 2-State Max/Min Running DP | `O(N)` | `O(1)` |
 | **50** | Ninja's Training (GeeksforGeeks) | 2D Activity Transitions O(1) Space | `O(N)` | `O(1)` |
+| **51** | Removing Digits (CSES 1637) | Top-Down Memoized Digit DP | `O(N log N)` | `O(N)` |
+| **52** | Array Description (CSES 1746) | 2D Value Continuity DP | `O(N * M)` | `O(N * M)` |
+| **53** | Counting Numbers - No Adj Equal (CSES 2220) | Digit DP with Prev Digit & Tight | `O(log B)` | `O(1)` |
+| **54** | Rectangle Cutting (CSES 1744) | 2D Rectangle Interval DP | `O(A * B * (A + B))` | `O(A * B)` |
+| **55** | Elevator Rides (CSES 1653) | Bitmask DP (rides, last_weight) | `O(2^N * N)` | `O(2^N)` |
+| **56** | Increasing Subsequence II (CSES 1748) | Fenwick Tree Prefix DP | `O(N log N)` | `O(N)` |
+| **57** | Minimal Grid Path (CSES 3359) | Level BFS Greedy Frontier Step | `O(N^2)` | `O(N^2)` |
 
 ---
 
@@ -154,6 +161,16 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **43** | Distinct Numbers in Sliding Window | Sliding Window Hash Map Frequencies | `O(N)` | `O(K)` |
 | **44** | Graph Valid Tree (LC 261) | DSU Edge Count & Cycle Verification | `O(N α(N))` | `O(N)` |
 | **45** | Clone Graph (LC 133) | BFS / DFS + Node Clone Hash Map | `O(V + E)` | `O(V)` |
+| **46** | Coin Collector (CSES 1686) | Kosaraju SCC Condensation + DAG DP | `O(V + E)` | `O(V + E)` |
+| **47** | Hamiltonian Flights (CSES 1690) | Bitmask Dynamic Programming | `O(2^N * N^2)` | `O(2^N * N)` |
+| **48** | Planets Cycles (CSES 1751) | Functional Graph Cycle Offsets | `O(N)` | `O(N)` |
+| **49** | Graph Girth (CSES 1707) | Multi-Source Unweighted BFS | `O(V(V + E))` | `O(V + E)` |
+| **50** | Network Breakdown (CSES 1676) | Offline Dynamic DSU Reverse Edges | `O((M + K) α(N))` | `O(N + M + K)` |
+| **51** | Network Renovation (CSES 2081) | Leaf Pairing Centroid Shift | `O(N)` | `O(N)` |
+| **52** | Flight Route Requests (CSES 1699) | Weakly Connected Component Cycle | `O(V + E)` | `O(V + E)` |
+| **53** | Bus Companies (CSES 3158) | Virtual Nodes + Dijkstra | `O((V + E) log(V + E))` | `O(V + E)` |
+| **54** | MST Edge Check (CSES 3407) | Kruskal Batching by Weight | `O(E log E)` | `O(V + E)` |
+| **55** | Transfer Speeds Sum (CSES 3111) | Reverse Kruskal DSU Product | `O(N log N)` | `O(N)` |
 
 ---
 

@@ -74,6 +74,16 @@ using namespace std;
  | 43 | Distinct Numbers in Sliding Window          | Sliding Window Hash Map Frequencies| O(N)     | O(K)     |
  | 44 | Graph Valid Tree (LC 261)                   | DSU Edge Count & Cycle Verification| O(N a(N))| O(N)     |
  | 45 | Clone Graph (LC 133)                        | BFS / DFS + Node Clone Hash Map    | O(V + E)  | O(V)     |
+ | 46 | Coin Collector (CSES 1686)                  | Kosaraju SCC Condensation + DAG DP | O(V + E)  | O(V + E) |
+ | 47 | Hamiltonian Flights (CSES 1690)             | Bitmask Dynamic Programming        | O(2^N * N^2)| O(2^N * N)|
+ | 48 | Planets Cycles (CSES 1751)                  | Functional Graph Cycle Offsets     | O(N)      | O(N)     |
+ | 49 | Graph Girth (CSES 1707)                     | Multi-Source Unweighted BFS        | O(V(V+E)) | O(V + E) |
+ | 50 | Network Breakdown (CSES 1676)               | Offline Dynamic DSU Reverse Edges  | O((M+K)a) | O(N+M+K) |
+ | 51 | Network Renovation (CSES 2081)              | Leaf Pairing Centroid Shift        | O(N)      | O(N)     |
+ | 52 | Flight Route Requests (CSES 1699)           | Weakly Connected Component Cycle   | O(V + E)  | O(V + E) |
+ | 53 | Bus Companies (CSES 3158)                   | Virtual Nodes + Dijkstra           | O(E log V)| O(V + E) |
+ | 54 | MST Edge Check (CSES 3407)                  | Kruskal Batching by Weight         | O(E log E)| O(V + E) |
+ | 55 | Transfer Speeds Sum (CSES 3111)             | Reverse Kruskal DSU Product        | O(N log N)| O(N)     |
  ====================================================================================================
 */
 
@@ -1693,4 +1703,429 @@ public:
     // - Problem Statement: Return a deep copy (clone) of a connected undirected graph (LC 133).
     // - Approach: BFS / DFS with Hash Map mapping original nodes to cloned nodes.
     // - Complexity: Time: O(V + E), Space: O(V) for clone hash map and queue.
+
+
+    // =========================================================
+    // 46. COIN COLLECTOR (CSES 1686)
+    // =========================================================
+
+    long long coinCollector(int n, const vector<long long>& coins, const vector<vector<int>>& adj) {
+        vector<vector<int>> g(n + 1), rg(n + 1), dag;
+        for (int u = 1; u <= n; u++) {
+            for (int v : adj[u]) {
+                g[u].push_back(v);
+                rg[v].push_back(u);
+            }
+        }
+        vector<bool> vis(n + 1, false);
+        vector<int> order;
+        function<void(int)> dfs1 = [&](int u) {
+            vis[u] = true;
+            for (int v : g[u]) if (!vis[v]) dfs1(v);
+            order.push_back(u);
+        };
+        for (int i = 1; i <= n; i++) if (!vis[i]) dfs1(i);
+
+        vector<int> comp(n + 1, 0);
+        int sccCount = 0;
+        function<void(int, int)> dfs2 = [&](int u, int id) {
+            comp[u] = id;
+            for (int v : rg[u]) if (!comp[v]) dfs2(v, id);
+        };
+        reverse(order.begin(), order.end());
+        for (int u : order) if (!comp[u]) dfs2(u, ++sccCount);
+
+        vector<long long> sccWeight(sccCount + 1, 0);
+        for (int i = 1; i <= n; i++) sccWeight[comp[i]] += coins[i];
+
+        dag.resize(sccCount + 1);
+        for (int u = 1; u <= n; u++) {
+            for (int v : g[u]) {
+                if (comp[u] != comp[v]) dag[comp[u]].push_back(comp[v]);
+            }
+        }
+
+        vector<long long> dp(sccCount + 1, -1);
+        function<long long(int)> getDP = [&](int u) -> long long {
+            if (dp[u] != -1) return dp[u];
+            dp[u] = sccWeight[u];
+            for (int v : dag[u]) dp[u] = max(dp[u], sccWeight[u] + getDP(v));
+            return dp[u];
+        };
+
+        long long maxCoins = 0;
+        for (int i = 1; i <= sccCount; i++) maxCoins = max(maxCoins, getDP(i));
+        return maxCoins;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum coins collected by traversing a directed graph (CSES 1686).
+    // - Approach: Kosaraju's SCC + Condensation DAG + Dynamic Programming.
+    // - Intuition: Contract strongly connected components into a DAG where each node contains total component coins; run DP for longest path.
+    // - Complexity: Time: O(V + E), Space: O(V + E).
+
+
+    // =========================================================
+    // 47. HAMILTONIAN FLIGHTS (CSES 1690)
+    // =========================================================
+
+    int countHamiltonianFlights(int n, const vector<vector<int>>& adj) {
+        const int MOD = 1e9 + 7;
+        vector<vector<int>> dp(1 << n, vector<int>(n, 0));
+        dp[1][0] = 1;
+
+        for (int mask = 1; mask < (1 << n); mask++) {
+            if (!(mask & 1)) continue; // Must start at node 0
+            if ((mask & (1 << (n - 1))) && mask != (1 << n) - 1) continue; // Do not reach end early
+
+            for (int u = 0; u < n; u++) {
+                if (!(mask & (1 << u)) || dp[mask][u] == 0) continue;
+                for (int v : adj[u]) {
+                    if (!(mask & (1 << v))) {
+                        dp[mask | (1 << v)][v] = (dp[mask | (1 << v)][v] + dp[mask][u]) % MOD;
+                    }
+                }
+            }
+        }
+        return dp[(1 << n) - 1][n - 1];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count number of Hamiltonian paths from city 1 to city n visiting all cities exactly once (CSES 1690).
+    // - Approach: Bitmask Dynamic Programming (`dp[mask][u]`).
+    // - Intuition: `dp[mask][u]` stores number of paths visiting subset `mask` ending at node u; bitmask transitions run in O(2^N * N).
+    // - Complexity: Time: O(2^N * N^2), Space: O(2^N * N).
+
+
+    // =========================================================
+    // 48. PLANETS CYCLES (CSES 1751)
+    // =========================================================
+
+    vector<int> planetsCycles(int n, const vector<int>& successor) {
+        vector<int> inDegree(n + 1, 0), ans(n + 1, -1);
+        vector<vector<int>> rev(n + 1);
+        for (int i = 1; i <= n; i++) {
+            inDegree[successor[i]]++;
+            rev[successor[i]].push_back(i);
+        }
+
+        queue<int> q;
+        for (int i = 1; i <= n; i++) if (inDegree[i] == 0) q.push(i);
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            if (--inDegree[successor[u]] == 0) q.push(successor[u]);
+        }
+
+        vector<int> vis(n + 1, 0);
+        for (int i = 1; i <= n; i++) {
+            if (inDegree[i] == 0 || vis[i]) continue;
+            int len = 0, u = i;
+            do { vis[u] = 1; len++; u = successor[u]; } while (u != i);
+            u = i;
+            do { ans[u] = len; u = successor[u]; } while (u != i);
+        }
+
+        function<void(int)> dfsTree = [&](int u) {
+            for (int v : rev[u]) {
+                if (ans[v] != -1) continue;
+                ans[v] = ans[u] + 1;
+                dfsTree(v);
+            }
+        };
+
+        for (int i = 1; i <= n; i++) if (ans[i] != -1) dfsTree(i);
+
+        vector<int> result(n);
+        for (int i = 1; i <= n; i++) result[i - 1] = ans[i];
+        return result;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find path length to repeat a planet state for every starting planet in a functional graph (CSES 1751).
+    // - Approach: Functional Graph Decomposition (Cycles via Kahn's + Trees via Reverse DFS).
+    // - Intuition: Nodes in a cycle have path length equal to cycle size; nodes in attached trees have length equal to distance to cycle plus cycle size.
+    // - Complexity: Time: O(N), Space: O(N).
+
+
+    // =========================================================
+    // 49. GRAPH GIRTH (CSES 1707)
+    // =========================================================
+
+    int findGraphGirth(int n, const vector<vector<int>>& adj) {
+        const int INF = 1e9;
+        int minGirth = INF;
+
+        for (int i = 1; i <= n; i++) {
+            queue<pair<int, int>> q;
+            q.push({i, -1});
+            vector<int> dist(n + 1, INF);
+            dist[i] = 0;
+
+            while (!q.empty()) {
+                auto [u, p] = q.front(); q.pop();
+                for (int v : adj[u]) {
+                    if (v == p) continue;
+                    if (dist[v] == INF) {
+                        dist[v] = dist[u] + 1;
+                        q.push({v, u});
+                    } else {
+                        minGirth = min(minGirth, dist[u] + dist[v] + 1);
+                    }
+                }
+            }
+        }
+        return minGirth == INF ? -1 : minGirth;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find the girth (length of the shortest cycle) in an unweighted undirected graph (CSES 1707).
+    // - Approach: BFS from Every Vertex (O(V * (V + E))).
+    // - Intuition: Running unweighted BFS from each vertex i finds shortest cycle containing i via cross-edges `dist[u] + dist[v] + 1`.
+    // - Complexity: Time: O(V(V + E)), Space: O(V + E).
+
+
+    // =========================================================
+    // 50. NETWORK BREAKDOWN (CSES 1676)
+    // =========================================================
+
+    vector<int> networkBreakdown(int n, const vector<pair<int, int>>& allEdges, const vector<pair<int, int>>& queries) {
+        struct DSU {
+            vector<int> p, sz;
+            int comp;
+            DSU(int n) : p(n + 1), sz(n + 1, 1), comp(n) { iota(p.begin(), p.end(), 0); }
+            int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
+            bool unite(int a, int b) {
+                a = find(a); b = find(b);
+                if (a == b) return false;
+                if (sz[a] < sz[b]) swap(a, b);
+                p[b] = a; sz[a] += sz[b]; comp--; return true;
+            }
+        };
+
+        set<pair<int, int>> removed;
+        for (auto [u, v] : queries) {
+            if (u > v) swap(u, v);
+            removed.insert({u, v});
+        }
+
+        DSU dsu(n);
+        for (auto [u, v] : allEdges) {
+            if (u > v) swap(u, v);
+            if (!removed.count({u, v})) dsu.unite(u, v);
+        }
+
+        int k = queries.size();
+        vector<int> ans(k);
+        for (int i = k - 1; i >= 0; i--) {
+            ans[i] = dsu.comp;
+            dsu.unite(queries[i].first, queries[i].second);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Output component counts after each edge breakdown query (CSES 1676).
+    // - Approach: Offline Processing via Reverse DSU Edge Re-insertion.
+    // - Intuition: Reversing edge deletions transforms graph destruction into incremental DSU unions, tracking component count `comp`.
+    // - Complexity: Time: O((M + K) * alpha(N)), Space: O(N + M + K).
+
+
+    // =========================================================
+    // 51. NETWORK RENOVATION (CSES 2081)
+    // =========================================================
+
+    vector<pair<int, int>> networkRenovation(int n, const vector<vector<int>>& adj) {
+        if (n <= 1) return {};
+        vector<int> leaves;
+        function<void(int, int)> dfs = [&](int u, int p) {
+            if (adj[u].size() == 1) leaves.push_back(u);
+            for (int v : adj[u]) if (v != p) dfs(v, u);
+        };
+        dfs(1, -1);
+
+        int totalLeaves = leaves.size();
+        int k = (totalLeaves + 1) / 2;
+        int half = totalLeaves / 2;
+        vector<pair<int, int>> newEdges;
+        for (int i = 0; i < k; i++) {
+            newEdges.push_back({leaves[i], leaves[(i + half) % totalLeaves]});
+        }
+        return newEdges;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum new connections to make a tree 2-edge-connected (CSES 2081).
+    // - Approach: Leaf Pairing via Half-Split Index Shift (k = ceil(L / 2)).
+    // - Intuition: Gathering all tree leaves and pairing leaf i with leaf (i + floor(L/2)) % L ensures no bridge remains.
+    // - Complexity: Time: O(N), Space: O(N).
+
+
+    // =========================================================
+    // 52. FLIGHT ROUTE REQUESTS (CSES 1699)
+    // =========================================================
+
+    int minFlightRouteRequests(int n, const vector<pair<int, int>>& directedEdges) {
+        vector<vector<int>> dG(n + 1), uG(n + 1);
+        for (auto [u, v] : directedEdges) {
+            dG[u].push_back(v);
+            uG[u].push_back(v);
+            uG[v].push_back(u);
+        }
+
+        vector<int> comp(n + 1, -1), compSize;
+        int compCount = 0;
+        function<void(int, int)> findComp = [&](int u, int compId) {
+            comp[u] = compId;
+            for (int v : uG[u]) if (comp[v] == -1) findComp(v, compId);
+        };
+
+        for (int i = 1; i <= n; i++) {
+            if (comp[i] == -1) {
+                compSize.push_back(0);
+                findComp(i, compCount++);
+            }
+        }
+        for (int i = 1; i <= n; i++) compSize[comp[i]]++;
+
+        vector<int> state(n + 1, 0);
+        vector<bool> hasCycle(compCount, false);
+        function<void(int)> detectCycle = [&](int u) {
+            state[u] = 1;
+            for (int v : dG[u]) {
+                if (state[v] == 0) detectCycle(v);
+                else if (state[v] == 1) hasCycle[comp[u]] = true;
+            }
+            state[u] = 2;
+        };
+
+        for (int i = 1; i <= n; i++) if (state[i] == 0) detectCycle(i);
+
+        int ans = 0;
+        for (int c = 0; c < compCount; c++) ans += hasCycle[c] ? compSize[c] : compSize[c] - 1;
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum flight routes required to satisfy all reachability requirements across n cities (CSES 1699).
+    // - Approach: Weakly Connected Components + DFS Cycle Detection.
+    // - Intuition: For each weakly connected component of size C: if it contains a directed cycle, it requires C edges; otherwise C-1 edges suffice.
+    // - Complexity: Time: O(V + E), Space: O(V + E).
+
+
+    // =========================================================
+    // 53. BUS COMPANIES (CSES 3158)
+    // =========================================================
+
+    vector<long long> busCompaniesMinCost(int cities, int companies, const vector<long long>& tickets, const vector<vector<int>>& routes) {
+        const long long INF = 1e18;
+        struct Edge { int to; long long cost; };
+        int totalNodes = cities + companies;
+        vector<vector<Edge>> g(totalNodes + 1);
+
+        for (int i = 1; i <= companies; i++) {
+            int compNode = cities + i;
+            for (int city : routes[i]) {
+                g[city].push_back({compNode, 0});
+                g[compNode].push_back({city, tickets[i]});
+            }
+        }
+
+        vector<long long> dist(totalNodes + 1, INF);
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        dist[1] = 0;
+        pq.push({0, 1});
+
+        while (!pq.empty()) {
+            auto [d, u] = pq.top(); pq.pop();
+            if (d != dist[u]) continue;
+            for (const auto& e : g[u]) {
+                if (d + e.cost < dist[e.to]) {
+                    dist[e.to] = d + e.cost;
+                    pq.push({dist[e.to], e.to});
+                }
+            }
+        }
+
+        vector<long long> result(cities);
+        for (int i = 1; i <= cities; i++) result[i - 1] = dist[i];
+        return result;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum travel cost from city 1 to all other cities using bus companies (CSES 3158).
+    // - Approach: Virtual Company Auxiliary Nodes + Single-Source Dijkstra Algorithm.
+    // - Intuition: Create virtual node for each company; entering company node costs 0 and exiting to any served city costs ticket price.
+    // - Complexity: Time: O((V + E) log(V + E)), Space: O(V + E).
+
+
+    // =========================================================
+    // 54. MST EDGE CHECK (CSES 3407)
+    // =========================================================
+
+    vector<bool> mstEdgeCheck(int n, int m, vector<tuple<int, int, int, int>> edges) {
+        // tuple: (w, u, v, id)
+        sort(edges.begin(), edges.end());
+        struct DSU {
+            vector<int> p, sz;
+            DSU(int n) : p(n + 1), sz(n + 1, 1) { iota(p.begin(), p.end(), 0); }
+            int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
+            bool unite(int a, int b) {
+                a = find(a); b = find(b);
+                if (a == b) return false;
+                if (sz[a] < sz[b]) swap(a, b);
+                p[b] = a; sz[a] += sz[b]; return true;
+            }
+        };
+
+        DSU dsu(n);
+        vector<bool> inMST(m, false);
+
+        for (int i = 0; i < m; ) {
+            int j = i;
+            while (j < m && get<0>(edges[j]) == get<0>(edges[i])) j++;
+            for (int k = i; k < j; k++) {
+                auto [w, u, v, id] = edges[k];
+                if (dsu.find(u) != dsu.find(v)) inMST[id] = true;
+            }
+            for (int k = i; k < j; k++) {
+                auto [w, u, v, id] = edges[k];
+                dsu.unite(u, v);
+            }
+            i = j;
+        }
+        return inMST;
+    }
+    // Interview Explanation:
+    // - Problem Statement: For each edge, determine if it can belong to AT LEAST ONE Minimum Spanning Tree (CSES 3407).
+    // - Approach: Kruskal Batching by Edge Weight.
+    // - Intuition: An edge of weight W can be in an MST iff its endpoints are unconnected in DSU prior to incorporating weight W batch edges.
+    // - Complexity: Time: O(E log E), Space: O(V + E).
+
+
+    // =========================================================
+    // 55. TRANSFER SPEEDS SUM (CSES 3111)
+    // =========================================================
+
+    long long transferSpeedsSum(int n, vector<tuple<long long, int, int>> treeEdges) {
+        sort(treeEdges.rbegin(), treeEdges.rend());
+        struct DSU {
+            vector<int> parent, sz;
+            DSU(int n) : parent(n + 1), sz(n + 1, 1) { iota(parent.begin(), parent.end(), 0); }
+            int find(int x) { return parent[x] == x ? x : parent[x] = find(parent[x]); }
+            long long unite(int u, int v) {
+                u = find(u); v = find(v);
+                if (u == v) return 0;
+                long long pairs = 1LL * sz[u] * sz[v];
+                if (sz[u] < sz[v]) swap(u, v);
+                parent[v] = u; sz[u] += sz[v];
+                return pairs;
+            }
+        };
+
+        DSU dsu(n);
+        long long ans = 0;
+        for (auto &[w, u, v] : treeEdges) {
+            long long pairs = dsu.unite(u, v);
+            ans += pairs * w;
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find sum of bottleneck transfer speeds over all pairs of nodes in a tree (CSES 3111).
+    // - Approach: Reverse Kruskal DSU Component Product.
+    // - Intuition: Sorting tree edges in descending order of weight guarantees that joining components of size S_u and S_v via edge w contributes S_u * S_v * w to total sum.
+    // - Complexity: Time: O(N log N), Space: O(N).
+
 };

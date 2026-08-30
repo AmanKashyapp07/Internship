@@ -1,6 +1,6 @@
 # CSES Problem Solutions — Problem Summary & Complexity Reference
 
-A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
+A structured reference catalog of all **70 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
 
 ## Category-by-Category Analysis
 
@@ -39,31 +39,7 @@ A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 3. Dynamic Programming
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Removing Digits | `T 1` | Greedy / Top-Down Memoized DP. | `O(N log_{10} N)` | `O(N)` |
-| **2** | Array Description | `T 2` | 2D State DP (`dp[i][v]` = ways for index i ending in value v). | `O(N * M)` | `O(N * M)` |
-| **3** | Counting Numbers | `T 3` | Digit DP (`dp[pos][prev_digit][started][tight]`). | `O(log_{10} B)` | `O(log_{10} B)` |
-| **4** | Rectangle Cutting | `T 2` | Interval DP (`dp[i][j]` for i \times j rectangle). | `O(A * B * (A + B))` | `O(A * B)` |
-| **5** | Elevator Rides | `T 3` | Bitmask DP storing pair `{rides, weight_of_last_ride}`. | `O(N * 2^N)` | `O(2^N)` |
-| **6** | Increasing Subsequence II | `T 3` | Coordinate Compression + Fenwick Tree DP. | `O(N log N)` | `O(N)` |
-| **7** | Minimal Grid Path | `T 2` | Step-by-step Level BFS Greedy Choice. | `O(N^2)` | `O(N)` |
-
----
-
-### 4. Graph Algorithms
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Planets Cycles | `T 2` | Functional Graph Cycle Length & Tree Distance Propagation. | `O(N)` | `O(N)` |
-| **2** | Coin Collector | `T 3` | SCC Condensation DAG + Dynamic Programming. | `O(V + E)` | `O(V + E)` |
-| **3** | Hamiltonian Flights | `T 3` | Bitmask Dynamic Programming (TSP / Hamiltonian Path). | `O(2^N * N^2)` | `O(2^N * N)` |
-
----
-
-### 5. Range Queries
+### 3. Range Queries
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -84,30 +60,7 @@ A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 6. Mathematics
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Exponentiation | `T 1` | Binary Exponentiation (Square-and-Multiply). | `O(log B) per query` | `O(1)` |
-| **2** | Exponentiation II | `T 2` | Double Modular Exponentiation via Fermat's Little Theorem. | `O(log C + log B) per query` | `O(1)` |
-| **3** | Counting Divisors | `T 1` | Sieve-Style Precomputation / Harmonic Series Sweep. | `O(N)` | `O(N)` |
-| **4** | Common Divisors | `T 2` | Frequency Array + Divisor Sieve Sweep. | `O(MAX log MAX + N)` | `O(MAX)` |
-| **5** | Next Prime | `T 2` | Trial Division Primality Test + Linear Odd-Step Search. | `O(sqrt{P}) per query where P approx n` | `O(1)` |
-| **6** | Binomial Coefficients | `T 1` | Precomputed Factorials and Inverse Factorials. | `O(N)` | `O(N)` |
-| **7** | Bracket Sequences I | `T 2` | Catalan Numbers C_k = \frac{1}{k+1} \binom{2k}{k}. | `O(N)` | `O(N)` |
-| **8** | Christmas Party | `T 2` | Derangement Recurrence D_n = (n-1)(D_{n-1} + D_{n-2}). | `O(N)` | `O(1)` |
-| **9** | Creating Strings II | `T 1` | Multinomial Coefficient \frac{N!}{\prod (f_c!)}. | `O(N)` | `O(N)` |
-| **10** | Distributing Apples | `T 1` | Stars and Bars Theorem \binom{N + M - 1}{M}. | `O(N + M)` | `O(N + M)` |
-| **11** | Fibonacci Numbers | `T 2` | Fast Doubling Fibonacci Method. | `O(log N)` | `O(log N)` |
-| **12** | Graph Paths I | `T 2` | Adjacency Matrix Exponentiation. | `O(N^3 log K)` | `O(N^2)` |
-| **13** | Permutation Order | `T 2` | Factorial Number System (Lehmer Code). | `O(N^2)` | `O(N)` |
-| **14** | Permutation Rounds | `T 2` | Disjoint Cycle Decomposition + LCM over Prime Factorization. | `O(N sqrt{N})` | `O(N)` |
-| **15** | Prime Multiples | `T 3` | Inclusion-Exclusion Principle over Bitmask Subsets. | `O(K * 2^K)` | `O(K)` |
-| **16** | Throwing Dice | `T 2` | 6 \times 6 Matrix Exponentiation on Linear Recurrence. | `O(6^3 log N)` | `O(6^2)` |
-
----
-
-### 7. Advanced Techniques
+### 4. Advanced Techniques
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -127,7 +80,7 @@ A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 8. Additional Problems I
+### 5. Additional Problems I
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -150,7 +103,7 @@ A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 9. Additional Problems II
+### 6. Additional Problems II
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -160,17 +113,3 @@ A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/
 | **4** | Increasing Array II | `T 3` | Slope Trick / Priority Queue Greedy. | `O(N log N)` | `O(N)` |
 | **5** | School Excursion | `T 2` | DSU Component Sizes + Bitset 0/1 Subset Sum Knapsack. | `O(N + N^2 / 64)` | `O(N / 64)` |
 | **6** | Stick Divisions | `T 2` | Reverse Huffman Coding / Min-Heap Greedy. | `O(N log N)` | `O(N)` |
-
----
-
-### 10. Advanced Graph Problems
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Graph Girth | `T 2` | Multi-Source BFS for Smallest Cycle in Unweighted Graph. | `O(V * (V + E))` | `O(V + E)` |
-| **2** | Network Breakdown | `T 2` | Offline Dynamic Connectivity via Reverse Edge Additions with DSU. | `O((M + K) * alpha(N))` | `O(N + M + K)` |
-| **3** | Network Renovation | `T 3` | Tree Leaf Pairing via Centroid Balancing. | `O(N)` | `O(N)` |
-| **4** | Flight Route Requests | `T 3` | Weakly Connected Component Functional Graph Analysis. | `O(V + E)` | `O(V + E)` |
-| **5** | Bus Companies | `T 3` | Virtual Graph Node Segment Tree / Multi-Layer Dijkstra. | `O((V + Q log V) log V)` | `O(V log V + E)` |
-| **6** | MST Edge Check | `T 2` | Kruskal's Same-Weight Batch Processing / Heavy-Light Decomposition. | `O(E log E)` | `O(V + E)` |
-| **7** | Transfer Speeds Sum | `T 3` | Gomory-Hu Tree / All-Pairs Max Flow. | `O(V * MaxFlow(V, E))` | `O(N)` |

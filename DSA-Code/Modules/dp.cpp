@@ -86,6 +86,13 @@ using vvl = vector<vector<ll>>;
  | 48 | Cherry Pickup (LC 741)                      | Synchronous 2-Agent Manhattan DP  | O(N^3)   | O(N^2)   |
  | 49 | Maximum Product Subarray (LC 152)           | 2-State Max/Min Running DP        | O(N)     | O(1)     |
  | 50 | Ninja's Training (GeeksforGeeks)            | 2D Activity Transitions O(1) Space| O(N)     | O(1)     |
+ | 51 | Removing Digits (CSES 1637)                 | Top-Down Memoized Digit DP        | O(N logN)| O(N)     |
+ | 52 | Array Description (CSES 1746)               | 2D Value Continuity DP            | O(N * M) | O(N * M) |
+ | 53 | Counting Numbers - No Adj Equal (CSES 2220) | Digit DP with Prev Digit & Tight  | O(log B) | O(1)     |
+ | 54 | Rectangle Cutting (CSES 1744)               | 2D Rectangle Interval DP          | O(A*B(A+B))| O(A * B)|
+ | 55 | Elevator Rides (CSES 1653)                  | Bitmask DP (rides, last_weight)   | O(2^N * N)| O(2^N)   |
+ | 56 | Increasing Subsequence II (CSES 1748)       | Fenwick Tree Prefix DP            | O(N logN)| O(N)     |
+ | 57 | Minimal Grid Path (CSES 3359)               | Level BFS Greedy Frontier Step    | O(N^2)   | O(N^2)   |
  ====================================================================================================
 */
 
@@ -1329,6 +1336,238 @@ public:
     // - Problem Statement: Maximize total points over N days with 3 daily activities without performing the same activity consecutively.
     // - Approach: 2D Dynamic Programming with space compression to O(1) size-4 array.
     // - Complexity: Time: O(N), Space: O(1).
+
+
+
+    // =========================================================
+    // 51. REMOVING DIGITS (CSES 1637)
+    // =========================================================
+
+    int minStepsRemovingDigits(int n) {
+        vi dp(n + 1, -1);
+        function<int(int)> solve = [&](int x) -> int {
+            if (x == 0) return 0;
+            if (dp[x] != -1) return dp[x];
+            int ans = INT_MAX, tmp = x;
+            while (tmp > 0) {
+                int d = tmp % 10;
+                tmp /= 10;
+                if (d != 0) ans = min(ans, 1 + solve(x - d));
+            }
+            return dp[x] = ans;
+        };
+        return solve(n);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum steps to reduce n to 0 by subtracting one of its digits (CSES 1637).
+    // - Approach: Top-Down Memoized DP (`dp[n] = 1 + min over digits`).
+    // - Complexity: Time: O(N log10 N), Space: O(N).
+
+
+    // =========================================================
+    // 52. ARRAY DESCRIPTION (CSES 1746)
+    // =========================================================
+
+    int countArrayDescriptions(int n, int m, const vi& a) {
+        vvl dp(n, vl(m + 2, 0));
+        if (a[0] == 0) {
+            for (int val = 1; val <= m; val++) dp[0][val] = 1;
+        } else {
+            dp[0][a[0]] = 1;
+        }
+
+        for (int i = 1; i < n; i++) {
+            if (a[i] == 0) {
+                for (int val = 1; val <= m; val++) {
+                    dp[i][val] = (dp[i - 1][val - 1] + dp[i - 1][val] + dp[i - 1][val + 1]) % MOD;
+                }
+            } else {
+                int val = a[i];
+                dp[i][val] = (dp[i - 1][val - 1] + dp[i - 1][val] + dp[i - 1][val + 1]) % MOD;
+            }
+        }
+
+        ll ans = 0;
+        for (int val = 1; val <= m; val++) ans = (ans + dp[n - 1][val]) % MOD;
+        return (int)ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count array fills with adjacent absolute differences <= 1 (CSES 1746).
+    // - Approach: 2D DP (`dp[i][v] = dp[i-1][v-1] + dp[i-1][v] + dp[i-1][v+1]`).
+    // - Complexity: Time: O(N * M), Space: O(N * M).
+
+
+    // =========================================================
+    // 53. COUNTING NUMBERS - NO ADJACENT EQUAL DIGITS (CSES 2220)
+    // =========================================================
+
+    long long countNumbersNoAdjacentEqual(long long a, long long b) {
+        auto countUpTo = [](long long x) -> long long {
+            if (x < 0) return 0;
+            string num = to_string(x);
+            long long memo[20][11][2][2];
+            memset(memo, -1, sizeof(memo));
+
+            function<long long(int, int, bool, bool)> solve = [&](int pos, int prev, bool started, bool tight) -> long long {
+                if (pos == (int)num.size()) return 1;
+                if (memo[pos][prev][started][tight] != -1) return memo[pos][prev][started][tight];
+
+                int lim = tight ? num[pos] - '0' : 9;
+                long long ans = 0;
+                if (!started) ans += solve(pos + 1, 10, false, tight && !lim);
+
+                for (int d = started ? 0 : 1; d <= lim; d++) {
+                    if (!started || d != prev) {
+                        ans += solve(pos + 1, d, true, tight && (d == lim));
+                    }
+                }
+                return memo[pos][prev][started][tight] = ans;
+            };
+
+            return solve(0, 10, false, true);
+        };
+
+        auto isValid = [](long long x) -> bool {
+            string s = to_string(x);
+            for (size_t i = 1; i < s.size(); i++) if (s[i] == s[i - 1]) return false;
+            return true;
+        };
+
+        return countUpTo(b) - countUpTo(a) + isValid(a);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count integers in range [a, b] where no two adjacent digits are equal (CSES 2220).
+    // - Approach: Digit DP with state (pos, prev_digit, started, tight).
+    // - Complexity: Time: O(digits * 10), Space: O(1).
+
+
+    // =========================================================
+    // 54. RECTANGLE CUTTING (CSES 1744)
+    // =========================================================
+
+    int minCutsRectangle(int a, int b) {
+        vvi dp(a + 1, vi(b + 1, 0));
+        for (int i = 1; i <= a; i++) {
+            for (int j = 1; j <= b; j++) {
+                if (i == j) { dp[i][j] = 1; continue; }
+                int ans = INT_MAX;
+                for (int k = 1; k < i; k++) ans = min(ans, dp[k][j] + dp[i - k][j]);
+                for (int k = 1; k < j; k++) ans = min(ans, dp[i][k] + dp[i][j - k]);
+                dp[i][j] = ans;
+            }
+        }
+        return dp[a][b] - 1;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum cuts to partition an a x b rectangle into squares (CSES 1744).
+    // - Approach: 2D Interval DP over all horizontal and vertical split lines.
+    // - Complexity: Time: O(A * B * (A + B)), Space: O(A * B).
+
+
+    // =========================================================
+    // 55. ELEVATOR RIDES (CSES 1653)
+    // =========================================================
+
+    int minElevatorRides(int n, int maxWeight, const vi& w) {
+        vector<pair<int, int>> dp(1 << n, {-1, -1});
+        function<pair<int, int>(int)> solve = [&](int mask) -> pair<int, int> {
+            if (!mask) return {1, 0};
+            if (dp[mask].first != -1) return dp[mask];
+
+            pair<int, int> best = {n + 1, 0};
+            for (int i = 0; i < n; i++) {
+                if (!(mask & (1 << i))) continue;
+                auto prev = solve(mask ^ (1 << i));
+                best = min(best, prev.second + w[i] <= maxWeight
+                    ? pair<int, int>(prev.first, prev.second + w[i])
+                    : pair<int, int>(prev.first + 1, w[i]));
+            }
+            return dp[mask] = best;
+        };
+        return solve((1 << n) - 1).first;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find minimum elevator rides to transport n people under weight limit (CSES 1653).
+    // - Approach: Bitmask DP storing pair state {rides, weight_of_last_ride}.
+    // - Complexity: Time: O(2^N * N), Space: O(2^N).
+
+
+    // =========================================================
+    // 56. INCREASING SUBSEQUENCE II (CSES 1748)
+    // =========================================================
+
+    int countIncreasingSubsequences(int n, const vi& a) {
+        vi vals = a;
+        sort(vals.begin(), vals.end());
+        vals.erase(unique(vals.begin(), vals.end()), vals.end());
+
+        struct Fenwick {
+            int sz; vi bit;
+            Fenwick(int sz) : sz(sz), bit(sz + 1, 0) {}
+            void add(int i, int val) {
+                for (i++; i <= sz; i += i & -i) bit[i] = (bit[i] + val) % MOD;
+            }
+            int query(int i) {
+                int s = 0;
+                for (i++; i > 0; i -= i & -i) s = (s + bit[i]) % MOD;
+                return s;
+            }
+        };
+
+        Fenwick ft(vals.size());
+        ll ans = 0;
+        for (int x : a) {
+            int idx = lower_bound(vals.begin(), vals.end(), x) - vals.begin();
+            ll cur = (1 + (idx > 0 ? ft.query(idx - 1) : 0)) % MOD;
+            ft.add(idx, cur);
+            ans = (ans + cur) % MOD;
+        }
+        return (int)ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count total increasing subsequences modulo 10^9+7 (CSES 1748).
+    // - Approach: Coordinate Compression + Fenwick Tree DP.
+    // - Complexity: Time: O(N log N), Space: O(N).
+
+
+    // =========================================================
+    // 57. MINIMAL GRID PATH (CSES 3359)
+    // =========================================================
+
+    string minLexicographicalGridPath(int n, const vector<string>& grid) {
+        string ans = "";
+        ans += grid[0][0];
+        vector<pair<int, int>> cur = {{0, 0}};
+        vector<vector<bool>> vis(n, vector<bool>(n, false));
+        vis[0][0] = true;
+
+        for (int step = 0; step < 2 * n - 2; step++) {
+            char best = 'z' + 1;
+            for (auto [x, y] : cur) {
+                if (x + 1 < n) best = min(best, grid[x + 1][y]);
+                if (y + 1 < n) best = min(best, grid[x][y + 1]);
+            }
+            ans += best;
+
+            vector<pair<int, int>> nxt;
+            for (auto [x, y] : cur) {
+                if (x + 1 < n && grid[x + 1][y] == best && !vis[x + 1][y]) {
+                    vis[x + 1][y] = true;
+                    nxt.push_back({x + 1, y});
+                }
+                if (y + 1 < n && grid[x][y + 1] == best && !vis[x][y + 1]) {
+                    vis[x][y + 1] = true;
+                    nxt.push_back({x, y + 1});
+                }
+            }
+            cur = move(nxt);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find lexicographically smallest path from (0,0) to (n-1, n-1) in grid (CSES 3359).
+    // - Approach: Step-by-Step Level BFS / Greedy Selection.
+    // - Complexity: Time: O(N^2), Space: O(N^2).
 
 };
 
