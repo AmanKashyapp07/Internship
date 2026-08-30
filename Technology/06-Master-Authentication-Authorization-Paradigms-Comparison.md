@@ -1,249 +1,224 @@
-# Types of Authentication & Authorization — Interview Notes
+# Authentication, Authorization & Identity Architecture Reference
 
-A guide to speak about identity, access control, token mechanics, and security
-protocols with the confidence of an engineer who has implemented, hardened, and
-scaled authentication systems in production, not just recited spec definitions.
+> **Scope:** Deep Architectural Analysis of Distributed Identity Systems: Authentication (AuthN) vs. Authorization (AuthZ), Stateful In-Memory Sessions, Stateless JSON Web Tokens (HS256 vs. Asymmetric RS256 with JWKS), OAuth 2.0 PKCE Authorization Frameworks, OpenID Connect (OIDC), Machine-to-Machine Security (API Keys & Mutual TLS mTLS), Access Control Models (RBAC, ABAC, ReBAC), and Enterprise SAML 2.0 Federation.
 
 ---
 
-## What They Are & Why They Are Needed
+# Table of Contents
+1. [Theoretical Foundations: Authentication (AuthN) vs. Authorization (AuthZ)](#1-theoretical-foundations-authentication-authn-vs-authorization-authz)
+2. [Stateful Session Management (Cookie + In-Memory State)](#2-stateful-session-management-cookie--in-memory-state)
+3. [Stateless JSON Web Tokens (JWT: HS256 vs. RS256 & JWKS)](#3-stateless-json-web-tokens-jwt-hs256-vs-rs256--jwks)
+4. [OAuth 2.0 Delegated Authorization Framework & PKCE](#4-oauth-20-delegated-authorization-framework--pkce)
+5. [OpenID Connect (OIDC): Identity Layer & Discovery Protocols](#5-openid-connect-oidc-identity-layer--discovery-protocols)
+6. [Machine-to-Machine Security: API Keys & Mutual TLS (mTLS)](#6-machine-to-machine-security-api-keys--mutual-tls-mtls)
+7. [Access Control Topologies: RBAC vs. ABAC vs. ReBAC](#7-access-control-topologies-rbac-vs-abac-vs-rebac)
+8. [Enterprise Federation: SAML 2.0 Architecture](#8-enterprise-federation-saml-20-architecture)
+9. [Master Identity & Access Control Comparison Matrix](#9-master-identity--access-control-comparison-matrix)
 
-### 1. Authentication (AuthN) vs. Authorization (AuthZ)
-- **Authentication (AuthN) = *"Who are you?"***
-  The process of verifying the identity of a user, device, or service (e.g., username/password, OTP, biometric, SSO login).
-- **Authorization (AuthZ) = *"What are you allowed to do?"***
-  The process of determining the permissions, access rights, and boundaries granted to an authenticated identity (e.g., can User A edit Document 42? Can Service B write to the billing database?).
+---
+
+# 1. Theoretical Foundations: Authentication (AuthN) vs. Authorization (AuthZ)
 
 ```
-+-----------------------------------------------------------------------------------+
-| STEP 1: AUTHENTICATION (AuthN)            | STEP 2: AUTHORIZATION (AuthZ)         |
-+-----------------------------------------------------------------------------------+
-| "Here are my credentials (login/password)" | "I want to DELETE /api/v1/orders/99"  |
-| ───► Verifies Identity (Valid User)        | ───► Checks Permissions (Is Admin?)  |
-| ───► Issues Session / Token                | ───► Allows (200) or Denies (403)    |
-+-----------------------------------------------------------------------------------+
+Identity & Access Control Pipeline:
+[ Client Ingress ] ---> [ Step 1: Authentication (AuthN) ]
+                                | (Verifies Identity: "Who are you?")
+                                v
+                        [ Validated Principal ]
+                                |
+                                v
+                        [ Step 2: Authorization (AuthZ) ]
+                                | (Evaluates Policy: "What can you execute?")
+                                v
+               +----------------+----------------+
+               | (Authorized)                    | (Unauthorized)
+               v                                 v
+       [ Execute Resource API ]           [ 403 Forbidden ]
 ```
 
-### 2. Why Are They Needed?
-1. **Perimeter & Resource Isolation:** Prevents unauthorized users from accessing or modifying sensitive tenant data.
-2. **Horizontal & Vertical Privilege Escalation Defense:** Ensures regular users cannot execute administrative operations (vertical) or access other users' private accounts (horizontal / IDOR).
-3. **Decoupled Stateless Scaling:** Enables hundreds of independent microservices to verify incoming requests without hammering a central database on every HTTP call.
-4. **Audit Logging & Compliance:** Satisfies strict regulatory requirements (SOC2, GDPR, HIPAA, PCI-DSS) by proving who performed what action at what exact timestamp.
+```
++----------------------------------------------------------------------------------------------------+
+| CORE DIMENSION       | AUTHENTICATION (AuthN)               | AUTHORIZATION (AuthZ)                |
++----------------------------------------------------------------------------------------------------+
+| Semantic Question    | "Who is the requesting principal?"   | "Does this principal have access?"   |
+| Verification Target  | Passwords, Passkeys, OTP, Biometrics | RBAC Roles, Scopes, ABAC Attributes  |
+| Protocol Standards   | OIDC, SAML 2.0, FIDO2 / WebAuthn     | OAuth 2.0 Scopes, XACML, Zanzibar    |
+| HTTP Error Codes     | 401 Unauthorized (Unauthenticated)   | 403 Forbidden (Insufficient Rights)  |
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-## 1. Server-Side Stateful Sessions (Cookie + Redis)
+# 2. Stateful Session Management (Cookie + In-Memory State)
 
-**What it is:** The classic web authentication model where the server validates
-credentials, generates a cryptographically random session ID stored in a server-side
-database (Redis/Postgres), and sends it to the browser as an `HttpOnly` cookie.
+Stateful session architectures store active session metadata on server-side databases (Redis) and attach an opaque cryptographic session ID to client requests via HTTP cookies:
 
-**Strengths**
-- Instant revocation: logging out or banning a user deletes the session from Redis,
-  invalidating access immediately across all devices.
-- Small payload footprint: the browser transmits only a tiny 32-byte opaque session ID
-  string in the `Cookie` header.
-- Zero client-side token management logic required (browsers attach cookies automatically).
+```
+Stateful Session Architecture:
+[ Browser Client ] <=== HTTP Set-Cookie: sid=a8f1... (HttpOnly, Secure, SameSite=Strict) ===> [ Web Server ]
+                                                                                                    |
+                                                                        [ Centralized Redis Cache ]<+
+                                                                        (Key: "sid:a8f1..." -> UserID)
+```
 
-**Weaknesses**
-- Stateful server storage: requires a centralized, low-latency in-memory store (Redis)
-  that must be queried on every incoming request.
-- Vulnerable to **Cross-Site Request Forgery (CSRF)** unless protected by `SameSite`
-  cookies and anti-CSRF tokens.
-- Cross-domain friction: sharing cookies across distinct top-level domains (`app.com`
-  vs `api.io`) requires complex CORS and domain cookie configuration.
-
-**When to use:** Monolithic web applications, traditional server-rendered websites
-(Next.js SSR, Rails, Django), and applications requiring instantaneous session termination.
-
-**Interview-ready line:** "Stateful sessions trade server memory for absolute control —
-you get instantaneous revocation at the cost of querying a shared Redis session store on every request."
+```
++----------------------------------------------------------------------------------------------------+
+| ARCHITECTURAL CHARACTERISTIC                                                                       |
++----------------------------------------------------------------------------------------------------+
+| - State Model: Stateful (Centralized in-memory session database required across all web nodes).     |
+| - Inherent Strengths: Instantaneous revocation (deleting Redis key terminates access everywhere).  |
+| - Inherent Weaknesses: Centralized session store dependency; cross-domain cookie restrictions.     |
+| - Security Protections: `HttpOnly` (blocks XSS access), `Secure` (TLS only), `SameSite=Strict` CSRF|
+| - Optimal Application Domain: Server-rendered web applications (SSR), high-security banking portals|
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-## 2. Stateless JSON Web Tokens (JWTs - HS256 vs RS256)
+# 3. Stateless JSON Web Tokens (JWT: HS256 vs. RS256 & JWKS)
 
-**What it is:** A self-contained, digitally signed JSON string formatted as three
-Base64URL-encoded segments: `Header.Payload.Signature`.
+A JSON Web Token (RFC 7519) is a compact, URL-safe, self-contained claims container digitally signed using symmetric or asymmetric cryptography:
 
-**Strengths**
-- Completely stateless: the payload contains identity claims (`sub`, `roles`, `exp`),
-  allowing any microservice to verify authentication without database lookups.
-- Cross-domain and mobile friendly: transmitted via the `Authorization: Bearer <token>`
-  header, bypassing browser cookie restrictions.
-- Decoupled asymmetric verification (**RS256**): signed with a private key by the Auth
-  Service and verified across all microservices using public **JWKS keys**.
+```
+JSON Web Token Anatomical Structure:
+[ Base64URL(Header) ] . [ Base64URL(Payload) ] . [ Base64URL(Signature) ]
+  - Header:    { "alg": "RS256", "typ": "JWT", "kid": "key-2026-v1" }
+  - Payload:   { "sub": "usr_1042", "role": "admin", "exp": 1774915200 }
+  - Signature: RSASSA-PKCS1-v1_5(Header + "." + Payload, PrivateKey)
+```
 
-**Weaknesses**
-- Revocation problem: once issued, a stateless JWT cannot be revoked before its
-  `exp` timestamp without building a stateful revocation blacklist in Redis.
-- Payload bloat: transmitting large claim payloads on every HTTP request increases
-  bandwidth overhead.
-- Storage vulnerability: storing JWTs in browser `localStorage` exposes them to
-  theft via **Cross-Site Scripting (XSS)**.
+```
+Decoupled Asymmetric Verification (RS256 / EdDSA via JWKS):
+[ Auth Microservice ] ---> Signs JWT with Private Key (.pem)
+                                  |
+                                  v (Transmitted via Authorization: Bearer <JWT>)
+[ Edge Microservice A ] <--- Verifies Signature using Public JWKS (/certs/.well-known/jwks.json)
+[ Edge Microservice B ] <--- Verifies Signature using Public JWKS (Zero Database I/O Overhead!)
+```
 
-**When to use:** Microservice architectures, mobile applications, and high-throughput
-distributed APIs where hitting a database on every request creates an I/O bottleneck.
-
-**Interview-ready line:** "JWTs trade instant revocation for stateless scalability —
-I keep access token lifetimes short (5–15 min) and store refresh tokens in HttpOnly
-cookies with automated rotation."
-
----
-
-## 3. OAuth 2.0 (Delegated Authorization Framework)
-
-**What it is:** An open industry-standard authorization framework that allows a
-third-party application to obtain limited access to a user's resources on an HTTP
-service without exposing user passwords.
-
-**Strengths**
-- Eliminates credential sharing: users authenticate with the Identity Provider (Google, GitHub)
-  and grant scoped access (`read:profile`, `write:orders`) to client applications.
-- **Authorization Code Flow with PKCE (Proof Key for Code Exchange)**: secures Single
-  Page Apps (SPAs) and mobile apps against authorization code interception attacks.
-- **Client Credentials Flow**: provides secure machine-to-machine (M2M) server authentication.
-
-**Weaknesses**
-- Protocol complexity: involves multiple actors (Resource Owner, Client, Authorization Server,
-  Resource Server) and multi-step redirect handshakes.
-- Not an authentication protocol by itself: OAuth 2.0 grants *authorization* tokens,
-  not user identity proofs (which led to the creation of OIDC).
-
-**When to use:** "Login with Google/GitHub" integrations, third-party developer API access,
-and delegating permissions across microservice boundaries.
-
-**Interview-ready line:** "OAuth 2.0 is a delegated authorization framework, not an authentication
-protocol — it gives applications a scoped valet key to user data without handing over the master password."
+```
++----------------------------------------------------------------------------------------------------+
+| ALGORITHM CLASS      | SIGNING MECHANICS                    | VERIFICATION TOPOLOGY                |
++----------------------------------------------------------------------------------------------------+
+| Symmetric (HS256)    | Single shared secret key for signing | All verifying microservices must     |
+|                      | and verification (HMAC-SHA256)       | hold the master signing secret (Risk)|
+| Asymmetric (RS256)   | Signed with private key; verified via| Any service verifies tokens using the|
+|                      | public key certificate (RSA / ECDSA) | public JSON Web Key Set (JWKS)       |
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-## 4. OpenID Connect (OIDC - Identity Layer on OAuth 2.0)
+# 4. OAuth 2.0 Delegated Authorization Framework & PKCE
 
-**What it is:** An identity authentication layer built directly on top of OAuth 2.0
-that introduces a standardized **ID Token** (JWT) and a `/userinfo` endpoint.
+OAuth 2.0 (RFC 6749) allows third-party clients to obtain scoped access to user-owned resources on a resource server without exposing credentials:
 
-**Strengths**
-- Standardized Identity: provides a signed ID Token containing verifiable user profile
-  information (`sub`, `name`, `email`, `email_verified`).
-- Universal Single Sign-On (SSO): powers modern identity providers (Auth0, Okta,
-  Firebase Auth, Keycloak, Google Identity).
-- Discovery endpoint (`.well-known/openid-configuration`): enables clients to automatically
-  discover public keys, endpoints, and supported scopes dynamically.
+```
+Authorization Code Flow with Proof Key for Code Exchange (PKCE):
+[ Client App (SPA/Mobile) ]        [ Authorization Server ]           [ Resource API ]
+            |                                  |                             |
+            |-- 1. /authorize?code_challenge ->|                             |
+            |-- 2. Authenticate User --------->|                             |
+            |<- 3. Redirect: ?code=auth_code --|                             |
+            |                                  |                             |
+            |-- 4. /token (code + verifier) -->|                             |
+            |<- 5. Return Access Token (JWT) --|                             |
+            |                                                                |
+            |-- 6. Request Resource with Bearer <AccessToken> -------------->|
+```
 
-**Weaknesses**
-- Overhead: requires running or paying for a compliant OpenID Provider.
-- Redundant tokens: clients receive both an **ID Token** (for client UI identity) and
-  an **Access Token** (for backend API authorization), which confuses junior developers.
-
-**When to use:** User authentication across web/mobile applications, Single Sign-On (SSO),
-and federated corporate login portals.
-
-**Interview-ready line:** "OIDC is the identity layer that OAuth 2.0 was always missing —
-it standardizes authentication by giving you a signed ID Token alongside your API access token."
+- **PKCE Cryptographic Invariant:** The client generates a cryptographically random `code_verifier` ($V$) and sends its SHA-256 digest `code_challenge` ($C = \text{BASE64URL}(\text{SHA256}(V))$). Upon token exchange, sending $V$ proves that the token requester is identical to the initial authorization initiator, preventing authorization code interception attacks.
 
 ---
 
-## 5. API Keys & Mutual TLS (mTLS - Service-to-Service Auth)
+# 5. OpenID Connect (OIDC): Identity Layer & Discovery Protocols
 
-**What it is:** Two primary machine-to-machine (M2M) authentication patterns:
-opaque static secret keys passed in headers vs. cryptographic bidirectional TLS certificates.
+OpenID Connect (OIDC) is an identity layer built on top of OAuth 2.0 that introduces a standardized **ID Token** (JWT) and discovery metadata:
 
-**Strengths**
-- **API Keys:** Extremely simple to implement, fast to validate, and easy for third-party
-  developers to use in scripts and CLI tools.
-- **mTLS (Mutual TLS):** Cryptographically authenticates *both* the client and server
-  at the network transport layer (Layer 4/7) using X.509 certificates, rendering man-in-the-middle
-  attacks impossible.
+```
+OIDC Token Roles:
+- ID Token (JWT):     Consumed by Client Application to render UI identity (name, email, sub).
+- Access Token (JWT): Consumed by Resource Servers to authorize backend API mutations.
+```
 
-**Weaknesses**
-- API Keys: static, long-lived secrets that are frequently leaked in GitHub commits;
-  lack fine-grained identity claims unless mapped in a database.
-- mTLS: high operational overhead for certificate rotation, PKI infrastructure, and
-  service mesh configuration.
-
-**When to use:** API keys for external developer access (Stripe, OpenAI API keys);
-mTLS for internal zero-trust service-to-service communication inside Kubernetes clusters.
-
-**Interview-ready line:** "API keys are great for developer simplicity at the public edge,
-but inside our zero-trust service mesh, we enforce mTLS so services cryptographically verify
-each other at the transport layer."
+- **Discovery Endpoint (`/.well-known/openid-configuration`):** Publishes standardized JSON descriptors defining authorization endpoints, token issuance routes, supported cryptographic signing algorithms, and the public `jwks_uri`.
 
 ---
 
-## 6. RBAC (Role-Based) vs. ABAC (Attribute-Based Access Control)
+# 6. Machine-to-Machine Security: API Keys & Mutual TLS (mTLS)
 
-**What it is:** The two primary paradigms for structuring authorization rules and
-permissions inside applications.
+```
++----------------------------------------------------------------------------------------------------+
+| SECURITY PATTERN     | AUTHENTICATION PRIMITIVE             | SYSTEM TRADEOFF                      |
++----------------------------------------------------------------------------------------------------+
+| API Keys             | Opaque high-entropy secret string    | Simple implementation; vulnerable to |
+|                      | passed in HTTP Authorization header  | credential leaks without rotation    |
+| Mutual TLS (mTLS)    | Bidirectional X.509 cryptographic    | Strong zero-trust perimeter security;|
+|                      | certificates validated at TLS layer  | high PKI management complexity       |
++----------------------------------------------------------------------------------------------------+
+```
 
-**Strengths**
-- **RBAC (Role-Based):** Simple mental model — users are assigned roles (`Admin`, `Editor`, `Viewer`),
-  and roles map to static permissions (`posts:create`, `posts:delete`).
-- **ABAC (Attribute-Based):** Fine-grained dynamic evaluation based on user attributes,
-  resource attributes, action, and environment context (e.g., *"Allow doctor to view patient record ONLY IF doctor is assigned to patient AND time is during hospital shift"*).
-
-**Weaknesses**
-- RBAC: "Role Explosion" — as business requirements become granular, roles proliferate
-  into dozens of overlapping variations (`RegionalBillingAdminViewer`).
-- ABAC: High computational complexity — policy evaluation engines (like Open Policy Agent / OPA)
-  must evaluate complex rules at runtime on every request.
-
-**When to use:** RBAC for standard SaaS applications and admin dashboards; ABAC for healthcare,
-defense, multi-tenant enterprise platforms, and fine-grained data ownership.
-
-**Interview-ready line:** "I start with RBAC for simplicity, but when permissions depend on
-dynamic context — like resource ownership or tenant boundaries — I transition to ABAC or policy engines like OPA."
-
----
-
-## Side-by-Side Comparison
-
-| Criteria | Stateful Sessions | Stateless JWTs | OAuth 2.0 + PKCE | OpenID Connect (OIDC) | API Keys | mTLS |
-|---|---|---|---|---|---|---|
-| Primary Focus | User Authentication | API Authorization | Delegated Access | User Identity / SSO | Machine-to-Machine | Zero-Trust M2M |
-| State Location | Server RAM / Redis | Client (Self-contained)| Auth Server | Auth Server | DB / Cache Hash | PKI Certificates |
-| Revocation | Instant ($O(1)$) | Hard (Needs blacklist) | Token Revocation Endpoint| Token Revocation | Instant (DB disable) | Certificate Revocation |
-| Transport | `Cookie` (HttpOnly) | `Authorization: Bearer`| `Authorization: Bearer` | `Authorization: Bearer` | `X-API-Key` Header | TLS Handshake (L4/7) |
-| Caching / DB Load | High (DB per request) | Zero (Stateless crypto) | Low (JWKS cached) | Low (JWKS cached) | Low (Cached in Redis)| Zero (Crypto handshake) |
-| Primary Threat | CSRF (needs SameSite) | XSS (localStorage leak) | Interception without PKCE| Scope / token misuse | Key leakage in git | Expired cert outage |
+```
+Mutual TLS (mTLS) Handshake Data Flow:
+Client                                           Server
+  |                                                |
+  |--- 1. ClientHello ---------------------------->|
+  |<-- 2. ServerHello + Server X.509 Certificate---| (Client verifies Server Identity)
+  |<-- 3. CertificateRequest ----------------------|
+  |--- 4. Client X.509 Certificate --------------->| (Server verifies Client Identity)
+  |<== 5. Encrypted Bidirectional Session TLS ====>|
+```
 
 ---
 
-## Decision Framework (say this out loud in interviews)
+# 7. Access Control Topologies: RBAC vs. ABAC vs. ReBAC
 
-1. **Monolithic or server-rendered web app needing instant logout** → Stateful Sessions in Redis with `HttpOnly; SameSite=Strict` cookies.
-2. **Distributed microservices needing high-throughput stateless verification** → Asymmetric RS256 JWTs verified via public JWKS.
-3. **Allowing third parties to access user data securely without passwords** → OAuth 2.0 (Auth Code + PKCE).
-4. **Implementing corporate Single Sign-On (SSO) or federated login** → OpenID Connect (OIDC) / SAML 2.0.
-5. **Public developer programmatic access (like Stripe / OpenAI)** → Hashed API Keys (`sk_live_...`).
-6. **Internal zero-trust service-to-service communication** → Mutual TLS (mTLS) via Service Mesh (Istio / Linkerd).
-7. **Simple role assignment** → RBAC; **Complex context-aware rules (time, ownership, tenancy)** → ABAC / OPA.
+```
++----------------------------------------------------------------------------------------------------+
+| MODEL                | ACCESS EVALUATION MECHANICS          | OPTIMAL SCALE & USE CASE             |
++----------------------------------------------------------------------------------------------------+
+| Role-Based (RBAC)    | Permissions mapped to static roles:  | Coarse-grained enterprise hierarchies|
+|                      | `User -> Roles -> Permissions`       | (e.g. Admin, Editor, Viewer)         |
+| Attribute-Based      | Dynamic boolean rule evaluation:     | Fine-grained contextual governance   |
+| (ABAC)               | $f(\text{Subject}, \text{Resource},  | (e.g. Allow if Department = Legal    |
+|                      | \text{Action}, \text{Environment})$  | AND Time is within Business Hours)   |
+| Relationship-Based   | Directed graph traversal over entity | Google Zanzibar, Google Drive / Docs |
+| (ReBAC)              | relationships (Parent / EditorOf)    | (Nested team and folder permissions) |
++----------------------------------------------------------------------------------------------------+
+```
 
 ---
 
-## What separates a senior answer from a junior one
+# 8. Enterprise Federation: SAML 2.0 Architecture
 
-### 1. Token Storage Security (XSS vs. CSRF)
-- **Junior:** "I save the JWT in `localStorage` because it's easy to read in React."
-- **Senior:** *"Storing tokens in `localStorage` leaves them completely vulnerable to **Cross-Site Scripting (XSS)** — any compromised npm package or injected `<script>` can steal the token. A senior engineer stores sensitive Refresh Tokens in **`HttpOnly; Secure; SameSite=Strict` cookies**, which are completely inaccessible to JavaScript, and keeps short-lived Access Tokens in application memory (React state/closure)."*
+Security Assertion Markup Language (SAML 2.0) is an XML-based federated identity standard used for enterprise Single Sign-On (SSO):
 
-### 2. The Stateless JWT Revocation Dilemma
-- **Junior:** "JWTs are amazing because they are 100% stateless and never touch the database."
-- **Senior:** *"Statelessness is a double-edged sword: if a user changes their password, gets fired, or gets compromised, **you cannot revoke a stateless JWT before its expiration time**. A senior solves this by:
-  1. Keeping Access Token lifetimes ultra-short (5 to 15 minutes).
-  2. Enforcing **Refresh Token Rotation**, where using a refresh token issues a new pair and revokes the old one.
-  3. Maintaining a fast Redis-based **Token Blacklist** (indexed by JWT `jti` ID) checked only during critical or privileged operations."*
+```
+SAML 2.0 SP-Initiated SSO Flow:
+[ Browser ]                  [ Service Provider (SP) ]              [ Identity Provider (IdP) ]
+    |                                   |                                        |
+    |-- 1. Access Protected Route ----->|                                        |
+    |<- 2. SAML Request (Redirect) -----|                                        |
+    |------------------------------------------------ 3. Authenticate User ----->|
+    |<----------------------------------------------- 4. Signed SAML Assertion --|
+    |-- 5. POST SAML Response Assertion>|                                        |
+    |<- 6. Establish Session Cookie ----|                                        |
+```
 
-### 3. PKCE Physics & Public Client Security
-- **Junior:** "SPAs use the Authorization Code Flow with a Client Secret."
-- **Senior:** *"Single Page Apps and mobile apps are **Public Clients** — any Client Secret embedded in client JavaScript or decompiled APKs can be extracted by an attacker. A senior mandates **Authorization Code Flow with PKCE (RFC 7636)**: the client generates a dynamic cryptographically random `code_verifier` and sends its SHA-256 hash (`code_challenge`) during authorization. The Authorization Server verifies that the client presenting the verifier is the exact client that initiated the flow, neutralizing authorization code interception attacks without exposing static secrets."*
+---
 
-### 4. Symmetric (HS256) vs. Asymmetric (RS256) Architecture
-- **Junior:** "We sign our JWTs with a shared secret string across all backend services."
-- **Senior:** *"Using symmetric HS256 means every microservice that verifies tokens must possess the secret key. If a single reporting microservice is compromised, the attacker can **forge valid admin tokens for the entire ecosystem**. A senior uses **asymmetric RS256 (or Ed25519)**: the Auth Service signs tokens using a private key, and all downstream services verify tokens statelessly using public **JWKS (JSON Web Key Set)** endpoints without ever seeing the signing private key."*
+# 9. Master Identity & Access Control Comparison Matrix
 
-### 5. Authorization Granularity: Beyond Simple Roles
-- **Junior:** "I check `if (user.role === 'admin')` on my endpoints."
-- **Senior:** *"Hardcoding role checks causes **Role Explosion** and security vulnerabilities as business requirements evolve. A senior decouples authorization from identity:
-  - Backends enforce **Permission-based checks** (`can('orders:delete')`) rather than role checks.
-  - For resource-level ownership (e.g. User A can only edit Order 99 if `order.tenant_id === user.tenant_id`), we use **Attribute-Based Access Control (ABAC)** or policy engines like **Open Policy Agent (OPA)** evaluated at the gateway or service layer."*
+```
++----------------------------------------------------------------------------------------------------+
+| PARADIGM      | STATE MODEL   | VERIFICATION MECHANISM | CRYPTOGRAPHIC BASE  | PRIMARY DOMAIN      |
++----------------------------------------------------------------------------------------------------+
+| Sessions      | Stateful      | Database Cache Lookup  | Random Hex / UUID   | Monolithic Web Apps |
+| JWT (RS256)   | Stateless     | Asymmetric Public JWKS | RSA / ECDSA Sign    | Microservices & APIs|
+| OAuth 2.0     | Delegated     | Access Token Scopes    | Bearer Signatures   | Delegated 3rd-Party |
+| OIDC          | Federated     | ID Token Validation    | Asymmetric JWTs     | Modern SSO & AuthN  |
+| mTLS          | Zero-Trust    | Bidirectional Handshake| X.509 PKI Certs     | Service Mesh (East) |
+| SAML 2.0      | Federated     | XML Signature Verify   | XMLDSIG X.509 Certs | Enterprise Okta SSO |
+| ReBAC         | Graph Model   | Graph Tuple Traversal  | Relational Tuples   | Complex Object ACLs |
++----------------------------------------------------------------------------------------------------+
+```

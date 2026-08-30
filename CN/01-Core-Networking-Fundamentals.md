@@ -1,152 +1,168 @@
-# Master Guide 01: Core Networking Fundamentals
+# Computer Networking Foundations, Transport Layer Mechanics & Domain Resolution
 
-> **Focus:** OSI vs. TCP/IP Models, TCP vs. UDP Decision Matrix, TCP 3-Way Handshake & 4-Way Teardown, HTTP vs. HTTPS (TLS Key Exchange), and DNS Resolution Workflow.
-> 
-> *Targeted for Top-Tier Tech Internship & Software Engineering Interviews.*
+> **Scope:** Deep Architectural Analysis of Network Reference Models (OSI 7-Layer vs. TCP/IP 4-Layer), Transport Layer Mechanics (TCP Stream Reliability vs. UDP Lightweight Datagrams), TCP Connection State Machines (3-Way Handshake, 4-Way Teardown, `TIME_WAIT` Invariants), Cryptographic Transport Security (TLS 1.2/1.3 Handshake Protocols), Hierarchical Domain Name System (DNS) Resolution Trees, and Flow Control vs. Congestion Control Mathematics.
 
 ---
 
-# Table of Contentss
-1. [OSI vs. TCP/IP Model: The Practical Mapping](#1-osi-vs-tcpip-model-the-practical-mapping)
-2. [TCP vs. UDP: The Master Decision Matrix](#2-tcp-vs-udp-the-master-decision-matrix)
-3. [TCP Connection Lifecycle: 3-Way Handshake & 4-Way Teardown](#3-tcp-connection-lifecycle-3-way-handshake--4-way-teardown)
-4. [HTTP vs. HTTPS & TLS Handshake Mechanics](#4-http-vs-https--tls-handshake-mechanics)
-5. [DNS Resolution: From Domain Name to IP Address](#5-dns-resolution-from-domain-name-to-ip-address)
-6. [High-Frequency Interview Drill & Verbal Q&A](#6-high-frequency-interview-drill--verbal-qa)
+# Table of Contents
+1. [Network Reference Models: OSI 7-Layer vs. TCP/IP 4-Layer Architecture](#1-network-reference-models-osi-7-layer-vs-tcpip-4-layer-architecture)
+2. [Transport Layer Mechanics: TCP vs. UDP](#2-transport-layer-mechanics-tcp-vs-udp)
+3. [TCP Connection Lifecycle State Machines](#3-tcp-connection-lifecycle-state-machines)
+4. [Transport Layer Security (TLS 1.2 / 1.3) Handshake Mechanics](#4-transport-layer-security-tls-12--13-handshake-mechanics)
+5. [Domain Name System (DNS) Hierarchical Resolution Flow](#5-domain-name-system-dns-hierarchical-resolution-flow)
+6. [Flow Control vs. Congestion Control Dynamics](#6-flow-control-vs-congestion-control-dynamics)
+7. [Core Network Foundations Reference Matrix](#7-core-network-foundations-reference-matrix)
 
 ---
 
-# 1. OSI vs. TCP/IP Model: The Practical Mapping
+# 1. Network Reference Models: OSI 7-Layer vs. TCP/IP 4-Layer Architecture
 
 ```
 +--------------------------+--------------------------+------------------------------------------------+
-| OSI 7-LAYER MODEL        | TCP/IP 4-LAYER MODEL     | COMMON PROTOCOLS & DATA UNITS                  |
+| OSI 7-LAYER MODEL        | TCP/IP 4-LAYER MODEL     | PROTOCOLS & DATA TRANSMISSION UNITS            |
 +--------------------------+--------------------------+------------------------------------------------+
 | 7. Application Layer     |                          | HTTP, HTTPS, DNS, SSH, FTP, SMTP, WebSockets   |
-| 6. Presentation Layer    | Application Layer        | (Data / Message Payload)                       |
+| 6. Presentation Layer    | Application Layer        | (Data Payloads & Messages)                     |
 | 5. Session Layer         |                          |                                                |
 +--------------------------+--------------------------+------------------------------------------------+
-| 4. Transport Layer       | Transport Layer          | TCP (Segments), UDP (Datagrams), Ports         |
+| 4. Transport Layer       | Transport Layer          | TCP (Segments), UDP (Datagrams), Port Numbers  |
 +--------------------------+--------------------------+------------------------------------------------+
 | 3. Network Layer         | Internet / Network Layer | IP (IPv4, IPv6), ICMP, Routers (Packets)       |
 +--------------------------+--------------------------+------------------------------------------------+
-| 2. Data Link Layer       | Link / Network Interface | Ethernet, Wi-Fi (MAC Addresses, Frames)        |
-| 1. Physical Layer        | Layer                    | Cables, Fiber, NIC Transceivers (Bits)         |
+| 2. Data Link Layer       | Link / Network Interface | Ethernet, Wi-Fi, Switches (MAC Frames)         |
+| 1. Physical Layer        | Layer                    | Optical Fiber, Copper Cables, Transceivers     |
 +--------------------------+--------------------------+------------------------------------------------+
 ```
 
-- **One-Line Intuition:** OSI is the theoretical 7-layer textbook blueprint; TCP/IP is the practical 4-layer architecture the actual internet runs on.
-- **The Interview Trap:** Trying to memorize obscure details of Presentation and Session layers. In real production software, layers 5, 6, and 7 are all collapsed into the user-space **Application Layer**.
-- **30-Second Verbal Answer:** **"The TCP/IP model has 4 layers: Application for user-level protocols like HTTP and DNS, Transport for end-to-end process communication via TCP or UDP, Network for host-to-host routing via IP, and Link for physical frame transmission over Ethernet or Wi-Fi."**
-- **Follow-up:** *What layer does a router operate on vs. a switch?* **A standard network switch operates on Layer 2 (Data Link / MAC addresses), while a router operates on Layer 3 (Network / IP addresses).**
+### Layer Addressing & Boundary Roles:
+- **Layer 2 (Data Link - MAC Addressing):** 48-bit physical hardware addresses (`00:1A:2B:3C:4D:5E`) used for frame delivery within the local physical segment / broadcast domain.
+- **Layer 3 (Network - IP Addressing):** 32-bit (IPv4) or 128-bit (IPv6) logical addresses used for routing packets across autonomous network boundaries.
 
 ---
 
-# 2. TCP vs. UDP: The Master Decision Matrix
+# 2. Transport Layer Mechanics: TCP vs. UDP
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| ATTRIBUTE            | TCP (Transmission Control Protocol)   | UDP (User Datagram Protocol)       |
-+---------------------------------------------------------------------------------------------------+
-| Connection Type      | Connection-Oriented (3-way handshake) | Connectionless (No setup overhead) |
-| Reliability          | 100% Reliable (ACKs + Retransmission) | Best-Effort (Packets can be lost)  |
-| Ordering             | Guaranteed In-Order (Sequence numbers)| Unordered (Packets arrive randomly)|
-| Flow/Congestion Ctrl | YES (Sliding Window, Backoff, AIMD)   | NO (Sends at application's rate)   |
-| Header Overhead      | 20–60 Bytes                           | 8 Bytes (Ultra-lightweight)        |
-| Speed / Latency      | Slower (Handshake + ACK roundtrips)   | Fastest (Zero handshake latency)   |
-| Primary Use Cases    | Web (HTTP/HTTPS), File transfers      | Video Streaming (Zoom), Gaming,    |
-|                      | (FTP), Emails (SMTP), SSH, Databases  | DNS Lookups, VoIP, Live Broadcasts |
-+---------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------------+
+| ATTRIBUTE            | TRANSMISSION CONTROL PROTOCOL (TCP)  | USER DATAGRAM PROTOCOL (UDP)         |
++----------------------------------------------------------------------------------------------------+
+| Connection Model     | Connection-oriented (3-Way Handshake)| Connectionless (Zero setup overhead) |
+| Delivery Guarantee   | 100% Guaranteed (ACKs + Retransmit)  | Best-effort (Packets may be dropped) |
+| Stream Ordering      | Strictly in-order (Sequence numbers) | Unordered (Datagrams arrive randomly)|
+| Flow/Congestion Ctrl | Integrated (Sliding Window, AIMD)    | Absent (Transmits at application rate|
+| Framing Overhead     | 20-60 Bytes Header                   | Minimal 8 Bytes Header               |
+| Primary Domain       | Web (HTTP/HTTPS), Database Drivers,  | Real-Time Media (WebRTC, VoIP),      |
+|                      | File Transfer (SFTP), SSH, Messaging | Online Gaming, DNS Queries, HTTP/3   |
++----------------------------------------------------------------------------------------------------+
 ```
-
-- **One-Line Intuition:** TCP is a certified registered letter requiring a signature confirmation; UDP is shouting across a crowded room—fast, but some words might get lost.
-- **The Interview Trap:** Saying "UDP is bad because it is unreliable." UDP is intentionally designed without retransmission overhead because in live video or online gaming, an old delayed frame is completely useless; **freshness and low latency beat guaranteed arrival**.
-- **30-Second Verbal Answer:** **"TCP is a connection-oriented, reliable protocol that guarantees in-order byte stream delivery using sequence numbers, acknowledgements, and congestion control at the cost of latency. UDP is connectionless and lightweight, sending datagrams with zero setup overhead and no delivery guarantees, making it ideal for real-time video, gaming, and DNS."**
 
 ---
 
-# 3. TCP Connection Lifecycle: 3-Way Handshake & 4-Way Teardown
+# 3. TCP Connection Lifecycle State Machines
 
 ```
-TCP 3-Way Handshake (Establishment):
-[ Client ]                                                        [ Server ]
-    | --- 1. SYN (seq=x) --------------------------------------------> | (Client: "Can you hear me?")
-    | <--- 2. SYN-ACK (seq=y, ack=x+1) ------------------------------- | (Server: "Yes, can you hear me?")
-    | --- 3. ACK (ack=y+1) ------------------------------------------> | (Client: "Yes, connection open!")
-    |                                                                  |
-    [ ESTABLISHED ]                                                    [ ESTABLISHED ]
-
-TCP 4-Way Handshake (Termination):
-[ Client ]                                                        [ Server ]
-    | --- 1. FIN (seq=u) --------------------------------------------> | (Client: "I have no more data to send")
-    | <--- 2. ACK (ack=u+1) ------------------------------------------ | (Server: "ACK, closing my read end")
-    | <--- 3. FIN (seq=w) -------------------------------------------- | (Server: "I am also done sending data")
-    | --- 4. ACK (ack=w+1) ------------------------------------------> | (Client: "ACK, fully closed")
-    | [ TIME_WAIT (2*MSL) ]                                            [ CLOSED ]
+TCP 3-Way Handshake (Connection Establishment):
+Client (Active Open)                                             Server (Passive Open)
+  |                                                                | (LISTEN)
+  |--- 1. SYN (seq = x) ------------------------------------------>| (SYN_RCVD)
+  |<-- 2. SYN-ACK (seq = y, ack = x + 1) --------------------------|
+  |--- 3. ACK (ack = y + 1) -------------------------------------->|
+  |                                                                |
+  [ ESTABLISHED ]                                                  [ ESTABLISHED ]
 ```
 
-- **One-Line Intuition:** The 3-way handshake confirms that both sides can independently **send AND receive** before transmitting payload data.
-- **The Interview Trap:** Thinking 2 packets are enough. With only 2 packets (SYN $\to$ SYN-ACK), the client knows the server can send and receive, but the **server has no confirmation that the client received its SYN-ACK**.
-- **Follow-up:** *What is the purpose of `TIME_WAIT` state on the client?* **To ensure the final ACK was delivered to the server (resending it if lost) and to prevent old delayed duplicate packets from a previous connection interfering with a newly opened connection on the same port.**
+```
+TCP 4-Way Teardown (Connection Termination):
+Client (Active Close)                                            Server (Passive Close)
+  |--- 1. FIN (seq = u) ------------------------------------------>| (CLOSE_WAIT)
+  |<-- 2. ACK (ack = u + 1) ---------------------------------------|
+  |                                                                |
+  |<-- 3. FIN (seq = w) -------------------------------------------| (LAST_ACK)
+  |--- 4. ACK (ack = w + 1) -------------------------------------->|
+  |                                                                |
+  [ TIME_WAIT (2 * MSL) ]                                          [ CLOSED ]
+```
+
+### The `TIME_WAIT` State & 2MSL Invariant:
+The active-closing endpoint remains in the `TIME_WAIT` state for **$2 \times \text{MSL}$ (Maximum Segment Lifetime)**, typically 60 to 120 seconds:
+1. **Guarantees Final ACK Delivery:** If the server fails to receive the final ACK, it retransmits its FIN; the client must remain active to acknowledge it.
+2. **Flushes Old Duplicate Segments:** Prevents delayed packets from a previous connection from corrupting subsequent connections instantiated on the same IP:Port 4-tuple.
 
 ---
 
-# 4. HTTP vs. HTTPS & TLS Handshake Mechanics
+# 4. Transport Layer Security (TLS 1.2 / 1.3) Handshake Mechanics
+
+HTTPS encapsulates HTTP communications within an encrypted TLS cryptographic tunnel operating on port 443:
 
 ```
-Plain HTTP (Port 80):     [ Plaintext Payload: "password=123" ] (Vulnerable to eavesdropping & MITM)
-
-HTTPS (Port 443):         [ Encrypted TLS Tunnel ] ---> [ Ciphertext: "a9#k!z98" ]
+TLS 1.3 Cryptographic Handshake (1-RTT Fast Path):
+Client                                                           Server
+  |                                                                |
+  |--- 1. ClientHello (Key Share: ECDH Public Key, Cipher Suites)->|
+  |<-- 2. ServerHello (Key Share: ECDH Public Key, Certificate) ---| (Server Authenticated via CA)
+  |                                                                |
+  |<== [ Shared Symmetric Session Key Established (AES-GCM) ] ====>|
+  |                                                                |
+  |--- 3. Encrypted Application Data (HTTP Payload) -------------->|
 ```
 
-### The TLS 1.2 / 1.3 Handshake in 3 Simple Steps:
-1. **Certificate Verification (Asymmetric Crypto):** Server presents its SSL/TLS Certificate signed by a trusted Certificate Authority (CA). Client verifies the server's identity using the CA's public key.
-2. **Key Exchange (Asymmetric Crypto):** Client and server use asymmetric cryptography (RSA or Diffie-Hellman / ECDHE) to securely agree on a shared random **Symmetric Session Key**.
-3. **Data Transfer (Symmetric Crypto):** All subsequent HTTP request/response payloads are encrypted using the fast **Symmetric Session Key** (e.g. AES-GCM).
-
-- **One-Line Intuition:** Asymmetric crypto is the slow armored truck used once to exchange a secret handshake; symmetric crypto is using that secret handshake to talk at lightning speed for the rest of the conversation.
-- **30-Second Verbal Answer:** **"HTTPS is HTTP encrypted over TLS on port 443. It provides confidentiality, integrity, and server authentication. It uses asymmetric cryptography during the initial handshake to authenticate certificates and negotiate a shared symmetric key, then uses fast symmetric encryption (like AES) for all actual payload data."**
+1. **Identity Authentication (Asymmetric Cryptography):** The server presents an X.509 certificate signed by a trusted Certificate Authority (CA), authenticated via RSA or ECDSA digital signatures.
+2. **Session Key Negotiation (ECDHE):** Elliptic Curve Diffie-Hellman Ephemeral key exchange generates an ephemeral shared secret with **Forward Secrecy**.
+3. **Data Encryption (Symmetric Cryptography):** High-speed symmetric ciphers (AES-256-GCM, ChaCha20-Poly1305) encrypt all application payloads.
 
 ---
 
-# 5. DNS Resolution: From Domain Name to IP Address
+# 5. Domain Name System (DNS) Hierarchical Resolution Flow
+
+DNS is a globally distributed, hierarchical database translating human-readable hostnames into 32-bit/128-bit IP addresses:
 
 ```
-Client types "google.com":
-[ Browser Cache ] ---> [ OS Local Cache ] ---> [ ISP Recursive Resolver ]
-                                                           |
-               +-------------------------------------------+-------------------------------------------+
-               |                                           |                                           |
-               v                                           v                                           v
-    1. Root DNS Server (.)                    2. TLD DNS Server (.com)             3. Authoritative DNS Server
-    (Returns .com TLD Server IP)              (Returns google.com Auth Server IP)   (Returns exact Host IP 142.250.x.x)
+DNS Hierarchical Resolution Path:
+[ Client Resolver ] ---> [ Local OS / Hosts Cache ] ---> [ Recursive DNS Server (8.8.8.8) ]
+                                                                      |
+                   +--------------------------------------------------+--------------------------------------------------+
+                   |                                                  |                                                  |
+                   v                                                  v                                                  v
+         1. Root Server (.)                               2. TLD Server (.com)                       3. Authoritative Nameserver
+         (Returns .com TLD IP)                            (Returns google.com Nameserver IP)         (Returns definitive A record IP)
 ```
 
-### Resolution Flow (Cache Miss Hierarchy):
-1. **Browser Cache & OS Hosts Cache:** Immediate local memory check.
-2. **Recursive DNS Resolver (ISP / `8.8.8.8`):** Queries on client's behalf.
-3. **Root Name Server (`.`):** Directs resolver to Top-Level Domain (TLD) server.
-4. **TLD Name Server (`.com`, `.org`):** Directs resolver to Authoritative Name Server.
-5. **Authoritative Name Server:** Holds the definitive DNS record (A record) and returns the actual IP address.
-
-- **One-Line Intuition:** DNS is the phonebook of the internet, translating human-friendly domain names (`google.com`) into computer-routable IP addresses (`142.250.190.46`).
-- **Follow-up:** *What is DNS TTL (Time-To-Live)?* **The duration in seconds that intermediate resolvers and clients are allowed to cache a DNS record before re-querying the authoritative server.**
+- **Record Types:** `A` (IPv4 address), `AAAA` (IPv6 address), `CNAME` (Canonical alias), `MX` (Mail exchanger), `TXT` (SPF/DKIM verification).
+- **Time-to-Live (TTL):** Specifies the duration (in seconds) intermediate caching resolvers may retain records before querying authoritative servers.
 
 ---
 
-# 6. High-Frequency Interview Drill & Verbal Q&A
+# 6. Flow Control vs. Congestion Control Dynamics
 
-### Q1: What is the difference between TCP Flow Control and Congestion Control?
-> **Answer:** **Flow Control** prevents the sender from overwhelming the *receiver's buffer* using a dynamic **Sliding Window (`rwnd`)**. **Congestion Control** prevents the sender from overwhelming the *underlying network routers* using algorithms like Slow Start and Congestion Avoidance (`cwnd`).
+```
++----------------------------------------------------------------------------------------------------+
+| MECHANISM            | TARGET PROTECTED                     | GOVERNING ALGORITHM & INVARIANT      |
++----------------------------------------------------------------------------------------------------+
+| Flow Control         | Protects the **Receiver's Buffer**   | Sliding Window (`rwnd`): Receiver    |
+|                      | from sender memory exhaustion        | advertises available buffer capacity |
+| Congestion Control   | Protects the **Network Routers**     | Congestion Window (`cwnd`): Sender   |
+|                      | from packet drop queue collapses     | dynamically probes capacity via AIMD |
++----------------------------------------------------------------------------------------------------+
+```
 
-### Q2: What is the difference between an IP address and a MAC address?
-> **Answer:** An **IP address (Layer 3)** is a logical, globally routable address used to deliver packets across different networks. A **MAC address (Layer 2)** is a physical, hardware-burned identifier used to deliver frames locally between devices on the same physical network link.
+### Additive Increase Multiplicative Decrease (AIMD):
+$$\text{Max Transmit Capacity} = \min(\text{rwnd}, \, \text{cwnd})$$
+- **Slow Start:** `cwnd` doubles exponentially each RTT until reaching `ssthresh`.
+- **Congestion Avoidance:** `cwnd` increments linearly ($+1 \text{ MSS}$ per RTT).
+- **Packet Loss Detection:** Halves `cwnd` on triple-duplicate ACKs (Fast Retransmit); collapses `cwnd` to 1 MSS on timeout.
 
-### Q3: What is the difference between HTTP/1.1, HTTP/2, and HTTP/3?
-> **Answer:** **HTTP/1.1** allows persistent connections but suffers from Head-of-Line (HoL) blocking on single requests. **HTTP/2** introduces binary framing and **multiplexing** over a single TCP connection. **HTTP/3** replaces TCP with **QUIC (over UDP)**, eliminating TCP-level Head-of-Line blocking and enabling near-instant 0-RTT handshakes.
+---
 
-### Q4: Why does DNS primarily use UDP instead of TCP?
-> **Answer:** Because DNS requests are small single-packet queries where the **3-way handshake overhead of TCP would double lookup latency**. DNS falls back to TCP only for zone transfers or when response payloads exceed 512 bytes (e.g. DNSSEC).
+# 7. Core Network Foundations Reference Matrix
 
-### Q5: What is a Port number in networking?
-> **Answer:** A 16-bit integer ($0\text{--}65535$) used at the Transport Layer to identify a **specific process or service running on a host** (e.g. Port 80 for HTTP, Port 443 for HTTPS, Port 22 for SSH).
+```
++----------------------------------------------------------------------------------------------------+
+| NETWORK PROTOCOL     | OSI LAYER LEVEL      | RELIABILITY MODEL    | STATE MACHINE COMPLEXITY      |
++----------------------------------------------------------------------------------------------------+
+| IP (IPv4/IPv6)       | Layer 3 (Network)    | Best-Effort Datagram | Stateless Packet Forwarding   |
+| TCP                  | Layer 4 (Transport)  | Guaranteed In-Order  | Stateful 3-Way Handshake/Teardown|
+| UDP                  | Layer 4 (Transport)  | Connectionless Unrel | Stateless Framing             |
+| TLS 1.3              | Layer 4/7 Security   | Cryptographic Tunnel | 1-RTT Key Negotiation         |
+| DNS Protocol         | Layer 7 (Application)| UDP Port 53 Primary  | Hierarchical Recursive Tree   |
++----------------------------------------------------------------------------------------------------+
+```

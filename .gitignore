@@ -5,3 +5,5 @@ sections/
 *.o
 *.dSYM/
 SD/
+.vscode/
+.clang-format
