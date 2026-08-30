@@ -57,18 +57,13 @@ const ll MOD = 1e9 + 7;
  | 16 | Min Subarrays with Sum <= K                 | Greedy Running Sum Partitioning   | O(N)     | O(1)     |
  | 17 | K-th Smallest via QuickSelect               | Lomuto Partition QuickSelect      | O(N) avg | O(1)     |
  | 18 | Bidirectional BFS                           | Two-Ended BFS (Smaller Frontier)  | O(B^(D/2) | O(B^(D/2) |
- | 19 | Valid Parentheses with Wildcard '*'         | Greedy Min-Max Bounds (cmin, cmax) | O(N)     | O(1)     |
- | 20 | Count Reverse Pairs (a[i] > x * a[j])       | Modified Merge Sort Counting      | O(N logN) | O(N)     |
- | 21 | Find Median via std::nth_element            | QuickSelect Median via STL        | O(N) avg | O(1)     |
- | 22 | Merge Sort                                  | Divide-and-Conquer Merge Sort     | O(N logN) | O(N)     |
- | 23 | Longest Substring with At Least K Frequency | Sliding Window per Unique Target  | O(26 * N) | O(1)     |
- | 24 | Cyclic Right and Left Rotation              | 3-Step Range Reversal Algorithm   | O(N)     | O(1)     |
- | 25 | Largest Number from Concatenation           | Custom String Comparator Sorting  | O(N logN) | O(N)     |
- | 26 | Running K-th Element Stream                 | Two Heaps (Max-Heap + Min-Heap)   | O(log K) | O(N)     |
- | 27 | Wiggle Sort II                              | Median + DNF 3-Way + Interleaving | O(N)     | O(N)     |
- | 28 | LRU Cache                                   | Hash Map + Doubly Linked List     | O(1)     | O(Cap)   |
- | 29 | LFU Cache                                   | Hash Map + Freq-to-List + minFreq | O(1)     | O(Cap)   |
- | 30 | Gas Station Circuit                         | Greedy Net Surplus & Tank Reset   | O(N)     | O(1)     |
+ | 19 | Count Reverse Pairs (a[i] > x * a[j])       | Modified Merge Sort Counting      | O(N logN) | O(N)     |
+ | 20 | Find Median via std::nth_element            | QuickSelect Median via STL        | O(N) avg | O(1)     |
+ | 21 | Longest Substring with At Least K Frequency | Sliding Window per Unique Target  | O(26 * N) | O(1)     |
+ | 22 | Cyclic Right and Left Rotation              | 3-Step Range Reversal Algorithm   | O(N)     | O(1)     |
+ | 23 | LRU Cache                                   | Hash Map + Doubly Linked List     | O(1)     | O(Cap)   |
+ | 24 | LFU Cache                                   | Hash Map + Freq-to-List + minFreq | O(1)     | O(Cap)   |
+ | 25 | Gas Station Circuit                         | Greedy Net Surplus & Tank Reset   | O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -419,28 +414,7 @@ int bidirectionalBFS(const string &start, const string &target) {
 // - Complexity: Time: O(B^{D/2}), Space: O(B^{D/2}).
 
 // ============================================================
-// 19. VALID PARENTHESES WITH WILDCARD '*'
-// ============================================================
-
-bool checkValidString(const string &s) {
-    int cmin = 0, cmax = 0;
-    for (char c : s) {
-        if (c == '(') { cmin++; cmax++; }
-        else if (c == ')') { cmin--; cmax--; }
-        else { cmin--; cmax++; }
-        if (cmax < 0) return false;
-        if (cmin < 0) cmin = 0;
-    }
-    return cmin == 0;
-}
-// Interview Explanation:
-// - Problem Statement: Check whether a parentheses string containing '(', ')', and '*' is valid.
-// - Approach: Range Tracking / Greedy Min-Max Open Parentheses Bounds.
-// - Intuition: `cmin` tracks min open parens and `cmax` tracks max; invalid if `cmax < 0`, valid if `cmin == 0` at end.
-// - Complexity: Time: O(N), Space: O(1).
-
-// ============================================================
-// 20. COUNT REVERSE PAIRS (a[i] > x * a[j])
+// 19. COUNT REVERSE PAIRS (a[i] > x * a[j])
 // ============================================================
 
 int countPairs(vector<int>& a, int x) {
@@ -462,7 +436,7 @@ int countPairs(vector<int>& a, int x) {
 // - Complexity: Time: O(N \log N), Space: O(N).
 
 // ============================================================
-// 21. FIND MEDIAN VIA STD::NTH_ELEMENT
+// 20. FIND MEDIAN VIA STD::NTH_ELEMENT
 // ============================================================
 
 int findMedian(vi &arr) {
@@ -482,23 +456,7 @@ int findMedian(vi &arr) {
 // - Complexity: Time: O(N) average, Space: O(1).
 
 // ============================================================
-// 22. MERGE SORT
-// ============================================================
-
-void mergeSort(vi& a, int l, int r) {
-    if (l >= r) return;
-    int mid = l + (r - l) / 2;
-    mergeSort(a, l, mid); mergeSort(a, mid + 1, r);
-    inplace_merge(a.begin() + l, a.begin() + mid + 1, a.begin() + r + 1);
-}
-// Interview Explanation:
-// - Problem Statement: Sort an array using divide-and-conquer Merge Sort.
-// - Approach: Classic Divide-and-Conquer Recursive Merge Sort.
-// - Intuition: Recursively divide array into halves, then merge sorted halves back using two pointers.
-// - Complexity: Time: O(N \log N), Space: O(N).
-
-// ============================================================
-// 23. LONGEST SUBSTRING WITH AT LEAST K FREQUENCY
+// 21. LONGEST SUBSTRING WITH AT LEAST K FREQUENCY
 // ============================================================
 
 int longestSubstring(string s, int k) {
@@ -528,7 +486,7 @@ int longestSubstring(string s, int k) {
 // - Complexity: Time: O(26 \cdot N) = O(N), Space: O(1).
 
 // ============================================================
-// 24. CYCLIC RIGHT AND LEFT ROTATION
+// 22. CYCLIC RIGHT AND LEFT ROTATION
 // ============================================================
 
 void reverseSubarray(vi& a, int l, int r) {
@@ -551,104 +509,7 @@ void LeftRotate(vi& a, int l, int r, int k) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 25. LARGEST NUMBER FROM CONCATENATION
-// ============================================================
-
-int ConcatenationSort(vi &a) {
-    sort(a.begin(), a.end(), [](int x, int y) {
-        return to_string(x) + to_string(y) > to_string(y) + to_string(x);
-    });
-    string s;
-    for (int x : a) s += to_string(x);
-    return stoi(s);
-}
-// Interview Explanation:
-// - Problem Statement: Arrange non-negative integers such that their concatenation forms the largest number.
-// - Approach: Custom comparator sorting based on string concatenation (Largest Number).
-// - Intuition: Sort with predicate $(to\_string(x) + to\_string(y)) > (to\_string(y) + to\_string(x))$.
-// - Complexity: Time: O(N \log N), Space: O(N).
-
-// ============================================================
-// 26. RUNNING K-TH ELEMENT STREAM
-// ============================================================
-
-int kthSmallest(vector<int>& a, int k) {
-    nth_element(a.begin(), a.begin() + k - 1, a.end()); return a[k - 1];
-}
-
-int kthLargest(vector<int>& a, int k) {
-    nth_element(a.begin(), a.end() - k, a.end()); return a[a.size() - k];
-}
-
-int median(vi &a) {
-    int n = a.size();
-    if (n % 2 == 1) return kthSmallest(a, n / 2 + 1);
-    return (kthSmallest(a, n / 2) + kthSmallest(a, n / 2 + 1)) / 2;
-}
-
-int kthElement(const vector<int>& a, const vector<int>& b, int k) {
-    if (a.size() > b.size()) return kthElement(b, a, k);
-    int n = a.size(), m = b.size(), lo = max(0, k - m), hi = min(k, n);
-    while (lo <= hi) {
-        int cutA = (lo + hi) / 2, cutB = k - cutA;
-        int lA = (cutA == 0) ? INT_MIN : a[cutA - 1], rA = (cutA == n) ? INT_MAX : a[cutA];
-        int lB = (cutB == 0) ? INT_MIN : b[cutB - 1], rB = (cutB == m) ? INT_MAX : b[cutB];
-        if (lA <= rB && lB <= rA) return max(lA, lB);
-        if (lA > rB) hi = cutA - 1; else lo = cutA + 1;
-    }
-    return -1;
-}
-
-double medianOfTwoSortedArrays(const vector<int>& a, const vector<int>& b) {
-    int total = a.size() + b.size();
-    if (total % 2 == 1) return kthElement(a, b, total / 2 + 1);
-    return (kthElement(a, b, total / 2) + kthElement(a, b, total / 2 + 1)) / 2.0;
-}
-
-class RunningKth {
-    priority_queue<int> left;
-    priority_queue<int, vector<int>, greater<int>> right;
-    int k;
-public:
-    RunningKth(int rank) : k(rank) {}
-    void add(int x) {
-        if (left.empty() || x <= left.top()) left.push(x); else right.push(x);
-        while (left.size() > k) { right.push(left.top()); left.pop(); }
-        while (left.size() < k && !right.empty()) { left.push(right.top()); right.pop(); }
-    }
-    int getKth() const { return left.top(); }
-};
-// Interview Explanation:
-// - Problem Statement: Design a data structure that dynamically returns the k-th smallest element added so far.
-// - Approach: Two Heaps (Max-Heap `left` holding $k$ smallest, Min-Heap `right` holding the rest).
-// - Intuition: Invariant maintains `left` size at $k$; top of `left` is always the $k$-th smallest element.
-// - Complexity: Time: O(\log K) for `add`, O(1) for `getKth`, Space: O(N).
-
-// ============================================================
-// 27. WIGGLE SORT II
-// ============================================================
-
-void wiggleSort(std::vector<int>& nums) {
-    int n = nums.size(), mid_idx = (n - 1) / 2;
-    std::vector<int> sorted_arr = nums;
-    nth_element(sorted_arr.begin(), sorted_arr.begin() + mid_idx, sorted_arr.end());
-    int median = sorted_arr[mid_idx], i = 0, j = 0, k = n - 1;
-    while (j <= k) {
-        if (sorted_arr[j] < median) swap(sorted_arr[i++], sorted_arr[j++]);
-        else if (sorted_arr[j] > median) swap(sorted_arr[j], sorted_arr[k--]);
-        else j++;
-    }
-    int left = mid_idx, right = n - 1;
-    for (int x = 0; x < n; ++x) nums[x] = (x % 2 == 0) ? sorted_arr[left--] : sorted_arr[right--];
-}
-// Interview Explanation:
-// - Problem Statement: Reorder array into wiggle sort order: nums[0] < nums[1] > nums[2] < nums[3]... (Wiggle Sort II).
-// - Approach: Quickselect Median Finding + Dutch National Flag Partition + Interleaving.
-// - Intuition: 3-way partition around median, then interleave into even/odd indices backwards.
-// - Complexity: Time: O(N), Space: O(N).
-
-// ============================================================
-// 28. LRU CACHE & MERGE INTERVALS
+// 23. LRU CACHE
 // ============================================================
 
 class LRUCache {
@@ -670,25 +531,14 @@ public:
         }
     }
 };
-
-vvi mergeIntervals(vvi &intervals) {
-    if (intervals.empty()) return {};
-    sort(intervals.begin(), intervals.end());
-    vvi merged = {intervals[0]};
-    for (const auto &interval : intervals) {
-        if (merged.back()[1] >= interval[0]) merged.back()[1] = max(merged.back()[1], interval[1]);
-        else merged.push_back(interval);
-    }
-    return merged;
-}
 // Interview Explanation:
-// - Problem Statement: Implement LRU cache with O(1) operations; and merge overlapping intervals.
-// - Approach: Hash Map + Doubly Linked List for LRU; Sort + Greedy Linear Scan for intervals.
-// - Intuition: Splicing list iterators provides O(1) recency updates; sorting by start time clusters overlaps.
-// - Complexity: Time: O(1) LRU ops / O(N log N) intervals, Space: O(Cap) / O(N).
+// - Problem Statement: Implement Least Recently Used (LRU) cache supporting get and put in O(1) time.
+// - Approach: Hash Map + Doubly Linked List.
+// - Intuition: Splicing list iterators provides O(1) recency updates; hash map provides O(1) key-to-node lookup.
+// - Complexity: Time: O(1) for get and put, Space: O(Cap).
 
 // ============================================================
-// 29. LFU CACHE
+// 24. LFU CACHE
 // ============================================================
 
 class LFUCache {
@@ -728,7 +578,7 @@ public:
 // - Complexity: Time: O(1) for both `get` and `put`, Space: O(Cap).
 
 // ============================================================
-// 30. TOP K, TOP K FREQUENT, STRING UTILS & GAS STATION
+// 25. TOP K, TOP K FREQUENT, STRING UTILS & GAS STATION
 // ============================================================
 
 class TopK {

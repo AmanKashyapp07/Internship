@@ -44,39 +44,44 @@ const ll MOD = 1e9 + 7;
  | 3  | Parallel Courses (LeetCode 1136)           | Level-Order TopoSort (Kahn's BFS) | O(V + E) | O(V + E) |
  | 4  | Find Peak Element (LeetCode 162)           | Binary Search on Monotonic Slope  | O(log N) | O(1)     |
  | 5  | Find a Peak Element II (LeetCode 1901)     | Column Binary Search + Column Max | O(R logC)| O(1)     |
- | 6  | Pancake Sorting (LeetCode 969)             | Greedy Suffix Placement (2-Flips) | O(N^2)   | O(N)     |
- | 7  | Jump Game I (LeetCode 55)                  | Greedy Farthest Reachable Index   | O(N)     | O(1)     |
- | 8  | Jump Game II (LeetCode 45)                 | Greedy BFS Horizon Interval       | O(N)     | O(1)     |
- | 9  | Jump Game III (LeetCode 1306)              | Graph BFS Reachability            | O(N)     | O(N)     |
- | 10 | Jump Game IV (LeetCode 1345)              | BFS + Same-Value Pruning          | O(N)     | O(N)     |
- | 11 | Jump Game V (LeetCode 1340)               | Memoized DFS / DAG Longest Path   | O(N * D) | O(N)     |
- | 12 | Jump Game VI (LeetCode 1696)              | Monotonic Deque Sliding Window DP | O(N)     | O(N)     |
- | 13 | Jump Game VII (LeetCode 1871)             | Sliding Window Reachability DP    | O(N)     | O(N)     |
- | 14 | Stock I — 1 Transaction (LeetCode 121)     | Running Minimum Price Tracking    | O(N)     | O(1)     |
- | 15 | Stock II — Infinite Txns (LeetCode 122)    | Greedy Positive Slope Harvest     | O(N)     | O(1)     |
- | 16 | Stock III — At Most 2 Txns (LeetCode 123)  | 4-State Finite State Machine      | O(N)     | O(1)     |
- | 17 | Stock IV — At Most K Txns (LeetCode 188)   | 1D DP K-Transaction Compression   | O(N * K) | O(K)     |
- | 18 | Stock with Cooldown (LeetCode 309)         | 3-State Machine (Held, Sold, Rest)| O(N)     | O(1)     |
- | 19 | Stock with Transaction Fee (LeetCode 714)  | 2-State Machine (Cash, Hold)      | O(N)     | O(1)     |
- | 20 | House Robber I (LeetCode 198)              | 1D DP Space-Optimized (prev1,prev2)| O(N)     | O(1)     |
- | 21 | House Robber II (LeetCode 213)             | Circular Array 2-Pass Range DP    | O(N)     | O(1)     |
- | 22 | House Robber III (LeetCode 337)            | Post-Order Tree DP (Rob / Skip)   | O(N)     | O(H)     |
- | 23 | House Robber IV (LeetCode 2560)           | Binary Search on Min Capability   | O(N logM)| O(1)     |
- | 24 | Delete and Earn / Robber V (LeetCode 740)  | Frequency Array Reduction to DP   | O(N+maxA)| O(maxA)  |
- | 25 | Coin Change I — Fewest (LeetCode 322)      | 1D Unbounded Knapsack DP (Min)    | O(N * A) | O(A)     |
- | 26 | Coin Change II — Combinations (LC 518)     | 1D Unbounded Combination DP       | O(N * A) | O(A)     |
- | 27 | Coin Change Permutations (LeetCode 377)    | 1D Unbounded Permutation DP       | O(N * A) | O(A)     |
- | 28 | Bounded Coin Change (Limited Supply)       | Binary Splitting + 0/1 Knapsack   | O(A logK)| O(A)     |
- | 29 | Coin Change Path Reconstruction            | DP Predecessor Pointer Traceback  | O(N * A) | O(A)     |
- | 30 | Reachable Money Sums (CSES Money Sums)     | 0/1 Knapsack Boolean Reachability | O(N*sum) | O(sum)   |
- | 31 | Dutch National Flag (0, 1, 2 Sort)         | 3-Way In-Place Partitioning (DNF) | O(N)     | O(1)     |
- | 32 | Counting Sort (Stable Implementation)      | Prefix Frequency Cumulative Table | O(N + K) | O(N + K) |
- | 33 | Radix Sort (LSD Base-10)                   | Digit-by-Digit Stable Counting DP | O(D*(N+B)| O(N + B) |
- | 34 | Bucket Sort (Uniform Distribution)         | Range Bucketing + Local Sorting   | O(N) avg | O(N)     |
- | 35 | Cyclic Sort [1 to N]                       | In-Place Index Mapping Swap       | O(N)     | O(1)     |
- | 36 | Pigeonhole Sort                            | Direct Hole Placement & Retrieval | O(N+Range| O(N+Range|
- | 37 | Patience Sorting (LIS Extraction)          | Card Pile Lower-Bound Insertion   | O(N logN)| O(N)     |
- | 38 | 3-Way QuickSort (Bentley-McIlroy)          | DNF Partitioning for Duplicates   | O(N logN)| O(log N) |
+ | 6  | Jump Game I (LeetCode 55)                  | Greedy Farthest Reachable Index   | O(N)     | O(1)     |
+ | 7  | Jump Game II (LeetCode 45)                 | Greedy BFS Horizon Interval       | O(N)     | O(1)     |
+ | 8  | Jump Game III (LeetCode 1306)              | Graph BFS Reachability            | O(N)     | O(N)     |
+ | 9  | Jump Game IV (LeetCode 1345)              | BFS + Same-Value Pruning          | O(N)     | O(N)     |
+ | 10 | Jump Game V (LeetCode 1340)               | Memoized DFS / DAG Longest Path   | O(N * D) | O(N)     |
+ | 11 | Jump Game VI (LeetCode 1696)              | Monotonic Deque Sliding Window DP | O(N)     | O(N)     |
+ | 12 | Jump Game VII (LeetCode 1871)             | Sliding Window Reachability DP    | O(N)     | O(N)     |
+ | 13 | Stock I — 1 Transaction (LeetCode 121)     | Running Minimum Price Tracking    | O(N)     | O(1)     |
+ | 14 | Stock II — Infinite Txns (LeetCode 122)    | Greedy Positive Slope Harvest     | O(N)     | O(1)     |
+ | 15 | Stock III — At Most 2 Txns (LeetCode 123)  | 4-State Finite State Machine      | O(N)     | O(1)     |
+ | 16 | Stock IV — At Most K Txns (LeetCode 188)   | 1D DP K-Transaction Compression   | O(N * K) | O(K)     |
+ | 17 | Stock with Cooldown (LeetCode 309)         | 3-State Machine (Held, Sold, Rest)| O(N)     | O(1)     |
+ | 18 | Stock with Transaction Fee (LeetCode 714)  | 2-State Machine (Cash, Hold)      | O(N)     | O(1)     |
+ | 19 | House Robber I (LeetCode 198)              | 1D DP Space-Optimized (prev1,prev2)| O(N)     | O(1)     |
+ | 20 | House Robber II (LeetCode 213)             | Circular Array 2-Pass Range DP    | O(N)     | O(1)     |
+ | 21 | House Robber III (LeetCode 337)            | Post-Order Tree DP (Rob / Skip)   | O(N)     | O(H)     |
+ | 22 | House Robber IV (LeetCode 2560)           | Binary Search on Min Capability   | O(N logM)| O(1)     |
+ | 23 | Delete and Earn / Robber V (LeetCode 740)  | Frequency Array Reduction to DP   | O(N+maxA)| O(maxA)  |
+ | 24 | Coin Change I — Fewest (LeetCode 322)      | 1D Unbounded Knapsack DP (Min)    | O(N * A) | O(A)     |
+ | 25 | Coin Change II — Combinations (LC 518)     | 1D Unbounded Combination DP       | O(N * A) | O(A)     |
+ | 26 | Coin Change Permutations (LeetCode 377)    | 1D Unbounded Permutation DP       | O(N * A) | O(A)     |
+ | 27 | Bounded Coin Change (Limited Supply)       | Binary Splitting + 0/1 Knapsack   | O(A logK)| O(A)     |
+ | 28 | Coin Change Path Reconstruction            | DP Predecessor Pointer Traceback  | O(N * A) | O(A)     |
+ | 29 | Reachable Money Sums (CSES Money Sums)     | 0/1 Knapsack Boolean Reachability | O(N*sum) | O(sum)   |
+ | 30 | Redundant Connection (Undirected Graph)    | DSU / Union-Find Cycle Detection  | O(N a(N))| O(N)     |
+ | 31 | Redundant Connection II (Directed Graph)   | 2-Parent Edge + DSU Directed Cycle| O(N a(N))| O(N)     |
+ | 32 | Valid Parentheses (LeetCode 20)            | Stack Character Matching (3 Pairs)| O(N)     | O(N)     |
+ | 33 | Generate Parentheses (LeetCode 22)         | Backtracking Open/Close Invariant | O(4^N/rtN)| O(N)     |
+ | 34 | Longest Valid Parentheses (LeetCode 32)    | Stack with -1 Base Index Sentinel | O(N)     | O(N)     |
+ | 35 | Valid Parentheses with Wildcard '*' (LC678)| Greedy Min-Max Bounds [cmin,cmax] | O(N)     | O(1)     |
+ | 36 | Min Add to Make Valid (LeetCode 921)       | Open & Close Counter Balance      | O(N)     | O(1)     |
+ | 37 | Min Remove to Make Valid (LeetCode 1249)   | Stack Index Filter & String Rebuild| O(N)    | O(N)     |
+ | 38 | Remove Invalid Parentheses (LeetCode 301)  | BFS Level-Order Minimal Deletion  | O(2^N)   | O(2^N)   |
+ | 39 | Score of Parentheses (LeetCode 856)        | Depth Bit-Shift Math (1 << depth) | O(N)     | O(1)     |
+ | 40 | Min Swaps to Make Balanced (LeetCode 1963) | Imbalance Math: (maxImb + 1) / 2  | O(N)     | O(1)     |
+ | 41 | Different Ways to Add Parentheses (LC 241) | Divide-and-Conquer + DP Memo      | O(Catalan)| O(Catalan)|
+ | 42 | Remove Outermost Parentheses (LC 1021)     | Open Counter Primitive Decomp     | O(N)     | O(N)     |
+ | 43 | Can Be Valid with Locked Bits (LC 2116)    | 2-Pass Forward & Backward Balance | O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -196,27 +201,7 @@ vector<int> findPeakGrid(vector<vector<int>>& mat) {
 // - Complexity: Time: O(M log N), Space: O(1).
 
 // ============================================================
-// 6. PANCAKE SORTING — LeetCode 969
-// ============================================================
-
-vi pancakeSort(vi &arr) {
-    vi ans;
-    for (int sz = arr.size(); sz > 1; sz--) {
-        int maxIdx = max_element(arr.begin(), arr.begin() + sz) - arr.begin();
-        if (maxIdx == sz - 1) continue;
-        if (maxIdx > 0) { ans.push_back(maxIdx + 1); reverse(arr.begin(), arr.begin() + maxIdx + 1); }
-        ans.push_back(sz); reverse(arr.begin(), arr.begin() + sz);
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Sort array using 1-indexed prefix reversals (pancake flips) (LeetCode 969).
-// - Approach: Greedy Suffix Placement (At most 2 flips per element).
-// - Intuition: For current unsorted size, locate max element. Flip to index 0 (if not already there), then flip to current end position sz.
-// - Complexity: Time: O(N^2), Space: O(N) flip sequence.
-
-// ============================================================
-// 7. JUMP GAME I — LeetCode 55
+// 6. JUMP GAME I — LeetCode 55
 // ============================================================
 
 bool canJump(vector<int>& nums) {
@@ -235,7 +220,7 @@ bool canJump(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 8. JUMP GAME II — LeetCode 45
+// 7. JUMP GAME II — LeetCode 45
 // ============================================================
 
 int jump(vector<int>& nums) {
@@ -253,7 +238,7 @@ int jump(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 9. JUMP GAME III — LeetCode 1306
+// 8. JUMP GAME III — LeetCode 1306
 // ============================================================
 
 bool canReach(vector<int>& arr, int start) {
@@ -277,7 +262,7 @@ bool canReach(vector<int>& arr, int start) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 10. JUMP GAME IV — LeetCode 1345
+// 9. JUMP GAME IV — LeetCode 1345
 // ============================================================
 
 int minJumps(vector<int>& arr) {
@@ -310,7 +295,7 @@ int minJumps(vector<int>& arr) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 11. JUMP GAME V — LeetCode 1340
+// 10. JUMP GAME V — LeetCode 1340
 // ============================================================
 
 int maxJumps(vector<int>& arr, int d) {
@@ -339,7 +324,7 @@ int maxJumps(vector<int>& arr, int d) {
 // - Complexity: Time: O(N * D), Space: O(N).
 
 // ============================================================
-// 12. JUMP GAME VI — LeetCode 1696
+// 11. JUMP GAME VI — LeetCode 1696
 // ============================================================
 
 int maxResult(vector<int>& nums, int k) {
@@ -362,7 +347,7 @@ int maxResult(vector<int>& nums, int k) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 13. JUMP GAME VII — LeetCode 1871
+// 12. JUMP GAME VII — LeetCode 1871
 // ============================================================
 
 bool canReach(string s, int minJump, int maxJump) {
@@ -384,7 +369,7 @@ bool canReach(string s, int minJump, int maxJump) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 14. BEST TIME TO BUY AND SELL STOCK I — LeetCode 121
+// 13. BEST TIME TO BUY AND SELL STOCK I — LeetCode 121
 // ============================================================
 
 int maxProfitI(vector<int>& prices) {
@@ -402,7 +387,7 @@ int maxProfitI(vector<int>& prices) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 15. BEST TIME TO BUY AND SELL STOCK II — LeetCode 122
+// 14. BEST TIME TO BUY AND SELL STOCK II — LeetCode 122
 // ============================================================
 
 int maxProfitII(vector<int>& prices) {
@@ -418,7 +403,7 @@ int maxProfitII(vector<int>& prices) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 16. BEST TIME TO BUY AND SELL STOCK III — LeetCode 123
+// 15. BEST TIME TO BUY AND SELL STOCK III — LeetCode 123
 // ============================================================
 
 int maxProfitIII(vector<int>& prices) {
@@ -438,7 +423,7 @@ int maxProfitIII(vector<int>& prices) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 17. BEST TIME TO BUY AND SELL STOCK IV — LeetCode 188
+// 16. BEST TIME TO BUY AND SELL STOCK IV — LeetCode 188
 // ============================================================
 
 int maxProfitIV(int k, vector<int>& prices) {
@@ -465,7 +450,7 @@ int maxProfitIV(int k, vector<int>& prices) {
 // - Complexity: Time: O(N * K), Space: O(K).
 
 // ============================================================
-// 18. BEST TIME TO BUY AND SELL STOCK WITH COOLDOWN — LeetCode 309
+// 17. BEST TIME TO BUY AND SELL STOCK WITH COOLDOWN — LeetCode 309
 // ============================================================
 
 int maxProfitCooldown(vector<int>& prices) {
@@ -485,7 +470,7 @@ int maxProfitCooldown(vector<int>& prices) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 19. BEST TIME TO BUY AND SELL STOCK WITH TRANSACTION FEE — LeetCode 714
+// 18. BEST TIME TO BUY AND SELL STOCK WITH TRANSACTION FEE — LeetCode 714
 // ============================================================
 
 int maxProfitFee(vector<int>& prices, int fee) {
@@ -503,7 +488,7 @@ int maxProfitFee(vector<int>& prices, int fee) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 20. HOUSE ROBBER I — LeetCode 198
+// 19. HOUSE ROBBER I — LeetCode 198
 // ============================================================
 
 int robI(vector<int>& nums) {
@@ -522,7 +507,7 @@ int robI(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 21. HOUSE ROBBER II — LeetCode 213
+// 20. HOUSE ROBBER II — LeetCode 213
 // ============================================================
 
 int robII(vector<int>& nums) {
@@ -545,7 +530,7 @@ int robII(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 22. HOUSE ROBBER III — LeetCode 337
+// 21. HOUSE ROBBER III — LeetCode 337
 // ============================================================
 
 struct TreeNode {
@@ -574,7 +559,7 @@ int robIII(TreeNode* root) {
 // - Complexity: Time: O(N), Space: O(H) recursion stack.
 
 // ============================================================
-// 23. HOUSE ROBBER IV — LeetCode 2560
+// 22. HOUSE ROBBER IV — LeetCode 2560
 // ============================================================
 
 int minCapability(vector<int>& nums, int k) {
@@ -596,7 +581,7 @@ int minCapability(vector<int>& nums, int k) {
 // - Complexity: Time: O(N log(max - min)), Space: O(1).
 
 // ============================================================
-// 24. DELETE AND EARN (HOUSE ROBBER V) — LeetCode 740
+// 23. DELETE AND EARN (HOUSE ROBBER V) — LeetCode 740
 // ============================================================
 
 int deleteAndEarn(vector<int>& nums) {
@@ -618,7 +603,7 @@ int deleteAndEarn(vector<int>& nums) {
 // - Complexity: Time: O(N + max(nums)), Space: O(max(nums)).
 
 // ============================================================
-// 25. COIN CHANGE I (FEWEST COINS) — LeetCode 322
+// 24. COIN CHANGE I (FEWEST COINS) — LeetCode 322
 // ============================================================
 
 int coinChange(vector<int>& coins, int amount) {
@@ -636,7 +621,7 @@ int coinChange(vector<int>& coins, int amount) {
 // - Complexity: Time: O(N * amount), Space: O(amount).
 
 // ============================================================
-// 26. COIN CHANGE II (UNIQUE COMBINATIONS) — LeetCode 518
+// 25. COIN CHANGE II (UNIQUE COMBINATIONS) — LeetCode 518
 // ============================================================
 
 int change(int amount, vector<int>& coins) {
@@ -654,7 +639,7 @@ int change(int amount, vector<int>& coins) {
 // - Complexity: Time: O(N * amount), Space: O(amount).
 
 // ============================================================
-// 27. COIN CHANGE PERMUTATIONS (ORDERED WAYS) — CSES / LeetCode 377
+// 26. COIN CHANGE PERMUTATIONS (ORDERED WAYS) — CSES / LeetCode 377
 // ============================================================
 
 int combinationSum4(vector<int>& coins, int amount) {
@@ -674,7 +659,7 @@ int combinationSum4(vector<int>& coins, int amount) {
 // - Complexity: Time: O(N * amount), Space: O(amount).
 
 // ============================================================
-// 28. BOUNDED COIN CHANGE (LIMITED SUPPLY)
+// 27. BOUNDED COIN CHANGE (LIMITED SUPPLY)
 // ============================================================
 
 int coinChangeBounded(vector<int>& coins, vector<int>& limits, int amount) {
@@ -698,7 +683,7 @@ int coinChangeBounded(vector<int>& coins, vector<int>& limits, int amount) {
 // - Complexity: Time: O(amount * sum(log(limit))), Space: O(amount).
 
 // ============================================================
-// 29. COIN CHANGE PATH RECONSTRUCTION (PRINT COINS)
+// 28. COIN CHANGE PATH RECONSTRUCTION (PRINT COINS)
 // ============================================================
 
 vector<int> reconstructCoins(vector<int>& coins, int amount) {
@@ -724,7 +709,7 @@ vector<int> reconstructCoins(vector<int>& coins, int amount) {
 // - Complexity: Time: O(N * amount), Space: O(amount).
 
 // ============================================================
-// 30. REACHABLE MONEY SUMS — CSES Money Sums
+// 29. REACHABLE MONEY SUMS — CSES Money Sums
 // ============================================================
 
 vector<int> getReachableSums(vector<int>& coins) {
@@ -747,166 +732,441 @@ vector<int> getReachableSums(vector<int>& coins) {
 // - Complexity: Time: O(N * sum(coins)), Space: O(sum(coins)).
 
 // ============================================================
-// 31. DUTCH NATIONAL FLAG SORT (0, 1, 2 SORT) — LeetCode 75
+// 30. REDUNDANT CONNECTION (UNDIRECTED GRAPH) — LeetCode 684
 // ============================================================
 
-void sortColors(vector<int>& nums) {
-    int lo = 0, mid = 0, hi = (int)nums.size() - 1;
-    while (mid <= hi) {
-        if (nums[mid] == 0) swap(nums[lo++], nums[mid++]);
-        else if (nums[mid] == 1) mid++;
-        else swap(nums[mid], nums[hi--]);
+vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+    int n = edges.size();
+    vector<int> parent(n + 1);
+    iota(parent.begin(), parent.end(), 0);
+
+    function<int(int)> find = [&](int x) {
+        return parent[x] == x ? x : parent[x] = find(parent[x]);
+    };
+
+    for (auto& edge : edges) {
+        int u = edge[0], v = edge[1];
+        int rootU = find(u), rootV = find(v);
+        if (rootU == rootV) return edge;
+        parent[rootU] = rootV;
     }
+    return {};
 }
 // Interview Explanation:
-// - Problem Statement: Sort an array with elements 0, 1, and 2 in-place in a single pass (LeetCode 75).
-// - Approach: Dijkstra's 3-Way Partitioning / Dutch National Flag.
-// - Intuition: Maintain 3 pointers: lo (boundary for 0s), mid (current explorer), hi (boundary for 2s). When nums[mid]==0 swap with lo; if 2 swap with hi; if 1 just advance mid.
+// - Problem Statement: Return an edge that can be removed so that the resulting graph is a tree of n nodes (LeetCode 684).
+// - Approach: Disjoint Set Union (DSU / Union-Find) with Path Compression.
+// - Intuition: Process edges sequentially; the first edge whose endpoints already share the same DSU root creates a cycle and is the redundant connection.
+// - Complexity: Time: O(N * α(N)), Space: O(N).
+
+// ============================================================
+// 31. REDUNDANT CONNECTION II (DIRECTED GRAPH) — LeetCode 685
+// ============================================================
+
+vector<int> findRedundantDirectedConnection(vector<vector<int>>& edges) {
+    int n = edges.size();
+    vector<int> parent(n + 1, 0);
+    vector<int> cand1, cand2;
+
+    // Step 1: Check if any node has two parents
+    for (auto& edge : edges) {
+        int u = edge[0], v = edge[1];
+        if (parent[v] == 0) {
+            parent[v] = u;
+        } else {
+            cand1 = {parent[v], v};
+            cand2 = edge;
+            edge[0] = -1;
+            edge[1] = -1; // Temporarily invalidate cand2
+        }
+    }
+
+    // Step 2: DSU to detect directed cycle
+    vector<int> root(n + 1);
+    iota(root.begin(), root.end(), 0);
+
+    function<int(int)> find = [&](int x) {
+        return root[x] == x ? x : root[x] = find(root[x]);
+    };
+
+    for (auto& edge : edges) {
+        int u = edge[0], v = edge[1];
+        if (u == -1 && v == -1) continue;
+
+        int rootU = find(u), rootV = find(v);
+        if (rootU == rootV) {
+            // If cycle found and 2-parent existed, cand1 was the culprit
+            if (!cand1.empty()) return cand1;
+            // Otherwise current edge formed the pure cycle
+            return edge;
+        }
+        root[rootU] = rootV;
+    }
+
+    return cand2;
+}
+// Interview Explanation:
+// - Problem Statement: Find redundant directed edge in a directed graph that started as a rooted tree with 1 extra directed edge (LeetCode 685).
+// - Approach: 2-Phase Disjoint Set Union (Two-Parent Node Detection + Directed Cycle Resolution).
+// - Intuition: Two possible anomalies: (1) A node has 2 parents, or (2) Graph contains a directed cycle. If both exist, removing cand1 breaks the cycle; if only 2 parents exist, removing cand2 works; if only cycle exists, the edge closing the cycle is returned.
+// - Complexity: Time: O(N * α(N)), Space: O(N).
+
+// ============================================================
+// 32. VALID PARENTHESES — LeetCode 20
+// ============================================================
+
+bool isValidParentheses(string s) {
+    stack<char> st;
+    for (char c : s) {
+        if (c == '(' || c == '{' || c == '[') st.push(c);
+        else {
+            if (st.empty()) return false;
+            char top = st.top();
+            st.pop();
+            if ((c == ')' && top != '(') ||
+                (c == '}' && top != '{') ||
+                (c == ']' && top != '[')) return false;
+        }
+    }
+    return st.empty();
+}
+// Interview Explanation:
+// - Problem Statement: Determine if input string containing '()', '{}', and '[]' is valid and properly nested (LeetCode 20).
+// - Approach: Explicit LIFO Stack bracket matching.
+// - Intuition: Push opening brackets onto stack. For closing brackets, check if stack is non-empty and matching pair is popped. Valid if stack is completely empty at end.
+// - Complexity: Time: O(N), Space: O(N).
+
+// ============================================================
+// 33. GENERATE PARENTHESES — LeetCode 22
+// ============================================================
+
+void backtrackGenParen(int open, int close, int n, string& cur, vector<string>& ans) {
+    if ((int)cur.size() == 2 * n) {
+        ans.push_back(cur);
+        return;
+    }
+    if (open < n) {
+        cur.push_back('(');
+        backtrackGenParen(open + 1, close, n, cur, ans);
+        cur.pop_back();
+    }
+    if (close < open) {
+        cur.push_back(')');
+        backtrackGenParen(open, close + 1, n, cur, ans);
+        cur.pop_back();
+    }
+}
+
+vector<string> generateParenthesis(int n) {
+    vector<string> ans;
+    string cur;
+    backtrackGenParen(0, 0, n, cur, ans);
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Generate all combinations of well-formed parentheses given n pairs (LeetCode 22).
+// - Approach: Backtracking with Open/Close Count Invariant.
+// - Intuition: Add '(' whenever open < n. Add ')' whenever close < open (never allow close to exceed open to guarantee balance). Base case when string length reaches 2n.
+// - Complexity: Time: O(4^N / sqrt(N)) (N-th Catalan number C_n), Space: O(N) recursion stack.
+
+// ============================================================
+// 34. LONGEST VALID PARENTHESES — LeetCode 32
+// ============================================================
+
+int longestValidParentheses(string s) {
+    stack<int> st;
+    st.push(-1); // Base sentinel for 0-indexed boundaries
+    int maxLen = 0;
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (s[i] == '(') {
+            st.push(i);
+        } else {
+            st.pop();
+            if (st.empty()) {
+                st.push(i); // New base index for subsequent valid segments
+            } else {
+                maxLen = max(maxLen, i - st.top());
+            }
+        }
+    }
+    return maxLen;
+}
+// Interview Explanation:
+// - Problem Statement: Find length of the longest valid (well-formed) parentheses substring (LeetCode 32).
+// - Approach: Stack of Indices with Initial -1 Sentinel Boundary.
+// - Intuition: Push '(' indices. On ')', pop matching index. If stack becomes empty, current index is new boundary marker. Otherwise, valid substring length is `i - st.top()`.
+// - Complexity: Time: O(N) single pass, Space: O(N) stack.
+
+// ============================================================
+// 35. VALID PARENTHESES WITH WILDCARD '*' — LeetCode 678
+// ============================================================
+
+bool checkValidString(const string& s) {
+    int cmin = 0, cmax = 0;
+    for (char c : s) {
+        if (c == '(') {
+            cmin++;
+            cmax++;
+        } else if (c == ')') {
+            cmin--;
+            cmax--;
+        } else { // '*' can be ')', empty, or '('
+            cmin--;
+            cmax++;
+        }
+        if (cmax < 0) return false; // More ')' than '(' + '*'
+        if (cmin < 0) cmin = 0;     // Min open cannot be negative
+    }
+    return cmin == 0;
+}
+// Interview Explanation:
+// - Problem Statement: Validate parenthesis string containing '(', ')', and '*' where '*' can be '(', ')', or empty (LeetCode 678).
+// - Approach: Greedy Range Tracking of Open Parentheses Count [cmin, cmax].
+// - Intuition: `cmin` represents min possible unclosed '(' and `cmax` max possible. If `cmax < 0`, string is irreparably invalid. String is valid if `cmin == 0` at end.
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 32. COUNTING SORT (STABLE IMPLEMENTATION)
+// 36. MINIMUM ADD TO MAKE PARENTHESES VALID — LeetCode 921
 // ============================================================
 
-vector<int> countingSort(vector<int>& arr) {
-    if (arr.empty()) return {};
-    int minVal = *min_element(arr.begin(), arr.end());
-    int maxVal = *max_element(arr.begin(), arr.end());
-    int k = maxVal - minVal + 1;
-    vector<int> count(k, 0), output(arr.size());
-    for (int x : arr) count[x - minVal]++;
-    for (int i = 1; i < k; i++) count[i] += count[i - 1];
-    for (int i = (int)arr.size() - 1; i >= 0; i--) output[--count[arr[i] - minVal]] = arr[i];
-    return output;
+int minAddToMakeValid(string s) {
+    int openNeeded = 0, closeNeeded = 0;
+    for (char c : s) {
+        if (c == '(') {
+            closeNeeded++;
+        } else {
+            if (closeNeeded > 0) closeNeeded--;
+            else openNeeded++;
+        }
+    }
+    return openNeeded + closeNeeded;
 }
 // Interview Explanation:
-// - Problem Statement: Sort an integer array with bounded range [minVal, maxVal] stably in linear time.
-// - Approach: Frequency Count Accumulation + Reverse Position Placement.
-// - Intuition: Build prefix sum table of frequency counts to determine exact final output index for each key. Iterating backwards ensures stability for duplicate values.
-// - Complexity: Time: O(N + K), Space: O(N + K).
+// - Problem Statement: Return minimum number of parentheses moves to make string valid (LeetCode 921).
+// - Approach: Two-Counter Balance Tracking.
+// - Intuition: `closeNeeded` tracks currently open '(' waiting for ')'. When ')' arrives with no open bracket available, `openNeeded++`. Total additions is `openNeeded + closeNeeded`.
+// - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 33. RADIX SORT (LSD DIGIT BY DIGIT)
+// 37. MINIMUM REMOVE TO MAKE VALID PARENTHESES — LeetCode 1249
 // ============================================================
 
-void radixSort(vector<int>& arr) {
-    if (arr.empty()) return;
-    int maxVal = *max_element(arr.begin(), arr.end());
-    for (long long exp = 1; maxVal / exp > 0; exp *= 10) {
-        vector<int> output(arr.size()), count(10, 0);
-        for (int x : arr) count[(x / exp) % 10]++;
-        for (int i = 1; i < 10; i++) count[i] += count[i - 1];
-        for (int i = (int)arr.size() - 1; i >= 0; i--)
-            output[--count[(arr[i] / exp) % 10]] = arr[i];
-        arr = output;
+string minRemoveToMakeValid(string s) {
+    stack<int> st;
+    unordered_set<int> invalidIndices;
+
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (s[i] == '(') {
+            st.push(i);
+        } else if (s[i] == ')') {
+            if (!st.empty()) st.pop();
+            else invalidIndices.insert(i); // Unmatched ')'
+        }
     }
+    while (!st.empty()) {
+        invalidIndices.insert(st.top()); // Unmatched '('
+        st.pop();
+    }
+
+    string result = "";
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (!invalidIndices.count(i)) result += s[i];
+    }
+    return result;
 }
 // Interview Explanation:
-// - Problem Statement: Sort integer array in non-comparative linear time regardless of value magnitude.
-// - Approach: Least Significant Digit (LSD) Radix Sort with Counting Sort Subroutine.
-// - Intuition: Sort stably by each digit position from least to most significant (1s, 10s, 100s...). Stability ensures higher-order sorts preserve lower-order sortedness.
-// - Complexity: Time: O(D * (N + B)), Space: O(N + B) where B=10 is base and D=digits.
+// - Problem Statement: Remove minimum number of parentheses to make string valid; return any valid result (LeetCode 1249).
+// - Approach: Stack Index Tagging + String Reconstruction.
+// - Intuition: Mark all indices of unmatched ')' and remaining unclosed '(' in a hash set. Rebuild the string omitting marked indices.
+// - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 34. BUCKET SORT (UNIFORM DISTRIBUTION)
+// 38. REMOVE INVALID PARENTHESES — LeetCode 301
 // ============================================================
 
-void bucketSort(vector<float>& arr) {
-    int n = arr.size();
-    if (n <= 1) return;
-    vector<vector<float>> buckets(n);
-    for (float x : arr) {
-        int idx = min(n - 1, max(0, (int)(n * x)));
-        buckets[idx].push_back(x);
+bool isValidParenString(const string& s) {
+    int count = 0;
+    for (char c : s) {
+        if (c == '(') count++;
+        else if (c == ')') {
+            if (--count < 0) return false;
+        }
     }
-    int k = 0;
+    return count == 0;
+}
+
+vector<string> removeInvalidParentheses(string s) {
+    vector<string> ans;
+    unordered_set<string> visited;
+    queue<string> q;
+
+    q.push(s);
+    visited.insert(s);
+    bool found = false;
+
+    while (!q.empty()) {
+        string curr = q.front();
+        q.pop();
+
+        if (isValidParenString(curr)) {
+            ans.push_back(curr);
+            found = true;
+        }
+        if (found) continue; // Found shortest removal level; do not explore deeper
+
+        for (int i = 0; i < (int)curr.size(); i++) {
+            if (curr[i] != '(' && curr[i] != ')') continue;
+            string nxt = curr.substr(0, i) + curr.substr(i + 1);
+            if (!visited.count(nxt)) {
+                visited.insert(nxt);
+                q.push(nxt);
+            }
+        }
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Remove minimum number of invalid parentheses to make input string valid; return all unique results (LeetCode 301).
+// - Approach: Breadth-First Search (BFS) Level-Order Minimal Deletions.
+// - Intuition: BFS explores deletion states level-by-level (0 deletions, 1 deletion, 2 deletions...). The first level that produces valid strings is guaranteed to have minimal deletions; stop deeper exploration.
+// - Complexity: Time: O(2^N * N), Space: O(2^N).
+
+// ============================================================
+// 39. SCORE OF PARENTHESES — LeetCode 856
+// ============================================================
+
+int scoreOfParentheses(string s) {
+    int score = 0, depth = 0;
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (s[i] == '(') {
+            depth++;
+        } else {
+            depth--;
+            if (s[i - 1] == '(') {
+                score += (1 << depth);
+            }
+        }
+    }
+    return score;
+}
+// Interview Explanation:
+// - Problem Statement: Compute score where '()' has score 1, 'AB' is A + B, and '(A)' is 2 * A (LeetCode 856).
+// - Approach: Direct Depth Bit-Shift Contribution Math.
+// - Intuition: Every innermost '()' at nesting depth d contributes exactly 2^d to the final score. Adding 1 << depth upon each matching '()' computes the total in O(1) space.
+// - Complexity: Time: O(N), Space: O(1).
+
+// ============================================================
+// 40. MINIMUM NUMBER OF SWAPS TO MAKE STRING BALANCED — LeetCode 1963
+// ============================================================
+
+int minSwapsToBalance(string s) {
+    int imbalance = 0, maxImbalance = 0;
+    for (char c : s) {
+        if (c == ']') imbalance++;
+        else imbalance--;
+        maxImbalance = max(maxImbalance, imbalance);
+    }
+    return (maxImbalance + 1) / 2;
+}
+// Interview Explanation:
+// - Problem Statement: Minimum number of bracket swaps to make a string of '[' and ']' balanced (LeetCode 1963).
+// - Approach: Maximum Imbalance Mathematical Division.
+// - Intuition: Each swap fixes 2 pairs of mismatched brackets. If maximum excess closing brackets at any point is k, we need ceil(k / 2) = (k + 1) / 2 swaps.
+// - Complexity: Time: O(N), Space: O(1).
+
+// ============================================================
+// 41. DIFFERENT WAYS TO ADD PARENTHESES — LeetCode 241
+// ============================================================
+
+unordered_map<string, vector<int>> diffWaysMemo;
+
+vector<int> diffWaysToCompute(string expression) {
+    if (diffWaysMemo.count(expression)) return diffWaysMemo[expression];
+    vector<int> res;
+
+    for (int i = 0; i < (int)expression.size(); i++) {
+        char op = expression[i];
+        if (op == '+' || op == '-' || op == '*') {
+            vector<int> left = diffWaysToCompute(expression.substr(0, i));
+            vector<int> right = diffWaysToCompute(expression.substr(i + 1));
+            for (int l : left) {
+                for (int r : right) {
+                    if (op == '+') res.push_back(l + r);
+                    else if (op == '-') res.push_back(l - r);
+                    else if (op == '*') res.push_back(l * r);
+                }
+            }
+        }
+    }
+    if (res.empty()) res.push_back(stoi(expression));
+    return diffWaysMemo[expression] = res;
+}
+// Interview Explanation:
+// - Problem Statement: Given a string of numbers and operators, return all possible results from computing all different groupings of parentheses (LeetCode 241).
+// - Approach: Divide and Conquer with Hash Map Memoization.
+// - Intuition: Split at each operator into left and right sub-expressions, recursively compute their results, and combine Cartesian product using operator.
+// - Complexity: Time: O(Catalan(N)), Space: O(Catalan(N)) memoization table.
+
+// ============================================================
+// 42. REMOVE OUTERMOST PARENTHESES — LeetCode 1021
+// ============================================================
+
+string removeOuterParentheses(string s) {
+    string result = "";
+    int opened = 0;
+    for (char c : s) {
+        if (c == '(') {
+            if (opened > 0) result += c;
+            opened++;
+        } else {
+            opened--;
+            if (opened > 0) result += c;
+        }
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Remove outermost parentheses of every primitive valid parenthesis string (LeetCode 1021).
+// - Approach: Open Counter Primitive Decomposition.
+// - Intuition: Append '(' if already opened > 0 before incrementing; append ')' if opened > 0 after decrementing. Outermost boundary brackets occur exactly when counter is 0.
+// - Complexity: Time: O(N), Space: O(N) output string.
+
+// ============================================================
+// 43. CHECK IF A PARENTHESES STRING CAN BE VALID — LeetCode 2116
+// ============================================================
+
+bool canBeValid(string s, string locked) {
+    int n = s.size();
+    if (n % 2 != 0) return false;
+
+    // Left-to-right pass: ensure no unmatched ')'
+    int openCount = 0, flexible = 0;
     for (int i = 0; i < n; i++) {
-        sort(buckets[i].begin(), buckets[i].end());
-        for (float x : buckets[i]) arr[k++] = x;
+        if (locked[i] == '0') flexible++;
+        else if (s[i] == '(') openCount++;
+        else if (s[i] == ')') {
+            if (openCount > 0) openCount--;
+            else if (flexible > 0) flexible--;
+            else return false;
+        }
     }
+
+    // Right-to-left pass: ensure no unmatched '('
+    int closeCount = 0;
+    flexible = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        if (locked[i] == '0') flexible++;
+        else if (s[i] == ')') closeCount++;
+        else if (s[i] == '(') {
+            if (closeCount > 0) closeCount--;
+            else if (flexible > 0) flexible--;
+            else return false;
+        }
+    }
+
+    return true;
 }
 // Interview Explanation:
-// - Problem Statement: Sort elements uniformly distributed in range [0, 1) in expected linear time.
-// - Approach: Scatter-Gather Bucket Sorting.
-// - Intuition: Partition range into n equal sub-intervals (buckets). Distribute elements into buckets, sort individual buckets (typically with insertion sort), and concatenate.
-// - Complexity: Time: O(N) average, O(N^2) worst, Space: O(N).
-
-// ============================================================
-// 35. CYCLIC SORT [1 TO N] (IN-PLACE INDEX MAPPING)
-// ============================================================
-
-void cyclicSort(vector<int>& nums) {
-    int i = 0, n = nums.size();
-    while (i < n) {
-        int correctIdx = nums[i] - 1;
-        if (nums[i] > 0 && nums[i] <= n && nums[i] != nums[correctIdx]) swap(nums[i], nums[correctIdx]);
-        else i++;
-    }
-}
-// Interview Explanation:
-// - Problem Statement: Sort array containing integers in range [1, N] in-place in O(N) time with O(1) space.
-// - Approach: Cyclic In-Place Index Mapping Swap.
-// - Intuition: Each number x belongs at index x - 1. If nums[i] is not at its correct index, swap it there. Each swap places at least one number in its permanent position (at most N swaps).
+// - Problem Statement: Given parentheses string and binary locked string, check if string can be valid by changing unlocked characters (LeetCode 2116).
+// - Approach: 2-Pass Forward & Backward Balance Check with Flexible Counters.
+// - Intuition: Left-to-right check ensures flexible + '(' can balance all locked ')'. Right-to-left check ensures flexible + ')' can balance all locked '('.
 // - Complexity: Time: O(N), Space: O(1).
-
-// ============================================================
-// 36. PIGEONHOLE SORT (SLOT PLACEMENT)
-// ============================================================
-
-void pigeonholeSort(vector<int>& arr) {
-    if (arr.empty()) return;
-    int minVal = *min_element(arr.begin(), arr.end());
-    int maxVal = *max_element(arr.begin(), arr.end());
-    int range = maxVal - minVal + 1;
-    vector<vector<int>> holes(range);
-    for (int x : arr) holes[x - minVal].push_back(x);
-    int idx = 0;
-    for (int i = 0; i < range; i++) {
-        for (int x : holes[i]) arr[idx++] = x;
-    }
-}
-// Interview Explanation:
-// - Problem Statement: Sort integer array where range of key values is approximately equal to the number of elements.
-// - Approach: Direct Pigeonhole / Bucket Slot Mapping.
-// - Intuition: Allocate an array of holes corresponding to each possible key value in [minVal, maxVal]. Place keys directly into their matching hole and collect sequentially.
-// - Complexity: Time: O(N + Range), Space: O(N + Range).
-
-// ============================================================
-// 37. PATIENCE SORTING (PILES & LIS EXTRACTION)
-// ============================================================
-
-vector<int> patienceSortLIS(vector<int>& arr) {
-    vector<int> topCards;
-    for (int x : arr) {
-        auto it = lower_bound(topCards.begin(), topCards.end(), x);
-        if (it == topCards.end()) topCards.push_back(x);
-        else *it = x;
-    }
-    return topCards;
-}
-// Interview Explanation:
-// - Problem Statement: Find Longest Increasing Subsequence and sort elements using card game patience mechanics.
-// - Approach: Greedy Pile Placement + Binary Search (lower_bound).
-// - Intuition: Place cards onto the leftmost pile whose top card is >= current card (or create new pile). The number of piles formed equals the length of the LIS (Greene's Theorem).
-// - Complexity: Time: O(N log N), Space: O(N).
-
-// ============================================================
-// 38. 3-WAY QUICKSORT (DUTCH NATIONAL FLAG PARTITION)
-// ============================================================
-
-void quickSort3Way(vector<int>& arr, int l, int r) {
-    if (l >= r) return;
-    int pivot = arr[l], lt = l, gt = r, i = l + 1;
-    while (i <= gt) {
-        if (arr[i] < pivot) swap(arr[lt++], arr[i++]);
-        else if (arr[i] > pivot) swap(arr[i], arr[gt--]);
-        else i++;
-    }
-    quickSort3Way(arr, l, lt - 1);
-    quickSort3Way(arr, gt + 1, r);
-}
-// Interview Explanation:
-// - Problem Statement: Sort array containing massive numbers of duplicate elements in optimal O(N log K) time.
-// - Approach: Bentley-McIlroy 3-Way Partition QuickSort.
-// - Intuition: Partition array into three subarrays: [< pivot], [== pivot], and [> pivot]. Recurse only on the strictly smaller and strictly larger segments, leaving all duplicates unvisited.
-// - Complexity: Time: O(N log N) average (O(N) with all duplicates), Space: O(log N) call stack.

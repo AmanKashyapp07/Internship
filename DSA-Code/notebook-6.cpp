@@ -44,28 +44,26 @@ const ll MOD = 1e9 + 7;
  | 3  | Merge Two Sorted Arrays                     | Two-Pointer Linear Merge Step     | O(N + M) | O(N + M) |
  | 4  | Longest Consecutive Sequence                | Hash Set Boundary (count(x - 1))  | O(N)     | O(N)     |
  | 5  | Row with Maximum 1s in Binary Matrix        | Top-Right Corner Staircase Scan   | O(N + M) | O(1)     |
- | 6  | Find Median from Data Stream (MedianFinder) | Two Heaps (Max-Heap + Min-Heap)   | O(log N) | O(N)     |
- | 7  | First Missing Positive                      | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
- | 8  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2*L) | O(N + D) |
- | 9  | Array Stack Implementation                  | Array with Top Index              | O(1) all | O(Cap)   |
- | 10 | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK) | O(K)     |
- | 11 | Longest Valid Parentheses                   | Stack of Indices (Base -1)        | O(N)     | O(N)     |
- | 12 | Move Zeroes                                 | Two-Pointer In-Place Swap         | O(N)     | O(1)     |
- | 13 | Majority Element (Boyer-Moore Voting)       | Candidate & Count Cancellation    | O(N)     | O(1)     |
- | 14 | Design HashMap (MyHashMap)                  | Separate Chaining (Bucket Lists)  | Avg O(1) | O(N)     |
- | 15 | Median of Row-Wise Sorted Matrix            | Binary Search on Range + UB       | O(RlogC) | O(1)     |
- | 16 | Kth Missing Positive Number                 | Binary Search on Missing Count    | O(log N) | O(1)     |
- | 17 | Summary Ranges                              | Sorted Set Range Traversal        | O(log N) | O(N)     |
- | 18 | Design Twitter                              | Multi-Way Heap Merge + Hash Map   | O(N logK) | O(U + T) |
- | 19 | Water and Jug Problem (BFS)                 | BFS 6-State Graph Traversal       | O(X * Y) | O(X * Y) |
- | 20 | Wiggle Subsequence                          | Greedy / DP Peak-Valley Tracking  | O(N)     | O(1)     |
- | 21 | Run-Length Encoding (Compress)              | Two-Pointer Suffix Counter Scan   | O(N)     | O(N)     |
- | 22 | Decode String                               | Nested Number & String Stacks     | O(N)     | O(N)     |
- | 23 | 132 Pattern                                 | Monotonic Decreasing Stack        | O(N)     | O(N)     |
- | 24 | Find All Numbers Disappeared in Array       | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
- | 25 | Kth Smallest in Lexicographical Order       | Trie Prefix Tree Level Skipping   | O(log^2N) | O(1)     |
- | 26 | Kth Smallest Element in Sorted Matrix       | Binary Search on Value Range + UB | O(NlogM) | O(1)     |
- | 27 | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
+ | 6  | First Missing Positive                      | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
+ | 7  | Word Break                                  | 1D Dynamic Programming + Set      | O(N^2*L) | O(N + D) |
+ | 8  | Array Stack Implementation                  | Array with Top Index              | O(1) all | O(Cap)   |
+ | 9  | Kth Largest Element in Array                | Min-Heap of Size K                | O(N logK) | O(K)     |
+ | 10 | Move Zeroes                                 | Two-Pointer In-Place Swap         | O(N)     | O(1)     |
+ | 11 | Majority Element (Boyer-Moore Voting)       | Candidate & Count Cancellation    | O(N)     | O(1)     |
+ | 12 | Design HashMap (MyHashMap)                  | Separate Chaining (Bucket Lists)  | Avg O(1) | O(N)     |
+ | 13 | Median of Row-Wise Sorted Matrix            | Binary Search on Range + UB       | O(RlogC) | O(1)     |
+ | 14 | Kth Missing Positive Number                 | Binary Search on Missing Count    | O(log N) | O(1)     |
+ | 15 | Summary Ranges                              | Sorted Set Range Traversal        | O(log N) | O(N)     |
+ | 16 | Design Twitter                              | Multi-Way Heap Merge + Hash Map   | O(N logK) | O(U + T) |
+ | 17 | Water and Jug Problem (BFS)                 | BFS 6-State Graph Traversal       | O(X * Y) | O(X * Y) |
+ | 18 | Wiggle Subsequence                          | Greedy / DP Peak-Valley Tracking  | O(N)     | O(1)     |
+ | 19 | Run-Length Encoding (Compress)              | Two-Pointer Suffix Counter Scan   | O(N)     | O(N)     |
+ | 20 | Decode String                               | Nested Number & String Stacks     | O(N)     | O(N)     |
+ | 21 | 132 Pattern                                 | Monotonic Decreasing Stack        | O(N)     | O(N)     |
+ | 22 | Find All Numbers Disappeared in Array       | Cyclic Sort In-Place Hashing      | O(N)     | O(1)     |
+ | 23 | Kth Smallest in Lexicographical Order       | Trie Prefix Tree Level Skipping   | O(log^2N) | O(1)     |
+ | 24 | Kth Smallest Element in Sorted Matrix       | Binary Search on Value Range + UB | O(NlogM) | O(1)     |
+ | 25 | Longest Nice Subarray (Pairwise AND = 0)    | Sliding Window + Cumulative OR    | O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -169,30 +167,7 @@ int rowWithMax1s(vector<vector<int>>& mat) {
 // - Complexity: Time: O(N + M), Space: O(1).
 
 // ============================================================
-// 6. FIND MEDIAN FROM DATA STREAM (MEDIANFINDER)
-// ============================================================
-
-class MedianFinder {
-    priority_queue<int> left;
-    priority_queue<int, vector<int>, greater<int>> right;
-public:
-    MedianFinder() {}
-    void addNum(int num) {
-        left.push(num); right.push(left.top()); left.pop();
-        if (right.size() > left.size()) { left.push(right.top()); right.pop(); }
-    }
-    double findMedian() {
-        return left.size() > right.size() ? left.top() : (left.top() + right.top()) / 2.0;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Design a data structure supporting adding numbers from a data stream and finding the current median.
-// - Approach: Two Heaps (Max-Heap `left` for lower half, Min-Heap `right` for upper half).
-// - Intuition: Maintain balance: size(left) == size(right) (+1 if odd) and max(left) <= min(right).
-// - Complexity: Time: O(log N) for addNum, O(1) for findMedian, Space: O(N).
-
-// ============================================================
-// 7. FIRST MISSING POSITIVE
+// 6. FIRST MISSING POSITIVE
 // ============================================================
 
 int firstMissingPositive(vector<int>& nums) {
@@ -209,7 +184,7 @@ int firstMissingPositive(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 8. WORD BREAK
+// 7. WORD BREAK
 // ============================================================
 
 class Solution {
@@ -230,7 +205,7 @@ public:
 // - Complexity: Time: O(N^2 * L), Space: O(N + D).
 
 // ============================================================
-// 9. ARRAY STACK IMPLEMENTATION
+// 8. ARRAY STACK IMPLEMENTATION
 // ============================================================
 
 class Stack {
@@ -250,7 +225,7 @@ public:
 // - Complexity: Time: O(1) all operations, Space: O(Cap).
 
 // ============================================================
-// 10. KTH LARGEST ELEMENT IN ARRAY
+// 9. KTH LARGEST ELEMENT IN ARRAY
 // ============================================================
 
 int kthLargest(vector<int>& nums, int k) {
@@ -268,28 +243,7 @@ int kthLargest(vector<int>& nums, int k) {
 // - Complexity: Time: O(N log K), Space: O(K).
 
 // ============================================================
-// 11. LONGEST VALID PARENTHESES
-// ============================================================
-
-int longestValidParenthesis(string s) {
-    stack<int> st; st.push(-1); int ans = 0;
-    for (int i = 0; i < s.size(); i++) {
-        if (s[i] == '(') st.push(i);
-        else {
-            st.pop();
-            if (st.empty()) st.push(i); else ans = max(ans, i - st.top());
-        }
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find the length of the longest valid parentheses substring.
-// - Approach: Stack of indices initialized with base boundary -1.
-// - Intuition: Push '(' indices; on ')' pop match; if empty push new base, else record length `i - st.top()`.
-// - Complexity: Time: O(N), Space: O(N).
-
-// ============================================================
-// 12. MOVE ZEROES
+// 10. MOVE ZEROES
 // ============================================================
 
 void moveZeroes(vector<int>& nums) {
@@ -303,7 +257,7 @@ void moveZeroes(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 13. MAJORITY ELEMENT (BOYER-MOORE VOTING)
+// 11. MAJORITY ELEMENT (BOYER-MOORE VOTING)
 // ============================================================
 
 int majorityElement(vi &nums) {
@@ -321,7 +275,7 @@ int majorityElement(vi &nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 14. DESIGN HASHMAP (MYHASHMAP)
+// 12. DESIGN HASHMAP (MYHASHMAP)
 // ============================================================
 
 class MyHashMap {
@@ -352,7 +306,7 @@ public:
 // - Complexity: Time: O(1) average, Space: O(N).
 
 // ============================================================
-// 15. MEDIAN OF ROW-WISE SORTED MATRIX
+// 13. MEDIAN OF ROW-WISE SORTED MATRIX
 // ============================================================
 
 int median(vector<vector<int>>& mat) {
@@ -373,7 +327,7 @@ int median(vector<vector<int>>& mat) {
 // - Complexity: Time: O(R * log C * log(max - min)), Space: O(1).
 
 // ============================================================
-// 16. KTH MISSING POSITIVE NUMBER
+// 14. KTH MISSING POSITIVE NUMBER
 // ============================================================
 
 int kthMissingPositive(vector<int>& arr, int k) {
@@ -391,7 +345,7 @@ int kthMissingPositive(vector<int>& arr, int k) {
 // - Complexity: Time: O(log N), Space: O(1).
 
 // ============================================================
-// 17. SUMMARY RANGES
+// 15. SUMMARY RANGES
 // ============================================================
 
 class SummaryRanges {
@@ -418,7 +372,7 @@ public:
 // - Complexity: Time: O(log N) for addNum, O(N) for getIntervals, Space: O(N).
 
 // ============================================================
-// 18. DESIGN TWITTER
+// 16. DESIGN TWITTER
 // ============================================================
 
 class Twitter {
@@ -452,7 +406,7 @@ public:
 // - Complexity: Time: O(K log F) for 10 tweets where F is followees, Space: O(Total Tweets + Follows).
 
 // ============================================================
-// 19. WATER AND JUG PROBLEM (BFS)
+// 17. WATER AND JUG PROBLEM (BFS)
 // ============================================================
 
 bool canMeasureWater(int x, int y, int target) {
@@ -477,7 +431,7 @@ bool canMeasureWater(int x, int y, int target) {
 // - Complexity: Time: O(x * y), Space: O(x * y).
 
 // ============================================================
-// 20. WIGGLE SUBSEQUENCE
+// 18. WIGGLE SUBSEQUENCE
 // ============================================================
 
 int wiggleMaxLength(vector<int>& nums) {
@@ -496,7 +450,7 @@ int wiggleMaxLength(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1).
 
 // ============================================================
-// 21. RUN-LENGTH ENCODING (COMPRESS)
+// 19. RUN-LENGTH ENCODING (COMPRESS)
 // ============================================================
 
 string encode(string s) {
@@ -515,7 +469,7 @@ string encode(string s) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 22. DECODE STRING
+// 20. DECODE STRING
 // ============================================================
 
 string decodeString(string s) {
@@ -540,7 +494,7 @@ string decodeString(string s) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 23. 132 PATTERN
+// 21. 132 PATTERN
 // ============================================================
 
 bool find132pattern(vector<int>& nums) {
@@ -559,7 +513,7 @@ bool find132pattern(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 24. FIND ALL NUMBERS DISAPPEARED IN ARRAY
+// 22. FIND ALL NUMBERS DISAPPEARED IN ARRAY
 // ============================================================
 
 vi findDisappearedNumbers(vi &nums) {
@@ -577,7 +531,7 @@ vi findDisappearedNumbers(vi &nums) {
 // - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
 // ============================================================
-// 25. KTH SMALLEST IN LEXICOGRAPHICAL ORDER
+// 23. KTH SMALLEST IN LEXICOGRAPHICAL ORDER
 // ============================================================
 
 class LexicographicalKth {
@@ -600,7 +554,7 @@ public:
 // - Complexity: Time: O(log^2 N), Space: O(1).
 
 // ============================================================
-// 26. KTH SMALLEST ELEMENT IN SORTED MATRIX
+// 24. KTH SMALLEST ELEMENT IN SORTED MATRIX
 // ============================================================
 
 int kthElementInSortedMatrix(vector<vector<int>>& mat, int k) {
@@ -619,7 +573,7 @@ int kthElementInSortedMatrix(vector<vector<int>>& mat, int k) {
 // - Complexity: Time: O(N log M * log(max - min)), Space: O(1).
 
 // ============================================================
-// 27. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
+// 25. LONGEST NICE SUBARRAY (PAIRWISE AND = 0)
 // ============================================================
 
 class LongestNiceSubarray {

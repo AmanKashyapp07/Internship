@@ -1,6 +1,6 @@
-# Master Problem Summary & Complexity Reference (Notebooks 1–7)
+# Master Problem Summary & Complexity Reference (Notebooks 1–10)
 
-A unified reference catalog of **189 unique Data Structures & Algorithms problems** implemented across `notebook-1.cpp` through `notebook-7.cpp` (all duplicates eliminated, only latest occurrences preserved). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A unified reference catalog of **279 unique Data Structures & Algorithms problems** implemented across `notebook-1.cpp` through `notebook-10.cpp` (all duplicates and prior sorting implementations consolidated exclusively into Notebook 10). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
 
 ## 📘 Notebook-by-Notebook Analysis
 
@@ -148,18 +148,13 @@ A unified reference catalog of **189 unique Data Structures & Algorithms problem
 | **16** | Min Subarrays with Sum <= K | Greedy Running Sum Partitioning | `O(N)` | `O(1)` |
 | **17** | K-th Smallest via QuickSelect | Lomuto Partition QuickSelect | `O(N)` avg | `O(1)` |
 | **18** | Bidirectional BFS | Two-Ended BFS (Smaller Frontier) | `O(B^(D/2))` | `O(B^(D/2))` |
-| **19** | Valid Parentheses with Wildcard '*' | Greedy Min-Max Bounds (cmin, cmax) | `O(N)` | `O(1)` |
-| **20** | Count Reverse Pairs (a[i] > x * a[j]) | Modified Merge Sort Counting | `O(N log N)` | `O(N)` |
-| **21** | Find Median via std::nth_element | QuickSelect Median via STL | `O(N)` avg | `O(1)` |
-| **22** | Merge Sort | Divide-and-Conquer Merge Sort | `O(N log N)` | `O(N)` |
-| **23** | Longest Substring with At Least K Frequency | Sliding Window per Unique Target | `O(26 * N)` | `O(1)` |
-| **24** | Cyclic Right and Left Rotation | 3-Step Range Reversal Algorithm | `O(N)` | `O(1)` |
-| **25** | Largest Number from Concatenation | Custom String Comparator Sorting | `O(N log N)` | `O(N)` |
-| **26** | Running K-th Element Stream | Two Heaps (Max-Heap + Min-Heap) | `O(log K)` add, `O(1)` get | `O(N)` |
-| **27** | Wiggle Sort II | Median + DNF 3-Way + Interleaving | `O(N)` | `O(N)` |
-| **28** | LRU Cache & Merge Intervals | Hash Map + Doubly Linked List / Greedy | `O(1)` get/put, `O(N log N)` merge | `O(Cap) / O(N)` |
-| **29** | LFU Cache | Hash Map + Freq-to-List + minFreq | `O(1)` get/put | `O(Cap)` |
-| **30** | Gas Station Circuit & String Utils | Greedy Net Surplus & Tank Reset | `O(N)` | `O(1)` |
+| **19** | Count Reverse Pairs (a[i] > x * a[j]) | Modified Merge Sort Counting | `O(N log N)` | `O(N)` |
+| **20** | Find Median via std::nth_element | QuickSelect Median via STL | `O(N)` avg | `O(1)` |
+| **21** | Longest Substring with At Least K Frequency | Sliding Window per Unique Target | `O(26 * N)` | `O(1)` |
+| **22** | Cyclic Right and Left Rotation | 3-Step Range Reversal Algorithm | `O(N)` | `O(1)` |
+| **23** | LRU Cache | Hash Map + Doubly Linked List | `O(1)` | `O(Cap)` |
+| **24** | LFU Cache | Hash Map + Freq-to-List + minFreq | `O(1)` get/put | `O(Cap)` |
+| **25** | Gas Station Circuit & String Utils | Greedy Net Surplus & Tank Reset | `O(N)` | `O(1)` |
 
 ---
 
@@ -171,29 +166,26 @@ A unified reference catalog of **189 unique Data Structures & Algorithms problem
 | **2** | Spiral Matrix Traversal | Layer Boundary Simulation | `O(M * N)` | `O(1)` |
 | **3** | Merge Two Sorted Arrays | Two-Pointer Linear Merge Step | `O(N + M)` | `O(N + M)` |
 | **4** | Longest Consecutive Sequence | Hash Set Boundary (count(x - 1)) | `O(N)` | `O(N)` |
-| **5** | Row with Maximum 1s in Binary Matrix | Top-Right Corner Staircase Scan | `O(N + M)` | `O(1)` |
-| **6** | Find Median from Data Stream (MedianFinder) | Two Heaps (Max-Heap + Min-Heap) | `O(log N)` add, `O(1)` get | `O(N)` |
-| **7** | First Missing Positive | Cyclic Sort In-Place Hashing | `O(N)` | `O(1)` |
-| **8** | Word Break | 1D Dynamic Programming + Set | `O(N^2 * L)` | `O(N + D)` |
-| **9** | Array Stack Implementation | Array with Top Index | `O(1)` all ops | `O(Cap)` |
-| **10** | Kth Largest Element in Array | Min-Heap of Size K | `O(N log K)` | `O(K)` |
-| **11** | Longest Valid Parentheses | Stack of Indices (Base -1) | `O(N)` | `O(N)` |
-| **12** | Move Zeroes | Two-Pointer In-Place Swap | `O(N)` | `O(1)` |
-| **13** | Majority Element (Boyer-Moore Voting) | Candidate & Count Cancellation | `O(N)` | `O(1)` |
-| **14** | Design HashMap (MyHashMap) | Separate Chaining (Bucket Lists) | `O(1)` avg | `O(N)` |
-| **15** | Median of Row-Wise Sorted Matrix | Binary Search on Range + UB | `O(R * log C * log(max - min))` | `O(1)` |
-| **16** | Kth Missing Positive Number | Binary Search on Missing Count | `O(log N)` | `O(1)` |
-| **17** | Summary Ranges | Sorted Set Range Traversal | `O(log N)` add, `O(N)` get | `O(N)` |
-| **18** | Design Twitter | Multi-Way Heap Merge + Hash Map | `O(K log F)` feed | `O(U + T)` |
-| **19** | Water and Jug Problem (BFS) | BFS 6-State Graph Traversal | `O(X * Y)` | `O(X * Y)` |
-| **20** | Wiggle Subsequence | Greedy / DP Peak-Valley Tracking | `O(N)` | `O(1)` |
-| **21** | Run-Length Encoding (Compress) | Two-Pointer Suffix Counter Scan | `O(N)` | `O(N)` |
-| **22** | Decode String | Nested Number & String Stacks | `O(N)` | `O(N)` |
-| **23** | 132 Pattern | Monotonic Decreasing Stack | `O(N)` | `O(N)` |
-| **24** | Find All Numbers Disappeared in Array | Cyclic Sort In-Place Hashing | `O(N)` | `O(1)` |
-| **25** | Kth Smallest in Lexicographical Order | Trie Prefix Tree Level Skipping | `O(log^2 N)` | `O(1)` |
-| **26** | Kth Smallest Element in Sorted Matrix | Binary Search on Value Range + UB | `O(N log M * log(max - min))` | `O(1)` |
-| **27** | Longest Nice Subarray (Pairwise AND = 0) | Sliding Window + Cumulative OR | `O(N)` | `O(1)` |
+| **6** | First Missing Positive | Cyclic Sort In-Place Hashing | `O(N)` | `O(1)` |
+| **7** | Word Break | 1D Dynamic Programming + Set | `O(N^2 * L)` | `O(N + D)` |
+| **8** | Array Stack Implementation | Array with Top Index | `O(1)` all ops | `O(Cap)` |
+| **9** | Kth Largest Element in Array | Min-Heap of Size K | `O(N log K)` | `O(K)` |
+| **10** | Move Zeroes | Two-Pointer In-Place Swap | `O(N)` | `O(1)` |
+| **11** | Majority Element (Boyer-Moore Voting) | Candidate & Count Cancellation | `O(N)` | `O(1)` |
+| **12** | Design HashMap (MyHashMap) | Separate Chaining (Bucket Lists) | `O(1)` avg | `O(N)` |
+| **13** | Median of Row-Wise Sorted Matrix | Binary Search on Range + UB | `O(R * log C * log(max - min))` | `O(1)` |
+| **14** | Kth Missing Positive Number | Binary Search on Missing Count | `O(log N)` | `O(1)` |
+| **15** | Summary Ranges | Sorted Set Range Traversal | `O(log N)` add, `O(N)` get | `O(N)` |
+| **16** | Design Twitter | Multi-Way Heap Merge + Hash Map | `O(K log F)` feed | `O(U + T)` |
+| **17** | Water and Jug Problem (BFS) | BFS 6-State Graph Traversal | `O(X * Y)` | `O(X * Y)` |
+| **18** | Wiggle Subsequence | Greedy / DP Peak-Valley Tracking | `O(N)` | `O(1)` |
+| **19** | Run-Length Encoding (Compress) | Two-Pointer Suffix Counter Scan | `O(N)` | `O(N)` |
+| **20** | Decode String | Nested Number & String Stacks | `O(N)` | `O(N)` |
+| **21** | 132 Pattern | Monotonic Decreasing Stack | `O(N)` | `O(N)` |
+| **22** | Find All Numbers Disappeared in Array | Cyclic Sort In-Place Hashing | `O(N)` | `O(1)` |
+| **23** | Kth Smallest in Lexicographical Order | Trie Prefix Tree Level Skipping | `O(log^2 N)` | `O(1)` |
+| **24** | Kth Smallest Element in Sorted Matrix | Binary Search on Value Range + UB | `O(N log M * log(max - min))` | `O(1)` |
+| **25** | Longest Nice Subarray (Pairwise AND = 0) | Sliding Window + Cumulative OR | `O(N)` | `O(1)` |
 
 ---
 
@@ -206,36 +198,142 @@ A unified reference catalog of **189 unique Data Structures & Algorithms problem
 | **3** | Parallel Courses (Min Semesters / Graph Depth)| Level-Order Kahn's BFS (Layer Steps)| `O(V + E)` | `O(V + E)` |
 | **4** | Find Peak Element (1D Peak Detection) | Binary Search on Slope Inflection | `O(log N)` | `O(1)` |
 | **5** | Find a Peak Element II (2D Peak Grid) | Binary Search on Columns + Row Max | `O(M log N)` | `O(1)` |
-| **6** | Pancake Sorting (Prefix Reversals) | Greedy Suffix Placement + 2 Reversals | `O(N^2)` | `O(N)` |
-| **7** | Jump Game I (Reachability Check) | Greedy Farthest Reachable Index | `O(N)` | `O(1)` |
-| **8** | Jump Game II (Min Jumps) | Greedy BFS Horizon Interval | `O(N)` | `O(1)` |
-| **9** | Jump Game III (Reach Zero Value) | Graph BFS Reachability | `O(N)` | `O(N)` |
-| **10** | Jump Game IV (Min Jumps with Same Values) | BFS + Same-Value Pruning | `O(N)` | `O(N)` |
-| **11** | Jump Game V (Max Visited Indices) | Memoized DFS / DAG Longest Path | `O(N * D)` | `O(N)` |
-| **12** | Jump Game VI (Max Score Sliding Window) | Monotonic Deque Sliding Window DP | `O(N)` | `O(N)` |
-| **13** | Jump Game VII (String Jump Reachability) | Sliding Window Reachability DP | `O(N)` | `O(N)` |
-| **14** | Stock I (At Most 1 Transaction) | Running Minimum Price Tracking | `O(N)` | `O(1)` |
-| **15** | Stock II (Unlimited Transactions) | Greedy Positive Slope Harvest | `O(N)` | `O(1)` |
-| **16** | Stock III (At Most 2 Transactions) | 4-State Finite State Machine | `O(N)` | `O(1)` |
-| **17** | Stock IV (At Most K Transactions) | 1D DP K-Transaction Compression | `O(N * K)` | `O(K)` |
-| **18** | Stock with Cooldown (1-Day Rest) | 3-State Machine (Held, Sold, Rest) | `O(N)` | `O(1)` |
-| **19** | Stock with Transaction Fee | 2-State Machine (Cash, Hold) | `O(N)` | `O(1)` |
-| **20** | House Robber I (Linear Street) | 1D DP Space-Optimized (prev1, prev2) | `O(N)` | `O(1)` |
-| **21** | House Robber II (Circular Street) | Circular Array 2-Pass Range DP | `O(N)` | `O(1)` |
-| **22** | House Robber III (Binary Tree) | Post-Order Tree DP (Rob / Skip) | `O(N)` | `O(H)` |
-| **23** | House Robber IV (Min Capability) | Binary Search on Min Capability | `O(N log(max - min))` | `O(1)` |
-| **24** | Delete and Earn / Robber V (Value Domain) | Frequency Array Reduction to DP | `O(N + max(nums))` | `O(max(nums))` |
-| **25** | Coin Change I — Fewest (LeetCode 322) | 1D Unbounded Knapsack DP (Min) | `O(N * amount)` | `O(amount)` |
-| **26** | Coin Change II — Combinations (LC 518) | 1D Unbounded Combination DP | `O(N * amount)` | `O(amount)` |
-| **27** | Coin Change Permutations (LeetCode 377) | 1D Unbounded Permutation DP | `O(N * amount)` | `O(amount)` |
-| **28** | Bounded Coin Change (Limited Supply) | Binary Splitting + 0/1 Knapsack | `O(amount * sum(log(limit)))` | `O(amount)` |
-| **29** | Coin Change Path Reconstruction | DP Predecessor Pointer Traceback | `O(N * amount)` | `O(amount)` |
-| **30** | Reachable Money Sums (CSES Money Sums) | 0/1 Knapsack Boolean Reachability | `O(N * sum(coins))` | `O(sum(coins))` |
-| **31** | Dutch National Flag (0, 1, 2 Sort) | 3-Way In-Place Partitioning (DNF) | `O(N)` | `O(1)` |
-| **32** | Counting Sort (Stable Implementation) | Prefix Frequency Cumulative Table | `O(N + K)` | `O(N + K)` |
-| **33** | Radix Sort (LSD Digit-by-Digit) | Digit-by-Digit Stable Counting DP | `O(D * (N + B))` | `O(N + B)` |
-| **34** | Bucket Sort (Uniform Distribution) | Range Bucketing + Local Sorting | `O(N)` avg | `O(N)` |
-| **35** | Cyclic Sort [1 to N] | In-Place Index Mapping Swap | `O(N)` | `O(1)` |
-| **36** | Pigeonhole Sort (Direct Slot Placement)| Direct Hole Placement & Retrieval | `O(N + Range)` | `O(N + Range)` |
-| **37** | Patience Sorting (LIS Extraction) | Card Pile Lower-Bound Insertion | `O(N log N)` | `O(N)` |
-| **38** | 3-Way QuickSort (Bentley-McIlroy) | DNF Partitioning for Duplicates | `O(N log N)` | `O(log N)` |
+| **6** | Jump Game I (Reachability Check) | Greedy Farthest Reachable Index | `O(N)` | `O(1)` |
+| **7** | Jump Game II (Min Jumps) | Greedy BFS Horizon Interval | `O(N)` | `O(1)` |
+| **8** | Jump Game III (Reach Zero Value) | Graph BFS Reachability | `O(N)` | `O(N)` |
+| **9** | Jump Game IV (Min Jumps with Same Values) | BFS + Same-Value Pruning | `O(N)` | `O(N)` |
+| **10** | Jump Game V (Max Visited Indices) | Memoized DFS / DAG Longest Path | `O(N * D)` | `O(N)` |
+| **11** | Jump Game VI (Max Score Sliding Window) | Monotonic Deque Sliding Window DP | `O(N)` | `O(N)` |
+| **12** | Jump Game VII (String Jump Reachability) | Sliding Window Reachability DP | `O(N)` | `O(N)` |
+| **13** | Stock I (At Most 1 Transaction) | Running Minimum Price Tracking | `O(N)` | `O(1)` |
+| **14** | Stock II (Unlimited Transactions) | Greedy Positive Slope Harvest | `O(N)` | `O(1)` |
+| **15** | Stock III (At Most 2 Transactions) | 4-State Finite State Machine | `O(N)` | `O(1)` |
+| **16** | Stock IV (At Most K Transactions) | 1D DP K-Transaction Compression | `O(N * K)` | `O(K)` |
+| **17** | Stock with Cooldown (1-Day Rest) | 3-State Machine (Held, Sold, Rest) | `O(N)` | `O(1)` |
+| **18** | Stock with Transaction Fee | 2-State Machine (Cash, Hold) | `O(N)` | `O(1)` |
+| **19** | House Robber I (Linear Street) | 1D DP Space-Optimized (prev1, prev2) | `O(N)` | `O(1)` |
+| **20** | House Robber II (Circular Street) | Circular Array 2-Pass Range DP | `O(N)` | `O(1)` |
+| **21** | House Robber III (Binary Tree) | Post-Order Tree DP (Rob / Skip) | `O(N)` | `O(H)` |
+| **22** | House Robber IV (Min Capability) | Binary Search on Min Capability | `O(N log(max - min))` | `O(1)` |
+| **23** | Delete and Earn / Robber V (Value Domain) | Frequency Array Reduction to DP | `O(N + max(nums))` | `O(max(nums))` |
+| **24** | Coin Change I — Fewest (LeetCode 322) | 1D Unbounded Knapsack DP (Min) | `O(N * amount)` | `O(amount)` |
+| **25** | Coin Change II — Combinations (LC 518) | 1D Unbounded Combination DP | `O(N * amount)` | `O(amount)` |
+| **26** | Coin Change Permutations (LeetCode 377) | 1D Unbounded Permutation DP | `O(N * amount)` | `O(amount)` |
+| **27** | Bounded Coin Change (Limited Supply) | Binary Splitting + 0/1 Knapsack | `O(amount * sum(log(limit)))` | `O(amount)` |
+| **28** | Coin Change Path Reconstruction | DP Predecessor Pointer Traceback | `O(N * amount)` | `O(amount)` |
+| **29** | Reachable Money Sums (CSES Money Sums) | 0/1 Knapsack Boolean Reachability | `O(N * sum(coins))` | `O(sum(coins))` |
+| **30** | Redundant Connection (Undirected Graph) | DSU / Union-Find Cycle Detection | `O(N * α(N))` | `O(N)` |
+| **31** | Redundant Connection II (Directed Graph) | 2-Parent Edge + DSU Directed Cycle | `O(N * α(N))` | `O(N)` |
+| **32** | Valid Parentheses (LeetCode 20) | Stack Character Matching (3 Pairs) | `O(N)` | `O(N)` |
+| **33** | Generate Parentheses (LeetCode 22) | Backtracking Open/Close Invariant | `O(4^N / sqrt(N))` | `O(N)` |
+| **34** | Longest Valid Parentheses (LeetCode 32) | Stack with -1 Base Index Sentinel | `O(N)` | `O(N)` |
+| **35** | Valid Parentheses with Wildcard '*' (LC 678) | Greedy Min-Max Bounds [cmin, cmax] | `O(N)` | `O(1)` |
+| **36** | Min Add to Make Valid (LeetCode 921) | Open & Close Counter Balance | `O(N)` | `O(1)` |
+| **37** | Min Remove to Make Valid (LeetCode 1249) | Stack Index Filter & String Rebuild | `O(N)` | `O(N)` |
+| **38** | Remove Invalid Parentheses (LeetCode 301) | BFS Level-Order Minimal Deletion | `O(2^N * N)` | `O(2^N)` |
+| **39** | Score of Parentheses (LeetCode 856) | Depth Bit-Shift Math (1 << depth) | `O(N)` | `O(1)` |
+| **40** | Min Swaps to Make Balanced (LeetCode 1963) | Imbalance Math: (maxImb + 1) / 2 | `O(N)` | `O(1)` |
+| **41** | Different Ways to Add Parentheses (LC 241) | Divide-and-Conquer + DP Memo | `O(Catalan(N))` | `O(Catalan(N))` |
+| **42** | Remove Outermost Parentheses (LC 1021) | Open Counter Primitive Decomp | `O(N)` | `O(N)` |
+| **43** | Can Be Valid with Locked Bits (LC 2116) | 2-Pass Forward & Backward Balance | `O(N)` | `O(1)` |
+
+---
+
+### Notebook 8: Popular Interval Problems (Greedy, Sweep-Line, BST, Heaps & DP)
+
+| # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | Merge Intervals (LeetCode 56) | Start-Time Sorting + Running Max | `O(N log N)` | `O(N)` |
+| **2** | Insert Interval (LeetCode 57) | 3-Stage Linear Range Merge Scan | `O(N)` | `O(N)` |
+| **3** | Non-overlapping Intervals (LeetCode 435) | Greedy End-Time Interval Schedule | `O(N log N)` | `O(1)` |
+| **4** | Meeting Rooms I (LeetCode 252) | Start-Time Sorting + Overlap Check | `O(N log N)` | `O(1)` |
+| **5** | Meeting Rooms II (LeetCode 253) | Min-Heap Active Rooms / Sweep Line | `O(N log N)` | `O(N)` |
+| **6** | Meeting Rooms III (LeetCode 2402) | Dual Min-Heaps (Free & Busy Rooms) | `O(M log M + M log N)` | `O(N)` |
+| **7** | Interval List Intersections (LeetCode 986) | Two-Pointer Boundary Intersection | `O(N + M)` | `O(N + M)` |
+| **8** | Min Arrows to Burst Balloons (LC 452) | Greedy End-Coordinate Pinning | `O(N log N)` | `O(1)` |
+| **9** | Employee Free Time (LeetCode 759) | Multi-Way Heap / Gap Extraction | `O(N log N)` | `O(N)` |
+| **10** | Data Stream Disjoint Intervals (LC 352) | Balanced BST (`std::set`) Neighbor Merge | `O(log N)` add, `O(N)` get | `O(N)` |
+| **11** | My Calendar I (LeetCode 729) | `std::set` `lower_bound` Boundary BST | `O(log N)` per book | `O(N)` |
+| **12** | My Calendar II (LeetCode 731) | Dual Overlap List Verification | `O(N)` per book | `O(N)` |
+| **13** | My Calendar III (LeetCode 732) | Sweep-Line Difference Map (`std::map`) | `O(N)` per book | `O(N)` |
+| **14** | Car Pooling (LeetCode 1094) | Timestamp Difference Array / Sweep | `O(N + MaxLocation)` | `O(MaxLocation)` |
+| **15** | Corporate Flight Bookings (LeetCode 1109) | 1D Range Difference Array + Prefix Sum | `O(N + Bookings)` | `O(N)` |
+| **16** | Range Module (LeetCode 715) | `std::map` Disjoint Interval Slices | `O(K log N)` per op | `O(N)` |
+| **17** | Count Integers in Intervals (LC 2276) | `std::map` Dynamic Overlap Merging | Amortized `O(log N)` | `O(N)` |
+| **18** | Remove Covered Intervals (LeetCode 1288) | Custom Sort (Start Asc, End Desc) | `O(N log N)` | `O(1)` |
+| **19** | Video Stitching (LeetCode 1024) | Greedy Jump Interval Max Reach | `O(N + Time)` | `O(Time)` |
+| **20** | Maximum Length of Pair Chain (LC 646) | Greedy End-Time Selection (LIS DP) | `O(N log N)` | `O(1)` |
+| **21** | Min Interval to Include Each Query (LC 1851)| Offline Sorted Queries + Min-Heap | `O(N log N + Q log Q)` | `O(N + Q)` |
+| **22** | Area Painted Each Day (LeetCode 2158) | Jump-Table / DSU Path Compression | `O(N + MaxPosition)` | `O(MaxPosition)` |
+| **23** | Partition Labels (LeetCode 763) | Character Last Occurrence Interval | `O(N)` | `O(1)` |
+| **24** | Teemo Attacking (LeetCode 495) | Timeline Overlap Accumulation | `O(N)` | `O(1)` |
+| **25** | Task Scheduler (LeetCode 621) | Idle Interval Slot Math | `O(N)` | `O(1)` |
+
+---
+
+### Notebook 9: Popular Data Stream & Online Algorithm Problems
+
+| # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | Find Median from Data Stream (LC 295) | Dual Balanced Heaps (Max/Min) | `O(log N)` add, `O(1)` get | `O(N)` |
+| **2** | Kth Largest in a Stream (LeetCode 703) | Fixed-Size K Min-Heap Stream | `O(log K)` per add | `O(K)` |
+| **3** | Moving Average from Stream (LeetCode 346) | Sliding Circular Buffer / Queue | `O(1)` per next | `O(W)` |
+| **4** | First Unique Number in Stream (LC 1429) | Doubly Linked List + Hash Map | `O(1)` all ops | `O(N)` |
+| **5** | First Non-Repeating Character in Stream | Frequency Table + FIFO Queue | `O(1)` avg | `O(1)` |
+| **6** | Online Stock Span (LeetCode 901) | Monotonic Decreasing Stack | `O(1)` avg per query | `O(N)` |
+| **7** | Design Hit Counter (LeetCode 362) | Circular Buckets (300s) / Queue | `O(1)` hit / `O(1)` get | `O(1)` |
+| **8** | Logger Rate Limiter (LeetCode 359) | Hash Map Expiration Timestamps | `O(1)` per message | `O(M)` |
+| **9** | Front Middle Back Queue (LeetCode 1670) | Dual Balanced Deques (Left/Right) | `O(1)` all operations | `O(N)` |
+| **10** | Finding MK Average (LeetCode 1825) | 3 Multisets (Left, Mid, Right) | `O(log M)` add, `O(1)` avg | `O(M)` |
+| **11** | Stream of Characters (LeetCode 1032) | Reversed Suffix Trie + Stream Log | `O(L)` per query | `O(Trie)` |
+| **12** | Snapshot Array (LeetCode 1146) | History Vectors + Binary Search | `O(1)` set, `O(log S)` get | `O(N + U)` |
+| **13** | Stock Price Fluctuation (LeetCode 2034) | Hash Map + Balanced Multiset | `O(log N)` update, `O(1)` get| `O(N)` |
+| **14** | Time Based Key-Value Store (LeetCode 981) | Hash Map + Sorted Vector UB | `O(1)` set, `O(log T)` get | `O(K * T)` |
+| **15** | Sliding Window Median (LeetCode 480) | Dual Multisets / Lazy Heap Deletes| `O(N log K)` | `O(K)` |
+| **16** | Maximum Frequency Stack (LeetCode 895) | Frequency Map + Stacks per Level | `O(1)` push & pop | `O(N)` |
+| **17** | Seat Reservation Manager (LeetCode 1845) | Min-Heap of Free Seat IDs | `O(log N)` reserve/unreserve| `O(N)` |
+| **18** | Design Underground System (LeetCode 1396) | Dual Hash Maps (Transit & Stats) | `O(1)` all operations | `O(P + S^2)`|
+| **19** | Number of Recent Calls (LeetCode 933) | Sliding Window Queue [t-3000, t] | `O(1)` avg per ping | `O(W)` |
+| **20** | Design Leaderboard (LeetCode 1244) | Hash Map + Min-Heap Top-K | `O(1)` add, `O(N log K)` top | `O(P)` |
+| **21** | Reservoir Sampling from Stream (LC 382/398)| Algorithm R Random Replacement | `O(1)` per item | `O(1)` |
+| **22** | Bounded Blocking Queue (LeetCode 1188) | Mutex + Dual Condition Variables | `O(1)` all operations | `O(Cap)` |
+| **23** | Majority Checker in Subarray (LC 1154) | Boyer-Moore Random Sampling + UB | `O(K log N)` per query | `O(N)` |
+| **24** | Design Authentication Manager (LC 1797) | Hash Map Expiry with Lazy Purge | `O(1)` gen, `O(N)` count | `O(T)` |
+| **25** | Multi-Policy Online Cache Engine (LRU/TTL) | DLL + Hash Map + Expiry Min-Heap | `O(1)` avg get/put | `O(Cap)` |
+
+---
+
+### Notebook 10: Famous Sorting Concepts, Algorithms & Interview Problems
+
+| # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | Bubble Sort with Early Stop & Round Count | Adjacent Swaps + Max Displacement | `O(N^2)` worst/avg, `O(N)` best | `O(1)` |
+| **2** | Selection Sort (Min-Element Swap) | Suffix Minimum Index Extraction | `O(N^2)` all cases | `O(1)` |
+| **3** | Insertion Sort (Array & Linked List) | Shift Larger Prefix In-Place | `O(N + I)` adaptive | `O(1)` |
+| **4** | Merge Sort (Classic Divide & Conquer) | Recursive 2-Way Merge Subroutine | `O(N log N)` guaranteed | `O(N)` |
+| **5** | In-Place Merge Sort (Gap Method) | Shell-like Gap Reduction | `O(N log^2 N)` | `O(1)` |
+| **6** | QuickSort (Lomuto & Hoare Partitioning) | Two-Way Pivot Partitioning | `O(N log N)` avg, `O(N^2)` worst | `O(log N)` |
+| **7** | Randomized QuickSort (Introsort Hybrid) | Random Pivot Selection | `O(N log N)` expected | `O(log N)` |
+| **8** | 3-Way QuickSort (Bentley-McIlroy DNF) | Duplicates Pivot Segregation | `O(N log N)` avg, `O(N)` best | `O(log N)` |
+| **9** | HeapSort (In-Place Max-Heapify) | Sift-Down In-Place Max Extraction | `O(N log N)` guaranteed | `O(1)` |
+| **10** | ShellSort (Knuth's Gap Sequence) | Diminishing Increment Insertion | `O(N^(3/2))` | `O(1)` |
+| **11** | TimSort Concept (Small Runs Insertion Merge)| Run Detection + Insertion + Merge | `O(N log N)` worst, `O(N)` best | `O(N)` |
+| **12** | Counting Sort (Stable Frequency Table) | Cumulative Prefix Sum Table | `O(N + K)` | `O(N + K)` |
+| **13** | Radix Sort LSD (Base-10 Digit-by-Digit) | Digit-by-Digit Stable Counting | `O(D * (N + B))` | `O(N + B)` |
+| **14** | Radix Sort MSD (Recursive Bucket Sort) | Trie-like MSD Prefix Partitioning | `O(N * L)` | `O(N + B * D)` |
+| **15** | Bucket Sort (Uniform Real Range [0, 1)) | Scatter-Gather Bucketing + Sort | `O(N)` avg, `O(N^2)` worst | `O(N)` |
+| **16** | Cyclic Sort [1 to N] (In-Place Swaps) | Direct Index Mapping Swap | `O(N)` | `O(1)` |
+| **17** | Pigeonhole Sort (Direct Range Slots) | Range-Sized Bucket Placement | `O(N + R)` | `O(N + R)` |
+| **18** | Pancake Sorting (LeetCode 969) | Greedy Suffix Placement (2-Flips) | `O(N^2)` | `O(N)` |
+| **19** | Sort Colors / DNF 3-Way (LeetCode 75) | In-Place 3-Pointer Partition | `O(N)` | `O(1)` |
+| **20** | Sort List (LeetCode 148 — Merge on SLL) | Fast/Slow Split + SLL Merge | `O(N log N)` | `O(log N)` |
+| **21** | Largest Number from Concatenation (LC 179) | Custom Transitive String Comp | `O(N log N * L)` | `O(N * L)` |
+| **22** | Wiggle Sort I & II (LeetCode 280 / 324) | Greedy Swap / Median + DNF Index | `O(N)` | `O(1)` |
+| **23** | Topological Sort vs Comparison Sort | Kahn's In-Degree BFS DAG Sort | `O(V + E)` | `O(V + E)` |
+| **24** | Patience Sorting & LIS (Greene's Theorem) | Pile Insertion via lower_bound | `O(N log N)` | `O(N)` |
+| **25** | Sort Characters By Frequency (LeetCode 451) | Bucket Sorting on Frequency Count | `O(N)` | `O(N)` |
+| **26** | Sort Matrix Diagonally (LeetCode 1329) | Hash Map Diagonal Bucketing | `O(M * N * log(min(M,N)))` | `O(M * N)` |
+| **27** | Multi-Criteria Custom Sorting Lambda | Multi-Field Tie-Breaking Predicate| `O(N log N)` | `O(1)` |
+| **28** | Min Swaps to Sort Permutation | Disjoint Cycle Decomposition | `O(N log N)` | `O(N)` |
+| **29** | Count Inversions & Reverse Pairs (LC 493) | Merge Sort Inversion Accumulator | `O(N log N)` | `O(N)` |
+| **30** | Sort Transformed Array (LeetCode 360) | Parabola Concavity Two-Pointers | `O(N)` | `O(N)` |
