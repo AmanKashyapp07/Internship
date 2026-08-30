@@ -352,6 +352,9 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **12** | Contiguous Array - Equal 0s & 1s (LC 525) | Cumulative Balance + First-Seen Map | `O(N)` | `O(N)` |
 | **13** | Subarray Sums Divisible by K (LC 974) | Normalized Modulo Remainder Map | `O(N)` | `O(K)` |
 | **14** | Difference Array / Range Addition (LC 370) | Sweep-Line Prefix Difference Array | `O(N + Q)` | `O(N)` |
+| **15** | Sliding Window Mode (CSES 3224) | Frequency Map + Ordered Set | `O(N log K)` | `O(K)` |
+| **16** | Sliding Window Mex (CSES 3219) | Frequency Array + Missing Set | `O(N log K)` | `O(K)` |
+| **17** | Sliding Window Median (CSES 1076 / LC 480) | Dual Multisets / Two Heaps | `O(N log K)` | `O(K)` |
 
 ---
 
@@ -485,6 +488,11 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **24** | Count and Say (LC 38) | Run-Length Encoding Simulation | `O(2^N)` | `O(2^N)` |
 | **25** | Compare Version Numbers (LC 165) | Dot-Separated Numerical Parsing | `O(N + M)` | `O(1)` |
 | **26** | Encode and Decode Strings (LC 271) | Length-Prefixed Framing (<len>#<str>) | `O(N)` | `O(1)` |
+| **27** | Repeating Substring (CSES 2106 / LC 1062) | Binary Search + Double Rolling Hash | `O(N log^2 N)` | `O(N)` |
+| **28** | All Palindromic Endpoints (CSES 3138) | Manacher Radii + Endpoint Backward Jump | `O(N)` | `O(N)` |
+| **29** | Distinct Subsequences II (CSES 1149 / LC 940) | 1D DP + Last Occurrence Deduplication | `O(N)` | `O(N + Σ)` |
+| **30** | Dynamic Palindrome Queries (CSES 2420) | Dual Fenwick Trees + Rolling Hash | `O((N + Q) log N)` | `O(N)` |
+| **31** | String Functions: KMP Pi & Z-Array (CSES 2107) | Dual Prefix-Function & LCP Arrays | `O(N)` | `O(N)` |
 
 ---
 
@@ -539,3 +547,6 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **45** | Construct BST from Preorder (LC 1008) | Upper-Bound Constrained DFS | `O(N)` | `O(H)` |
 | **46** | Binary Tree to Doubly Linked List | Inorder DFS Pointer Stitching | `O(N)` | `O(H)` |
 | **47** | Subtree of Another Tree (LC 572) | DFS Traversal + Same Tree Match | `O(N * M)` | `O(H)` |
+| **48** | Tree Maximum Matching (CSES 1130) | Subtree Dynamic Programming (DP) | `O(N)` | `O(N)` |
+| **49** | Counting Paths on Tree (CSES 1136) | LCA + Tree Difference Array | `O((N + M) log N)` | `O(N log N)` |
+| **50** | Distinct Colors in Subtree (CSES 1139) | Small-to-Large Set Merging (Sack) | `O(N log^2 N)` | `O(N log N)` |

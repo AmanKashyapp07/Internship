@@ -95,6 +95,9 @@ struct NodeWithParent {
  | 45 | Construct BST from Preorder (LC 1008)       | Upper-Bound Constrained DFS       | O(N)     | O(H)     |
  | 46 | Binary Tree to Doubly Linked List           | Inorder DFS Pointer Stitching     | O(N)     | O(H)     |
  | 47 | Subtree of Another Tree (LC 572)            | DFS Traversal + Same Tree Match   | O(N * M) | O(H)     |
+ | 48 | Tree Maximum Matching (CSES 1130)           | Subtree Dynamic Programming (DP)  | O(N)     | O(N)     |
+ | 49 | Counting Paths on Tree (CSES 1136)          | LCA + Tree Difference Array       | O((N+M)logN)| O(N logN)|
+ | 50 | Distinct Colors in Subtree (CSES 1139)      | Small-to-Large Set Merging (Sack) | O(N log^2N)| O(N logN)|
  ====================================================================================================
 */
 
@@ -1586,4 +1589,140 @@ public:
     // - Problem Statement: Check if binary tree contains subRoot as a structural subtree (LeetCode 572).
     // - Approach: DFS tree traversal + isSameTree recursive structural comparison.
     // - Complexity: Time: O(N * M), Space: O(H) recursion stack.
+
+
+    // =========================================================
+    // 48. TREE MAXIMUM MATCHING (CSES 1130)
+    // =========================================================
+
+    int maxTreeMatching(int n, const vector<vector<int>>& adj) {
+        vector<vector<int>> dp(n + 1, vector<int>(2, 0)); // dp[u][0]: max matching in subtree, dp[u][1]: sum of dp[v][0]
+        function<void(int, int)> dfs = [&](int u, int p) {
+            int base = 0;
+            for (int v : adj[u]) {
+                if (v != p) {
+                    dfs(v, u);
+                    base += dp[v][0];
+                }
+            }
+            dp[u][1] = base;
+            dp[u][0] = base;
+            for (int v : adj[u]) {
+                if (v != p) {
+                    dp[u][0] = max(dp[u][0], base - dp[v][0] + dp[v][1] + 1);
+                }
+            }
+        };
+        dfs(1, 0);
+        return dp[1][0];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find maximum number of disjoint edges in a tree (CSES 1130).
+    // - Approach: Subtree Tree DP (`dp[u][0]` includes edge to a child, `dp[u][1]` excludes u).
+    // - Intuition: Matching u with child v contributes +1 edge while preventing v from internally matching; transitions test best child v to pair with u.
+    // - Complexity: Time: O(N), Space: O(N).
+
+
+    // =========================================================
+    // 49. COUNTING PATHS ON TREE (CSES 1136)
+    // =========================================================
+
+    vector<long long> countPathsOnTree(int n, const vector<vector<int>>& adj, const vector<pair<int, int>>& paths) {
+        const int LOG = 20;
+        vector<vector<int>> up(n + 1, vector<int>(LOG, -1));
+        vector<int> depth(n + 1, 0);
+        vector<long long> val(n + 1, 0);
+
+        function<void(int, int, int)> dfsLCA = [&](int u, int p, int d) {
+            depth[u] = d;
+            up[u][0] = p;
+            for (int j = 1; j < LOG; j++) {
+                up[u][j] = (up[u][j - 1] == -1) ? -1 : up[up[u][j - 1]][j - 1];
+            }
+            for (int v : adj[u]) {
+                if (v != p) dfsLCA(v, u, d + 1);
+            }
+        };
+        dfsLCA(1, -1, 0);
+
+        auto getLCA = [&](int u, int v) -> int {
+            if (depth[u] < depth[v]) swap(u, v);
+            int diff = depth[u] - depth[v];
+            for (int j = LOG - 1; j >= 0; j--) {
+                if ((diff >> j) & 1) u = up[u][j];
+            }
+            if (u == v) return u;
+            for (int j = LOG - 1; j >= 0; j--) {
+                if (up[u][j] != up[v][j]) {
+                    u = up[u][j];
+                    v = up[v][j];
+                }
+            }
+            return up[u][0];
+        };
+
+        for (auto [u, v] : paths) {
+            int L = getLCA(u, v);
+            val[u]++;
+            val[v]++;
+            val[L]--;
+            int p = up[L][0];
+            if (p != -1) val[p]--;
+        }
+
+        function<void(int, int)> dfsAccumulate = [&](int u, int p) {
+            for (int v : adj[u]) {
+                if (v != p) {
+                    dfsAccumulate(v, u);
+                    val[u] += val[v];
+                }
+            }
+        };
+        dfsAccumulate(1, -1);
+
+        vector<long long> result(n);
+        for (int i = 1; i <= n; i++) result[i - 1] = val[i];
+        return result;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Given M path queries on a tree, count how many paths pass through each node (CSES 1136).
+    // - Approach: Binary Lifting LCA + Tree Difference Array (`val[u]++, val[v]++, val[LCA]--, val[parent(LCA)]--`).
+    // - Intuition: Prefix sums on subtrees via post-order DFS accumulate path counts in linear time.
+    // - Complexity: Time: O((N + M) log N), Space: O(N log N).
+
+
+    // =========================================================
+    // 50. DISTINCT COLORS IN SUBTREE (CSES 1139)
+    // =========================================================
+
+    vector<int> distinctColorsInSubtree(int n, const vector<int>& color, const vector<vector<int>>& adj) {
+        vector<int> ans(n + 1, 0);
+        function<set<int>*(int, int)> dfs = [&](int u, int p) -> set<int>* {
+            set<int>* cur = new set<int>();
+            cur->insert(color[u]);
+
+            for (int v : adj[u]) {
+                if (v == p) continue;
+                set<int>* child = dfs(v, u);
+                if (cur->size() < child->size()) swap(cur, child);
+                for (int x : *child) cur->insert(x);
+                delete child;
+            }
+            ans[u] = cur->size();
+            return cur;
+        };
+
+        set<int>* rootSet = dfs(1, 0);
+        delete rootSet;
+
+        vector<int> result(n);
+        for (int i = 1; i <= n; i++) result[i - 1] = ans[i];
+        return result;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find number of distinct color values in subtree of each node (CSES 1139).
+    // - Approach: Small-to-Large Merging (DSU on Tree / Sack Algorithm).
+    // - Intuition: Merging smaller child sets into largest child set bounds total insertions by O(N log^2 N).
+    // - Complexity: Time: O(N log^2 N), Space: O(N log N).
+
 };

@@ -52,6 +52,9 @@ using vvl = vector<vector<ll>>;
  | 12 | Contiguous Array - Equal 0s & 1s (LC 525)   | Cumulative Balance + First-Seen Map| O(N)    | O(N)     |
  | 13 | Subarray Sums Divisible by K (LC 974)       | Normalized Modulo Remainder Map   | O(N)     | O(K)     |
  | 14 | Difference Array / Range Addition (LC 370)  | Sweep-Line Prefix Difference Array| O(N + Q) | O(N)     |
+ | 15 | Sliding Window Mode (CSES 3224)             | Frequency Map + Ordered Set       | O(N log K)| O(K)     |
+ | 16 | Sliding Window Mex (CSES 3219)              | Frequency Array + Missing Set     | O(N log K)| O(K)     |
+ | 17 | Sliding Window Median (CSES 1076 / LC 480)  | Dual Multisets / Two Heaps        | O(N log K)| O(K)     |
  ====================================================================================================
 */
 
@@ -422,3 +425,123 @@ vi getModifiedArray(int length, vvi &updates) {
 // - Approach: Difference Array (Sweep-line delta array).
 // - Intuition: `diff[start] += val` propagates increase to all elements $\ge start$; `diff[end+1] -= val` stops propagation beyond $end$. Running prefix sum reconstructs final array in O(N).
 // - Complexity: Time: O(N + Q) where Q is number of updates, Space: O(N) difference buffer.
+
+// =========================================================
+// 15. SLIDING WINDOW MODE (CSES 3224)
+// =========================================================
+
+vi slidingWindowMode(const vi &nums, int k) {
+    int n = nums.size();
+    if (n < k || k <= 0) return {};
+    unordered_map<int, int> freq;
+    set<pair<int, int>> st; // {-frequency, value}
+
+    auto add = [&](int x) {
+        if (freq[x] > 0) st.erase({-freq[x], x});
+        freq[x]++;
+        st.insert({-freq[x], x});
+    };
+
+    auto remove = [&](int x) {
+        st.erase({-freq[x], x});
+        if (--freq[x] > 0) st.insert({-freq[x], x});
+        else freq.erase(x);
+    };
+
+    vi result;
+    for (int i = 0; i < n; i++) {
+        add(nums[i]);
+        if (i >= k) remove(nums[i - k]);
+        if (i >= k - 1) result.push_back(st.begin()->second);
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Find the mode (most frequent element) in every sliding window of size k (CSES 3224).
+// - Approach: Frequency Map + Ordered `std::set` storing `{-frequency, value}` pairs.
+// - Intuition: Storing `-frequency` orders elements by maximum frequency first; `st.begin()->second` yields the mode in O(log K) per sliding window transition.
+// - Complexity: Time: O(N log K), Space: O(K).
+
+
+// =========================================================
+// 16. SLIDING WINDOW MEX (CSES 3219)
+// =========================================================
+
+vi slidingWindowMex(const vi &nums, int k) {
+    int n = nums.size();
+    if (n < k || k <= 0) return {};
+    vector<int> freq(k + 2, 0);
+    set<int> missing;
+    for (int i = 0; i <= k; i++) missing.insert(i);
+
+    vi result;
+    for (int i = 0; i < k; i++) {
+        if (nums[i] <= k && ++freq[nums[i]] == 1) missing.erase(nums[i]);
+    }
+    result.push_back(*missing.begin());
+
+    for (int i = k; i < n; i++) {
+        int out = nums[i - k], in = nums[i];
+        if (out <= k && --freq[out] == 0) missing.insert(out);
+        if (in <= k && ++freq[in] == 1) missing.erase(in);
+        result.push_back(*missing.begin());
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Find the Minimum Excluded Value (MEX) in every sliding window of size k (CSES 3219).
+// - Approach: Frequency Array + `std::set` tracking available non-negative integers up to k.
+// - Intuition: The MEX cannot exceed k in a window of size k; maintaining missing values in a set allows querying the minimum missing element `*missing.begin()` in O(1).
+// - Complexity: Time: O(N log K), Space: O(K).
+
+
+// =========================================================
+// 17. SLIDING WINDOW MEDIAN (CSES 1076 / LEETCODE 480)
+// =========================================================
+
+vector<double> slidingWindowMedian(const vi &nums, int k) {
+    int n = nums.size();
+    if (n < k || k <= 0) return {};
+    multiset<ll> lo, hi;
+
+    auto balance = [&]() {
+        while (lo.size() > hi.size() + 1) {
+            auto it = prev(lo.end()); hi.insert(*it); lo.erase(it);
+        }
+        while (lo.size() < hi.size()) {
+            auto it = hi.begin(); lo.insert(*it); hi.erase(it);
+        }
+    };
+
+    auto add = [&](ll x) {
+        if (lo.empty() || x <= *lo.rbegin()) lo.insert(x);
+        else hi.insert(x);
+        balance();
+    };
+
+    auto remove = [&](ll x) {
+        auto it = lo.find(x);
+        if (it != lo.end()) lo.erase(it);
+        else { it = hi.find(x); if (it != hi.end()) hi.erase(it); }
+        balance();
+    };
+
+    vector<double> result;
+    for (int i = 0; i < k; i++) add(nums[i]);
+    if (k % 2 == 1) result.push_back((double)*lo.rbegin());
+    else result.push_back(((double)*lo.rbegin() + (double)*hi.begin()) / 2.0);
+
+    for (int i = k; i < n; i++) {
+        remove(nums[i - k]);
+        add(nums[i]);
+        if (k % 2 == 1) result.push_back((double)*lo.rbegin());
+        else result.push_back(((double)*lo.rbegin() + (double)*hi.begin()) / 2.0);
+    }
+    return result;
+}
+// Interview Explanation:
+// - Problem Statement: Find median in every sliding window of size k (CSES 1076 / LeetCode 480).
+// - Approach: Dual Multiset (`lo` and `hi`) with invariant `lo.size() == hi.size()` or `lo.size() == hi.size() + 1`.
+// - Intuition: `lo` stores the lower half (max-heap behavior), `hi` stores the upper half (min-heap behavior); the median is directly accessible from `*lo.rbegin()` and `*hi.begin()`.
+// - Complexity: Time: O(N log K), Space: O(K).
+

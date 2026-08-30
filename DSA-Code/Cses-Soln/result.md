@@ -1,6 +1,6 @@
 # CSES Problem Solutions — Problem Summary & Complexity Reference
 
-A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
+A structured reference catalog of all **103 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
 
 ## Category-by-Category Analysis
 
@@ -10,7 +10,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 | :-: | :--- | :-: | :--- | :--- | :--- |
 | **1** | Trailing Zeros | `T 1` | Legendre's Formula for Prime Factor 5. | `O(log_5 N)` | `O(1)` |
 | **2** | Palindrome Reorder | `T 1` | Frequency Counting + Symmetric Half Mirroring. | `O(N)` | `O(N)` |
-| **3** | Gray Code | `T 2` | Binary-to-Gray Code Formula G(i) = i ^ (i >> 1). | `O(2^N * N)` | `O(1)` |
+| **3** | Gray Code | `T 2` | Binary-to-Gray Code Formula G(i) = i \oplus (i \gg 1). | `O(2^N * N)` | `O(1)` |
 | **4** | Apple Division | `T 1` | Bitmask Subset Sum Enumeration (2^N). | `O(N * 2^N)` | `O(N)` |
 | **5** | Digit Queries | `T 2` | Bucket Range Decomposition + Arithmetic Offset. | `O(log_{10} K)` | `O(1)` |
 
@@ -33,7 +33,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 | **11** | Subarray Divisibility | `T 2` | Prefix Remainder Frequency Map modulo N. | `O(N)` | `O(N)` |
 | **12** | Distinct Values Subarrays | `T 2` | Sliding Window Frequency Map. | `O(N)` | `O(K)` |
 | **13** | Distinct Values Subarrays II | `T 2` | Complementary Counting (Total Subarrays - Subarrays with < K distinct). | `O(N)` | `O(K)` |
-| **14** | Distinct Values Subsequences | `T 2` | Element Frequency Product prod (freq[x] + 1) - 1. | `O(N)` | `O(N)` |
+| **14** | Distinct Values Subsequences | `T 2` | Element Frequency Product \prod (freq[x] + 1) - 1. | `O(N)` | `O(N)` |
 | **15** | Movie Festival II | `T 3` | Greedy Sort by End Time + `std::multiset` Upper Bound. | `O(N log K)` | `O(K)` |
 | **16** | Maximum Subarray Sum II | `T 2` | Prefix Sum + Sliding Window Monotonic Deque / `std::multiset`. | `O(N log(B - A))` | `O(B - A)` |
 
@@ -46,7 +46,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 | **1** | Removing Digits | `T 1` | Greedy / Top-Down Memoized DP. | `O(N log_{10} N)` | `O(N)` |
 | **2** | Array Description | `T 2` | 2D State DP (`dp[i][v]` = ways for index i ending in value v). | `O(N * M)` | `O(N * M)` |
 | **3** | Counting Numbers | `T 3` | Digit DP (`dp[pos][prev_digit][started][tight]`). | `O(log_{10} B)` | `O(log_{10} B)` |
-| **4** | Rectangle Cutting | `T 2` | Interval DP (`dp[i][j]` for i * j rectangle). | `O(A * B * (A + B))` | `O(A * B)` |
+| **4** | Rectangle Cutting | `T 2` | Interval DP (`dp[i][j]` for i \times j rectangle). | `O(A * B * (A + B))` | `O(A * B)` |
 | **5** | Elevator Rides | `T 3` | Bitmask DP storing pair `{rides, weight_of_last_ride}`. | `O(N * 2^N)` | `O(2^N)` |
 | **6** | Increasing Subsequence II | `T 3` | Coordinate Compression + Fenwick Tree DP. | `O(N log N)` | `O(N)` |
 | **7** | Minimal Grid Path | `T 2` | Step-by-step Level BFS Greedy Choice. | `O(N^2)` | `O(N)` |
@@ -84,17 +84,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 6. Tree Algorithms
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Tree Matching | `T 2` | Greedy Bottom-Up Matching / Tree Dynamic Programming. | `O(N)` | `O(N)` |
-| **2** | Counting Paths | `T 3` | Tree Difference Array / Path Prefix Sums. | `O((N + Q) log N)` | `O(N log N)` |
-| **3** | Distinct Colors | `T 3` | Small-to-Large Set Merging (Sack / DSU on Tree). | `O(N log^2 N)` | `O(N log N)` |
-
----
-
-### 7. Mathematics
+### 6. Mathematics
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -104,45 +94,27 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 | **4** | Common Divisors | `T 2` | Frequency Array + Divisor Sieve Sweep. | `O(MAX log MAX + N)` | `O(MAX)` |
 | **5** | Next Prime | `T 2` | Trial Division Primality Test + Linear Odd-Step Search. | `O(sqrt{P}) per query where P approx n` | `O(1)` |
 | **6** | Binomial Coefficients | `T 1` | Precomputed Factorials and Inverse Factorials. | `O(N)` | `O(N)` |
-| **7** | Bracket Sequences I | `T 2` | Catalan Numbers C_k = Catalan(K). | `O(N)` | `O(N)` |
+| **7** | Bracket Sequences I | `T 2` | Catalan Numbers C_k = \frac{1}{k+1} \binom{2k}{k}. | `O(N)` | `O(N)` |
 | **8** | Christmas Party | `T 2` | Derangement Recurrence D_n = (n-1)(D_{n-1} + D_{n-2}). | `O(N)` | `O(1)` |
-| **9** | Creating Strings II | `T 1` | Multinomial Coefficient N! / prod(f_c!). | `O(N)` | `O(N)` |
-| **10** | Distributing Apples | `T 1` | Stars and Bars Theorem C(N+M-1, M). | `O(N + M)` | `O(N + M)` |
+| **9** | Creating Strings II | `T 1` | Multinomial Coefficient \frac{N!}{\prod (f_c!)}. | `O(N)` | `O(N)` |
+| **10** | Distributing Apples | `T 1` | Stars and Bars Theorem \binom{N + M - 1}{M}. | `O(N + M)` | `O(N + M)` |
 | **11** | Fibonacci Numbers | `T 2` | Fast Doubling Fibonacci Method. | `O(log N)` | `O(log N)` |
 | **12** | Graph Paths I | `T 2` | Adjacency Matrix Exponentiation. | `O(N^3 log K)` | `O(N^2)` |
 | **13** | Permutation Order | `T 2` | Factorial Number System (Lehmer Code). | `O(N^2)` | `O(N)` |
 | **14** | Permutation Rounds | `T 2` | Disjoint Cycle Decomposition + LCM over Prime Factorization. | `O(N sqrt{N})` | `O(N)` |
 | **15** | Prime Multiples | `T 3` | Inclusion-Exclusion Principle over Bitmask Subsets. | `O(K * 2^K)` | `O(K)` |
-| **16** | Throwing Dice | `T 2` | 6 * 6 Matrix Exponentiation on Linear Recurrence. | `O(6^3 log N)` | `O(6^2)` |
+| **16** | Throwing Dice | `T 2` | 6 \times 6 Matrix Exponentiation on Linear Recurrence. | `O(6^3 log N)` | `O(6^2)` |
 
 ---
 
-### 8. String Algorithms
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | String Matching | `T 1` | KMP (Knuth-Morris-Pratt) / Z-Algorithm / String Hashing. | `O(N + M)` | `O(N + M)` |
-| **2** | Finding Borders | `T 2` | KMP Prefix Function Iteration / Polynomial Rolling Hash. | `O(N)` | `O(N)` |
-| **3** | Finding Periods | `T 2` | Z-Algorithm / String Hashing. | `O(N)` | `O(N)` |
-| **4** | Minimal Rotation | `T 2` | Booth's Algorithm (\mathcal{O}(N) Lexicographical Minimum Rotation). | `O(N)` | `O(N)` |
-| **5** | Longest Palindrome | `T 2` | Manacher's Algorithm (\mathcal{O}(N) Palindrome Centers). | `O(N)` | `O(N)` |
-| **6** | Repeating Substring | `T 3` | Suffix Array + LCP (Longest Common Prefix) Array. | `O(N log N)` | `O(N)` |
-| **7** | All Palindromes | `T 2` | Palindromic Tree (EERTREE) / Suffix Automaton + Manacher. | `O(N Sigma)` | `O(N Sigma)` |
-| **8** | Word Combinations | `T 2` | Trie-Optimized 1D Dynamic Programming. | `O(N * max_word_len + \sum |W_i|)` | `O(\sum |W_i| + N)` |
-| **9** | String Functions | `T 2` | KMP \pi-Array + Z-Array Algorithms. | `O(N)` | `O(N)` |
-| **10** | Palindrome Queries | `T 3` | Dual Segment Trees / Fenwick Trees with Polynomial Rolling Hash. | `O((N + Q) log N)` | `O(N)` |
-| **11** | Distinct Subsequences | `T 3` | Dynamic Programming with Last Occurrence Tracking. | `O(N)` | `O(N + Sigma)` |
-
----
-
-### 9. Advanced Techniques
+### 7. Advanced Techniques
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
 | **1** | Hamming Distance | `T 2` | Bitmask XOR + Fast Hardware Popcount. | `O(N^2)` | `O(N)` |
 | **2** | Meet in the Middle | `T 2` | Meet-in-the-Middle (2^{N/2} Search Space Reduction). | `O(2^{N/2} * N)` | `O(2^{N/2})` |
 | **3** | Corner Subgrid Check | `T 2` | Column-Pair Hash Map / Boolean Matrix Sweep. | `O(K * N^2)` | `O(N^2)` |
-| **4** | Corner Subgrid Count | `T 2` | Bitset Row AND + Combinatorial C(C, 2). | `O(N^3 / 64)` | `O(N^2 / 8)` |
+| **4** | Corner Subgrid Count | `T 2` | Bitset Row AND + Combinatorial \binom{C}{2}. | `O(N^3 / 64)` | `O(N^2 / 8)` |
 | **5** | Eulerian Subgraphs | `T 3` | Linear Algebra over GF(2) / Graph Connected Components. | `O(V + E)` | `O(V + E)` |
 | **6** | Necessary Cities | `T 3` | Tarjan's Articulation Points Algorithm via DFS. | `O(V + E)` | `O(V + E)` |
 | **7** | Necessary Roads | `T 3` | Tarjan's Bridge-Finding Algorithm via DFS. | `O(V + E)` | `O(V + E)` |
@@ -155,7 +127,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 10. Additional Problems I
+### 8. Additional Problems I
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -178,7 +150,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 11. Additional Problems II
+### 9. Additional Problems II
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -191,7 +163,7 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 
 ---
 
-### 12. Advanced Graph Problems
+### 10. Advanced Graph Problems
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -202,15 +174,3 @@ A structured reference catalog of all **122 solved CSES problems** in `DSA-Code/
 | **5** | Bus Companies | `T 3` | Virtual Graph Node Segment Tree / Multi-Layer Dijkstra. | `O((V + Q log V) log V)` | `O(V log V + E)` |
 | **6** | MST Edge Check | `T 2` | Kruskal's Same-Weight Batch Processing / Heavy-Light Decomposition. | `O(E log E)` | `O(V + E)` |
 | **7** | Transfer Speeds Sum | `T 3` | Gomory-Hu Tree / All-Pairs Max Flow. | `O(V * MaxFlow(V, E))` | `O(N)` |
-
----
-
-### 13. Sliding Window Problems
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Sliding Window Mode | `T 2` | Multi-Set / Frequency Buckets in Sliding Window. | `O(N log K)` | `O(K)` |
-| **2** | Sliding Window Mex | `T 2` | Frequency Map + Active Missing Value Set (`std::set`). | `O(N log K)` | `O(K)` |
-| **3** | Sliding Window Median | `T 2` | Dual Multisets / Two Heaps Balancing (`left_max`, `right_min`). | `O(N log K)` | `O(K)` |
-| **4** | Sliding Window Cost | `T 2` | Dual Multisets with Running Sum Tracking. | `O(N log K)` | `O(K)` |
-| **5** | Sliding Window Inversions | `T 3` | Fenwick Tree (BIT) / Order Statistic Tree in Sliding Window. | `O(N log K)` | `O(K)` |

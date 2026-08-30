@@ -74,6 +74,11 @@ const ll P = 31;
  | 24 | Count and Say (LC 38)                       | Run-Length Encoding Simulation    | O(2^N)   | O(2^N)   |
  | 25 | Compare Version Numbers (LC 165)            | Dot-Separated Numerical Parsing   | O(N + M) | O(1)     |
  | 26 | Encode and Decode Strings (LC 271)          | Length-Prefixed Framing (<len>#<str>)| O(N)   | O(1)     |
+ | 27 | Repeating Substring (CSES 2106 / LC 1062)   | Binary Search + Double Rolling Hash| O(N log^2N)| O(N)  |
+ | 28 | All Palindromic Endpoints (CSES 3138)       | Manacher Radii + Endpoint Jump     | O(N)     | O(N)     |
+ | 29 | Distinct Subsequences II (CSES 1149 / LC 940)| 1D DP + Last Occurrence Deduplication| O(N)   | O(N + S) |
+ | 30 | Dynamic Palindrome Queries (CSES 2420)      | Dual Fenwick Trees + Rolling Hash  | O((N+Q)lgN| O(N)    |
+ | 31 | String Functions: KMP Pi & Z-Array (CSES 2107)| Dual Prefix-Function & LCP Arrays | O(N)     | O(N)     |
  ====================================================================================================
 */
 
@@ -707,6 +712,220 @@ vector<string> decodeStrings(const string& s) {
 // - Problem Statement: Encode a list of strings to a single string and decode back to original list.
 // - Approach: Length-prefixed string framing (<length>#<string>).
 // - Complexity: Time: O(Total Characters), Space: O(1) auxiliary space.
+
+
+
+// ====================================================================================================
+// 27. REPEATING SUBSTRING (CSES 2106 / LEETCODE 1062)
+// ====================================================================================================
+
+string longestRepeatingSubstring(const string& s) {
+    int n = s.size();
+    if (n <= 1) return "";
+    const ll MOD1 = 1e9 + 7, MOD2 = 1e9 + 9, BASE = 31;
+    vll p1(n + 1, 1), p2(n + 1, 1), h1(n + 1, 0), h2(n + 1, 0);
+    for (int i = 0; i < n; i++) {
+        p1[i + 1] = p1[i] * BASE % MOD1;
+        p2[i + 1] = p2[i] * BASE % MOD2;
+        h1[i + 1] = (h1[i] * BASE + (s[i] - 'a' + 1)) % MOD1;
+        h2[i + 1] = (h2[i] * BASE + (s[i] - 'a' + 1)) % MOD2;
+    }
+
+    auto getHash = [&](int l, int r) -> pair<ll, ll> {
+        ll x1 = (h1[r + 1] - h1[l] * p1[r - l + 1] % MOD1 + MOD1) % MOD1;
+        ll x2 = (h2[r + 1] - h2[l] * p2[r - l + 1] % MOD2 + MOD2) % MOD2;
+        return {x1, x2};
+    };
+
+    auto check = [&](int len) -> int {
+        map<pair<ll, ll>, int> seen;
+        for (int i = 0; i + len <= n; i++) {
+            auto h = getHash(i, i + len - 1);
+            if (seen.count(h)) return i;
+            seen[h] = i;
+        }
+        return -1;
+    };
+
+    int lo = 1, hi = n - 1, bestLen = 0, bestPos = -1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        int pos = check(mid);
+        if (pos != -1) {
+            bestLen = mid;
+            bestPos = pos;
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    if (bestLen == 0) return "";
+    return s.substr(bestPos, bestLen);
+}
+// Interview Explanation:
+// - Problem Statement: Find the longest substring of s that occurs at least twice (CSES 2106 / LC 1062).
+// - Approach: Binary Search on Substring Length + Double Polynomial Rolling Hash Table.
+// - Intuition: If a repeating substring of length L exists, smaller repeating substrings must also exist; monotonic predicate allows binary search.
+// - Complexity: Time: O(N log^2 N), Space: O(N).
+
+
+// ====================================================================================================
+// 28. ALL PALINDROMIC ENDPOINTS (CSES 3138 / 2110)
+// ====================================================================================================
+
+vi maxPalindromeEndingAtEachPosition(const string& s) {
+    int n = s.size();
+    if (n == 0) return {};
+    vi d1(n, 0), d2(n, 0);
+    for (int l = 0, r = -1, i = 0; i < n; i++) {
+        int k = (i > r) ? 1 : min(d1[l + r - i], r - i + 1);
+        while (i - k >= 0 && i + k < n && s[i - k] == s[i + k]) k++;
+        d1[i] = k--;
+        if (i + k > r) { l = i - k; r = i + k; }
+    }
+    for (int l = 0, r = -1, i = 0; i < n; i++) {
+        int k = (i > r) ? 0 : min(d2[l + r - i + 1], r - i + 1);
+        while (i - k - 1 >= 0 && i + k < n && s[i - k - 1] == s[i + k]) k++;
+        d2[i] = k--;
+        if (i + k > r) { l = i - k - 1; r = i + k; }
+    }
+
+    vi ans(n, 0);
+    for (int c = 0; c < n; c++) {
+        int r = d1[c], R = c + r - 1;
+        ans[R] = max(ans[R], 2 * r - 1);
+    }
+    for (int c = 0; c < n; c++) {
+        int r = d2[c];
+        if (r == 0) continue;
+        int R = c + r - 1;
+        ans[R] = max(ans[R], 2 * r);
+    }
+    for (int i = n - 1; i > 0; i--) {
+        if (ans[i] >= 2) ans[i - 1] = max(ans[i - 1], ans[i] - 2);
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: For each index i, find maximum length of a palindromic substring ending at position i (CSES 3138).
+// - Approach: Manacher's Algorithm + Backward Maximum Radius Propagation.
+// - Intuition: Compute exact odd (d1) and even (d2) radii; map right endpoints and propagate decremented lengths backwards (ans[i-1] = max(ans[i-1], ans[i]-2)).
+// - Complexity: Time: O(N), Space: O(N).
+
+
+// ====================================================================================================
+// 29. DISTINCT SUBSEQUENCES II (CSES 1149 / LEETCODE 940)
+// ====================================================================================================
+
+int distinctSubsequencesII(const string& s) {
+    int n = s.size();
+    vll dp(n + 1, 0);
+    dp[0] = 1;
+    vi last(26, 0);
+
+    for (int i = 1; i <= n; i++) {
+        int c = s[i - 1] - 'a\;
+        dp[i] = (2 * dp[i - 1]) % MOD;
+        if (last[c] != 0) {
+            dp[i] = (dp[i] - dp[last[c] - 1] + MOD) % MOD;
+        }
+        last[c] = i;
+    }
+    return (int)((dp[n] - 1 + MOD) % MOD);
+}
+// Interview Explanation:
+// - Problem Statement: Count number of distinct non-empty subsequences of string s modulo 10^9+7 (CSES 1149 / LC 940).
+// - Approach: 1D Dynamic Programming with Last Sighting Deduplication (`dp[i] = 2 * dp[i-1] - dp[last[c]-1]`).
+// - Intuition: Appending character s[i-1] doubles the previous valid choices; subtracting choices from before s[i-1]'s previous appearance removes duplicates.
+// - Complexity: Time: O(N), Space: O(N + Sigma).
+
+
+// ====================================================================================================
+// 30. DYNAMIC PALINDROME QUERIES (CSES 2420)
+// ====================================================================================================
+
+class DynamicPalindromeQueries {
+    int n;
+    vll p, fwdBIT, bwdBIT;
+
+    void bitUpdate(vll& bit, int idx, ll val) {
+        for (; idx <= n; idx += idx & -idx) bit[idx] = (bit[idx] + val % MOD + MOD) % MOD;
+    }
+
+    ll bitQuery(const vll& bit, int idx) const {
+        ll sum = 0;
+        for (; idx > 0; idx -= idx & -idx) sum = (sum + bit[idx]) % MOD;
+        return sum;
+    }
+
+    ll queryRange(const vll& bit, int l, int r) const {
+        return (bitQuery(bit, r) - bitQuery(bit, l - 1) + MOD) % MOD;
+    }
+
+public:
+    DynamicPalindromeQueries(const string& s) {
+        n = s.size();
+        p.assign(n + 1, 1);
+        fwdBIT.assign(n + 1, 0);
+        bwdBIT.assign(n + 1, 0);
+        for (int i = 1; i <= n; i++) p[i] = (p[i - 1] * P) % MOD;
+        for (int i = 1; i <= n; i++) {
+            ll val = s[i - 1] - 'a' + 1;
+            bitUpdate(fwdBIT, i, val * p[i - 1] % MOD);
+            bitUpdate(bwdBIT, i, val * p[n - i] % MOD);
+        }
+    }
+
+    void update(int idx, char oldChar, char newChar) {
+        ll diff = ((newChar - 'a' + 1) - (oldChar - 'a' + 1) + MOD) % MOD;
+        bitUpdate(fwdBIT, idx, diff * p[idx - 1] % MOD);
+        bitUpdate(bwdBIT, idx, diff * p[n - idx] % MOD);
+    }
+
+    bool isPalindrome(int l, int r) const {
+        ll fwd = queryRange(fwdBIT, l, r);
+        ll bwd = queryRange(bwdBIT, l, r);
+        ll fwdNormalized = fwd * p[n - r] % MOD;
+        ll bwdNormalized = bwd * p[l - 1] % MOD;
+        return fwdNormalized == bwdNormalized;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Process point character updates and substring palindrome queries in O(log N) (CSES 2420).
+// - Approach: Dual Fenwick Trees tracking Forward and Backward Polynomial Rolling Hashes.
+// - Intuition: A substring s[l..r] is a palindrome iff its forward rolling hash equals its backward rolling hash; Fenwick Trees maintain dynamic prefix hash sums.
+// - Complexity: Time: O(log N) per query/update, Space: O(N).
+
+
+// ====================================================================================================
+// 31. STRING FUNCTIONS: KMP PI & Z-ARRAY (CSES 2107)
+// ====================================================================================================
+
+pair<vi, vi> computeStringFunctions(const string& s) {
+    int n = s.size();
+    vi pi(n, 0), z(n, 0);
+
+    // Compute KMP Pi
+    for (int i = 1; i < n; i++) {
+        int j = pi[i - 1];
+        while (j > 0 && s[i] != s[j]) j = pi[j - 1];
+        if (s[i] == s[j]) j++;
+        pi[i] = j;
+    }
+
+    // Compute Z-Array
+    for (int i = 1, l = 0, r = 0; i < n; i++) {
+        if (i <= r) z[i] = min(r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]]) z[i]++;
+        if (i + z[i] - 1 > r) { l = i; r = i + z[i] - 1; }
+    }
+
+    return {pi, z};
+}
+// Interview Explanation:
+// - Problem Statement: Compute both KMP prefix function (pi) and Z-array for string s in O(N) (CSES 2107).
+// - Approach: Standard linear-time algorithms for failure function and sliding LCP box.
+// - Complexity: Time: O(N), Space: O(N).
 
 int main() {
     ios::sync_with_stdio(false);
