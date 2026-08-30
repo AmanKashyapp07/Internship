@@ -1019,3 +1019,54 @@ public:
 // - Approach: Doubly Linked List (LRU Recency) + Hash Map + Expiration Min-Heap.
 // - Intuition: DLL maintains access recency for O(1) LRU eviction. Min-heap prioritizes earliest expiring keys for lazy TTL purging.
 // - Complexity: Time: O(1) amortized for `get` and `put`, Space: O(Capacity).
+
+string boothAlgorithm(string s) {
+    string t = s + s;
+    int n = s.size();
+    int i = 0, j = 1, k = 0;
+    while (i < n && j < n && k < n) {
+        if (t[i + k] == t[j + k]) k++;
+        else if (t[i + k] < t[j + k]) { j += k + 1; if (i == j) j++; k = 0; }
+        else { i += k + 1; if (i == j) i++; k = 0; }
+    }
+    int start = min(i, j);
+    return t.substr(start, n);
+}
+
+// Interview Explanation:
+// Problem Statement - Given a string, find its lexicographically smallest rotation (Booth's Algorithm).
+// Approach - Booth's Algorithm (Linear Time).
+// Intuition - Concatenate string to itself. Use two pointers to compare rotations and find the minimal starting index.
+
+// LeetCode 338 + Popcount DP Template
+
+vector<int> countBits(int n) {
+    vector<int> dp(n + 1);
+
+    for (int i = 1; i <= n; i++)
+        dp[i] = dp[i >> 1] + (i & 1);
+
+    return dp;
+}
+// Interview Explanation:
+// Problem Statement - Count number of 1's in binary representation for all numbers from 0 to n (LeetCode 338).
+// Approach - Dynamic Programming with Bit Manipulation.
+// Intuition - The number of 1's in `i` is equal to the number of 1's in `i >> 1` (i.e., `i / 2`) plus the least significant bit (`i & 1`).
+// Complexity - Time: O(n), Space: O(n).
+
+long long countBits(long long n) {
+    long long ans = 0;
+
+    for (long long h = 1; h <= n; h <<= 1) {
+        long long cycle = h << 1;
+        ans += (n + 1) / cycle * h;
+        ans += max(0LL, (n + 1) % cycle - h);
+    }
+
+    return ans;
+}
+// Interview Explanation:
+// Problem Statement - Count total number of 1's in binary representation for all numbers from 0 to n.
+// Approach - Bitwise Counting by Position.
+// Intuition - For each bit position, count how many complete cycles of 0's and 1's occur, and add the remaining 1's from the incomplete cycle.
+// Complexity - Time: O(log n), Space: O(1).

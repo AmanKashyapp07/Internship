@@ -6,6 +6,7 @@ This document contains **problem statements, interview-style explanations, intui
 
 ## 1. Static Range Sum Queries
 
+- **Tier**: Tier 1
 - **Link**: [Static Range Sum Queries](https://cses.fi/problemset/task/1646)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ static range sum queries asking for the sum of values in range $[l, r]$.
 - **Interview Pattern**: 1D Prefix Sum Array.
@@ -30,6 +31,7 @@ for query (l, r):
 
 ## 2. Static Range Minimum Queries
 
+- **Tier**: Tier 2
 - **Link**: [Static Range Minimum Queries](https://cses.fi/problemset/task/1647)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ static range minimum queries asking for the minimum value in range $[l, r]$.
 - **Interview Pattern**: Sparse Table ($\mathcal{O}(1)$ Overlapping Range Query).
@@ -59,6 +61,7 @@ function query(l, r):
 
 ## 3. Dynamic Range Sum Queries
 
+- **Tier**: Tier 2
 - **Link**: [Dynamic Range Sum Queries](https://cses.fi/problemset/task/1648)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ queries: (1) update element at index $k$ to value $u$, (2) calculate range sum $[l, r]$.
 - **Interview Pattern**: Fenwick Tree (BIT) / Segment Tree.
@@ -86,6 +89,7 @@ for query:
 
 ## 4. Dynamic Range Minimum Queries
 
+- **Tier**: Tier 2
 - **Link**: [Dynamic Range Minimum Queries](https://cses.fi/problemset/task/1649)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ queries: (1) update element at index $k$ to value $u$, (2) find minimum value in range $[l, r]$.
 - **Interview Pattern**: Segment Tree (Point Update, Range Min Query).
@@ -116,6 +120,7 @@ function query(v, l, r, ql, qr):
 
 ## 5. Range Update Queries
 
+- **Tier**: Tier 2
 - **Link**: [Range Update Queries](https://cses.fi/problemset/task/1651)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ queries: (1) add value $u$ to all elements in range $[l, r]$, (2) query value at single index $k$.
 - **Interview Pattern**: Fenwick Tree on Difference Array.
@@ -141,6 +146,7 @@ return BIT.prefix_sum(k)
 
 ## 6. Range Xor Queries
 
+- **Tier**: Tier 1
 - **Link**: [Range Xor Queries](https://cses.fi/problemset/task/1650)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ static queries asking for the XOR sum of elements in range $[l, r]$.
 - **Interview Pattern**: 1D Prefix XOR Array.
@@ -165,6 +171,7 @@ for query (l, r):
 
 ## 7. Forest Queries
 
+- **Tier**: Tier 2
 - **Link**: [Forest Queries](https://cses.fi/problemset/task/1652)
 - **Problem Statement**: Given an $N \times N$ grid of trees (`*`) and empty spaces (`.`), process $Q$ queries asking for total trees inside subgrid $(y_1, x_1)$ to $(y_2, x_2)$.
 - **Interview Pattern**: 2D Prefix Sum Array (Inclusion-Exclusion).
@@ -191,6 +198,7 @@ for query (y1, x1, y2, x2):
 
 ## 8. Hotel Queries
 
+- **Tier**: Tier 2
 - **Link**: [Hotel Queries](https://cses.fi/problemset/task/1143)
 - **Problem Statement**: Given $N$ hotels with available room counts $A_i$ and $M$ groups of tourists with required room counts $X_j$, assign each group to the first hotel with $\ge X_j$ rooms and decrease its rooms by $X_j$. Output assigned hotel index or 0 if none available.
 - **Interview Pattern**: Segment Tree Range Max + Binary Walk on Tree.
@@ -218,6 +226,7 @@ function first_ge(v, l, r, X):
 
 ## 9. List Removals
 
+- **Tier**: Tier 2
 - **Link**: [List Removals](https://cses.fi/problemset/task/1749)
 - **Problem Statement**: Given an initial list of $N$ integers, process $N$ queries where each query specifies 1-based index $k$ of element to be removed from the **current** list. Print removed values.
 - **Interview Pattern**: Fenwick Tree Binary Lifting (Find $k$-th Active Element).
@@ -250,6 +259,7 @@ for query k:
 
 ## 10. Salary Queries
 
+- **Tier**: Tier 2
 - **Link**: [Salary Queries](https://cses.fi/problemset/task/1144)
 - **Problem Statement**: Given salaries of $N$ employees, process $Q$ queries: (1) change salary of employee $k$ to $x$, (2) count employees with salary in range $[a, b]$.
 - **Interview Pattern**: Coordinate Compression + Fenwick Tree.
@@ -280,6 +290,7 @@ for query:
 
 ## 11. Prefix Sum Queries
 
+- **Tier**: Tier 2
 - **Link**: [Prefix Sum Queries](https://cses.fi/problemset/task/2166)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ queries: (1) update element at index $k$ to $u$, (2) find maximum prefix sum in subarray $[l, r]$.
 - **Interview Pattern**: Segment Tree with Augmented Node `(sum, max_prefix)`.
@@ -310,6 +321,7 @@ function query(l, r):
 
 ## 12. Subarray Sum Queries
 
+- **Tier**: Tier 3
 - **Link**: [Subarray Sum Queries](https://cses.fi/problemset/task/1190)
 - **Problem Statement**: Given an array of $N$ integers, after each of $Q$ point updates, print the maximum subarray sum in the **entire array**.
 - **Interview Pattern**: Segment Tree Kadane's Node `(sum, pref, suff, max_ans)`.
@@ -336,6 +348,7 @@ function merge(L, R):
 
 ## 13. Subarray Sum Queries II
 
+- **Tier**: Tier 3
 - **Link**: [Subarray Sum Queries II](https://cses.fi/problemset/task/3226)
 - **Problem Statement**: Given a static array of $N$ integers, process $Q$ queries asking for maximum subarray sum in arbitrary subsegment $[l, r]$.
 - **Interview Pattern**: Segment Tree Kadane's Range Query.
@@ -345,12 +358,27 @@ function merge(L, R):
   1. Build Segment Tree with Kadane node struct.
   2. Range query $[l, r]$: combine covered node structs using `merge(L, R)`.
   3. Return `result.ans`.
+- **Pseudocode**:
+```text
+function query(node, start, end, l, r):
+    if l <= start and end <= r:
+        return tree[node]
+    mid = (start + end) / 2
+    if r <= mid:
+        return query(2 * node, start, mid, l, r)
+    if l > mid:
+        return query(2 * node + 1, mid + 1, end, l, r)
+    left_node = query(2 * node, start, mid, l, r)
+    right_node = query(2 * node + 1, mid + 1, end, l, r)
+    return merge(left_node, right_node)
+```
 - **Complexity**: Time: $\mathcal{O}((N + Q) \log N)$, Space: $\mathcal{O}(N)$.
 
 ---
 
 ## 14. Distinct Values Queries
 
+- **Tier**: Tier 3
 - **Link**: [Distinct Values Queries](https://cses.fi/problemset/task/1734)
 - **Problem Statement**: Given an array of $N$ integers, process $Q$ static range queries asking for the number of distinct values in subarray $[l, r]$.
 - **Interview Pattern**: Offline Queries + Fenwick Tree + Last Occurrence Sweep.

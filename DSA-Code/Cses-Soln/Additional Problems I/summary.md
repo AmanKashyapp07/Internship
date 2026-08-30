@@ -6,6 +6,7 @@ This document contains **problem statements, interview-style explanations, intui
 
 ## 1. Shortest Subsequence
 
+- **Tier**: Tier 2
 - **Link**: [Shortest Subsequence](https://cses.fi/problemset/task/1087)
 - **Problem Statement**: Given a DNA sequence of characters ('A', 'C', 'G', 'T'), find the shortest DNA sequence that is **not** a subsequence of the given string.
 - **Interview Pattern**: Greedy Character-Set Coverage (Alphabet Phase Completion).
@@ -39,6 +40,7 @@ return result
 
 ## 2. Advertisement
 
+- **Tier**: Tier 2
 - **Link**: [Advertisement](https://cses.fi/problemset/task/1142)
 - **Problem Statement**: Given $N$ histogram bars of width 1 and specified heights, find the area of the largest rectangle that can be formed within the histogram.
 - **Interview Pattern**: Monotonic Stack (Largest Rectangle in Histogram).
@@ -73,6 +75,7 @@ return max_area
 
 ## 3. Bubble Sort Rounds I
 
+- **Tier**: Tier 2
 - **Link**: [Bubble Sort Rounds I](https://cses.fi/problemset/task/1147)
 - **Problem Statement**: Given an array of $N$ numbers, calculate how many rounds of Bubble Sort pass are required until the array is fully sorted.
 - **Interview Pattern**: Maximum Displacement of Inversions.
@@ -102,6 +105,7 @@ return max_left_shift
 
 ## 4. Multiplication Table
 
+- **Tier**: Tier 2
 - **Link**: [Multiplication Table](https://cses.fi/problemset/task/2422)
 - **Problem Statement**: Given an $N \times N$ multiplication table where cell $(i, j)$ contains $i \times j$, find the median element (the element at position $\lfloor N^2 / 2 \rfloor + 1$ in sorted order).
 - **Interview Pattern**: Binary Search on Answer / Counting Multiples.
@@ -137,6 +141,7 @@ return ans
 
 ## 5. Bit Inversions
 
+- **Tier**: Tier 3
 - **Link**: [Bit Inversions](https://cses.fi/problemset/task/1188)
 - **Problem Statement**: Given a bit string of length $N$ and $M$ queries (each flipping a single bit), output the length of the longest contiguous substring of identical bits after each flip.
 - **Interview Pattern**: Segment Tree with Subsegment Merging / `std::set` Boundary Maintenance.
@@ -164,6 +169,7 @@ function merge(L, R):
 
 ## 6. Distinct Values Sum
 
+- **Tier**: Tier 3
 - **Link**: [Distinct Values Sum](https://cses.fi/problemset/task/2084)
 - **Problem Statement**: Given an array of $N$ numbers, calculate the sum of the number of distinct values in all possible subarrays $[l, r]$.
 - **Interview Pattern**: Contribution Technique / Last Occurrence Indexing.
@@ -197,6 +203,7 @@ return total_sum
 
 ## 7. Swap Game
 
+- **Tier**: Tier 2
 - **Link**: [Swap Game](https://cses.fi/problemset/task/1670)
 - **Problem Statement**: Given a $3 \times 3$ grid containing numbers 1 to 9, find the minimum number of adjacent cell swaps required to reach the target grid (row-major order 1 to 9).
 - **Interview Pattern**: BFS State-Space Search / Permutation Hash.
@@ -229,6 +236,7 @@ while queue not empty:
 
 ## 8. Maximum Building I
 
+- **Tier**: Tier 2
 - **Link**: [Maximum Building I](https://cses.fi/problemset/task/1147)
 - **Problem Statement**: Given an $N \times M$ grid of forest trees (`*`) and empty spaces (`.`), find the maximum area of a rectangular building that can be built on empty spaces.
 - **Interview Pattern**: 2D Grid Monotonic Stack (Histogram Expansion per Row).
@@ -260,6 +268,7 @@ return max_area
 
 ## 9. Sorting Methods
 
+- **Tier**: Tier 2
 - **Link**: [Sorting Methods](https://cses.fi/problemset/task/1162)
 - **Problem Statement**: Calculate the minimum number of operations required to sort a permutation of $1 \dots N$ using 4 different operation types: (1) Swap any adjacent, (2) Swap any pair, (3) Move element to end, (4) Move element to front.
 - **Interview Pattern**: Permutation Inversions, Cycle Decomposition, LIS, LNDS.
@@ -271,14 +280,28 @@ return max_area
 - **Step-by-Step Interview Walkthrough**:
   1. Op 1: Count inversions using Fenwick Tree / Merge Sort.
   2. Op 2: Find cycle components in permutation graph; result = $N - C$.
-  3. Op 3: Find longest subsegment of values $1, 2, 3, \dots$ appearing in relative order; result = $N - \text{length}$.
-  4. Op 4: Find longest subsegment of values $\dots, N-1, N$ appearing in relative order; result = $N - \text{length}$.
+  3. Op 3: Find longest increasing subsequence; result = $N - \text{LIS}$.
+  4. Op 4: Find longest increasing consecutive subsegment of values; result = $N - \max(\text{dp})$.
+- **Pseudocode**:
+```text
+function sorting_methods(arr, N):
+    op1 = count_inversions(arr)
+    op2 = N - count_disjoint_cycles(arr)
+    op3 = N - length_of_LIS(arr)
+    
+    dp = [0] * (N + 1)
+    for x in arr: dp[x] = dp[x - 1] + 1
+    op4 = N - max(dp)
+    
+    return op1, op2, op3, op4
+```
 - **Complexity**: Time: $\mathcal{O}(N \log N)$, Space: $\mathcal{O}(N)$.
 
 ---
 
 ## 10. Cyclic Array
 
+- **Tier**: Tier 3
 - **Link**: [Cyclic Array](https://cses.fi/problemset/task/1191)
 - **Problem Statement**: Given a cyclic array of $N$ integers and a sum limit $K$, partition the cyclic array into minimum number of contiguous subarrays such that each subarray sum $\le K$.
 - **Interview Pattern**: Binary Lifting on Functional Jump Graph (Doubling).
@@ -315,6 +338,7 @@ return min_subarrays
 
 ## 11. Special Substrings
 
+- **Tier**: Tier 3
 - **Link**: [Special Substrings](https://cses.fi/problemset/task/2186)
 - **Problem Statement**: Given a string $S$, count the number of non-empty substrings in which all distinct characters present in $S$ appear with equal frequency.
 - **Interview Pattern**: Difference Relative Frequency Map / Prefix Hash.
@@ -345,6 +369,7 @@ return ans
 
 ## 12. Writing Numbers
 
+- **Tier**: Tier 2
 - **Link**: [Writing Numbers](https://cses.fi/problemset/task/1086)
 - **Problem Statement**: You have $N$ ones available. You write numbers $1, 2, 3, \dots$ in sequence. Find the maximum integer $X$ you can write before running out of ones.
 - **Interview Pattern**: Binary Search on Answer + Digit DP / Digit Counting.
@@ -382,6 +407,7 @@ return ans
 
 ## 13. Permutation Subsequence
 
+- **Tier**: Tier 2
 - **Link**: [Permutation Subsequence](https://cses.fi/problemset/task/2215)
 - **Problem Statement**: Given a permutation of $1 \dots N$, find the length of the longest subsequence that can be formed such that elements are in strictly increasing order and values differ by 1.
 - **Interview Pattern**: Index-Map Dynamic Programming.
@@ -410,6 +436,7 @@ return max_len
 
 ## 14. Subarray Sum Constraints
 
+- **Tier**: Tier 3
 - **Link**: [Subarray Sum Constraints](https://cses.fi/problemset/task/2414)
 - **Problem Statement**: Given subarray sum constraints, determine if there exists a non-negative array satisfying all constraints.
 - **Interview Pattern**: Prefix Sum Graph / Constraint Graph 2-Coloring.
@@ -420,12 +447,27 @@ return max_len
   1. Model prefix sums $P[i]$ as graph nodes.
   2. Add weighted edge between $l-1$ and $r$ with value $S$.
   3. Check bipartite/component consistency via DFS: `P[v] = P[u] + weight`.
+- **Pseudocode**:
+```text
+function check_constraints(constraints, N):
+    for (l, r, S) in constraints:
+        adj[l - 1].push((r, S))
+        adj[r].push((l - 1, -S))
+    
+    visited[0..N] = false
+    for i = 0 to N:
+        if not visited[i]:
+            P[i] = 0
+            if not dfs_assign(i): return "NO"
+    return "YES"
+```
 - **Complexity**: Time: $\mathcal{O}(N + M)$, Space: $\mathcal{O}(N + M)$.
 
 ---
 
 ## 15. Subsets with Fixed Average
 
+- **Tier**: Tier 3
 - **Link**: [Subsets with Fixed Average](https://cses.fi/problemset/task/2425)
 - **Problem Statement**: Count non-empty subsets of an array whose average equals $A$.
 - **Interview Pattern**: Target Shifted Subset Sum DP.
@@ -436,12 +478,26 @@ return max_len
   1. Shift all elements $B[i] = A[i] - K$.
   2. Run 0/1 Knapsack DP to count ways to achieve sum 0 using elements of $B$.
   3. Subtract 1 to exclude empty set.
+- **Pseudocode**:
+```text
+function subsets_fixed_average(A, target_avg):
+    dp = map() // sum -> ways
+    dp[0] = 1
+    for x in A:
+        val = x - target_avg
+        next_dp = copy(dp)
+        for (s, ways) in dp:
+            next_dp[s + val] += ways
+        dp = next_dp
+    return dp[0] - 1
+```
 - **Complexity**: Time: $\mathcal{O}(N \cdot \text{MaxSum})$, Space: $\mathcal{O}(\text{MaxSum})$.
 
 ---
 
 ## 16. Two Array Average
 
+- **Tier**: Tier 3
 - **Link**: [Two Array Average](https://cses.fi/problemset/task/2426)
 - **Problem Statement**: Given two arrays $A$ and $B$, select $K$ indices to maximize the ratio $\sum A_i / \sum B_i$.
 - **Interview Pattern**: Binary Search on Ratio (Dinkelbach's Algorithm).
@@ -453,4 +509,16 @@ return max_len
   2. Evaluate $\text{mid}$: compute $W_i = A_i - \text{mid} \times B_i$.
   3. Sort $W_i$ descending and sum top $K$.
   4. If sum $\ge 0$, set $\text{low} = \text{mid}$; else $\text{high} = \text{mid}$.
+- **Pseudocode**:
+```text
+function max_two_array_average(A, B, K):
+    low = 0.0, high = 1e6
+    for iter = 1 to 60:
+        mid = (low + high) / 2
+        W = [A[i] - mid * B[i] for i in 0..N-1]
+        sort(W, descending=True)
+        if sum(W[0..K-1]) >= 0: low = mid
+        else: high = mid
+    return low
+```
 - **Complexity**: Time: $\mathcal{O}(N \log N \cdot \log(\text{precision}))$, Space: $\mathcal{O}(N)$.

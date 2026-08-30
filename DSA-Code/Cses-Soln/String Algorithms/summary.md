@@ -6,6 +6,7 @@ This document contains **problem statements, interview-style explanations, intui
 
 ## 1. String Matching
 
+- **Tier**: Tier 1
 - **Link**: [String Matching](https://cses.fi/problemset/task/1753)
 - **Problem Statement**: Given a string $S$ of length $N$ and a pattern $P$ of length $M$, count the number of occurrences of pattern $P$ as a substring in $S$.
 - **Interview Pattern**: KMP (Knuth-Morris-Pratt) / Z-Algorithm / String Hashing.
@@ -29,6 +30,7 @@ return ans
 
 ## 2. Finding Borders
 
+- **Tier**: Tier 2
 - **Link**: [Finding Borders](https://cses.fi/problemset/task/1732)
 - **Problem Statement**: Given a string $S$, find all lengths $L > 0$ such that the prefix of length $L$ equals the suffix of length $L$ (excluding the full string length $N$).
 - **Interview Pattern**: KMP Prefix Function Iteration / Polynomial Rolling Hash.
@@ -59,6 +61,7 @@ return borders
 
 ## 3. Finding Periods
 
+- **Tier**: Tier 2
 - **Link**: [Finding Periods](https://cses.fi/problemset/task/1733)
 - **Problem Statement**: A string $S$ has period $L$ if $S[i] = S[i + L]$ for all valid indices. Find all possible period lengths $L > 0$ of string $S$.
 - **Interview Pattern**: Z-Algorithm / String Hashing.
@@ -82,6 +85,7 @@ print N
 
 ## 4. Minimal Rotation
 
+- **Tier**: Tier 2
 - **Link**: [Minimal Rotation](https://cses.fi/problemset/task/1110)
 - **Problem Statement**: Given a string $S$, find its lexicographically smallest cyclic shift (rotation).
 - **Interview Pattern**: Booth's Algorithm ($\mathcal{O}(N)$ Lexicographical Minimum Rotation).
@@ -113,6 +117,7 @@ return T[best_start .. best_start + N - 1]
 
 ## 5. Longest Palindrome
 
+- **Tier**: Tier 2
 - **Link**: [Longest Palindrome](https://cses.fi/problemset/task/1111)
 - **Problem Statement**: Given a string $S$, find the longest palindromic substring in $S$.
 - **Interview Pattern**: Manacher's Algorithm ($\mathcal{O}(N)$ Palindrome Centers).
@@ -137,6 +142,7 @@ return extract_original_substring(S, best_center, P[best_center])
 
 ## 6. Repeating Substring
 
+- **Tier**: Tier 3
 - **Link**: [Repeating Substring](https://cses.fi/problemset/task/2106)
 - **Problem Statement**: Given a string $S$, find the longest substring that appears at least twice as a substring in $S$, or output -1 if none.
 - **Interview Pattern**: Suffix Array + LCP (Longest Common Prefix) Array.
@@ -162,6 +168,7 @@ return S[SA[best_idx] .. SA[best_idx] + LCP[best_idx] - 1]
 
 ## 7. All Palindromes
 
+- **Tier**: Tier 2
 - **Link**: [All Palindromes](https://cses.fi/problemset/task/2110)
 - **Problem Statement**: Given a string $S$, count the total number of distinct palindromic substrings.
 - **Interview Pattern**: Palindromic Tree (EERTREE) / Suffix Automaton + Manacher.
@@ -185,6 +192,7 @@ return eertree.num_nodes - 2
 
 ## 8. Word Combinations
 
+- **Tier**: Tier 2
 - **Link**: [Word Combinations](https://cses.fi/problemset/task/1731)
 - **Problem Statement**: Given a target string $S$ of length $N$ and a dictionary of $K$ words, count the number of ways to construct $S$ by concatenating words from the dictionary modulo $10^9+7$.
 - **Interview Pattern**: Trie-Optimized 1D Dynamic Programming.
@@ -220,6 +228,7 @@ return dp[N]
 
 ## 9. String Functions
 
+- **Tier**: Tier 2
 - **Link**: [String Functions](https://cses.fi/problemset/task/2107)
 - **Problem Statement**: Given a string $S$ of length $N$, compute both the KMP Prefix Function $\pi$ and the Z-Algorithm Array $Z$.
 - **Interview Pattern**: KMP $\pi$-Array + Z-Array Algorithms.
@@ -243,6 +252,7 @@ print pi
 
 ## 10. Palindrome Queries
 
+- **Tier**: Tier 3
 - **Link**: [Palindrome Queries](https://cses.fi/problemset/task/2420)
 - **Problem Statement**: Given a string $S$, process $Q$ queries: (1) update character at index $k$ to $c$, (2) check if substring $S[l \dots r]$ is a palindrome.
 - **Interview Pattern**: Dual Segment Trees / Fenwick Trees with Polynomial Rolling Hash.
@@ -269,6 +279,7 @@ function is_palindrome(l, r):
 
 ## 11. Distinct Subsequences
 
+- **Tier**: Tier 3
 - **Link**: [Distinct Subsequences](https://cses.fi/problemset/task/2108)
 - **Problem Statement**: Given a string $S$, count the total number of distinct subsequences modulo $10^9+7$.
 - **Interview Pattern**: Dynamic Programming with Last Occurrence Tracking.

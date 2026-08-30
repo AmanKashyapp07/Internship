@@ -6,6 +6,7 @@ This document contains **problem statements, interview-style explanations, intui
 
 ## 1. Hamming Distance
 
+- **Tier**: Tier 2
 - **Link**: [Hamming Distance](https://cses.fi/problemset/task/2136)
 - **Problem Statement**: Given $N$ binary strings of length $K$, find the minimum Hamming distance (number of differing bits) between any pair of strings.
 - **Interview Pattern**: Bitmask XOR + Fast Hardware Popcount.
@@ -37,6 +38,7 @@ return min_dist
 
 ## 2. Meet in the Middle
 
+- **Tier**: Tier 2
 - **Link**: [Meet in the Middle](https://cses.fi/problemset/task/1628)
 - **Problem Statement**: Given an array of $N$ integers and a target sum $X$, count the number of subsets whose elements sum up to exactly $X$. ($N \le 40$).
 - **Interview Pattern**: Meet-in-the-Middle ($2^{N/2}$ Search Space Reduction).
@@ -70,6 +72,7 @@ return ans
 
 ## 3. Corner Subgrid Check
 
+- **Tier**: Tier 2
 - **Link**: [Corner Subgrid Check](https://cses.fi/problemset/task/3360)
 - **Problem Statement**: Given an $N \times N$ grid of characters, for each of $K$ target uppercase letters, check if there exists a $2 \times 2$ corner subgrid (4 cells forming a rectangle) containing that letter.
 - **Interview Pattern**: Column-Pair Hash Map / Boolean Matrix Sweep.
@@ -102,6 +105,7 @@ for char L in target_letters:
 
 ## 4. Corner Subgrid Count
 
+- **Tier**: Tier 2
 - **Link**: [Corner Subgrid Count](https://cses.fi/problemset/task/2137)
 - **Problem Statement**: Given an $N \times N$ binary grid, count the total number of $2 \times 2$ corner subgrids with 1s at all 4 corners.
 - **Interview Pattern**: Bitset Row AND + Combinatorial $\binom{C}{2}$.
@@ -131,6 +135,7 @@ return ans
 
 ## 5. Eulerian Subgraphs
 
+- **Tier**: Tier 3
 - **Link**: [Eulerian Subgraphs](https://cses.fi/problemset/task/2078)
 - **Problem Statement**: Given an undirected graph with $N$ nodes and $M$ edges, count the number of Eulerian subgraphs (subsets of edges where every vertex has an even degree) modulo $10^9+7$.
 - **Interview Pattern**: Linear Algebra over GF(2) / Graph Connected Components.
@@ -154,6 +159,7 @@ return power(2, exponent, 10^9 + 7)
 
 ## 6. Necessary Cities
 
+- **Tier**: Tier 3
 - **Link**: [Necessary Cities](https://cses.fi/problemset/task/2077)
 - **Problem Statement**: Given a connected undirected graph of $N$ cities and $M$ roads, find all articulation points (cities whose removal disconnects the graph).
 - **Interview Pattern**: Tarjan's Articulation Points Algorithm via DFS.
@@ -187,6 +193,7 @@ function dfs(u, parent):
 
 ## 7. Necessary Roads
 
+- **Tier**: Tier 3
 - **Link**: [Necessary Roads](https://cses.fi/problemset/task/2076)
 - **Problem Statement**: Given a connected undirected graph of $N$ cities and $M$ roads, find all bridges (roads whose removal disconnects the graph).
 - **Interview Pattern**: Tarjan's Bridge-Finding Algorithm via DFS.
@@ -214,6 +221,7 @@ function dfs(u, parent):
 
 ## 8. New Roads Queries
 
+- **Tier**: Tier 3
 - **Link**: [New Roads Queries](https://cses.fi/problemset/task/2101)
 - **Problem Statement**: $M$ roads are built sequentially day by day. Process $Q$ queries asking for the earliest day $u$ and $v$ become connected.
 - **Interview Pattern**: Parallel Binary Search + Disjoint Set Union (DSU).
@@ -246,6 +254,7 @@ while any lo[i] < hi[i]:
 
 ## 9. Reachability Queries
 
+- **Tier**: Tier 3
 - **Link**: [Reachability Queries](https://cses.fi/problemset/task/2143)
 - **Problem Statement**: Given a directed graph of $N$ nodes and $M$ edges, process $Q$ reachability queries asking if node $a$ can reach node $b$.
 - **Interview Pattern**: Kosaraju SCC Condensation + Bitset Reachability on DAG.
@@ -276,6 +285,7 @@ function query(a, b):
 
 ## 10. Reachable Nodes
 
+- **Tier**: Tier 3
 - **Link**: [Reachable Nodes](https://cses.fi/problemset/task/2138)
 - **Problem Statement**: Given a Directed Acyclic Graph (DAG) of $N$ nodes and $M$ edges, calculate for every node $u$ the total number of reachable nodes.
 - **Interview Pattern**: Topological Sort + Bitset DP Propagation.
@@ -306,6 +316,7 @@ for u = 1 to N:
 
 ## 11. Substring Reversals
 
+- **Tier**: Tier 3
 - **Link**: [Substring Reversals](https://cses.fi/problemset/task/2073)
 - **Problem Statement**: Given a string $S$ of length $N$, process $M$ range operations where substring $S[l \dots r]$ is reversed. Print the final string.
 - **Interview Pattern**: Implicit Treap with Lazy Reversal Propagation.
@@ -334,6 +345,7 @@ print_inorder(root)
 
 ## 12. Reversals and Sums
 
+- **Tier**: Tier 3
 - **Link**: [Reversals and Sums](https://cses.fi/problemset/task/2074)
 - **Problem Statement**: Given an array of $N$ integers, process $M$ queries: (1) Reverse subarray $[l, r]$, (2) Calculate sum of subarray $[l, r]$.
 - **Interview Pattern**: Implicit Treap with Lazy Reversal + Augmented Subtree Sum.
@@ -360,6 +372,7 @@ for query (type, l, r):
 
 ## 13. Cut and Paste
 
+- **Tier**: Tier 3
 - **Link**: [Cut and Paste](https://cses.fi/problemset/task/2072)
 - **Problem Statement**: Given a string $S$ of length $N$, process $M$ operations: cut substring $S[l \dots r]$ and paste it at the end of the string. Print final string.
 - **Interview Pattern**: Implicit Treap Split and Merge Reordering.

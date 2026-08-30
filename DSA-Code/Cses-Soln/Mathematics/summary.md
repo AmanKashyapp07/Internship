@@ -1,11 +1,12 @@
 # CSES Mathematics - Self-Contained Interview Cheat Sheet
 
-This document contains **problem statements, interview-style explanations, intuitive breakdowns, step-by-step algorithms, structured pseudocode, and complexity analysis** for all 21 problems in the **Mathematics** topic.
+This document contains **problem statements, interview-style explanations, intuitive breakdowns, step-by-step algorithms, structured pseudocode, and complexity analysis** for all 16 problems in the **Mathematics** topic.
 
 ---
 
 ## 1. Exponentiation
 
+- **Tier**: Tier 1
 - **Link**: [Exponentiation](https://cses.fi/problemset/task/1095)
 - **Problem Statement**: Calculate $a^b \pmod{10^9+7}$ for $N$ test cases.
 - **Interview Pattern**: Binary Exponentiation (Square-and-Multiply).
@@ -35,6 +36,7 @@ function power(a, b):
 
 ## 2. Exponentiation II
 
+- **Tier**: Tier 2
 - **Link**: [Exponentiation II](https://cses.fi/problemset/task/1712)
 - **Problem Statement**: Calculate $a^{(b^c)} \pmod{10^9+7}$ for $N$ test cases.
 - **Interview Pattern**: Double Modular Exponentiation via Fermat's Little Theorem.
@@ -58,6 +60,7 @@ return ans
 
 ## 3. Counting Divisors
 
+- **Tier**: Tier 1
 - **Link**: [Counting Divisors](https://cses.fi/problemset/task/1713)
 - **Problem Statement**: Given $N$ queries, find the total number of divisors of integer $x_i$ ($x_i \le 10^6$).
 - **Interview Pattern**: Sieve-Style Precomputation / Harmonic Series Sweep.
@@ -82,6 +85,7 @@ for query x:
 
 ## 4. Common Divisors
 
+- **Tier**: Tier 2
 - **Link**: [Common Divisors](https://cses.fi/problemset/task/1081)
 - **Problem Statement**: Given an array of $N$ positive integers, find the maximum Greatest Common Divisor (GCD) shared by at least two numbers in the array.
 - **Interview Pattern**: Frequency Array + Divisor Sieve Sweep.
@@ -110,6 +114,7 @@ for d = 10^6 down to 1:
 
 ## 5. Next Prime
 
+- **Tier**: Tier 2
 - **Link**: [Next Prime](https://cses.fi/problemset/task/3396)
 - **Problem Statement**: Given $N$ queries $n_i$, find the smallest prime number strictly greater than $n_i$.
 - **Interview Pattern**: Trial Division Primality Test + Linear Odd-Step Search.
@@ -143,6 +148,7 @@ return x
 
 ## 6. Binomial Coefficients
 
+- **Tier**: Tier 1
 - **Link**: [Binomial Coefficients](https://cses.fi/problemset/task/1079)
 - **Problem Statement**: Calculate $\binom{a}{b} = \frac{a!}{b!(a-b)!} \pmod{10^9+7}$ for $N$ queries ($a, b \le 10^6$).
 - **Interview Pattern**: Precomputed Factorials and Inverse Factorials.
@@ -170,6 +176,7 @@ function nCr(a, b):
 
 ## 7. Bracket Sequences I
 
+- **Tier**: Tier 2
 - **Link**: [Bracket Sequences I](https://cses.fi/problemset/task/2064)
 - **Problem Statement**: Count the number of valid bracket sequences of length $N$ modulo $10^9+7$.
 - **Interview Pattern**: Catalan Numbers $C_k = \frac{1}{k+1} \binom{2k}{k}$.
@@ -194,6 +201,7 @@ return ans
 
 ## 8. Christmas Party
 
+- **Tier**: Tier 2
 - **Link**: [Christmas Party](https://cses.fi/problemset/task/1717)
 - **Problem Statement**: $N$ children exchange gifts such that no child receives their own gift. Count the total valid gift assignments (derangements $D_N$) modulo $10^9+7$.
 - **Interview Pattern**: Derangement Recurrence $D_n = (n-1)(D_{n-1} + D_{n-2})$.
@@ -224,6 +232,7 @@ return d1
 
 ## 9. Creating Strings II
 
+- **Tier**: Tier 1
 - **Link**: [Creating Strings II](https://cses.fi/problemset/task/1715)
 - **Problem Statement**: Given a string $S$ of length $N$ containing repeating characters, count the number of distinct permutations of the string modulo $10^9+7$.
 - **Interview Pattern**: Multinomial Coefficient $\frac{N!}{\prod (f_c!)}$.
@@ -247,6 +256,7 @@ return ans
 
 ## 10. Distributing Apples
 
+- **Tier**: Tier 1
 - **Link**: [Distributing Apples](https://cses.fi/problemset/task/1716)
 - **Problem Statement**: Count the number of ways to distribute $M$ identical apples to $N$ children modulo $10^9+7$.
 - **Interview Pattern**: Stars and Bars Theorem $\binom{N + M - 1}{M}$.
@@ -264,38 +274,9 @@ return fact[K] * invFact[M] % MOD * invFact[N - 1] % MOD
 
 ---
 
-## 11. Divisor Analysis
+## 11. Fibonacci Numbers
 
-- **Link**: [Divisor Analysis](https://cses.fi/problemset/task/2182)
-- **Problem Statement**: Given prime factorization of $N = \prod p_i^{k_i}$, compute: (1) total number of divisors, (2) sum of divisors, (3) product of divisors modulo $10^9+7$.
-- **Interview Pattern**: Multiplicative Number Theory Formulas + Fermat's Exponent Reduction.
-- **Intuition**:
-  - Number of divisors: $d(N) = \prod (k_i + 1) \pmod{\text{MOD}}$.
-  - Sum of divisors: $\sigma(N) = \prod \frac{p_i^{k_i+1} - 1}{p_i - 1} \pmod{\text{MOD}}$.
-  - Product of divisors: $P(N) = N^{d(N)/2} \pmod{\text{MOD}}$. Compute exponent using Fermat's theorem modulo $(\text{MOD}-1)$.
-- **Step-by-Step Interview Walkthrough**:
-  1. Compute $d(N)$ modulo $\text{MOD}$.
-  2. Compute $\sigma(N)$ using geometric series formula for each prime factor.
-  3. Compute product of divisors maintaining running exponent modulo $(\text{MOD}-1)$.
-- **Pseudocode**:
-```text
-num = 1, sum_div = 1, prod_div = 1, num_mod_phi = 1
-for (p, k) in prime_factors:
-    num = num * (k + 1) % MOD
-    geom = (power(p, k + 1) - 1) * power(p - 1, MOD - 2) % MOD
-    sum_div = sum_div * geom % MOD
-    
-    tri = k * (k + 1) / 2 % (MOD - 1)
-    exp = num_mod_phi * tri % (MOD - 1)
-    prod_div = power(prod_div, k + 1) * power(p, exp) % MOD
-    num_mod_phi = num_mod_phi * (k + 1) % (MOD - 1)
-```
-- **Complexity**: Time: $\mathcal{O}(N \log \text{MOD})$, Space: $\mathcal{O}(1)$.
-
----
-
-## 12. Fibonacci Numbers
-
+- **Tier**: Tier 2
 - **Link**: [Fibonacci Numbers](https://cses.fi/problemset/task/1722)
 - **Problem Statement**: Compute the $N$-th Fibonacci number $F_N$ modulo $10^9+7$ for $N \le 10^{18}$.
 - **Interview Pattern**: Fast Doubling Fibonacci Method.
@@ -324,8 +305,9 @@ function fib(n):
 
 ---
 
-## 13. Graph Paths I
+## 12. Graph Paths I
 
+- **Tier**: Tier 2
 - **Link**: [Graph Paths I](https://cses.fi/problemset/task/1723)
 - **Problem Statement**: Given a directed graph with $N$ nodes and $M$ edges, count the number of paths of length $K$ from node 1 to node $N$ modulo $10^9+7$.
 - **Interview Pattern**: Adjacency Matrix Exponentiation.
@@ -345,8 +327,9 @@ return P[0][N-1]
 
 ---
 
-## 14. Permutation Order
+## 13. Permutation Order
 
+- **Tier**: Tier 2
 - **Link**: [Permutation Order](https://cses.fi/problemset/task/3397)
 - **Problem Statement**: Process two query types: (1) Find the $K$-th lexicographical permutation of $1 \dots N$, (2) Find the 1-based lexicographical rank of a given permutation.
 - **Interview Pattern**: Factorial Number System (Lehmer Code).
@@ -372,8 +355,9 @@ function kth_permutation(n, k):
 
 ---
 
-## 15. Permutation Rounds
+## 14. Permutation Rounds
 
+- **Tier**: Tier 2
 - **Link**: [Permutation Rounds](https://cses.fi/problemset/task/3398)
 - **Problem Statement**: Given a permutation $A$ of $1 \dots N$, find the minimum number of rounds of applying $A$ until all elements return to their initial positions modulo $10^9+7$.
 - **Interview Pattern**: Disjoint Cycle Decomposition + LCM over Prime Factorization.
@@ -402,8 +386,9 @@ return lcm
 
 ---
 
-## 16. Prime Multiples
+## 15. Prime Multiples
 
+- **Tier**: Tier 3
 - **Link**: [Prime Multiples](https://cses.fi/problemset/task/2185)
 - **Problem Statement**: Given an integer $N$ and $K$ prime numbers, count how many integers in $1 \dots N$ are divisible by at least one of the given primes ($K \le 20$).
 - **Interview Pattern**: Inclusion-Exclusion Principle over Bitmask Subsets.
@@ -432,73 +417,9 @@ return ans
 
 ---
 
-## 17. Sum of Divisors
+## 16. Throwing Dice
 
-- **Link**: [Sum of Divisors](https://cses.fi/problemset/task/1082)
-- **Problem Statement**: Calculate $\sum_{i=1}^{N} \sigma(i) \pmod{10^9+7}$, where $\sigma(i)$ is the sum of all divisors of $i$ ($N \le 10^{12}$).
-- **Interview Pattern**: Quotient Range Decomposition (Square Root Decomposition).
-- **Intuition**:
-  - Rewriting sum: $\sum_{i=1}^{N} \sigma(i) = \sum_{d=1}^{N} d \cdot \lfloor N / d \rfloor$.
-  - The value of $q = \lfloor N / d \rfloor$ remains constant over continuous ranges $[l, r]$.
-  - There are at most $2\sqrt{N}$ distinct quotient values!
-- **Step-by-Step Interview Walkthrough**:
-  1. Initialize $l = 1$, `total_sum = 0`.
-  2. While $l \le N$:
-     - Quotient $q = \lfloor N / l \rfloor$.
-     - Range end $r = \lfloor N / q \rfloor$.
-     - Sum of $d$ in range $[l, r]$ is arithmetic progression sum $\frac{(l + r)(r - l + 1)}{2} \pmod{\text{MOD}}$.
-     - `total_sum += q * sum_range % MOD`.
-     - Jump $l = r + 1$.
-- **Pseudocode**:
-```text
-l = 1, ans = 0
-while l <= N:
-    q = N / l
-    r = N / q
-    count = (r - l + 1) % MOD
-    sum_range = (l + r) % MOD * count % MOD * INV2 % MOD
-    ans = (ans + (q % MOD) * sum_range) % MOD
-    l = r + 1
-return ans
-```
-- **Complexity**: Time: $\mathcal{O}(\sqrt{N})$, Space: $\mathcal{O}(1)$.
-
----
-
-## 18. Sum of Four Squares
-
-- **Link**: [Sum of Four Squares](https://cses.fi/problemset/task/3355)
-- **Problem Statement**: Given $N$, express $N$ as the sum of 4 squares $N = a^2 + b^2 + c^2 + d^2$ (Lagrange's Four-Square Theorem).
-- **Interview Pattern**: Precomputed 2-Square Lookup Table + Meet-in-the-Middle Splitting.
-- **Intuition**:
-  - By Lagrange's Theorem, every non-negative integer can be written as the sum of 4 squares.
-  - Precompute 2-square representation table `twoSq[s] = {a, b}` for all $s \le 10^7$.
-  - Split $N = s + (N - s)$ and find $s$ such that both $s$ and $N - s$ can be represented as sums of 2 squares.
-- **Step-by-Step Interview Walkthrough**:
-  1. Precompute `twoSq[a^2 + b^2] = {a, b}` for all $a \le b \le \sqrt{MAX}$.
-  2. For query $N$: iterate $s$ from 0 to $N$:
-     - If both `twoSq[s]` and `twoSq[N - s]` exist:
-       - Retrieve $\{a, b\} = \text{twoSq}[s]$ and $\{c, d\} = \text{twoSq}[N - s]$.
-       - Return $\{a, b, c, d\}$.
-- **Pseudocode**:
-```text
-// Precomputation
-for a = 0 to sqrt(MAX):
-    for b = a to sqrt(MAX):
-        s = a*a + b*b
-        if s <= MAX and twoSq[s] empty: twoSq[s] = {a, b}
-
-// Query
-for s = 0 to N:
-    if twoSq[s] and twoSq[N - s]:
-        return {twoSq[s].a, twoSq[s].b, twoSq[N-s].a, twoSq[N-s].b}
-```
-- **Complexity**: Time: $\mathcal{O}(MAX + T \cdot N)$, Space: $\mathcal{O}(MAX)$.
-
----
-
-## 19. Throwing Dice
-
+- **Tier**: Tier 2
 - **Link**: [Throwing Dice](https://cses.fi/problemset/task/1096)
 - **Problem Statement**: Count ways to reach sum $N$ by throwing a 6-sided die modulo $10^9+7$ ($N \le 10^{18}$).
 - **Interview Pattern**: $6 \times 6$ Matrix Exponentiation on Linear Recurrence.
@@ -526,64 +447,3 @@ return ans
 - **Complexity**: Time: $\mathcal{O}(6^3 \log N)$, Space: $\mathcal{O}(6^2)$.
 
 ---
-
-## 20. Triangle Number Sums
-
-- **Link**: [Triangle Number Sums](https://cses.fi/problemset/task/3406)
-- **Problem Statement**: Find the minimum number of triangular numbers ($T_k = k(k+1)/2$) needed to sum to $N$.
-- **Interview Pattern**: Gauss's Triangular Number Theorem + Two Pointers.
-- **Intuition**:
-  - Gauss's Eureka theorem states every integer is the sum of at most 3 triangular numbers!
-  - Answer is always 1, 2, or 3.
-  - Test 1: binary search in precomputed triangular numbers.
-  - Test 2: two pointers on precomputed triangular numbers array.
-  - Otherwise: answer is 3.
-- **Step-by-Step Interview Walkthrough**:
-  1. Precompute all triangular numbers $T_k \le 10^{12}$.
-  2. If $N \in T$, return 1.
-  3. Run Two Pointers (`left = 0`, `right = max_index`): if $T_{\text{left}} + T_{\text{right}} == N$, return 2.
-  4. Otherwise, return 3.
-- **Pseudocode**:
-```text
-if N in triangular_list: return 1
-
-left = 0, right = upper_bound(N) - 1
-while left <= right:
-    s = T[left] + T[right]
-    if s == N: return 2
-    else if s < N: left += 1
-    else: right -= 1
-
-return 3
-```
-- **Complexity**: Time: $\mathcal{O}(\sqrt{N} + T \cdot \sqrt{N})$, Space: $\mathcal{O}(\sqrt{N})$.
-
----
-
-## 21. Counting Coprime Pairs
-
-- **Link**: [Counting Coprime Pairs](https://cses.fi/problemset/task/2417)
-- **Problem Statement**: Given an array of $N$ integers, count the number of pairs $(A[i], A[j])$ with $i < j$ such that $\gcd(A[i], A[j]) = 1$.
-- **Interview Pattern**: Inclusion-Exclusion on Exact GCDs (Backward Frequency Inversion).
-- **Intuition**:
-  - For candidate GCD $d$, count naive pairs $P(d) = \binom{c_d}{2}$ where $c_d$ is total multiples of $d$.
-  - Exact GCD count $E[d] = P(d) - \sum_{m = 2d, 3d, \dots} E[m]$.
-  - Desired coprime pair count is $E[1]$.
-- **Step-by-Step Interview Walkthrough**:
-  1. Compute frequency array of input numbers.
-  2. For $d = \text{MAX}$ down to 1:
-     - Count total multiples $c_d$.
-     - Set $E[d] = c_d \times (c_d - 1) / 2$.
-     - Subtract exact counts of strict multiples: $E[d] = E[d] - \sum_{m=2d, 3d, \dots} E[m]$.
-  3. Output $E[1]$.
-- **Pseudocode**:
-```text
-for d = MAX down to 1:
-    multiples = sum(freq[m] for m in d, 2d, 3d...)
-    E[d] = multiples * (multiples - 1) / 2
-    for m in 2d, 3d, 4d...:
-        E[d] -= E[m]
-
-return E[1]
-```
-- **Complexity**: Time: $\mathcal{O}(MAX \log MAX + N)$, Space: $\mathcal{O}(MAX)$.

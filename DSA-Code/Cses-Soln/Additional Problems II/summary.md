@@ -6,6 +6,7 @@ This document contains **problem statements, interview-style explanations, intui
 
 ## 1. Book Shop II
 
+- **Tier**: Tier 2
 - **Link**: [Book Shop II](https://cses.fi/problemset/task/1159)
 - **Problem Statement**: Given $N$ book types where each book type has price $h_i$, page count $s_i$, and copy limit $k_i$, find the maximum total pages you can buy with total budget $X$.
 - **Interview Pattern**: Bounded Knapsack with Binary Decomposition.
@@ -42,6 +43,7 @@ return dp[X]
 
 ## 2. Coin Grid
 
+- **Tier**: Tier 3
 - **Link**: [Coin Grid](https://cses.fi/problemset/task/1709)
 - **Problem Statement**: Given an $N \times N$ grid containing coins at certain cells, find the minimum number of row/column sweep operations (and which ones) to clear all coins from the grid.
 - **Interview Pattern**: Minimum Vertex Cover in Bipartite Graph (König's Theorem).
@@ -74,6 +76,7 @@ return min_vertex_cover
 
 ## 3. GCD Subsets
 
+- **Tier**: Tier 3
 - **Link**: [GCD Subsets](https://cses.fi/problemset/task/2417)
 - **Problem Statement**: Given an array of $N$ positive integers, count the number of non-empty subsets whose Greatest Common Divisor (GCD) is exactly 1.
 - **Interview Pattern**: Inclusion-Exclusion on Multiple Counts / Mobius Inversion.
@@ -106,6 +109,7 @@ return exact[1]
 
 ## 4. Increasing Array II
 
+- **Tier**: Tier 3
 - **Link**: [Increasing Array II](https://cses.fi/problemset/task/2132)
 - **Problem Statement**: Given an array of $N$ integers, find the minimum total cost of operations (incrementing or decrementing any element by 1) to make the array non-decreasing.
 - **Interview Pattern**: Slope Trick / Priority Queue Greedy.
@@ -141,6 +145,7 @@ return total_cost
 
 ## 5. School Excursion
 
+- **Tier**: Tier 2
 - **Link**: [School Excursion](https://cses.fi/problemset/task/1707)
 - **Problem Statement**: Given $N$ students and $M$ pairs who want to be in the same group, partition students into connected components of sizes $S_1, S_2, \dots, S_k$. Determine all target capacity values $K \in [1, N]$ that can be formed by a subset of these group sizes.
 - **Interview Pattern**: DSU Component Sizes + Bitset 0/1 Subset Sum Knapsack.
@@ -172,6 +177,7 @@ for k = 1 to N:
 
 ## 6. Stick Divisions
 
+- **Tier**: Tier 2
 - **Link**: [Stick Divisions](https://cses.fi/problemset/task/1161)
 - **Problem Statement**: You have a stick of length $X$ that needs to be divided into $N$ sticks of given lengths $L_1, L_2, \dots, L_N$. The cost of splitting a stick of length $S$ into two is $S$. Find the minimum total cost to obtain all $N$ sticks.
 - **Interview Pattern**: Reverse Huffman Coding / Min-Heap Greedy.

@@ -1,6 +1,6 @@
 # Master Problem Summary & Complexity Reference (Notebooks 1–10)
 
-A unified reference catalog of **279 unique Data Structures & Algorithms problems** implemented across `notebook-1.cpp` through `notebook-10.cpp` (all duplicates and prior sorting implementations consolidated exclusively into Notebook 10). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A unified reference catalog of **278 unique Data Structures & Algorithms problems** implemented across `notebook-1.cpp` through `notebook-10.cpp` (all duplicates and prior sorting implementations consolidated exclusively into Notebook 10). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
 
 ## 📘 Notebook-by-Notebook Analysis
 
@@ -309,7 +309,7 @@ A unified reference catalog of **279 unique Data Structures & Algorithms problem
 | :-: | :--- | :--- | :--- | :--- |
 | **1** | Bubble Sort with Early Stop & Round Count | Adjacent Swaps + Max Displacement | `O(N^2)` worst/avg, `O(N)` best | `O(1)` |
 | **2** | Selection Sort (Min-Element Swap) | Suffix Minimum Index Extraction | `O(N^2)` all cases | `O(1)` |
-| **3** | Insertion Sort (Array & Linked List) | Shift Larger Prefix In-Place | `O(N + I)` adaptive | `O(1)` |
+| **3** | Insertion Sort | Shift Larger Prefix In-Place | `O(N + I)` adaptive | `O(1)` |
 | **4** | Merge Sort (Classic Divide & Conquer) | Recursive 2-Way Merge Subroutine | `O(N log N)` guaranteed | `O(N)` |
 | **5** | In-Place Merge Sort (Gap Method) | Shell-like Gap Reduction | `O(N log^2 N)` | `O(1)` |
 | **6** | QuickSort (Lomuto & Hoare Partitioning) | Two-Way Pivot Partitioning | `O(N log N)` avg, `O(N^2)` worst | `O(log N)` |
@@ -326,14 +326,13 @@ A unified reference catalog of **279 unique Data Structures & Algorithms problem
 | **17** | Pigeonhole Sort (Direct Range Slots) | Range-Sized Bucket Placement | `O(N + R)` | `O(N + R)` |
 | **18** | Pancake Sorting (LeetCode 969) | Greedy Suffix Placement (2-Flips) | `O(N^2)` | `O(N)` |
 | **19** | Sort Colors / DNF 3-Way (LeetCode 75) | In-Place 3-Pointer Partition | `O(N)` | `O(1)` |
-| **20** | Sort List (LeetCode 148 — Merge on SLL) | Fast/Slow Split + SLL Merge | `O(N log N)` | `O(log N)` |
-| **21** | Largest Number from Concatenation (LC 179) | Custom Transitive String Comp | `O(N log N * L)` | `O(N * L)` |
-| **22** | Wiggle Sort I & II (LeetCode 280 / 324) | Greedy Swap / Median + DNF Index | `O(N)` | `O(1)` |
-| **23** | Topological Sort vs Comparison Sort | Kahn's In-Degree BFS DAG Sort | `O(V + E)` | `O(V + E)` |
-| **24** | Patience Sorting & LIS (Greene's Theorem) | Pile Insertion via lower_bound | `O(N log N)` | `O(N)` |
-| **25** | Sort Characters By Frequency (LeetCode 451) | Bucket Sorting on Frequency Count | `O(N)` | `O(N)` |
-| **26** | Sort Matrix Diagonally (LeetCode 1329) | Hash Map Diagonal Bucketing | `O(M * N * log(min(M,N)))` | `O(M * N)` |
-| **27** | Multi-Criteria Custom Sorting Lambda | Multi-Field Tie-Breaking Predicate| `O(N log N)` | `O(1)` |
-| **28** | Min Swaps to Sort Permutation | Disjoint Cycle Decomposition | `O(N log N)` | `O(N)` |
-| **29** | Count Inversions & Reverse Pairs (LC 493) | Merge Sort Inversion Accumulator | `O(N log N)` | `O(N)` |
-| **30** | Sort Transformed Array (LeetCode 360) | Parabola Concavity Two-Pointers | `O(N)` | `O(N)` |
+| **20** | Largest Number from Concatenation (LC 179) | Custom Transitive String Comp | `O(N log N * L)` | `O(N * L)` |
+| **21** | Wiggle Sort I & II (LeetCode 280 / 324) | Greedy Swap / Median + DNF Index | `O(N)` | `O(1)` |
+| **22** | Topological Sort vs Comparison Sort | Kahn's In-Degree BFS DAG Sort | `O(V + E)` | `O(V + E)` |
+| **23** | Patience Sorting & LIS (Greene's Theorem) | Pile Insertion via lower_bound | `O(N log N)` | `O(N)` |
+| **24** | Sort Characters By Frequency (LeetCode 451) | Bucket Sorting on Frequency Count | `O(N)` | `O(N)` |
+| **25** | Sort Matrix Diagonally (LeetCode 1329) | Hash Map Diagonal Bucketing | `O(M * N * log(min(M,N)))` | `O(M * N)` |
+| **26** | Multi-Criteria Custom Sorting Lambda | Multi-Field Tie-Breaking Predicate| `O(N log N)` | `O(1)` |
+| **27** | Min Swaps to Sort Permutation | Disjoint Cycle Decomposition | `O(N log N)` | `O(N)` |
+| **28** | Count Inversions & Reverse Pairs (LC 493) | Merge Sort Inversion Accumulator | `O(N log N)` | `O(N)` |
+| **29** | Sort Transformed Array (LeetCode 360) | Parabola Concavity Two-Pointers | `O(N)` | `O(N)` |

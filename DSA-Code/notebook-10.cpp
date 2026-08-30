@@ -42,7 +42,7 @@ const ll MOD = 1e9 + 7;
  |----|---------------------------------------------|-----------------------------------|----------|----------|
  | 1  | Bubble Sort with Early Stop & Round Count   | Adjacent Swaps + Max Displacement | O(N^2)   | O(1)     |
  | 2  | Selection Sort (Min-Element Swap)           | Suffix Minimum Index Extraction   | O(N^2)   | O(1)     |
- | 3  | Insertion Sort (Array & Linked List)        | Shift Larger Prefix In-Place      | O(N + I) | O(1)     |
+ | 3  | Insertion Sort                              | Shift Larger Prefix In-Place      | O(N + I) | O(1)     |
  | 4  | Merge Sort (Classic Divide & Conquer)       | Recursive 2-Way Merge Subroutine  | O(N logN)| O(N)     |
  | 5  | In-Place Merge Sort (Gap Method)            | Shell-like Gap Shelling           | O(N log^2N)| O(1)   |
  | 6  | QuickSort (Lomuto & Hoare Partitioning)     | Two-Way Pivot Partitioning        | O(N logN)| O(log N) |
@@ -59,17 +59,16 @@ const ll MOD = 1e9 + 7;
  | 17 | Pigeonhole Sort (Direct Range Slots)        | Range-Sized Bucket Placement      | O(N + R) | O(N + R) |
  | 18 | Pancake Sorting (LeetCode 969)              | Greedy Suffix Placement (2-Flips) | O(N^2)   | O(N)     |
  | 19 | Sort Colors / DNF 3-Way (LeetCode 75)       | In-Place 3-Pointer Partition      | O(N)     | O(1)     |
- | 20 | Sort List (LeetCode 148 — Merge on SLL)     | Fast/Slow Split + SLL Merge       | O(N logN)| O(log N) |
- | 21 | Largest Number from Concatenation (LC 179)  | Custom Transitive String Comp     | O(N logN)| O(N)     |
- | 22 | Wiggle Sort I & II (LeetCode 280 / 324)     | Greedy Swap / Median + DNF Index  | O(N)     | O(1)/O(N)|
- | 23 | Topological Sort vs Comparison Sort         | Kahn's In-Degree BFS DAG Sort     | O(V + E) | O(V + E) |
- | 24 | Patience Sorting & LIS (Greene's Theorem)   | Pile Insertion via lower_bound    | O(N logN)| O(N)     |
- | 25 | Sort Characters By Frequency (LeetCode 451) | Bucket Sorting on Frequency Count | O(N)     | O(N)     |
- | 26 | Sort Matrix Diagonally (LeetCode 1329)      | Hash Map Diagonal Bucketing       | O(MN logM)| O(M * N)|
- | 27 | Multi-Criteria Custom Sorting Lambda        | Multi-Field Tie-Breaking Predicate| O(N logN)| O(1)     |
- | 28 | Min Swaps to Sort Permutation               | Disjoint Cycle Decomposition      | O(N)     | O(N)     |
- | 29 | Count Inversions & Reverse Pairs (LC 493)   | Merge Sort Inversion Accumulator  | O(N logN)| O(N)     |
- | 30 | Sort Transformed Array (LeetCode 360)       | Parabola Concavity Two-Pointers   | O(N)     | O(N)     |
+ | 20 | Largest Number from Concatenation (LC 179)  | Custom Transitive String Comp     | O(N logN)| O(N)     |
+ | 21 | Wiggle Sort I & II (LeetCode 280 / 324)     | Greedy Swap / Median + DNF Index  | O(N)     | O(1)/O(N)|
+ | 22 | Topological Sort vs Comparison Sort         | Kahn's In-Degree BFS DAG Sort     | O(V + E) | O(V + E) |
+ | 23 | Patience Sorting & LIS (Greene's Theorem)   | Pile Insertion via lower_bound    | O(N logN)| O(N)     |
+ | 24 | Sort Characters By Frequency (LeetCode 451) | Bucket Sorting on Frequency Count | O(N)     | O(N)     |
+ | 25 | Sort Matrix Diagonally (LeetCode 1329)      | Hash Map Diagonal Bucketing       | O(MN logM)| O(M * N)|
+ | 26 | Multi-Criteria Custom Sorting Lambda        | Multi-Field Tie-Breaking Predicate| O(N logN)| O(1)     |
+ | 27 | Min Swaps to Sort Permutation               | Disjoint Cycle Decomposition      | O(N)     | O(N)     |
+ | 28 | Count Inversions & Reverse Pairs (LC 493)   | Merge Sort Inversion Accumulator  | O(N logN)| O(N)     |
+ | 29 | Sort Transformed Array (LeetCode 360)       | Parabola Concavity Two-Pointers   | O(N)     | O(N)     |
  ====================================================================================================
 */
 
@@ -135,10 +134,10 @@ void selectionSort(vector<int>& arr) {
 // - Complexity: Time: O(N^2) all cases, Space: O(1) auxiliary.
 
 // ============================================================
-// 3. INSERTION SORT (ARRAY & LINKED LIST)
+// 3. INSERTION SORT
 // ============================================================
 
-void insertionSortArray(vector<int>& arr) {
+void insertionSort(vector<int>& arr) {
     int n = arr.size();
     for (int i = 1; i < n; i++) {
         int key = arr[i];
@@ -150,30 +149,8 @@ void insertionSortArray(vector<int>& arr) {
         arr[j + 1] = key;
     }
 }
-
-struct ListNode {
-    int val;
-    ListNode* next;
-    ListNode(int x) : val(x), next(nullptr) {}
-};
-
-ListNode* insertionSortList(ListNode* head) {
-    ListNode dummy(0);
-    ListNode* curr = head;
-    while (curr) {
-        ListNode* prevNode = &dummy;
-        ListNode* nextNode = curr->next;
-        while (prevNode->next && prevNode->next->val < curr->val) {
-            prevNode = prevNode->next;
-        }
-        curr->next = prevNode->next;
-        prevNode->next = curr;
-        curr = nextNode;
-    }
-    return dummy.next;
-}
 // Interview Explanation:
-// - Problem Statement: Sort an array or singly linked list using Insertion Sort.
+// - Problem Statement: Sort an array using Insertion Sort.
 // - Approach: Maintain sorted prefix; take next element and shift all larger prefix elements right until proper slot is found.
 // - Intuition: Adaptive algorithm: takes O(N + I) time where I is the number of inversions. Extremely fast for small (N < 32) or nearly-sorted datasets.
 // - Complexity: Time: O(N^2) worst, O(N) best for sorted array; Space: O(1).
@@ -626,45 +603,7 @@ void sortColors(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1) in-place.
 
 // ============================================================
-// 20. SORT LIST (MERGE SORT ON SINGLY LINKED LIST) — LeetCode 148
-// ============================================================
-
-ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
-    ListNode dummy(0);
-    ListNode* tail = &dummy;
-    while (l1 && l2) {
-        if (l1->val <= l2->val) { tail->next = l1; l1 = l1->next; }
-        else { tail->next = l2; l2 = l2->next; }
-        tail = tail->next;
-    }
-    tail->next = l1 ? l1 : l2;
-    return dummy.next;
-}
-
-ListNode* sortList(ListNode* head) {
-    if (!head || !head->next) return head;
-    // Find middle with fast/slow pointer
-    ListNode* slow = head;
-    ListNode* fast = head->next;
-    while (fast && fast->next) {
-        slow = slow->next;
-        fast = fast->next->next;
-    }
-    ListNode* mid = slow->next;
-    slow->next = nullptr; // Disconnect halves
-
-    ListNode* left = sortList(head);
-    ListNode* right = sortList(mid);
-    return mergeTwoLists(left, right);
-}
-// Interview Explanation:
-// - Problem Statement: Sort a singly linked list in O(N log N) time and O(log N) stack space (LeetCode 148).
-// - Approach: Top-Down Divide-and-Conquer Merge Sort on Linked List.
-// - Intuition: Split list using fast & slow pointers, disconnect halves, recursively sort, and merge with two pointers. Requires 0 array allocations.
-// - Complexity: Time: O(N log N), Space: O(log N) recursion depth.
-
-// ============================================================
-// 21. LARGEST NUMBER FROM CONCATENATION — LeetCode 179
+// 20. LARGEST NUMBER FROM CONCATENATION — LeetCode 179
 // ============================================================
 
 string largestNumber(vector<int>& nums) {
@@ -687,7 +626,7 @@ string largestNumber(vector<int>& nums) {
 // - Complexity: Time: O(N log N * L), Space: O(N * L).
 
 // ============================================================
-// 22. WIGGLE SORT I & II — LeetCode 280 / 324
+// 21. WIGGLE SORT I & II — LeetCode 280 / 324
 // ============================================================
 
 void wiggleSortI(vector<int>& nums) {
@@ -722,7 +661,7 @@ void wiggleSortII(vector<int>& nums) {
 // - Complexity: Time: O(N), Space: O(1) in-place.
 
 // ============================================================
-// 23. TOPOLOGICAL SORT VS COMPARISON SORT
+// 22. TOPOLOGICAL SORT VS COMPARISON SORT
 // ============================================================
 
 vector<int> topologicalSortKahn(int numCourses, vector<vector<int>>& prerequisites) {
@@ -753,7 +692,7 @@ vector<int> topologicalSortKahn(int numCourses, vector<vector<int>>& prerequisit
 // - Complexity: Time: O(V + E), Space: O(V + E).
 
 // ============================================================
-// 24. PATIENCE SORTING & LIS (GREENE'S THEOREM)
+// 23. PATIENCE SORTING & LIS (GREENE'S THEOREM)
 // ============================================================
 
 int patienceSortLISLength(const vector<int>& arr) {
@@ -772,7 +711,7 @@ int patienceSortLISLength(const vector<int>& arr) {
 // - Complexity: Time: O(N log N), Space: O(N).
 
 // ============================================================
-// 25. SORT CHARACTERS BY FREQUENCY — LeetCode 451
+// 24. SORT CHARACTERS BY FREQUENCY — LeetCode 451
 // ============================================================
 
 string frequencySort(string s) {
@@ -800,7 +739,7 @@ string frequencySort(string s) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // ============================================================
-// 26. SORT MATRIX DIAGONALLY — LeetCode 1329
+// 25. SORT MATRIX DIAGONALLY — LeetCode 1329
 // ============================================================
 
 vector<vector<int>> diagonalSort(vector<vector<int>>& mat) {
@@ -830,7 +769,7 @@ vector<vector<int>> diagonalSort(vector<vector<int>>& mat) {
 // - Complexity: Time: O(M * N * log(min(M, N))), Space: O(M * N).
 
 // ============================================================
-// 27. MULTI-CRITERIA CUSTOM SORTING LAMBDA
+// 26. MULTI-CRITERIA CUSTOM SORTING LAMBDA
 // ============================================================
 
 struct Student {
@@ -853,7 +792,7 @@ void sortStudentsCustom(vector<Student>& students) {
 // - Complexity: Time: O(N log N), Space: O(1) auxiliary.
 
 // ============================================================
-// 28. MIN SWAPS TO SORT PERMUTATION (CYCLE DECOMPOSITION)
+// 27. MIN SWAPS TO SORT PERMUTATION (CYCLE DECOMPOSITION)
 // ============================================================
 
 int minSwapsToSort(vector<int>& arr) {
@@ -888,7 +827,7 @@ int minSwapsToSort(vector<int>& arr) {
 // - Complexity: Time: O(N log N), Space: O(N).
 
 // ============================================================
-// 29. COUNT INVERSIONS & REVERSE PAIRS — LeetCode 493
+// 28. COUNT INVERSIONS & REVERSE PAIRS — LeetCode 493
 // ============================================================
 
 int mergeAndCountReversePairs(vector<int>& nums, int l, int mid, int r) {
@@ -922,7 +861,7 @@ int reversePairs(vector<int>& nums) {
 // - Complexity: Time: O(N log N), Space: O(N) merge buffer.
 
 // ============================================================
-// 30. SORT TRANSFORMED ARRAY — LeetCode 360
+// 29. SORT TRANSFORMED ARRAY — LeetCode 360
 // ============================================================
 
 vector<int> sortTransformedArray(vector<int>& nums, int a, int b, int c) {
