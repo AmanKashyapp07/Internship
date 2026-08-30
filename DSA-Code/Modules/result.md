@@ -1,6 +1,6 @@
 # DSA Modules — Problem Summary & Complexity Reference
 
-A comprehensive, unified reference catalog of **428 essential Data Structures & Algorithms problems and algorithms** across all 14 topic modules in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A comprehensive, unified reference catalog of **436 essential Data Structures & Algorithms problems and algorithms** across all 14 topic modules in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
 
 ## 📘 Module-by-Module Analysis
 
@@ -247,6 +247,14 @@ A comprehensive, unified reference catalog of **428 essential Data Structures & 
 | **8** | Merge Two Sorted Linked Lists (LC 21) | Dummy Head + Linear Merge Step | `O(N + M)` | `O(1)` |
 | **9** | Merge K Sorted Linked Lists (LC 23) | Min-Heap Priority Queue on Heads | `O(N log K)` | `O(K)` |
 | **10** | Reorder List (LC 143) | Midpoint Split + Reverse + Weave | `O(N)` | `O(1)` |
+| **11** | Add Two Numbers (LC 2) | Linear Digit Simulation + Carry | `O(max(N, M))` | `O(1)` |
+| **12** | Delete Node in a Linked List O(1) (LC 237) | Value Copying + Next Node Bypass | `O(1)` | `O(1)` |
+| **13** | Reverse Nodes in k-Group (LC 25) | Bounded K-Group Iterative Reversal | `O(N)` | `O(1)` |
+| **14** | Palindrome Linked List (LC 234) | Midpoint Cut + Reverse Half + Match | `O(N)` | `O(1)` |
+| **15** | Find Starting Point of Loop in LL (LC 142) | Floyd's Cycle + Head-Meeting Reset | `O(N)` | `O(1)` |
+| **16** | Flattening a Linked List (GFG) | Bottom-Up Recursive Merge 2 Lists | `O(N * K)` | `O(1)` |
+| **17** | Rotate List by K Places (LC 61) | Circular Ring Cut at (Len - K % Len) | `O(N)` | `O(1)` |
+| **18** | Copy List with Random Pointer (LC 138) | 3-Pass In-Place Node Interweaving | `O(N)` | `O(1)` |
 
 ---
 
