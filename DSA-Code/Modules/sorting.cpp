@@ -103,6 +103,22 @@ using vvl = vector<vector<ll>>;
  | 55 | N-th Root of an Integer (GFG)               | Binary Search on Answer [1, M]    | O(N logM)| O(1)     |
  | 56 | Majority Element II (> N/3) (LC 229)        | Extended Boyer-Moore Voting (2 Cands)| O(N)  | O(1)     |
  | 57 | Minimize Max Distance to Gas Station (LC774)| Continuous Binary Search (eps 1e-6)| O(N logS)| O(1)   |
+ | 58 | Collecting Numbers (CSES 2216)               | Position Inversion Counting       | O(N)     | O(N)     |
+ | 59 | Collecting Numbers II (CSES 2217)            | Local Inversion Delta Tracking    | O(N + M) | O(N)     |
+ | 60 | Concert Tickets (CSES 1091)                  | Multiset Upper Bound Decrement    | O((N+M)lgN| O(N)    |
+ | 61 | Distinct Values Subarrays (CSES 3420)        | Two Pointers / Variable Window    | O(N)     | O(N)     |
+ | 62 | Distinct Values Subarrays II (CSES 2428)     | Sliding Window + Map Size <= K    | O(N)     | O(K)     |
+ | 63 | Distinct Values Subsequences (CSES 3421)     | Frequency Product Principle       | O(N logN)| O(1)     |
+ | 64 | Josephus Problem II (CSES 2163)              | Fenwick Tree + Binary Search      | O(N log^2N)| O(N)   |
+ | 65 | Maximum Subarray Sum II (CSES 1644)          | Monotonic Deque on Prefix Sums    | O(N)     | O(N)     |
+ | 66 | Movie Festival II (CSES 1632)                | Greedy End-Time Sort + Multiset   | O(N log(NK))| O(N+K) |
+ | 67 | Nested Ranges Check (CSES 2168)              | 2D Sorting + Forward/Back Sweeps  | O(N logN)| O(N)     |
+ | 68 | Nested Ranges Count (CSES 2169)              | Coordinate Compression + Fenwick  | O(N logN)| O(N)     |
+ | 69 | Reading Books (CSES 1631)                    | Bottleneck Criterion max(2*mx, S) | O(N)     | O(1)     |
+ | 70 | Room Allocation (CSES 1164)                  | Arrival Sort + Min-Heap Free Times| O(N logN)| O(N)     |
+ | 71 | Subarray Divisibility (CSES 1662)             | Prefix Sum Modulo Remainder Map   | O(N)     | O(N)     |
+ | 72 | Towers (CSES 1073)                           | Greedy Binary Search / Patience   | O(N logN)| O(N)     |
+ | 73 | Traffic Lights (CSES 1163)                   | Dual Ordered Sets (Coord + Lens)  | O(N logN)| O(N)     |
  ====================================================================================================
 */
 
@@ -1450,6 +1466,392 @@ double minMaxGasStationDistance(vi& stations, int k) {
 // - Problem Statement: Add k new gas stations minimizing the maximum gap between adjacent stations.
 // - Approach: Continuous Binary Search on Answer [0, max_gap] with epsilon precision.
 // - Complexity: Time: O(N \cdot \log(\text{max\_dist} / \text{eps})), Space: O(1).
+
+
+// ====================================================================================================
+// SECTION: CSES SORTING AND SEARCHING SOLUTIONS
+// ====================================================================================================
+
+// 58. Collecting Numbers (CSES 2216)
+int collectingNumbers(int n, const vi& a) {
+    vi pos(n + 1);
+    for (int i = 0; i < n; i++) pos[a[i]] = i + 1;
+    int rounds = 1;
+    for (int i = 1; i < n; i++) {
+        if (pos[i] > pos[i + 1]) rounds++;
+    }
+    return rounds;
+}
+// Interview Explanation:
+// - Problem Statement: Find number of left-to-right passes to collect numbers 1 to n in increasing order (CSES 2216).
+// - Approach: Track 1-based indices in pos array and count inversions where pos[i] > pos[i+1].
+// - Intuition: A new round is required whenever the number x + 1 appears to the left of number x in the original array.
+// - Complexity: Time: O(N), Space: O(N).
+
+// 59. Collecting Numbers II (CSES 2217)
+vi collectingNumbersII(int n, vi a, const vector<pii>& swaps) {
+    vi pos(n + 1);
+    for (int i = 1; i <= n; i++) pos[a[i]] = i;
+    auto bad = [&](int x) {
+        if (x < 1 || x >= n) return false;
+        return pos[x] > pos[x + 1];
+    };
+    int rounds = 1;
+    for (int x = 1; x < n; x++) if (pos[x] > pos[x + 1]) rounds++;
+    vi results;
+    for (auto& [p, q] : swaps) {
+        int u = a[p], v = a[q];
+        set<int> affected = {u - 1, u, v - 1, v};
+        for (int x : affected) rounds -= bad(x);
+        swap(a[p], a[q]);
+        swap(pos[u], pos[v]);
+        for (int x : affected) rounds += bad(x);
+        results.push_back(rounds);
+    }
+    return results;
+}
+// Interview Explanation:
+// - Problem Statement: Count collecting rounds after each pairwise position swap query (CSES 2217).
+// - Approach: Local Inversion Delta Tracking via small neighbor set {u-1, u, v-1, v}.
+// - Intuition: Swapping two elements only affects adjacent value orderings for the swapped values, allowing O(1) update per swap.
+// - Complexity: Time: O(N + M), Space: O(N).
+
+// 60. Concert Tickets (CSES 1091)
+vi concertTickets(const vi& tickets, const vi& maxPrices) {
+    multiset<int> ms(tickets.begin(), tickets.end());
+    vi res;
+    for (int maxPrice : maxPrices) {
+        auto it = ms.upper_bound(maxPrice);
+        if (it == ms.begin()) {
+            res.push_back(-1);
+        } else {
+            --it;
+            res.push_back(*it);
+            ms.erase(it);
+        }
+    }
+    return res;
+}
+// Interview Explanation:
+// - Problem Statement: Match each customer to the largest ticket price <= their budget, removing purchased tickets (CSES 1091).
+// - Approach: Multiset Upper Bound with decrement (--upper_bound(maxPrice)).
+// - Intuition: Multiset maintains sorted prices dynamically; upper_bound finds the first element > budget, and decrementing yields the greatest available price <= budget in O(log N).
+// - Complexity: Time: O((N + M) log N), Space: O(N).
+
+// 61. Distinct Values Subarrays (CSES 3420)
+ll distinctValuesSubarrays(const vi& a) {
+    int n = a.size();
+    unordered_map<int, int> freq;
+    ll ans = 0;
+    int l = 0;
+    for (int r = 0; r < n; r++) {
+        freq[a[r]]++;
+        while (freq[a[r]] > 1) {
+            freq[a[l]]--;
+            l++;
+        }
+        ans += (r - l + 1);
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Count total number of subarrays containing only unique/distinct values (CSES 3420).
+// - Approach: Two Pointers / Variable Sliding Window.
+// - Intuition: Shrink left pointer until window [l..r] contains no duplicates. All (r - l + 1) subarrays ending at r are strictly distinct.
+// - Complexity: Time: O(N), Space: O(N).
+
+// 62. Distinct Values Subarrays II (CSES 2428)
+ll distinctValuesSubarraysII(const vi& a, int k) {
+    int n = a.size();
+    unordered_map<int, int> freq;
+    ll ans = 0;
+    int l = 0;
+    for (int r = 0; r < n; r++) {
+        freq[a[r]]++;
+        while ((int)freq.size() > k) {
+            if (--freq[a[l]] == 0) freq.erase(a[l]);
+            l++;
+        }
+        ans += (r - l + 1);
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Count total subarrays with at most k distinct values (CSES 2428).
+// - Approach: Variable Sliding Window maintaining map size <= k.
+// - Intuition: If window [l..r] has <= k distinct values, exactly (r - l + 1) valid subarrays end at r.
+// - Complexity: Time: O(N), Space: O(K).
+
+// 63. Distinct Values Subsequences (CSES 3421)
+ll distinctValuesSubsequences(vi a) {
+    int n = a.size();
+    if (n == 0) return 0;
+    sort(a.begin(), a.end());
+    ll ans = 1, curFreq = 1;
+    for (int i = 1; i < n; i++) {
+        if (a[i] == a[i - 1]) curFreq++;
+        else {
+            ans = (ans * (curFreq + 1)) % 1000000007LL;
+            curFreq = 1;
+        }
+    }
+    ans = (ans * (curFreq + 1)) % 1000000007LL;
+    return (ans - 1 + 1000000007LL) % 1000000007LL;
+}
+// Interview Explanation:
+// - Problem Statement: Count non-empty subsequences containing distinct elements (CSES 3421).
+// - Approach: Product Principle over Element Frequencies (prod(count_i + 1) - 1).
+// - Intuition: For each distinct element with count c, choose either 0 or 1 copy from the c identical copies (c + 1 choices). Subtract 1 for the empty subsequence.
+// - Complexity: Time: O(N log N), Space: O(1) auxiliary.
+
+// 64. Josephus Problem II (CSES 2163)
+vi josephusProblemII(int n, int k) {
+    struct Fenwick {
+        int n; vi bit;
+        Fenwick(int n) : n(n), bit(n + 1, 0) {}
+        void add(int i, int v) { for (i++; i <= n; i += i & -i) bit[i] += v; }
+        int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
+    } bit(n);
+    for (int i = 0; i < n; i++) bit.add(i, 1);
+    vi order;
+    int cur = 0;
+    for (int rem = n; rem > 0; rem--) {
+        cur = (cur + k) % rem;
+        int need = cur + 1;
+        int low = 0, high = n - 1, ans = n - 1;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            if (bit.query(mid) >= need) { ans = mid; high = mid - 1; }
+            else low = mid + 1;
+        }
+        order.push_back(ans + 1);
+        bit.add(ans, -1);
+    }
+    return order;
+}
+// Interview Explanation:
+// - Problem Statement: Output removal order of n children in a circle where every k-th child is eliminated (CSES 2163).
+// - Approach: Fenwick Tree (Binary Indexed Tree) + Binary Search for Order Statistics (O(N log^2 N)).
+// - Intuition: Track remaining active positions in Fenwick tree; advance current rank by (k % remaining) and binary search for exact physical index.
+// - Complexity: Time: O(N log^2 N), Space: O(N).
+
+// 65. Maximum Subarray Sum II (CSES 1644)
+ll maximumSubarraySumII(const vi& a, int A, int B) {
+    int n = a.size();
+    vll pref(n + 1, 0);
+    for (int i = 1; i <= n; i++) pref[i] = pref[i - 1] + a[i - 1];
+    deque<int> dq;
+    ll ans = -1e18;
+    for (int i = A; i <= n; i++) {
+        int L = i - B, R = i - A;
+        while (!dq.empty() && dq.front() < L) dq.pop_front();
+        while (!dq.empty() && pref[dq.back()] >= pref[R]) dq.pop_back();
+        dq.push_back(R);
+        ans = max(ans, pref[i] - pref[dq.front()]);
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find maximum subarray sum with length between A and B inclusive (CSES 1644).
+// - Approach: Monotonic Deque maintaining minimum prefix sum in sliding window [i - B, i - A].
+// - Intuition: Subarray sum spanning [j + 1 .. i] is pref[i] - pref[j]. To maximize this for a fixed right endpoint i, minimize pref[j] over j in [i - B, i - A].
+// - Complexity: Time: O(N), Space: O(N).
+
+// 66. Movie Festival II (CSES 1632)
+int movieFestivalII(int k, vector<pii> movies) {
+    sort(movies.begin(), movies.end(), [](const pii& a, const pii& b) {
+        return a.second < b.second || (a.second == b.second && a.first < b.first);
+    });
+    multiset<int> freeTimes;
+    for (int i = 0; i < k; i++) freeTimes.insert(0);
+    int count = 0;
+    for (const auto& [start, end] : movies) {
+        auto it = freeTimes.upper_bound(start);
+        if (it != freeTimes.begin()) {
+            --it;
+            freeTimes.erase(it);
+            freeTimes.insert(end);
+            count++;
+        }
+    }
+    return count;
+}
+// Interview Explanation:
+// - Problem Statement: Find maximum total movies k people can watch without overlaps (CSES 1632).
+// - Approach: Greedy Interval Scheduling sorted by End Time + Multiset of Member End Times.
+// - Intuition: Assign movie to the person whose available end time is closest to (and <=) movie start time, keeping other members free for earlier opportunities.
+// - Complexity: Time: O(N log N + N log K), Space: O(N + K).
+
+// 67. Nested Ranges Check (CSES 2168)
+pair<vi, vi> nestedRangesCheck(int n, const vector<pii>& rawRanges) {
+    struct Range { int l, r, idx; };
+    vector<Range> ranges(n);
+    for (int i = 0; i < n; i++) ranges[i] = {rawRanges[i].first, rawRanges[i].second, i};
+    sort(ranges.begin(), ranges.end(), [](const Range& a, const Range& b) {
+        if (a.l == b.l) return a.r > b.r;
+        return a.l < b.l;
+    });
+    vi contains(n, 0), contained(n, 0);
+    int maxRight = ranges[0].r;
+    for (int i = 1; i < n; i++) {
+        if (ranges[i].r <= maxRight) contained[ranges[i].idx] = 1;
+        maxRight = max(maxRight, ranges[i].r);
+    }
+    int minRight = ranges[n - 1].r;
+    for (int i = n - 2; i >= 0; i--) {
+        if (ranges[i].r >= minRight) contains[ranges[i].idx] = 1;
+        minRight = min(minRight, ranges[i].r);
+    }
+    return {contains, contained};
+}
+// Interview Explanation:
+// - Problem Statement: For each range, determine if it contains another range and if it is contained by another range (CSES 2168).
+// - Approach: Sort by Left Ascending, Right Descending + Forward/Backward Running Extremum.
+// - Intuition: After sorting, range i is contained by some previous range iff its right bound <= max right seen so far. Symmetrically, it contains a subsequent range iff its right bound >= min right seen from the right.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+// 68. Nested Ranges Count (CSES 2169)
+pair<vi, vi> nestedRangesCount(int n, const vector<pii>& rawRanges) {
+    struct Fenwick {
+        int n; vi bit;
+        Fenwick(int n) : n(n), bit(n + 1, 0) {}
+        void add(int i, int v) { for (i++; i <= n; i += i & -i) bit[i] += v; }
+        int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
+    };
+    struct Range { int l, r, idx; };
+    vector<Range> ranges(n);
+    vi vals;
+    for (int i = 0; i < n; i++) {
+        ranges[i] = {rawRanges[i].first, rawRanges[i].second, i};
+        vals.push_back(rawRanges[i].second);
+    }
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    auto getRank = [&](int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); };
+    for (auto &x : ranges) x.r = getRank(x.r);
+
+    sort(ranges.begin(), ranges.end(), [](const Range &a, const Range &b) {
+        if (a.l == b.l) return a.r > b.r;
+        return a.l < b.l;
+    });
+
+    vi contains(n, 0), contained(n, 0);
+    Fenwick bit1(vals.size());
+    for (int i = n - 1; i >= 0; i--) {
+        contains[ranges[i].idx] = bit1.query(ranges[i].r);
+        bit1.add(ranges[i].r, 1);
+    }
+    Fenwick bit2(vals.size());
+    for (int i = 0; i < n; i++) {
+        contained[ranges[i].idx] = bit2.query(vals.size() - 1) - (ranges[i].r ? bit2.query(ranges[i].r - 1) : 0);
+        bit2.add(ranges[i].r, 1);
+    }
+    return {contains, contained};
+}
+// Interview Explanation:
+// - Problem Statement: Count how many ranges each range contains, and how many ranges contain each range (CSES 2169).
+// - Approach: Coordinate Compression on Right Endpoints + Sweepline with Fenwick Trees.
+// - Intuition: Sorting guarantees left endpoint monotonicity; range sum queries on right endpoints count valid nested intervals in O(log N).
+// - Complexity: Time: O(N log N), Space: O(N).
+
+// 69. Reading Books (CSES 1631)
+ll readingBooks(const vi& t) {
+    ll sum = 0, mx = 0;
+    for (int x : t) {
+        sum += x;
+        mx = max(mx, (ll)x);
+    }
+    return max(2LL * mx, sum);
+}
+// Interview Explanation:
+// - Problem Statement: Two readers must read all n books without reading the same book at the same time. Find minimum total time (CSES 1631).
+// - Approach: Max Bottleneck vs Sum Criterion (max(2 * max_book, total_sum)).
+// - Intuition: If the longest book takes strictly more time than all other books combined (mx > sum - mx), the second reader must wait for the first to finish that book, taking 2 * mx. Otherwise, schedule without idle time taking total sum.
+// - Complexity: Time: O(N), Space: O(1).
+
+// 70. Room Allocation (CSES 1164)
+pair<int, vi> roomAllocation(int n, const vector<pii>& customers) {
+    vector<array<int, 3>> a(n);
+    for (int i = 0; i < n; i++) a[i] = {customers[i].first, customers[i].second, i};
+    sort(a.begin(), a.end());
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    vi ans(n);
+    int rooms = 0;
+    for (auto &[l, r, i] : a) {
+        int room;
+        if (!pq.empty() && pq.top().first < l) {
+            room = pq.top().second;
+            pq.pop();
+        } else {
+            rooms++;
+            room = rooms;
+        }
+        ans[i] = room;
+        pq.push({r, room});
+    }
+    return {rooms, ans};
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum rooms needed for customers and assign room IDs to each stay (CSES 1164).
+// - Approach: Interval Arrival Sorting + Min-Heap of Active Departure Times.
+// - Intuition: Always reuse the room whose current occupant departs earliest if departure < arrival; otherwise allocate a new room.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+// 71. Subarray Divisibility (CSES 1662)
+ll subarrayDivisibility(const vi& a, int n) {
+    vll freq(n, 0);
+    freq[0] = 1;
+    ll pref = 0, ans = 0;
+    for (int x : a) {
+        pref = ((pref + x) % n + n) % n;
+        ans += freq[pref];
+        freq[pref]++;
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Count subarrays whose sum is divisible by n (CSES 1662).
+// - Approach: Prefix Sum Remainder Frequency Counting ((pref % n + n) % n).
+// - Intuition: A subarray a[l..r] sum is divisible by n iff pref[r] mod n == pref[l-1] mod n. Counting previous occurrences of the same remainder yields answer in single pass.
+// - Complexity: Time: O(N), Space: O(N).
+
+// 72. Towers (CSES 1073)
+int towers(const vi& a) {
+    vi tops;
+    for (int x : a) {
+        auto it = upper_bound(tops.begin(), tops.end(), x);
+        if (it == tops.end()) tops.push_back(x);
+        else *it = x;
+    }
+    return tops.size();
+}
+// Interview Explanation:
+// - Problem Statement: Build minimum number of towers where each cube placed on top must be strictly smaller than the one below it (CSES 1073).
+// - Approach: Greedy Binary Search (upper_bound) / Patience Sorting.
+// - Intuition: Place cube x on top of the smallest tower top that is strictly greater than x (upper_bound) to preserve larger tower tops for future cubes. If none exists, create a new tower.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+// 73. Traffic Lights (CSES 1163)
+vi trafficLights(int x, const vi& positions) {
+    set<int> lights = {0, x};
+    multiset<int> lengths = {x};
+    vi ans;
+    for (int p : positions) {
+        auto it = lights.upper_bound(p);
+        int r = *it, l = *prev(it);
+        lengths.erase(lengths.find(r - l));
+        lengths.insert(p - l);
+        lengths.insert(r - p);
+        lights.insert(p);
+        ans.push_back(*lengths.rbegin());
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find length of longest segment without traffic lights after each new light addition (CSES 1163).
+// - Approach: Dual Ordered Sets (std::set for light coordinates, std::multiset for segment lengths).
+// - Intuition: Adding light at p splits segment [l, r] into [l, p] and [p, r]. Erase (r - l) and insert (p - l) and (r - p) in O(log N).
+// - Complexity: Time: O(N log N), Space: O(N).
 
 int main() {
     ios::sync_with_stdio(false);

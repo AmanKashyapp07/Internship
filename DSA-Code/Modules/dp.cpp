@@ -27,8 +27,11 @@ using ll = long long;
 using pii = pair<int, int>;
 using vi = vector<int>;
 using vl = vector<ll>;
+using vll = vector<ll>;
 using vvi = vector<vector<int>>;
 using vvl = vector<vector<ll>>;
+
+const ll MOD = 1e9 + 7;
 
 /*
  ====================================================================================================
@@ -93,6 +96,13 @@ using vvl = vector<vector<ll>>;
  | 55 | Elevator Rides (CSES 1653)                  | Bitmask DP (rides, last_weight)   | O(2^N * N)| O(2^N)   |
  | 56 | Increasing Subsequence II (CSES 1748)       | Fenwick Tree Prefix DP            | O(N logN)| O(N)     |
  | 57 | Minimal Grid Path (CSES 3359)               | Level BFS Greedy Frontier Step    | O(N^2)   | O(N^2)   |
+ | 58 | Dice Combinations (CSES 1633)               | 1D Permutation Sum DP (1..6)      | O(N)     | O(N)     |
+ | 59 | Book Shop (CSES 1158)                       | 1D Space-Optimized 0/1 Knapsack   | O(N * X) | O(X)     |
+ | 60 | Money Sums (CSES 1745)                      | 1D Boolean Subset Sum DP / Bitset | O(N * Sum)| O(Sum)  |
+ | 61 | Two Sets II (CSES 1093)                     | Subset Sum S/2 with Fixed Element | O(N^3)   | O(N^2)   |
+ | 62 | Counting Towers (CSES 2413)                 | 2-State Block DP (Split vs Merge) | O(N)     | O(N)     |
+ | 63 | Counting Tilings (CSES 2181)                | Broken Profile / Bitmask DP       | O(M 2^{2N})| O(M 2^N)|
+ | 64 | Mountain Range (CSES 3150)                  | 2-State Alternating Sequence DP   | O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -1560,7 +1570,7 @@ public:
                     nxt.push_back({x, y + 1});
                 }
             }
-            cur = move(nxt);
+            cur = std::move(nxt);
         }
         return ans;
     }
@@ -1568,6 +1578,177 @@ public:
     // - Problem Statement: Find lexicographically smallest path from (0,0) to (n-1, n-1) in grid (CSES 3359).
     // - Approach: Step-by-Step Level BFS / Greedy Selection.
     // - Complexity: Time: O(N^2), Space: O(N^2).
+
+
+    // =========================================================
+    // 58. DICE COMBINATIONS (CSES 1633)
+    // =========================================================
+
+    int diceCombinations(int n) {
+        vll dp(n + 1, 0);
+        dp[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            for (int d = 1; d <= 6; d++) {
+                if (i - d >= 0) dp[i] = (dp[i] + dp[i - d]) % MOD;
+            }
+        }
+        return (int)dp[n];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count total ways to produce sum n by rolling a fair 6-sided dice (CSES 1633).
+    // - Approach: 1D Dynamic Programming (Order-dependent combination / Permutation sum).
+    // - Intuition: State dp[i] represents number of ways to form sum i; the last throw can be any d in [1..6], so dp[i] = sum(dp[i - d]).
+    // - Complexity: Time: O(N), Space: O(N).
+
+
+    // =========================================================
+    // 59. BOOK SHOP (CSES 1158)
+    // =========================================================
+
+    int bookShop(int n, int x, const vi& price, const vi& pages) {
+        vi dp(x + 1, 0);
+        for (int i = 0; i < n; i++) {
+            for (int w = x; w >= price[i]; w--) {
+                dp[w] = max(dp[w], dp[w - price[i]] + pages[i]);
+            }
+        }
+        return dp[x];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Maximize total pages from n books with given prices and pages under budget x (CSES 1158).
+    // - Approach: 1D Space-Optimized 0/1 Knapsack (Backwards weight iteration).
+    // - Intuition: Iterating weight downwards prevents taking the same book multiple times within the same round.
+    // - Complexity: Time: O(N * X), Space: O(X).
+
+
+    // =========================================================
+    // 60. MONEY SUMS (CSES 1745)
+    // =========================================================
+
+    vi moneySums(int n, const vi& coins) {
+        int maxSum = accumulate(coins.begin(), coins.end(), 0);
+        vector<bool> dp(maxSum + 1, false);
+        dp[0] = true;
+        for (int c : coins) {
+            for (int s = maxSum; s >= c; s--) {
+                if (dp[s - c]) dp[s] = true;
+            }
+        }
+        vi ans;
+        for (int s = 1; s <= maxSum; s++) {
+            if (dp[s]) ans.push_back(s);
+        }
+        return ans;
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find all distinct positive sums that can be created using a subset of n coins (CSES 1745).
+    // - Approach: 1D Boolean Subset Sum DP / Reachability Bitmask.
+    // - Intuition: For each coin c, update reachable sums backwards from maxSum down to c: `dp[s] = dp[s] || dp[s - c]`.
+    // - Complexity: Time: O(N * Sum), Space: O(Sum).
+
+
+    // =========================================================
+    // 61. TWO SETS II (CSES 1093)
+    // =========================================================
+
+    int twoSetsII(int n) {
+        ll total = 1LL * n * (n + 1) / 2;
+        if (total % 2 != 0) return 0;
+        int target = total / 2;
+        vll dp(target + 1, 0);
+        dp[0] = 1;
+        for (int i = 1; i < n; i++) {
+            for (int s = target; s >= i; s--) {
+                dp[s] = (dp[s] + dp[s - i]) % MOD;
+            }
+        }
+        return (int)dp[target];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count ways to partition {1, 2, ..., n} into two sets of equal sum modulo 10^9+7 (CSES 1093).
+    // - Approach: 0/1 Subset Sum DP up to target sum S/2 with fixed element n.
+    // - Intuition: Total sum must be even. By fixing element n in the second partition, each valid subset of {1..n-1} summing to S/2 uniquely defines one unordered two-set partition.
+    // - Complexity: Time: O(N^3), Space: O(N^2).
+
+
+    // =========================================================
+    // 62. COUNTING TOWERS (CSES 2413)
+    // =========================================================
+
+    int countingTowers(int n) {
+        vvl dp(n + 1, vl(2, 0));
+        dp[1][0] = 1; // separate blocks
+        dp[1][1] = 1; // single merged block
+        for (int i = 2; i <= n; i++) {
+            dp[i][0] = (4LL * dp[i - 1][0] + dp[i - 1][1]) % MOD;
+            dp[i][1] = (dp[i - 1][0] + 2LL * dp[i - 1][1]) % MOD;
+        }
+        return (int)((dp[n][0] + dp[n][1]) % MOD);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count valid 2 x n block towers formed by horizontal/vertical partitions (CSES 2413).
+    // - Approach: 2-State Dynamic Programming (separate vs linked tops).
+    // - Intuition: dp[i][0] (split top) transitions to next layer in 4 split ways + 1 merged way; dp[i][1] (merged top) transitions in 1 split way + 2 merged ways.
+    // - Complexity: Time: O(N), Space: O(N).
+
+
+    // =========================================================
+    // 63. COUNTING TILINGS (CSES 2181)
+    // =========================================================
+
+    int countingTilings(int n, int m) {
+        vvl dp(m + 1, vl(1 << n, 0));
+        dp[0][0] = 1;
+
+        function<void(int, int, int, int, int)> generate = [&](int col, int row, int mask, int next_mask, int idx) {
+            if (row == n) {
+                dp[col + 1][next_mask] = (dp[col + 1][next_mask] + dp[col][mask]) % MOD;
+                return;
+            }
+            if ((mask & (1 << row)) != 0) {
+                generate(col, row + 1, mask, next_mask, idx);
+            } else {
+                generate(col, row + 1, mask, next_mask | (1 << row), idx);
+                if (row + 1 < n && !(mask & (1 << (row + 1)))) {
+                    generate(col, row + 2, mask, next_mask, idx);
+                }
+            }
+        };
+
+        for (int col = 0; col < m; col++) {
+            for (int mask = 0; mask < (1 << n); mask++) {
+                if (dp[col][mask] > 0) {
+                    generate(col, 0, mask, 0, mask);
+                }
+            }
+        }
+        return (int)dp[m][0];
+    }
+    // Interview Explanation:
+    // - Problem Statement: Count total ways to perfectly tile an n x m grid with 2 x 1 dominoes (CSES 2181).
+    // - Approach: Profile DP / Column-by-Column Bitmask DP with recursive state generation.
+    // - Intuition: Bitmask of length n represents which cells of current column have horizontal dominoes extending into it; DFS generates all valid placements for the column.
+    // - Complexity: Time: O(M * 2^{2N}), Space: O(M * 2^N).
+
+
+    // =========================================================
+    // 64. MOUNTAIN RANGE (CSES 3150)
+    // =========================================================
+
+    int mountainRange(int n, const vi& h) {
+        if (n <= 1) return n;
+        int up = 1, down = 1;
+        for (int i = 1; i < n; i++) {
+            if (h[i] > h[i - 1]) up = down + 1;
+            else if (h[i] < h[i - 1]) down = up + 1;
+        }
+        return max(up, down);
+    }
+    // Interview Explanation:
+    // - Problem Statement: Find length of longest alternating mountain sub-walk across height peaks and valleys (CSES 3150).
+    // - Approach: 2-State Alternating Sequence DP (up / down running extrema).
+    // - Intuition: Maintain longest sequence ending with an uphill step (up) and downhill step (down); transitions update greedily on strictly increasing/decreasing adjacent height comparisons.
+    // - Complexity: Time: O(N), Space: O(1).
 
 };
 

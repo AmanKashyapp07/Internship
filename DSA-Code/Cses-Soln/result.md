@@ -1,6 +1,6 @@
 # CSES Problem Solutions — Problem Summary & Complexity Reference
 
-A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
+A structured reference catalog of all **61 solved CSES problems** in `DSA-Code/Cses-Soln`. Every entry includes standard problem names, difficulty tier ratings (**T 1**, **T 2**, **T 3**), algorithmic patterns, optimal time complexities, and auxiliary space complexities categorized by domain.
 
 ## Category-by-Category Analysis
 
@@ -16,30 +16,7 @@ A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/C
 
 ---
 
-### 2. Sorting and Searching
-
-| # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :-: | :--- | :--- | :--- |
-| **1** | Concert Tickets | `T 2` | Multiset Upper Bound Search. | `O((H + M) log H)` | `O(H)` |
-| **2** | Collecting Numbers | `T 1` | Inverse Index Inversions. | `O(N)` | `O(N)` |
-| **3** | Collecting Numbers II | `T 2` | Local Inversion Delta Update. | `O(N + M)` | `O(N)` |
-| **4** | Towers | `T 2` | `std::multiset` Upper Bound Greedy (Patience Sorting). | `O(N log N)` | `O(N)` |
-| **5** | Traffic Lights | `T 2` | `std::set` Position Maintenance + `std::multiset` Segment Lengths. | `O(N log N)` | `O(N)` |
-| **6** | Josephus Problem II | `T 2` | Order Statistic Tree (Policy-Based Data Structure `pbds`) / Fenwick Binary Lifting. | `O(N log N)` | `O(N)` |
-| **7** | Nested Ranges Check | `T 2` | Interval Sorting + Min/Max Sweeping. | `O(N log N)` | `O(N)` |
-| **8** | Nested Ranges Count | `T 2` | Coordinate Compression + Fenwick Tree on Sorted Intervals. | `O(N log N)` | `O(N)` |
-| **9** | Room Allocation | `T 2` | Min-Heap Event Processing (Departure Tracking). | `O(N log N)` | `O(N)` |
-| **10** | Reading Books | `T 2` | Bottleneck Max Element vs Sum. | `O(N)` | `O(1)` |
-| **11** | Subarray Divisibility | `T 2` | Prefix Remainder Frequency Map modulo N. | `O(N)` | `O(N)` |
-| **12** | Distinct Values Subarrays | `T 2` | Sliding Window Frequency Map. | `O(N)` | `O(K)` |
-| **13** | Distinct Values Subarrays II | `T 2` | Complementary Counting (Total Subarrays - Subarrays with < K distinct). | `O(N)` | `O(K)` |
-| **14** | Distinct Values Subsequences | `T 2` | Element Frequency Product \prod (freq[x] + 1) - 1. | `O(N)` | `O(N)` |
-| **15** | Movie Festival II | `T 3` | Greedy Sort by End Time + `std::multiset` Upper Bound. | `O(N log K)` | `O(K)` |
-| **16** | Maximum Subarray Sum II | `T 2` | Prefix Sum + Sliding Window Monotonic Deque / `std::multiset`. | `O(N log(B - A))` | `O(B - A)` |
-
----
-
-### 3. Range Queries
+### 2. Range Queries
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -60,7 +37,7 @@ A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/C
 
 ---
 
-### 4. Advanced Techniques
+### 3. Advanced Techniques
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -80,7 +57,7 @@ A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/C
 
 ---
 
-### 5. Additional Problems I
+### 4. Additional Problems I
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |
@@ -107,7 +84,7 @@ A structured reference catalog of all **77 solved CSES problems** in `DSA-Code/C
 
 ---
 
-### 6. Additional Problems II
+### 5. Additional Problems II
 
 | # | Problem Name | T | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :-: | :--- | :--- | :--- |

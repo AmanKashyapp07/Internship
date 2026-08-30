@@ -1,74 +1,56 @@
 /*
 ================================================================================
-  LAST-MOMENT DSA REVISION SHEET FOR ONLINE ASSESSMENTS (TOP 62 TEMPLATES)
+  LAST-MOMENT DSA REVISION SHEET FOR ONLINE ASSESSMENTS & FAANG INTERVIEWS
   File: DSA/last-moment.cpp
   Language: C++17 / C++20
 ================================================================================
   CONTENTS / INDEX:
-  01. Fast I/O, PBDS & Custom Hash
-  02. Binary Search Foundations
-  03. Two Pointers & Fast-Slow Pointers
-  04. Basic Sliding Window
-  05. Monotonic Stack
-  06. Monotonic Queue
-  07. Prefix Sums & Difference Array
-  08. Intervals Patterns
-  09. Tree DP & Traversal (Diameter, Max Path Sum, LCA)
-  10. Binary Search Tree (BST)
-  11. Trie & Bitwise Trie
-  12. Graph BFS (Standard, Multi-Source, 0-1 BFS)
-  13. Graph DFS & Grid Traversal (Cycle Detection)
-  14. Topological Sort (Kahn's & Cycle Detection)
-  15. Disjoint Set Union (DSU)
-  16. Dijkstra's Algorithm
-  17. Beintman-Ford & SPFA (Negative Cycles)
-  18. Floyd-Warshall (all-Pairs Shortest Path)
-  19. Minimum Spanning Tree (Kruskal's & Prim's)
-  20. 0/1 & Unbounded Knapsack
-  21. String / Subsequence DP (LCS, Edit Distance, LIS in O(N log N))
-  22. Grid DP (Unique Paths, Min Path Sum)
-  23. Interval DP / MCM (Matrix Chain, Burst Balloons)
-  24. Bitmask DP (Traveinting Salesperson Problem - TSP)
-  25. Digit DP Template
-  26. KMP String Matching (Prefix Function)
-  27. Rabin-Karp Rointing Hash (Double Hash)
-  28. Z-Algorithm
-  29. Heaps & Two Heaps (Median Finder)
-  30. Backtracking Template (Subsets, Permutations, Combination Sum)
-  31. Bit Manipulation Core Tricks
-  32. Math: Binary Exponentiation, Ext GCD, Modular Inverse
-  33. Sieve of Eratosthenes & SPF (Prime Factorization O(log N))
-  34. Segment Tree & Fenwick Tree (Point Update)
-  35. Tarjan's Bridges, Articulation Points & SCC
-  36. Greedy Algorithms
-  37. Kadane's Algorithm & Variants
-  38. Linked List Patterns
-  39. Stack / Expression Patterns
-  40. Binary Tree Construction & Advanced Traversal
-  41. Advanced Binary Search
-  42. Advanced Sliding Window
-  43. Coordinate Compression
-  44. Sweep Line
-  45. Meet in the Middle
-  46. Advanced Segment Tree (Lazy Propagation)
-  47. Tree Techniques (Euler Tour, Rerooting DP, Tree Difference)
-  48. Advanced Graph Patterns (SCC Condensation, DAG DP, 2-SAT)
-  49. Offline Query Techniques (Mo's Algorithm, Offline Fenwick)
-  50. Number Theory & Combinatorics (nCr Mod, Euler Totient, Catalan)
-  51. Advanced Bitmask Techniques (Submask Enumeration, XOR Basis)
-  52. Manacher's Algorithm (O(N) Longest Palindromic Substring)
-  53. Binary Lifting & Kth Ancestor (Tree Queries)
-  54. Sparse Table (Static O(1) Range Minimum Query - RMQ)
-  55. Sprague-Grundy Theorem & Nim Game (Game Theory)
-  56. Boyer-Moore Majority Voting Algorithm (> N/2 & > N/3)
-  57. Matrix Exponentiation (O(K^3 log N) Linear Recurrences)
-  58. Quickselect Algorithm (O(N) Average Kth Element)
-  59. Inversion Count (Merge Sort / Fenwick Tree)
-  60. DSU on Tree / Sack (Small-to-Large Subtree Merging)
-  61. LRU Cache Design (Doubly Linked List + Hash Map)
-  62. Palindrome Partitioning DP (Min Cuts)
+  01. Two Pointers & Fast-Slow Pointers
+  02. Monotonic Stack
+  03. Monotonic Queue
+  04. Intervals Patterns
+  05. Tree DP & Traversal (Diameter, Max Path Sum, LCA)
+  06. Binary Search Tree (BST)
+  07. Graph BFS (Standard, Multi-Source, 0-1 BFS)
+  08. Graph DFS & Grid Traversal (Cycle Detection)
+  09. Topological Sort (Kahn's & Cycle Detection)
+  10. Disjoint Set Union (DSU)
+  11. Dijkstra's Algorithm
+  12. Bellman-Ford & SPFA (Negative Cycles)
+  13. Floyd-Warshall (All-Pairs Shortest Path)
+  14. Minimum Spanning Tree (Kruskal's & Prim's)
+  15. 0/1 & Unbounded Knapsack
+  16. String / Subsequence DP (LCS, Edit Distance, LIS in O(N log N))
+  17. Grid DP (Unique Paths, Min Path Sum)
+  18. Interval DP / MCM (Matrix Chain, Burst Balloons)
+  19. Bitmask DP (Traveling Salesperson Problem - TSP)
+  20. Digit DP Template
+  21. KMP String Matching (Prefix Function & Search)
+  22. Heaps & Two Heaps (Median Finder)
+  23. Backtracking Template (Subsets, Permutations, Combination Sum)
+  24. Bit Manipulation Core Tricks
+  25. Math: Binary Exponentiation, Ext GCD, Modular Inverse
+  26. Sieve of Eratosthenes & SPF (Prime Factorization O(log N))
+  27. Greedy Algorithms
+  28. Kadane's Algorithm & Variants
+  29. Stack / Expression Patterns
+  30. Binary Tree Construction & Advanced Traversal (Pre+In, Morris)
+  31. Advanced Binary Search (Rotated Array, Peak Element)
+  32. Advanced Sliding Window (Min Window Substring)
+  33. Coordinate Compression
+  34. Sweep Line (Overlapping Events)
+  35. Meet in the Middle (Subset Sum Diff N <= 40)
+  36. Number Theory & Combinatorics (nCr Mod, Euler Totient)
+  37. Binary Lifting & Kth Ancestor (Tree Queries)
+  38. Boyer-Moore Majority Voting Algorithm (> N/2 & > N/3)
+  39. Quickselect Algorithm (O(N) Average Kth Element)
+  40. Inversion Count (Merge Sort)
+  41. LRU Cache Design (Doubly Linked List + Hash Map)
+  42. Palindrome Partitioning DP (Min Cuts)
+  43. QuickSort Implementation
 
   LAST-MINUTE PATTERN SELECTION GUIDE (AT THE BOTTOM OF FILE)
+  PRE-OA CHECKLIST & STL CHEAT SHEET
 ================================================================================
 */
 
@@ -95,21 +77,18 @@
 #include <vector>
 #include <chrono>
 
-#if __has_include(<ext/pb_ds/assoc_container.hpp>)
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp>
-using namespace __gnu_pbds;
-#endif
-
 using namespace std;
 
-using int = long long;
-using uint = unsigned long long;
+using ll = long long;
+using ull = unsigned long long;
 using pii = pair<int, int>;
+using pll = pair<ll, ll>;
 using pint = pair<int, int>;
 using vi = vector<int>;
+using vll = vector<ll>;
 using vint = vector<int>;
 using vvi = vector<vector<int>>;
+using vvll = vector<vector<ll>>;
 using vvint = vector<vector<int>>;
 
 #define all(x) (x).begin(), (x).end()
@@ -119,17 +98,14 @@ using vvint = vector<vector<int>>;
 #define ss second
 
 const int INF = 1e9 + 7;
-const int LINF = 1e18 + 7;
+const ll LINF = 1e18 + 7;
 const int MOD = 1e9 + 7;
-
 
 // for lower bound -> use lower_bound(all(v), x) - v.begin(); -> this gives the index of the first element >= x
 // for upper bound -> use upper_bound(all(v), x) - v.begin(); -> this gives the index of the first element > x
 
-
-
 // ============================================================
-// 03. TWO POINTERS & FAST-SLOW POINTERS
+// 01. TWO POINTERS & FAST-SLOW POINTERS
 // Pattern: Sorted array search, Floyd's cycle detection
 // Complexity: O(N) time, O(1) space
 // ============================================================
@@ -172,7 +148,7 @@ bool hasCycle(ListNode* head) {
 
 
 // ============================================================
-// 05. MONOTONIC STACK
+// 02. MONOTONIC STACK
 // Pattern: Next Greater/Smaller Element, Histogram Area
 // Complexity: O(N) time, O(N) space
 // ============================================================
@@ -229,7 +205,7 @@ int largestRectangleArea(vi &heights) {
 }
 
 // ============================================================
-// 06. MONOTONIC QUEUE
+// 03. MONOTONIC QUEUE
 // Pattern: Sliding Window Maximum / Minimum
 // Complexity: O(N) time, O(K) space
 // ============================================================
@@ -250,7 +226,7 @@ vi maxSlidingWindow(const vi &nums, int k) {
 
 
 // ============================================================
-// 08. INTERVALS PATTERNS
+// 04. INTERVALS PATTERNS
 // Pattern: Merge Overlapping Intervals, Interval Intersection
 // Complexity: O(N log N) time, O(N) space
 // ============================================================
@@ -270,7 +246,7 @@ vvi mergeIntervals(vvi& intervals) {
 }
 
 // ============================================================
-// 09. TREE DP & TRAVERSAL (DIAMETER, MAX PATH SUM, LCA)
+// 05. TREE DP & TRAVERSAL (DIAMETER, MAX PATH SUM, LCA)
 // Pattern: Binary Tree DP & LCA via Binary Lifting
 // Complexity: O(N) / Query O(log N) time
 // ============================================================
@@ -327,7 +303,7 @@ struct TreeLCA {
 };
 
 // ============================================================
-// 10. BINARY SEARCH TREE (BST)
+// 06. BINARY SEARCH TREE (BST)
 // Pattern: BST Validation, Range Search
 // Complexity: O(H) time, O(H) recursion stack
 // ============================================================
@@ -337,11 +313,8 @@ bool isValidBST(TreeNode* root, long long minVal = -1e18, long long maxVal = 1e1
     return isValidBST(root->left, minVal, root->val) && isValidBST(root->right, root->val, maxVal);
 }
 
-// please see trie folder
-
-
 // ============================================================
-// 12. GRAPH BFS (STANDARD, MULTI-SOURCE, 0-1 BFS)
+// 07. GRAPH BFS (STANDARD, MULTI-SOURCE, 0-1 BFS)
 // Pattern: Shortest Path Unweighted / 0-1 Weighted / Grid Waves
 // Complexity: O(V + E) time, O(V) space
 // ============================================================
@@ -393,7 +366,7 @@ int multiSourceBFS(vvi& grid) {
 }
 
 // ============================================================
-// 13. GRAPH DFS & GRID TRAVERSAL (CYCLE DETECTION)
+// 08. GRAPH DFS & GRID TRAVERSAL (CYCLE DETECTION)
 // Pattern: Connected Components, Directed Graph Cycle Detection
 // Complexity: O(V + E) time, O(V) space
 // ============================================================
@@ -424,7 +397,7 @@ bool dfsCycleUndirected(int u, const vvi& g, int parent, vector<bool>& visited) 
 }
 
 // ============================================================
-// 14. TOPOLOGICAL SORT (KAHN'S & CYCLE DETECTION)
+// 09. TOPOLOGICAL SORT (KAHN'S & CYCLE DETECTION)
 // Pattern: Dependency Ordering / Cycle Detection
 // Complexity: O(V + E) time, O(V) space
 // ============================================================
@@ -449,7 +422,7 @@ vi topoSortKahn(int n, const vvi& adj) {
 }
 
 // ============================================================
-// 15. DISJOINT SET UNION (DSU)
+// 10. DISJOINT SET UNION (DSU)
 // Pattern: Dynamic Connectivity, Merging Sets
 // Complexity: O(alpha(N)) ~ O(1) amortized
 // ============================================================
@@ -459,7 +432,7 @@ struct DSU {
     DSU(int n) {
         components = n;
         parent.resize(n + 1);
-        iota(all(parent), 0); // fiint parent[i] = i
+        iota(all(parent), 0); // fill parent[i] = i
         sz.assign(n + 1, 1);
     }
     int find(int i) {
@@ -478,13 +451,13 @@ struct DSU {
 };
 
 // ============================================================
-// 16. DIJKSTRA'S ALGORITHM
+// 11. DIJKSTRA'S ALGORITHM
 // Pattern: Non-negative weighted single-source shortest path
 // Complexity: O((V + E) log V) time, O(V) space
 // ============================================================
-vint dijkstra(int start, int n, const vector<vector<pair<int, int>>>& adj) {
-    vint dist(n + 1, LINF);
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+vll dijkstra(int start, int n, const vector<vector<pair<int, int>>>& adj) {
+    vll dist(n + 1, LINF);
+    priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
     dist[start] = 0;
     pq.push({0, start});
 
@@ -504,7 +477,7 @@ vint dijkstra(int start, int n, const vector<vector<pair<int, int>>>& adj) {
 }
 
 // ============================================================
-// 17. BEintMAN-FORD & SPFA (NEGATIVE CYCLES)
+// 12. BELLMAN-FORD & SPFA (NEGATIVE CYCLES)
 // Pattern: Negative edge shortest path & negative cycle detection
 // Complexity: SPFA Average O(E), Worst O(V * E)
 // ============================================================
@@ -538,8 +511,8 @@ bool spfa(int start, int n, const vector<vector<pair<int, int>>>& adj, vi& dist)
 }
 
 // ============================================================
-// 18. FLOYD-WARSHall (all-PAIRS SHORTEST PATH)
-// Pattern: all pairs shortest path for small V (V <= 400)
+// 13. FLOYD-WARSHALL (ALL-PAIRS SHORTEST PATH)
+// Pattern: All pairs shortest path for small V (V <= 400)
 // Complexity: O(V^3) time, O(V^2) space
 // ============================================================
 void floydWarshall(vvi& dist, int n) {
@@ -555,7 +528,7 @@ void floydWarshall(vvi& dist, int n) {
 }
 
 // ============================================================
-// 19. MINIMUM SPANNING TREE (KRUSKAL'S & PRIM'S)
+// 14. MINIMUM SPANNING TREE (KRUSKAL'S & PRIM'S)
 // Pattern: MST on connected weighted undirected graph
 // Complexity: O(E log E) time
 // ============================================================
@@ -573,13 +546,13 @@ int kruskalMST(int n, vector<Edge>& edges) {
     return (edgesAdded == n - 1) ? mstWeight : -1;
 }
 
-int primMST(int n, const vector<vector<pair<int, int>>>& adj) {
-    vint key(n + 1, LINF);
+ll primMST(int n, const vector<vector<pair<int, int>>>& adj) {
+    vll key(n + 1, LINF);
     vector<bool> inMST(n + 1, false);
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    priority_queue<pair<ll, int>, vector<pair<ll, int>>, greater<pair<ll, int>>> pq;
     key[1] = 0; // key[i] -> minimum weight edge to connect i to MST
     pq.push({0, 1});
-    int mstWeight = 0;
+    ll mstWeight = 0;
 
     while (!pq.empty()) {
         auto [w, u] = pq.top(); pq.pop();
@@ -587,7 +560,7 @@ int primMST(int n, const vector<vector<pair<int, int>>>& adj) {
         inMST[u] = true;
         mstWeight += w;
 
-        for(auto& {v, weight} : adj[u]) {
+        for (auto& [v, weight] : adj[u]) {
             if (!inMST[v] && weight < key[v]) {
                 key[v] = weight;
                 pq.push({key[v], v});
@@ -597,7 +570,7 @@ int primMST(int n, const vector<vector<pair<int, int>>>& adj) {
     return mstWeight;
 }
 // ============================================================
-// 20. 0/1 & UNBOUNDED KNAPSACK
+// 15. 0/1 & UNBOUNDED KNAPSACK
 // Pattern: Subset selection optimization (1D space optimized)
 // Complexity: O(N * W) time, O(W) space
 // ============================================================
@@ -623,7 +596,7 @@ int unboundedKnapsack(const vi& wt, const vi& val, int W) {
 } // this is used when we can take each item any number of times, and we have to return the maximum value we can get with the given weight limit W.
 
 // ============================================================
-// 21. STRING / SUBSEQUENCE DP (LCS, EDIT DISTANCE, LIS O(N log N))
+// 16. STRING / SUBSEQUENCE DP (LCS, EDIT DISTANCE, LIS O(N log N))
 // Pattern: String alignment, Longest Increasing Subsequence
 // Complexity: LCS O(N*M), LIS O(N log N)
 // ============================================================
@@ -651,7 +624,7 @@ int lis(const vi& nums) {
 }
 
 // ============================================================
-// 22. GRID DP (UNIQUE PATHS, MIN PATH SUM)
+// 17. GRID DP (UNIQUE PATHS, MIN PATH SUM)
 // Pattern: Matrix traversal DP
 // Complexity: O(R * C) time, O(C) space
 // ============================================================
@@ -669,7 +642,7 @@ int minPathSum(const vvi& grid) {
 }
 
 // ============================================================
-// 23. INTERVAL DP / MCM (MATRIX CHAIN, BURST BallOONS)
+// 18. INTERVAL DP / MCM (MATRIX CHAIN, BURST BALLOONS)
 // Pattern: Range DP over subsegments [i, j]
 // Complexity: O(N^3) time, O(N^2) space
 // ============================================================
@@ -690,7 +663,7 @@ int matrixChainMultiplication(const vi& arr) {
 }
 
 // ============================================================
-// 24. BITMASK DP (TRAVEintING SALESPERSON PROBLEM - TSP)
+// 19. BITMASK DP (TRAVELING SALESPERSON PROBLEM - TSP)
 // Pattern: Exponential state reduction using bitmasks (N <= 20)
 // Complexity: O(N^2 * 2^N) time, O(N * 2^N) space
 // ============================================================
@@ -707,7 +680,7 @@ int tsp(int u, int mask, int n, const vvi& dist, vvi& memo) {
 }
 
 // ============================================================
-// 25. DIGIT DP TEMPLATE
+// 20. DIGIT DP TEMPLATE
 // Pattern: Counting valid numbers in range [0, N]
 // Complexity: O(Digits * State * 10) time
 // ============================================================
@@ -740,32 +713,17 @@ struct DigitDP {
         return dp(0, false, true, 0);
     }
 };
-#include <bits/stdc++.h>
-using namespace std;
 
-/* ============================================================
-   1. KMP — PREFIX FUNCTION
-   ============================================================
-
-   pi[i] = length of the longest proper prefix of s[0..i]
-           which is also a suffix of s[0..i].
-
-   Use when:
-   - Searching for a pattern in a text.
-   - Finding all occurrences of a pattern.
-   - Questions involving prefix/suffix structure.
-   - "Longest proper prefix which is also suffix."
-
-   Time:  O(n)
-   Space: O(n)
-*/
-
+// ============================================================
+// 21. KMP STRING MATCHING (PREFIX FUNCTION & SEARCH)
+// Pattern: Search pattern in text in linear time
+// Complexity: O(N + M) time, O(N + M) space
+// ============================================================
 vector<int> prefix_function(const string& s) {
     int n = s.size();
     vector<int> pi(n, 0);
 
     for (int i = 1, j = 0; i < n; i++) {
-
         while (j > 0 && s[i] != s[j])
             j = pi[j - 1];
 
@@ -774,246 +732,28 @@ vector<int> prefix_function(const string& s) {
 
         pi[i] = j;
     }
-
     return pi;
 }
 
-
-/* ============================================================
-   KMP — SEARCH PATTERN
-   ============================================================
-
-   Finds all occurrences of pattern in text.
-
-   Time:  O(n + m)
-   Space: O(n + m) for this combined-string implementation.
-
-   IMPORTANT:
-   If '#' can occur in the input, choose another separator.
-*/
-
-vector<int> kmp_search(const string& text,
-                       const string& pattern) {
-
+vector<int> kmp_search(const string& text, const string& pattern) {
     if (pattern.empty() || pattern.size() > text.size())
         return {};
 
     string s = pattern + "#" + text;
-
     vector<int> pi = prefix_function(s);
-
     vector<int> ans;
     int m = pattern.size();
 
-    for (int i = m + 1; i < s.size(); i++) {
-
+    for (int i = m + 1; i < (int)s.size(); i++) {
         if (pi[i] == m) {
-            // Convert combined-string index to text index.
             ans.push_back(i - 2 * m);
         }
     }
-
     return ans;
 }
-
-
-/* ============================================================
-   2. Z-ALGORITHM
-   ============================================================
-
-   z[i] = length of the longest substring starting at i
-          that matches the prefix of s.
-
-   Example:
-       s = "aaaa"
-       z = [0, 3, 2, 1]
-
-   Use when:
-   - Pattern matching.
-   - Comparing prefixes with suffixes/substrings.
-   - Questions explicitly mention prefix matching.
-   - Finding occurrences of a pattern using:
-         pattern + '#' + text
-
-   Time:  O(n)
-   Space: O(n)
-*/
-
-vector<int> z_function(const string& s) {
-
-    int n = s.size();
-    vector<int> z(n, 0);
-
-    int l = 0, r = 0;
-
-    for (int i = 1; i < n; i++) {
-
-        // i lies inside current Z-box.
-        if (i <= r)
-            z[i] = min(r - i + 1, z[i - l]);
-
-        // Try to extend the match.
-        while (i + z[i] < n &&
-               s[z[i]] == s[i + z[i]]) {
-            z[i]++;
-        }
-
-        // Update Z-box.
-        if (i + z[i] - 1 > r) {
-            l = i;
-            r = i + z[i] - 1;
-        }
-    }
-
-    return z;
-}
-
-
-/* ============================================================
-   Z-ALGORITHM — SEARCH PATTERN
-   ============================================================
-
-   Finds all occurrences of pattern in text.
-
-   Time:  O(n + m)
-   Space: O(n + m)
-*/
-
-vector<int> z_search(const string& text,
-                     const string& pattern) {
-
-    if (pattern.empty() || pattern.size() > text.size())
-        return {};
-
-    string s = pattern + "#" + text;
-
-    vector<int> z = z_function(s);
-
-    vector<int> ans;
-    int m = pattern.size();
-
-    for (int i = m + 1; i < s.size(); i++) {
-
-        if (z[i] == m) {
-            // Position in original text.
-            ans.push_back(i - m - 1);
-        }
-    }
-
-    return ans;
-}
-
-
-/* ============================================================
-   3. MANACHER'S ALGORITHM
-   ============================================================
-
-   Finds palindrome radii for every possible center in O(n).
-
-   We transform:
-
-       "abba"
-
-       -> "^#a#b#b#a#$"
-
-   p[i] = radius of palindrome centered at i
-          in the transformed string.
-
-   For this transformation:
-
-       p[i] = length of corresponding palindrome
-              in the ORIGINAL string.
-
-   Use when:
-   - Longest palindromic substring.
-   - Find all palindromic substrings.
-   - Palindrome centered at every position.
-   - Need O(n) palindrome processing.
-
-   Time:  O(n)
-   Space: O(n)
-*/
-
-vector<int> manacher(const string& s) {
-
-    // Add separators so odd/even palindromes
-    // are handled uniformly.
-    string t = "^";
-
-    for (char ch : s) {
-        t += '#';
-        t += ch;
-    }
-
-    t += "#$";
-
-    int n = t.size();
-
-    vector<int> p(n, 0);
-
-    // c = center of rightmost palindrome
-    // r = right boundary of that palindrome
-    int c = 0;
-    int r = 0;
-
-    for (int i = 1; i < n - 1; i++) {
-
-        // Mirror position of i around c.
-        int mirror = 2 * c - i;
-
-        // Reuse previously calculated information.
-        if (i < r)
-            p[i] = min(r - i, p[mirror]);
-
-        // Expand palindrome.
-        while (t[i + 1 + p[i]] ==
-               t[i - 1 - p[i]]) {
-            p[i]++;
-        }
-
-        // Update rightmost palindrome.
-        if (i + p[i] > r) {
-            c = i;
-            r = i + p[i];
-        }
-    }
-
-    return p;
-}
-
-
-/* ============================================================
-   LONGEST PALINDROMIC SUBSTRING USING MANACHER
-   ============================================================ */
-
-string longest_palindrome(const string& s) {
-
-    if (s.empty())
-        return "";
-
-    vector<int> p = manacher(s);
-
-    int best = 0;
-    int center = 0;
-
-    for (int i = 1; i < p.size() - 1; i++) {
-
-        if (p[i] > best) {
-            best = p[i];
-            center = i;
-        }
-    }
-
-    // Convert transformed-string center/radius
-    // back to original-string indices.
-    int start = (center - best) / 2;
-
-    return s.substr(start, best);
-}
-
 
 // ============================================================
-// 29. HEAPS & TWO HEAPS (MEDIAN FINDER)
+// 22. HEAPS & TWO HEAPS (MEDIAN FINDER)
 // Pattern: Continuous median tracking / Dual PQ
 // Complexity: O(log N) per update, O(1) query
 // ============================================================
@@ -1022,30 +762,30 @@ class MedianFinder {
     priority_queue<int, vi, greater<int>> minHeap; // Upper half
 public:
     void addNum(int num) {
-        maxHeap.push(num); // Add to maxHeap first
-        minHeap.push(maxHeap.top()); // Balance: move the largest of maxHeap to minHeap
-        maxHeap.pop(); // Remove from maxHeap
+        maxHeap.push(num);
+        minHeap.push(maxHeap.top());
+        maxHeap.pop();
 
-        if (maxHeap.size() < minHeap.size()) { // Balance sizes
-            maxHeap.push(minHeap.top()); // Move the smallest of minHeap to maxHeap
-            minHeap.pop(); // Remove from minHeap
+        if (maxHeap.size() < minHeap.size()) {
+            maxHeap.push(minHeap.top());
+            minHeap.pop();
         }
     }
 
     double findMedian() {
-        if (maxHeap.size() > minHeap.size()) return maxHeap.top(); // Odd number of elements
-        return (maxHeap.top() + minHeap.top()) / 2.0; // Even number of elements
+        if (maxHeap.size() > minHeap.size()) return maxHeap.top();
+        return (maxHeap.top() + minHeap.top()) / 2.0;
     }
 };
 
 // ============================================================
-// 30. BACKTRACKING TEMPLATE
+// 23. BACKTRACKING TEMPLATE
 // Pattern: Generating Subsets, Permutations, Combinations
 // Complexity: O(2^N) or O(N!)
 // ============================================================
 void generateSubsets(int idx, vi& nums, vi& current, vvi& result) {
     result.push_back(current);
-    for (int i = idx; i < nums.size(); i++) {
+    for (int i = idx; i < (int)nums.size(); i++) {
         current.push_back(nums[i]);
         generateSubsets(i + 1, nums, current, result);
         current.pop_back();
@@ -1053,86 +793,46 @@ void generateSubsets(int idx, vi& nums, vi& current, vvi& result) {
 }
 
 // ============================================================
-// 31. BIT MANIPULATION CORE TRICKS
+// 24. BIT MANIPULATION CORE TRICKS
 // Pattern: Kernighan, LSB, Submask enumeration
 // Complexity: O(Set bits) / O(3^N for all submasks)
 // ============================================================
 void bitTricks(int mask) {
-    // Count set bits
     int count = __builtin_popcount(mask);
-    // Lowest set bit
     int lsb = mask & (-mask);
-    // Iterate submasks of mask
     for (int sub = mask; sub > 0; sub = (sub - 1) & mask) {
         // sub is a valid non-empty submask of mask
     }
 }
 
-// ===== CRUCIAL BIT TRICKS FOR OAs (Online Assessments) =====
+// Crucial Bit Helpers:
+inline bool isBitSet(int n, int i) { return (n & (1 << i)) != 0; }
+inline int setBit(int n, int i) { return n | (1 << i); }
+inline int clearBit(int n, int i) { return n & ~(1 << i); }
+inline int toggleBit(int n, int i) { return n ^ (1 << i); }
+inline bool isPowerOfTwo(int n) { return n > 0 && !(n & (n - 1)); }
+inline int clearLowestSetBit(int n) { return n & (n - 1); }
+inline int getLowestSetBit(int n) { return n & (-n); }
 
-int n = 42, i = 3; // i is 0-based index of the bit we want to manipulate from the right (LSB)
-
-// 1. Check if i-th bit is set
-bool isSet = (n & (1 << i)) != 0;
-
-// 2. Set the i-th bit
-n = n | (1 << i);
-
-// 3. Clear (unset) the i-th bit
-n = n & ~(1 << i);
-
-// 4. Toggle the i-th bit
-n = n ^ (1 << i);
-
-// 5. Check if n is a power of 2 (only one bit set, n > 0)
-bool isPow2 = n && !(n & (n - 1));
-
-// 6. Remove the rightmost set bit (Brian Kernighan's trick)
-n = n & (n - 1);   // used to count set bits efficiently
-
-// 7. Count set bits using Brian Kernighan's algorithm — O(number of set bits)
-int countBits(int x) {
+int countBitsKernighan(int x) {
     int count = 0;
     while (x) {
-        x = x & (x - 1); // drops lowest set bit each time
+        x = x & (x - 1);
         count++;
     }
     return count;
 }
-// Alternative: __builtin_popcount(x) in GCC/C++ for instant set-bit count
 
-// 8. Isolate the rightmost set bit
-int rightmostBit = n & (-n);   // works because -n is two's complement (~n + 1)
-
-// 9. Check even/odd without % operator
-bool isOdd = (n & 1);
-
-// 10. Multiply/divide by powers of 2 using shifts (faster than * or /)
-int mul = n << 1;   // n * 2
-int div = n >> 1;   // n / 2 (careful with negative numbers — rounds toward -inf)
-
-// 11. Swap two numbers without a temp variable (XOR swap)
-int a = 5, b = 9;
-a = a ^ b;
-b = a ^ b;
-a = a ^ b;
-
-// 12. XOR self-cancels — classic "find the unique element" trick
-// If every element appears twice except one, XOR of all gives the unique one
-int findUnique(vector<int>& arr) {
-    int result = 0;
-    for (int x : arr) result ^= x;   // a^a = 0, a^0 = a
-    return result;
+int findSingleUnique(const vi& arr) {
+    int res = 0;
+    for (int x : arr) res ^= x;
+    return res;
 }
 
-// 13. Find two unique numbers when all others appear twice
-// Step 1: XOR all -> gives xor of the two uniques (say diff)
-// Step 2: Isolate any set bit in diff (a bit where the two numbers differ)
-// Step 3: Split array into two groups based on that bit, XOR each group separately
-void findTwoUnique(vector<int>& arr, int &x, int &y) {
+void findTwoUnique(const vi& arr, int &x, int &y) {
     int diff = 0;
     for (int v : arr) diff ^= v;
-    int setBit = diff & (-diff);   // isolate one differing bit
+    int setBit = diff & (-diff);
     x = 0; y = 0;
     for (int v : arr) {
         if (v & setBit) x ^= v;
@@ -1140,37 +840,6 @@ void findTwoUnique(vector<int>& arr, int &x, int &y) {
     }
 }
 
-// 14. Check if two integers have opposite signs (no branching)
-bool oppositeSigns = ((a ^ b) < 0);
-
-// 15. Get position of the rightmost set bit (1-indexed)
-int rightmostSetPos = log2(n & (-n)) + 1;
-// Or using built-in: __builtin_ctz(n) + 1  (count trailing zeros)
-
-// 16. Generate all subsets (bitmask / power set enumeration)
-// For n elements, iterate mask from 0 to (1<<n)-1
-// Each bit in mask teints whether that element is included
-void generateSubsets(vector<int>& nums) {
-    int n = nums.size();
-    for (int mask = 0; mask < (1 << n); mask++) {
-        vector<int> subset;
-        for (int i = 0; i < n; i++) {
-            if (mask & (1 << i)) subset.push_back(nums[i]);
-        }
-        // process subset here
-    }
-}
-
-// 17. Turn all bits on up to position k (useful for masks)
-int allOnesUpToK = (1 << k) - 1;
-
-// 18. Check if n has alternating bits (1010...)
-bool hasAlternating(int n) {
-    int x = n ^ (n >> 1);
-    return (x & (x + 1)) == 0;
-}
-
-// 19. Reverse bits (common in "reverse bits of a 32-bit integer" style questions)
 uint32_t reverseBits(uint32_t n) {
     uint32_t result = 0;
     for (int i = 0; i < 32; i++) {
@@ -1180,31 +849,31 @@ uint32_t reverseBits(uint32_t n) {
     return result;
 }
 
-// 20. Fast modulo for powers of 2 (n % (2^k) == n & (2^k - 1))
-int fastMod = n & ((1 << k) - 1);
-
 // ============================================================
-// 32. MATH: BINARY EXPONENTIATION, EXT GCD, MOD INVERSE
+// 25. MATH: BINARY EXPONENTIATION, EXT GCD, MOD INVERSE
 // Pattern: Modular Arithmetic, Inverse
 // Complexity: O(log EXP) time
 // ============================================================
-
-int power(int base, int p){
+int power(int base, int p) {
     int res = 1;
-    while(p){
-        if(p & 1) res = (1LL * res * base) % MOD;
+    while (p) {
+        if (p & 1) res = (1LL * res * base) % MOD;
         base = (1LL * base * base) % MOD;
         p >>= 1;
     }
     return res;
 }
 
-int inverse(int a){
+int inverse(int a) {
     return power(a, MOD - 2); // Fermat's little theorem for prime MOD
 }
 
+int modInverse(int a) {
+    return inverse(a);
+}
+
 // ============================================================
-// 33. SIEVE OF ERATOSTHENES & SPF (FACTORIZATION O(log N))
+// 26. SIEVE OF ERATOSTHENES & SPF (FACTORIZATION O(log N))
 // Pattern: Fast Prime Factorization up to 1e6
 // Complexity: O(N log log N) precomp, O(log X) query
 // ============================================================
@@ -1221,7 +890,7 @@ void buildSPF() {
         }
     }
 }
-// spf[i] = smallest prime factor of i
+
 vi getPrimeFactorization(int x) {
     vi factors;
     while (x > 1) {
@@ -1231,11 +900,9 @@ vi getPrimeFactorization(int x) {
     return factors;
 }
 
-
-
 // ============================================================
-// 36. GREEDY ALGORITHMS
-// Pattern: Activity Selection, Jump Game I/II, Gas Station, Fractional Knapsack
+// 27. GREEDY ALGORITHMS
+// Pattern: Activity Selection, Jump Game I/II, Gas Station
 // Complexity: O(N) or O(N log N) time
 // ============================================================
 int maxActivities(vvi& intervals) {
@@ -1270,7 +937,7 @@ int jumpMin(const vi& nums) {
 
 int canCompleteCircuit(const vi& gas, const vi& cost) {
     int total = 0, curr = 0, start = 0;
-    for (int i = 0; i < gas.size(); i++) {
+    for (int i = 0; i < (int)gas.size(); i++) {
         int diff = gas[i] - cost[i];
         total += diff;
         curr += diff;
@@ -1280,16 +947,15 @@ int canCompleteCircuit(const vi& gas, const vi& cost) {
 }
 
 // ============================================================
-// 37. KADANE'S ALGORITHM & VARIANTS
+// 28. KADANE'S ALGORITHM & VARIANTS
 // Max Subarray | Circular Max Subarray | Max Product Subarray
 // Time: O(N) | Space: O(1)
 // ============================================================
-
 tuple<int,int,int> maxSubArray(const vi& a) {
     int cur = a[0], ans = a[0];
     int start = 0, bestL = 0, bestR = 0;
 
-    for (int i = 1; i < a.size(); ++i) {
+    for (int i = 1; i < (int)a.size(); ++i) {
         if (a[i] > cur + a[i]) {
             cur = a[i];
             start = i;
@@ -1303,7 +969,6 @@ tuple<int,int,int> maxSubArray(const vi& a) {
             bestR = i;
         }
     }
-
     return {ans, bestL, bestR};
 }
 
@@ -1320,26 +985,24 @@ int maxSubarraySumCircular(const vi& a) {
 
         total += x;
     }
-
     return mx > 0 ? max(mx, total - mn) : mx;
-} // this returns max sum of a circular subarray. If all numbers are negative, it returns the maximum single element.
+}
 
 int maxProductSubarray(const vi& a) {
     int mx = a[0], mn = a[0], ans = a[0];
 
-    for (int i = 1; i < a.size(); ++i) {
+    for (int i = 1; i < (int)a.size(); ++i) {
         if (a[i] < 0) swap(mx, mn);
 
         mx = max(a[i], mx * a[i]);
         mn = min(a[i], mn * a[i]);
         ans = max(ans, mx);
     }
-
     return ans;
 }
 
 // ============================================================
-// 39. STACK / EXPRESSION PATTERNS
+// 29. STACK / EXPRESSION PATTERNS
 // Pattern: Valid Parentheses, Min Stack, Evaluate Postfix, Decode String
 // Complexity: O(N) time, O(N) space
 // ============================================================
@@ -1378,7 +1041,7 @@ string decodeString(string s) {
 }
 
 // ============================================================
-// 40. BINARY TREE CONSTRUCTION & ADVANCED TRAVERSAL
+// 30. BINARY TREE CONSTRUCTION & ADVANCED TRAVERSAL
 // Pattern: Serialize/Deserialize, Pre+In Build, Morris Traversal
 // Complexity: O(N) time, O(N) or O(1) space
 // ============================================================
@@ -1387,7 +1050,7 @@ TreeNode* buildTreePreIn(vi& preorder, vi& inorder) {
     for (int i = 0; i < (int)inorder.size(); i++) inMap[inorder[i]] = i;
 
     function<TreeNode*(int, int, int, int)> build = [&](int preS, int preE, int inS, int inE) -> TreeNode* {
-        if (preS > preE || inS > inE) return nuintptr;
+        if (preS > preE || inS > inE) return nullptr;
         TreeNode* root = new TreeNode(preorder[preS]);
         int inRoot = inMap[root->val];
         int numsLeft = inRoot - inS;
@@ -1413,7 +1076,7 @@ vi morrisInorder(TreeNode* root) {
                 prev->right = curr;
                 curr = curr->left;
             } else {
-                prev->right = nuintptr;
+                prev->right = nullptr;
                 res.push_back(curr->val);
                 curr = curr->right;
             }
@@ -1423,9 +1086,9 @@ vi morrisInorder(TreeNode* root) {
 }
 
 // ============================================================
-// 41. ADVANCED BINARY SEARCH
-// Pattern: Rotated array, Peak element, 2D matrix, Median of 2 arrays
-// Complexity: O(log N) or O(log(min(M, N)))
+// 31. ADVANCED BINARY SEARCH
+// Pattern: Rotated array, Peak element, 2D matrix
+// Complexity: O(log N)
 // ============================================================
 int searchRotated(const vi& nums, int target) {
     int low = 0, high = (int)nums.size() - 1;
@@ -1454,7 +1117,7 @@ int findPeakElement(const vi& nums) {
 }
 
 // ============================================================
-// 42. ADVANCED SLIDING WINDOW
+// 32. ADVANCED SLIDING WINDOW
 // Pattern: Exactly K = AtMost(K) - AtMost(K-1), Min Window Substring
 // Complexity: O(N) time, O(1) or O(K) space
 // ============================================================
@@ -1477,7 +1140,7 @@ string minWindowSubstring(string s, string t) {
 }
 
 // ============================================================
-// 43. COORDINATE COMPRESSION
+// 33. COORDINATE COMPRESSION
 // Pattern: Mapping large domain [1, 1e9] to compact [0, N-1]
 // Complexity: O(N log N) time
 // ============================================================
@@ -1486,14 +1149,14 @@ vi coordinateCompress(const vi& vals) {
     sort(all(sorted));
     sorted.erase(unique(all(sorted)), sorted.end());
     vi res(vals.size());
-    for (int i = 0; i < vals.size(); i++) {
+    for (int i = 0; i < (int)vals.size(); i++) {
         res[i] = lower_bound(all(sorted), vals[i]) - sorted.begin();
     }
     return res;
 }
 
 // ============================================================
-// 44. SWEEP LINE
+// 34. SWEEP LINE
 // Pattern: Event Processing / Interval Overlap / Meeting Rooms
 // Complexity: O(N log N) time
 // ============================================================
@@ -1516,29 +1179,29 @@ int maxOverlappingIntervals(const vvi& intervals) {
 }
 
 // ============================================================
-// 45. MEET IN THE MIDDLE
+// 35. MEET IN THE MIDDLE
 // Pattern: Split array N <= 40 into two N/2 halves -> 2^(N/2)
 // Complexity: O(2^(N/2) * N) time
 // ============================================================
-int minSubsetSumDiff(const vint& arr, int target) {
+ll minSubsetSumDiff(const vi& arr, ll target) {
     int n = arr.size();
     int mid = n / 2;
-    vint leftSums, rightSums;
+    vll leftSums, rightSums;
 
     for (int mask = 0; mask < (1 << mid); mask++) {
-        int s = 0;
+        ll s = 0;
         for (int i = 0; i < mid; i++) if (mask & (1 << i)) s += arr[i];
         leftSums.push_back(s);
     }
     for (int mask = 0; mask < (1 << (n - mid)); mask++) {
-        int s = 0;
+        ll s = 0;
         for (int i = 0; i < n - mid; i++) if (mask & (1 << i)) s += arr[mid + i];
         rightSums.push_back(s);
     }
 
     sort(all(rightSums));
-    int ans = LINF;
-    for (int l : leftSums) {
+    ll ans = LINF;
+    for (ll l : leftSums) {
         auto it = lower_bound(all(rightSums), target - l);
         if (it != rightSums.end()) ans = min(ans, abs(target - (l + *it)));
         if (it != rightSums.begin()) ans = min(ans, abs(target - (l + *prev(it))));
@@ -1591,89 +1254,7 @@ struct LazySegTree {
 };
 
 // ============================================================
-// 47. TREE TECHNIQUES (EULER TOUR, REROOTING DP, TREE DIFFERENCE)
-// Pattern: Flatten tree to array segment [tin[u], tout[u]] for range queries
-// Complexity: O(N) traversal, O(log N) query
-// ============================================================
-struct EulerTour {
-    int timer = 0;
-    vi tin, tout;
-    EulerTour(int n) : tin(n + 1), tout(n + 1) {}
-    void dfs(int u, int p, const vvi& adj) {
-        tin[u] = ++timer;
-        for (int v : adj[u]) if (v != p) dfs(v, u, adj);
-        tout[u] = timer;
-    }
-};
-
-// ============================================================
-// 48. ADVANCED GRAPH PATTERNS (SCC CONDENSATION, DAG DP, 2-SAT)
-// Pattern: Condense SCCs into DAG for DP
-// Complexity: O(V + E)
-// ============================================================
-struct SCC {
-    int n, timer = 0, sccCount = 0;
-    vvi adj;
-    vi tin, low, sccId;
-    stack<int> st;
-    vector<bool> inStack;
-
-    SCC(int n, const vvi& adj) : n(n), adj(adj), tin(n + 1, 0), low(n + 1, 0), sccId(n + 1, 0), inStack(n + 1, false) {
-        for (int i = 1; i <= n; i++) if (!tin[i]) dfs(i);
-    }
-
-    void dfs(int u) {
-        tin[u] = low[u] = ++timer;
-        st.push(u);
-        inStack[u] = true;
-
-        for (int v : adj[u]) {
-            if (!tin[v]) {
-                dfs(v);
-                low[u] = min(low[u], low[v]);
-            } else if (inStack[v]) {
-                low[u] = min(low[u], tin[v]);
-            }
-        }
-
-        if (low[u] == tin[u]) {
-            sccCount++;
-            while (true) {
-                int v = st.top(); st.pop();
-                inStack[v] = false;
-                sccId[v] = sccCount;
-                if (u == v) break;
-            }
-        }
-    }
-};
-
-// ============================================================
-// 49. OFFLINE QUERY TECHNIQUES (MO'S ALGORITHM)
-// Pattern: Sort queries by block to process efficiently
-// Complexity: O((N + Q) * sqrt(N))
-// ============================================================
-struct Query {
-    int l, r, id, block;
-    bool operator<(const Query& other) const {
-        if (block != other.block) return block < other.block;
-        return (block & 1) ? r < other.r : r > other.r;
-    }
-};
-
-vi mosAlgorithm(const vi& arr, vector<Query>& queries) {
-    int n = arr.size(), q = queries.size();
-    int blockSize = max(1, (int)(n / sqrt(q)));
-    for (int i = 0; i < q; i++) queries[i].block = queries[i].l / blockSize;
-    sort(all(queries));
-
-    vi res(q);
-    int curL = 0, curR = -1;
-    return res;
-}
-
-// ============================================================
-// 50. NUMBER THEORY & COMBINATORICS
+// 36. NUMBER THEORY & COMBINATORICS
 // Pattern: nCr % P via Factorial Precomputation & Euler Totient
 // Complexity: O(N) precomp, O(1) per nCr query
 // ============================================================
@@ -1682,14 +1263,14 @@ int fact[MAXCOMB], invFact[MAXCOMB];
 
 void precomputeCombinatorics() {
     fact[0] = invFact[0] = 1;
-    for (int i = 1; i < MAXCOMB; i++) fact[i] = (fact[i - 1] * i) % MOD;
+    for (int i = 1; i < MAXCOMB; i++) fact[i] = (1LL * fact[i - 1] * i) % MOD;
     invFact[MAXCOMB - 1] = modInverse(fact[MAXCOMB - 1]);
-    for (int i = MAXCOMB - 2; i >= 1; i--) invFact[i] = (invFact[i + 1] * (i + 1)) % MOD;
+    for (int i = MAXCOMB - 2; i >= 1; i--) invFact[i] = (1LL * invFact[i + 1] * (i + 1)) % MOD;
 }
 
 int nCr(int n, int r) {
     if (r < 0 || r > n) return 0;
-    return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+    return 1LL * fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
 }
 
 int phi(int n) {
@@ -1705,63 +1286,7 @@ int phi(int n) {
 }
 
 // ============================================================
-// 51. ADVANCED BITMASK TECHNIQUES (XOR LINEAR BASIS)
-// Pattern: Find maximum XOR subset or linear independence
-// Complexity: O(BITS) per insertion
-// ============================================================
-struct XORBasis {
-    int basis[32] = {};
-    int sz = 0;
-
-    void insert(int mask) {
-        for (int i = 31; i >= 0; i--) {
-            if (!(mask & (1 << i))) continue;
-            if (!basis[i]) {
-                basis[i] = mask;
-                sz++;
-                return;
-            }
-            mask ^= basis[i];
-        }
-    }
-
-    int getMaxXOR() {
-        int maxXor = 0;
-        for (int i = 31; i >= 0; i--) {
-            if ((maxXor ^ basis[i]) > maxXor) maxXor ^= basis[i];
-        }
-        return maxXor;
-    }
-};
-
-// ============================================================
-// 52. MANACHER'S ALGORITHM
-// Pattern: Longest Palindromic Substring in linear time
-// Complexity: O(N) time, O(N) space
-// ============================================================
-string manacher(string s) {
-    string t = "^";
-    for (char c : s) { t += "#"; t += c; }
-    t += "#$";
-    int n = t.size();
-    vi p(n, 0);
-    int c = 0, r = 0;
-    for (int i = 1; i < n - 1; i++) {
-        int i_mirror = 2 * c - i;
-        if (r > i) p[i] = min(r - i, p[i_mirror]);
-        while (t[i + 1 + p[i]] == t[i - 1 - p[i]]) p[i]++;
-        if (i + p[i] > r) { c = i; r = i + p[i]; }
-    }
-    int maxLen = 0, centerIdx = 0;
-    for (int i = 1; i < n - 1; i++) {
-        if (p[i] > maxLen) { maxLen = p[i]; centerIdx = i; }
-    }
-    int start = (centerIdx - maxLen) / 2;
-    return s.substr(start, maxLen);
-}
-
-// ============================================================
-// 53. BINARY LIFTING (KTH ANCESTOR & LCA)
+// 37. BINARY LIFTING (KTH ANCESTOR & LCA)
 // Pattern: O(log N) tree queries for Kth parent & LCA
 // Complexity: O(N log N) precomp, O(log N) per query
 // ============================================================
@@ -1810,65 +1335,7 @@ struct BinaryLiftingTree {
 };
 
 // ============================================================
-// 54. SPARSE TABLE (STATIC RMQ)
-// Pattern: Range Minimum Query / GCD without updates in O(1)
-// Complexity: O(N log N) precomp, O(1) query
-// ============================================================
-struct SparseTable {
-    int n, LOG;
-    vvi st;
-    vi lg;
-
-    SparseTable(const vi& arr) {
-        n = arr.size();
-        LOG = 20;
-        st.assign(n, vi(LOG));
-        lg.assign(n + 1, 0);
-        for (int i = 2; i <= n; i++) lg[i] = lg[i / 2] + 1;
-
-        for (int i = 0; i < n; i++) st[i][0] = arr[i];
-        for (int j = 1; j < LOG; j++) {
-            for (int i = 0; i + (1 << j) <= n; i++) {
-                st[i][j] = min(st[i][j - 1], st[i + (1 << (j - 1))][j - 1]);
-            }
-        }
-    }
-
-    int queryMin(int l, int r) {
-        int j = lg[r - l + 1];
-        return min(st[l][j], st[r - (1 << j) + 1][j]);
-    }
-};
-
-// ============================================================
-// 55. SPRAGUE-GRUNDY THEOREM / NIM GAME
-// Pattern: Impartial Game Theory (Nim sum & MEX)
-// Complexity: O(N) for Nim, O(States * Transitions) for Grundy
-// ============================================================
-bool nimGameWins(const vi& piles) {
-    int xorSum = 0;
-    for (int p : piles) xorSum ^= p;
-    return xorSum != 0;
-}
-
-int calculateMEX(const unordered_set<int>& s) {
-    int mex = 0;
-    while (s.count(mex)) mex++;
-    return mex;
-}
-
-int getGrundy(int n, vi& memo, const vi& moves) {
-    if (n == 0) return 0;
-    if (memo[n] != -1) return memo[n];
-    unordered_set<int> nextStates;
-    for (int m : moves) {
-        if (n >= m) nextStates.insert(getGrundy(n - m, memo, moves));
-    }
-    return memo[n] = calculateMEX(nextStates);
-}
-
-// ============================================================
-// 56. BOYER-MOORE MAJORITY VOTING ALGORITHM
+// 38. BOYER-MOORE MAJORITY VOTING ALGORITHM
 // Pattern: Find elements appearing > N/2 or > N/3 times
 // Complexity: O(N) time, O(1) space
 // ============================================================
@@ -1903,46 +1370,7 @@ vi majorityElementNBy3(const vi& nums) {
 }
 
 // ============================================================
-// 57. MATRIX EXPONENTIATION
-// Pattern: Fast computation of linear recurrences in O(K^3 log N)
-// Complexity: O(K^3 log N) time where K is matrix size
-// ============================================================
-vvi multiplyMatrix(const vvi& A, const vvi& B, int mod = MOD) {
-    int n = A.size(), m = B[0].size(), p = B.size();
-    vvi C(n, vi(m, 0));
-    for (int i = 0; i < n; i++) {
-        for (int k = 0; k < p; k++) {
-            for (int j = 0; j < m; j++) {
-                C[i][j] = (C[i][j] + 1int * A[i][k] * B[k][j]) % mod;
-            }
-        }
-    }
-    return C;
-}
-
-vvi powerMatrix(vvi A, int p, int mod = MOD) {
-    int n = A.size();
-    vvi res(n, vi(n, 0));
-    for (int i = 0; i < n; i++) res[i][i] = 1;
-    while (p > 0) {
-        if (p & 1) res = multiplyMatrix(res, A, mod);
-        A = multiplyMatrix(A, A, mod);
-        p >>= 1;
-    }
-    return res;
-}
-
-int fibonacciMatrix(int n) {
-    if (n <= 0) return 0;
-    if (n == 1) return 1;
-    vvi T = {{1, 1}, {1, 0}};
-    T = powerMatrix(T, n - 1);
-    return T[0][0];
-} // F(0) = 0, F(1) = 1, F(2) = 1, ...
-
-
-// ============================================================
-// 58. QUICKSELECT ALGORITHM
+// 39. QUICKSELECT ALGORITHM
 // Pattern: Kth smallest/largest element without sorting
 // Complexity: O(N) average time, O(N^2) worst-case, O(1) space
 // ============================================================
@@ -1968,14 +1396,14 @@ int quickselect(vi& nums, int left, int right, int k) {
 }
 
 // ============================================================
-// 59. INVERSION COUNT (MERGE SORT)
+// 40. INVERSION COUNT (MERGE SORT)
 // Pattern: Count pairs (i < j) with A[i] > A[j] / Min Swaps
 // Complexity: O(N log N) time, O(N) space
 // ============================================================
-int mergeSortInversions(vi& arr, int l, int r) {
+ll mergeSortInversions(vi& arr, int l, int r) {
     if (l >= r) return 0;
     int mid = l + (r - l) / 2;
-    int invCount = mergeSortInversions(arr, l, mid) + mergeSortInversions(arr, mid + 1, r);
+    ll invCount = mergeSortInversions(arr, l, mid) + mergeSortInversions(arr, mid + 1, r);
     vi temp(r - l + 1);
     int i = l, j = mid + 1, k = 0;
     while (i <= mid && j <= r) {
@@ -1993,37 +1421,13 @@ int mergeSortInversions(vi& arr, int l, int r) {
 }
 
 // ============================================================
-// 60. DSU ON TREE / SACK (SMall-TO-LARGE MERGING)
-// Pattern: Offline subtree queries merging color/freq maps
-// Complexity: O(N log^2 N) or O(N log N) time, O(N) space
-// ============================================================
-void mergeMaps(map<int, int>& heavyMap, map<int, int>& lightMap) {
-    for (auto& [val, count] : lightMap) {
-        heavyMap[val] += count;
-    }
-}
-
-map<int, int> dfsSack(int u, int p, const vvi& adj, const vi& color, vi& ans) {
-    map<int, int> uMap;
-    uMap[color[u]] = 1;
-    for (int v : adj[u]) {
-        if (v == p) continue;
-        map<int, int> vMap = dfsSack(v, u, adj, color, ans);
-        if (uMap.size() < vMap.size()) swap(uMap, vMap);
-        mergeMaps(uMap, vMap);
-    }
-    ans[u] = uMap.size(); // Count distinct colors in subtree u
-    return uMap;
-}
-
-// ============================================================
-// 61. LRU CACHE DESIGN
+// 41. LRU CACHE DESIGN
 // Pattern: Fast O(1) Cache eviction using HashMap + Doubly LinkedList
 // Complexity: O(1) per get/put, O(Capacity) space
 // ============================================================
 class LRUCache {
     int cap;
-    list<pair<int, int>> dint;
+    list<pair<int, int>> dll;
     unordered_map<int, list<pair<int, int>>::iterator> cacheMap;
 
 public:
@@ -2031,28 +1435,28 @@ public:
 
     int get(int key) {
         if (!cacheMap.count(key)) return -1;
-        dint.splice(dint.begin(), dint, cacheMap[key]);
+        dll.splice(dll.begin(), dll, cacheMap[key]);
         return cacheMap[key]->second;
     }
 
     void put(int key, int value) {
         if (cacheMap.count(key)) {
             cacheMap[key]->second = value;
-            dint.splice(dint.begin(), dint, cacheMap[key]);
+            dll.splice(dll.begin(), dll, cacheMap[key]);
             return;
         }
-        if ((int)dint.size() == cap) {
-            int delKey = dint.back().first;
-            dint.pop_back();
+        if ((int)dll.size() == cap) {
+            int delKey = dll.back().first;
+            dll.pop_back();
             cacheMap.erase(delKey);
         }
-        dint.push_front({key, value});
-        cacheMap[key] = dint.begin();
+        dll.push_front({key, value});
+        cacheMap[key] = dll.begin();
     }
 };
 
 // ============================================================
-// 62. PALINDROME PARTITIONING DP
+// 42. PALINDROME PARTITIONING DP
 // Pattern: Min cuts to partition s into palindromes
 // Complexity: O(N^2) time, O(N^2) space
 // ============================================================
@@ -2097,14 +1501,10 @@ int minCutPalindromePartition(string s) {
   - Topological ordering / Dependency DAG -> Topological Sort (Kahn's BFS)
   - Subset choices / Small N (N <= 20) -> Bitmask DP / Backtracking
   - Split N <= 40 into halves -> Meet in the Middle (2^(N/2))
-  - Tree subtree queries -> Euler Tour (Flattening) / DSU on Tree (Small-to-Large)
   - Tree Kth parent / LCA queries -> Binary Lifting (O(log N))
   - Intervals / Overlapping events -> Sort by start/end / Sweep Line / Priority Queue
-  - Substring matching / Prefix match -> KMP / Z-Algorithm / Rointing Hash / Trie
-  - Longest Palindromic Substring -> Manacher's Algorithm (O(N))
-  - Game theory / Taking turns -> Nim Game XOR Sum / Sprague-Grundy (MEX)
+  - Substring matching / Pattern search -> KMP / Trie / Sliding Window
   - Majority element (> N/2 or > N/3) -> Boyer-Moore Majority Voting (O(N) time, O(1) space)
-  - Linear Recurrences / Generalized Fibonacci -> Matrix Exponentiation (O(K^3 log N))
   - Kth smallest/largest in unsorted array -> Quickselect (O(N) avg time)
   - Inverted pairs / Adjacent swaps count -> Inversion Count via Merge Sort (O(N log N))
   - O(1) Get/Put Cache -> LRU Cache (Doubly Linked List + Map)
@@ -2113,16 +1513,16 @@ int minCutPalindromePartition(string s) {
 */
 
 /*
-================================================================================
+===============================================================================
   PRE-OA CHECKLIST — READ THIS 10 MINUTES BEFORE THE TEST STARTS
-================================================================================
+===============================================================================
 
   [MINDSET / TIME MANAGEMENT]
   - Read all questions first (skim 2-3 min) before writing code for any one.
     Solve easiest/highest-confidence problem first to bank points early.
   - Hard cap per question: if stuck > 15-20 min with no progress, move on.
     Partial credit exists in most OAs (many test cases pass != all).
-  - Note constralls FIRST, always. They teint you the expected complexity:
+  - Note constraints FIRST, always. They tell you the expected complexity:
       N <= 10          -> exponential / bitmask / brute force OK
       N <= 20          -> bitmask DP (2^N * N)
       N <= 500-1000     -> O(N^2) or O(N^2 log N)
@@ -2145,20 +1545,20 @@ int minCutPalindromePartition(string s) {
     (sums, products, N > ~1e5 with counting). Cast BEFORE multiplying:
         long long x = (long long)a * b;   // not (a*b) then cast
   - Initialize variables (esp. min/max accumulators) with safe sentinels:
-        long long best = intONG_MIN; / intONG_MAX;
+        long long best = LONG_MIN; / LONG_MAX;
   - Watch off-by-one in loop bounds, mid = (l+r)/2 vs l+(r-l)/2 (overflow-safe).
   - Vector/array bounds: double check i+1, i-1 accesses near edges.
   - Modulo arithmetic: take mod after EVERY addition/multiplication,
     and handle negative mod: ((x % MOD) + MOD) % MOD.
 
-  [EDGE CASES TO MANUallY TEST BEFORE SUBMITTING]
+  [EDGE CASES TO MANUALLY TEST BEFORE SUBMITTING]
   - Empty input / empty array / empty string
   - Single element
-  - all elements identical
+  - All elements identical
   - Already sorted / reverse sorted (for sorting-based problems)
   - Negative numbers, zero, very large numbers
   - Duplicate values (esp. for two-pointer / binary search problems)
-  - Minimum and maximum constrall values (N=1 and N=max)
+  - Minimum and maximum constraint values (N=1 and N=max)
 
   [DEBUGGING UNDER TIME PRESSURE]
   - If wrong answer on hidden tests but sample passes: re-check assumptions,
@@ -2193,20 +1593,20 @@ int minCutPalindromePartition(string s) {
   - "Number of ways / arrangements"                -> combinatorics or DP + mod
   - "Contiguous subarray with max/min sum"         -> Kadane's
   - "Cycle detection in directed graph"            -> topo sort (Kahn's) fails => cycle
-  - "String matching / pattern occurs in text"     -> KMP / Z-algorithm
+  - "String matching / pattern occurs in text"     -> KMP / Trie / Sliding Window
 
   [LAST 2 MINUTES]
   - Submit something, even if incomplete — partial > zero.
   - Double-check you clicked "Submit" / "Run all Tests", not just "Run".
   - Don't leave the tab / lose internet — some platforms auto-submit on
     tab switch violations (proctoring). Keep the tab focused throughout.
-================================================================================
+===============================================================================
 */
 
 /*
-================================================================================
+===============================================================================
   STL CONTAINER SYNTAX CHEAT SHEET — QUICK REFERENCE BEFORE OA
-================================================================================
+===============================================================================
 
   [VECTOR]
   vector<int> v;                          // empty
@@ -2226,7 +1626,7 @@ int minCutPalindromePartition(string s) {
   auto it = find(v.begin(), v.end(), x);  // returns v.end() if not found
   int mn = *min_element(v.begin(), v.end());
   int mx = *max_element(v.begin(), v.end());
-  long long s = accumulate(v.begin(), v.end(), 0int);
+  long long s = accumulate(v.begin(), v.end(), 0LL);
   v.resize(newSize);
   v.clear();
 
@@ -2304,7 +1704,7 @@ int minCutPalindromePartition(string s) {
   priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
 
   [STRING]
-  string s = "heinto";
+  string s = "hello";
   s.substr(start, len);                   // substring, len optional (to end)
   s.length(); s.size();
   s += "abc";                             // concat
@@ -2312,7 +1712,7 @@ int minCutPalindromePartition(string s) {
   reverse(s.begin(), s.end());
   sort(s.begin(), s.end());
   to_string(123);                         // int -> string
-  stoi(s); stol(s); stoint(s);             // string -> int/long/long long
+  stoi(s); stol(s); stoll(s);             // string -> int/long/long long
   s.find("sub");                          // returns string::npos if not found
   s.find("sub") != string::npos           // existence check
   isalpha(c); isdigit(c); isupper(c); islower(c);
@@ -2321,7 +1721,7 @@ int minCutPalindromePartition(string s) {
   [BITSET]
   bitset<32> b(num);
   b.count();                              // number of set bits
-  b.to_uintong(); b.to_string();
+  b.to_ulong(); b.to_string();
   b[i];                                   // access/set bit i
 
   [ARRAY (fixed size, C++11)]
@@ -2342,13 +1742,13 @@ int minCutPalindromePartition(string s) {
   - vector out-of-bounds with [] is UB (no error) — use .at(i) while
     debugging to catch it, switch back to [] for speed if needed
   - comparing floating point directly (==) is unsafe, use abs(a-b) < eps
-================================================================================
+===============================================================================
 */
 
 /*
-================================================================================
+===============================================================================
   LAST-MINUTE REVISION GUIDE — DYNAMIC PROGRAMMING
-================================================================================
+===============================================================================
 
   [HOW TO RECOGNIZE A DP PROBLEM]
   - Asks for: min/max value, count of ways, is it possible (yes/no),
@@ -2361,7 +1761,7 @@ int minCutPalindromePartition(string s) {
     "longest/shortest subsequence", "partition into", "at each step choose".
 
   [THE 5-STEP DP FRAMEWORK — DO THIS ON PAPER FIRST]
-  1. Define state:  dp[i] / dp[i][j] = "what does this ceint MEAN in words"
+  1. Define state:  dp[i] / dp[i][j] = "what does this cell MEAN in words"
      (this is the step people skip and then get stuck — always write it out)
   2. Identify choices at each state (usually 2-K options per step).
   3. Write recurrence: dp[state] = best/sum of (choice -> dp[smaller state])
@@ -2372,7 +1772,7 @@ int minCutPalindromePartition(string s) {
   - Top-down: easier to write correctly under time pressure, write the
     brute-force recursion first, then add memo (map or array of -1).
         if (memo[state] != -1) return memo[state];
-        return memo[state] = /* recurrence
+        return memo[state] = compute_transition(state);
   - Bottom-up: needed when recursion depth might stack-overflow (N > ~1e5),
     or when you want O(1) space optimization after.
   - If stuck on transitions, ALWAYS write recursive brute force first,
@@ -2381,7 +1781,7 @@ int minCutPalindromePartition(string s) {
 
   [SPACE OPTIMIZATION TRICK]
   - If dp[i] only depends on dp[i-1] (or dp[i-1], dp[i-2]), drop the array
-    dimension to O(1) using rointing variables. Common in Knapsack, Fibonacci-
+    dimension to O(1) using rolling variables. Common in Knapsack, Fibonacci-
     style, House Robber-style problems. Do this ONLY after correctness works.
 
   [CLASSIC DP PATTERNS — MAP PROBLEM TO PATTERN FAST]
@@ -2395,7 +1795,7 @@ int minCutPalindromePartition(string s) {
        dp[i][j] = min over k of dp[i][k] + dp[k+1][j] + cost(i,j)
   - "Count ways to reach N using steps {1,2,3..}"  -> 1D DP, dp[i]=sum(dp[i-step])
   - "Subset sum / can we make sum S"               -> boolean DP, dp[sum] = true/false
-  - "N small (<=20), choose subset with constrall"-> Bitmask DP
+  - "N small (<=20), choose subset with constraints"-> Bitmask DP
   - "Count numbers in [L,R] with digit property"   -> Digit DP
   - "Max sum non-adjacent elements"                -> House Robber pattern,
        dp[i] = max(dp[i-1], dp[i-2] + a[i])
@@ -2403,7 +1803,7 @@ int minCutPalindromePartition(string s) {
 
   [DP DEBUGGING CHECKLIST]
   - Print the DP table for a small example, verify by hand.
-  - Check base case indices carefuinty (dp[0] vs dp[1], off-by-one is #1 bug).
+  - Check base case indices carefully (dp[0] vs dp[1], off-by-one is #1 bug).
   - Check iteration ORDER — are you using values not yet computed?
     (e.g., unbounded knapsack iterates weight ascending, 0/1 knapsack
     descending, when using 1D optimized array — this trips people up a lot)
@@ -2411,20 +1811,20 @@ int minCutPalindromePartition(string s) {
   - If "count ways" — remember answer might need % 1e9+7 at EVERY step,
     not just at the end.
 
-================================================================================
+===============================================================================
   LAST-MINUTE REVISION GUIDE — GRAPH PROBLEMS
-================================================================================
+===============================================================================
 
   [HOW TO RECOGNIZE + PICK THE RIGHT ALGORITHM FAST]
   - "Shortest path, unweighted"                    -> BFS
   - "Shortest path, weighted, all edges >= 0"       -> Dijkstra (priority_queue)
-  - "Shortest path, negative edges allowed"         -> Beintman-Ford (or SPFA)
-  - "Shortest path, negative cycle detection"       -> Beintman-Ford (N-1 relax,
-       check if Nth relaxation stiint improves something)
-  - "all-pairs shortest path, small N (<=400)"      -> Floyd-Warshall O(N^3)
+  - "Shortest path, negative edges allowed"         -> Bellman-Ford (or SPFA)
+  - "Shortest path, negative cycle detection"       -> Bellman-Ford (N-1 relax,
+       check if Nth relaxation still improves something)
+  - "All-pairs shortest path, small N (<=400)"      -> Floyd-Warshall O(N^3)
   - "Min cost to connect all nodes (spanning tree)" -> Kruskal (DSU) or Prim
   - "Grid problem, 4/8-directional movement"        -> BFS/DFS on grid,
-       treat each ceint as a node, check bounds before recursing
+       treat each cell as a node, check bounds before recursing
   - "0/1 weighted edges only (0 or 1 cost)"         -> 0-1 BFS (deque, push
        front for 0-weight, back for 1-weight)
   - "Multiple starting points, same time"           -> Multi-source BFS
@@ -2436,14 +1836,12 @@ int minCutPalindromePartition(string s) {
   - "Detect cycle in undirected graph"               -> DFS with parent tracking,
        or DSU (if union(u,v) finds u,v already same set => cycle)
   - "Group connected components / union queries"     -> DSU (Union-Find)
-  - "Find bridges/articulation points"                -> Tarjan's (disc/low arrays)
-  - "Strongly connected components"                   -> Tarjan's SCC or Kosaraju's
   - "Bipartite check"                                 -> BFS/DFS 2-coloring
   - "Min spanning tree, need actual edges used"       -> Kruskal + DSU (sort
        edges by weight, add if it doesn't form cycle)
 
   [BFS TEMPLATE — MENTAL CHECKLIST]
-  - Use queue, NOT stack (stack = DFS, common siinty mistake under pressure).
+  - Use queue, NOT stack (stack = DFS, common silly mistake under pressure).
   - Mark visited WHEN PUSHING to queue, not when popping (avoids duplicate
     pushes of the same node -> can cause TLE or wrong distances).
   - Track distance/level either via a parallel dist[] array or by
@@ -2453,7 +1851,7 @@ int minCutPalindromePartition(string s) {
   - Recursive DFS can stack overflow if graph is a long chain and N > ~1e5;
     prefer iterative DFS with explicit stack for large inputs.
   - For cycle detection in directed graphs via DFS, track 3 states per node:
-    unvisited / in current recursion stack / fuinty processed (not just
+    unvisited / in current recursion stack / fully processed (not just
     visited/unvisited — 2-state DFS cycle check is WRONG for directed graphs).
 
   [GRAPH REPRESENTATION — PICK FAST]
@@ -2473,17 +1871,22 @@ int minCutPalindromePartition(string s) {
   - Off-by-one: nodes numbered 0-indexed or 1-indexed in the problem?
     Mismatch here silently breaks everything.
   - Self-loops and multiple edges — does the problem guarantee simple graph?
-    If not, your visited/dist logic must stiint handle them correctly.
+    If not, your visited/dist logic must still handle them correctly.
   - Disconnected graph: does your BFS/DFS need to run from EVERY unvisited
     node (for "count components" style problems), not just node 0?
   - Dijkstra: skip processing if popped distance > dist[node] (stale entry
     in priority_queue) — forgetting this causes wrong answers, not just TLE.
-  - Beintman-Ford: relax all edges exactly V-1 times, then do ONE more pass
-    to detect negative cycles (if any edge stiint relaxes, cycle exists).
+  - Bellman-Ford: relax all edges exactly V-1 times, then do ONE more pass
+    to detect negative cycles (if any edge still relaxes, cycle exists).
   - Check edge weights: can they be 0? negative? does that rule out Dijkstra?
-================================================================================
+===============================================================================
 */
 
+// ============================================================
+// 43. QUICKSORT IMPLEMENTATION
+// Pattern: In-place divide and conquer sorting
+// Complexity: O(N log N) avg time, O(log N) recursion stack
+// ============================================================
 void QuickSort(vector<int>& a, int l, int r) {
     if (l >= r) return;
 
