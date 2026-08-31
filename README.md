@@ -1,12 +1,12 @@
 # My Internship Journey
 
-## The Path of Perseverance: Lessons from the Pitch
+## The Path of Perseverance
 
-Before Lionel Messi ever lifted the World Cup in Qatar, he carried the unbearable weight of repeated international heartbreak. For years, I watched as football's greatest maestro suffered defeat after defeat: a heartbreaking final loss in the 2014 World Cup, back-to-back Copa América final losses in 2015 and 2016, and even a brief, painful retirement born out of overwhelming despair. Critics questioned his resolve, and the crushing pressure of an entire nation rested on his shoulders. Yet, Messi didn't let those agonizing failures define his destiny. He returned to the pitch, recalibrated his mindset, and kept pushing forward until he finally achieved ultimate glory.
+Every great outcome is preceded by a long stretch of unglamorous effort that nobody sees. The applications that go nowhere, the interviews that don't convert, the silence after a rejection email, none of that is proof of where I'll end up. It's just the cost of trying.
 
-My internship search is my own campaign. The rejections I've faced aren't proof of my limitations-they are merely the brutal, necessary stepping stones toward my eventual triumph. Every missed opportunity refines my technique, sharpens my focus, and builds the resilience I need for victory. I will trust the process, keep stepping up to the ball, and remember that the grandest comebacks are written only after the hardest falls.
+Athletes talk about this often: the difference between the ones who make it and the ones who don't is rarely talent. It's who kept showing up after the tenth setback instead of the third. Messi spent years losing finals before he won the one that mattered. The losses weren't the story, they were the setup.
 
-Believe, Believe, and Believe.
+My internship search is the same kind of campaign. Each rejection isn't a verdict on my worth. It's data. It tells me something to refine, sharpen, or try differently next time. The offer I eventually get won't erase the rejections that came before it it'll be built on them.
 
 ---
 
@@ -16,13 +16,12 @@ Believe, Believe, and Believe.
 - **Salesforce**
 
 ### Goal
- **To secure an Internship offer**
+**To secure an internship offer**
 
 ---
 
-### Words to Live By
+### Reminder to Self
 
-> **And anytime you feel the pain, hey Jude, refrain,**  
-> **Don't carry the world upon your shoulders.**  
-> **For well you know that it's a fool who plays it cool**  
-> **By making his world a little colder.**
+I am not behind. I am not out of chances. I am in the middle of a process that only looks like failure until it doesn't.
+Keep applying. Keep improving. Keep showing up.
+The right yes is still out there and it only takes one.
