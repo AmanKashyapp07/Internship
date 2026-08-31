@@ -3,6 +3,7 @@
 #else
 #include <iostream>
 #include <vector>
+#include <list>
 #include <string>
 #include <algorithm>
 #include <cmath>
@@ -32,78 +33,36 @@ using vvl = vector<vector<ll>>;
 
 const ll MOD = 1e9 + 7;
 
-// ============================================================
-// HELPER UTILITIES FOR COMBINATORICS & MATRIX POWERS
-// ============================================================
-
-ll power(ll a, ll b, ll mod = MOD) {
-    ll res = 1; a %= mod;
-    while (b > 0) {
-        if (b & 1) res = (res * a) % mod;
-        a = (a * a) % mod;
-        b >>= 1;
-    }
-    return res;
-}
-
-ll inv(ll x, ll mod = MOD) { return power(x, mod - 2, mod); }
-
-vl fac, ifac;
-void init_nCr(int n) {
-    fac.resize(n + 1); ifac.resize(n + 1); fac[0] = 1;
-    for (int i = 1; i <= n; i++) fac[i] = (fac[i - 1] * i) % MOD;
-    ifac[n] = inv(fac[n]);
-    for (int i = n; i > 0; i--) ifac[i - 1] = (ifac[i] * i) % MOD;
-}
-
-ll nCr(int n, int r) { return (r < 0 || r > n) ? 0 : fac[n] * ifac[r] % MOD * ifac[n - r] % MOD; }
-
-vvi multiplyMatrices(const vvi &A, const vvi &B) {
-    int n = A.size(), m = B[0].size(), p = B.size();
-    vvi C(n, vi(m, 0));
-    for (int i = 0; i < n; i++)
-        for (int k = 0; k < p; k++)
-            for (int j = 0; j < m; j++)
-                C[i][j] = (C[i][j] + 1LL * A[i][k] * B[k][j]) % MOD;
-    return C;
-}
-
-vvi powerMatrices(vvi A, ll b) {
-    int n = A.size();
-    vvi res(n, vi(n, 0));
-    for (int i = 0; i < n; i++) res[i][i] = 1;
-    while (b > 0) {
-        if (b & 1) res = multiplyMatrices(res, A);
-        A = multiplyMatrices(A, A);
-        b >>= 1;
-    }
-    return res;
-}
-
 /*
  ====================================================================================================
                                       PROBLEM SUMMARY & COMPLEXITY TABLE
  ====================================================================================================
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
- | 1  | Check Subsequence                           | Greedy Two-Pointer Linear Scan    | O(|S|)   | O(1)     |
+ | 1  | Check Subsequence                           | Greedy Two-Pointer Linear Scan    | O(len(S))| O(1)     |
  | 2  | Precompute Palindromic Subarrays Table      | 2D Interval DP over Lengths       | O(N^2)   | O(N^2)   |
- | 3  | Minimum Excluded Value (MEX)                | Hash Set Presence Lookup          | O(N) avg | O(N)     |
- | 4  | Matrix Multiplication & Exponentiation      | Binary Exponentiation on Matrices | O(N^3logB| O(N^2)   |
+ | 3  | Minimum Excluded Value (MEX)                | Hash Set Presence Lookup          | O(N)     | O(N)     |
+ | 4  | Matrix Multiplication & Exponentiation      | Binary Exponentiation on Matrices | O(N^3logB)| O(N^2)   |
  | 5  | Total Area Covered by Two 2D Rectangles     | Inclusion-Exclusion Geometry      | O(1)     | O(1)     |
  | 6  | Balanced Parentheses Count (Catalan Number) | Catalan Number Formula C_n        | O(N)     | O(N)     |
- | 7  | Double Modular Exponentiation (A^(B^C))     | Fermat's Little Theorem Power Twr | O(log C) | O(1)     |
- | 8  | Counting Divisors for Multiple Queries      | Sieve Divisor Count Array         | O(MAX)   | O(MAX)   |
- | 9  | Maximum GCD of Array Pair (Common Divisors) | Multiples Frequency Bucket Sweep  | O(MAX lg)| O(MAX)   |
- | 10 | Next Prime & Deterministic Primality        | 6k +/- 1 Trial Division Primality | O(sqrt P)| O(1)     |
- | 11 | Derangements Count (Subfactorial !N)        | Recurrence D_n = (n-1)(D_n-1+D_n-2| O(N)     | O(1)     |
- | 12 | Multinomial Permutations Count              | N! / (c1! * c2! * ... * ck!)      | O(N)     | O(N)     |
- | 13 | Stars and Bars Distribution                 | Combinatorics C(N + K - 1, K)     | O(N + K) | O(N + K) |
- | 14 | Paths of Length K in Directed Graph         | Adjacency Matrix Exponentiation   | O(N^3 lg)| O(N^2)   |
- | 15 | Lehmer Code / K-th Permutation & Rank       | Factorial Base Positional Number  | O(N^2)   | O(N)     |
- | 16 | Permutation Orbit Period & LCM Modulo M     | Cycle Decomp + Max Prime Powers   | O(N rt N)| O(N)     |
- | 17 | Inclusion-Exclusion on Prime Multiples      | Bitmask Subset Product PIE        | O(K 2^K) | O(K)     |
- | 18 | General Recurrence Matrix Exponentiation    | Linear Transition State Matrix    | O(K^3 lg)| O(K^2)   |
+ | 7  | Exponentiation II (Power Tower — CSES 1712) | Euler's Totient + Fermat MOD-1    | O(log B) | O(1)     |
+ | 8  | Divisor Analysis (CSES 1713 / Number Theory)| Prime Factorization Powers Modulo | O(N logM)| O(N)     |
+ | 9  | Maximum GCD Pair in Range (CSES 1081)       | Multiples Sieve Frequency Scan    | O(M logM)| O(M)     |
+ | 10 | Next Prime Search (CSES 3396)               | Deterministic Miller-Rabin Test   | O(k log3N)| O(1)     |
+ | 11 | Derangements / Christmas Party (CSES 1717)  | Derangement Recurrence DP         | O(N)     | O(N)     |
+ | 12 | Distributing Apples / Multinomial (CSES 1715)| Stars and Bars Formula nCr        | O(N) bld | O(N)     |
+ | 13 | Creating Strings II / Stars & Bars (CSES 1716)| Multinomial Permutations Formula | O(N) bld | O(N)     |
+ | 14 | Graph Paths II / Length K Walks (CSES 1723) | Min-Plus Matrix Exponentiation    | O(V^3logK)| O(V^2)   |
+ | 15 | Permutation Inversions / Lehmer (CSES 3397) | Inversion Table + Fenwick Tree    | O(N logN)| O(N)     |
+ | 16 | Permutation Rounds / Orbit Period (CSES 3398)| Permutation Orbit LCM Modulo     | O(N logM)| O(N)     |
+ | 17 | Prime Multiples (CSES 2185 — PIE)           | Inclusion-Exclusion on Bitmasks   | O(K 2^K) | O(K)     |
+ | 18 | Throwing Dice (CSES 1096 — Order-6 Exponent)| Order-6 Companion Exponentiation | O(6^3logN)| O(1)    |
+ | 19 | Range Bitwise AND (LeetCode 201)            | Binary Prefix Bit-Shifts          | O(log R) | O(1)     |
+ | 20 | Subarray Bitwise ORs (LeetCode 898)         | Set DP / Monotonic Frontier Values| O(N * 30)| O(N * 30)|
+ | 21 | Count Total Set Bits (1 to N)               | Periodic Bit Position Math        | O(log N) | O(1)     |
+ | 22 | Count Subarrays with Bitwise AND Equal to K | Hash Map DP on Frontier Values    | O(N * 30)| O(N)     |
+ | 23 | Multiply Two 2D Matrices                    | 3-Nested Loop Dot Products        | O(M N P) | O(M * P) |
+ | 24 | N x N MEX Grid Construction                 | Bitwise XOR Matrix (i ^ j)        | O(N^2)   | O(N^2)   |
  ====================================================================================================
 */
 
@@ -111,41 +70,42 @@ vvi powerMatrices(vvi A, ll b) {
 // 1. CHECK SUBSEQUENCE
 // ============================================================
 
-bool checkSubsequence(const string &s, const string &t) {
-    int n = s.size(), m = t.size(), i = 0, j = 0;
-    while (i < n && j < m) {
-        if (s[i] == t[j]) j++;
-        i++;
+bool isSubsequence(string s, string t) {
+    int i = 0, j = 0;
+    while (i < s.size() && j < t.size()) {
+        if (s[i] == t[j]) i++;
+        j++;
     }
-    return j == m;
+    return i == s.size();
 }
 // Interview Explanation:
-// - Problem Statement: Determine whether string t is a subsequence of string s.
-// - Approach: Greedy Two-Pointer linear scan.
-// - Intuition: Advance pointer in s searching for next required character of t.
-// - Complexity: Time: O(|S|), Space: O(1).
+// - Problem Statement: Check if string s is a subsequence of string t.
+// - Approach: Greedy two-pointer scan.
+// - Intuition: Advance pointer in s only on match; advance in t always.
+// - Complexity: Time: O(len(T)), Space: O(1).
 
 
 // ============================================================
 // 2. PRECOMPUTE PALINDROMIC SUBARRAYS TABLE
 // ============================================================
 
-vvi palindromeTable(const vi &nums) {
-    int n = nums.size();
-    vvi is_pal(n, vi(n, 0));
-    for (int i = 0; i < n; i++) is_pal[i][i] = 1;
-    for (int len = 2; len <= n; len++) {
-        for (int l = 0; l + len <= n; l++) {
-            int r = l + len - 1;
-            is_pal[l][r] = (nums[l] == nums[r]) ? ((len == 2) ? 1 : is_pal[l + 1][r - 1]) : 0;
+vector<vector<bool>> precomputePalindromicSubarrays(const string& s) {
+    int n = s.size();
+    vector<vector<bool>> isPal(n, vector<bool>(n, false));
+    for (int i = 0; i < n; i++) isPal[i][i] = true;
+    for (int i = 0; i < n - 1; i++) isPal[i][i + 1] = (s[i] == s[i + 1]);
+    for (int len = 3; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            isPal[i][j] = (s[i] == s[j]) && isPal[i + 1][j - 1];
         }
     }
-    return is_pal;
+    return isPal;
 }
 // Interview Explanation:
-// - Problem Statement: Precompute 2D table indicating whether substring s[l...r] is a palindrome.
-// - Approach: Interval Dynamic Programming over substring lengths.
-// - Intuition: is_pal[l][r] = (nums[l] == nums[r]) && is_pal[l+1][r-1].
+// - Problem Statement: Precompute a table where isPal[i][j] indicates whether s[i...j] is a palindrome.
+// - Approach: 2D Interval DP expanding over substring lengths.
+// - Intuition: s[i...j] is a palindrome iff outer characters match and interior is a palindrome.
 // - Complexity: Time: O(N^2), Space: O(N^2).
 
 
@@ -153,355 +113,562 @@ vvi palindromeTable(const vi &nums) {
 // 3. MINIMUM EXCLUDED VALUE (MEX)
 // ============================================================
 
-int mex(const vi &nums) {
-    unordered_set<int> st(nums.begin(), nums.end());
-    int val = 0;
-    while (st.count(val)) val++;
-    return val;
+int findMEX(const vector<int>& nums) {
+    unordered_set<int> s(nums.begin(), nums.end());
+    int mex = 0;
+    while (s.count(mex)) mex++;
+    return mex;
 }
 // Interview Explanation:
-// - Problem Statement: Find smallest non-negative integer absent from array.
-// - Approach: Hash Set presence lookup starting from 0.
-// - Intuition: Increment counter from 0 until first missing integer in set.
-// - Complexity: Time: O(N) average, Space: O(N).
+// - Problem Statement: Find the smallest non-negative integer not present in the array.
+// - Approach: Hash Set presence lookup.
+// - Intuition: MEX is bounded in [0, N]; incrementing from 0 finds the first missing element.
+// - Complexity: Time: O(N), Space: O(N).
 
 
 // ============================================================
-// 4. MATRIX MULTIPLICATION & MATRIX EXPONENTIATION
+// 4. MATRIX MULTIPLICATION & EXPONENTIATION
 // ============================================================
-// multiplyMatrices and powerMatrices are defined in the helper utilities above.
-// Time Complexity: O(N^3 log B), Space Complexity: O(N^2).
+
+using Matrix = vector<vector<ll>>;
+
+Matrix multiply(const Matrix& A, const Matrix& B) {
+    int n = A.size();
+    Matrix C(n, vector<ll>(n, 0));
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < n; k++)
+            for (int j = 0; j < n; j++)
+                C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+    return C;
+}
+
+Matrix matrixPower(Matrix A, ll p) {
+    int n = A.size();
+    Matrix res(n, vector<ll>(n, 0));
+    for (int i = 0; i < n; i++) res[i][i] = 1;
+    while (p > 0) {
+        if (p & 1) res = multiply(res, A);
+        A = multiply(A, A);
+        p >>= 1;
+    }
+    return res;
+}
+// Interview Explanation:
+// - Problem Statement: Compute A^p for an N x N matrix modulo MOD.
+// - Approach: Binary exponentiation with O(N^3) matrix multiplication.
+// - Intuition: Repeated matrix squaring solves linear recurrences in logarithmic steps.
+// - Complexity: Time: O(N^3 log p), Space: O(N^2).
 
 
 // ============================================================
 // 5. TOTAL AREA COVERED BY TWO 2D RECTANGLES
 // ============================================================
 
-int computeArea(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
-    int area1 = (x2 - x1) * (y2 - y1), area2 = (x4 - x3) * (y4 - y3);
-    int w = max(0, min(x2, x4) - max(x1, x3));
-    int h = max(0, min(y2, y4) - max(y1, y3));
-    return area1 + area2 - (w * h);
+int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int areaA = (ax2 - ax1) * (ay2 - ay1);
+    int areaB = (bx2 - bx1) * (by2 - by1);
+    int overlapW = max(0, min(ax2, bx2) - max(ax1, bx1));
+    int overlapH = max(0, min(ay2, by2) - max(ay1, by1));
+    int overlapArea = overlapW * overlapH;
+    return areaA + areaB - overlapArea;
 }
 // Interview Explanation:
-// - Problem Statement: Find total 2D area covered by two rectilinear rectangles (LC 223).
-// - Approach: 2D Geometry Inclusion-Exclusion Principle.
-// - Intuition: Total area = Area(A) + Area(B) - Overlap(A, B).
+// - Problem Statement: Compute total 2D area covered by two rectilinear rectangles.
+// - Approach: Principle of Inclusion-Exclusion.
+// - Intuition: Total Area = Area(A) + Area(B) - Area(A ∩ B).
 // - Complexity: Time: O(1), Space: O(1).
 
 
 // ============================================================
-// 6. BALANCED PARENTHESES STRINGS COUNT (CATALAN NUMBER)
+// 6. BALANCED PARENTHESES COUNT (CATALAN NUMBER)
 // ============================================================
 
-ll countOfBalancedParentheses(int len) {
-    if (len % 2 != 0) return 0;
-    int n = len / 2;
-    init_nCr(2 * n);
-    return nCr(2 * n, n) * inv(n + 1) % MOD;
+ll catalanNumber(int n) {
+    vl C(n + 1, 0);
+    C[0] = 1;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j < i; j++) {
+            C[i] = (C[i] + C[j] * C[i - 1 - j]) % MOD;
+        }
+    }
+    return C[n];
 }
 // Interview Explanation:
-// - Problem Statement: Count valid balanced parentheses strings of length LEN.
-// - Approach: Catalan Number formula C_n = (1 / (n + 1)) * (2n choose n) where n = LEN / 2.
-// - Intuition: Balanced string corresponds to Dyck path enumerated by Catalan numbers.
-// - Complexity: Time: O(N) precomputation, Space: O(N).
+// - Problem Statement: Count number of valid parentheses sequences of length 2N.
+// - Approach: Catalan recurrence DP C_n = Sum(C_i * C_{n-1-i}).
+// - Intuition: Any valid sequence can be uniquely split as `(A)B` where A and B are valid sub-sequences.
+// - Complexity: Time: O(N^2), Space: O(N).
 
 
 // ============================================================
-// 7. DOUBLE MODULAR EXPONENTIATION (A^(B^C) MOD M)
+// 7. EXPONENTIATION II (POWER TOWER — CSES 1712)
 // ============================================================
 
-ll powerTower(ll a, ll b, ll c) {
-    // By Fermat's Little Theorem: a^(b^c) % MOD = a^( (b^c) % (MOD - 1) ) % MOD
-    ll exp = power(b, c, MOD - 1);
-    return power(a, exp, MOD);
+ll powerMod(ll base, ll exp, ll mod) {
+    ll res = 1;
+    base %= mod;
+    while (exp > 0) {
+        if (exp & 1) res = (res * base) % mod;
+        base = (base * base) % mod;
+        exp >>= 1;
+    }
+    return res;
+}
+
+ll solvePowerTower(ll a, ll b, ll c) {
+    ll exp = powerMod(b, c, MOD - 1);
+    return powerMod(a, exp, MOD);
 }
 // Interview Explanation:
-// - Problem Statement: Compute (a^(b^c)) % (10^9 + 7) (CSES 1712).
-// - Approach: Fermat's Little Theorem power reduction: exponent modulo (MOD - 1).
+// - Problem Statement: Compute a^(b^c) % (1e9 + 7) (CSES 1712).
+// - Approach: Fermat's Little Theorem: a^(MOD-1) ≡ 1 (mod MOD).
+// - Intuition: Reduce exponent (b^c) modulo (MOD - 1) before computing power of a.
 // - Complexity: Time: O(log C + log B), Space: O(1).
 
 
 // ============================================================
-// 8. COUNTING DIVISORS FOR MULTIPLE QUERIES
+// 8. DIVISOR ANALYSIS (CSES 1713 / NUMBER THEORY)
 // ============================================================
 
-vi precomputeDivisorCounts(int maxVal) {
-    vi divs(maxVal + 1, 0);
-    for (int i = 1; i <= maxVal; i++) {
-        for (int j = i; j <= maxVal; j += i) {
-            divs[j]++;
-        }
+struct DivisorAnalysis {
+    static ll countDivisors(const vector<pair<ll, ll>>& factors) {
+        ll count = 1;
+        for (auto& [p, k] : factors) count = (count * (k + 1)) % MOD;
+        return count;
     }
-    return divs;
-}
-// Interview Explanation:
-// - Problem Statement: Compute number of divisors for multiple queries up to maxVal (CSES 1713).
-// - Approach: Harmonic series sieve precomputation.
-// - Complexity: Time: O(MAX log MAX) precomputation, O(1) query, Space: O(MAX).
 
-
-// ============================================================
-// 9. MAXIMUM GCD OF ARRAY PAIR (COMMON DIVISORS)
-// ============================================================
-
-int maxGCDPair(const vi& nums, int maxVal) {
-    vi freq(maxVal + 1, 0);
-    for (int x : nums) freq[x]++;
-    for (int d = maxVal; d >= 1; d--) {
-        int multiples = 0;
-        for (int m = d; m <= maxVal; m += d) {
-            multiples += freq[m];
+    static ll sumDivisors(const vector<pair<ll, ll>>& factors) {
+        ll sum = 1;
+        for (auto& [p, k] : factors) {
+            ll num = (powerMod(p, k + 1, MOD) - 1 + MOD) % MOD;
+            ll den = powerMod(p - 1, MOD - 2, MOD);
+            ll term = (num * den) % MOD;
+            sum = (sum * term) % MOD;
         }
-        if (multiples >= 2) return d;
+        return sum;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Compute count and sum of all divisors from prime factorization.
+// - Approach: Geometric series sum and multiplicative arithmetic functions.
+// - Intuition: Multiplicative properties of divisor count and sum formulas.
+// - Complexity: Time: O(K log MOD), Space: O(1).
+
+
+// ============================================================
+// 9. MAXIMUM GCD PAIR IN RANGE (CSES 1081)
+// ============================================================
+
+int maxGCDPair(const vector<int>& arr) {
+    int maxVal = 0;
+    for (int x : arr) maxVal = max(maxVal, x);
+    vector<int> freq(maxVal + 1, 0);
+    for (int x : arr) freq[x]++;
+
+    for (int gcd = maxVal; gcd >= 1; gcd--) {
+        int count = 0;
+        for (int multiple = gcd; multiple <= maxVal; multiple += gcd) {
+            count += freq[multiple];
+            if (count >= 2) return gcd;
+        }
     }
     return 1;
 }
 // Interview Explanation:
-// - Problem Statement: Find maximum GCD shared by at least two elements in array (CSES 1081).
-// - Approach: Multiples bucket frequency sweep from maxVal down to 1.
-// - Complexity: Time: O(MAX log MAX + N), Space: O(MAX).
+// - Problem Statement: Find maximum GCD among any pair of elements in array (CSES 1081).
+// - Approach: Sieve-like multiple frequency counting backwards from maxVal.
+// - Intuition: Harmonic series iteration: the first candidate GCD with >= 2 multiples is optimal.
+// - Complexity: Time: O(M log M + N), Space: O(M).
 
 
 // ============================================================
-// 10. NEXT PRIME & DETERMINISTIC PRIMALITY
+// 10. NEXT PRIME SEARCH (CSES 3396)
 // ============================================================
 
-bool isPrimeCheck(ll n) {
+bool millerRabinPrime(ll n) {
     if (n < 2) return false;
     if (n == 2 || n == 3) return true;
-    if (n % 2 == 0 || n % 3 == 0) return false;
-    for (ll d = 5; d * d <= n; d += 6) {
-        if (n % d == 0 || n % (d + 2) == 0) return false;
+    if (n % 2 == 0) return false;
+    ll d = n - 1; int s = 0;
+    while (d % 2 == 0) { d /= 2; s++; }
+    static const vector<ll> bases = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+    for (ll a : bases) {
+        if (n <= a) break;
+        ll x = powerMod(a, d, n);
+        if (x == 1 || x == n - 1) continue;
+        bool composite = true;
+        for (int r = 1; r < s; r++) {
+            x = ((__int128)x * x) % n;
+            if (x == n - 1) { composite = false; break; }
+        }
+        if (composite) return false;
     }
     return true;
 }
 
-ll getNextPrime(ll n) {
-    ll x = n + 1;
-    if (x <= 2) return 2;
-    if (x % 2 == 0) x++;
-    while (!isPrimeCheck(x)) x += 2;
-    return x;
+ll nextPrime(ll n) {
+    ll cur = n;
+    while (!millerRabinPrime(cur)) cur++;
+    return cur;
 }
 // Interview Explanation:
-// - Problem Statement: Find smallest prime strictly greater than n (CSES 3396).
-// - Approach: 6k +/- 1 trial division primality testing + linear odd-step progression.
-// - Complexity: Time: O(sqrt P) per query, Space: O(1).
+// - Problem Statement: Find the smallest prime >= n (CSES 3396).
+// - Approach: Deterministic Miller-Rabin Primality Test for 64-bit integers.
+// - Intuition: Prime gaps are small (~O(log N)); Miller-Rabin tests each candidate deterministically.
+// - Complexity: Time: O(log^3 N), Space: O(1).
 
 
 // ============================================================
-// 11. DERANGEMENTS COUNT (SUBFACTORIAL !N)
+// 11. DERANGEMENTS / CHRISTMAS PARTY (CSES 1717)
 // ============================================================
 
 ll countDerangements(int n) {
     if (n == 1) return 0;
     if (n == 2) return 1;
-    ll d0 = 0, d1 = 1;
+    ll prev2 = 0, prev1 = 1;
     for (int i = 3; i <= n; i++) {
-        ll cur = (1LL * (i - 1) * ((d0 + d1) % MOD)) % MOD;
-        d0 = d1;
-        d1 = cur;
+        ll cur = ((i - 1) * (prev1 + prev2)) % MOD;
+        prev2 = prev1;
+        prev1 = cur;
     }
-    return d1;
+    return prev1;
 }
 // Interview Explanation:
 // - Problem Statement: Count permutations where no element appears in its original position (CSES 1717).
-// - Approach: Subfactorial DP recurrence D_n = (n - 1) * (D_{n-1} + D_{n-2}) mod MOD.
+// - Approach: Derangement Recurrence: D(n) = (n - 1) * (D(n - 1) + D(n - 2)).
+// - Intuition: Element 1 has (n - 1) choices to swap; case analysis on whether the other element takes pos 1 yields the recurrence.
 // - Complexity: Time: O(N), Space: O(1).
 
 
 // ============================================================
-// 12. MULTINOMIAL PERMUTATIONS COUNT
+// 12. DISTRIBUTING APPLES / MULTINOMIAL (CSES 1715)
 // ============================================================
 
-ll multinomialPermutations(const string& s) {
-    int n = s.size();
-    init_nCr(n);
-    vi count(26, 0);
-    for (char c : s) count[c - 'a']++;
-    ll ans = fac[n];
-    for (int i = 0; i < 26; i++) {
-        if (count[i] > 1) {
-            ans = (ans * ifac[count[i]]) % MOD;
-        }
+struct Combinatorics {
+    vl fact, invFact;
+    Combinatorics(int n) : fact(n + 1), invFact(n + 1) {
+        fact[0] = 1;
+        for (int i = 1; i <= n; i++) fact[i] = (fact[i - 1] * i) % MOD;
+        invFact[n] = powerMod(fact[n], MOD - 2, MOD);
+        for (int i = n - 1; i >= 0; i--) invFact[i] = (invFact[i + 1] * (i + 1)) % MOD;
     }
+    ll nCr(int n, int r) {
+        if (r < 0 || r > n) return 0;
+        return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+    }
+};
+
+ll distributeApples(int n, int m) {
+    Combinatorics comb(n + m);
+    return comb.nCr(n + m - 1, n - 1);
+}
+// Interview Explanation:
+// - Problem Statement: Distribute m identical apples to n children (CSES 1715).
+// - Approach: Stars and Bars theorem: C(m + n - 1, n - 1).
+// - Intuition: Placing n - 1 dividers among m stars.
+// - Complexity: Time: O(N + M) build, O(1) query, Space: O(N + M).
+
+
+// ============================================================
+// 13. CREATING STRINGS II / STARS & BARS (CSES 1716)
+// ============================================================
+
+ll creatingStringsII(string s) {
+    int n = s.size();
+    Combinatorics comb(n);
+    vector<int> freq(26, 0);
+    for (char c : s) freq[c - 'a']++;
+    ll ans = comb.fact[n];
+    for (int f : freq) ans = (ans * comb.invFact[f]) % MOD;
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Count distinct permutations of string with character duplicates (CSES 1715).
-// - Approach: Multinomial formula N! / prod(count[c]!).
+// - Problem Statement: Count distinct permutations of a string with repeating characters (CSES 1716).
+// - Approach: Multinomial Coefficient: N! / (f_a! * f_b! * ... * f_z!).
+// - Intuition: Factorial of total length divided by factorials of identical character frequencies.
 // - Complexity: Time: O(N), Space: O(N).
 
 
 // ============================================================
-// 13. STARS AND BARS COMBINATORIAL DISTRIBUTION
+// 14. GRAPH PATHS II / LENGTH K WALKS (CSES 1723)
 // ============================================================
 
-ll starsAndBars(int n_children, int m_apples) {
-    // Distribute m identical objects among n distinct bins: C(n + m - 1, m)
-    init_nCr(n_children + m_apples);
-    return nCr(n_children + m_apples - 1, m_apples);
+Matrix minPlusMultiply(const Matrix& A, const Matrix& B) {
+    int n = A.size();
+    Matrix C(n, vector<ll>(n, 2e18));
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < n; k++)
+            for (int j = 0; j < n; j++)
+                if (A[i][k] < 2e18 && B[k][j] < 2e18)
+                    C[i][j] = min(C[i][j], A[i][k] + B[k][j]);
+    return C;
 }
-// Interview Explanation:
-// - Problem Statement: Count ways to distribute m identical items to n distinct groups (CSES 1716).
-// - Approach: Stars and Bars Theorem: C(n + m - 1, m).
-// - Complexity: Time: O(N + M), Space: O(N + M).
 
-
-// ============================================================
-// 14. PATHS OF LENGTH K IN DIRECTED GRAPH
-// ============================================================
-
-ll countGraphPathsLengthK(int n, const vvi& adj, ll k, int src, int dest) {
-    vvi A = adj;
-    vvi P = powerMatrices(A, k);
-    return P[src - 1][dest - 1];
-}
-// Interview Explanation:
-// - Problem Statement: Count number of paths of exact length K from node 1 to node N (CSES 1723).
-// - Approach: Binary Matrix Exponentiation on Graph Adjacency Matrix (A^K).
-// - Complexity: Time: O(N^3 log K), Space: O(N^2).
-
-
-// ============================================================
-// 15. LEHMER CODE / K-TH PERMUTATION & RANK
-// ============================================================
-
-vi getKthPermutation(int n, ll k) {
-    vl factorials(n + 1, 1);
-    for (int i = 1; i <= n; i++) factorials[i] = factorials[i - 1] * i;
-    k--; // 0-based
-    vi unused(n), res;
-    iota(unused.begin(), unused.end(), 1);
-    for (int rem = n; rem >= 1; rem--) {
-        ll block = factorials[rem - 1];
-        int idx = k / block;
-        res.push_back(unused[idx]);
-        unused.erase(unused.begin() + idx);
-        k %= block;
+ll shortestPathKWalks(int n, int k, Matrix& adjMatrix) {
+    Matrix res = adjMatrix;
+    k--;
+    Matrix base = adjMatrix;
+    while (k > 0) {
+        if (k & 1) res = minPlusMultiply(res, base);
+        base = minPlusMultiply(base, base);
+        k >>= 1;
     }
-    return res;
+    return res[0][n - 1] >= 2e18 ? -1 : res[0][n - 1];
 }
+// Interview Explanation:
+// - Problem Statement: Find shortest path of EXACTLY K edges between node 1 and N (CSES 1723).
+// - Approach: (Min, +) Tropical Semiring Matrix Exponentiation.
+// - Intuition: Replace standard (+, *) matrix multiplication with (min, +) to propagate shortest path lengths.
+// - Complexity: Time: O(V^3 log K), Space: O(V^2).
 
-ll getPermutationRank(const vi& p) {
-    int n = p.size();
-    vl factorials(n + 1, 1);
-    for (int i = 1; i <= n; i++) factorials[i] = factorials[i - 1] * i;
-    vi unused(n);
-    iota(unused.begin(), unused.end(), 1);
-    ll rank = 0;
+
+// ============================================================
+// 15. PERMUTATION INVERSIONS / LEHMER (CSES 3397)
+// ============================================================
+
+struct Fenwick {
+    int n; vi tree;
+    Fenwick(int n) : n(n), tree(n + 1, 0) {}
+    void add(int i, int delta) { for (; i <= n; i += i & -i) tree[i] += delta; }
+    int query(int i) { int sum = 0; for (; i > 0; i -= i & -i) sum += tree[i]; return sum; }
+};
+
+vl lehmerCode(const vi& perm) {
+    int n = perm.size();
+    Fenwick bit(n);
+    vl code(n);
+    for (int i = n - 1; i >= 0; i--) {
+        code[i] = bit.query(perm[i]);
+        bit.add(perm[i], 1);
+    }
+    return code;
+}
+// Interview Explanation:
+// - Problem Statement: Compute Lehmer code / inversion table of a permutation (CSES 3397).
+// - Approach: Fenwick tree (Binary Indexed Tree) scanning backwards.
+// - Intuition: Counting elements smaller than perm[i] to its right.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+
+// ============================================================
+// 16. PERMUTATION ROUNDS / ORBIT PERIOD (CSES 3398)
+// ============================================================
+
+ll permutationOrbitLCM(const vi& perm) {
+    int n = perm.size();
+    vector<bool> vis(n, false);
+    map<int, int> primeMaxPower;
+
     for (int i = 0; i < n; i++) {
-        int idx = find(unused.begin(), unused.end(), p[i]) - unused.begin();
-        rank += idx * factorials[n - i - 1];
-        unused.erase(unused.begin() + idx);
-    }
-    return rank + 1; // 1-based
-}
-// Interview Explanation:
-// - Problem Statement: Convert between 1-based lexicographical rank and Nth permutation (CSES 3397 / LC 60).
-// - Approach: Factorial Number System (Lehmer Code / Positional Division).
-// - Complexity: Time: O(N^2), Space: O(N).
-
-
-// ============================================================
-// 16. PERMUTATION ORBIT PERIOD & LCM MODULO M
-// ============================================================
-
-ll permutationOrbitPeriodLCM(int n, const vi& p) {
-    vector<bool> vis(n + 1, false);
-    unordered_map<int, int> maxPrimePower;
-
-    for (int i = 1; i <= n; i++) {
-        if (vis[i]) continue;
-        int cur = i, len = 0;
-        while (!vis[cur]) {
-            vis[cur] = true;
-            cur = p[cur];
-            len++;
-        }
-        int temp = len;
-        for (int d = 2; d * d <= temp; d++) {
-            if (temp % d == 0) {
-                int cnt = 0;
-                while (temp % d == 0) { temp /= d; cnt++; }
-                maxPrimePower[d] = max(maxPrimePower[d], cnt);
+        if (!vis[i]) {
+            int len = 0, cur = i;
+            while (!vis[cur]) { vis[cur] = true; cur = perm[cur] - 1; len++; }
+            int temp = len;
+            for (int p = 2; p * p <= temp; p++) {
+                if (temp % p == 0) {
+                    int count = 0;
+                    while (temp % p == 0) { count++; temp /= p; }
+                    primeMaxPower[p] = max(primeMaxPower[p], count);
+                }
             }
+            if (temp > 1) primeMaxPower[temp] = max(primeMaxPower[temp], 1);
         }
-        if (temp > 1) maxPrimePower[temp] = max(maxPrimePower[temp], 1);
     }
-
-    ll lcm = 1;
-    for (auto [prime, powerVal] : maxPrimePower) {
-        lcm = (lcm * power(prime, powerVal)) % MOD;
-    }
-    return lcm;
-}
-// Interview Explanation:
-// - Problem Statement: Find number of rounds for permutation to return to original state mod 10^9+7 (CSES 3398).
-// - Approach: Disjoint Cycle Decomposition + LCM calculated via maximum prime powers mod MOD.
-// - Complexity: Time: O(N + sum sqrt(L_i)), Space: O(N).
-
-
-// ============================================================
-// 17. INCLUSION-EXCLUSION PRINCIPLE ON PRIME MULTIPLES
-// ============================================================
-
-ll countPrimeMultiples(ll n, int k, const vl& primes) {
-    ll ans = 0;
-    for (int mask = 1; mask < (1 << k); mask++) {
-        ll prod = 1;
-        bool ok = true;
-        for (int i = 0; i < k; i++) {
-            if (mask & (1 << i)) {
-                if (prod > n / primes[i]) { ok = false; break; }
-                prod *= primes[i];
-            }
-        }
-        if (ok) {
-            int bits = __builtin_popcount(mask);
-            if (bits % 2 == 1) ans += n / prod;
-            else ans -= n / prod;
-        }
+    ll ans = 1;
+    for (auto& [p, power] : primeMaxPower) {
+        ans = (ans * powerMod(p, power, MOD)) % MOD;
     }
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Count integers in 1..N divisible by at least one of K primes (K <= 20) (CSES 2185).
-// - Approach: Principle of Inclusion-Exclusion (PIE) with overflow-safe product checks over bitmask subsets.
+// - Problem Statement: Find period of permutation orbit: LCM of all cycle lengths modulo 1e9+7 (CSES 3398).
+// - Approach: Disjoint cycle decomposition + prime-factor max power tracking.
+// - Intuition: Modular LCM requires tracking global max prime exponent across all cycle lengths.
+// - Complexity: Time: O(N log MOD), Space: O(N).
+
+
+// ============================================================
+// 17. PRIME MULTIPLES (CSES 2185 — PIE)
+// ============================================================
+
+ll countPrimeMultiples(ll n, int k, const vl& primes) {
+    ll total = 0;
+    for (int mask = 1; mask < (1 << k); mask++) {
+        ll prod = 1;
+        bool overflow = false;
+        int bitCount = 0;
+        for (int i = 0; i < k; i++) {
+            if ((mask >> i) & 1) {
+                bitCount++;
+                if (prod > n / primes[i]) { overflow = true; break; }
+                prod *= primes[i];
+            }
+        }
+        if (overflow) continue;
+        if (bitCount % 2 == 1) total += n / prod;
+        else total -= n / prod;
+    }
+    return total;
+}
+// Interview Explanation:
+// - Problem Statement: Count numbers <= n divisible by at least one of k primes (CSES 2185).
+// - Approach: Principle of Inclusion-Exclusion over 2^K bitmasks with overflow guards.
+// - Intuition: Add odd-sized intersections, subtract even-sized intersections.
 // - Complexity: Time: O(K * 2^K), Space: O(K).
 
 
 // ============================================================
-// 18. GENERAL RECURRENCE MATRIX EXPONENTIATION (THROWING DICE)
+// 18. THROWING DICE (CSES 1096 — ORDER-6 EXPONENTIATION)
 // ============================================================
 
-ll throwingDiceSumN(ll n) {
-    if (n <= 0) return 1;
-    if (n == 1) return 1;
-    if (n == 2) return 2;
-    if (n == 3) return 4;
-    if (n == 4) return 8;
-    if (n == 5) return 16;
-    if (n == 6) return 32;
+ll throwingDiceWays(ll n) {
+    if (n < 0) return 0;
+    Matrix T(6, vector<ll>(6, 0));
+    for (int j = 0; j < 6; j++) T[0][j] = 1;
+    for (int i = 1; i < 6; i++) T[i][i - 1] = 1;
 
-    vvi T = {
-        {1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 1, 0}
-    };
-    vvi P = powerMatrices(T, n - 6);
-    vl base = {32, 16, 8, 4, 2, 1};
-    ll ans = 0;
-    for (int j = 0; j < 6; j++) {
-        ans = (ans + 1LL * P[0][j] * base[j]) % MOD;
-    }
-    return ans;
+    Matrix Tn = matrixPower(T, n);
+    return Tn[0][0];
 }
 // Interview Explanation:
-// - Problem Statement: Count ways to reach sum N by throwing a 6-sided die modulo 10^9+7 (CSES 1096).
-// - Approach: 6 x 6 Companion Transition Matrix Exponentiation for order-6 linear recurrence.
-// - Complexity: Time: O(6^3 log N), Space: O(6^2).
+// - Problem Statement: Count ways to get sum n by throwing dice with outcomes 1 to 6 (CSES 1096).
+// - Approach: Order-6 Companion Matrix Exponentiation.
+// - Intuition: Recurrence dp[n] = dp[n-1] + ... + dp[n-6] represented in 6x6 transition matrix.
+// - Complexity: Time: O(6^3 log N), Space: O(1).
+
+
+// ============================================================
+// 19. RANGE BITWISE AND — LeetCode 201
+// ============================================================
+
+int rangeBitwiseAnd(int left, int right) {
+    int shift = 0;
+    while (left < right) {
+        left >>= 1;
+        right >>= 1;
+        shift++;
+    }
+    return left << shift;
+}
+// Interview Explanation:
+// - Problem Statement: Bitwise AND of all numbers in range [left, right] (LeetCode 201).
+// - Approach: Find Common Binary Prefix.
+// - Intuition: Bit positions that change between left and right will evaluate to 0 in bitwise AND.
+// - Complexity: Time: O(log R), Space: O(1).
+
+
+// ============================================================
+// 20. SUBARRAY BITWISE ORS — LeetCode 898
+// ============================================================
+
+int subarrayBitwiseORs(vector<int>& arr) {
+    unordered_set<int> allOrs, curOrs;
+    for (int x : arr) {
+        unordered_set<int> nextOrs = {x};
+        for (int y : curOrs) nextOrs.insert(x | y);
+        curOrs = std::move(nextOrs);
+        for (int v : curOrs) allOrs.insert(v);
+    }
+    return allOrs.size();
+}
+// Interview Explanation:
+// - Problem Statement: Find number of distinct bitwise ORs of all non-empty subarrays (LeetCode 898).
+// - Approach: Set Dynamic Programming on Frontier Values.
+// - Intuition: Bitwise OR is monotonically non-decreasing and can change at most 30 times.
+// - Complexity: Time: O(30 * N), Space: O(30 * N).
+
+
+// ============================================================
+// 21. COUNT TOTAL SET BITS (1 TO N)
+// ============================================================
+
+int countTotalSetBits(int n) {
+    int total = 0;
+    n++;
+    for (int i = 0; (1 << i) <= n; i++) {
+        int cycle = 1 << (i + 1);
+        int fullCycles = n / cycle;
+        total += fullCycles * (1 << i);
+        int rem = n % cycle;
+        total += max(0, rem - (1 << i));
+    }
+    return total;
+}
+// Interview Explanation:
+// - Problem Statement: Count total number of set bits (1s) across all integers from 1 to n.
+// - Approach: Periodic Bit Position Contribution Math.
+// - Intuition: For bit position i, bits alternate in cycles of length 2^(i+1).
+// - Complexity: Time: O(log N), Space: O(1).
+
+
+// ============================================================
+// 22. COUNT SUBARRAYS WITH BITWISE AND EQUAL TO K
+// ============================================================
+
+long long countSubarraysWithAndK(vector<int>& nums, int k) {
+    long long count = 0;
+    unordered_map<int, int> prevAnds;
+    for (int x : nums) {
+        unordered_map<int, int> currAnds;
+        if ((x & k) == k) {
+            currAnds[x] = 1;
+            for (auto& [val, freq] : prevAnds) {
+                currAnds[val & x] += freq;
+            }
+            for (auto& [val, freq] : currAnds) {
+                if (val == k) count += freq;
+            }
+        }
+        prevAnds = currAnds;
+    }
+    return count;
+}
+// Interview Explanation:
+// - Problem Statement: Count total number of subarrays whose bitwise AND equals k.
+// - Approach: Hash Map DP on Frontier Bitwise AND Values.
+// - Intuition: Frontier values are bounded by <= 30 distinct values at each index.
+// - Complexity: Time: O(N * 30), Space: O(30).
+
+
+// ============================================================
+// 23. MULTIPLY TWO 2D MATRICES
+// ============================================================
+
+vector<vector<int>> multiplyMatrices(vector<vector<int>>& A, vector<vector<int>>& B) {
+    int m = A.size(), k = A[0].size(), n = B[0].size();
+    vector<vector<int>> C(m, vector<int>(n, 0));
+    for (int i = 0; i < m; i++) {
+        for (int p = 0; p < k; p++) {
+            if (A[i][p] == 0) continue;
+            for (int j = 0; j < n; j++) {
+                C[i][j] += A[i][p] * B[p][j];
+            }
+        }
+    }
+    return C;
+}
+// Interview Explanation:
+// - Problem Statement: Multiply matrix A (m x k) by matrix B (k x n).
+// - Approach: Cache-friendly row-major 3-nested loop with zero skipping.
+// - Intuition: `C[i][j] = Sum(A[i][p] * B[p][j])`.
+// - Complexity: Time: O(M * K * N), Space: O(M * N).
+
+
+// ============================================================
+// 24. N X N MEX GRID CONSTRUCTION
+// ============================================================
+
+vector<vector<int>> constructMEXGrid(int n) {
+    vector<vector<int>> grid(n, vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            grid[i][j] = (i ^ j);
+        }
+    }
+    return grid;
+}
+// Interview Explanation:
+// - Problem Statement: Construct an n x n grid where every row and column has distinct values with minimum MEX properties.
+// - Approach: Bitwise XOR matrix `grid[i][j] = i ^ j` (Nim addition table).
+// - Intuition: XOR grid forms a Latin square / group table where each row/column is a permutation of [0, 2^k - 1].
+// - Complexity: Time: O(N^2), Space: O(N^2).
