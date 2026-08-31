@@ -42,96 +42,28 @@ const ll MOD = 1e9 + 7;
  ====================================================================================================
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
- | 1  | Find Median from Data Stream (LC 295)       | Dual Balanced Heaps (Max/Min)     | O(log N) | O(N)     |
- | 2  | Kth Largest in a Stream (LeetCode 703)      | Fixed-Size K Min-Heap Stream      | O(log K) | O(K)     |
- | 3  | Moving Average from Stream (LeetCode 346)   | Sliding Circular Buffer / Queue   | O(1)     | O(W)     |
- | 4  | First Unique Number in Stream (LC 1429)     | Doubly Linked List + Hash Map     | O(1)     | O(N)     |
- | 5  | First Non-Repeating Character in Stream     | Frequency Table + FIFO Queue      | O(1) avg | O(1)     |
- | 6  | Online Stock Span (LeetCode 901)            | Monotonic Decreasing Stack        | O(1) avg | O(N)     |
- | 7  | Design Hit Counter (LeetCode 362)           | Circular Buckets (300s) / Queue   | O(1)     | O(1)     |
- | 8  | Logger Rate Limiter (LeetCode 359)          | Hash Map Expiration Timestamps    | O(1)     | O(M)     |
- | 9  | Front Middle Back Queue (LeetCode 1670)     | Dual Balanced Deques (Left/Right) | O(1) all | O(N)     |
- | 10 | Finding MK Average (LeetCode 1825)          | 3 Multisets (Left, Mid, Right)    | O(log M) | O(M)     |
- | 11 | Stream of Characters (LeetCode 1032)        | Reversed Suffix Trie + Stream Log | O(L)     | O(Trie)  |
- | 12 | Snapshot Array (LeetCode 1146)              | History Vectors + Binary Search   | O(log S) | O(N + U) |
- | 13 | Stock Price Fluctuation (LeetCode 2034)     | Hash Map + Balanced Multiset      | O(log N) | O(N)     |
- | 14 | Time Based Key-Value Store (LeetCode 981)   | Hash Map + Sorted Vector UB       | O(log T) | O(K * T) |
- | 15 | Sliding Window Median (LeetCode 480)        | Dual Multisets / Lazy Heap Deletes| O(N logK)| O(K)     |
- | 16 | Maximum Frequency Stack (LeetCode 895)      | Frequency Map + Stacks per Level  | O(1) all | O(N)     |
- | 17 | Seat Reservation Manager (LeetCode 1845)    | Min-Heap of Free Seat IDs         | O(log N) | O(N)     |
- | 18 | Design Underground System (LeetCode 1396)   | Dual Hash Maps (Transit & Stats)  | O(1) all | O(P + S2)|
- | 19 | Number of Recent Calls (LeetCode 933)       | Sliding Window Queue [t-3000, t]  | O(1) avg | O(W)     |
- | 20 | Design Leaderboard (LeetCode 1244)          | Hash Map + Min-Heap Top-K         | O(N logK)| O(P)     |
- | 21 | Reservoir Sampling from Stream (LC 382/398) | Algorithm R Random Replacement    | O(N)     | O(1)     |
- | 22 | Bounded Blocking Queue (LeetCode 1188)      | Mutex + Dual Condition Variables  | O(1) all | O(Cap)   |
- | 23 | Majority Checker in Subarray (LC 1154)      | Boyer-Moore Random Sampling + UB  | O(K logN)| O(N)     |
- | 24 | Design Authentication Manager (LC 1797)     | Hash Map Expiry with Lazy Purge   | O(1) gen | O(T)     |
- | 25 | Multi-Policy Online Cache Engine (LRU/TTL)  | DLL + Hash Map + Expiry Min-Heap  | O(1) avg | O(Cap)   |
+ | 1  | Moving Average from Stream (LeetCode 346)   | Sliding Circular Buffer / Queue   | O(1)     | O(W)     |
+ | 2  | First Unique Number in Stream (LC 1429)     | Doubly Linked List + Hash Map     | O(1)     | O(N)     |
+ | 3  | First Non-Repeating Character in Stream     | Frequency Table + FIFO Queue      | O(1) avg | O(1)     |
+ | 4  | Design Hit Counter (LeetCode 362)           | Circular Buckets (300s) / Queue   | O(1)     | O(1)     |
+ | 5  | Logger Rate Limiter (LeetCode 359)          | Hash Map Expiration Timestamps    | O(1)     | O(M)     |
+ | 6  | Front Middle Back Queue (LeetCode 1670)     | Dual Balanced Deques (Left/Right) | O(1) all | O(N)     |
+ | 7  | Finding MK Average (LeetCode 1825)          | 3 Multisets (Left, Mid, Right)    | O(log M) | O(M)     |
+ | 8  | Snapshot Array (LeetCode 1146)              | History Vectors + Binary Search   | O(log S) | O(N + U) |
+ | 9  | Stock Price Fluctuation (LeetCode 2034)     | Hash Map + Balanced Multiset      | O(log N) | O(N)     |
+ | 10 | Seat Reservation Manager (LeetCode 1845)    | Min-Heap of Free Seat IDs         | O(log N) | O(N)     |
+ | 11 | Design Underground System (LeetCode 1396)   | Dual Hash Maps (Transit & Stats)  | O(1) all | O(P + S2)|
+ | 12 | Number of Recent Calls (LeetCode 933)       | Sliding Window Queue [t-3000, t]  | O(1) avg | O(W)     |
+ | 13 | Design Leaderboard (LeetCode 1244)          | Hash Map + Min-Heap Top-K         | O(N logK)| O(P)     |
+ | 14 | Bounded Blocking Queue (LeetCode 1188)      | Mutex + Dual Condition Variables  | O(1) all | O(Cap)   |
+ | 15 | Majority Checker in Subarray (LC 1154)      | Boyer-Moore Random Sampling + UB  | O(K logN)| O(N)     |
+ | 16 | Design Authentication Manager (LC 1797)     | Hash Map Expiry with Lazy Purge   | O(1) gen | O(T)     |
+ | 17 | Multi-Policy Online Cache Engine (LRU/TTL)  | DLL + Hash Map + Expiry Min-Heap  | O(1) avg | O(Cap)   |
  ====================================================================================================
 */
 
 // ============================================================
-// 1. FIND MEDIAN FROM DATA STREAM — LeetCode 295
-// ============================================================
-
-class MedianFinder {
-    priority_queue<int> maxHeap; // Lower half
-    priority_queue<int, vector<int>, greater<int>> minHeap; // Upper half
-public:
-    MedianFinder() {}
-
-    void addNum(int num) {
-        maxHeap.push(num);
-        minHeap.push(maxHeap.top());
-        maxHeap.pop();
-
-        if (minHeap.size() > maxHeap.size()) {
-            maxHeap.push(minHeap.top());
-            minHeap.pop();
-        }
-    }
-
-    double findMedian() {
-        if (maxHeap.size() > minHeap.size()) {
-            return maxHeap.top();
-        }
-        return (maxHeap.top() + minHeap.top()) / 2.0;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Design a data structure supporting adding numbers from a data stream and finding the current median in O(1) time (LeetCode 295).
-// - Approach: Two Balanced Priority Queues (Max-Heap for lower half, Min-Heap for upper half).
-// - Intuition: Invariant ensures `maxHeap.size() == minHeap.size()` (for even count) or `maxHeap.size() == minHeap.size() + 1` (for odd count). Top elements directly yield median.
-// - Complexity: Time: O(log N) per `addNum`, O(1) for `findMedian`, Space: O(N).
-
-// ============================================================
-// 2. KTH LARGEST ELEMENT IN A STREAM — LeetCode 703
-// ============================================================
-
-class KthLargestStream {
-    priority_queue<int, vector<int>, greater<int>> minHeap;
-    int k;
-public:
-    KthLargestStream(int k, vector<int>& nums) : k(k) {
-        for (int x : nums) add(x);
-    }
-
-    int add(int val) {
-        minHeap.push(val);
-        if ((int)minHeap.size() > k) {
-            minHeap.pop();
-        }
-        return minHeap.top();
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Design a class to find the k-th largest element in a continuous data stream (LeetCode 703).
-// - Approach: Min-Heap of bounded capacity K.
-// - Intuition: Retaining only the K largest elements in a min-heap means the smallest among them (the top) is precisely the K-th largest element overall.
-// - Complexity: Time: O(log K) per `add`, Space: O(K).
-
-// ============================================================
-// 3. MOVING AVERAGE FROM DATA STREAM — LeetCode 346
+// 1. MOVING AVERAGE FROM DATA STREAM — LeetCode 346
 // ============================================================
 
 class MovingAverage {
@@ -157,8 +89,9 @@ public:
 // - Intuition: Push incoming values and add to running sum; when size exceeds w, pop oldest from queue and subtract from sum in O(1).
 // - Complexity: Time: O(1) per `next`, Space: O(W) where W is window size.
 
+
 // ============================================================
-// 4. FIRST UNIQUE NUMBER IN DATA STREAM — LeetCode 1429
+// 2. FIRST UNIQUE NUMBER IN DATA STREAM — LeetCode 1429
 // ============================================================
 
 class FirstUnique {
@@ -194,8 +127,9 @@ public:
 // - Intuition: Store unique items in DLL order. On second occurrence, erase node from DLL in O(1) via stored iterator and mark as permanently duplicate.
 // - Complexity: Time: O(1) for both `showFirstUnique` and `add`, Space: O(N).
 
+
 // ============================================================
-// 5. FIRST NON-REPEATING CHARACTER IN A STREAM — GFG / LeetCode
+// 3. FIRST NON-REPEATING CHARACTER IN A STREAM — GFG / LeetCode
 // ============================================================
 
 class StreamFirstNonRepeatingChar {
@@ -222,33 +156,9 @@ public:
 // - Intuition: Increment frequency and push to queue. Discard front elements whose frequency > 1. Top of queue is the first non-repeating character.
 // - Complexity: Time: O(1) amortized per character, Space: O(1) (26 characters).
 
-// ============================================================
-// 6. ONLINE STOCK SPAN — LeetCode 901
-// ============================================================
-
-class StockSpanner {
-    stack<pair<int, int>> st; // {price, span}
-public:
-    StockSpanner() {}
-
-    int next(int price) {
-        int span = 1;
-        while (!st.empty() && st.top().first <= price) {
-            span += st.top().second;
-            st.pop();
-        }
-        st.push({price, span});
-        return span;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Compute stock span for today's price (maximum number of consecutive days price was <= today's price) (LeetCode 901).
-// - Approach: Monotonic Decreasing Stack with Span Accumulation.
-// - Intuition: Pop all previous days with prices <= current price, summing their pre-accumulated spans into the current day's span.
-// - Complexity: Time: O(1) amortized per query (each element pushed and popped at most once), Space: O(N).
 
 // ============================================================
-// 7. DESIGN HIT COUNTER — LeetCode 362
+// 4. DESIGN HIT COUNTER — LeetCode 362
 // ============================================================
 
 class HitCounter {
@@ -286,8 +196,9 @@ public:
 // - Intuition: Use array of size 300 indexed by `timestamp % 300`. If bucket timestamp is outdated, reset count to 1; otherwise increment. `getHits` sums buckets where `timestamp - times[i] < 300`.
 // - Complexity: Time: O(1) for `hit`, O(300) = O(1) for `getHits`, Space: O(300) = O(1).
 
+
 // ============================================================
-// 8. LOGGER RATE LIMITER — LeetCode 359
+// 5. LOGGER RATE LIMITER — LeetCode 359
 // ============================================================
 
 class Logger {
@@ -309,8 +220,9 @@ public:
 // - Intuition: Store the earliest timestamp at which the message is eligible to print again (`timestamp + 10`). Check and update in O(1).
 // - Complexity: Time: O(1) per message, Space: O(M) where M is number of unique messages.
 
+
 // ============================================================
-// 9. DESIGN FRONT MIDDLE BACK QUEUE — LeetCode 1670
+// 6. DESIGN FRONT MIDDLE BACK QUEUE — LeetCode 1670
 // ============================================================
 
 class FrontMiddleBackQueue {
@@ -384,8 +296,9 @@ public:
 // - Intuition: Middle element is always `left.back()`. Maintain balance invariant so `left.size()` is equal to or 1 greater than `right.size()`.
 // - Complexity: Time: O(1) for all operations, Space: O(N).
 
+
 // ============================================================
-// 10. FINDING MK AVERAGE — LeetCode 1825
+// 7. FINDING MK AVERAGE — LeetCode 1825
 // ============================================================
 
 class MKAverage {
@@ -457,58 +370,9 @@ public:
 // - Intuition: Maintain running sum of the middle multiset `midSum`. On insertions and deletions, cascade elements across set boundaries to preserve exact partition sizes.
 // - Complexity: Time: O(log M) per `addElement`, O(1) for `calculateMKAverage`, Space: O(M).
 
-// ============================================================
-// 11. STREAM OF CHARACTERS — LeetCode 1032
-// ============================================================
-
-class StreamChecker {
-    struct TrieNode {
-        TrieNode* children[26];
-        bool isEnd;
-        TrieNode() : isEnd(false) { fill(children, children + 26, nullptr); }
-    };
-
-    TrieNode* root;
-    string streamHistory;
-    int maxWordLen;
-
-    void insertReversed(const string& word) {
-        TrieNode* curr = root;
-        for (int i = (int)word.size() - 1; i >= 0; i--) {
-            int idx = word[i] - 'a';
-            if (!curr->children[idx]) curr->children[idx] = new TrieNode();
-            curr = curr->children[idx];
-        }
-        curr->isEnd = true;
-    }
-public:
-    StreamChecker(vector<string>& words) : root(new TrieNode()), maxWordLen(0) {
-        for (auto& w : words) {
-            insertReversed(w);
-            maxWordLen = max(maxWordLen, (int)w.size());
-        }
-    }
-
-    bool query(char letter) {
-        streamHistory += letter;
-        TrieNode* curr = root;
-        for (int i = (int)streamHistory.size() - 1; i >= 0 && (int)streamHistory.size() - i <= maxWordLen; i--) {
-            int idx = streamHistory[i] - 'a';
-            if (!curr->children[idx]) return false;
-            curr = curr->children[idx];
-            if (curr->isEnd) return true;
-        }
-        return false;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Check if any word from dictionary forms a suffix of the stream of characters seen so far (LeetCode 1032).
-// - Approach: Reversed Suffix Trie + Stream History Buffer.
-// - Intuition: Insert words reversed into Trie. Querying the stream backwards against the Trie checks if any suffix matches a word in O(L) time.
-// - Complexity: Time: O(L) per `query` where L is max word length, Space: O(Total Trie Nodes + History).
 
 // ============================================================
-// 12. SNAPSHOT ARRAY — LeetCode 1146
+// 8. SNAPSHOT ARRAY — LeetCode 1146
 // ============================================================
 
 class SnapshotArray {
@@ -546,8 +410,9 @@ public:
 // - Intuition: Record `{snap_id, val}` only when mutated. To get value at `snap_id`, binary search for the most recent mutation recorded <= `snap_id`.
 // - Complexity: Time: O(1) for `set` and `snap`, O(log S) for `get`, Space: O(Length + Set Operations).
 
+
 // ============================================================
-// 13. STOCK PRICE FLUCTUATION — LeetCode 2034
+// 9. STOCK PRICE FLUCTUATION — LeetCode 2034
 // ============================================================
 
 class StockPrice {
@@ -585,124 +450,9 @@ public:
 // - Intuition: Hash map maintains `{timestamp -> price}`. Multiset maintains sorted prices; remove old price on correction and insert new price in O(log N).
 // - Complexity: Time: O(log N) for `update`, O(1) for `current`, `maximum`, `minimum`, Space: O(N).
 
-// ============================================================
-// 14. TIME BASED KEY-VALUE STORE — LeetCode 981
-// ============================================================
-
-class TimeMap {
-    unordered_map<string, vector<pair<int, string>>> store; // key -> vector of {timestamp, value}
-public:
-    TimeMap() {}
-
-    void set(string key, string value, int timestamp) {
-        store[key].push_back({timestamp, value});
-    }
-
-    string get(string key, int timestamp) {
-        if (!store.count(key)) return "";
-        auto& entries = store[key];
-
-        // Binary search for largest timestamp <= query timestamp
-        auto it = upper_bound(entries.begin(), entries.end(), make_pair(timestamp, string(127, 'z')),
-            [](const pair<int, string>& a, const pair<int, string>& b) {
-                return a.first < b.first;
-            });
-
-        if (it == entries.begin()) return "";
-        return prev(it)->second;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Design key-value store where keys can have multiple values at different timestamps; get returns value with largest timestamp_prev <= timestamp (LeetCode 981).
-// - Approach: Hash Map of Sorted Timestamp Vectors + Binary Search (`upper_bound`).
-// - Intuition: Since `set` calls arrive with strictly increasing timestamps, vector for each key is naturally sorted. Binary search returns result in O(log T).
-// - Complexity: Time: O(1) for `set`, O(log T) for `get`, Space: O(Total Key-Value pairs).
 
 // ============================================================
-// 15. SLIDING WINDOW MEDIAN — LeetCode 480
-// ============================================================
-
-vector<double> medianSlidingWindow(vector<int>& nums, int k) {
-    multiset<int> low, high;
-    vector<double> medians;
-
-    auto balance = [&]() {
-        while (low.size() > high.size() + 1) {
-            high.insert(*low.rbegin());
-            low.erase(prev(low.end()));
-        }
-        while (low.size() < high.size()) {
-            low.insert(*high.begin());
-            high.erase(high.begin());
-        }
-    };
-
-    auto add = [&](int val) {
-        if (low.empty() || val <= *low.rbegin()) low.insert(val);
-        else high.insert(val);
-        balance();
-    };
-
-    auto remove = [&](int val) {
-        if (val <= *low.rbegin()) low.erase(low.find(val));
-        else high.erase(high.find(val));
-        balance();
-    };
-
-    for (int i = 0; i < (int)nums.size(); i++) {
-        add(nums[i]);
-        if (i >= k - 1) {
-            if (k % 2 == 1) {
-                medians.push_back((double)*low.rbegin());
-            } else {
-                medians.push_back(((double)*low.rbegin() + (double)*high.begin()) / 2.0);
-            }
-            remove(nums[i - k + 1]);
-        }
-    }
-    return medians;
-}
-// Interview Explanation:
-// - Problem Statement: Find median of each sliding window of size k in an array of numbers (LeetCode 480).
-// - Approach: Dual Balanced Multisets (`low` max-ordered, `high` min-ordered).
-// - Intuition: `low` stores lower half, `high` stores upper half. Dynamic element additions and removals run in O(log K), keeping sizes balanced for O(1) median query.
-// - Complexity: Time: O(N log K), Space: O(K).
-
-// ============================================================
-// 16. MAXIMUM FREQUENCY STACK — LeetCode 895
-// ============================================================
-
-class FreqStack {
-    unordered_map<int, int> freq;
-    unordered_map<int, stack<int>> group;
-    int maxFreq;
-public:
-    FreqStack() : maxFreq(0) {}
-
-    void push(int val) {
-        int f = ++freq[val];
-        maxFreq = max(maxFreq, f);
-        group[f].push(val);
-    }
-
-    int pop() {
-        int val = group[maxFreq].top();
-        group[maxFreq].pop();
-        freq[val]--;
-        if (group[maxFreq].empty()) {
-            maxFreq--;
-        }
-        return val;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Stack that pops the most frequent element; if tie, pops element closest to top of stack (LeetCode 895).
-// - Approach: Frequency Map + Stacks per Frequency Level.
-// - Intuition: When element frequency increases to f, push it to `group[f]`. Popping from `group[maxFreq]` naturally handles frequency priority and recency tie-breaking in O(1).
-// - Complexity: Time: O(1) for `push` and `pop`, Space: O(N).
-
-// ============================================================
-// 17. SEAT RESERVATION MANAGER — LeetCode 1845
+// 10. SEAT RESERVATION MANAGER — LeetCode 1845
 // ============================================================
 
 class SeatManager {
@@ -728,8 +478,9 @@ public:
 // - Intuition: Min-heap guarantees O(log N) retrieval of the minimum available seat number and O(log N) unreservation.
 // - Complexity: Time: O(N log N) initialization, O(log N) per `reserve` and `unreserve`, Space: O(N).
 
+
 // ============================================================
-// 18. DESIGN UNDERGROUND SYSTEM — LeetCode 1396
+// 11. DESIGN UNDERGROUND SYSTEM — LeetCode 1396
 // ============================================================
 
 class UndergroundSystem {
@@ -763,8 +514,9 @@ public:
 // - Intuition: When customer checks out, calculate trip duration and update route sum & count in O(1). `getAverageTime` divides total time by count in O(1).
 // - Complexity: Time: O(1) for `checkIn`, `checkOut`, `getAverageTime`, Space: O(Active Passengers + Station Pairs).
 
+
 // ============================================================
-// 19. NUMBER OF RECENT CALLS — LeetCode 933
+// 12. NUMBER OF RECENT CALLS — LeetCode 933
 // ============================================================
 
 class RecentCounter {
@@ -786,8 +538,9 @@ public:
 // - Intuition: Push incoming timestamp `t`. Pop expired timestamps `< t - 3000`. Number of elements remaining in queue is the active count.
 // - Complexity: Time: O(1) amortized per `ping`, Space: O(W) where W <= 3000.
 
+
 // ============================================================
-// 20. DESIGN LEADERBOARD — LeetCode 1244
+// 13. DESIGN LEADERBOARD — LeetCode 1244
 // ============================================================
 
 class Leaderboard {
@@ -823,36 +576,9 @@ public:
 // - Intuition: `scores` tracks player totals in O(1). `top(K)` maintains a min-heap of size K over all players in O(N log K).
 // - Complexity: Time: O(1) for `addScore` and `reset`, O(N log K) for `top`, Space: O(Players).
 
-// ============================================================
-// 21. RESERVOIR SAMPLING FROM STREAM — LeetCode 382 / 398
-// ============================================================
-
-class StreamReservoirSampler {
-    int count;
-    int reservoir;
-public:
-    StreamReservoirSampler() : count(0), reservoir(0) {}
-
-    void feed(int val) {
-        count++;
-        // Probability of replacing reservoir is 1 / count
-        if (rand() % count == 0) {
-            reservoir = val;
-        }
-    }
-
-    int getRandomSample() {
-        return reservoir;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Uniformly sample a single element at random from a data stream of unknown or infinite length (LeetCode 382 / 398).
-// - Approach: Algorithm R Reservoir Sampling.
-// - Intuition: For the i-th item in the stream, keep it with probability 1/i and discard with (1 - 1/i). Inductively, every item has identical 1/N probability of being chosen at any point.
-// - Complexity: Time: O(1) per item, Space: O(1) auxiliary space.
 
 // ============================================================
-// 22. BOUNDED BLOCKING QUEUE — LeetCode 1188
+// 14. BOUNDED BLOCKING QUEUE — LeetCode 1188
 // ============================================================
 
 class BoundedBlockingQueue {
@@ -891,8 +617,9 @@ public:
 // - Intuition: Synchronization primitives protect critical section. Threads wait on condition variables until space/item is available, then signal waiting consumer/producer.
 // - Complexity: Time: O(1) per operation, Space: O(Capacity).
 
+
 // ============================================================
-// 23. MAJORITY CHECKER IN SUBARRAY — LeetCode 1154
+// 15. MAJORITY CHECKER IN SUBARRAY — LeetCode 1154
 // ============================================================
 
 class MajorityChecker {
@@ -927,8 +654,9 @@ public:
 // - Intuition: If a majority element exists, picking a random index hits it with probability >= 0.5. With 20 iterations, failure probability is <= (0.5)^20 < 10^-6. Verify candidate count via `upper_bound - lower_bound` on index list.
 // - Complexity: Time: O(20 * log N) per query, Space: O(N).
 
+
 // ============================================================
-// 24. DESIGN AUTHENTICATION MANAGER — LeetCode 1797
+// 16. DESIGN AUTHENTICATION MANAGER — LeetCode 1797
 // ============================================================
 
 class AuthenticationManager {
@@ -961,8 +689,9 @@ public:
 // - Intuition: Store expiry time `currentTime + timeToLive`. On renewal, check if `expiry > currentTime`. Count active tokens in linear scan over active map.
 // - Complexity: Time: O(1) for `generate` and `renew`, O(N) for `countUnexpiredTokens`, Space: O(Tokens).
 
+
 // ============================================================
-// 25. MULTI-POLICY ONLINE CACHE ENGINE (LRU + TTL)
+// 17. MULTI-POLICY ONLINE CACHE ENGINE (LRU + TTL)
 // ============================================================
 
 class OnlineCacheEngine {
@@ -1019,54 +748,3 @@ public:
 // - Approach: Doubly Linked List (LRU Recency) + Hash Map + Expiration Min-Heap.
 // - Intuition: DLL maintains access recency for O(1) LRU eviction. Min-heap prioritizes earliest expiring keys for lazy TTL purging.
 // - Complexity: Time: O(1) amortized for `get` and `put`, Space: O(Capacity).
-
-string boothAlgorithm(string s) {
-    string t = s + s;
-    int n = s.size();
-    int i = 0, j = 1, k = 0;
-    while (i < n && j < n && k < n) {
-        if (t[i + k] == t[j + k]) k++;
-        else if (t[i + k] < t[j + k]) { j += k + 1; if (i == j) j++; k = 0; }
-        else { i += k + 1; if (i == j) i++; k = 0; }
-    }
-    int start = min(i, j);
-    return t.substr(start, n);
-}
-
-// Interview Explanation:
-// Problem Statement - Given a string, find its lexicographically smallest rotation (Booth's Algorithm).
-// Approach - Booth's Algorithm (Linear Time).
-// Intuition - Concatenate string to itself. Use two pointers to compare rotations and find the minimal starting index.
-
-// LeetCode 338 + Popcount DP Template
-
-vector<int> countBits(int n) {
-    vector<int> dp(n + 1);
-
-    for (int i = 1; i <= n; i++)
-        dp[i] = dp[i >> 1] + (i & 1);
-
-    return dp;
-}
-// Interview Explanation:
-// Problem Statement - Count number of 1's in binary representation for all numbers from 0 to n (LeetCode 338).
-// Approach - Dynamic Programming with Bit Manipulation.
-// Intuition - The number of 1's in `i` is equal to the number of 1's in `i >> 1` (i.e., `i / 2`) plus the least significant bit (`i & 1`).
-// Complexity - Time: O(n), Space: O(n).
-
-long long countBits(long long n) {
-    long long ans = 0;
-
-    for (long long h = 1; h <= n; h <<= 1) {
-        long long cycle = h << 1;
-        ans += (n + 1) / cycle * h;
-        ans += max(0LL, (n + 1) % cycle - h);
-    }
-
-    return ans;
-}
-// Interview Explanation:
-// Problem Statement - Count total number of 1's in binary representation for all numbers from 0 to n.
-// Approach - Bitwise Counting by Position.
-// Intuition - For each bit position, count how many complete cycles of 0's and 1's occur, and add the remaining 1's from the incomplete cycle.
-// Complexity - Time: O(log n), Space: O(1).

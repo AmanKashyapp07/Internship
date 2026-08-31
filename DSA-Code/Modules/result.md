@@ -1,10 +1,33 @@
 # DSA Modules — Problem Summary & Complexity Reference
 
-A comprehensive, unified reference catalog of **436 essential Data Structures & Algorithms problems and algorithms** across all 14 topic modules in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A comprehensive, unified reference catalog of **474 essential Data Structures & Algorithms problems and algorithms** across all **13 topic files** in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+
+---
+
+## 📊 Modules Overview & Problem Counts
+
+| # | File Name | Topic Domain | Problem Count |
+| :-: | :--- | :--- | :-: |
+| **1** | [`alphabet_trie.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/alphabet_trie.cpp) | Alphabet Trie & Multi-Branching Strings | **15** |
+| **2** | [`binary_trie.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/binary_trie.cpp) | Bitwise Binary Trie & XOR Optimizations | **15** |
+| **3** | [`dp.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/dp.cpp) | Dynamic Programming & State Optimizations | **64** |
+| **4** | [`graph.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/graph.cpp) | Graph Algorithms, Traversals & Shortest Paths | **55** |
+| **5** | [`greedy.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/greedy.cpp) | Greedy Strategy, Intervals & Scheduling | **39** |
+| **6** | [`heap.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/heap.cpp) | Heaps, Priority Queues & Top-K Streams | **23** |
+| **7** | [`maths.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/maths.cpp) | Mathematics, Number Theory & Bit Manipulation | **42** |
+| **8** | [`recursion.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/recursion.cpp) | Recursion, Backtracking & Search Trees | **20** |
+| **9** | [`sliding.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/sliding.cpp) | Sliding Window & Two-Pointer Invariants | **18** |
+| **10** | [`sorting.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/sorting.cpp) | Sorting, Binary Search & Coordinate Sweeps | **73** |
+| **11** | [`stack.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/stack.cpp) | Monotonic Stack, Deque & Expression Parsing | **29** |
+| **12** | [`string.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/string.cpp) | String Matching, Rolling Hash & KMP/Z/Manacher | **31** |
+| **13** | [`tree.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/tree.cpp) | Binary Trees, BST & Advanced Tree Traversals | **50** |
+| **Total** | **13 Module Files** | **Unified Core DSA Library** | **474 Problems** |
+
+---
 
 ## 📘 Module-by-Module Analysis
 
-### 1. Alphabet Trie (`alphabet_trie.cpp`)
+### 1. Alphabet Trie (`alphabet_trie.cpp`) — 15 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -26,7 +49,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 2. Binary Trie (`binary_trie.cpp`)
+### 2. Binary Trie (`binary_trie.cpp`) — 15 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -48,7 +71,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 3. Dynamic Programming (`dp.cpp`)
+### 3. Dynamic Programming (`dp.cpp`) — 64 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -109,10 +132,17 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **55** | Elevator Rides (CSES 1653) | Bitmask DP (rides, last_weight) | `O(2^N * N)` | `O(2^N)` |
 | **56** | Increasing Subsequence II (CSES 1748) | Fenwick Tree Prefix DP | `O(N log N)` | `O(N)` |
 | **57** | Minimal Grid Path (CSES 3359) | Level BFS Greedy Frontier Step | `O(N^2)` | `O(N^2)` |
+| **58** | Dice Combinations (CSES 1633) | 1D Permutation Sum DP (1..6) | `O(N)` | `O(N)` |
+| **59** | Book Shop (CSES 1158) | 1D Space-Optimized 0/1 Knapsack | `O(N * X)` | `O(X)` |
+| **60** | Money Sums (CSES 1745) | 1D Boolean Subset Sum DP / Bitset | `O(N * sum)` | `O(sum)` |
+| **61** | Two Sets II (CSES 1093) | Subset Sum S/2 with Fixed Element | `O(N^3)` | `O(N^2)` |
+| **62** | Counting Towers (CSES 2413) | 2-State Block DP (Split vs Merge) | `O(N)` | `O(N)` |
+| **63** | Counting Tilings (CSES 2181) | Broken Profile / Bitmask DP | `O(M * 2^{2N})` | `O(M * 2^N)` |
+| **64** | Mountain Range (CSES 3150) | 2-State Alternating Sequence DP | `O(N)` | `O(1)` |
 
 ---
 
-### 4. Graph Algorithms (`graph.cpp`)
+### 4. Graph Algorithms (`graph.cpp`) — 55 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -174,7 +204,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 5. Greedy Algorithms (`greedy.cpp`)
+### 5. Greedy Algorithms (`greedy.cpp`) — 39 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -220,7 +250,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 6. Heaps & Priority Queues (`heap.cpp`)
+### 6. Heaps & Priority Queues (`heap.cpp`) — 23 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -250,32 +280,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 7. Linked Lists (`linked_list.cpp`)
-
-| # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
-| :-: | :--- | :--- | :--- | :--- |
-| **1** | Middle of the Linked List (LC 876) | Fast & Slow Pointers (Tortoise/Hare) | `O(N)` | `O(1)` |
-| **2** | Detect Cycle in Linked List (LC 141) | Floyd's Cycle-Finding Algorithm | `O(N)` | `O(1)` |
-| **3** | Remove N-th Node From End of List (LC 19) | Two Pointers with Dummy Sentinel | `O(N)` | `O(1)` |
-| **4** | Intersection Point of Two Lists (LC 160) | Two Pointers Alternate Redirection | `O(L1 + L2)` | `O(1)` |
-| **5** | Sort Linked List (Merge Sort on LL) (LC 148) | Top-Down Merge Sort + Midpoint Cut | `O(N log N)` | `O(log N)` |
-| **6** | Segregate Odd & Even Nodes in LL (LC 328) | Two-Pointer Parity List Weaving | `O(N)` | `O(1)` |
-| **7** | Reverse Linked List (LC 206) | Iterative 3-Pointer Reversal | `O(N)` | `O(1)` |
-| **8** | Merge Two Sorted Linked Lists (LC 21) | Dummy Head + Linear Merge Step | `O(N + M)` | `O(1)` |
-| **9** | Merge K Sorted Linked Lists (LC 23) | Min-Heap Priority Queue on Heads | `O(N log K)` | `O(K)` |
-| **10** | Reorder List (LC 143) | Midpoint Split + Reverse + Weave | `O(N)` | `O(1)` |
-| **11** | Add Two Numbers (LC 2) | Linear Digit Simulation + Carry | `O(max(N, M))` | `O(1)` |
-| **12** | Delete Node in a Linked List O(1) (LC 237) | Value Copying + Next Node Bypass | `O(1)` | `O(1)` |
-| **13** | Reverse Nodes in k-Group (LC 25) | Bounded K-Group Iterative Reversal | `O(N)` | `O(1)` |
-| **14** | Palindrome Linked List (LC 234) | Midpoint Cut + Reverse Half + Match | `O(N)` | `O(1)` |
-| **15** | Find Starting Point of Loop in LL (LC 142) | Floyd's Cycle + Head-Meeting Reset | `O(N)` | `O(1)` |
-| **16** | Flattening a Linked List (GFG) | Bottom-Up Recursive Merge 2 Lists | `O(N * K)` | `O(1)` |
-| **17** | Rotate List by K Places (LC 61) | Circular Ring Cut at (Len - K % Len) | `O(N)` | `O(1)` |
-| **18** | Copy List with Random Pointer (LC 138) | 3-Pass In-Place Node Interweaving | `O(N)` | `O(1)` |
-
----
-
-### 8. Mathematics & Bit Manipulation (`maths.cpp`)
+### 7. Mathematics & Bit Manipulation (`maths.cpp`) — 42 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -324,7 +329,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 9. Recursion & Backtracking (`recursion.cpp`)
+### 8. Recursion & Backtracking (`recursion.cpp`) — 20 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -351,7 +356,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 10. Sliding Window & Two Pointers (`sliding.cpp`)
+### 9. Sliding Window & Two Pointers (`sliding.cpp`) — 18 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -376,7 +381,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 11. Sorting & Binary Search (`sorting.cpp`)
+### 10. Sorting & Binary Search (`sorting.cpp`) — 73 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -437,10 +442,26 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 | **55** | N-th Root of an Integer (GFG) | Binary Search on Answer [1, M] | `O(N log M)` | `O(1)` |
 | **56** | Majority Element II (> N/3) (LC 229) | Extended Boyer-Moore Voting (2 Cands) | `O(N)` | `O(1)` |
 | **57** | Minimize Max Distance to Gas Station (LC 774) | Continuous Binary Search (eps 1e-6) | `O(N log(max_dist / eps))` | `O(1)` |
+| **58** | Collecting Numbers (CSES 2216) | Position Inversion Counting | `O(N)` | `O(N)` |
+| **59** | Collecting Numbers II (CSES 2217) | Local Inversion Delta Tracking | `O(N + M)` | `O(N)` |
+| **60** | Concert Tickets (CSES 1091) | Multiset Upper Bound Decrement | `O((N + M) log N)` | `O(N)` |
+| **61** | Distinct Values Subarrays (CSES 3420) | Two Pointers / Variable Window | `O(N)` | `O(N)` |
+| **62** | Distinct Values Subarrays II (CSES 2428) | Sliding Window + Map Size <= K | `O(N)` | `O(K)` |
+| **63** | Distinct Values Subsequences (CSES 3421) | Frequency Product Principle | `O(N log N)` | `O(1)` |
+| **64** | Josephus Problem II (CSES 2163) | Fenwick Tree + Binary Search | `O(N log^2 N)` | `O(N)` |
+| **65** | Maximum Subarray Sum II (CSES 1644) | Monotonic Deque on Prefix Sums | `O(N)` | `O(N)` |
+| **66** | Movie Festival II (CSES 1632) | Greedy End-Time Sort + Multiset | `O(N log(N * K))` | `O(N + K)` |
+| **67** | Nested Ranges Check (CSES 2168) | 2D Sorting + Forward/Back Sweeps | `O(N log N)` | `O(N)` |
+| **68** | Nested Ranges Count (CSES 2169) | Coordinate Compression + Fenwick | `O(N log N)` | `O(N)` |
+| **69** | Reading Books (CSES 1631) | Bottleneck Criterion max(2*mx, S) | `O(N)` | `O(1)` |
+| **70** | Room Allocation (CSES 1164) | Arrival Sort + Min-Heap Free Times | `O(N log N)` | `O(N)` |
+| **71** | Subarray Divisibility (CSES 1662) | Prefix Sum Modulo Remainder Map | `O(N)` | `O(N)` |
+| **72** | Towers (CSES 1073) | Greedy Binary Search / Patience | `O(N log N)` | `O(N)` |
+| **73** | Traffic Lights (CSES 1163) | Dual Ordered Sets (Coord + Lens) | `O(N log N)` | `O(N)` |
 
 ---
 
-### 12. Monotonic Stack & Deque (`stack.cpp`)
+### 11. Monotonic Stack & Deque (`stack.cpp`) — 29 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -476,7 +497,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 13. String Algorithms (`string.cpp`)
+### 12. String Algorithms (`string.cpp`) — 31 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -514,7 +535,7 @@ A comprehensive, unified reference catalog of **436 essential Data Structures & 
 
 ---
 
-### 14. Tree Algorithms & BST (`tree.cpp`)
+### 13. Tree Algorithms & BST (`tree.cpp`) — 50 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
