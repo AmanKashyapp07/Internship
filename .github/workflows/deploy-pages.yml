@@ -30,7 +30,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'DSA-Code/Microsoft/todo'
+          path: 'Microsoft/todo'
 
       - name: Deploy to GitHub Pages
         id: deployment

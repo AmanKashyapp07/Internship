@@ -2,8 +2,8 @@ import json
 import re
 import os
 
-BASE_DIR = '/Users/amankashyap/Documents/internship/DSA-Code/Microsoft'
-TODO_DIR = os.path.join(BASE_DIR, 'todo')
+TODO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(TODO_DIR)
 PROBLEMS_JSON = os.path.join(TODO_DIR, 'problems.json')
 PROBLEMS_JS = os.path.join(TODO_DIR, 'problems.js')
 
