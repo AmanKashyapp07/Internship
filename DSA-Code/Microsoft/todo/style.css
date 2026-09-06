@@ -87,7 +87,7 @@ body {
    1. Header & Repository Navigation Bar
    ========================================================================== */
 .gh-header {
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .gh-repo-bar {
@@ -211,12 +211,28 @@ body {
    2. Milestone Progress Card
    ========================================================================== */
 .gh-milestone-card {
-  margin-top: 16px;
-  padding: 14px 18px;
-  background-color: var(--canvas-card);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-top: 14px;
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  background-color: rgba(22, 27, 34, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: border-radius 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, padding 0.15s ease;
+}
+
+.gh-milestone-card.is-stuck {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
+  border-color: var(--border-default);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  padding: 10px 18px;
 }
 
 .gh-milestone-top {

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260906_pyq">
+  <link rel="stylesheet" href="style.css?v=20260906_sticky">
 </head>
 <body>
   <div class="container">
@@ -35,41 +35,41 @@
           </button>
         </div>
       </div>
+    </header>
 
-      <!-- Milestone Progress Card -->
-      <div class="gh-milestone-card">
-        <div class="gh-milestone-top">
-          <div class="gh-milestone-stats">
-            <div class="stat-chip stat-chip-done">
-              <span class="stat-dot dot-done"></span>
-              <span class="stat-num" id="statDone">0</span>
-              <span class="stat-lbl">done</span>
-            </div>
-            <div class="stat-chip stat-chip-open">
-              <span class="stat-dot dot-open"></span>
-              <span class="stat-num" id="statRemaining">215</span>
-              <span class="stat-lbl">open</span>
-            </div>
-            <div class="stat-chip stat-chip-star">
-              <span class="stat-dot dot-star"></span>
-              <span class="stat-num" id="statStarredMeta">11</span>
-              <span class="stat-lbl">starred</span>
-            </div>
-            <div class="stat-chip stat-chip-total">
-              <span class="stat-num" id="statTotal">215</span>
-              <span class="stat-lbl">total</span>
-            </div>
+    <!-- Milestone Progress Card (Sticky at top on scroll) -->
+    <div class="gh-milestone-card" id="milestoneCard">
+      <div class="gh-milestone-top">
+        <div class="gh-milestone-stats">
+          <div class="stat-chip stat-chip-done">
+            <span class="stat-dot dot-done"></span>
+            <span class="stat-num" id="statDone">0</span>
+            <span class="stat-lbl">done</span>
           </div>
-          <div class="gh-progress-pill">
-            <span id="progressPercent" class="gh-percent-text">0%</span>
-            <span class="gh-percent-sub">completed</span>
+          <div class="stat-chip stat-chip-open">
+            <span class="stat-dot dot-open"></span>
+            <span class="stat-num" id="statRemaining">215</span>
+            <span class="stat-lbl">open</span>
+          </div>
+          <div class="stat-chip stat-chip-star">
+            <span class="stat-dot dot-star"></span>
+            <span class="stat-num" id="statStarredMeta">11</span>
+            <span class="stat-lbl">starred</span>
+          </div>
+          <div class="stat-chip stat-chip-total">
+            <span class="stat-num" id="statTotal">215</span>
+            <span class="stat-lbl">total</span>
           </div>
         </div>
-        <div class="gh-progress-bar">
-          <div id="progressBarFill" class="gh-progress-fill" style="width: 0%;"></div>
+        <div class="gh-progress-pill">
+          <span id="progressPercent" class="gh-percent-text">0%</span>
+          <span class="gh-percent-sub">completed</span>
         </div>
       </div>
-    </header>
+      <div class="gh-progress-bar">
+        <div id="progressBarFill" class="gh-progress-fill" style="width: 0%;"></div>
+      </div>
+    </div>
 
     <!-- Filter Bar -->
     <div class="gh-filter-bar">
@@ -138,6 +138,6 @@
   </div>
 
   <script src="problems.js?v=20260906_pyq"></script>
-  <script src="app.js?v=20260906_pyq"></script>
+  <script src="app.js?v=20260906_sticky"></script>
 </body>
 </html>

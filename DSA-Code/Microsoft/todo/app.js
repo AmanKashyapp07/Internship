@@ -557,5 +557,19 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Sticky header stuck state detection
+const milestoneCard = document.getElementById('milestoneCard');
+if (milestoneCard) {
+  const onScroll = () => {
+    if (window.scrollY > 35) {
+      milestoneCard.classList.add('is-stuck');
+    } else {
+      milestoneCard.classList.remove('is-stuck');
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
+
 // Initialize on page load
 loadProblemsFromDB();
