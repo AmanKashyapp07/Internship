@@ -61,78 +61,39 @@ public:
 
 /*
  ====================================================================================================
-                       LINKED LIST — TOP OA / INTERVIEW PROBLEMS (MICROSOFT-TIER)
+                   LINKED LIST — MICROSOFT OA HIGH-YIELD PROBLEMS
  ====================================================================================================
  | #  | Problem Name                                     | Pattern / Technique                | Time      | Space  |
  |----|---------------------------------------------------|-------------------------------------|-----------|--------|
- | 01 | Reverse Linked List                                | Iterative Pointer Reversal          | O(N)      | O(1)   |
- | 02 | Reverse Linked List II                             | Sublist Pointer Inversion           | O(N)      | O(1)   |
- | 03 | Reverse Nodes in k-Group                           | Group Length Check + Sublist Rev    | O(N)      | O(1)   |
- | 04 | Merge Two Sorted Lists                             | Two-Pointer Linked Splice           | O(N+M)    | O(1)   |
- | 05 | Merge k Sorted Lists                               | Min-Heap Priority Queue Merge       | O(N logK) | O(K)   |
- | 06 | Sort List                                          | Merge Sort (Slow/Fast Split)        | O(N logN) | O(logN)|
- | 07 | Linked List Cycle                                  | Floyd's Tortoise & Hare             | O(N)      | O(1)   |
- | 08 | Linked List Cycle II (Find Cycle Start)            | Floyd's Cycle + Reset Pointer       | O(N)      | O(1)   |
- | 09 | Middle of the Linked List                          | Slow/Fast Pointer                   | O(N)      | O(1)   |
- | 10 | Remove Nth Node From End of List                   | Two-Pointer Gap Technique           | O(N)      | O(1)   |
- | 11 | Reorder List                                       | Mid Find + Reverse + Interleave     | O(N)      | O(1)   |
- | 12 | Palindrome Linked List                              | Mid Find + Reverse + Compare        | O(N)      | O(1)   |
- | 13 | Odd Even Linked List                                | In-place Bucket Splitting           | O(N)      | O(1)   |
- | 14 | Swap Nodes in Pairs                                 | Adjacent Node Pointer Swap          | O(N)      | O(1)   |
- | 15 | Rotate List                                         | Ring Formation & Modular Cut        | O(N)      | O(1)   |
- | 16 | Partition List                                      | Two Dummy Heads (Less/GreaterEq)    | O(N)      | O(1)   |
- | 17 | Remove Duplicates from Sorted List                 | Single Pass Skip                    | O(N)      | O(1)   |
- | 18 | Remove Duplicates from Sorted List II               | Dummy Node + Skip Entire Runs       | O(N)      | O(1)   |
- | 19 | Remove Linked List Elements                        | Dummy Node + Value Filter           | O(N)      | O(1)   |
- | 20 | Add Two Numbers                                     | Dummy Node + Carry Propagation      | O(max(N,M))| O(max(N,M))|
- | 21 | Add Two Numbers II                                 | Stack Reversal + Carry Propagation  | O(N+M)    | O(N+M) |
- | 22 | Intersection of Two Linked Lists                   | Two-Pointer Switch-Path Alignment   | O(N+M)    | O(1)   |
- | 23 | Copy List with Random Pointer                       | Interleaving Clone Nodes            | O(N)      | O(1)   |
- | 24 | Flatten a Multilevel Doubly Linked List             | DFS Stack-Based Flattening          | O(N)      | O(N)   |
- | 25 | Convert BST to Sorted Doubly Linked List            | In-order Traversal + Node Relinking | O(N)      | O(H)   |
- | 26 | Split Linked List in Parts                          | Size Calc + Balanced Chunking       | O(N+K)    | O(K)   |
- | 27 | Next Greater Node In Linked List                    | Stack (Monotonic) on Array Convert  | O(N)      | O(N)   |
- | 28 | Insert into a Sorted Circular Linked List           | Circular Traversal Edge Handling    | O(N)      | O(1)   |
- | 29 | Merge In Between Linked Lists                       | Pointer Splice at Boundaries        | O(N+M)    | O(1)   |
- | 30 | Delete Node in a Linked List (no head access)       | Value/Next Copy Trick               | O(1)      | O(1)   |
- | 31 | Design Linked List                                  | Custom Singly/Doubly Implementation | O(N)/op   | O(N)   |
- | 32 | LRU Cache                                           | Hash Map + Doubly-Linked List        | O(1) ops  | O(C)   |
- | 33 | LFU Cache                                           | Hash Map + Doubly-Linked Buckets    | O(1) ops  | O(C)   |
- | 34 | Find the Duplicate Number                           | Array-as-Linked-List Floyd Cycle    | O(N)      | O(1)   |
- | 35 | Design Browser History                              | Doubly-Linked List / Two Stacks     | O(1) avg  | O(N)   |
+ | 01 | Reverse Linked List II (LC 92)                    | Sublist Pointer Inversion           | O(N)      | O(1)   |
+ | 02 | Reverse Nodes in k-Group (LC 25)                  | Chunked Sublist Reversal            | O(N)      | O(1)   |
+ | 03 | Merge k Sorted Lists (LC 23)                      | Min-Heap Priority Queue Merge       | O(N logK) | O(K)   |
+ | 04 | Sort List (LC 148)                                | Merge Sort (Slow/Fast Split)        | O(N logN) | O(logN)|
+ | 05 | Linked List Cycle (LC 141)                        | Floyd's Tortoise & Hare             | O(N)      | O(1)   |
+ | 06 | Linked List Cycle II (Find Cycle Start) (LC 142)  | Floyd's Cycle + Reset Pointer       | O(N)      | O(1)   |
+ | 07 | Find the Duplicate Number (LC 287)                | Array-as-Linked-List Floyd Cycle    | O(N)      | O(1)   |
+ | 08 | Remove Nth Node From End of List (LC 19)          | Two-Pointer Gap Technique           | O(N)      | O(1)   |
+ | 09 | Reorder List (LC 143)                             | Mid Find + Reverse + Interleave     | O(N)      | O(1)   |
+ | 10 | Palindrome Linked List (LC 234)                   | Mid Find + Reverse + Compare        | O(N)      | O(1)   |
+ | 11 | Odd Even Linked List (LC 328)                     | In-place Bucket Splitting           | O(N)      | O(1)   |
+ | 12 | Rotate List (LC 61)                               | Ring Formation & Modular Cut        | O(N)      | O(1)   |
+ | 13 | Partition List (LC 86)                            | Two Dummy Heads (Less/GreaterEq)    | O(N)      | O(1)   |
+ | 14 | Remove Duplicates from Sorted List II (LC 82)     | Dummy Node + Skip Entire Runs       | O(N)      | O(1)   |
+ | 15 | Add Two Numbers (LC 2)                            | Dummy Node + Carry Propagation      | O(max(N,M))| O(max(N,M))|
+ | 16 | Add Two Numbers II (LC 445)                       | Stack Reversal + Carry Propagation  | O(N+M)    | O(N+M) |
+ | 17 | Intersection of Two Linked Lists (LC 160)         | Two-Pointer Switch-Path Alignment   | O(N+M)    | O(1)   |
+ | 18 | Copy List with Random Pointer (LC 138)             | Interleaving Clone Nodes (O(1))     | O(N)      | O(1)   |
+ | 19 | Split Linked List in Parts (LC 725)                | Size Calc + Balanced Chunking       | O(N+K)    | O(K)   |
+ | 20 | Next Greater Node In Linked List (LC 1019)         | Stack (Monotonic) on Array Convert  | O(N)      | O(N)   |
+ | 21 | Merge In Between Linked Lists (LC 1669)            | Pointer Splice at Boundaries        | O(N+M)    | O(1)   |
  ====================================================================================================
 */
 
 // =========================================================
-// 1. REVERSE LINKED LIST (LC 206)
+// 1. REVERSE LINKED LIST II (LC 92)
 // =========================================================
 
 class Solution1 {
-public:
-    ListNode* reverseList(ListNode* head) {
-        ListNode* prev = nullptr;
-        ListNode* curr = head;
-        while (curr) {
-            ListNode* nextNode = curr->next;
-            curr->next = prev;
-            prev = curr;
-            curr = nextNode;
-        }
-        return prev;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Reverse a singly linked list and return the reversed list head.
-// - Approach: Three-pointer iterative pointer reversal (`prev`, `curr`, `nextNode`).
-// - Intuition: At each node, invert its `next` pointer to point to `prev`, then advance `prev` and `curr`.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 2. REVERSE LINKED LIST II (LC 92)
-// =========================================================
-
-class Solution2 {
 public:
     ListNode* reverseBetween(ListNode* head, int left, int right) {
         if (!head || left == right) return head;
@@ -161,10 +122,10 @@ public:
 
 
 // =========================================================
-// 3. REVERSE NODES IN K-GROUP (LC 25)
+// 2. REVERSE NODES IN K-GROUP (LC 25)
 // =========================================================
 
-class Solution3 {
+class Solution2 {
 public:
     ListNode* reverseKGroup(ListNode* head, int k) {
         ListNode dummy(0, head);
@@ -198,44 +159,13 @@ public:
 };
 // Interview Explanation:
 // - Problem Statement: Reverse nodes of a linked list in chunks of size `k`. Remaining nodes at end stay unreversed.
-// - Approach: Check if $k$ nodes exist ahead. If so, reverse the $k$-window with `groupNext` as initial `prev`.
-// - Intuition: Connect reversed subsegment tail to next group, then advance `groupPrev` to end of reversed group.
+// - Approach: Find the $k$-th node of the current group. If fewer than $k$ nodes remain, terminate. Otherwise reverse group in-place and reconnect boundaries.
+// - Intuition: Local pointer reversal per $k$-window anchored by `groupPrev` and `groupNext`.
 // - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
 
 // =========================================================
-// 4. MERGE TWO SORTED LISTS (LC 21)
-// =========================================================
-
-class Solution4 {
-public:
-    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-        ListNode dummy(0);
-        ListNode* tail = &dummy;
-
-        while (list1 && list2) {
-            if (list1->val <= list2->val) {
-                tail->next = list1;
-                list1 = list1->next;
-            } else {
-                tail->next = list2;
-                list2 = list2->next;
-            }
-            tail = tail->next;
-        }
-        tail->next = list1 ? list1 : list2;
-        return dummy.next;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Merge two sorted singly linked lists into one sorted linked list.
-// - Approach: Two pointers with dummy head. Append the smaller node at each step and splice remaining list at the end.
-// - Intuition: Splicing existing nodes preserves memory allocations and achieves linear time.
-// - Complexity: Time: O(N + M), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 5. MERGE K SORTED LISTS (LC 23)
+// 3. MERGE K SORTED LISTS (LC 23)
 // =========================================================
 
 struct CompareListNode {
@@ -244,7 +174,7 @@ struct CompareListNode {
     }
 };
 
-class Solution5 {
+class Solution3 {
 public:
     ListNode* mergeKLists(vector<ListNode*>& lists) {
         priority_queue<ListNode*, vector<ListNode*>, CompareListNode> pq;
@@ -275,10 +205,10 @@ public:
 
 
 // =========================================================
-// 6. SORT LIST (LC 148)
+// 4. SORT LIST (LC 148)
 // =========================================================
 
-class Solution6 {
+class Solution4 {
     ListNode* merge(ListNode* l1, ListNode* l2) {
         ListNode dummy(0);
         ListNode* tail = &dummy;
@@ -323,10 +253,10 @@ public:
 
 
 // =========================================================
-// 7. LINKED LIST CYCLE (LC 141)
+// 5. LINKED LIST CYCLE (LC 141)
 // =========================================================
 
-class Solution7 {
+class Solution5 {
 public:
     bool hasCycle(ListNode *head) {
         ListNode* slow = head;
@@ -347,10 +277,10 @@ public:
 
 
 // =========================================================
-// 8. LINKED LIST CYCLE II (FIND CYCLE START) (LC 142)
+// 6. LINKED LIST CYCLE II (FIND CYCLE START) (LC 142)
 // =========================================================
 
-class Solution8 {
+class Solution6 {
 public:
     ListNode *detectCycle(ListNode *head) {
         ListNode* slow = head;
@@ -379,33 +309,43 @@ public:
 
 
 // =========================================================
-// 9. MIDDLE OF THE LINKED LIST (LC 876)
+// 7. FIND THE DUPLICATE NUMBER (LC 287)
 // =========================================================
 
-class Solution9 {
+class Solution7 {
 public:
-    ListNode* middleNode(ListNode* head) {
-        ListNode* slow = head;
-        ListNode* fast = head;
-        while (fast && fast->next) {
-            slow = slow->next;
-            fast = fast->next->next;
+    int findDuplicate(vector<int>& nums) {
+        int slow = nums[0];
+        int fast = nums[0];
+
+        // Phase 1: Cycle detection
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+
+        // Phase 2: Find cycle entrance
+        slow = nums[0];
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
         }
+
         return slow;
     }
 };
 // Interview Explanation:
-// - Problem Statement: Return middle node of linked list. If two middle nodes exist, return second middle node.
-// - Approach: Two pointers where slow moves 1 step and fast moves 2 steps.
-// - Intuition: When fast reaches end or one step past, slow lands on index $\lfloor N/2 \rfloor$.
+// - Problem Statement: Given array with $n + 1$ integers in range $[1, n]$, find duplicate without modifying array and in $O(1)$ extra space.
+// - Approach: Interpret array as linked list where index $i$ points to $nums[i]$. Use Floyd's cycle detection.
+// - Intuition: Duplicate number causes multiple indices to point to same target, forming the cycle entrance node.
 // - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
 
 // =========================================================
-// 10. REMOVE NTH NODE FROM END OF LIST (LC 19)
+// 8. REMOVE NTH NODE FROM END OF LIST (LC 19)
 // =========================================================
 
-class Solution10 {
+class Solution8 {
 public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
         ListNode dummy(0, head);
@@ -435,10 +375,10 @@ public:
 
 
 // =========================================================
-// 11. REORDER LIST (LC 143)
+// 9. REORDER LIST (LC 143)
 // =========================================================
 
-class Solution11 {
+class Solution9 {
 public:
     void reorderList(ListNode* head) {
         if (!head || !head->next) return;
@@ -483,10 +423,10 @@ public:
 
 
 // =========================================================
-// 12. PALINDROME LINKED LIST (LC 234)
+// 10. PALINDROME LINKED LIST (LC 234)
 // =========================================================
 
-class Solution12 {
+class Solution10 {
 public:
     bool isPalindrome(ListNode* head) {
         if (!head || !head->next) return true;
@@ -531,10 +471,10 @@ public:
 
 
 // =========================================================
-// 13. ODD EVEN LINKED LIST (LC 328)
+// 11. ODD EVEN LINKED LIST (LC 328)
 // =========================================================
 
-class Solution13 {
+class Solution11 {
 public:
     ListNode* oddEvenList(ListNode* head) {
         if (!head || !head->next) return head;
@@ -561,40 +501,10 @@ public:
 
 
 // =========================================================
-// 14. SWAP NODES IN PAIRS (LC 24)
+// 12. ROTATE LIST (LC 61)
 // =========================================================
 
-class Solution14 {
-public:
-    ListNode* swapPairs(ListNode* head) {
-        ListNode dummy(0, head);
-        ListNode* prev = &dummy;
-
-        while (prev->next && prev->next->next) {
-            ListNode* first = prev->next;
-            ListNode* second = first->next;
-
-            first->next = second->next;
-            second->next = first;
-            prev->next = second;
-
-            prev = first;
-        }
-        return dummy.next;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Swap every two adjacent nodes and return head without modifying values.
-// - Approach: Use dummy head and iteratively rewire pointers for pairs $(A, B)$ into $(B, A)$.
-// - Intuition: For pair $(A, B)$ after `prev`: link `prev->next = B`, `B->next = A`, `A->next = nextPair`.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 15. ROTATE LIST (LC 61)
-// =========================================================
-
-class Solution15 {
+class Solution12 {
 public:
     ListNode* rotateRight(ListNode* head, int k) {
         if (!head || !head->next || k == 0) return head;
@@ -629,10 +539,10 @@ public:
 
 
 // =========================================================
-// 16. PARTITION LIST (LC 86)
+// 13. PARTITION LIST (LC 86)
 // =========================================================
 
-class Solution16 {
+class Solution13 {
 public:
     ListNode* partition(ListNode* head, int x) {
         ListNode lessDummy(0);
@@ -657,43 +567,16 @@ public:
 };
 // Interview Explanation:
 // - Problem Statement: Partition list so nodes $< x$ precede nodes $\ge x$ while preserving relative original order.
-// - Approach: Two separate dummy heads (`less` and `ge`). Append each node to appropriate chain, then concatenate.
+// - Approach: Two separate dummy heads (`less` and `greater`). Append each node to appropriate chain, then concatenate.
 // - Intuition: Stable two-way partitioning using two accumulator linked lists.
 // - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
 
 // =========================================================
-// 17. REMOVE DUPLICATES FROM SORTED LIST (LC 83)
+// 14. REMOVE DUPLICATES FROM SORTED LIST II (LC 82)
 // =========================================================
 
-class Solution17 {
-public:
-    ListNode* deleteDuplicates(ListNode* head) {
-        ListNode* curr = head;
-        while (curr && curr->next) {
-            if (curr->val == curr->next->val) {
-                ListNode* temp = curr->next;
-                curr->next = curr->next->next;
-                delete temp;
-            } else {
-                curr = curr->next;
-            }
-        }
-        return head;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Remove duplicate values from a sorted list such that each value appears once.
-// - Approach: Single pass. If `curr->val == curr->next->val`, skip duplicate node; otherwise advance `curr`.
-// - Intuition: Sorted order guarantees all identical elements are contiguous.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 18. REMOVE DUPLICATES FROM SORTED LIST II (LC 82)
-// =========================================================
-
-class Solution18 {
+class Solution14 {
 public:
     ListNode* deleteDuplicates(ListNode* head) {
         ListNode dummy(0, head);
@@ -721,39 +604,10 @@ public:
 
 
 // =========================================================
-// 19. REMOVE LINKED LIST ELEMENTS (LC 203)
+// 15. ADD TWO NUMBERS (LC 2)
 // =========================================================
 
-class Solution19 {
-public:
-    ListNode* removeElements(ListNode* head, int val) {
-        ListNode dummy(0, head);
-        ListNode* curr = &dummy;
-
-        while (curr->next) {
-            if (curr->next->val == val) {
-                ListNode* temp = curr->next;
-                curr->next = curr->next->next;
-                delete temp;
-            } else {
-                curr = curr->next;
-            }
-        }
-        return dummy.next;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Remove all nodes in linked list that have value equal to `val`.
-// - Approach: Dummy node before head. Iterate and unlink matching nodes.
-// - Intuition: Dummy node unifies head deletion with general interior node deletion.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 20. ADD TWO NUMBERS (LC 2)
-// =========================================================
-
-class Solution20 {
+class Solution15 {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
         ListNode dummy(0);
@@ -785,10 +639,10 @@ public:
 
 
 // =========================================================
-// 21. ADD TWO NUMBERS II (LC 445)
+// 16. ADD TWO NUMBERS II (LC 445)
 // =========================================================
 
-class Solution21 {
+class Solution16 {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
         stack<int> s1, s2;
@@ -830,10 +684,10 @@ public:
 
 
 // =========================================================
-// 22. INTERSECTION OF TWO LINKED LISTS (LC 160)
+// 17. INTERSECTION OF TWO LINKED LISTS (LC 160)
 // =========================================================
 
-class Solution22 {
+class Solution17 {
 public:
     ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
         if (!headA || !headB) return nullptr;
@@ -855,10 +709,10 @@ public:
 
 
 // =========================================================
-// 23. COPY LIST WITH RANDOM POINTER (LC 138)
+// 18. COPY LIST WITH RANDOM POINTER (LC 138)
 // =========================================================
 
-class Solution23 {
+class Solution18 {
 public:
     Node* copyRandomList(Node* head) {
         if (!head) return nullptr;
@@ -907,95 +761,10 @@ public:
 
 
 // =========================================================
-// 24. FLATTEN A MULTILEVEL DOUBLY LINKED LIST (LC 430)
+// 19. SPLIT LINKED LIST IN PARTS (LC 725)
 // =========================================================
 
-class Solution24 {
-public:
-    Node* flatten(Node* head) {
-        if (!head) return nullptr;
-        Node* curr = head;
-
-        while (curr) {
-            if (curr->child) {
-                Node* nextNode = curr->next;
-                Node* childTail = curr->child;
-
-                while (childTail->next) {
-                    childTail = childTail->next;
-                }
-
-                curr->next = curr->child;
-                curr->child->prev = curr;
-                curr->child = nullptr;
-
-                if (nextNode) {
-                    childTail->next = nextNode;
-                    nextNode->prev = childTail;
-                }
-            }
-            curr = curr->next;
-        }
-        return head;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Flatten a multilevel doubly linked list with child pointers into a single-level doubly linked list.
-// - Approach: When encountering a child node, find child's tail, splice child list between `curr` and `curr->next`, reset child to null.
-// - Intuition: In-place pointer re-linking flattens nested lists level-by-level without recursion overhead.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 25. CONVERT BST TO SORTED DOUBLY LINKED LIST (LC 426)
-// =========================================================
-
-class Solution25 {
-    Node* first = nullptr;
-    Node* prev = nullptr;
-
-    void inorder(Node* node) {
-        if (!node) return;
-        inorder(node->left);
-
-        if (prev) {
-            prev->right = node;
-            node->left = prev;
-        } else {
-            first = node;
-        }
-        prev = node;
-
-        inorder(node->right);
-    }
-
-public:
-    Node* treeToDoublyList(Node* root) {
-        if (!root) return nullptr;
-        first = nullptr;
-        prev = nullptr;
-
-        inorder(root);
-
-        // Make doubly linked list circular
-        prev->right = first;
-        first->left = prev;
-
-        return first;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Convert a Binary Search Tree to a circular sorted Doubly Linked List in-place.
-// - Approach: Recursive inorder traversal. Link `prev->right = curr` and `curr->left = prev`. Connect head and tail at the end.
-// - Intuition: Inorder traversal naturally visits BST nodes in monotonically increasing order.
-// - Complexity: Time: O(N), Space: O(H) recursion stack space (where H is tree height).
-
-
-// =========================================================
-// 26. SPLIT LINKED LIST IN PARTS (LC 725)
-// =========================================================
-
-class Solution26 {
+class Solution19 {
 public:
     vector<ListNode*> splitListToParts(ListNode* head, int k) {
         int len = 0;
@@ -1035,10 +804,10 @@ public:
 
 
 // =========================================================
-// 27. NEXT GREATER NODE IN LINKED LIST (LC 1019)
+// 20. NEXT GREATER NODE IN LINKED LIST (LC 1019)
 // =========================================================
 
-class Solution27 {
+class Solution20 {
 public:
     vector<int> nextLargerNodes(ListNode* head) {
         vector<int> vals;
@@ -1070,56 +839,10 @@ public:
 
 
 // =========================================================
-// 28. INSERT INTO A SORTED CIRCULAR LINKED LIST (LC 708)
+// 21. MERGE IN BETWEEN LINKED LISTS (LC 1669)
 // =========================================================
 
-class Solution28 {
-public:
-    Node* insert(Node* head, int insertVal) {
-        if (!head) {
-            Node* newNode = new Node(insertVal);
-            newNode->next = newNode;
-            return newNode;
-        }
-
-        Node* prev = head;
-        Node* curr = head->next;
-        bool inserted = false;
-
-        do {
-            // Case 1: insertVal lies between prev and curr
-            if (prev->val <= insertVal && insertVal <= curr->val) {
-                inserted = true;
-                break;
-            }
-            // Case 2: Boundary inflection point (max element wrapping to min element)
-            if (prev->val > curr->val) {
-                if (insertVal >= prev->val || insertVal <= curr->val) {
-                    inserted = true;
-                    break;
-                }
-            }
-            prev = curr;
-            curr = curr->next;
-        } while (prev != head);
-
-        // Case 3: Insertion spot found, or all elements identical / loop finished
-        prev->next = new Node(insertVal, curr);
-        return head;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Insert value into a sorted circular linked list in proper sorted position.
-// - Approach: Traverse circular list. Check if `insertVal` fits monotonically between `prev` and `curr`, or spans across min/max boundary point.
-// - Intuition: If no interior point matches, value must be either strictly $\ge \max$ or $\le \min$ at the wrap-around edge.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 29. MERGE IN BETWEEN LINKED LISTS (LC 1669)
-// =========================================================
-
-class Solution29 {
+class Solution21 {
 public:
     ListNode* mergeInBetween(ListNode* list1, int a, int b, ListNode* list2) {
         ListNode* prevA = list1;
@@ -1148,349 +871,3 @@ public:
 // - Approach: Advance pointer to index $a - 1$ and index $b + 1$. Wire $(a - 1)$ to `list2` head, and `list2` tail to $(b + 1)$.
 // - Intuition: Constant number of pointer reconnections once boundary positions are reached.
 // - Complexity: Time: O(N + M), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 30. DELETE NODE IN A LINKED LIST (NO HEAD ACCESS) (LC 237)
-// =========================================================
-
-class Solution30 {
-public:
-    void deleteNode(ListNode* node) {
-        ListNode* nextNode = node->next;
-        node->val = nextNode->val;
-        node->next = nextNode->next;
-        delete nextNode;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Delete given node without access to list head (guaranteed not to be tail).
-// - Approach: Overwrite current node's value with successor's value, then bypass successor.
-// - Intuition: Value copying converts deletion of target into deletion of next node.
-// - Complexity: Time: O(1), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 31. DESIGN LINKED LIST (LC 707)
-// =========================================================
-
-class Solution31 {
-public:
-    class MyLinkedList {
-        struct DNode {
-            int val;
-            DNode* prev;
-            DNode* next;
-            DNode(int v) : val(v), prev(nullptr), next(nullptr) {}
-        };
-
-        DNode* head;
-        DNode* tail;
-        int size;
-
-    public:
-        MyLinkedList() {
-            head = new DNode(0);
-            tail = new DNode(0);
-            head->next = tail;
-            tail->prev = head;
-            size = 0;
-        }
-
-        int get(int index) {
-            if (index < 0 || index >= size) return -1;
-            DNode* curr = head->next;
-            for (int i = 0; i < index; ++i) curr = curr->next;
-            return curr->val;
-        }
-
-        void addAtHead(int val) {
-            addAtIndex(0, val);
-        }
-
-        void addAtTail(int val) {
-            addAtIndex(size, val);
-        }
-
-        void addAtIndex(int index, int val) {
-            if (index < 0 || index > size) return;
-            DNode* pred = head;
-            for (int i = 0; i < index; ++i) pred = pred->next;
-            DNode* succ = pred->next;
-
-            DNode* node = new DNode(val);
-            node->prev = pred;
-            node->next = succ;
-            pred->next = node;
-            succ->prev = node;
-            size++;
-        }
-
-        void deleteAtIndex(int index) {
-            if (index < 0 || index >= size) return;
-            DNode* pred = head;
-            for (int i = 0; i < index; ++i) pred = pred->next;
-            DNode* toDelete = pred->next;
-            DNode* succ = toDelete->next;
-
-            pred->next = succ;
-            succ->prev = pred;
-            delete toDelete;
-            size--;
-        }
-    };
-};
-using MyLinkedList = Solution31::MyLinkedList;
-
-// Interview Explanation:
-// - Problem Statement: Design singly/doubly linked list supporting get, addAtHead, addAtTail, addAtIndex, deleteAtIndex.
-// - Approach: Doubly-linked list with sentinel head and tail nodes to simplify edge deletions/insertions.
-// - Intuition: Sentinel nodes eliminate null checks at boundaries.
-// - Complexity: Time: O(index) for get/addAtIndex/deleteAtIndex, O(1) for addAtHead/addAtTail, Space: O(N).
-
-
-// =========================================================
-// 32. LRU CACHE (LC 146)
-// =========================================================
-
-class Solution32 {
-public:
-    class LRUCache {
-        struct CacheNode {
-            int key;
-            int val;
-            CacheNode* prev;
-            CacheNode* next;
-            CacheNode(int k, int v) : key(k), val(v), prev(nullptr), next(nullptr) {}
-        };
-
-        int cap;
-        unordered_map<int, CacheNode*> mp;
-        CacheNode* head;
-        CacheNode* tail;
-
-        void removeNode(CacheNode* node) {
-            node->prev->next = node->next;
-            node->next->prev = node->prev;
-        }
-
-        void addToHead(CacheNode* node) {
-            node->next = head->next;
-            node->prev = head;
-            head->next->prev = node;
-            head->next = node;
-        }
-
-        void moveToHead(CacheNode* node) {
-            removeNode(node);
-            addToHead(node);
-        }
-
-    public:
-        LRUCache(int capacity) : cap(capacity) {
-            head = new CacheNode(0, 0);
-            tail = new CacheNode(0, 0);
-            head->next = tail;
-            tail->prev = head;
-        }
-
-        int get(int key) {
-            if (!mp.count(key)) return -1;
-            CacheNode* node = mp[key];
-            moveToHead(node);
-            return node->val;
-        }
-
-        void put(int key, int value) {
-            if (mp.count(key)) {
-                CacheNode* node = mp[key];
-                node->val = value;
-                moveToHead(node);
-            } else {
-                if ((int)mp.size() >= cap) {
-                    CacheNode* lru = tail->prev;
-                    mp.erase(lru->key);
-                    removeNode(lru);
-                    delete lru;
-                }
-                CacheNode* newNode = new CacheNode(key, value);
-                mp[key] = newNode;
-                addToHead(newNode);
-            }
-        }
-    };
-};
-using LRUCache = Solution32::LRUCache;
-
-// Interview Explanation:
-// - Problem Statement: Design Least Recently Used (LRU) Cache supporting get and put in O(1) time.
-// - Approach: Hash map paired with doubly-linked list. Sentinel `head` (most recent) and `tail` (least recent).
-// - Intuition: Hash map provides O(1) key-to-node lookup; doubly-linked list provides O(1) node relocation and eviction.
-// - Complexity: Time: O(1) for get and put, Space: O(capacity).
-
-
-// =========================================================
-// 33. LFU CACHE (LC 460)
-// =========================================================
-
-class Solution33 {
-public:
-    class LFUCache {
-        struct Node {
-            int key;
-            int val;
-            int freq;
-        };
-
-        int cap;
-        int minFreq;
-        unordered_map<int, list<Node>::iterator> keyMap;
-        unordered_map<int, list<Node>> freqMap;
-
-        void updateFreq(list<Node>::iterator it) {
-            int key = it->key;
-            int val = it->val;
-            int freq = it->freq;
-
-            freqMap[freq].erase(it);
-            if (freqMap[freq].empty()) {
-                freqMap.erase(freq);
-                if (minFreq == freq) {
-                    minFreq++;
-                }
-            }
-
-            freqMap[freq + 1].push_front({key, val, freq + 1});
-            keyMap[key] = freqMap[freq + 1].begin();
-        }
-
-    public:
-        LFUCache(int capacity) : cap(capacity), minFreq(0) {}
-
-        int get(int key) {
-            if (cap == 0 || !keyMap.count(key)) return -1;
-            auto it = keyMap[key];
-            int val = it->val;
-            updateFreq(it);
-            return val;
-        }
-
-        void put(int key, int value) {
-            if (cap == 0) return;
-
-            if (keyMap.count(key)) {
-                auto it = keyMap[key];
-                it->val = value;
-                updateFreq(it);
-                return;
-            }
-
-            if ((int)keyMap.size() >= cap) {
-                auto& minList = freqMap[minFreq];
-                int evictKey = minList.back().key;
-                minList.pop_back();
-                if (minList.empty()) {
-                    freqMap.erase(minFreq);
-                }
-                keyMap.erase(evictKey);
-            }
-
-            minFreq = 1;
-            freqMap[1].push_front({key, value, 1});
-            keyMap[key] = freqMap[1].begin();
-        }
-    };
-};
-using LFUCache = Solution33::LFUCache;
-
-// Interview Explanation:
-// - Problem Statement: Design Least Frequently Used (LFU) Cache supporting get and put in O(1) time.
-// - Approach: Hash map of iterators + frequency-to-doubly-linked-list buckets (`freqMap`). Maintain `minFreq`.
-// - Intuition: Access moves node from frequency bucket $f$ to $f+1$. Eviction removes from back of `minFreq` bucket.
-// - Complexity: Time: O(1) for get and put, Space: O(capacity).
-
-
-// =========================================================
-// 34. FIND THE DUPLICATE NUMBER (LC 287)
-// =========================================================
-
-class Solution34 {
-public:
-    int findDuplicate(vector<int>& nums) {
-        int slow = nums[0];
-        int fast = nums[0];
-
-        // Phase 1: Cycle detection
-        do {
-            slow = nums[slow];
-            fast = nums[nums[fast]];
-        } while (slow != fast);
-
-        // Phase 2: Find cycle entrance
-        slow = nums[0];
-        while (slow != fast) {
-            slow = nums[slow];
-            fast = nums[fast];
-        }
-
-        return slow;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Given array with $n + 1$ integers in range $[1, n]$, find duplicate without modifying array and in $O(1)$ extra space.
-// - Approach: Interpret array as linked list where index $i$ points to $nums[i]$. Use Floyd's cycle detection.
-// - Intuition: Duplicate number causes multiple indices to point to same target, forming the cycle entrance node.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 35. DESIGN BROWSER HISTORY (LC 1472)
-// =========================================================
-
-class Solution35 {
-public:
-    class BrowserHistory {
-        struct HistoryNode {
-            string url;
-            HistoryNode* prev;
-            HistoryNode* next;
-            HistoryNode(string u) : url(u), prev(nullptr), next(nullptr) {}
-        };
-        HistoryNode* curr;
-
-    public:
-        BrowserHistory(string homepage) {
-            curr = new HistoryNode(homepage);
-        }
-
-        void visit(string url) {
-            HistoryNode* node = new HistoryNode(url);
-            curr->next = node;
-            node->prev = curr;
-            curr = node; // Naturally discards forward history
-        }
-
-        string back(int steps) {
-            while (curr->prev && steps > 0) {
-                curr = curr->prev;
-                steps--;
-            }
-            return curr->url;
-        }
-
-        string forward(int steps) {
-            while (curr->next && steps > 0) {
-                curr = curr->next;
-                steps--;
-            }
-            return curr->url;
-        }
-    };
-};
-using BrowserHistory = Solution35::BrowserHistory;
-
-// Interview Explanation:
-// - Problem Statement: Design browser history starting at homepage, with visit(url), back(steps), and forward(steps).
-// - Approach: Doubly-linked list. Current page pointer navigates backward/forward; visit appends new node and drops forward branch.
-// - Intuition: Doubly-linked list provides natural bidirectional linear navigation and O(1) branch truncation.
-// - Complexity: Time: visit O(1), back/forward O(min(steps, len)), Space: O(N) total history nodes.

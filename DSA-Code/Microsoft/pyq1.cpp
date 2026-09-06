@@ -189,12 +189,34 @@ public:
             val[i] = (long long)profit[i] + profit[(i + half) % n];
         }
         long long curSum = 0;
-        for (int i = 0; i < K; ++i) curSum += val[i];
+        for (int i = 0; i < K; ++i) curSum += val[i]; // Initial window sum
         long long maxSum = curSum;
         for (int i = 1; i < n; ++i) {
-            curSum += val[(i + K - 1) % n] - val[i - 1];
+            curSum += val[(i + K - 1) % n] - val[i - 1]; // Slide window forward
             maxSum = max(maxSum, curSum);
         }
+        return maxSum;
+    }
+
+    int maxCircularSubarraySum(vector<int> &arr, int k) {
+        int n = arr.size();
+
+        // Calculate sum of first window
+        int windowSum = 0;
+        for (int i = 0; i < k; i++) {
+            windowSum += arr[i % n];
+        }
+
+        int maxSum = windowSum;
+
+        // Slide through remaining circular windows
+        for (int i = 1; i < n; i++) {
+            windowSum -= arr[(i - 1) % n]; // (i-1)%n is the element leaving the window
+            windowSum += arr[(i + k - 1) % n]; // (i+k-1)%n is the new element entering the window
+
+            maxSum = max(maxSum, windowSum);
+        }
+
         return maxSum;
     }
 };
@@ -228,11 +250,11 @@ class Solution4 {
 public:
     int maxDistinctElements(vector<int>& nums) {
         sort(nums.begin(), nums.end());
-        long long prev = -2e18;
+        long long prev = -2e18; // Initialize to a value smaller than any possible candidate
         int distinctCount = 0;
         for (int x : nums) {
-            long long cand = max((long long)x - 1, prev + 1);
-            if (cand <= (long long)x + 1) {
+            long long cand = max((long long)x - 1, prev + 1); // can be max of x-1 or prev+1
+            if (cand <= (long long)x + 1) { // check if candidate is within the valid range
                 distinctCount++;
                 prev = cand;
             }
@@ -307,18 +329,18 @@ public:
 class Solution6 {
 public:
     vector<int> rateLimiter(const vector<string>& users, const vector<int>& times, int T, int K) {
-        unordered_map<string, queue<int>> userHistory;
+        unordered_map<string, queue<int>> userHistory; // userId -> queue of accepted timestamps
         vector<int> results;
         results.reserve(users.size());
         for (size_t i = 0; i < users.size(); ++i) {
             queue<int>& q = userHistory[users[i]];
             while (!q.empty() && q.front() < times[i] - T) {
                 q.pop();
-            }
-            if ((int)q.size() < K) {
+            } // Evict timestamps outside the sliding window
+            if (q.size() < K) { // If fewer than K accepted requests in window, accept this request
                 q.push(times[i]);
                 results.push_back(1);
-            } else {
+            } else { // Otherwise, reject the request
                 results.push_back(0);
             }
         }
@@ -354,32 +376,28 @@ public:
   Store component maximums at DSU roots; incrementally maintain global strength sum in O(1)
   during each successful union.
 */
-class Solution7 {
-    vector<int> parent, maxNode;
-    int find(int x) {
-        return parent[x] == x ? x : parent[x] = find(parent[x]);
+class DSU {
+public:
+    vector<int> p, mx;
+    DSU(int n) : p(n + 1), mx(n + 1) {
+        iota(p.begin(), p.end(), 0);
+        iota(mx.begin(), mx.end(), 0);
     }
+    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
+    void unite(int a, int b) {
+        a = find(a), b = find(b);
+        if (a != b) p[b] = a, mx[a] = max(mx[a], mx[b]);
+    }
+};
+
+class Solution7 {
 public:
     vector<long long> getStrength(int n, const vector<int>& from, const vector<int>& to) {
-        parent.resize(n + 1);
-        maxNode.resize(n + 1);
-        iota(parent.begin(), parent.end(), 0);
-        iota(maxNode.begin(), maxNode.end(), 0);
-
-        long long totalStrength = 1LL * n * (n + 1) / 2;
-        vector<long long> ans;
-        ans.reserve(from.size());
-
-        for (size_t i = 0; i < from.size(); ++i) {
-            int rootA = find(from[i]);
-            int rootB = find(to[i]);
-            if (rootA != rootB) {
-                totalStrength -= (maxNode[rootA] + maxNode[rootB]);
-                parent[rootB] = rootA;
-                maxNode[rootA] = max(maxNode[rootA], maxNode[rootB]);
-                totalStrength += maxNode[rootA];
-            }
-            ans.push_back(totalStrength);
+        DSU d(n); long long sum = 1LL*n*(n+1)/2; vector<long long> ans;
+        for (int i = 0; i < from.size(); i++) {
+            int a = d.find(from[i]), b = d.find(to[i]);
+            if (a != b) sum -= d.mx[a] + d.mx[b], d.unite(a,b), sum += d.mx[d.find(a)];
+            ans.push_back(sum);
         }
         return ans;
     }
@@ -418,12 +436,13 @@ public:
         vector<long long> cnt(d, 0), pairCnt(d, 0);
         long long triplets = 0;
         for (int x : nums) {
-            int r = ((x % d) + d) % d;
+            int r = ((x % d) + d) % d; // we wanted (A+B+C)%D==0, so we need (A+B)%D == -C%D == (D-C%D)%D
+            // x%d + d is due to negative numbers, we want to ensure r is in [0, d-1]
             triplets += pairCnt[(d - r) % d];
             for (int rem = 0; rem < d; ++rem) {
-                pairCnt[(rem + r) % d] += cnt[rem];
+                pairCnt[(rem + r) % d] += cnt[rem]; // Update pair counts for new remainder sums
             }
-            cnt[r]++;
+            cnt[r]++; // Update single remainder count
         }
         return triplets;
     }
@@ -497,18 +516,18 @@ public:
         for (int i = 0; i + m <= n; ++i) {
             string cur = word;
             bool match = true;
-            for (int j = 0; j < m; ++j) {
+            int j=0;
+            while(j < m) {
                 if (cur[i + j] != '?' && cur[i + j] != sub[j]) {
                     match = false;
                     break;
                 }
                 cur[i + j] = sub[j];
+                j++;
             }
             if (!match) continue;
-            for (char& c : cur) {
-                if (c == '?') c = 'a';
-            }
-            if (best.empty() || cur < best) best = cur;
+            for (char& c : cur) if(c=='?') c = 'a';
+            cur = min(cur, best.empty() ? cur : best);
         }
         return best.empty() ? "-1" : best;
     }
@@ -543,7 +562,7 @@ public:
     int countIncreasing(const vector<int>& nums, int k) {
         if (nums.empty() || k <= 0 || k > (int)nums.size()) return 0;
         int streak = 1, ans = (k == 1 ? 1 : 0);
-        for (size_t i = 1; i < nums.size(); ++i) {
+        for (int i = 1; i < nums.size(); ++i) {
             streak = (nums[i] > nums[i - 1]) ? streak + 1 : 1;
             if (streak >= k) ans++;
         }
@@ -576,15 +595,20 @@ public:
 */
 class Solution12 {
 public:
+    int expandAroundCenter(const string& s, int left, int right) {
+        int count = 0;
+        while (left >= 0 && right < s.size() && s[left] == s[right]) {
+            count++;
+            left--;
+            right++;
+        }
+        return count;
+    }
     int countSubstrings(const string& s) {
         int n = s.size(), total = 0;
-        for (int c = 0; c < 2 * n - 1; ++c) {
-            int l = c / 2, r = l + c % 2;
-            while (l >= 0 && r < n && s[l] == s[r]) {
-                total++;
-                l--;
-                r++;
-            }
+        for(int i=0;i<n;i++){
+            total += expandAroundCenter(s, i, i);     // Odd length palindromes
+            total += expandAroundCenter(s, i, i + 1); // Even length palindromes
         }
         return total;
     }
@@ -616,18 +640,11 @@ public:
 */
 class Solution13 {
 public:
-    int earliestFreeSlot(vector<pair<int, int>>& intervals, int k) {
+    int earliestFreeSlot(vector<pair<int,int>>& intervals, int k) {
         sort(intervals.begin(), intervals.end());
-        vector<pair<int, int>> merged;
-        for (const auto& [s, e] : intervals) {
-            if (merged.empty() || s > merged.back().second) {
-                merged.push_back({s, e});
-            } else {
-                merged.back().second = max(merged.back().second, e);
-            }
-        }
+        
         int freeStart = 0;
-        for (const auto& [s, e] : merged) {
+        for (const auto& [s, e] : intervals) {
             if (s - freeStart >= k) return freeStart;
             freeStart = max(freeStart, e);
         }
@@ -720,7 +737,7 @@ public:
             if (stress > dist[u]) continue;
 
             for (const auto& [v, w] : graph[u]) {
-                int nextStress = max(stress, w);
+                int nextStress = max(stress, w); // in normal dijkstra, we do newWeight = dist[u] + w, here we do max
                 if (nextStress < dist[v]) {
                     dist[v] = nextStress;
                     pq.push({nextStress, v});
@@ -839,20 +856,23 @@ public:
 */
 class Solution18 {
 public:
-    long long minimumStartingResources(const vector<int>& worstCase, const vector<int>& actual) {
+    long long minimumStartingResources(vector<int>& worstCase, vector<int>& actual) {
         int n = worstCase.size();
-        vector<int> order(n);
-        iota(order.begin(), order.end(), 0);
-        sort(order.begin(), order.end(), [&](int a, int b) {
-            return (worstCase[a] - actual[a]) > (worstCase[b] - actual[b]);
+        vector<pair<int,int>> tasks(n);
+        for (int i = 0; i < n; ++i)
+            tasks[i] = {worstCase[i], actual[i]};
+
+        sort(tasks.begin(), tasks.end(), [](const pair<int,int>& a, const pair<int,int>& b) {
+            return (a.first - a.second) > (b.first - b.second);
         });
+
         long long cur = 0, req = 0;
-        for (int i : order) {
-            if (cur < worstCase[i]) {
-                req += (worstCase[i] - cur);
-                cur = worstCase[i];
+        for (auto& [w, a] : tasks) {
+            if (cur < w) {
+                req += w - cur;
+                cur = w;
             }
-            cur -= actual[i];
+            cur -= a;
         }
         return req;
     }
@@ -1201,47 +1221,41 @@ public:
   Partition "at least two adjacent" into mutually exclusive cases (first pair adjacent vs last pair
   adjacent with gap) to prevent double counting while querying frequency maps in O(1).
 */
-class Solution26 {
-public:
-    long long countTriplets(const vector<int>& A, long long target) {
-        int n = A.size();
-        long long ans = 0;
 
-        auto getCount = [&](const unordered_map<long long, int>& mp, int total, long long x, long long y) -> long long {
-            long long p = x * y;
-            if (p == 0) return target == 0 ? total : 0LL;
-            if (target % p != 0) return 0LL;
-            auto it = mp.find(target / p);
-            return it == mp.end() ? 0LL : it->second;
-        };
+long long countTriplets(vector<int>& A, long long target) {
+    int n = A.size();
+    long long count = 0;
 
-        // Case 1: i and i+1 are adjacent, k is strictly in suffix [i + 2, n - 1]
-        unordered_map<long long, int> suf;
-        int sufTotal = 0;
-        for (int i = 2; i < n; i++) {
-            suf[A[i]]++;
-            sufTotal++;
-        }
-        for (int i = 0; i + 1 < n; i++) {
-            ans += getCount(suf, sufTotal, A[i], A[i + 1]);
-            if (i + 2 < n) {
-                if (--suf[A[i + 2]] == 0) suf.erase(A[i + 2]);
-                sufTotal--;
-            }
-        }
+    // Case 1: (i, i+1) are adjacent
+    unordered_map<long long, int> suffix;
 
-        // Case 2: j and j+1 are adjacent, i is strictly in prefix [0, j - 2] (non-adjacent to j)
-        unordered_map<long long, int> pre;
-        int preTotal = 0;
-        for (int j = 2; j + 1 < n; j++) {
-            pre[A[j - 2]]++;
-            preTotal++;
-            ans += getCount(pre, preTotal, A[j], A[j + 1]);
-        }
+    for (int k = 2; k < n; k++)
+        suffix[A[k]]++;
 
-        return ans;
+    for (int i = 0; i < n - 2; i++) {
+        long long product = 1LL * A[i] * A[i + 1];
+
+        if (target % product == 0)
+            count += suffix[target / product];
+
+        suffix[A[i + 2]]--; // Remove A[i+2] from suffix as we move the window forward
     }
-};
+
+    // Case 2: (j, j+1) are adjacent
+    // and i is NOT adjacent to j
+    unordered_map<long long, int> prefix;
+
+    for (int j = 1; j < n - 1; j++) {
+        long long product = 1LL * A[j] * A[j + 1];
+
+        if (target % product == 0)
+            count += prefix[target / product];
+
+        prefix[A[j - 1]]++; // Add A[j-1] to prefix as we move the window forward
+    }
+
+    return count;
+}
 
 // ====================================================================================================
 // 27. ROLL STRING [MS OA]
@@ -1312,24 +1326,68 @@ public:
   Subsequence allows character skips in x; substring enforces contiguous increment in y:
   `dp[j] = prev[j-1] + 1` when characters match.
 */
+
 class Solution28 {
-public:
-    int longestSubsequence(const string& x, const string& y) {
-        int m = y.size(), ans = 0;
-        vector<int> prev(m + 1, 0), cur(m + 1, 0);
-        for (char a : x) {
-            cur = prev;
-            for (int j = 1; j <= m; j++) {
-                if (a == y[j - 1]) {
-                    cur[j] = max(cur[j], prev[j - 1] + 1);
-                }
-                ans = max(ans, cur[j]);
-            }
-            prev = cur;
+  public:
+    string X, Y;
+    vector<vector<int>> memo;
+    int ans = 0;
+
+    // f(i, j) = length of the longest substring of Y ending exactly at Y[j-1]
+    //           that is also a subsequence of X[0..i-1]
+    int solve(int i, int j) {
+        if (i == 0 || j == 0)
+            return 0;
+        if (memo[i][j] != -1)
+            return memo[i][j];
+
+        int res = solve(i - 1, j); // skip X[i-1], carry forward best so far
+
+        if (X[i - 1] == Y[j - 1]) {
+            res = max(res, solve(i - 1, j - 1) + 1); // extend contiguous match in Y
         }
+
+        ans = max(ans, res);
+        return memo[i][j] = res;
+    }
+
+    int longestSubsequence(const string &x, const string &y) {
+        X = x;
+        Y = y;
+        int n = x.size(), m = y.size();
+        memo.assign(n + 1, vector<int>(m + 1, -1));
+
+        for (int i = 1; i <= n; ++i)
+            for (int j = 1; j <= m; ++j)
+                solve(i, j);
+
         return ans;
     }
 };
+
+class Solution299 {
+public:
+    int longestSubsequence(const string& x, const string& y) {
+        int n = x.size(), m = y.size();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+        int ans = 0;
+
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= m; ++j) {
+                dp[i][j] = dp[i - 1][j]; // skip x[i-1]
+
+                if (x[i - 1] == y[j - 1]) {
+                    dp[i][j] = max(dp[i][j], dp[i - 1][j - 1] + 1); // extend contiguous match in y
+                }
+
+                ans = max(ans, dp[i][j]);
+            }
+        }
+
+        return ans;
+    }
+};
+
 
 // ====================================================================================================
 // 29. CLOSEST NUMBERS [MS OA]
