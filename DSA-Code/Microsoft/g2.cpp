@@ -67,39 +67,25 @@ using vvl = vector<vector<ll>>;
 // 23. MINIMUM COST TO HIRE K WORKERS [G-23]
 // =========================================================
 
-struct Worker {
-    double ratio;
-    int qual;
-};
-
-bool compareWorkerRatio(const Worker& a, const Worker& b) {
-    return a.ratio < b.ratio;
-}
-
 double mincostToHireWorkers(vector<int>& qual, vector<int>& wage, int k) {
     int n = qual.size();
-    vector<Worker> w(n);
-    for (int i = 0; i < n; ++i) {
-        w[i] = {(double)wage[i] / qual[i], qual[i]};
-    }
-    sort(w.begin(), w.end(), compareWorkerRatio);
+    vector<pair<double, int>> w(n);
+    for (int i = 0; i < n; i++) w[i] = {(double)wage[i] / qual[i], qual[i]};
+    sort(w.begin(), w.end());
 
     priority_queue<int> pq; // max-heap of qualities
     int sumQ = 0;
     double ans = 1e18;
 
-    for (const auto& worker : w) {
-        pq.push(worker.qual);
-        sumQ += worker.qual;
-
+    for (auto [ratio, q] : w) {
+        pq.push(q);
+        sumQ += q;
         if ((int)pq.size() > k) {
             sumQ -= pq.top();
             pq.pop();
         }
-
-        if ((int)pq.size() == k) {
-            ans = min(ans, sumQ * worker.ratio);
-        }
+        if ((int)pq.size() == k)
+            ans = min(ans, sumQ * ratio);
     }
     return ans;
 }
@@ -119,55 +105,32 @@ double mincostToHireWorkers(vector<int>& qual, vector<int>& wage, int k) {
 // 24. MEETING ROOMS III [G-24]
 // =========================================================
 
-bool compareMeetingStart(const vector<int>& a, const vector<int>& b) {
-    return a[0] < b[0];
-}
-
-struct BusyRoomCompare {
-    bool operator()(const pair<long long, int>& a, const pair<long long, int>& b) const {
-        if (a.first != b.first) return a.first > b.first; // freeTime
-        return a.second > b.second;                       // room index
-    }
-};
-
 int mostBooked(int n, vector<vector<int>>& meetings) {
-    sort(meetings.begin(), meetings.end(), compareMeetingStart);
+    sort(meetings.begin(), meetings.end());
 
-    priority_queue<int, vector<int>, greater<int>> freeRooms;
-    for (int i = 0; i < n; ++i) freeRooms.push(i);
+    priority_queue<int, vector<int>, greater<int>> free;
+    for (int i = 0; i < n; i++) free.push(i);
 
-    priority_queue<pair<long long, int>, vector<pair<long long, int>>, BusyRoomCompare> busyRooms;
-    vector<int> cnt(n, 0);
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> busy;
+    vector<int> cnt(n);
 
-    for (const auto& m : meetings) {
+    for (auto& m : meetings) {
         long long start = m[0], end = m[1];
-        long long dur = end - start;
-
-        while (!busyRooms.empty() && busyRooms.top().first <= start) {
-            freeRooms.push(busyRooms.top().second);
-            busyRooms.pop();
+        while (!busy.empty() && busy.top().first <= start) {
+            free.push(busy.top().second);
+            busy.pop();
         }
-
-        if (!freeRooms.empty()) {
-            int room = freeRooms.top();
-            freeRooms.pop();
+        if (!free.empty()) {
+            int room = free.top(); free.pop();
             cnt[room]++;
-            busyRooms.push({end, room});
+            busy.push({end, room});
         } else {
-            auto [freeTime, room] = busyRooms.top();
-            busyRooms.pop();
+            auto [freeTime, room] = busy.top(); busy.pop();
             cnt[room]++;
-            busyRooms.push({freeTime + dur, room});
+            busy.push({freeTime + (end - start), room});
         }
     }
-
-    int bestRoom = 0;
-    for (int i = 1; i < n; ++i) {
-        if (cnt[i] > cnt[bestRoom]) {
-            bestRoom = i;
-        }
-    }
-    return bestRoom;
+    return max_element(cnt.begin(), cnt.end()) - cnt.begin();
 }
 // Interview Explanation:
 // - Problem Statement: Find room hosting the most meetings under lowest-index-first and delayed-allocation rules.
@@ -185,43 +148,18 @@ int mostBooked(int n, vector<vector<int>>& meetings) {
 // 25. MAXIMUM PROFIT IN JOB SCHEDULING [G-25]
 // =========================================================
 
-struct JobItem {
-    int start, end, profit;
-};
-
-bool compareJobItemEnd(const JobItem& a, const JobItem& b) {
-    return a.end < b.end;
-}
-
 int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
     int n = startTime.size();
-    vector<JobItem> jobs(n);
-    for (int i = 0; i < n; ++i) {
-        jobs[i] = {startTime[i], endTime[i], profit[i]};
-    }
-    sort(jobs.begin(), jobs.end(), compareJobItemEnd);
+    vector<array<int, 3>> jobs(n);
+    for (int i = 0; i < n; i++) jobs[i] = {endTime[i], startTime[i], profit[i]};
+    sort(jobs.begin(), jobs.end());
 
-    // dp[i] = {end_time, max_profit}
-    vector<pair<int, int>> dp;
-    dp.push_back({0, 0});
-
-    for (const auto& j : jobs) {
-        // Binary search for latest non-overlapping job
-        int lo = 0, hi = (int)dp.size() - 1, best = 0;
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            if (dp[mid].first <= j.start) {
-                best = mid;
-                lo = mid + 1;
-            } else {
-                hi = mid - 1;
-            }
-        }
-
-        int curProfit = dp[best].second + j.profit;
-        if (curProfit > dp.back().second) {
-            dp.push_back({j.end, curProfit});
-        }
+    vector<pair<int, int>> dp = {{0, 0}}; // {end, max_profit}
+    for (auto& [e, s, p] : jobs) {
+        auto it = prev(upper_bound(dp.begin(), dp.end(), make_pair(s, INT_MAX)));
+        int cur = it->second + p;
+        if (cur > dp.back().second)
+            dp.push_back({e, cur});
     }
     return dp.back().second;
 }
@@ -240,25 +178,25 @@ int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& pro
 // 26. MINIMUM DIFFICULTY OF A JOB SCHEDULE [G-26]
 // =========================================================
 
-int minDifficulty(vector<int>& jobDifficulty, int d) {
-    int n = jobDifficulty.size();
+int minDifficulty(vector<int>& job, int d) {
+    int n = job.size();
     if (n < d) return -1;
+    vector<int> dp(n + 1, 1e9);
+    dp[0] = 0;
 
-    vector<vector<int>> dp(d + 1, vector<int>(n + 1, 1e9));
-    dp[0][0] = 0;
-
-    for (int day = 1; day <= d; ++day) {
-        for (int i = day; i <= n; ++i) {
-            int maxDiff = 0;
-            for (int j = i; j >= day; --j) {
-                maxDiff = max(maxDiff, jobDifficulty[j - 1]);
-                if (dp[day - 1][j - 1] != 1e9) {
-                    dp[day][i] = min(dp[day][i], dp[day - 1][j - 1] + maxDiff);
-                }
+    for (int day = 1; day <= d; day++) {
+        vector<int> next(n + 1, 1e9);
+        for (int i = day; i <= n; i++) {
+            int mx = 0;
+            for (int j = i; j >= day; j--) {
+                mx = max(mx, job[j - 1]);
+                if (dp[j - 1] != 1e9)
+                    next[i] = min(next[i], dp[j - 1] + mx);
             }
         }
+        dp = std::move(next);
     }
-    return dp[d][n];
+    return dp[n];
 }
 // Interview Explanation:
 // - Problem Statement: Schedule n jobs over d days with at least 1 job per day minimizing sum of daily maximum difficulties.
@@ -277,14 +215,9 @@ int minDifficulty(vector<int>& jobDifficulty, int d) {
 
 int numRescueBoats(vector<int>& people, int limit) {
     sort(people.begin(), people.end());
-
-    int l = 0, r = (int)people.size() - 1;
-    int boats = 0;
-
+    int l = 0, r = (int)people.size() - 1, boats = 0;
     while (l <= r) {
-        if (people[l] + people[r] <= limit) {
-            l++;
-        }
+        if (people[l] + people[r] <= limit) l++;
         r--;
         boats++;
     }
@@ -305,18 +238,13 @@ int numRescueBoats(vector<int>& people, int limit) {
 // 28. QUEUE RECONSTRUCTION BY HEIGHT [G-28]
 // =========================================================
 
-bool compareQueuePeople(const vector<int>& a, const vector<int>& b) {
-    if (a[0] != b[0]) return a[0] > b[0]; // height descending
-    return a[1] < b[1];                   // k ascending
-}
-
 vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
-    sort(people.begin(), people.end(), compareQueuePeople);
-
+    sort(people.begin(), people.end(), [](auto& a, auto& b) {
+        return a[0] == b[0] ? a[1] < b[1] : a[0] > b[0];
+    });
     vector<vector<int>> ans;
-    for (const auto& p : people) {
+    for (auto& p : people)
         ans.insert(ans.begin() + p[1], p);
-    }
     return ans;
 }
 // Interview Explanation:
@@ -337,22 +265,15 @@ vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
 vector<int> advantageCount(vector<int>& a, vector<int>& b) {
     int n = a.size();
     sort(a.begin(), a.end());
-
-    vector<pair<int, int>> sortedB(n);
-    for (int i = 0; i < n; ++i) sortedB[i] = {b[i], i};
-    sort(sortedB.begin(), sortedB.end());
+    vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int i, int j) { return b[i] < b[j]; });
 
     vector<int> ans(n);
     int lo = 0, hi = n - 1;
-
     for (int x : a) {
-        if (x > sortedB[lo].first) {
-            ans[sortedB[lo].second] = x;
-            lo++;
-        } else {
-            ans[sortedB[hi].second] = x;
-            hi--;
-        }
+        if (x > b[idx[lo]]) ans[idx[lo++]] = x;
+        else ans[idx[hi--]] = x;
     }
     return ans;
 }
@@ -372,23 +293,17 @@ vector<int> advantageCount(vector<int>& a, vector<int>& b) {
 
 int bagOfTokensScore(vector<int>& tokens, int power) {
     sort(tokens.begin(), tokens.end());
-
-    int l = 0, r = (int)tokens.size() - 1;
-    int score = 0, maxScore = 0;
-
+    int l = 0, r = (int)tokens.size() - 1, score = 0, ans = 0;
     while (l <= r) {
         if (power >= tokens[l]) {
             power -= tokens[l++];
-            score++;
-            maxScore = max(maxScore, score);
+            ans = max(ans, ++score);
         } else if (score > 0 && l < r) {
             power += tokens[r--];
             score--;
-        } else {
-            break;
-        }
+        } else break;
     }
-    return maxScore;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Maximize score using tokens to gain score (face-up, costs power) or gain power (face-down, costs 1 score).
@@ -408,14 +323,11 @@ int bagOfTokensScore(vector<int>& tokens, int power) {
 int minSetSize(vector<int>& arr) {
     unordered_map<int, int> freq;
     for (int x : arr) freq[x]++;
-
     vector<int> counts;
-    for (const auto& [val, count] : freq) counts.push_back(count);
+    for (auto& [_, c] : freq) counts.push_back(c);
     sort(counts.rbegin(), counts.rend());
 
-    int removed = 0, ans = 0;
-    int half = arr.size() / 2;
-
+    int removed = 0, ans = 0, half = arr.size() / 2;
     for (int c : counts) {
         removed += c;
         ans++;
@@ -439,13 +351,11 @@ int minSetSize(vector<int>& arr) {
 
 int minIncrementForUnique(vector<int>& a) {
     sort(a.begin(), a.end());
-
     int ans = 0;
     for (int i = 1; i < (int)a.size(); ++i) {
         if (a[i] <= a[i - 1]) {
-            int needed = a[i - 1] + 1;
-            ans += needed - a[i];
-            a[i] = needed;
+            ans += a[i - 1] + 1 - a[i];
+            a[i] = a[i - 1] + 1;
         }
     }
     return ans;
@@ -513,11 +423,8 @@ int minMoves(vector<int>& a, int limit) {
 vector<vector<int>> divideArray(vector<int>& a, int k) {
     sort(a.begin(), a.end());
     vector<vector<int>> ans;
-
     for (int i = 0; i < (int)a.size(); i += 3) {
-        if (a[i + 2] - a[i] > k) {
-            return {};
-        }
+        if (a[i + 2] - a[i] > k) return {};
         ans.push_back({a[i], a[i + 1], a[i + 2]});
     }
     return ans;
@@ -538,20 +445,13 @@ vector<vector<int>> divideArray(vector<int>& a, int k) {
 
 int maxBoxesInWarehouse(vector<int>& boxes, vector<int>& warehouse) {
     int m = warehouse.size();
-    for (int i = 1; i < m; ++i) {
+    for (int i = 1; i < m; ++i)
         warehouse[i] = min(warehouse[i], warehouse[i - 1]);
-    }
     sort(boxes.begin(), boxes.end());
 
     int ans = 0;
-    int bIdx = 0;
-
-    for (int i = m - 1; i >= 0 && bIdx < (int)boxes.size(); --i) {
-        if (boxes[bIdx] <= warehouse[i]) {
-            ans++;
-            bIdx++;
-        }
-    }
+    for (int i = m - 1; i >= 0 && ans < (int)boxes.size(); --i)
+        if (boxes[ans] <= warehouse[i]) ans++;
     return ans;
 }
 // Interview Explanation:
@@ -571,22 +471,13 @@ int maxBoxesInWarehouse(vector<int>& boxes, vector<int>& warehouse) {
 
 int maxBoxesInWarehouse2(vector<int>& boxes, vector<int>& warehouse) {
     sort(boxes.rbegin(), boxes.rend());
-
-    int l = 0, r = (int)warehouse.size() - 1;
-    int ans = 0;
-
+    int l = 0, r = (int)warehouse.size() - 1, ans = 0;
     for (int b : boxes) {
         if (l > r) break;
         if (warehouse[l] >= warehouse[r]) {
-            if (warehouse[l] >= b) {
-                ans++;
-                l++;
-            }
+            if (warehouse[l] >= b) ans++, l++;
         } else {
-            if (warehouse[r] >= b) {
-                ans++;
-                r--;
-            }
+            if (warehouse[r] >= b) ans++, r--;
         }
     }
     return ans;
@@ -606,25 +497,22 @@ int maxBoxesInWarehouse2(vector<int>& boxes, vector<int>& warehouse) {
 // =========================================================
 
 string removeDuplicateLetters(string s) {
-    int last[26] = {0};
-    bool inStack[26] = {false};
-    int n = s.size();
-    for (int i = 0; i < n; ++i) last[s[i] - 'a'] = i;
+    vector<int> last(26);
+    vector<bool> seen(26);
+    for (int i = 0; i < (int)s.size(); ++i) last[s[i] - 'a'] = i;
 
-    string st = "";
-    for (int i = 0; i < n; ++i) {
+    string ans = "";
+    for (int i = 0; i < (int)s.size(); ++i) {
         int c = s[i] - 'a';
-        if (inStack[c]) continue;
-
-        while (!st.empty() && st.back() > s[i] && last[st.back() - 'a'] > i) {
-            inStack[st.back() - 'a'] = false;
-            st.pop_back();
+        if (seen[c]) continue;
+        while (!ans.empty() && ans.back() > s[i] && last[ans.back() - 'a'] > i) {
+            seen[ans.back() - 'a'] = false;
+            ans.pop_back();
         }
-
-        st.push_back(s[i]);
-        inStack[c] = true;
+        ans.push_back(s[i]);
+        seen[c] = true;
     }
-    return st;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Remove duplicate letters so every letter appears once and result is smallest in lexicographical order.
@@ -642,26 +530,19 @@ string removeDuplicateLetters(string s) {
 // =========================================================
 
 string removeKdigits(string num, int k) {
-    string st = "";
+    string ans = "";
     for (char c : num) {
-        while (!st.empty() && k > 0 && st.back() > c) {
-            st.pop_back();
+        while (!ans.empty() && k > 0 && ans.back() > c) {
+            ans.pop_back();
             k--;
         }
-        st.push_back(c);
+        ans.push_back(c);
     }
-
-    while (k > 0 && !st.empty()) {
-        st.pop_back();
-        k--;
-    }
+    while (k-- > 0 && !ans.empty()) ans.pop_back();
 
     int start = 0;
-    while (start < (int)st.size() && st[start] == '0') {
-        start++;
-    }
-
-    string ans = st.substr(start);
+    while (start < (int)ans.size() && ans[start] == '0') start++;
+    ans = ans.substr(start);
     return ans.empty() ? "0" : ans;
 }
 // Interview Explanation:
@@ -693,30 +574,21 @@ vector<int> maxSubsequence(const vector<int>& a, int k) {
     return st;
 }
 
-vector<int> mergeVectors(vector<int> a, vector<int> b) {
-    vector<int> res;
-    auto itA = a.begin(), itB = b.begin();
-    while (itA != a.end() || itB != b.end()) {
-        if (lexicographical_compare(itA, a.end(), itB, b.end())) {
-            res.push_back(*itB++);
-        } else {
-            res.push_back(*itA++);
-        }
-    }
-    return res;
-}
-
 vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
     int n = nums1.size(), m = nums2.size();
     vector<int> best;
-
     for (int i = max(0, k - m); i <= min(k, n); ++i) {
         vector<int> seq1 = maxSubsequence(nums1, i);
         vector<int> seq2 = maxSubsequence(nums2, k - i);
-        vector<int> cand = mergeVectors(seq1, seq2);
-        if (best.empty() || cand > best) {
-            best = cand;
+        vector<int> cand;
+        auto itA = seq1.begin(), itB = seq2.begin();
+        while (itA != seq1.end() || itB != seq2.end()) {
+            if (lexicographical_compare(itA, seq1.end(), itB, seq2.end()))
+                cand.push_back(*itB++);
+            else
+                cand.push_back(*itA++);
         }
+        best = max(best, cand);
     }
     return best;
 }
@@ -736,31 +608,25 @@ vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
 // =========================================================
 
 string reorganizeString(string s) {
-    int cnt[26] = {0};
-    int n = s.size();
+    vector<int> cnt(26);
     for (char c : s) cnt[c - 'a']++;
 
     priority_queue<pair<int, char>> pq;
     for (int i = 0; i < 26; ++i) {
-        if (cnt[i] > (n + 1) / 2) return "";
-        if (cnt[i] > 0) pq.push({cnt[i], (char)('a' + i)});
+        if (cnt[i] > ((int)s.size() + 1) / 2) return "";
+        if (cnt[i]) pq.push({cnt[i], (char)('a' + i)});
     }
 
     string ans = "";
     while (pq.size() >= 2) {
         auto [c1, ch1] = pq.top(); pq.pop();
         auto [c2, ch2] = pq.top(); pq.pop();
-
         ans.push_back(ch1);
         ans.push_back(ch2);
-
-        if (--c1 > 0) pq.push({c1, ch1});
-        if (--c2 > 0) pq.push({c2, ch2});
+        if (--c1) pq.push({c1, ch1});
+        if (--c2) pq.push({c2, ch2});
     }
-
-    if (!pq.empty()) {
-        ans.push_back(pq.top().second);
-    }
+    if (!pq.empty()) ans.push_back(pq.top().second);
     return ans;
 }
 // Interview Explanation:
@@ -781,30 +647,26 @@ string reorganizeString(string s) {
 
 string rearrangeString(string s, int k) {
     if (k <= 1) return s;
-
-    unordered_map<char, int> freq;
-    for (char c : s) freq[c]++;
+    int freq[26] = {0};
+    for (char c : s) freq[c - 'a']++;
 
     priority_queue<pair<int, char>> pq;
-    for (auto& [c, count] : freq) pq.push({count, c});
+    for (int i = 0; i < 26; ++i)
+        if (freq[i]) pq.push({freq[i], (char)('a' + i)});
 
     queue<pair<int, char>> waitQ;
     string ans = "";
 
     while (!pq.empty()) {
-        auto [count, c] = pq.top();
-        pq.pop();
-
+        auto [count, c] = pq.top(); pq.pop();
         ans.push_back(c);
         waitQ.push({count - 1, c});
 
         if ((int)waitQ.size() >= k) {
-            auto front = waitQ.front();
-            waitQ.pop();
-            if (front.first > 0) pq.push(front);
+            auto [cnt, ch] = waitQ.front(); waitQ.pop();
+            if (cnt > 0) pq.push({cnt, ch});
         }
     }
-
     return ans.size() == s.size() ? ans : "";
 }
 // Interview Explanation:
@@ -826,15 +688,9 @@ string rearrangeString(string s, int k) {
 int minAddToMakeValid(string s) {
     int open = 0, add = 0;
     for (char c : s) {
-        if (c == '(') {
-            open++;
-        } else {
-            if (open > 0) {
-                open--;
-            } else {
-                add++;
-            }
-        }
+        if (c == '(') open++;
+        else if (open > 0) open--;
+        else add++;
     }
     return add + open;
 }
@@ -855,30 +711,20 @@ int minAddToMakeValid(string s) {
 // =========================================================
 
 string minRemoveToMakeValid(string s) {
-    stack<int> st;
-    vector<bool> remove(s.size(), false);
-
-    for (int i = 0; i < (int)s.size(); ++i) {
-        if (s[i] == '(') {
-            st.push(i);
-        } else if (s[i] == ')') {
-            if (!st.empty()) {
-                st.pop();
-            } else {
-                remove[i] = true; // Unmatched closing
-            }
-        }
+    int open = 0;
+    string tmp = "";
+    for (char c : s) {
+        if (c == '(') open++, tmp += c;
+        else if (c == ')') {
+            if (open > 0) open--, tmp += c;
+        } else tmp += c;
     }
-
-    while (!st.empty()) {
-        remove[st.top()] = true; // Unmatched opening
-        st.pop();
-    }
-
     string ans = "";
-    for (int i = 0; i < (int)s.size(); ++i) {
-        if (!remove[i]) ans.push_back(s[i]);
+    for (int i = (int)tmp.size() - 1; i >= 0; --i) {
+        if (tmp[i] == '(' && open > 0) open--;
+        else ans += tmp[i];
     }
+    reverse(ans.begin(), ans.end());
     return ans;
 }
 // Interview Explanation:
@@ -897,21 +743,10 @@ string minRemoveToMakeValid(string s) {
 // =========================================================
 
 bool checkValidString(string s) {
-    int lo = 0, hi = 0; // Range of possible open bracket counts
-
+    int lo = 0, hi = 0;
     for (char c : s) {
-        if (c == '(') {
-            lo++;
-            hi++;
-        } else if (c == ')') {
-            lo--;
-            hi--;
-        } else {
-            // '*' can be ')', empty, or '('
-            lo--;
-            hi++;
-        }
-
+        lo += (c == '(') ? 1 : -1;
+        hi += (c != ')') ? 1 : -1;
         if (hi < 0) return false;
         lo = max(lo, 0);
     }

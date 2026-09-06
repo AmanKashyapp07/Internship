@@ -67,49 +67,43 @@ using vvl = vector<vector<ll>>;
 // 45. REMOVE INVALID PARENTHESES [G-45]
 // =========================================================
 
-class SolutionRemoveInvalidParentheses {
-    unordered_set<string> validStrings;
+vector<string> removeInvalidParentheses(string s) {
+    vector<string> ans;
+    auto isValid = [](const string& str) {
+        int cnt = 0;
+        for (char c : str) {
+            if (c == '(') cnt++;
+            else if (c == ')' && --cnt < 0) return false;
+        }
+        return cnt == 0;
+    };
 
-    void dfs(const string& s, int idx, int leftRem, int rightRem, int open, string cur) {
-        if (idx == (int)s.size()) {
-            if (leftRem == 0 && rightRem == 0 && open == 0) {
-                validStrings.insert(cur);
-            }
+    int l = 0, r = 0;
+    for (char c : s) {
+        if (c == '(') l++;
+        else if (c == ')') {
+            if (l > 0) l--;
+            else r++;
+        }
+    }
+
+    auto dfs = [&](auto& self, string cur, int start, int remL, int remR) -> void {
+        if (remL == 0 && remR == 0) {
+            if (isValid(cur)) ans.push_back(cur);
             return;
         }
-
-        char c = s[idx];
-        if (c == '(') {
-            // Discard '('
-            if (leftRem > 0) dfs(s, idx + 1, leftRem - 1, rightRem, open, cur);
-            // Keep '('
-            dfs(s, idx + 1, leftRem, rightRem, open + 1, cur + c);
-        } else if (c == ')') {
-            // Discard ')'
-            if (rightRem > 0) dfs(s, idx + 1, leftRem, rightRem - 1, open, cur);
-            // Keep ')' if valid open bracket available
-            if (open > 0) dfs(s, idx + 1, leftRem, rightRem, open - 1, cur + c);
-        } else {
-            dfs(s, idx + 1, leftRem, rightRem, open, cur + c);
+        for (int i = start; i < (int)cur.size(); ++i) {
+            if (i > start && cur[i] == cur[i - 1]) continue;
+            if (remL > 0 && cur[i] == '(')
+                self(self, cur.substr(0, i) + cur.substr(i + 1), i, remL - 1, remR);
+            if (remR > 0 && cur[i] == ')')
+                self(self, cur.substr(0, i) + cur.substr(i + 1), i, remL, remR - 1);
         }
-    }
+    };
 
-public:
-    vector<string> removeInvalidParentheses(string s) {
-        int leftRem = 0, rightRem = 0;
-        for (char c : s) {
-            if (c == '(') leftRem++;
-            else if (c == ')') {
-                if (leftRem > 0) leftRem--;
-                else rightRem++;
-            }
-        }
-
-        validStrings.clear();
-        dfs(s, 0, leftRem, rightRem, 0, "");
-        return vector<string>(validStrings.begin(), validStrings.end());
-    }
-};
+    dfs(dfs, s, 0, l, r);
+    return ans;
+}
 // Interview Explanation:
 // - Problem Statement: Remove minimum invalid parentheses and return all unique valid results.
 // - Approach: Backtracking DFS with Exact Discard Count Pruning.
@@ -128,18 +122,13 @@ public:
 
 int maximumSwap(int num) {
     string s = to_string(num);
-    int last[10] = {0};
-    int n = s.size();
+    int last[10] = {0}, n = s.size();
+    for (int i = 0; i < n; ++i) last[s[i] - '0'] = i;
 
     for (int i = 0; i < n; ++i) {
-        last[s[i] - '0'] = i;
-    }
-
-    for (int i = 0; i < n; ++i) {
-        int d = s[i] - '0';
-        for (int larger = 9; larger > d; --larger) {
-            if (last[larger] > i) {
-                swap(s[i], s[last[larger]]);
+        for (int d = 9; d > s[i] - '0'; --d) {
+            if (last[d] > i) {
+                swap(s[i], s[last[d]]);
                 return stoi(s);
             }
         }
@@ -162,19 +151,13 @@ int maximumSwap(int num) {
 // 47. LARGEST NUMBER [G-47]
 // =========================================================
 
-bool compareLargestNum(const string& a, const string& b) {
-    return (a + b) > (b + a);
-}
-
 string largestNumber(vector<int>& a) {
     vector<string> s;
     for (int x : a) s.push_back(to_string(x));
-    sort(s.begin(), s.end(), compareLargestNum);
-
+    sort(s.begin(), s.end(), [](auto& x, auto& y) { return x + y > y + x; });
     if (s[0] == "0") return "0";
-
     string ans = "";
-    for (const string& str : s) ans += str;
+    for (auto& str : s) ans += str;
     return ans;
 }
 // Interview Explanation:
@@ -195,16 +178,14 @@ string largestNumber(vector<int>& a) {
 
 long long minCostToConnectRopes(vector<long long>& a) {
     priority_queue<long long, vector<long long>, greater<long long>> pq(a.begin(), a.end());
-    long long totalCost = 0;
-
+    long long ans = 0;
     while (pq.size() > 1) {
-        long long first = pq.top(); pq.pop();
-        long long second = pq.top(); pq.pop();
-        long long combined = first + second;
-        totalCost += combined;
-        pq.push(combined);
+        long long x = pq.top(); pq.pop();
+        long long y = pq.top(); pq.pop();
+        ans += x + y;
+        pq.push(x + y);
     }
-    return totalCost;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Connect n ropes with minimum total cost where cost to connect two ropes is sum of their lengths.
@@ -222,12 +203,10 @@ long long minCostToConnectRopes(vector<long long>& a) {
 // =========================================================
 
 int findKthLargest(vector<int>& a, int k) {
-    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of size k
+    priority_queue<int, vector<int>, greater<int>> pq;
     for (int x : a) {
         pq.push(x);
-        if ((int)pq.size() > k) {
-            pq.pop();
-        }
+        if ((int)pq.size() > k) pq.pop();
     }
     return pq.top();
 }
@@ -247,23 +226,11 @@ int findKthLargest(vector<int>& a, int k) {
 // =========================================================
 
 int lastStoneWeightII(vector<int>& stones) {
-    int total = accumulate(stones.begin(), stones.end(), 0);
-    int target = total / 2;
-
-    vector<bool> dp(target + 1, false);
-    dp[0] = true;
-
-    for (int s : stones) {
-        for (int i = target; i >= s; --i) {
-            dp[i] = dp[i] || dp[i - s];
-        }
-    }
-
-    for (int i = target; i >= 0; --i) {
-        if (dp[i]) {
-            return total - 2 * i;
-        }
-    }
+    int sum = accumulate(stones.begin(), stones.end(), 0);
+    bitset<1501> dp = {1};
+    for (int s : stones) dp |= dp << s;
+    for (int i = sum / 2; i >= 0; --i)
+        if (dp[i]) return sum - 2 * i;
     return 0;
 }
 // Interview Explanation:
@@ -282,22 +249,17 @@ int lastStoneWeightII(vector<int>& stones) {
 // =========================================================
 
 int furthestBuilding(vector<int>& h, int bricks, int ladders) {
-    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs
-
+    priority_queue<int, vector<int>, greater<int>> pq;
     for (int i = 0; i < (int)h.size() - 1; ++i) {
         int diff = h[i + 1] - h[i];
-        if (diff > 0) {
-            pq.push(diff);
-            if ((int)pq.size() > ladders) {
-                bricks -= pq.top();
-                pq.pop();
-            }
-            if (bricks < 0) {
-                return i;
-            }
+        if (diff > 0) pq.push(diff);
+        if ((int)pq.size() > ladders) {
+            bricks -= pq.top();
+            pq.pop();
         }
+        if (bricks < 0) return i;
     }
-    return (int)h.size() - 1;
+    return h.size() - 1;
 }
 // Interview Explanation:
 // - Problem Statement: Find furthest building reachable using limited bricks and ladders.
@@ -316,23 +278,16 @@ int furthestBuilding(vector<int>& h, int bricks, int ladders) {
 // =========================================================
 
 int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {
-    priority_queue<int> pq; // max-heap of passed fuel capacities
-    long long curReach = startFuel;
-    int stops = 0, i = 0, n = stations.size();
-
-    while (curReach < target) {
-        while (i < n && stations[i][0] <= curReach) {
-            pq.push(stations[i][1]);
-            i++;
-        }
-
+    priority_queue<int> pq;
+    long long cur = startFuel;
+    int ans = 0, i = 0, n = stations.size();
+    while (cur < target) {
+        while (i < n && stations[i][0] <= cur) pq.push(stations[i++][1]);
         if (pq.empty()) return -1;
-
-        curReach += pq.top();
-        pq.pop();
-        stops++;
+        cur += pq.top(); pq.pop();
+        ans++;
     }
-    return stops;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find minimum refueling stops to reach target starting with startFuel.
@@ -349,22 +304,13 @@ int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {
 // 53. TRAPPING RAIN WATER II [G-53]
 // =========================================================
 
-struct Cell3D {
-    int h, r, c;
-};
-
-struct Cell3DCompare {
-    bool operator()(const Cell3D& a, const Cell3D& b) const {
-        return a.h > b.h;
-    }
-};
-
 int trapRainWater(vector<vector<int>>& g) {
     int m = g.size(), n = g[0].size();
     if (m <= 2 || n <= 2) return 0;
 
-    priority_queue<Cell3D, vector<Cell3D>, Cell3DCompare> pq;
-    vector<vector<bool>> vis(m, vector<bool>(n, false));
+    using T = tuple<int, int, int>; // {height, r, c}
+    priority_queue<T, vector<T>, greater<T>> pq;
+    vector<vector<bool>> vis(m, vector<bool>(n));
 
     for (int r = 0; r < m; ++r) {
         for (int c = 0; c < n; ++c) {
@@ -375,28 +321,23 @@ int trapRainWater(vector<vector<int>>& g) {
         }
     }
 
-    int trapped = 0;
-    int maxBoundary = 0;
-    const int dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    int ans = 0, maxH = 0;
+    int dr[] = {1, -1, 0, 0}, dc[] = {0, 0, 1, -1};
 
     while (!pq.empty()) {
-        auto [h, r, c] = pq.top();
-        pq.pop();
+        auto [h, r, c] = pq.top(); pq.pop();
+        maxH = max(maxH, h);
 
-        maxBoundary = max(maxBoundary, h);
-
-        for (auto& d : dirs) {
-            int nr = r + d[0], nc = c + d[1];
+        for (int k = 0; k < 4; ++k) {
+            int nr = r + dr[k], nc = c + dc[k];
             if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc]) {
                 vis[nr][nc] = true;
-                if (g[nr][nc] < maxBoundary) {
-                    trapped += maxBoundary - g[nr][nc];
-                }
+                if (g[nr][nc] < maxH) ans += maxH - g[nr][nc];
                 pq.push({g[nr][nc], nr, nc});
             }
         }
     }
-    return trapped;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find volume of water trapped after rain in a 3D elevation matrix.
@@ -414,40 +355,26 @@ int trapRainWater(vector<vector<int>>& g) {
 // 54. MAXIMUM AVERAGE PASS RATIO [G-54]
 // =========================================================
 
-struct ClassGain {
-    int p, t;
-    double gain() const {
+double maxAverageRatio(vector<vector<int>>& classes, int extra) {
+    auto gain = [](int p, int t) {
         return (double)(p + 1) / (t + 1) - (double)p / t;
-    }
-};
+    };
 
-struct ClassGainCompare {
-    bool operator()(const ClassGain& a, const ClassGain& b) const {
-        return a.gain() < b.gain(); // max-heap by marginal gain
-    }
-};
+    priority_queue<tuple<double, int, int>> pq;
+    for (auto& c : classes)
+        pq.push({gain(c[0], c[1]), c[0], c[1]});
 
-double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
-    priority_queue<ClassGain, vector<ClassGain>, ClassGainCompare> pq;
-    for (const auto& c : classes) {
-        pq.push({c[0], c[1]});
+    while (extra--) {
+        auto [_, p, t] = pq.top(); pq.pop();
+        pq.push({gain(p + 1, t + 1), p + 1, t + 1});
     }
 
-    while (extraStudents-- > 0) {
-        auto top = pq.top();
-        pq.pop();
-        top.p++;
-        top.t++;
-        pq.push(top);
-    }
-
-    double sumRatio = 0.0;
+    double sum = 0;
     while (!pq.empty()) {
-        auto top = pq.top();
-        pq.pop();
-        sumRatio += (double)top.p / top.t;
+        auto [_, p, t] = pq.top(); pq.pop();
+        sum += (double)p / t;
     }
-    return sumRatio / classes.size();
+    return sum / classes.size();
 }
 // Interview Explanation:
 // - Problem Statement: Assign extraStudents to classes maximizing average pass ratio (passi / totali).
@@ -465,36 +392,23 @@ double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
 // =========================================================
 
 long long totalCost(vector<int>& costs, int k, int candidates) {
-    int n = costs.size();
-    priority_queue<int, vector<int>, greater<int>> leftPq, rightPq;
-
-    int l = 0, r = n - 1;
-
-    for (int i = 0; i < candidates && l <= r; ++i) {
-        leftPq.push(costs[l++]);
-    }
-    for (int i = 0; i < candidates && l <= r; ++i) {
-        rightPq.push(costs[r--]);
-    }
-
+    priority_queue<int, vector<int>, greater<int>> pq1, pq2;
+    int i = 0, j = (int)costs.size() - 1;
     long long ans = 0;
 
-    while (k-- > 0) {
-        int leftVal = leftPq.empty() ? INT_MAX : leftPq.top();
-        int rightVal = rightPq.empty() ? INT_MAX : rightPq.top();
+    while (k--) {
+        while ((int)pq1.size() < candidates && i <= j) pq1.push(costs[i++]);
+        while ((int)pq2.size() < candidates && i <= j) pq2.push(costs[j--]);
 
-        if (leftVal <= rightVal) {
-            ans += leftVal;
-            leftPq.pop();
-            if (l <= r) {
-                leftPq.push(costs[l++]);
-            }
+        int a = pq1.empty() ? INT_MAX : pq1.top();
+        int b = pq2.empty() ? INT_MAX : pq2.top();
+
+        if (a <= b) {
+            ans += a;
+            pq1.pop();
         } else {
-            ans += rightVal;
-            rightPq.pop();
-            if (l <= r) {
-                rightPq.push(costs[r--]);
-            }
+            ans += b;
+            pq2.pop();
         }
     }
     return ans;
@@ -516,17 +430,13 @@ long long totalCost(vector<int>& costs, int k, int candidates) {
 
 bool isNStraightHand(vector<int>& hand, int groupSize) {
     if ((int)hand.size() % groupSize != 0) return false;
-
-    map<int, int> mp;
-    for (int x : hand) mp[x]++;
-
-    while (!mp.empty()) {
-        int start = mp.begin()->first;
-        for (int i = 0; i < groupSize; ++i) {
-            int card = start + i;
-            if (!mp.count(card)) return false;
-            if (--mp[card] == 0) {
-                mp.erase(card);
+    map<int, int> count;
+    for (int x : hand) count[x]++;
+    for (auto [x, c] : count) {
+        if (c > 0) {
+            for (int i = 0; i < groupSize; ++i) {
+                if (count[x + i] < c) return false;
+                count[x + i] -= c;
             }
         }
     }
@@ -548,48 +458,44 @@ bool isNStraightHand(vector<int>& hand, int groupSize) {
 // 57. VALID ARRANGEMENT OF PAIRS [G-57]
 // =========================================================
 
-class SolutionValidArrangement {
+vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {
     unordered_map<int, vector<int>> adj;
-    vector<int> path;
-
-    void dfs(int u) {
-        auto& edges = adj[u];
-        while (!edges.empty()) {
-            int v = edges.back();
-            edges.pop_back();
-            dfs(v);
-        }
-        path.push_back(u);
+    unordered_map<int, int> deg;
+    for (const auto& p : pairs) {
+        adj[p[0]].push_back(p[1]);
+        deg[p[0]]++;
+        deg[p[1]]--;
     }
 
-public:
-    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {
-        unordered_map<int, int> inDeg, outDeg;
-        for (const auto& p : pairs) {
-            adj[p[0]].push_back(p[1]);
-            outDeg[p[0]]++;
-            inDeg[p[1]]++;
+    int start = pairs[0][0];
+    for (const auto& [u, d] : deg) {
+        if (d == 1) {
+            start = u;
+            break;
         }
-
-        int startNode = pairs[0][0];
-        for (const auto& [node, out] : outDeg) {
-            if (out - inDeg[node] == 1) {
-                startNode = node;
-                break;
-            }
-        }
-
-        path.clear();
-        dfs(startNode);
-        reverse(path.begin(), path.end());
-
-        vector<vector<int>> ans;
-        for (int i = 0; i < (int)path.size() - 1; ++i) {
-            ans.push_back({path[i], path[i + 1]});
-        }
-        return ans;
     }
-};
+
+    vector<int> path, st = {start};
+    while (!st.empty()) {
+        int u = st.back();
+        if (!adj[u].empty()) {
+            int v = adj[u].back();
+            adj[u].pop_back();
+            st.push_back(v);
+        } else {
+            path.push_back(u);
+            st.pop_back();
+        }
+    }
+    reverse(path.begin(), path.end());
+
+    vector<vector<int>> ans;
+    ans.reserve(pairs.size());
+    for (int i = 0; i + 1 < (int)path.size(); ++i) {
+        ans.push_back({path[i], path[i + 1]});
+    }
+    return ans;
+}
 // Interview Explanation:
 // - Problem Statement: Arrange pairs such that end of pair i equals start of pair i + 1 for all pairs.
 // - Approach: Hierholzer's Algorithm for Directed Eulerian Path.
@@ -611,8 +517,7 @@ int minPatches(vector<int>& nums, int n) {
 
     while (miss <= n) {
         if (i < m && nums[i] <= miss) {
-            miss += nums[i];
-            i++;
+            miss += nums[i++];
         } else {
             miss += miss; // greedily patch miss itself
             patches++;
@@ -641,11 +546,8 @@ int wiggleMaxLength(vector<int>& a) {
 
     int up = 1, down = 1;
     for (int i = 1; i < n; ++i) {
-        if (a[i] > a[i - 1]) {
-            up = down + 1;
-        } else if (a[i] < a[i - 1]) {
-            down = up + 1;
-        }
+        if (a[i] > a[i - 1]) up = down + 1;
+        else if (a[i] < a[i - 1]) down = up + 1;
     }
     return max(up, down);
 }
@@ -699,13 +601,9 @@ bool increasingTriplet(vector<int>& nums) {
     int first = INT_MAX, second = INT_MAX;
 
     for (int x : nums) {
-        if (x <= first) {
-            first = x;
-        } else if (x <= second) {
-            second = x;
-        } else {
-            return true; // x > second > first
-        }
+        if (x <= first) first = x;
+        else if (x <= second) second = x;
+        else return true; // x > second > first
     }
     return false;
 }
@@ -724,16 +622,12 @@ bool increasingTriplet(vector<int>& nums) {
 // 62. MAXIMUM LENGTH OF PAIR CHAIN [G-62]
 // =========================================================
 
-bool comparePairChainEnd(const vector<int>& a, const vector<int>& b) {
-    return a[1] < b[1];
-}
-
 int findLongestChain(vector<vector<int>>& pairs) {
-    sort(pairs.begin(), pairs.end(), comparePairChainEnd);
+    sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
+        return a[1] < b[1];
+    });
 
-    int ans = 0;
-    int curEnd = -1e9;
-
+    int ans = 0, curEnd = -1e9;
     for (const auto& p : pairs) {
         if (p[0] > curEnd) {
             ans++;
@@ -757,23 +651,17 @@ int findLongestChain(vector<vector<int>>& pairs) {
 // 63. RUSSIAN DOLL ENVELOPES [G-63]
 // =========================================================
 
-bool compareEnvelopes(const vector<int>& a, const vector<int>& b) {
-    if (a[0] != b[0]) return a[0] < b[0]; // width ascending
-    return a[1] > b[1];                   // height descending
-}
-
 int maxEnvelopes(vector<vector<int>>& env) {
-    sort(env.begin(), env.end(), compareEnvelopes);
+    sort(env.begin(), env.end(), [](const auto& a, const auto& b) {
+        return a[0] == b[0] ? a[1] > b[1] : a[0] < b[0];
+    });
 
     vector<int> tails;
     for (const auto& e : env) {
         int h = e[1];
         auto it = lower_bound(tails.begin(), tails.end(), h);
-        if (it == tails.end()) {
-            tails.push_back(h);
-        } else {
-            *it = h;
-        }
+        if (it == tails.end()) tails.push_back(h);
+        else *it = h;
     }
     return tails.size();
 }
@@ -792,27 +680,23 @@ int maxEnvelopes(vector<vector<int>>& env) {
 // 64. SHORTEST UNSORTED CONTINUOUS SUBARRAY [G-64]
 // =========================================================
 
-class Solution {
-public:
-    int findUnsortedSubarray(vector<int>& nums) {
-        int n = nums.size();
-        int left = -1, right = -1;
-        int mx = INT_MIN, mn = INT_MAX;
+int findUnsortedSubarray(vector<int>& nums) {
+    int n = nums.size(), left = -1, right = -1;
+    int mx = INT_MIN, mn = INT_MAX;
 
-        for (int i = 0; i < n; i++) {
-            // Left -> Right
-            mx = max(mx, nums[i]);
-            if (nums[i] < mx) right = i;
+    for (int i = 0; i < n; i++) {
+        // Left -> Right
+        mx = max(mx, nums[i]);
+        if (nums[i] < mx) right = i;
 
-            // Right -> Left
-            int j = n - 1 - i;
-            mn = min(mn, nums[j]);
-            if (nums[j] > mn) left = j;
-        }
-
-        return right == -1 ? 0 : right - left + 1;
+        // Right -> Left
+        int j = n - 1 - i;
+        mn = min(mn, nums[j]);
+        if (nums[j] > mn) left = j;
     }
-};
+
+    return right == -1 ? 0 : right - left + 1;
+}
 // Interview Explanation:
 // - Problem Statement: Find shortest continuous subarray whose sorting sorts the whole array.
 // - Approach: Two Pointers Running Min/Max Extremes Sweep.
@@ -830,46 +714,33 @@ public:
 // =========================================================
 
 struct HuffmanNode {
-    char data;
     int freq;
-    HuffmanNode *left, *right;
-    HuffmanNode(char d, int f) : data(d), freq(f), left(nullptr), right(nullptr) {}
+    HuffmanNode *left = nullptr, *right = nullptr;
+    HuffmanNode(int f, HuffmanNode* l = nullptr, HuffmanNode* r = nullptr) : freq(f), left(l), right(r) {}
 };
-
-struct HuffmanNodeCompare {
-    bool operator()(HuffmanNode* a, HuffmanNode* b) const {
-        return a->freq > b->freq; // min-heap
-    }
-};
-
-void buildHuffmanCodes(HuffmanNode* root, string code, vector<string>& ans) {
-    if (!root) return;
-    if (!root->left && !root->right) {
-        ans.push_back(code);
-        return;
-    }
-    buildHuffmanCodes(root->left, code + "0", ans);
-    buildHuffmanCodes(root->right, code + "1", ans);
-}
 
 vector<string> huffmanCodes(string s, vector<int>& f, int n) {
-    priority_queue<HuffmanNode*, vector<HuffmanNode*>, HuffmanNodeCompare> pq;
-    for (int i = 0; i < n; ++i) {
-        pq.push(new HuffmanNode(s[i], f[i]));
-    }
+    auto cmp = [](HuffmanNode* a, HuffmanNode* b) { return a->freq > b->freq; };
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, decltype(cmp)> pq(cmp);
+    for (int x : f) pq.push(new HuffmanNode(x));
 
     while (pq.size() > 1) {
-        HuffmanNode* l = pq.top(); pq.pop();
-        HuffmanNode* r = pq.top(); pq.pop();
-
-        HuffmanNode* parent = new HuffmanNode('$', l->freq + r->freq);
-        parent->left = l;
-        parent->right = r;
-        pq.push(parent);
+        auto* l = pq.top(); pq.pop();
+        auto* r = pq.top(); pq.pop();
+        pq.push(new HuffmanNode(l->freq + r->freq, l, r));
     }
 
     vector<string> ans;
-    buildHuffmanCodes(pq.top(), "", ans);
+    auto dfs = [&](auto& self, HuffmanNode* node, string code) -> void {
+        if (!node) return;
+        if (!node->left && !node->right) {
+            ans.push_back(code.empty() ? "0" : code);
+            return;
+        }
+        self(self, node->left, code + "0");
+        self(self, node->right, code + "1");
+    };
+    dfs(dfs, pq.top(), "");
     return ans;
 }
 // Interview Explanation:
@@ -892,23 +763,19 @@ struct KnapsackItem {
     int value, weight;
 };
 
-bool compareKnapsackRatio(const KnapsackItem& a, const KnapsackItem& b) {
-    double r1 = (double)a.value / a.weight;
-    double r2 = (double)b.value / b.weight;
-    return r1 > r2;
-}
-
 double fractionalKnapsack(int w, vector<KnapsackItem>& arr, int n) {
-    sort(arr.begin(), arr.end(), compareKnapsackRatio);
+    sort(arr.begin(), arr.end(), [](const auto& a, const auto& b) {
+        return 1LL * a.value * b.weight > 1LL * b.value * a.weight;
+    });
 
     double totalVal = 0.0;
-    for (int i = 0; i < n && w > 0; ++i) {
-        if (w >= arr[i].weight) {
-            totalVal += arr[i].value;
-            w -= arr[i].weight;
+    for (const auto& item : arr) {
+        if (w <= 0) break;
+        if (w >= item.weight) {
+            totalVal += item.value;
+            w -= item.weight;
         } else {
-            totalVal += (double)arr[i].value * w / arr[i].weight;
-            w = 0;
+            totalVal += (double)item.value * w / item.weight;
             break;
         }
     }
@@ -923,4 +790,5 @@ double fractionalKnapsack(int w, vector<KnapsackItem>& arr, int n) {
 //   * Greedily take whole items as long as remaining capacity permits.
 //   * For the final fitting item, take the exact fraction required to fill the remaining capacity w.
 // - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+
 

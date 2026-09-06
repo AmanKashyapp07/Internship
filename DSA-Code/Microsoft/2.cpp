@@ -303,14 +303,15 @@ public:
 
 class Solution39 {
     int m, n;
+    vector<vector<char>>* b;
 
-    void dfs(vector<vector<char>>& board, int r, int c) {
-        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] != 'O') return;
-        board[r][c] = '#';
-        dfs(board, r + 1, c);
-        dfs(board, r - 1, c);
-        dfs(board, r, c + 1);
-        dfs(board, r, c - 1);
+    void dfs(int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || (*b)[r][c] != 'O') return;
+        (*b)[r][c] = '#';
+        dfs(r + 1, c);
+        dfs(r - 1, c);
+        dfs(r, c + 1);
+        dfs(r, c - 1);
     }
 
 public:
@@ -318,15 +319,16 @@ public:
         if (board.empty()) return;
         m = board.size();
         n = board[0].size();
+        b = &board;
 
         // Step 1: Run DFS from border cells
         for (int i = 0; i < m; i++) {
-            if (board[i][0] == 'O') dfs(board, i, 0);
-            if (board[i][n - 1] == 'O') dfs(board, i, n - 1);
+            if (board[i][0] == 'O') dfs(i, 0);
+            if (board[i][n - 1] == 'O') dfs(i, n - 1);
         }
         for (int j = 0; j < n; j++) {
-            if (board[0][j] == 'O') dfs(board, 0, j);
-            if (board[m - 1][j] == 'O') dfs(board, m - 1, j);
+            if (board[0][j] == 'O') dfs(0, j);
+            if (board[m - 1][j] == 'O') dfs(m - 1, j);
         }
 
         // Step 2: Flip remaining 'O' to 'X', restore '#' to 'O'
@@ -353,24 +355,29 @@ public:
 // =========================================================
 
 class Solution40 {
-    void dfs(vector<vector<char>>& grid, int r, int c, int m, int n) {
-        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;
-        grid[r][c] = '0'; // Sink island in-place
-        dfs(grid, r + 1, c, m, n);
-        dfs(grid, r - 1, c, m, n);
-        dfs(grid, r, c + 1, m, n);
-        dfs(grid, r, c - 1, m, n);
+    int m, n;
+    vector<vector<char>>* g;
+
+    void dfs(int r, int c) {
+        if (r < 0 || r >= m || c < 0 || c >= n || (*g)[r][c] != '1') return;
+        (*g)[r][c] = '0'; // Sink island in-place
+        dfs(r + 1, c);
+        dfs(r - 1, c);
+        dfs(r, c + 1);
+        dfs(r, c - 1);
     }
 
 public:
     int numIslands(vector<vector<char>>& grid) {
-        int m = grid.size(), n = grid[0].size();
+        m = grid.size();
+        n = grid[0].size();
+        g = &grid;
         int count = 0;
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 if (grid[i][j] == '1') {
                     count++;
-                    dfs(grid, i, j, m, n);
+                    dfs(i, j);
                 }
             }
         }
@@ -445,28 +452,34 @@ public:
 // =========================================================
 
 class Solution42 {
+    string str;
+    int start = 0, maxLen = 1;
+
+    void expand(int l, int r) {
+        int n = str.size();
+        while (l >= 0 && r < n && str[l] == str[r]) {
+            if (r - l + 1 > maxLen) {
+                start = l;
+                maxLen = r - l + 1;
+            }
+            l--;
+            r++;
+        }
+    }
+
 public:
     string longestPalindrome(string s) {
-        int n = s.size();
-        if (n <= 1) return s;
-        int start = 0, maxLen = 1;
+        if (s.size() <= 1) return s;
+        str = std::move(s);
+        start = 0;
+        maxLen = 1;
 
-        auto expand = [&](int l, int r) {
-            while (l >= 0 && r < n && s[l] == s[r]) {
-                if (r - l + 1 > maxLen) {
-                    start = l;
-                    maxLen = r - l + 1;
-                }
-                l--;
-                r++;
-            }
-        };
-
+        int n = str.size();
         for (int i = 0; i < n; i++) {
             expand(i, i);     // Odd-length palindromes
             expand(i, i + 1); // Even-length palindromes
         }
-        return s.substr(start, maxLen);
+        return str.substr(start, maxLen);
     }
 };
 // Interview Explanation:
@@ -543,14 +556,21 @@ public:
 // =========================================================
 
 class Solution45 {
-    void backtrack(const string& digits, int index, string& current, vector<string>& result, const vector<string>& mapping) {
-        if (index == (int)digits.size()) {
+    vector<string> result;
+    string current;
+    string d;
+    const vector<string> mapping = {
+        "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
+    };
+
+    void backtrack(int index) {
+        if (index == (int)d.size()) {
             result.push_back(current);
             return;
         }
-        for (char letter : mapping[digits[index] - '0']) {
+        for (char letter : mapping[d[index] - '0']) {
             current.push_back(letter);
-            backtrack(digits, index + 1, current, result, mapping);
+            backtrack(index + 1);
             current.pop_back();
         }
     }
@@ -558,12 +578,10 @@ class Solution45 {
 public:
     vector<string> letterCombinations(string digits) {
         if (digits.empty()) return {};
-        const vector<string> mapping = {
-            "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
-        };
-        vector<string> result;
-        string current;
-        backtrack(digits, 0, current, result, mapping);
+        d = std::move(digits);
+        result.clear();
+        current.clear();
+        backtrack(0);
         return result;
     }
 };
@@ -613,24 +631,35 @@ public:
 // =========================================================
 
 class Solution47 {
-public:
     vector<string> ans;
+    string cur;
+    int limit;
 
-    void solve(string s, int open, int close, int n) {
-        if (s.size() == 2 * n) { // Base case: valid combination of length 2n
-            ans.push_back(s);
+    void solve(int open, int close) {
+        if ((int)cur.size() == 2 * limit) {
+            ans.push_back(cur);
             return;
         }
 
-        if (open < n) // If we can still add an opening parenthesis
-            solve(s + "(", open + 1, close, n);
+        if (open < limit) {
+            cur.push_back('(');
+            solve(open + 1, close);
+            cur.pop_back();
+        }
 
-        if (close < open) // If we can add a closing parenthesis without invalidating the string
-            solve(s + ")", open, close + 1, n);
+        if (close < open) {
+            cur.push_back(')');
+            solve(open, close + 1);
+            cur.pop_back();
+        }
     }
 
+public:
     vector<string> generateParenthesis(int n) {
-        solve("", 0, 0, n);
+        ans.clear();
+        cur.clear();
+        limit = n;
+        solve(0, 0);
         return ans;
     }
 };
@@ -786,8 +815,17 @@ public:
             else l = x + 1;
         }
         return -1;
-    } // k is 1-based index
-    
+    }
+
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        int n = nums1.size() + nums2.size();
+        if (n % 2 == 1) {
+            return kthElement(nums1, nums2, n / 2 + 1);
+        } else {
+            return (kthElement(nums1, nums2, n / 2) + kthElement(nums1, nums2, n / 2 + 1)) / 2.0;
+        }
+    }
 };
 // Interview Explanation:
 // - Problem Statement: Find median of two sorted arrays nums1 and nums2 in O(log (m+n)) runtime.

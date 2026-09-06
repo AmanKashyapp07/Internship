@@ -42,14 +42,10 @@ function getFileBadgeClass(file) {
 
 // Load problems from SQLite API or fallback
 async function loadProblemsFromDB() {
-  // One-time cleanup to purge legacy auto-marked 86 problems from browser localStorage
-  if (localStorage.getItem('ms_dsa_legacy_cleaned_v1') !== 'true') {
-    localStorage.removeItem('ms_dsa_completed_problems');
-    localStorage.setItem('ms_dsa_legacy_cleaned_v1', 'true');
-  }
-
-  const savedCompleted = JSON.parse(localStorage.getItem('ms_dsa_completed_problems') || '[]');
-  const savedStarred = JSON.parse(localStorage.getItem('ms_dsa_starred_problems') || '[]');
+  const hasSavedCompleted = localStorage.getItem('ms_dsa_completed_problems') !== null;
+  const hasSavedStarred = localStorage.getItem('ms_dsa_starred_problems') !== null;
+  const savedCompleted = hasSavedCompleted ? JSON.parse(localStorage.getItem('ms_dsa_completed_problems')) : null;
+  const savedStarred = hasSavedStarred ? JSON.parse(localStorage.getItem('ms_dsa_starred_problems')) : null;
   
   try {
     const res = await fetch('/api/problems');
@@ -76,8 +72,8 @@ async function loadProblemsFromDB() {
     console.warn("API request failed, loading fallback local dataset:", err);
     if (typeof PROBLEMS_DATA !== 'undefined') {
       allProblems = PROBLEMS_DATA;
-      completedIds = new Set(savedCompleted);
-      starredIds = new Set(savedStarred.length > 0 ? savedStarred : allProblems.filter(p => p.starred).map(p => p.id));
+      completedIds = new Set(savedCompleted !== null ? savedCompleted : allProblems.filter(p => p.completed).map(p => p.id));
+      starredIds = new Set(savedStarred !== null ? savedStarred : allProblems.filter(p => p.starred).map(p => p.id));
       localStorage.setItem('ms_dsa_completed_problems', JSON.stringify([...completedIds]));
       localStorage.setItem('ms_dsa_starred_problems', JSON.stringify([...starredIds]));
       updatePillCounts();
@@ -539,7 +535,7 @@ resetAllBtn.addEventListener('click', async () => {
     updateStats();
     renderList();
 
-    localStorage.removeItem('ms_dsa_completed_problems');
+    localStorage.setItem('ms_dsa_completed_problems', JSON.stringify([]));
 
     try {
       await fetch('/api/reset', { method: 'POST' });

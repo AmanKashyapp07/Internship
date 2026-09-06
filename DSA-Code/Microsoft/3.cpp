@@ -81,34 +81,21 @@ struct TreeNode {
 // =========================================================
 
 class Solution70 {
-  public:
     unordered_map<int, int> pos;
-    int index = 0;
-
-    TreeNode *build(vector<int> &preorder, int left, int right) {
-        if (left > right)
-            return nullptr;
-
-        // Current preorder element is the root
-        int val = preorder[index];
-        index++;
-        TreeNode *root = new TreeNode(val);
-
-        // Find root position in inorder
+    TreeNode* build(vector<int>& preorder, int& idx, int left, int right) {
+        if (left > right) return nullptr;
+        int val = preorder[idx++];
+        TreeNode* root = new TreeNode(val);
         int mid = pos[val];
-
-        // Build left and right subtrees
-        root->left = build(preorder, left, mid - 1);
-        root->right = build(preorder, mid + 1, right);
-
+        root->left = build(preorder, idx, left, mid - 1);
+        root->right = build(preorder, idx, mid + 1, right);
         return root;
     }
-
-    TreeNode *buildTree(vector<int> &preorder, vector<int> &inorder) {
-        for (int i = 0; i < inorder.size(); i++)
-            pos[inorder[i]] = i;
-        int n = preorder.size();
-        return build(preorder, 0, n - 1);
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        for (int i = 0; i < (int)inorder.size(); ++i) pos[inorder[i]] = i;
+        int idx = 0;
+        return build(preorder, idx, 0, (int)inorder.size() - 1);
     }
 };
 // Interview Explanation:
@@ -125,19 +112,15 @@ class Solution70 {
 // =========================================================
 
 class Solution71 {
-    int checkHeight(TreeNode *node) {
-        if (!node)
-            return 0;
-        int leftH = checkHeight(node->left);
-        int rightH = checkHeight(node->right);
-        if (leftH == -1 || rightH == -1 || abs(leftH - rightH) > 1)
-            return -1;
-        return 1 + max(leftH, rightH);
+    int check(TreeNode* node) {
+        if (!node) return 0;
+        int l = check(node->left), r = check(node->right);
+        if (l == -1 || r == -1 || abs(l - r) > 1) return -1;
+        return 1 + max(l, r);
     }
-
-  public:
-    bool isBalanced(TreeNode *root) {
-        return checkHeight(root) != -1;
+public:
+    bool isBalanced(TreeNode* root) {
+        return check(root) != -1;
     }
 };
 // Interview Explanation:
@@ -153,21 +136,17 @@ class Solution71 {
 // =========================================================
 
 class Solution72 {
-    int globalMax;
-
-    int maxGain(TreeNode *node) {
-        if (!node)
-            return 0;
-        int leftGain = max(0, maxGain(node->left));
-        int rightGain = max(0, maxGain(node->right));
-        globalMax = max(globalMax, node->val + leftGain + rightGain);
-        return node->val + max(leftGain, rightGain);
+    int globalMax = INT_MIN;
+    int gain(TreeNode* node) {
+        if (!node) return 0;
+        int l = max(0, gain(node->left)), r = max(0, gain(node->right));
+        globalMax = max(globalMax, node->val + l + r);
+        return node->val + max(l, r);
     }
-
-  public:
-    int maxPathSum(TreeNode *root) {
+public:
+    int maxPathSum(TreeNode* root) {
         globalMax = INT_MIN;
-        maxGain(root);
+        gain(root);
         return globalMax;
     }
 };
@@ -228,36 +207,29 @@ class Solution73 {
 // =========================================================
 
 class Solution74 {
-    void serializeHelper(TreeNode *node, ostringstream &out) {
-        if (!node) {
-            out << "# ";
-            return;
-        }
-        out << node->val << " ";
-        serializeHelper(node->left, out);
-        serializeHelper(node->right, out);
+    void encode(TreeNode* root, ostringstream& out) {
+        if (!root) { out << "# "; return; }
+        out << root->val << " ";
+        encode(root->left, out);
+        encode(root->right, out);
     }
-
-    TreeNode *deserializeHelper(istringstream &in) {
-        string val;
-        if (!(in >> val) || val == "#")
-            return nullptr;
-        TreeNode *node = new TreeNode(stoi(val));
-        node->left = deserializeHelper(in);
-        node->right = deserializeHelper(in);
-        return node;
+    TreeNode* decode(istringstream& in) {
+        string s;
+        if (!(in >> s) || s == "#") return nullptr;
+        TreeNode* root = new TreeNode(stoi(s));
+        root->left = decode(in);
+        root->right = decode(in);
+        return root;
     }
-
-  public:
-    string serialize(TreeNode *root) {
+public:
+    string serialize(TreeNode* root) {
         ostringstream out;
-        serializeHelper(root, out);
+        encode(root, out);
         return out.str();
     }
-
-    TreeNode *deserialize(string data) {
+    TreeNode* deserialize(string data) {
         istringstream in(data);
-        return deserializeHelper(in);
+        return decode(in);
     }
 };
 // Interview Explanation:
@@ -272,19 +244,15 @@ class Solution74 {
 // =========================================================
 
 class Solution75 {
-    int maxDiameter;
-
-    int depth(TreeNode *node) {
-        if (!node)
-            return 0;
-        int l = depth(node->left);
-        int r = depth(node->right);
+    int maxDiameter = 0;
+    int depth(TreeNode* node) {
+        if (!node) return 0;
+        int l = depth(node->left), r = depth(node->right);
         maxDiameter = max(maxDiameter, l + r);
         return 1 + max(l, r);
     }
-
-  public:
-    int diameterOfBinaryTree(TreeNode *root) {
+public:
+    int diameterOfBinaryTree(TreeNode* root) {
         maxDiameter = 0;
         depth(root);
         return maxDiameter;
@@ -302,28 +270,13 @@ class Solution75 {
 // 76. TWO SUM IV - INPUT IS A BST (LC 653)
 // =========================================================
 class Solution76 {
+    unordered_set<int> seen;
 public:
-    void inorder(TreeNode* root, vector<int>& nums) {
-        if (!root) return;
-        inorder(root->left, nums);
-        nums.push_back(root->val);
-        inorder(root->right, nums);
-    }
-    // inorder returns a sorted array of the BST values. Then we can use two pointers to find if there exists a pair that sums to k.
     bool findTarget(TreeNode* root, int k) {
-        vector<int> nums;
-        inorder(root, nums);
-        int left = 0;
-        int right = nums.size() - 1;
-        while (left < right) {
-            int sum = nums[left] + nums[right];
-            if (sum == k) return true;
-            if (sum < k)
-                left++;
-            else
-                right--;
-        }
-        return false;
+        if (!root) return false;
+        if (seen.count(k - root->val)) return true;
+        seen.insert(root->val);
+        return findTarget(root->left, k) || findTarget(root->right, k);
     }
 };
 // Interview Explanation:
@@ -339,52 +292,36 @@ public:
 // =========================================================
 
 class Solution77 {
-public:
     unordered_map<TreeNode*, TreeNode*> parent;
 
-    void setParent(TreeNode* root) {
-        if (!root) return; // Base case: if the current node is null, return
-
-        if (root->left) {
-            parent[root->left] = root; // Set the parent of the left child to the current node
-            setParent(root->left);
-        }
-        if (root->right) {
-            parent[root->right] = root; // Set the parent of the right child to the current node
-            setParent(root->right);
-        }
+    void setParent(TreeNode* node) {
+        if (!node) return;
+        if (node->left) { parent[node->left] = node; setParent(node->left); }
+        if (node->right) { parent[node->right] = node; setParent(node->right); }
     }
 
+public:
     vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        parent.clear();
         setParent(root);
+
         queue<TreeNode*> q;
         unordered_set<TreeNode*> visited;
-
         q.push(target);
         visited.insert(target);
 
-        // BFS for exactly k levels
-        while (k--) {
-            int size = q.size();
-
-            while (size--) {
-                TreeNode* node = q.front();
-                q.pop();
-
-                if (node->left && !visited.count(node->left)) {
-                    visited.insert(node->left);
-                    q.push(node->left);
-                }
-                if (node->right && !visited.count(node->right)) {
-                    visited.insert(node->right);
-                    q.push(node->right);
-                }
-                if (parent[node] && !visited.count(parent[node])) {
-                    visited.insert(parent[node]);
-                    q.push(parent[node]);
+        while (k-- && !q.empty()) {
+            int sz = q.size();
+            while (sz--) {
+                auto* node = q.front(); q.pop();
+                for (auto* next : {node->left, node->right, parent[node]}) {
+                    if (next && visited.insert(next).second) {
+                        q.push(next);
+                    }
                 }
             }
         }
+
         vector<int> ans;
         while (!q.empty()) {
             ans.push_back(q.front()->val);
@@ -401,34 +338,29 @@ public:
 //   * BFS radiating out from `target` up to radius k finds all nodes at distance k in level order.
 // - Complexity: Time: O(N), Space: O(N).
 
-// =========================================================
-// 78. VERTICAL ORDER TRAVERSAL OF A BINARY TREE (LC 987)
-// =========================================================
-
 class Solution78 {
-public:
-    vector<tuple<int, int, int>> nodes;
+    vector<tuple<int,int,int>> v;
 
     void dfs(TreeNode* root, int row, int col) {
         if (!root) return;
-        nodes.push_back({col, row, root->val});
+        v.push_back({col, row, root->val});
         dfs(root->left, row + 1, col - 1);
         dfs(root->right, row + 1, col + 1);
     }
 
+public:
     vector<vector<int>> verticalTraversal(TreeNode* root) {
         dfs(root, 0, 0);
-        // Sort by column -> row -> value
-        sort(nodes.begin(), nodes.end());
+        sort(v.begin(), v.end());
+
         vector<vector<int>> ans;
+        int prev = INT_MIN;
 
-        int lastCol = INT_MIN;
-        for (auto [col, row, val] : nodes) {
-            if (col != lastCol) { // New column encountered
-                ans.push_back({}); // Start a new column in the answer
-                lastCol = col; // Update lastCol to the current column
+        for (auto [col, row, val] : v) {
+            if (col != prev) {
+                ans.push_back({});
+                prev = col;
             }
-
             ans.back().push_back(val);
         }
 
@@ -448,55 +380,39 @@ public:
 // =========================================================
 
 class Solution79 {
-    unordered_map<int, TreeNode *> rootMap;
-    int mergedCount = 0;
-
-    bool validate(TreeNode *node, long long minVal, long long maxVal, TreeNode *globalRoot) {
-        if (!node)
-            return true;
-        if (node->val <= minVal || node->val >= maxVal)
-            return false;
-
-        if (!node->left && !node->right && rootMap.count(node->val) && node != globalRoot) {
-            TreeNode *match = rootMap[node->val];
-            node->left = match->left;
-            node->right = match->right;
-            rootMap.erase(node->val);
-            mergedCount++;
+    unordered_map<int, TreeNode*> mp;
+    bool dfs(TreeNode* node, long long low, long long high) {
+        if (!node) return true;
+        if (node->val <= low || node->val >= high) return false;
+        // Replace leaf with matching BST
+        if (!node->left && !node->right && mp.count(node->val)) {
+            TreeNode* t = mp[node->val];
+            node->left = t->left;
+            node->right = t->right;
+            mp.erase(node->val);
         }
-        return validate(node->left, minVal, node->val, globalRoot) &&
-               validate(node->right, node->val, maxVal, globalRoot);
+        return dfs(node->left, low, node->val) && dfs(node->right, node->val, high);
     }
-
-  public:
-    TreeNode *canMerge(vector<TreeNode *> &trees) {
-        rootMap.clear();
-        unordered_map<int, int> leafFreq;
-        for (TreeNode *t : trees) {
-            rootMap[t->val] = t;
-            if (t->left)
-                leafFreq[t->left->val]++;
-            if (t->right)
-                leafFreq[t->right->val]++;
+public:
+    TreeNode* canMerge(vector<TreeNode*>& trees) {
+        unordered_set<int> leaves;
+        for (auto root : trees) {
+            mp[root->val] = root;
+            if (root->left) leaves.insert(root->left->val);
+            if (root->right) leaves.insert(root->right->val);
         }
-
-        TreeNode *globalRoot = nullptr;
-        for (TreeNode *t : trees) {
-            if (leafFreq.find(t->val) == leafFreq.end()) {
-                if (globalRoot != nullptr)
-                    return nullptr;
-                globalRoot = t;
+        // Find the only root that is not a leaf
+        TreeNode* root = nullptr;
+        for (auto tree : trees) {
+            if (!leaves.count(tree->val)) {
+                if (root) return nullptr;
+                root = tree;
             }
         }
-        if (!globalRoot)
-            return nullptr;
-
-        mergedCount = 0;
-        if (!validate(globalRoot, LLONG_MIN, LLONG_MAX, globalRoot))
-            return nullptr;
-        if (mergedCount != (int)trees.size() - 1)
-            return nullptr;
-        return globalRoot;
+        if (!root) return nullptr;
+        mp.erase(root->val);
+        if (!dfs(root, LLONG_MIN, LLONG_MAX) || !mp.empty()) return nullptr;
+        return root;
     }
 };
 // Interview Explanation:
@@ -512,30 +428,18 @@ class Solution79 {
 // =========================================================
 
 class Solution80 {
-    struct DSU {
-        vector<int> parent;
-        DSU(int n) : parent(n + 1) {
-            iota(parent.begin(), parent.end(), 0);
-        }
-        int find(int x) {
-            return parent[x] == x ? x : parent[x] = find(parent[x]);
-        }
-        bool unite(int x, int y) {
-            int rootX = find(x), rootY = find(y);
-            if (rootX == rootY) return false;
-            parent[rootX] = rootY;
-            return true;
-        }
-    };
-
+    vector<int> parent;
+    int find(int x) {
+        return parent[x] == x ? x : parent[x] = find(parent[x]);
+    }
 public:
     vector<int> findRedundantConnection(vector<vector<int>>& edges) {
-        int n = edges.size();
-        DSU dsu(n);
-        for (const auto& edge : edges) {
-            if (!dsu.unite(edge[0], edge[1])) {
-                return edge;
-            }
+        parent.resize(edges.size() + 1);
+        iota(parent.begin(), parent.end(), 0);
+        for (const auto& e : edges) {
+            int rx = find(e[0]), ry = find(e[1]);
+            if (rx == ry) return e;
+            parent[rx] = ry;
         }
         return {};
     }
@@ -552,31 +456,22 @@ public:
 // =========================================================
 
 class Solution81 {
-    struct DSU {
-        vector<int> parent;
-        DSU(int n) : parent(n) {
-            iota(parent.begin(), parent.end(), 0);
-        }
-        int find(int x) {
-            return parent[x] == x ? x : parent[x] = find(parent[x]);
-        }
-        void unite(int x, int y) {
-            int rootX = find(x), rootY = find(y);
-            if (rootX != rootY) parent[rootX] = rootY;
-        }
-    };
-
+    vector<int> parent;
+    int find(int x) {
+        return parent[x] == x ? x : parent[x] = find(parent[x]);
+    }
 public:
     vector<vector<string>> accountsMerge(vector<vector<string>>& accounts) {
         int n = accounts.size();
-        DSU dsu(n);
-        unordered_map<string, int> emailToId;
+        parent.resize(n);
+        iota(parent.begin(), parent.end(), 0);
 
-        for (int i = 0; i < n; i++) {
-            for (size_t j = 1; j < accounts[i].size(); j++) {
-                const string& email = accounts[i][j];
+        unordered_map<string, int> emailToId;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 1; j < (int)accounts[i].size(); ++j) {
+                const auto& email = accounts[i][j];
                 if (emailToId.count(email)) {
-                    dsu.unite(i, emailToId[email]);
+                    parent[find(i)] = find(emailToId[email]);
                 } else {
                     emailToId[email] = i;
                 }
@@ -585,8 +480,7 @@ public:
 
         unordered_map<int, vector<string>> leaderToEmails;
         for (const auto& [email, id] : emailToId) {
-            int leader = dsu.find(id);
-            leaderToEmails[leader].push_back(email);
+            leaderToEmails[find(id)].push_back(email);
         }
 
         vector<vector<string>> mergedAccounts;
@@ -594,7 +488,7 @@ public:
             sort(emails.begin(), emails.end());
             vector<string> account = {accounts[leader][0]};
             account.insert(account.end(), emails.begin(), emails.end());
-            mergedAccounts.push_back(account);
+            mergedAccounts.push_back(std::move(account));
         }
         return mergedAccounts;
     }
@@ -611,32 +505,24 @@ public:
 // =========================================================
 
 class Solution82 {
-  public:
-    vector<int> eventualSafeNodes(vector<vector<int>> &graph) {
+public:
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
         int n = graph.size();
         vector<vector<int>> rev(n);
-        vector<int> outdegree(n, 0);
-
-        for (int i = 0; i < n; i++) {
-            outdegree[i] = graph[i].size();
-            for (int v : graph[i])
-                rev[v].push_back(i);
-        }
-
+        vector<int> out(n);
         queue<int> q;
-        for (int i = 0; i < n; i++) {
-            if (outdegree[i] == 0)
-                q.push(i);
+        for (int u = 0; u < n; ++u) {
+            out[u] = graph[u].size();
+            if (out[u] == 0) q.push(u);
+            for (int v : graph[u]) rev[v].push_back(u);
         }
 
         vector<int> safe;
         while (!q.empty()) {
-            int node = q.front();
-            q.pop();
-            safe.push_back(node);
-            for (int prev : rev[node]) {
-                if (--outdegree[prev] == 0)
-                    q.push(prev);
+            int u = q.front(); q.pop();
+            safe.push_back(u);
+            for (int p : rev[u]) {
+                if (--out[p] == 0) q.push(p);
             }
         }
         sort(safe.begin(), safe.end());
@@ -654,79 +540,44 @@ class Solution82 {
 // =========================================================
 // 83. MAKING A LARGE ISLAND (LC 827)
 // =========================================================
+
 class Solution83 {
-  public:
     int n;
-    vector<int> area;
-    int dr[4] = {0, 0, 1, -1};
-    int dc[4] = {1, -1, 0, 0};
-
-    int dfs(vector<vector<int>> &grid, int r, int c, int id) {
-        grid[r][c] = id;
-        int count = 1; // count denotes the area of the island with id `id`
-
-        for (int k = 0; k < 4; k++) {
-            int nr = r + dr[k];
-            int nc = c + dc[k];
-
-            if (nr >= 0 && nr < n &&
-                nc >= 0 && nc < n &&
-                grid[nr][nc] == 1) {
-
-                count += dfs(grid, nr, nc, id);
-            }
-        }
-
-        return count;
+    int dfs(vector<vector<int>>& g, int r, int c, int curId) {
+        if (r < 0 || r >= n || c < 0 || c >= n || g[r][c] != 1) return 0;
+        g[r][c] = curId;
+        return 1 + dfs(g, r + 1, c, curId) + dfs(g, r - 1, c, curId)
+                 + dfs(g, r, c + 1, curId) + dfs(g, r, c - 1, curId);
     }
+public:
+    int largestIsland(vector<vector<int>>& g) {
+        n = g.size();
+        int id = 2, ans = 0;
+        vector<int> area(n * n + 2, 0);
 
-    int largestIsland(vector<vector<int>> &grid) {
-        n = grid.size();
-        area.resize(n * n + 2);
-
-        int id = 2; // Start labeling islands from 2 to avoid confusion with 0 and 1
-        int ans = 0;
-
-        // Mark every island with a unique id
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
-                    area[id] = dfs(grid, i, j, id);
-                    ans = max(ans, area[id]);
-                    id++;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (g[i][j] == 1) {
+                    area[id] = dfs(g, i, j, id);
+                    ans = max(ans, area[id++]);
                 }
             }
         }
-        // ans now contains the area of the largest island without any changes.
-        // Try changing each 0 into 1
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] != 0)
-                    continue;
 
-                int total = 1; // Start with 1 for the flipped cell
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (g[i][j]) continue;
+                int total = 1;
                 unordered_set<int> seen;
-
-                for (int k = 0; k < 4; k++) {
-                    int nr = i + dr[k];
-                    int nc = j + dc[k];
-
-                    if (nr < 0 || nr >= n || nc < 0 || nc >= n)
-                        continue;
-
-                    int id = grid[nr][nc];
-
-                    // Add this island only once
-                    if (id > 1 && !seen.count(id)) {
-                        seen.insert(id);
-                        total += area[id];
+                for (auto [dr, dc] : {pair<int, int>{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+                    int ni = i + dr, nj = j + dc;
+                    if (ni >= 0 && ni < n && nj >= 0 && nj < n && g[ni][nj] > 1 && seen.insert(g[ni][nj]).second) {
+                        total += area[g[ni][nj]];
                     }
                 }
-
                 ans = max(ans, total);
             }
         }
-
         return ans;
     }
 };
@@ -735,53 +586,56 @@ class Solution83 {
 // - Approach: Component Labeling + 4-Directional Boundary Bridge Probing.
 // - Intuition:
 //   * Label each island with a unique ID and store its area in a hash map.
-//   * For every 0 cell, examine its 4 neighbors and sum the unique graphacent island areas + 1.
+//   * For every 0 cell, examine its 4 neighbors and sum the unique adjacent island areas + 1.
 // - Complexity: Time: O(N^2), Space: O(N^2).
 
+
+// =========================================================
+// 84. MIN EDGE REVERSALS FOR REACHABILITY (LC 2858)
+// =========================================================
+
 class Solution84 {
-public:
-    vector<vector<pair<int, int>>> graph;
+    vector<vector<pair<int, int>>> g;
     vector<int> ans;
 
-    // Count reversals needed when starting from node 0
-    int dfs1(int node, int parent) {
+    int dfs1(int u, int p) {
         int cost = 0;
-        for (auto [next, reverse] : graph[node]) {
-            if(next!=parent){
-                cost+= reverse + dfs1(next, node);
-            }
+        for (auto [v, rev] : g[u]) {
+            if (v != p) cost += rev + dfs1(v, u);
         }
         return cost;
     }
 
-    // Calculate answer for every possible starting node
-    void dfs2(int node, int parent) {
-        for (auto [next, reverse] : graph[node]) {
-            if(next!=parent) {
-                ans[next] = ans[node] + (reverse ? -1 : 1);
-                dfs2(next, node);
+    void dfs2(int u, int p) {
+        for (auto [v, rev] : g[u]) {
+            if (v != p) {
+                ans[v] = ans[u] + (rev ? -1 : 1);
+                dfs2(v, u);
             }
         }
     }
 
+public:
     vector<int> minEdgeReversals(int n, vector<vector<int>>& edges) {
-        graph.resize(n);
-        ans.resize(n);
-        for (auto& edge : edges) {
-            int u = edge[0];
-            int v = edge[1];
-            // u -> v is already correct when going from u to v
-            graph[u].push_back({v, 0}); // 0 means no reversal needed
-            // Going from v to u requires reversing the edge
-            graph[v].push_back({u, 1}); // 1 means reversal needed
+        g.assign(n, {});
+        ans.assign(n, 0);
+        for (const auto& e : edges) {
+            g[e[0]].push_back({e[1], 0}); // forward edge (cost 0)
+            g[e[1]].push_back({e[0], 1}); // backward edge (cost 1 to reverse)
         }
-        // Answer when starting from node 0
+
         ans[0] = dfs1(0, -1);
-        // Re-root and calculate answers for all nodes
         dfs2(0, -1);
         return ans;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Find min edge reversals to reach all nodes from each node in directed tree.
+// - Approach: Tree Re-Rooting Dynamic Programming.
+// - Intuition:
+//   * Calculate answer for root (node 0) using bottom-up DFS.
+//   * When shifting root from u to neighbor v across edge u -> v (or v -> u), cost changes by +1 or -1.
+// - Complexity: Time: O(N), Space: O(N).
 
 // =========================================================
 // 85. PATH EXISTENCE QUERIES IN A GRAPH I (LC 3532)
@@ -1033,31 +887,26 @@ class Solution91 {
 // =========================================================
 
 class Solution92 {
-    struct TupleCmp {
-        bool operator()(const tuple<int, int, int> &a, const tuple<int, int, int> &b) const {
-            return get<0>(a) > get<0>(b);
-        }
-    };
-
-  public:
-    vector<vector<int>> kSmallestPairs(vector<int> &nums1, vector<int> &nums2, int k) {
+public:
+    vector<vector<int>> kSmallestPairs(vector<int>& a, vector<int>& b, int k) {
         vector<vector<int>> ans;
-        if (nums1.empty() || nums2.empty() || k <= 0)
-            return ans;
 
-        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, TupleCmp> pq;
-        for (int i = 0; i < (int)nums1.size() && i < k; ++i) {
-            pq.emplace(nums1[i] + nums2[0], i, 0);
-        }
+        using T = tuple<int,int,int>; // sum, i, j
+        priority_queue<T, vector<T>, greater<T>> pq;
 
-        while (!pq.empty() && (int)ans.size() < k) {
+        for (int i = 0; i < min((int)a.size(), k); i++)
+            pq.push({a[i] + b[0], i, 0});
+
+        while (k-- && !pq.empty()) {
             auto [sum, i, j] = pq.top();
             pq.pop();
-            ans.push_back({nums1[i], nums2[j]});
-            if (j + 1 < (int)nums2.size()) {
-                pq.emplace(nums1[i] + nums2[j + 1], i, j + 1);
-            }
+
+            ans.push_back({a[i], b[j]});
+
+            if (j + 1 < b.size())
+                pq.push({a[i] + b[j + 1], i, j + 1});
         }
+
         return ans;
     }
 };

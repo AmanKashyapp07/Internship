@@ -206,26 +206,21 @@ public:
 // =========================================================
 // 5. HEATERS (LC 475)
 // =========================================================
-
 class Solution5 {
 public:
     int findRadius(vector<int>& houses, vector<int>& heaters) {
         sort(heaters.begin(), heaters.end());
-        int maxRadius = 0;
+        int ans = 0;
         for (int house : houses) {
-            // Binary search nearest heaters to the right and left
-            auto it = lower_bound(heaters.begin(), heaters.end(), house);
-            int dist = INT_MAX;
-            if (it != heaters.end()) {
-                dist = min(dist, *it - house);
-            }
-            if (it != heaters.begin()) {
-                dist = min(dist, house - *prev(it));
-            }
-            // Max radius needed across all houses
-            maxRadius = max(maxRadius, dist);
+            auto it = lower_bound(heaters.begin(), heaters.end(), house); // find the first heater not less than house
+            int i = it - heaters.begin();
+            int j = (i == 0) ? -1 : i - 1; // index of the heater just before the house
+            int right = (i == heaters.size()) ? INT_MAX : heaters[i] - house;
+            int left = (j == -1) ? INT_MAX : house - heaters[j];
+            ans = max(ans, min(left, right));
         }
-        return maxRadius;
+
+        return ans;
     }
 };
 // Interview Explanation:
@@ -246,20 +241,13 @@ class Solution6 {
 public:
     int leastInterval(vector<char>& tasks, int n) {
         vector<int> freq(26, 0);
-        int maxFreq = 0;
-        // Count frequencies of tasks
-        for (char c : tasks) {
+        for (char c : tasks)
             freq[c - 'A']++;
-            maxFreq = max(maxFreq, freq[c - 'A']);
-        }
-        // Count how many tasks share the maximum frequency
-        int maxCount = 0;
-        for (int f : freq) {
-            if (f == maxFreq) maxCount++;
-        }
-        // Frame formula: maxFreq blocks with n idle slots each
-        int emptySlots = (maxFreq - 1) * (n + 1) + maxCount;
-        return max((int)tasks.size(), emptySlots);
+
+        int maxFreq = *max_element(freq.begin(), freq.end());
+        int maxCount = count(freq.begin(), freq.end(), maxFreq);
+
+        return max((int)tasks.size(), (maxFreq - 1) * (n + 1) + maxCount);
     }
 };
 // Interview Explanation:
@@ -276,27 +264,27 @@ public:
 // =========================================================
 // 7. PARTITION LABELS (LC 763)
 // =========================================================
-
 class Solution7 {
 public:
     vector<int> partitionLabels(string s) {
-        vector<int> lastIndex(26, 0);
-        // Record last occurrence index of each character
-        for (int i = 0; i < (int)s.size(); ++i) {
-            lastIndex[s[i] - 'a'] = i;
-        }
-        vector<int> result;
-        int start = 0;
-        int currEnd = 0;
-        // Greedily expand current partition boundary
-        for (int i = 0; i < (int)s.size(); ++i) {
-            currEnd = max(currEnd, lastIndex[s[i] - 'a']);
-            if (i == currEnd) {
-                result.push_back(currEnd - start + 1);
+        vector<int> last(26);
+
+        for (int i = 0; i < s.size(); i++)
+            last[s[i] - 'a'] = i;
+
+        vector<int> ans;
+        int start = 0, end = 0;
+
+        for (int i = 0; i < s.size(); i++) {
+            end = max(end, last[s[i] - 'a']);
+
+            if (i == end) {
+                ans.push_back(end - start + 1);
                 start = i + 1;
             }
         }
-        return result;
+
+        return ans;
     }
 };
 // Interview Explanation:
@@ -345,38 +333,50 @@ public:
 // =========================================================
 // 9. MAXIMUM NUMBER OF EVENTS THAT CAN BE ATTENDED (LC 1353)
 // =========================================================
-
 class Solution9 {
 public:
     int maxEvents(vector<vector<int>>& events) {
+        // Step 1: Sort events based on their start days
         sort(events.begin(), events.end());
+        
+        // Min-heap to store the end days of currently active events
         priority_queue<int, vector<int>, greater<int>> minHeap;
-        int day = 1;
+        
+        int totalEventsAttended = 0;
         int i = 0;
         int n = events.size();
-        int attended = 0;
+        
+        // Track current day, starting from the first event's start day
+        int currentDay = events[0][0];
+        
+        // Loop runs as long as there are unconsidered events or active events in the heap
         while (i < n || !minHeap.empty()) {
-            // Advance day if no active events in queue
-            if (minHeap.empty()) {
-                day = events[i][0];
+            
+            // Fast-forward currentDay if heap is empty and next event starts far in the future
+            if (minHeap.empty() && currentDay < events[i][0]) {
+                currentDay = events[i][0];
             }
-            // Add all events that start by today
-            while (i < n && events[i][0] <= day) {
-                minHeap.push(events[i][1]);
+            
+            // Add all events that start today (or earlier) to the min-heap
+            while (i < n && events[i][0] <= currentDay) {
+                minHeap.push(events[i][1]); // Push end day
                 i++;
             }
-            // Discard expired events
-            while (!minHeap.empty() && minHeap.top() < day) {
+            
+            // Remove events that have already expired (end day < currentDay)
+            while (!minHeap.empty() && minHeap.top() < currentDay) {
                 minHeap.pop();
             }
-            // Greedily attend the event ending earliest
+            
+            // Greedily attend the event that ends earliest
             if (!minHeap.empty()) {
-                minHeap.pop();
-                attended++;
-                day++;
+                minHeap.pop(); // Event attended
+                totalEventsAttended++;
+                currentDay++;  // Advance day
             }
         }
-        return attended;
+        
+        return totalEventsAttended;
     }
 };
 // Interview Explanation:
@@ -481,82 +481,135 @@ public:
         }
         return maxWater;
     }
-    
+};
+// Interview Explanation:
+// - Problem Statement: Find two lines that together with the x-axis form a container holding the most water.
+// - Approach: Two Pointers inward convergence.
+// - Intuition:
+//   * Start with maximum width (left = 0, right = n - 1).
+//   * Area is limited by the shorter line. Advancing the taller line can never increase area as width decreases.
+//   * Always advance the shorter line inward to potentially encounter a taller line.
+// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-class Solution {
-    vector<pair<int,int>> twoSum(vector<int>& a, int l, int target) {
-        vector<pair<int,int>> res;
-        int r = a.size() - 1;
 
-        while (l < r) {
-            int sum = a[l] + a[r];
+// =========================================================
+// 13. 3SUM (LC 15)
+// =========================================================
 
-            if (sum == target) {
-                res.push_back({a[l], a[r]});
-                int x = a[l], y = a[r];
-                while (l < r && a[l] == x) l++;
-                while (l < r && a[r] == y) r--;
-            }
-            else if (sum < target) l++;
-            else r--;
-        }
-        return res;
-    }
-
+class Solution13 {
 public:
-    vector<vector<int>> threeSum(vector<int>& a, int target = 0) {
-        sort(a.begin(), a.end());
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
         vector<vector<int>> res;
+        int n = nums.size();
 
-        for (int i = 0; i < a.size() - 2; i++) {
-            if (i && a[i] == a[i - 1]) continue;
+        for (int i = 0; i < n - 2; ++i) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            if (nums[i] > 0) break;
 
-            for (auto [x, y] : twoSum(a, i + 1, target - a[i]))
-                res.push_back({a[i], x, y});
-        }
-        return res;
-    }
-
-    vector<vector<int>> fourSum(vector<int>& a, int target) {
-        sort(a.begin(), a.end());
-        vector<vector<int>> res;
-
-        for (int i = 0; i < a.size() - 3; i++) {
-            if (i && a[i] == a[i - 1]) continue;
-
-            for (int j = i + 1; j < a.size() - 2; j++) {
-                if (j > i + 1 && a[j] == a[j - 1]) continue;
-
-                for (auto [x, y] : twoSum(a, j + 1, target - a[i] - a[j]))
-                    res.push_back({a[i], a[j], x, y});
+            int l = i + 1, r = n - 1;
+            while (l < r) {
+                int sum = nums[i] + nums[l] + nums[r];
+                if (sum == 0) {
+                    res.push_back({nums[i], nums[l], nums[r]});
+                    int x = nums[l], y = nums[r];
+                    while (l < r && nums[l] == x) l++;
+                    while (l < r && nums[r] == y) r--;
+                } else if (sum < 0) {
+                    l++;
+                } else {
+                    r--;
+                }
             }
         }
         return res;
     }
 };
+// Interview Explanation:
+// - Problem Statement: Find all unique triplets [nums[i], nums[j], nums[k]] such that i != j != k and nums[i] + nums[j] + nums[k] == 0.
+// - Approach: Sorting + Two Pointers + Duplicate Skipping.
+// - Intuition:
+//   * Sort the array. Fix the first element nums[i] and run two pointers (l, r) for the remaining sum -nums[i].
+//   * Skip duplicate values for nums[i], nums[l], and nums[r] to avoid duplicate triplets without using a hash set.
+// - Complexity: Time: O(N^2), Space: O(1) auxiliary space (excluding output).
+
+
+// =========================================================
+// 14. 4SUM (LC 18)
+// =========================================================
+
+class Solution14 {
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        sort(nums.begin(), nums.end());
+        vector<vector<int>> res;
+        int n = nums.size();
+
+        for (int i = 0; i < n - 3; ++i) {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            for (int j = i + 1; j < n - 2; ++j) {
+                if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+
+                long long rem = (long long)target - nums[i] - nums[j];
+                int l = j + 1, r = n - 1;
+
+                while (l < r) {
+                    long long sum = nums[l] + nums[r];
+                    if (sum == rem) {
+                        res.push_back({nums[i], nums[j], nums[l], nums[r]});
+                        int x = nums[l], y = nums[r];
+                        while (l < r && nums[l] == x) l++;
+                        while (l < r && nums[r] == y) r--;
+                    } else if (sum < rem) {
+                        l++;
+                    } else {
+                        r--;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find all unique quadruplets [nums[a], nums[b], nums[c], nums[d]] that sum to target.
+// - Approach: Sorting + Nested Loops + Two Pointers with 64-bit sum check.
+// - Intuition:
+//   * Fix the first two elements with nested loops, and use two pointers for the remaining pair.
+//   * Cast target subtraction to long long to prevent integer overflow.
+//   * Skip duplicates at each pointer level to ensure unique quadruplets.
+// - Complexity: Time: O(N^3), Space: O(1) auxiliary space (excluding output).
+
+
+// =========================================================
+// 15. TRAPPING RAIN WATER (LC 42)
+// =========================================================
+
 class Solution15 {
 public:
-    int trap(vector<int>& h) {
-        stack<int> st;
+    int trap(vector<int>& height) {
+        int left = 0, right = (int)height.size() - 1;
+        int leftMax = 0, rightMax = 0;
         int water = 0;
 
-        for (int i = 0; i < h.size(); i++) {
-            while (!st.empty() && h[i] > h[st.top()]) {
-                int mid = st.top();
-                st.pop();
-
-                if (st.empty()) break;
-
-                int left = st.top();
-                int right = i;
-                int width = right - left - 1;
-                int boundedHeight = min(h[left], h[i]) - h[mid]; // height of water trapped above mid
-
-                water += width * boundedHeight;
+        while (left < right) {
+            if (height[left] < height[right]) {
+                if (height[left] >= leftMax) {
+                    leftMax = height[left];
+                } else {
+                    water += leftMax - height[left];
+                }
+                left++;
+            } else {
+                if (height[right] >= rightMax) {
+                    rightMax = height[right];
+                } else {
+                    water += rightMax - height[right];
+                }
+                right--;
             }
-            st.push(i);
         }
-
         return water;
     }
 };
@@ -611,7 +664,7 @@ public:
 // 17. MINIMUM WINDOW SUBSTRING (LC 76)
 // =========================================================
 
-class Solution {
+class Solution17 {
 public:
     string minWindow(string s, string t) {
         vector<int> need(128, 0);

@@ -15,10 +15,11 @@ const PROBLEMS_DATA = [
       "Swap nums[i] with the smallest element in the suffix that is strictly greater than nums[i].",
       "Reverse the suffix after index i to make it ascending (lexicographically smallest)."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/next-permutation/",
-    "code": "class Solution1 {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        int i = n - 2;\n        // Step 1: Find first decreasing element from right\n        while (i >= 0 && nums[i] >= nums[i + 1]) {\n            i--;\n        }\n        // now i is the index of the first element that is smaller than its next element from the right\n        // Step 2: Swap with the smallest element in suffix larger than nums[i]\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) { // find the first element from the right that is greater than nums[i]\n                j--;\n            }\n            swap(nums[i], nums[j]); // swap the found elements to get the next permutation\n        }\n        // Step 3: Reverse suffix to get lexicographically smallest order\n        reverse(nums.begin() + i + 1, nums.end()); // reveser subarray [i+1, n-1] to get the next permutation\n    }\n};"
+    "code": "class Solution1 {\npublic:\n    void nextPermutation(vector<int>& nums) {\n        int n = nums.size();\n        int i = n - 2;\n        // Step 1: Find first decreasing element from right\n        while (i >= 0 && nums[i] >= nums[i + 1]) {\n            i--;\n        }\n        // now i is the index of the first element that is smaller than its next element from the right\n        // Step 2: Swap with the smallest element in suffix larger than nums[i]\n        if (i >= 0) {\n            int j = n - 1;\n            while (nums[j] <= nums[i]) { // find the first element from the right that is greater than nums[i]\n                j--;\n            }\n            swap(nums[i], nums[j]); // swap the found elements to get the next permutation\n        }\n        // Step 3: Reverse suffix to get lexicographically smallest order\n        reverse(nums.begin() + i + 1, nums.end()); // reveser subarray [i+1, n-1] to get the next permutation\n    }\n};",
+    "summary": "Suffix Inversion Pivot Swap"
   },
   {
     "id": 2,
@@ -36,10 +37,11 @@ const PROBLEMS_DATA = [
       "When index reaches curEnd, increment jump count and update curEnd to nextFarthest.",
       "Single pass O(N) avoids costly O(N^2) DP or explicit queue memory."
     ],
-    "completed": false,
+    "completed": true,
     "starred": true,
     "url": "https://leetcode.com/problems/jump-game-ii/",
-    "code": "class Solution2 {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n <= 1) return 0;\n        int jumps = 0;\n        int currEnd = 0;\n        int farthest = 0;\n        // Greedy: Extend max reach within current window\n        for (int i = 0; i < n - 1; ++i) {\n            farthest = max(farthest, i + nums[i]);\n            // Jump to next window when reaching end of current reach\n            if (i == currEnd) {\n                jumps++;\n                currEnd = farthest;\n                if (currEnd >= n - 1) break; // Early exit if we can reach or exceed the last index\n            }\n        }\n        return jumps;\n    }\n};"
+    "code": "class Solution2 {\npublic:\n    int jump(vector<int>& nums) {\n        int n = nums.size();\n        if (n <= 1) return 0;\n        int jumps = 0;\n        int currEnd = 0;\n        int farthest = 0;\n        // Greedy: Extend max reach within current window\n        for (int i = 0; i < n - 1; ++i) {\n            farthest = max(farthest, i + nums[i]);\n            // Jump to next window when reaching end of current reach\n            if (i == currEnd) {\n                jumps++;\n                currEnd = farthest;\n                if (currEnd >= n - 1) break; // Early exit if we can reach or exceed the last index\n            }\n        }\n        return jumps;\n    }\n};",
+    "summary": "Greedy Farthest Range Window"
   },
   {
     "id": 3,
@@ -57,10 +59,11 @@ const PROBLEMS_DATA = [
       "If overlapping, merge by extending current.end = max(current.end, next.end).",
       "If disjoint, push current interval to result and update current to the next interval."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/merge-intervals/",
-    "code": "class Solution3 {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        if (intervals.empty()) return {};\n        // Sort intervals by start time\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (const auto& interval : intervals) {\n            // Append if no overlap; otherwise extend the current interval's end\n            if (merged.empty() || merged.back()[1] < interval[0]) {\n                merged.push_back(interval);\n            } else {\n                merged.back()[1] = max(merged.back()[1], interval[1]);\n            }\n        }\n        return merged;\n    }\n};"
+    "code": "class Solution3 {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        if (intervals.empty()) return {};\n        // Sort intervals by start time\n        sort(intervals.begin(), intervals.end());\n        vector<vector<int>> merged;\n        for (const auto& interval : intervals) {\n            // Append if no overlap; otherwise extend the current interval's end\n            if (merged.empty() || merged.back()[1] < interval[0]) {\n                merged.push_back(interval);\n            } else {\n                merged.back()[1] = max(merged.back()[1], interval[1]);\n            }\n        }\n        return merged;\n    }\n};",
+    "summary": "Sorting by Start + Overlap Merge"
   },
   {
     "id": 4,
@@ -78,10 +81,11 @@ const PROBLEMS_DATA = [
       "Greedily reset start station to i + 1 and reset current tank to 0.",
       "Single pass O(N) guarantees the first valid candidate after the last reset works globally."
     ],
-    "completed": false,
+    "completed": true,
     "starred": true,
     "url": "https://leetcode.com/problems/gas-station/",
-    "code": "class Solution4 {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        int totalTank = 0;\n        int currTank = 0;\n        int start = 0;\n        for (int i = 0; i < (int)gas.size(); ++i) {\n            int diff = gas[i] - cost[i];\n            totalTank += diff;\n            currTank += diff;\n            // If tank drops below zero, reset start to next station\n            if (currTank < 0) {\n                start = i + 1;\n                currTank = 0;\n            }\n        }\n        // If overall gas >= cost, the circuit can be completed\n        return (totalTank >= 0) ? start : -1;\n    }\n};"
+    "code": "class Solution4 {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        int totalTank = 0;\n        int currTank = 0;\n        int start = 0;\n        for (int i = 0; i < (int)gas.size(); ++i) {\n            int diff = gas[i] - cost[i];\n            totalTank += diff;\n            currTank += diff;\n            // If tank drops below zero, reset start to next station\n            if (currTank < 0) {\n                start = i + 1;\n                currTank = 0;\n            }\n        }\n        // If overall gas >= cost, the circuit can be completed\n        return (totalTank >= 0) ? start : -1;\n    }\n};",
+    "summary": "Greedy Net Tank Reset"
   },
   {
     "id": 5,
@@ -99,10 +103,11 @@ const PROBLEMS_DATA = [
       "For each house, find the minimum distance between left and right neighboring heaters.",
       "Global answer is the maximum of all individual house minimum heater distances."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/heaters/",
-    "code": "class Solution5 {\npublic:\n    int findRadius(vector<int>& houses, vector<int>& heaters) {\n        sort(heaters.begin(), heaters.end());\n        int maxRadius = 0;\n        for (int house : houses) {\n            // Binary search nearest heaters to the right and left\n            auto it = lower_bound(heaters.begin(), heaters.end(), house);\n            int dist = INT_MAX;\n            if (it != heaters.end()) {\n                dist = min(dist, *it - house);\n            }\n            if (it != heaters.begin()) {\n                dist = min(dist, house - *prev(it));\n            }\n            // Max radius needed across all houses\n            maxRadius = max(maxRadius, dist);\n        }\n        return maxRadius;\n    }\n};"
+    "code": "class Solution5 {\npublic:\n    int findRadius(vector<int>& houses, vector<int>& heaters) {\n        sort(heaters.begin(), heaters.end());\n        int maxRadius = 0;\n        for (int house : houses) {\n            // Binary search nearest heaters to the right and left\n            auto it = lower_bound(heaters.begin(), heaters.end(), house);\n            int dist = INT_MAX;\n            if (it != heaters.end()) {\n                dist = min(dist, *it - house);\n            }\n            if (it != heaters.begin()) {\n                dist = min(dist, house - *prev(it));\n            }\n            // Max radius needed across all houses\n            maxRadius = max(maxRadius, dist);\n        }\n        return maxRadius;\n    }\n};",
+    "summary": "Sorting + Binary Search Radius"
   },
   {
     "id": 6,
@@ -120,10 +125,11 @@ const PROBLEMS_DATA = [
       "Frame formula: (maxFreq - 1) * (n + 1) + count of tasks sharing max frequency.",
       "Result is max(formula, total tasks) to account for cases with no idle slots."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/task-scheduler/",
-    "code": "class Solution6 {\npublic:\n    int leastInterval(vector<char>& tasks, int n) {\n        vector<int> freq(26, 0);\n        int maxFreq = 0;\n        // Count frequencies of tasks\n        for (char c : tasks) {\n            freq[c - 'A']++;\n            maxFreq = max(maxFreq, freq[c - 'A']);\n        }\n        // Count how many tasks share the maximum frequency\n        int maxCount = 0;\n        for (int f : freq) {\n            if (f == maxFreq) maxCount++;\n        }\n        // Frame formula: maxFreq blocks with n idle slots each\n        int emptySlots = (maxFreq - 1) * (n + 1) + maxCount;\n        return max((int)tasks.size(), emptySlots);\n    }\n};"
+    "code": "class Solution6 {\npublic:\n    int leastInterval(vector<char>& tasks, int n) {\n        vector<int> freq(26, 0);\n        int maxFreq = 0;\n        // Count frequencies of tasks\n        for (char c : tasks) {\n            freq[c - 'A']++;\n            maxFreq = max(maxFreq, freq[c - 'A']);\n        }\n        // Count how many tasks share the maximum frequency\n        int maxCount = 0;\n        for (int f : freq) {\n            if (f == maxFreq) maxCount++;\n        }\n        // Frame formula: maxFreq blocks with n idle slots each\n        int emptySlots = (maxFreq - 1) * (n + 1) + maxCount;\n        return max((int)tasks.size(), emptySlots);\n    }\n};",
+    "summary": "Max Frequency Frame Formula"
   },
   {
     "id": 7,
@@ -141,10 +147,11 @@ const PROBLEMS_DATA = [
       "Iterate through the string, greedily updating boundary end = max(end, last[s[i]]).",
       "When current index equals end, a valid minimal partition has closed; record size and restart."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/partition-labels/",
-    "code": "class Solution7 {\npublic:\n    vector<int> partitionLabels(string s) {\n        vector<int> lastIndex(26, 0);\n        // Record last occurrence index of each character\n        for (int i = 0; i < (int)s.size(); ++i) {\n            lastIndex[s[i] - 'a'] = i;\n        }\n        vector<int> result;\n        int start = 0;\n        int currEnd = 0;\n        // Greedily expand current partition boundary\n        for (int i = 0; i < (int)s.size(); ++i) {\n            currEnd = max(currEnd, lastIndex[s[i] - 'a']);\n            if (i == currEnd) {\n                result.push_back(currEnd - start + 1);\n                start = i + 1;\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution7 {\npublic:\n    vector<int> partitionLabels(string s) {\n        vector<int> lastIndex(26, 0);\n        // Record last occurrence index of each character\n        for (int i = 0; i < (int)s.size(); ++i) {\n            lastIndex[s[i] - 'a'] = i;\n        }\n        vector<int> result;\n        int start = 0;\n        int currEnd = 0;\n        // Greedily expand current partition boundary\n        for (int i = 0; i < (int)s.size(); ++i) {\n            currEnd = max(currEnd, lastIndex[s[i] - 'a']);\n            if (i == currEnd) {\n                result.push_back(currEnd - start + 1);\n                start = i + 1;\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Greedy Last-Occurrence Window"
   },
   {
     "id": 8,
@@ -162,10 +169,11 @@ const PROBLEMS_DATA = [
       "If an interval's end <= maxRight, it is fully covered by a predecessor and discarded.",
       "Otherwise, increment non-covered count and expand maxRight to current interval's end."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/remove-covered-intervals/",
-    "code": "class Solution8 {\npublic:\n    // Sort start ascending; break ties with end descending\n    static bool cmp(const vector<int>& a, const vector<int>& b) {\n        return a[0] != b[0] ? a[0] < b[0] : a[1] > b[1];\n    }\n    int removeCoveredIntervals(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end(), cmp);\n        int count = 0, maxEnd = 0;\n        // Retain intervals that extend past the maximum seen end point\n        for (const auto& interval : intervals) {\n            if (interval[1] > maxEnd) {\n                count++;\n                maxEnd = interval[1];\n            }\n        }\n        return count;\n    }\n};"
+    "code": "class Solution8 {\npublic:\n    // Sort start ascending; break ties with end descending\n    static bool cmp(const vector<int>& a, const vector<int>& b) {\n        return a[0] != b[0] ? a[0] < b[0] : a[1] > b[1];\n    }\n    int removeCoveredIntervals(vector<vector<int>>& intervals) {\n        sort(intervals.begin(), intervals.end(), cmp);\n        int count = 0, maxEnd = 0;\n        // Retain intervals that extend past the maximum seen end point\n        for (const auto& interval : intervals) {\n            if (interval[1] > maxEnd) {\n                count++;\n                maxEnd = interval[1];\n            }\n        }\n        return count;\n    }\n};",
+    "summary": "Sort (Start Asc, End Desc)"
   },
   {
     "id": 9,
@@ -186,7 +194,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended/",
-    "code": "class Solution9 {\npublic:\n    int maxEvents(vector<vector<int>>& events) {\n        sort(events.begin(), events.end());\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        int day = 1;\n        int i = 0;\n        int n = events.size();\n        int attended = 0;\n        while (i < n || !minHeap.empty()) {\n            // Advance day if no active events in queue\n            if (minHeap.empty()) {\n                day = events[i][0];\n            }\n            // Add all events that start by today\n            while (i < n && events[i][0] <= day) {\n                minHeap.push(events[i][1]);\n                i++;\n            }\n            // Discard expired events\n            while (!minHeap.empty() && minHeap.top() < day) {\n                minHeap.pop();\n            }\n            // Greedily attend the event ending earliest\n            if (!minHeap.empty()) {\n                minHeap.pop();\n                attended++;\n                day++;\n            }\n        }\n        return attended;\n    }\n};"
+    "code": "class Solution9 {\npublic:\n    int maxEvents(vector<vector<int>>& events) {\n        sort(events.begin(), events.end());\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        int day = 1;\n        int i = 0;\n        int n = events.size();\n        int attended = 0;\n        while (i < n || !minHeap.empty()) {\n            // Advance day if no active events in queue\n            if (minHeap.empty()) {\n                day = events[i][0];\n            }\n            // Add all events that start by today\n            while (i < n && events[i][0] <= day) {\n                minHeap.push(events[i][1]);\n                i++;\n            }\n            // Discard expired events\n            while (!minHeap.empty() && minHeap.top() < day) {\n                minHeap.pop();\n            }\n            // Greedily attend the event ending earliest\n            if (!minHeap.empty()) {\n                minHeap.pop();\n                attended++;\n                day++;\n            }\n        }\n        return attended;\n    }\n};",
+    "summary": "Greedy Min-Heap by End Day"
   },
   {
     "id": 10,
@@ -204,10 +213,11 @@ const PROBLEMS_DATA = [
       "Greedily acquire items with highest return until budget or inventory limit is reached.",
       "Breaks ties by favoring lower base price to maximize total items acquired."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "",
-    "code": "class Solution10 {\npublic:\n    int maxItemsFromSale(vector<int>& basePrices, vector<int>& discounts, int budget) {\n        int n = basePrices.size();\n        vector<int> effectiveCosts(n);\n        // Calculate discounted prices\n        for (int i = 0; i < n; ++i) {\n            effectiveCosts[i] = max(0, basePrices[i] - discounts[i]);\n        }\n        // Greedily purchase cheapest items first\n        sort(effectiveCosts.begin(), effectiveCosts.end());\n        int count = 0;\n        for (int cost : effectiveCosts) {\n            if (budget >= cost) {\n                budget -= cost;\n                count++;\n            } else {\n                break;\n            }\n        }\n        return count;\n    }\n};"
+    "code": "class Solution10 {\npublic:\n    int maxItemsFromSale(vector<int>& basePrices, vector<int>& discounts, int budget) {\n        int n = basePrices.size();\n        vector<int> effectiveCosts(n);\n        // Calculate discounted prices\n        for (int i = 0; i < n; ++i) {\n            effectiveCosts[i] = max(0, basePrices[i] - discounts[i]);\n        }\n        // Greedily purchase cheapest items first\n        sort(effectiveCosts.begin(), effectiveCosts.end());\n        int count = 0;\n        for (int cost : effectiveCosts) {\n            if (budget >= cost) {\n                budget -= cost;\n                count++;\n            } else {\n                break;\n            }\n        }\n        return count;\n    }\n};",
+    "summary": "Greedy Effective Cost Sorting"
   },
   {
     "id": 11,
@@ -225,10 +235,11 @@ const PROBLEMS_DATA = [
       "Update lastSeen[s[right]] = right on every step.",
       "Window size right - left + 1 at each iteration tracks the maximum non-repeating length in O(N)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
-    "code": "class Solution11 {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        vector<int> lastIndex(256, -1);\n        int left = 0;\n        int maxLen = 0;\n        // Sliding window: move left pointer past previous occurrence of s[right]\n        for (int right = 0; right < (int)s.size(); ++right) {\n            unsigned char c = s[right];\n            if (lastIndex[c] >= left) {\n                left = lastIndex[c] + 1;\n            }\n            lastIndex[c] = right;\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};"
+    "code": "class Solution11 {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        vector<int> lastIndex(256, -1);\n        int left = 0;\n        int maxLen = 0;\n        // Sliding window: move left pointer past previous occurrence of s[right]\n        for (int right = 0; right < (int)s.size(); ++right) {\n            unsigned char c = s[right];\n            if (lastIndex[c] >= left) {\n                left = lastIndex[c] + 1;\n            }\n            lastIndex[c] = right;\n            maxLen = max(maxLen, right - left + 1);\n        }\n        return maxLen;\n    }\n};",
+    "summary": "Sliding Window + Last-Seen Map"
   },
   {
     "id": 12,
@@ -246,10 +257,11 @@ const PROBLEMS_DATA = [
       "Moving the taller line inward can never increase area because width decreases and height is bounded by the shorter line.",
       "Greedily move the shorter line pointer inward to search for a potentially taller boundary."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/container-with-most-water/",
-    "code": "class Solution12 {\npublic:\n    int maxArea(vector<int>& height) {\n        int left = 0;\n        int right = (int)height.size() - 1;\n        int maxWater = 0;\n        // Two pointers: move inward from the shorter wall\n        while (left < right) {\n            int h = min(height[left], height[right]);\n            int w = right - left;\n            maxWater = max(maxWater, h * w);\n            if (height[left] < height[right]) {\n                left++;\n            } else {\n                right--;\n            }\n        }\n        return maxWater;\n    }\n};"
+    "code": "class Solution12 {\npublic:\n    int maxArea(vector<int>& height) {\n        int left = 0;\n        int right = (int)height.size() - 1;\n        int maxWater = 0;\n        // Two pointers: move inward from the shorter wall\n        while (left < right) {\n            int h = min(height[left], height[right]);\n            int w = right - left;\n            maxWater = max(maxWater, h * w);\n            if (height[left] < height[right]) {\n                left++;\n            } else {\n                right--;\n            }\n        }\n        return maxWater;\n    }\n};",
+    "summary": "Inward Converging Two Pointers"
   },
   {
     "id": 13,
@@ -267,10 +279,11 @@ const PROBLEMS_DATA = [
       "Use two pointers (left = i + 1, right = n - 1) to find pairs summing to -nums[i].",
       "Skip identical consecutive elements for i, left, and right to guarantee strictly unique triplets."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/3sum/",
-    "code": "class Solution13 {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> result;\n        int n = nums.size();\n        for (int i = 0; i < n - 2; ++i) {\n            // Skip duplicates for the first element\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            if (nums[i] > 0) break; // Cannot sum to 0 if smallest is positive\n            int left = i + 1;\n            int right = n - 1;\n            // Two pointers for two-sum target = -nums[i]\n            while (left < right) {\n                int sum = nums[i] + nums[left] + nums[right];\n                if (sum == 0) {\n                    result.push_back({nums[i], nums[left], nums[right]});\n                    while (left < right && nums[left] == nums[left + 1]) left++;\n                    while (left < right && nums[right] == nums[right - 1]) right--;\n                    left++;\n                    right--;\n                } else if (sum < 0) {\n                    left++;\n                } else {\n                    right--;\n                }\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution13 {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> result;\n        int n = nums.size();\n        for (int i = 0; i < n - 2; ++i) {\n            // Skip duplicates for the first element\n            if (i > 0 && nums[i] == nums[i - 1]) continue;\n            if (nums[i] > 0) break; // Cannot sum to 0 if smallest is positive\n            int left = i + 1;\n            int right = n - 1;\n            // Two pointers for two-sum target = -nums[i]\n            while (left < right) {\n                int sum = nums[i] + nums[left] + nums[right];\n                if (sum == 0) {\n                    result.push_back({nums[i], nums[left], nums[right]});\n                    while (left < right && nums[left] == nums[left + 1]) left++;\n                    while (left < right && nums[right] == nums[right - 1]) right--;\n                    left++;\n                    right--;\n                } else if (sum < 0) {\n                    left++;\n                } else {\n                    right--;\n                }\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Sorting + Two Pointers + Skip Dups"
   },
   {
     "id": 14,
@@ -288,10 +301,11 @@ const PROBLEMS_DATA = [
       "Run two pointers on remaining subarray [j + 1, n - 1] to locate valid complementary pairs.",
       "Prune duplicate values at all four levels (i, j, left, right) to prevent duplicate quadruplets."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/4sum/",
-    "code": "class Solution14 {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> result;\n        int n = nums.size();\n        for (int i = 0; i < n - 3; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue; // Skip duplicates for 1st num\n            for (int j = i + 1; j < n - 2; ++j) {\n                if (j > i + 1 && nums[j] == nums[j - 1]) continue; // Skip duplicates for 2nd num\n                int left = j + 1;\n                int right = n - 1;\n                // Two pointers for remaining two numbers\n                while (left < right) {\n                    long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];\n                    if (sum == target) {\n                        result.push_back({nums[i], nums[j], nums[left], nums[right]});\n                        while (left < right && nums[left] == nums[left + 1]) left++;\n                        while (left < right && nums[right] == nums[right - 1]) right--;\n                        left++;\n                        right--;\n                    } else if (sum < target) {\n                        left++;\n                    } else {\n                        right--;\n                    }\n                }\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution14 {\npublic:\n    vector<vector<int>> fourSum(vector<int>& nums, int target) {\n        sort(nums.begin(), nums.end());\n        vector<vector<int>> result;\n        int n = nums.size();\n        for (int i = 0; i < n - 3; ++i) {\n            if (i > 0 && nums[i] == nums[i - 1]) continue; // Skip duplicates for 1st num\n            for (int j = i + 1; j < n - 2; ++j) {\n                if (j > i + 1 && nums[j] == nums[j - 1]) continue; // Skip duplicates for 2nd num\n                int left = j + 1;\n                int right = n - 1;\n                // Two pointers for remaining two numbers\n                while (left < right) {\n                    long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];\n                    if (sum == target) {\n                        result.push_back({nums[i], nums[j], nums[left], nums[right]});\n                        while (left < right && nums[left] == nums[left + 1]) left++;\n                        while (left < right && nums[right] == nums[right - 1]) right--;\n                        left++;\n                        right--;\n                    } else if (sum < target) {\n                        left++;\n                    } else {\n                        right--;\n                    }\n                }\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Generalized 2-Pointers + Skip"
   },
   {
     "id": 15,
@@ -309,10 +323,11 @@ const PROBLEMS_DATA = [
       "If leftMax < rightMax, the bottleneck at left is confirmed regardless of unseen middle heights.",
       "Accumulate leftMax - height[left] and advance left; otherwise accumulate from rightMax and retreat right."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/trapping-rain-water/",
-    "code": "class Solution15 {\npublic:\n    int trap(vector<int>& h) {\n        stack<int> st;\n        int water = 0;\n\n        for (int i = 0; i < h.size(); i++) {\n            while (!st.empty() && h[i] > h[st.top()]) {\n                int mid = st.top();\n                st.pop();\n\n                if (st.empty()) break;\n\n                int left = st.top();\n                int width = i - left - 1;\n                int boundedHeight = min(h[left], h[i]) - h[mid];\n\n                water += width * boundedHeight;\n            }\n            st.push(i);\n        }\n\n        return water;\n    }\n};"
+    "code": "class Solution15 {\npublic:\n    int trap(vector<int>& h) {\n        stack<int> st;\n        int water = 0;\n\n        for (int i = 0; i < h.size(); i++) {\n            while (!st.empty() && h[i] > h[st.top()]) {\n                int mid = st.top();\n                st.pop();\n\n                if (st.empty()) break;\n\n                int left = st.top();\n                int width = i - left - 1;\n                int boundedHeight = min(h[left], h[i]) - h[mid];\n\n                water += width * boundedHeight;\n            }\n            st.push(i);\n        }\n\n        return water;\n    }\n};",
+    "summary": "Two Pointers Running Max Enclosure"
   },
   {
     "id": 16,
@@ -330,10 +345,11 @@ const PROBLEMS_DATA = [
       "If nums[mid] == 0: swap with nums[low], advance both low and mid.",
       "If nums[mid] == 2: swap with nums[high], decrement high without advancing mid (to inspect swapped value)."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/sort-colors/",
-    "code": "class Solution16 {\npublic:\n    void sortColors(vector<int>& nums) {\n        int low = 0;\n        int mid = 0;\n        int high = (int)nums.size() - 1;\n        // Dutch National Flag: 3-way partition (0s at low, 2s at high)\n        while (mid <= high) {\n            if (nums[mid] == 0) {\n                swap(nums[low], nums[mid]);\n                low++;\n                mid++;\n            } else if (nums[mid] == 1) {\n                mid++;\n            } else {\n                swap(nums[mid], nums[high]);\n                high--;\n            }\n        }\n    }\n};"
+    "code": "class Solution16 {\npublic:\n    void sortColors(vector<int>& nums) {\n        int low = 0;\n        int mid = 0;\n        int high = (int)nums.size() - 1;\n        // Dutch National Flag: 3-way partition (0s at low, 2s at high)\n        while (mid <= high) {\n            if (nums[mid] == 0) {\n                swap(nums[low], nums[mid]);\n                low++;\n                mid++;\n            } else if (nums[mid] == 1) {\n                mid++;\n            } else {\n                swap(nums[mid], nums[high]);\n                high--;\n            }\n        }\n    }\n};",
+    "summary": "Dutch National Flag 3-Way Part"
   },
   {
     "id": 17,
@@ -351,10 +367,11 @@ const PROBLEMS_DATA = [
       "Once valid, contract left boundary to shed redundant characters and minimize window length.",
       "Record smallest valid window coordinates; overall time is O(N + M) with O(1) alphabet space."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/minimum-window-substring/",
-    "code": "class Solution17 {\npublic:\n    string minWindow(string s, string t) {\n        vector<int> need(128, 0);\n        int required = 0;\n        // Count frequency of required characters\n        for (char c : t) {\n            if (need[(unsigned char)c] == 0) required++;\n            need[(unsigned char)c]++;\n        }\n        vector<int> window(128, 0);\n        int have = 0;\n        int bestLen = INT_MAX;\n        int bestStart = 0;\n        int left = 0;\n        // Expand window to the right\n        for (int right = 0; right < (int)s.size(); ++right) {\n            unsigned char c = s[right];\n            window[c]++;\n            if (need[c] > 0 && window[c] == need[c]) {\n                have++;\n            }\n            // Contract window from left while condition is satisfied\n            while (have == required) {\n                if (right - left + 1 < bestLen) {\n                    bestLen = right - left + 1;\n                    bestStart = left;\n                }\n                unsigned char leftChar = s[left];\n                window[leftChar]--;\n                if (need[leftChar] > 0 && window[leftChar] < need[leftChar]) {\n                    have--;\n                }\n                left++;\n            }\n        }\n        return (bestLen == INT_MAX) ? \"\" : s.substr(bestStart, bestLen);\n    }\n};"
+    "code": "class Solution17 {\npublic:\n    string minWindow(string s, string t) {\n        vector<int> need(128, 0);\n        int required = 0;\n        // Count frequency of required characters\n        for (char c : t) {\n            if (need[(unsigned char)c] == 0) required++;\n            need[(unsigned char)c]++;\n        }\n        vector<int> window(128, 0);\n        int have = 0;\n        int bestLen = INT_MAX;\n        int bestStart = 0;\n        int left = 0;\n        // Expand window to the right\n        for (int right = 0; right < (int)s.size(); ++right) {\n            unsigned char c = s[right];\n            window[c]++;\n            if (need[c] > 0 && window[c] == need[c]) {\n                have++;\n            }\n            // Contract window from left while condition is satisfied\n            while (have == required) {\n                if (right - left + 1 < bestLen) {\n                    bestLen = right - left + 1;\n                    bestStart = left;\n                }\n                unsigned char leftChar = s[left];\n                window[leftChar]--;\n                if (need[leftChar] > 0 && window[leftChar] < need[leftChar]) {\n                    have--;\n                }\n                left++;\n            }\n        }\n        return (bestLen == INT_MAX) ? \"\" : s.substr(bestStart, bestLen);\n    }\n};",
+    "summary": "Dynamic Window + Freq Matches"
   },
   {
     "id": 18,
@@ -372,10 +389,11 @@ const PROBLEMS_DATA = [
       "Slide the fixed window right by 1: decrement count of departed character and increment count of incoming character.",
       "Record window starting index whenever the sliding window frequency matches target frequency."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/find-all-anagrams-in-a-string/",
-    "code": "class Solution19 {\npublic:\n    vector<int> findAnagrams(string s, string p) {\n        int ns = s.size(), np = p.size();\n        if (ns < np) return {};\n        vector<int> pCount(26, 0), sCount(26, 0);\n        for (char c : p) pCount[c - 'a']++;\n        vector<int> result;\n        // Fixed-size sliding window of length |p|\n        for (int i = 0; i < ns; ++i) {\n            sCount[s[i] - 'a']++;\n            if (i >= np) {\n                sCount[s[i - np] - 'a']--;\n            }\n            if (sCount == pCount) {\n                result.push_back(i - np + 1);\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution19 {\npublic:\n    vector<int> findAnagrams(string s, string p) {\n        int ns = s.size(), np = p.size();\n        if (ns < np) return {};\n        vector<int> pCount(26, 0), sCount(26, 0);\n        for (char c : p) pCount[c - 'a']++;\n        vector<int> result;\n        // Fixed-size sliding window of length |p|\n        for (int i = 0; i < ns; ++i) {\n            sCount[s[i] - 'a']++;\n            if (i >= np) {\n                sCount[s[i - np] - 'a']--;\n            }\n            if (sCount == pCount) {\n                result.push_back(i - np + 1);\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Fixed-Size Sliding Window Table"
   },
   {
     "id": 19,
@@ -393,10 +411,11 @@ const PROBLEMS_DATA = [
       "Shift window one step at a time: update counts for outgoing and incoming characters.",
       "Return true immediately if matched characters reaches 26, avoiding full map comparisons."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/permutation-in-string/",
-    "code": "class Solution20 {\npublic:\n    bool checkInclusion(string s1, string s2) {\n        int n1 = s1.size(), n2 = s2.size();\n        if (n1 > n2) return false;\n        vector<int> c1(26, 0), c2(26, 0);\n        for (char c : s1) c1[c - 'a']++;\n        // Sliding window of length |s1| over s2\n        for (int i = 0; i < n2; ++i) {\n            c2[s2[i] - 'a']++;\n            if (i >= n1) {\n                c2[s2[i - n1] - 'a']--;\n            }\n            if (c1 == c2) return true;\n        }\n        return false;\n    }\n};"
+    "code": "class Solution20 {\npublic:\n    bool checkInclusion(string s1, string s2) {\n        int n1 = s1.size(), n2 = s2.size();\n        if (n1 > n2) return false;\n        vector<int> c1(26, 0), c2(26, 0);\n        for (char c : s1) c1[c - 'a']++;\n        // Sliding window of length |s1| over s2\n        for (int i = 0; i < n2; ++i) {\n            c2[s2[i] - 'a']++;\n            if (i >= n1) {\n                c2[s2[i - n1] - 'a']--;\n            }\n            if (c1 == c2) return true;\n        }\n        return false;\n    }\n};",
+    "summary": "Fixed-Size Window Freq Equality"
   },
   {
     "id": 20,
@@ -414,10 +433,11 @@ const PROBLEMS_DATA = [
       "Implement atMost(X): expand right pointer, shrink left pointer when distinct count exceeds X.",
       "At each step, exactly right - left + 1 valid subarrays ending at right have <= X distinct elements."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/subarrays-with-k-different-integers/",
-    "code": "class Solution21 {\n    // Helper: count subarrays with at most k distinct elements\n    int atMost(vector<int>& nums, int k) {\n        unordered_map<int, int> freq;\n        int left = 0, ans = 0;\n        for (int right = 0; right < nums.size(); right++) {\n            freq[nums[right]]++;\n            while (freq.size() > k) {\n                if (--freq[nums[left]] == 0)\n                    freq.erase(nums[left]);\n                left++;\n            }\n            ans += right - left + 1;\n        }\n        return ans;\n    }\npublic:\n    // Exactly(k) = atMost(k) - atMost(k - 1)\n    int subarraysWithKDistinct(vector<int>& nums, int k) {\n        return atMost(nums, k) - atMost(nums, k - 1);\n    }\n};"
+    "code": "class Solution21 {\n    // Helper: count subarrays with at most k distinct elements\n    int atMost(vector<int>& nums, int k) {\n        unordered_map<int, int> freq;\n        int left = 0, ans = 0;\n        for (int right = 0; right < nums.size(); right++) {\n            freq[nums[right]]++;\n            while (freq.size() > k) {\n                if (--freq[nums[left]] == 0)\n                    freq.erase(nums[left]);\n                left++;\n            }\n            ans += right - left + 1;\n        }\n        return ans;\n    }\npublic:\n    // Exactly(k) = atMost(k) - atMost(k - 1)\n    int subarraysWithKDistinct(vector<int>& nums, int k) {\n        return atMost(nums, k) - atMost(nums, k - 1);\n    }\n};",
+    "summary": "Exact(K) = AtMost(K) - AtMost(K-1)"
   },
   {
     "id": 21,
@@ -435,10 +455,11 @@ const PROBLEMS_DATA = [
       "If cost exceeds budget k, shrink window from left by subtracting nums[left++].",
       "Window size right - left + 1 monotonically expands to find the maximum possible frequency."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/frequency-of-the-most-frequent-element/",
-    "code": "class Solution22 {\npublic:\n    int maxFrequency(vector<int>& nums, int k) {\n        sort(nums.begin(), nums.end());\n        long long sum = 0;\n        int left = 0, ans = 0;\n        // Sliding window: operations needed to make [left..right] equal to nums[right]\n        for (int right = 0; right < nums.size(); right++) {\n            sum += nums[right];\n            while (1LL * nums[right] * (right - left + 1) - sum > k)\n                sum -= nums[left++];\n            ans = max(ans, right - left + 1);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution22 {\npublic:\n    int maxFrequency(vector<int>& nums, int k) {\n        sort(nums.begin(), nums.end());\n        long long sum = 0;\n        int left = 0, ans = 0;\n        // Sliding window: operations needed to make [left..right] equal to nums[right]\n        for (int right = 0; right < nums.size(); right++) {\n            sum += nums[right];\n            while (1LL * nums[right] * (right - left + 1) - sum > k)\n                sum -= nums[left++];\n            ans = max(ans, right - left + 1);\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort + Sliding Window Budget"
   },
   {
     "id": 22,
@@ -456,10 +477,11 @@ const PROBLEMS_DATA = [
       "If num is a start, count consecutive elements num + 1, num + 2, ... while present in set.",
       "Each number is visited at most twice (once in set check, once in sequence walk), achieving O(N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/longest-consecutive-sequence/",
-    "code": "class Solution24 {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        unordered_set<int> st(nums.begin(), nums.end());\n        int ans = 0;\n        for (int x : st) {\n            // Only start count from the beginning of a sequence\n            if (st.count(x - 1)) continue;\n            int len = 1;\n            while (st.count(x + len))\n                len++;\n            ans = max(ans, len);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution24 {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        unordered_set<int> st(nums.begin(), nums.end());\n        int ans = 0;\n        for (int x : st) {\n            // Only start count from the beginning of a sequence\n            if (st.count(x - 1)) continue;\n            int len = 1;\n            while (st.count(x + len))\n                len++;\n            ans = max(ans, len);\n        }\n        return ans;\n    }\n};",
+    "summary": "Hash Set Boundary Expansion"
   },
   {
     "id": 23,
@@ -477,10 +499,11 @@ const PROBLEMS_DATA = [
       "Increment counter if element matches candidate; decrement counter otherwise.",
       "Since majority element appears > N/2 times, it survives all cancellations in O(N) time and O(1) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/majority-element/",
-    "code": "class Solution25 {\npublic:\n    int majorityElement(vector<int>& nums) {\n        int ans = 0, count = 0;\n        // Boyer-Moore Voting: find candidate element appearing > n/2 times\n        for (int x : nums) {\n            if (count == 0) ans = x;\n            count += (x == ans) ? 1 : -1;\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution25 {\npublic:\n    int majorityElement(vector<int>& nums) {\n        int ans = 0, count = 0;\n        // Boyer-Moore Voting: find candidate element appearing > n/2 times\n        for (int x : nums) {\n            if (count == 0) ans = x;\n            count += (x == ans) ? 1 : -1;\n        }\n        return ans;\n    }\n};",
+    "summary": "Boyer-Moore Voting Algorithm"
   },
   {
     "id": 24,
@@ -498,10 +521,11 @@ const PROBLEMS_DATA = [
       "First pass: identify top two surviving candidates through 3-way pair cancellation.",
       "Second pass: verify actual frequencies of both candidates to ensure each strictly exceeds N/3."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/majority-element-ii/",
-    "code": "class Solution26 {\npublic:\n    vector<int> majorityElementII(vector<int>& nums) {\n        int a = 0, b = 1, ca = 0, cb = 0;\n        // Boyer-Moore Voting: track up to 2 candidates appearing > n/3 times\n        for (int x : nums) {\n            if (x == a) ca++; // Increment count for candidate a\n            else if (x == b) cb++; // Increment count for candidate b\n            else if (ca == 0) a = x, ca = 1; // Adopt new candidate a\n            else if (cb == 0) b = x, cb = 1; // Adopt new candidate b\n            else ca--, cb--;\n        }\n        // Verify actual counts for both candidates\n        ca = cb = 0;\n        for (int x : nums) {\n            if (x == a) ca++;\n            else if (x == b) cb++;\n        }\n        vector<int> ans;\n        if (ca > nums.size() / 3) ans.push_back(a);\n        if (cb > nums.size() / 3) ans.push_back(b);\n        return ans;\n    }\n};"
+    "code": "class Solution26 {\npublic:\n    vector<int> majorityElementII(vector<int>& nums) {\n        int a = 0, b = 1, ca = 0, cb = 0;\n        // Boyer-Moore Voting: track up to 2 candidates appearing > n/3 times\n        for (int x : nums) {\n            if (x == a) ca++; // Increment count for candidate a\n            else if (x == b) cb++; // Increment count for candidate b\n            else if (ca == 0) a = x, ca = 1; // Adopt new candidate a\n            else if (cb == 0) b = x, cb = 1; // Adopt new candidate b\n            else ca--, cb--;\n        }\n        // Verify actual counts for both candidates\n        ca = cb = 0;\n        for (int x : nums) {\n            if (x == a) ca++;\n            else if (x == b) cb++;\n        }\n        vector<int> ans;\n        if (ca > nums.size() / 3) ans.push_back(a);\n        if (cb > nums.size() / 3) ans.push_back(b);\n        return ans;\n    }\n};",
+    "summary": "Extended 2-Candidate Boyer-Moore"
   },
   {
     "id": 25,
@@ -519,10 +543,11 @@ const PROBLEMS_DATA = [
       "If nums[abs(nums[i]) - 1] is already negative, abs(nums[i]) is the duplicate.",
       "Second pass: the index containing a positive value reveals the missing number (index + 1)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/set-mismatch/",
-    "code": "class Solution31 {\npublic:\n    vector<int> findErrorNums(vector<int>& nums) {\n        int dup = -1, missing = -1;\n        // In-place sign negation to find duplicate value\n        for (int x : nums) {\n            int i = abs(x) - 1; \n            if (nums[i] < 0) dup = abs(x);\n            else nums[i] = -nums[i];\n        }\n        // Positive index + 1 identifies the missing value\n        for (int i = 0; i < nums.size(); i++) {\n            if (nums[i] > 0) {\n                missing = i + 1;\n                break;\n            }\n        }\n        return {dup, missing};\n    }\n};"
+    "code": "class Solution31 {\npublic:\n    vector<int> findErrorNums(vector<int>& nums) {\n        int dup = -1, missing = -1;\n        // In-place sign negation to find duplicate value\n        for (int x : nums) {\n            int i = abs(x) - 1; \n            if (nums[i] < 0) dup = abs(x);\n            else nums[i] = -nums[i];\n        }\n        // Positive index + 1 identifies the missing value\n        for (int i = 0; i < nums.size(); i++) {\n            if (nums[i] > 0) {\n                missing = i + 1;\n                break;\n            }\n        }\n        return {dup, missing};\n    }\n};",
+    "summary": "In-Place Sign Negation Marking"
   },
   {
     "id": 26,
@@ -539,10 +564,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N)",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/partition-array-according-to-given-pivot/",
-    "code": "class Solution32 {\npublic:\n    vector<int> pivotArray(vector<int>& nums, int pivot) {\n        vector<int> result;\n        result.reserve(nums.size());\n        for (int x : nums) if (x < pivot) result.push_back(x);\n        for (int x : nums) if (x == pivot) result.push_back(x);\n        for (int x : nums) if (x > pivot) result.push_back(x);\n        return result;\n    }\n};"
+    "code": "class Solution32 {\npublic:\n    vector<int> pivotArray(vector<int>& nums, int pivot) {\n        vector<int> result;\n        result.reserve(nums.size());\n        for (int x : nums) if (x < pivot) result.push_back(x);\n        for (int x : nums) if (x == pivot) result.push_back(x);\n        for (int x : nums) if (x > pivot) result.push_back(x);\n        return result;\n    }\n};",
+    "summary": "Three-Pass Stable Reordering"
   },
   {
     "id": 27,
@@ -559,10 +585,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logN)",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/count-subarrays-with-majority-element-i/",
-    "code": "class Solution33 {\npublic:\n    long long countSubarrays(vector<int>& nums, int target) {\n        int n = nums.size();\n        long long count = 0;\n        for (int i = 0; i < n; i++) {\n            int freq = 0;\n            for (int j = i; j < n; j++) {\n                if (nums[j] == target) freq++;\n                int len = j - i + 1;\n                if (freq > len / 2) count++;\n            }\n        }\n        return count;\n    }\n};"
+    "code": "class Solution33 {\npublic:\n    long long countSubarrays(vector<int>& nums, int target) {\n        int n = nums.size();\n        long long count = 0;\n        for (int i = 0; i < n; i++) {\n            int freq = 0;\n            for (int j = i; j < n; j++) {\n                if (nums[j] == target) freq++;\n                int len = j - i + 1;\n                if (freq > len / 2) count++;\n            }\n        }\n        return count;\n    }\n};",
+    "summary": "Prefix Transform + Fenwick/Count"
   },
   {
     "id": 28,
@@ -579,10 +606,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logV)",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/min-distance-between-mirror-pairs/",
-    "code": "class Solution34 {\n    int reverseNum(int n) {\n        int rev = 0;\n        while (n > 0) {\n            rev = rev * 10 + (n % 10);\n            n /= 10;\n        }\n        return rev;\n    }\n\npublic:\n    int minMirrorPairDistance(vector<int>& nums) {\n        unordered_map<int, int> lastSeen;\n        int minDistance = INT_MAX;\n\n        for (int j = 0; j < (int)nums.size(); j++) {\n            if (lastSeen.count(nums[j])) {\n                minDistance = min(minDistance, j - lastSeen[nums[j]]);\n            }\n            int rev = reverseNum(nums[j]);\n            lastSeen[rev] = j;\n        }\n        return minDistance == INT_MAX ? -1 : minDistance;\n    }\n};"
+    "code": "class Solution34 {\n    int reverseNum(int n) {\n        int rev = 0;\n        while (n > 0) {\n            rev = rev * 10 + (n % 10);\n            n /= 10;\n        }\n        return rev;\n    }\n\npublic:\n    int minMirrorPairDistance(vector<int>& nums) {\n        unordered_map<int, int> lastSeen;\n        int minDistance = INT_MAX;\n\n        for (int j = 0; j < (int)nums.size(); j++) {\n            if (lastSeen.count(nums[j])) {\n                minDistance = min(minDistance, j - lastSeen[nums[j]]);\n            }\n            int rev = reverseNum(nums[j]);\n            lastSeen[rev] = j;\n        }\n        return minDistance == INT_MAX ? -1 : minDistance;\n    }\n};",
+    "summary": "Hash Map + Digit Reversal"
   },
   {
     "id": 29,
@@ -599,10 +627,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(1)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/valid-sudoku/",
-    "code": "class Solution35 {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        int rows[9] = {0}, cols[9] = {0}, boxes[9] = {0};\n\n        for (int r = 0; r < 9; r++) {\n            for (int c = 0; c < 9; c++) {\n                if (board[r][c] == '.') continue;\n                int digit = board[r][c] - '1';\n                int mask = 1 << digit;\n                int boxIndex = (r / 3) * 3 + (c / 3);\n\n                if ((rows[r] & mask) || (cols[c] & mask) || (boxes[boxIndex] & mask)) {\n                    return false;\n                }\n                rows[r] |= mask;\n                cols[c] |= mask;\n                boxes[boxIndex] |= mask;\n            }\n        }\n        return true;\n    }\n};"
+    "code": "class Solution35 {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        int rows[9] = {0}, cols[9] = {0}, boxes[9] = {0};\n\n        for (int r = 0; r < 9; r++) {\n            for (int c = 0; c < 9; c++) {\n                if (board[r][c] == '.') continue;\n                int digit = board[r][c] - '1';\n                int mask = 1 << digit;\n                int boxIndex = (r / 3) * 3 + (c / 3);\n\n                if ((rows[r] & mask) || (cols[c] & mask) || (boxes[boxIndex] & mask)) {\n                    return false;\n                }\n                rows[r] |= mask;\n                cols[c] |= mask;\n                boxes[boxIndex] |= mask;\n            }\n        }\n        return true;\n    }\n};",
+    "summary": "Bitmask / Frequency Matrices"
   },
   {
     "id": 30,
@@ -619,10 +648,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N^2)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/rotate-image/",
-    "code": "class Solution36 {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        int n = matrix.size();\n        // Step 1: Transpose matrix (swap matrix[i][j] with matrix[j][i])\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                swap(matrix[i][j], matrix[j][i]);\n            }\n        }\n        // Step 2: Reverse each row\n        for (int i = 0; i < n; i++) {\n            ::reverse(matrix[i].begin(), matrix[i].end());\n        }\n    }\n};"
+    "code": "class Solution36 {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        int n = matrix.size();\n        // Step 1: Transpose matrix (swap matrix[i][j] with matrix[j][i])\n        for (int i = 0; i < n; i++) {\n            for (int j = i + 1; j < n; j++) {\n                swap(matrix[i][j], matrix[j][i]);\n            }\n        }\n        // Step 2: Reverse each row\n        for (int i = 0; i < n; i++) {\n            ::reverse(matrix[i].begin(), matrix[i].end());\n        }\n    }\n};",
+    "summary": "Transpose + Row Reversal"
   },
   {
     "id": 31,
@@ -643,7 +673,8 @@ const PROBLEMS_DATA = [
     "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/set-matrix-zeroes/",
-    "code": "class Solution37 {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int n = matrix.size(), m = matrix[0].size();\n        bool firstRow = false, firstCol = false;\n\n        // Check first row and first column\n        for (int j = 0; j < m; j++)\n            if (matrix[0][j] == 0) firstRow = true;\n\n        for (int i = 0; i < n; i++)\n            if (matrix[i][0] == 0) firstCol = true;\n\n        // Use first row and column as markers\n        for (int i = 1; i < n; i++) {\n            for (int j = 1; j < m; j++) {\n                if (matrix[i][j] == 0) {\n                    matrix[i][0] = 0;\n                    matrix[0][j] = 0;\n                }\n            }\n        }\n\n        // Set cells to zero\n        for (int i = 1; i < n; i++) {\n            for (int j = 1; j < m; j++) {\n                if (matrix[i][0] == 0 || matrix[0][j] == 0)\n                    matrix[i][j] = 0;\n            }\n        }\n\n        // Handle first row\n        if (firstRow){\n            fill(matrix[0].begin(), matrix[0].end(), 0);\n        }\n\n        // Handle first column\n        if (firstCol){\n            for (int i = 0; i < n; i++)\n                matrix[i][0] = 0;\n        }\n    }\n};"
+    "code": "class Solution37 {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        int n = matrix.size(), m = matrix[0].size();\n        bool firstRow = false, firstCol = false;\n\n        // Check first row and first column\n        for (int j = 0; j < m; j++)\n            if (matrix[0][j] == 0) firstRow = true;\n\n        for (int i = 0; i < n; i++)\n            if (matrix[i][0] == 0) firstCol = true;\n\n        // Use first row and column as markers\n        for (int i = 1; i < n; i++) {\n            for (int j = 1; j < m; j++) {\n                if (matrix[i][j] == 0) {\n                    matrix[i][0] = 0;\n                    matrix[0][j] = 0;\n                }\n            }\n        }\n\n        // Set cells to zero\n        for (int i = 1; i < n; i++) {\n            for (int j = 1; j < m; j++) {\n                if (matrix[i][0] == 0 || matrix[0][j] == 0)\n                    matrix[i][j] = 0;\n            }\n        }\n\n        // Handle first row\n        if (firstRow){\n            fill(matrix[0].begin(), matrix[0].end(), 0);\n        }\n\n        // Handle first column\n        if (firstCol){\n            for (int i = 0; i < n; i++)\n                matrix[i][0] = 0;\n        }\n    }\n};",
+    "summary": "In-Place First Row/Col Markers"
   },
   {
     "id": 32,
@@ -660,10 +691,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(log MN)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/search-a-2d-matrix/",
-    "code": "class Solution38 {\npublic:\n    bool searchMatrix(vector<vector<int>>& matrix, int target) {\n        int m = matrix.size(), n = matrix[0].size();\n        int low = 0, high = m * n - 1;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            int r = mid / n, c = mid % n;\n            if (matrix[r][c] == target) return true;\n            if (matrix[r][c] < target) low = mid + 1;\n            else high = mid - 1;\n        }\n        return false;\n    }\n};"
+    "code": "class Solution38 {\npublic:\n    bool searchMatrix(vector<vector<int>>& matrix, int target) {\n        int m = matrix.size(), n = matrix[0].size();\n        int low = 0, high = m * n - 1;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            int r = mid / n, c = mid % n;\n            if (matrix[r][c] == target) return true;\n            if (matrix[r][c] < target) low = mid + 1;\n            else high = mid - 1;\n        }\n        return false;\n    }\n};",
+    "summary": "Virtual 1D Binary Search"
   },
   {
     "id": 33,
@@ -684,7 +716,8 @@ const PROBLEMS_DATA = [
     "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/surrounded-regions/",
-    "code": "class Solution39 {\n    int m, n;\n\n    void dfs(vector<vector<char>>& board, int r, int c) {\n        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] != 'O') return;\n        board[r][c] = '#';\n        dfs(board, r + 1, c);\n        dfs(board, r - 1, c);\n        dfs(board, r, c + 1);\n        dfs(board, r, c - 1);\n    }\n\npublic:\n    void solve(vector<vector<char>>& board) {\n        if (board.empty()) return;\n        m = board.size();\n        n = board[0].size();\n\n        // Step 1: Run DFS from border cells\n        for (int i = 0; i < m; i++) {\n            if (board[i][0] == 'O') dfs(board, i, 0);\n            if (board[i][n - 1] == 'O') dfs(board, i, n - 1);\n        }\n        for (int j = 0; j < n; j++) {\n            if (board[0][j] == 'O') dfs(board, 0, j);\n            if (board[m - 1][j] == 'O') dfs(board, m - 1, j);\n        }\n\n        // Step 2: Flip remaining 'O' to 'X', restore '#' to 'O'\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (board[i][j] == 'O') board[i][j] = 'X';\n                else if (board[i][j] == '#') board[i][j] = 'O';\n            }\n        }\n    }\n};"
+    "code": "class Solution39 {\n    int m, n;\n\n    void dfs(vector<vector<char>>& board, int r, int c) {\n        if (r < 0 || r >= m || c < 0 || c >= n || board[r][c] != 'O') return;\n        board[r][c] = '#';\n        dfs(board, r + 1, c);\n        dfs(board, r - 1, c);\n        dfs(board, r, c + 1);\n        dfs(board, r, c - 1);\n    }\n\npublic:\n    void solve(vector<vector<char>>& board) {\n        if (board.empty()) return;\n        m = board.size();\n        n = board[0].size();\n\n        // Step 1: Run DFS from border cells\n        for (int i = 0; i < m; i++) {\n            if (board[i][0] == 'O') dfs(board, i, 0);\n            if (board[i][n - 1] == 'O') dfs(board, i, n - 1);\n        }\n        for (int j = 0; j < n; j++) {\n            if (board[0][j] == 'O') dfs(board, 0, j);\n            if (board[m - 1][j] == 'O') dfs(board, m - 1, j);\n        }\n\n        // Step 2: Flip remaining 'O' to 'X', restore '#' to 'O'\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (board[i][j] == 'O') board[i][j] = 'X';\n                else if (board[i][j] == '#') board[i][j] = 'O';\n            }\n        }\n    }\n};",
+    "summary": "Boundary Flood-Fill (DFS/BFS)"
   },
   {
     "id": 34,
@@ -701,10 +734,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(M * N)",
       "Space complexity target: O(M * N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/number-of-islands/",
-    "code": "class Solution40 {\n    void dfs(vector<vector<char>>& grid, int r, int c, int m, int n) {\n        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;\n        grid[r][c] = '0'; // Sink island in-place\n        dfs(grid, r + 1, c, m, n);\n        dfs(grid, r - 1, c, m, n);\n        dfs(grid, r, c + 1, m, n);\n        dfs(grid, r, c - 1, m, n);\n    }\n\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] == '1') {\n                    count++;\n                    dfs(grid, i, j, m, n);\n                }\n            }\n        }\n        return count;\n    }\n};"
+    "code": "class Solution40 {\n    void dfs(vector<vector<char>>& grid, int r, int c, int m, int n) {\n        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;\n        grid[r][c] = '0'; // Sink island in-place\n        dfs(grid, r + 1, c, m, n);\n        dfs(grid, r - 1, c, m, n);\n        dfs(grid, r, c + 1, m, n);\n        dfs(grid, r, c - 1, m, n);\n    }\n\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        int m = grid.size(), n = grid[0].size();\n        int count = 0;\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] == '1') {\n                    count++;\n                    dfs(grid, i, j, m, n);\n                }\n            }\n        }\n        return count;\n    }\n};",
+    "summary": "Grid Connected Components DFS/BFS"
   },
   {
     "id": 35,
@@ -725,7 +759,8 @@ const PROBLEMS_DATA = [
     "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/rotting-oranges/",
-    "code": "class Solution41 {\npublic:\n    int orangesRotting(vector<vector<int>>& grid) {\n        int m = (int)grid.size();\n        int n = (int)grid[0].size();\n        queue<pair<int, int>> q;\n        int freshCount = 0;\n\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] == 2) {\n                    q.push({i, j});\n                } else if (grid[i][j] == 1) {\n                    freshCount++;\n                }\n            }\n        }\n\n        if (freshCount == 0) return 0;\n\n        int minutes = 0;\n        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};\n\n        while (!q.empty() && freshCount > 0) {\n            int sz = (int)q.size();\n            for (int k = 0; k < sz; ++k) {\n                auto [r, c] = q.front();\n                q.pop();\n\n                for (auto& d : dirs) {\n                    int nr = r + d[0], nc = c + d[1];\n                    if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == 1) {\n                        grid[nr][nc] = 2;\n                        freshCount--;\n                        q.push({nr, nc});\n                    }\n                }\n            }\n            minutes++;\n        }\n        return (freshCount == 0) ? minutes : -1;\n    }\n};"
+    "code": "class Solution41 {\npublic:\n    int orangesRotting(vector<vector<int>>& grid) {\n        int m = (int)grid.size();\n        int n = (int)grid[0].size();\n        queue<pair<int, int>> q;\n        int freshCount = 0;\n\n        for (int i = 0; i < m; ++i) {\n            for (int j = 0; j < n; ++j) {\n                if (grid[i][j] == 2) {\n                    q.push({i, j});\n                } else if (grid[i][j] == 1) {\n                    freshCount++;\n                }\n            }\n        }\n\n        if (freshCount == 0) return 0;\n\n        int minutes = 0;\n        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};\n\n        while (!q.empty() && freshCount > 0) {\n            int sz = (int)q.size();\n            for (int k = 0; k < sz; ++k) {\n                auto [r, c] = q.front();\n                q.pop();\n\n                for (auto& d : dirs) {\n                    int nr = r + d[0], nc = c + d[1];\n                    if (nr >= 0 && nr < m && nc >= 0 && nc < n && grid[nr][nc] == 1) {\n                        grid[nr][nc] = 2;\n                        freshCount--;\n                        q.push({nr, nc});\n                    }\n                }\n            }\n            minutes++;\n        }\n        return (freshCount == 0) ? minutes : -1;\n    }\n};",
+    "summary": "Multi-Source BFS Matrix Traversal"
   },
   {
     "id": 36,
@@ -742,10 +777,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N^2)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/longest-palindromic-substring/",
-    "code": "class Solution42 {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n <= 1) return s;\n        int start = 0, maxLen = 1;\n\n        auto expand = [&](int l, int r) {\n            while (l >= 0 && r < n && s[l] == s[r]) {\n                if (r - l + 1 > maxLen) {\n                    start = l;\n                    maxLen = r - l + 1;\n                }\n                l--;\n                r++;\n            }\n        };\n\n        for (int i = 0; i < n; i++) {\n            expand(i, i);     // Odd-length palindromes\n            expand(i, i + 1); // Even-length palindromes\n        }\n        return s.substr(start, maxLen);\n    }\n};"
+    "code": "class Solution42 {\npublic:\n    string longestPalindrome(string s) {\n        int n = s.size();\n        if (n <= 1) return s;\n        int start = 0, maxLen = 1;\n\n        auto expand = [&](int l, int r) {\n            while (l >= 0 && r < n && s[l] == s[r]) {\n                if (r - l + 1 > maxLen) {\n                    start = l;\n                    maxLen = r - l + 1;\n                }\n                l--;\n                r++;\n            }\n        };\n\n        for (int i = 0; i < n; i++) {\n            expand(i, i);     // Odd-length palindromes\n            expand(i, i + 1); // Even-length palindromes\n        }\n        return s.substr(start, maxLen);\n    }\n};",
+    "summary": "Expand Around Center Search"
   },
   {
     "id": 37,
@@ -763,10 +799,11 @@ const PROBLEMS_DATA = [
       "Append each character to its current row string, flipping direction at row 0 and row numRows - 1.",
       "Concatenate all row strings at the end to produce the final converted output in O(N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/zigzag-conversion/",
-    "code": "class Solution43 {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1) return s;\n        vector<string> rows(numRows);\n        int row = 0, dir = 1;\n        for (char c : s) {\n            rows[row] += c;\n            if (row == 0) dir = 1; \n            if (row == numRows - 1) dir = -1;\n            row += dir;\n        }\n        string ans;\n        for (string& x : rows) ans += x;\n        return ans;\n    }\n};"
+    "code": "class Solution43 {\npublic:\n    string convert(string s, int numRows) {\n        if (numRows == 1) return s;\n        vector<string> rows(numRows);\n        int row = 0, dir = 1;\n        for (char c : s) {\n            rows[row] += c;\n            if (row == 0) dir = 1; \n            if (row == numRows - 1) dir = -1;\n            row += dir;\n        }\n        string ans;\n        for (string& x : rows) ans += x;\n        return ans;\n    }\n};",
+    "summary": "Directional Row Simulation"
   },
   {
     "id": 38,
@@ -783,10 +820,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(1)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/integer-to-roman/",
-    "code": "class Solution44 {\npublic:\n    string intToRoman(int num) {\n        static const vector<pair<int, string>> roman = {\n            {1000, \"M\"}, {900, \"CM\"}, {500, \"D\"}, {400, \"CD\"},\n            {100, \"C\"},  {90, \"XC\"},  {50, \"L\"},  {40, \"XL\"},\n            {10, \"X\"},   {9, \"IX\"},   {5, \"V\"},   {4, \"IV\"},\n            {1, \"I\"}\n        };\n        string result;\n        for (const auto& [val, sym] : roman) {\n            while (num >= val) {\n                result += sym;\n                num -= val;\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution44 {\npublic:\n    string intToRoman(int num) {\n        static const vector<pair<int, string>> roman = {\n            {1000, \"M\"}, {900, \"CM\"}, {500, \"D\"}, {400, \"CD\"},\n            {100, \"C\"},  {90, \"XC\"},  {50, \"L\"},  {40, \"XL\"},\n            {10, \"X\"},   {9, \"IX\"},   {5, \"V\"},   {4, \"IV\"},\n            {1, \"I\"}\n        };\n        string result;\n        for (const auto& [val, sym] : roman) {\n            while (num >= val) {\n                result += sym;\n                num -= val;\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Greedy Greedy Value-Symbol Match"
   },
   {
     "id": 39,
@@ -803,10 +841,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(4^N * N)",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
-    "code": "class Solution45 {\n    void backtrack(const string& digits, int index, string& current, vector<string>& result, const vector<string>& mapping) {\n        if (index == (int)digits.size()) {\n            result.push_back(current);\n            return;\n        }\n        for (char letter : mapping[digits[index] - '0']) {\n            current.push_back(letter);\n            backtrack(digits, index + 1, current, result, mapping);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        const vector<string> mapping = {\n            \"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"\n        };\n        vector<string> result;\n        string current;\n        backtrack(digits, 0, current, result, mapping);\n        return result;\n    }\n};"
+    "code": "class Solution45 {\n    void backtrack(const string& digits, int index, string& current, vector<string>& result, const vector<string>& mapping) {\n        if (index == (int)digits.size()) {\n            result.push_back(current);\n            return;\n        }\n        for (char letter : mapping[digits[index] - '0']) {\n            current.push_back(letter);\n            backtrack(digits, index + 1, current, result, mapping);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<string> letterCombinations(string digits) {\n        if (digits.empty()) return {};\n        const vector<string> mapping = {\n            \"\", \"\", \"abc\", \"def\", \"ghi\", \"jkl\", \"mno\", \"pqrs\", \"tuv\", \"wxyz\"\n        };\n        vector<string> result;\n        string current;\n        backtrack(digits, 0, current, result, mapping);\n        return result;\n    }\n};",
+    "summary": "Backtracking / Branch Recursion"
   },
   {
     "id": 40,
@@ -824,10 +863,11 @@ const PROBLEMS_DATA = [
       "When encountering a closing bracket, verify the stack is non-empty and top matches type.",
       "After processing the entire string, stack must be completely empty for parentheses to be valid."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/valid-parentheses/",
-    "code": "class Solution46 {\npublic:\n    bool isValid(string s) {\n        stack<char> st;\n        for (char c : s) {\n            if (c == '(' || c == '{' || c == '[') {\n                st.push(c);\n            } else {\n                if (st.empty()) return false;\n                char top = st.top();\n                st.pop();\n                if ((c == ')' && top != '(') ||\n                    (c == '}' && top != '{') ||\n                    (c == ']' && top != '[')) {\n                    return false;\n                }\n            }\n        }\n        return st.empty();\n    }\n};"
+    "code": "class Solution46 {\npublic:\n    bool isValid(string s) {\n        stack<char> st;\n        for (char c : s) {\n            if (c == '(' || c == '{' || c == '[') {\n                st.push(c);\n            } else {\n                if (st.empty()) return false;\n                char top = st.top();\n                st.pop();\n                if ((c == ')' && top != '(') ||\n                    (c == '}' && top != '{') ||\n                    (c == ']' && top != '[')) {\n                    return false;\n                }\n            }\n        }\n        return st.empty();\n    }\n};",
+    "summary": "Stack Matching LIFO Verification"
   },
   {
     "id": 41,
@@ -845,10 +885,11 @@ const PROBLEMS_DATA = [
       "Can place ')' only when closeCount < openCount to preserve prefix validity at all times.",
       "When openCount == closeCount == n, valid combination is formed; generated combinations follow Catalan number."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/generate-parentheses/",
-    "code": "class Solution47 {\npublic:\n    vector<string> ans;\n\n    void solve(string s, int open, int close, int n) {\n        if (s.size() == 2 * n) {\n            ans.push_back(s);\n            return;\n        }\n\n        if (open < n) // If we can still add an opening parenthesis\n            solve(s + \"(\", open + 1, close, n);\n\n        if (close < open) // If we can add a closing parenthesis without invalidating the string\n            solve(s + \")\", open, close + 1, n);\n    }\n\n    vector<string> generateParenthesis(int n) {\n        solve(\"\", 0, 0, n);\n        return ans;\n    }\n};"
+    "code": "class Solution47 {\npublic:\n    vector<string> ans;\n\n    void solve(string s, int open, int close, int n) {\n        if (s.size() == 2 * n) {\n            ans.push_back(s);\n            return;\n        }\n\n        if (open < n) // If we can still add an opening parenthesis\n            solve(s + \"(\", open + 1, close, n);\n\n        if (close < open) // If we can add a closing parenthesis without invalidating the string\n            solve(s + \")\", open, close + 1, n);\n    }\n\n    vector<string> generateParenthesis(int n) {\n        solve(\"\", 0, 0, n);\n        return ans;\n    }\n};",
+    "summary": "Constrained Backtracking (Catalan)"
   },
   {
     "id": 42,
@@ -865,10 +906,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N * W)",
       "Space complexity target: O(K * W)"
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/substring-with-concatenation-of-all-words/",
-    "code": "class Solution48 {\npublic:\n    vector<int> findSubstring(string s, vector<string>& words) {\n        vector<int> ans;\n        int len = words[0].size(), count = words.size();\n        unordered_map<string, int> freq;\n\n        for (string w : words) freq[w]++;\n\n        for (int start = 0; start < len; start++) {\n            unordered_map<string, int> window;\n            int left = start, used = 0;\n            // left pointer marks the start of the current window, right pointer moves in steps of word length\n            for (int right = start; right + len <= s.size(); right += len) {\n                string word = s.substr(right, len);\n\n                if (!freq.count(word)) { // If the word is not in the original list, reset the window\n                    window.clear();\n                    used = 0;\n                    left = right + len;\n                    continue;\n                }\n\n                window[word]++, used++; // if the word is in the list, add it to the current window\n\n                while (window[word] > freq[word]) { // if the word frequency in window is greater than in the original list, shrink the window from the left\n                    window[s.substr(left, len)]--; // remove leftmost word from window\n                    left += len, used--; // shift left pointer and reduce used counter\n                }\n\n                if (used == count) { \n                    ans.push_back(left);\n                    window[s.substr(left, len)]--;\n                    left += len, used--;\n                }\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution48 {\npublic:\n    vector<int> findSubstring(string s, vector<string>& words) {\n        vector<int> ans;\n        int len = words[0].size(), count = words.size();\n        unordered_map<string, int> freq;\n\n        for (string w : words) freq[w]++;\n\n        for (int start = 0; start < len; start++) {\n            unordered_map<string, int> window;\n            int left = start, used = 0;\n            // left pointer marks the start of the current window, right pointer moves in steps of word length\n            for (int right = start; right + len <= s.size(); right += len) {\n                string word = s.substr(right, len);\n\n                if (!freq.count(word)) { // If the word is not in the original list, reset the window\n                    window.clear();\n                    used = 0;\n                    left = right + len;\n                    continue;\n                }\n\n                window[word]++, used++; // if the word is in the list, add it to the current window\n\n                while (window[word] > freq[word]) { // if the word frequency in window is greater than in the original list, shrink the window from the left\n                    window[s.substr(left, len)]--; // remove leftmost word from window\n                    left += len, used--; // shift left pointer and reduce used counter\n                }\n\n                if (used == count) { \n                    ans.push_back(left);\n                    window[s.substr(left, len)]--;\n                    left += len, used--;\n                }\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Offset Sliding Window + Freq Map"
   },
   {
     "id": 43,
@@ -886,10 +928,11 @@ const PROBLEMS_DATA = [
       "Append the original string to the hash map bucket keyed by its canonical form.",
       "Return all grouped bucket values; runs in O(N * K log K) time with O(N * K) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/group-anagrams/",
-    "code": "class Solution49 {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> groups;\n\n        for (const string& s : strs) {\n            string key = s;\n            sort(key.begin(), key.end());\n            groups[key].push_back(s);\n        }\n\n        vector<vector<string>> result;\n        result.reserve(groups.size());\n        for (auto& [_, vec] : groups) {\n            result.push_back(std::move(vec));\n        }\n        return result;\n    }\n};"
+    "code": "class Solution49 {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        unordered_map<string, vector<string>> groups;\n\n        for (const string& s : strs) {\n            string key = s;\n            sort(key.begin(), key.end());\n            groups[key].push_back(s);\n        }\n\n        vector<vector<string>> result;\n        result.reserve(groups.size());\n        for (auto& [_, vec] : groups) {\n            result.push_back(std::move(vec));\n        }\n        return result;\n    }\n};",
+    "summary": "Sorted String Hash Map Grouping"
   },
   {
     "id": 44,
@@ -907,10 +950,11 @@ const PROBLEMS_DATA = [
       "For each index, if existing mapping contradicts current character pair, strings are not isomorphic.",
       "If no conflict arises across all indices, the transformation is a valid bijection."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/isomorphic-strings/",
-    "code": "class Solution50 {\npublic:\n    bool isIsomorphic(string s, string t) {\n        if (s.length() != t.length()) return false;\n\n        vector<int> m1(256, -1);\n        vector<int> m2(256, -1);\n\n        for (int i = 0; i < s.length(); i++) {\n            if (m1[s[i]] != m2[t[i]]) return false;\n            m1[s[i]] = i;\n            m2[t[i]] = i;\n        }\n\n        return true;\n    }\n};"
+    "code": "class Solution50 {\npublic:\n    bool isIsomorphic(string s, string t) {\n        if (s.length() != t.length()) return false;\n\n        vector<int> m1(256, -1);\n        vector<int> m2(256, -1);\n\n        for (int i = 0; i < s.length(); i++) {\n            if (m1[s[i]] != m2[t[i]]) return false;\n            m1[s[i]] = i;\n            m2[t[i]] = i;\n        }\n\n        return true;\n    }\n};",
+    "summary": "Bi-Directional Character Mapping"
   },
   {
     "id": 45,
@@ -928,10 +972,11 @@ const PROBLEMS_DATA = [
       "Validate partition: maxLeftA <= minRightB and maxLeftB <= minRightA.",
       "If valid, median is max(lefts) for odd total, or average of max(lefts) and min(rights) for even."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
-    "code": "class Solution51 {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        // Ensure nums1 is the smaller array to minimize the binary search range\n        if (nums1.size() > nums2.size()) {\n            return findMedianSortedArrays(nums2, nums1);\n        }\n\n        int m = nums1.size();\n        int n = nums2.size();\n        int low = 0, high = m;\n\n        while (low <= high) {\n            int partition1 = (low + high) / 2;\n            int partition2 = (m + n + 1) / 2 - partition1;\n\n            // Edge cases: if partition is at the boundaries\n            int maxLeft1 = (partition1 == 0) ? INT_MIN : nums1[partition1 - 1];\n            int minRight1 = (partition1 == m) ? INT_MAX : nums1[partition1];\n\n            int maxLeft2 = (partition2 == 0) ? INT_MIN : nums2[partition2 - 1];\n            int minRight2 = (partition2 == n) ? INT_MAX : nums2[partition2];\n\n            // Check if correct partition is found\n            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {\n                // Odd total length: max of left halves\n                if ((m + n) % 2 == 1) {\n                    return max(maxLeft1, maxLeft2);\n                }\n                // Even total length: average of max of left and min of right\n                else {\n                    return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2.0;\n                }\n            } else if (maxLeft1 > minRight2) {\n                // Move towards the left in nums1\n                high = partition1 - 1;\n            } else {\n                // Move towards the right in nums1\n                low = partition1 + 1;\n            }\n        }\n\n        return 0.0;\n    }\n};"
+    "code": "class Solution51 {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        // Ensure nums1 is the smaller array to minimize the binary search range\n        if (nums1.size() > nums2.size()) {\n            return findMedianSortedArrays(nums2, nums1);\n        }\n\n        int m = nums1.size();\n        int n = nums2.size();\n        int low = 0, high = m;\n\n        while (low <= high) {\n            int partition1 = (low + high) / 2;\n            int partition2 = (m + n + 1) / 2 - partition1;\n\n            // Edge cases: if partition is at the boundaries\n            int maxLeft1 = (partition1 == 0) ? INT_MIN : nums1[partition1 - 1];\n            int minRight1 = (partition1 == m) ? INT_MAX : nums1[partition1];\n\n            int maxLeft2 = (partition2 == 0) ? INT_MIN : nums2[partition2 - 1];\n            int minRight2 = (partition2 == n) ? INT_MAX : nums2[partition2];\n\n            // Check if correct partition is found\n            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {\n                // Odd total length: max of left halves\n                if ((m + n) % 2 == 1) {\n                    return max(maxLeft1, maxLeft2);\n                }\n                // Even total length: average of max of left and min of right\n                else {\n                    return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2.0;\n                }\n            } else if (maxLeft1 > minRight2) {\n                // Move towards the left in nums1\n                high = partition1 - 1;\n            } else {\n                // Move towards the right in nums1\n                low = partition1 + 1;\n            }\n        }\n\n        return 0.0;\n    }\n};",
+    "summary": "Binary Search on Partitioning"
   },
   {
     "id": 46,
@@ -949,10 +994,11 @@ const PROBLEMS_DATA = [
       "Check if target falls within the sorted half's boundary range.",
       "If inside, search that half; otherwise discard it and search the opposite rotated half."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
-    "code": "class Solution52 {\npublic:\n    int search(vector<int>& nums, int target) {\n        int low = 0, high = nums.size() - 1;\n\n        while (low <= high) {\n            int mid = (low + high) / 2;\n\n            if (nums[mid] == target) return mid;\n\n            // Left half is sorted\n            if (nums[low] <= nums[mid]) {\n                if (nums[low] <= target && target < nums[mid])\n                    high = mid - 1;\n                else\n                    low = mid + 1;\n            }\n            // Right half is sorted\n            else {\n                if (nums[mid] < target && target <= nums[high])\n                    low = mid + 1;\n                else\n                    high = mid - 1;\n            }\n        }\n\n        return -1;\n    }\n};"
+    "code": "class Solution52 {\npublic:\n    int search(vector<int>& nums, int target) {\n        int low = 0, high = nums.size() - 1;\n\n        while (low <= high) {\n            int mid = (low + high) / 2;\n\n            if (nums[mid] == target) return mid;\n\n            // Left half is sorted\n            if (nums[low] <= nums[mid]) {\n                if (nums[low] <= target && target < nums[mid])\n                    high = mid - 1;\n                else\n                    low = mid + 1;\n            }\n            // Right half is sorted\n            else {\n                if (nums[mid] < target && target <= nums[high])\n                    low = mid + 1;\n                else\n                    high = mid - 1;\n            }\n        }\n\n        return -1;\n    }\n};",
+    "summary": "Partitioned Binary Search Checks"
   },
   {
     "id": 47,
@@ -969,10 +1015,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logS)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/split-array-largest-sum/",
-    "code": "class Solution53 {\n    bool canSplit(const vector<int>& nums, int k, long long maxCap) {\n        int subarrays = 1;\n        long long currentSum = 0;\n        for (int x : nums) {\n            if (currentSum + x > maxCap) {\n                subarrays++;\n                currentSum = x;\n            } else {\n                currentSum += x;\n            }\n        }\n        return subarrays <= k;\n    }\n\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        long long low = *max_element(nums.begin(), nums.end());\n        long long high = accumulate(nums.begin(), nums.end(), 0LL);\n        long long ans = high;\n\n        while (low <= high) {\n            long long mid = low + (high - low) / 2;\n            if (canSplit(nums, k, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller maximum sum\n            } else {\n                low = mid + 1;\n            }\n        }\n        return (int)ans;\n    }\n};"
+    "code": "class Solution53 {\n    bool canSplit(const vector<int>& nums, int k, long long maxCap) {\n        int subarrays = 1;\n        long long currentSum = 0;\n        for (int x : nums) {\n            if (currentSum + x > maxCap) {\n                subarrays++;\n                currentSum = x;\n            } else {\n                currentSum += x;\n            }\n        }\n        return subarrays <= k;\n    }\n\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        long long low = *max_element(nums.begin(), nums.end());\n        long long high = accumulate(nums.begin(), nums.end(), 0LL);\n        long long ans = high;\n\n        while (low <= high) {\n            long long mid = low + (high - low) / 2;\n            if (canSplit(nums, k, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller maximum sum\n            } else {\n                low = mid + 1;\n            }\n        }\n        return (int)ans;\n    }\n};",
+    "summary": "Binary Search on Answer + Greedy"
   },
   {
     "id": 48,
@@ -990,10 +1037,11 @@ const PROBLEMS_DATA = [
       "Binary search mid; ensure mid is even (if odd, decrement mid).",
       "If nums[mid] == nums[mid + 1], anomaly is on the right; otherwise it is at mid or on the left."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/single-element-in-a-sorted-array/",
-    "code": "class Solution54 {\npublic:\n    int singleNonDuplicate(vector<int>& nums) {\n        int low = 0, high = nums.size() - 1, ans = 0;\n        while (low <= high) {\n            int mid = (low + high) / 2;\n            if (mid % 2 == 1) mid--; // Ensure mid is even for pair comparison\n            if (nums[mid] == nums[mid + 1]) { // Pair found, single element is in the right half\n                low = mid + 2;\n            } else { // No pair, single element is in the left half or at mid\n                ans = nums[mid];\n                high = mid - 1;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution54 {\npublic:\n    int singleNonDuplicate(vector<int>& nums) {\n        int low = 0, high = nums.size() - 1, ans = 0;\n        while (low <= high) {\n            int mid = (low + high) / 2;\n            if (mid % 2 == 1) mid--; // Ensure mid is even for pair comparison\n            if (nums[mid] == nums[mid + 1]) { // Pair found, single element is in the right half\n                low = mid + 2;\n            } else { // No pair, single element is in the left half or at mid\n                ans = nums[mid];\n                high = mid - 1;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Even-Odd Index Binary Search"
   },
   {
     "id": 49,
@@ -1010,10 +1058,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logM)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/koko-eating-bananas/",
-    "code": "class Solution55 {\n    bool canEatAll(const vector<int>& piles, int h, int speed) {\n        long long hours = 0;\n        for (int pile : piles) {\n            hours += (pile + speed - 1) / speed;\n        }\n        return hours <= h;\n    }\n\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        int low = 1, high = *max_element(piles.begin(), piles.end());\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (canEatAll(piles, h, mid)) {\n                ans = mid;\n                high = mid - 1; // Try slower speed\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution55 {\n    bool canEatAll(const vector<int>& piles, int h, int speed) {\n        long long hours = 0;\n        for (int pile : piles) {\n            hours += (pile + speed - 1) / speed;\n        }\n        return hours <= h;\n    }\n\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        int low = 1, high = *max_element(piles.begin(), piles.end());\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (canEatAll(piles, h, mid)) {\n                ans = mid;\n                high = mid - 1; // Try slower speed\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Monotonic Speed Binary Search"
   },
   {
     "id": 50,
@@ -1030,10 +1079,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logS)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
-    "code": "class Solution56 {\n    bool canShip(const vector<int>& weights, int days, int cap) {\n        int neededDays = 1;\n        int currentWeight = 0;\n        for (int w : weights) {\n            if (currentWeight + w > cap) {\n                neededDays++;\n                currentWeight = w;\n            } else {\n                currentWeight += w;\n            }\n        }\n        return neededDays <= days;\n    }\n\npublic:\n    int shipWithinDays(vector<int>& weights, int days) {\n        int low = *max_element(weights.begin(), weights.end());\n        int high = accumulate(weights.begin(), weights.end(), 0);\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (canShip(weights, days, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller capacity\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution56 {\n    bool canShip(const vector<int>& weights, int days, int cap) {\n        int neededDays = 1;\n        int currentWeight = 0;\n        for (int w : weights) {\n            if (currentWeight + w > cap) {\n                neededDays++;\n                currentWeight = w;\n            } else {\n                currentWeight += w;\n            }\n        }\n        return neededDays <= days;\n    }\n\npublic:\n    int shipWithinDays(vector<int>& weights, int days) {\n        int low = *max_element(weights.begin(), weights.end());\n        int high = accumulate(weights.begin(), weights.end(), 0);\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (canShip(weights, days, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller capacity\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Capacity Feasibility Binary Search"
   },
   {
     "id": 51,
@@ -1050,10 +1100,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N logM)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/find-smallest-divisor-given-threshold/",
-    "code": "class Solution57 {\n    bool check(const vector<int>& nums, int threshold, int divisor) {\n        long long sum = 0;\n        for (int x : nums) {\n            sum += (x + divisor - 1) / divisor;\n        }\n        return sum <= threshold;\n    }\n\npublic:\n    int smallestDivisor(vector<int>& nums, int threshold) {\n        int low = 1, high = *max_element(nums.begin(), nums.end());\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (check(nums, threshold, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller divisor\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution57 {\n    bool check(const vector<int>& nums, int threshold, int divisor) {\n        long long sum = 0;\n        for (int x : nums) {\n            sum += (x + divisor - 1) / divisor;\n        }\n        return sum <= threshold;\n    }\n\npublic:\n    int smallestDivisor(vector<int>& nums, int threshold) {\n        int low = 1, high = *max_element(nums.begin(), nums.end());\n        int ans = high;\n\n        while (low <= high) {\n            int mid = low + (high - low) / 2;\n            if (check(nums, threshold, mid)) {\n                ans = mid;\n                high = mid - 1; // Try smaller divisor\n            } else {\n                low = mid + 1;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Divisor Sum Binary Search Check"
   },
   {
     "id": 52,
@@ -1071,10 +1122,11 @@ const PROBLEMS_DATA = [
       "Elements left of root in inorder belong to left subtree; elements right belong to right subtree.",
       "Recursively construct left and right subtrees by calculating subtree sizes to slice preorder indices."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
-    "code": "class Solution70 {\n  public:\n    unordered_map<int, int> pos;\n    int index = 0;\n\n    TreeNode *build(vector<int> &preorder, int left, int right) {\n        if (left > right)\n            return nullptr;\n\n        // Current preorder element is the root\n        int val = preorder[index];\n        index++;\n        TreeNode *root = new TreeNode(val);\n\n        // Find root position in inorder\n        int mid = pos[val];\n\n        // Build left and right subtrees\n        root->left = build(preorder, left, mid - 1);\n        root->right = build(preorder, mid + 1, right);\n\n        return root;\n    }\n\n    TreeNode *buildTree(vector<int> &preorder, vector<int> &inorder) {\n        for (int i = 0; i < inorder.size(); i++)\n            pos[inorder[i]] = i;\n        int n = preorder.size();\n        return build(preorder, 0, n - 1);\n    }\n};"
+    "code": "class Solution70 {\n  public:\n    unordered_map<int, int> pos;\n    int index = 0;\n\n    TreeNode *build(vector<int> &preorder, int left, int right) {\n        if (left > right)\n            return nullptr;\n\n        // Current preorder element is the root\n        int val = preorder[index];\n        index++;\n        TreeNode *root = new TreeNode(val);\n\n        // Find root position in inorder\n        int mid = pos[val];\n\n        // Build left and right subtrees\n        root->left = build(preorder, left, mid - 1);\n        root->right = build(preorder, mid + 1, right);\n\n        return root;\n    }\n\n    TreeNode *buildTree(vector<int> &preorder, vector<int> &inorder) {\n        for (int i = 0; i < inorder.size(); i++)\n            pos[inorder[i]] = i;\n        int n = preorder.size();\n        return build(preorder, 0, n - 1);\n    }\n};",
+    "summary": "Divide-and-Conquer + Index Map"
   },
   {
     "id": 53,
@@ -1092,10 +1144,11 @@ const PROBLEMS_DATA = [
       "If any subtree is unbalanced, immediately return -1 to short-circuit further traversal.",
       "Avoids redundant O(N^2) top-down depth recalculations, achieving clean O(N) complexity."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/balanced-binary-tree/",
-    "code": "class Solution71 {\n    int checkHeight(TreeNode *node) {\n        if (!node)\n            return 0;\n        int leftH = checkHeight(node->left);\n        int rightH = checkHeight(node->right);\n        if (leftH == -1 || rightH == -1 || abs(leftH - rightH) > 1)\n            return -1;\n        return 1 + max(leftH, rightH);\n    }\n\n  public:\n    bool isBalanced(TreeNode *root) {\n        return checkHeight(root) != -1;\n    }\n};"
+    "code": "class Solution71 {\n    int checkHeight(TreeNode *node) {\n        if (!node)\n            return 0;\n        int leftH = checkHeight(node->left);\n        int rightH = checkHeight(node->right);\n        if (leftH == -1 || rightH == -1 || abs(leftH - rightH) > 1)\n            return -1;\n        return 1 + max(leftH, rightH);\n    }\n\n  public:\n    bool isBalanced(TreeNode *root) {\n        return checkHeight(root) != -1;\n    }\n};",
+    "summary": "Bottom-Up Depth Check"
   },
   {
     "id": 54,
@@ -1113,10 +1166,11 @@ const PROBLEMS_DATA = [
       "Clamp branch gains to 0: max(0, dfs(child)) to ignore negative path contributions.",
       "Update global maximum path sum at each node with node.val + leftGain + rightGain."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
-    "code": "class Solution72 {\n    int globalMax;\n\n    int maxGain(TreeNode *node) {\n        if (!node)\n            return 0;\n        int leftGain = max(0, maxGain(node->left));\n        int rightGain = max(0, maxGain(node->right));\n        globalMax = max(globalMax, node->val + leftGain + rightGain);\n        return node->val + max(leftGain, rightGain);\n    }\n\n  public:\n    int maxPathSum(TreeNode *root) {\n        globalMax = INT_MIN;\n        maxGain(root);\n        return globalMax;\n    }\n};"
+    "code": "class Solution72 {\n    int globalMax;\n\n    int maxGain(TreeNode *node) {\n        if (!node)\n            return 0;\n        int leftGain = max(0, maxGain(node->left));\n        int rightGain = max(0, maxGain(node->right));\n        globalMax = max(globalMax, node->val + leftGain + rightGain);\n        return node->val + max(leftGain, rightGain);\n    }\n\n  public:\n    int maxPathSum(TreeNode *root) {\n        globalMax = INT_MIN;\n        maxGain(root);\n        return globalMax;\n    }\n};",
+    "summary": "Postorder Subtree Max Gain"
   },
   {
     "id": 55,
@@ -1134,10 +1188,11 @@ const PROBLEMS_DATA = [
       "Decrement counter k on visiting each node (in-order root step).",
       "When k reaches 0, current node's value is the kth smallest; terminate early in O(H + K) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
-    "code": "class Solution73 {\n  public:\n    int countNodes(TreeNode *node) {\n        if (!node)\n            return 0;\n        return 1 + countNodes(node->left) + countNodes(node->right);\n    }\n\n    int kthSmallest(TreeNode *root, int k) {\n        stack<TreeNode *> st;\n        TreeNode *curr = root;\n\n        while (curr || !st.empty()) {\n            while (curr) {\n                st.push(curr);\n                curr = curr->left;\n            }\n            curr = st.top();\n            st.pop();\n\n            if (--k == 0) {\n                return curr->val;\n            }\n            curr = curr->right;\n        }\n        return -1;\n    }\n    int kthlargest(TreeNode *root, int k) {\n        return kthSmallest(root, countNodes(root) - k + 1);\n    }\n};"
+    "code": "class Solution73 {\n  public:\n    int countNodes(TreeNode *node) {\n        if (!node)\n            return 0;\n        return 1 + countNodes(node->left) + countNodes(node->right);\n    }\n\n    int kthSmallest(TreeNode *root, int k) {\n        stack<TreeNode *> st;\n        TreeNode *curr = root;\n\n        while (curr || !st.empty()) {\n            while (curr) {\n                st.push(curr);\n                curr = curr->left;\n            }\n            curr = st.top();\n            st.pop();\n\n            if (--k == 0) {\n                return curr->val;\n            }\n            curr = curr->right;\n        }\n        return -1;\n    }\n    int kthlargest(TreeNode *root, int k) {\n        return kthSmallest(root, countNodes(root) - k + 1);\n    }\n};",
+    "summary": "Iterative Inorder Traversal"
   },
   {
     "id": 56,
@@ -1155,10 +1210,11 @@ const PROBLEMS_DATA = [
       "Deserialization: tokenize string into a queue of tokens.",
       "Recursively or queue-wise construct tree: consume next token; if '#', return null; otherwise build node."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
-    "code": "class Solution74 {\n    void serializeHelper(TreeNode *node, ostringstream &out) {\n        if (!node) {\n            out << \"# \";\n            return;\n        }\n        out << node->val << \" \";\n        serializeHelper(node->left, out);\n        serializeHelper(node->right, out);\n    }\n\n    TreeNode *deserializeHelper(istringstream &in) {\n        string val;\n        if (!(in >> val) || val == \"#\")\n            return nullptr;\n        TreeNode *node = new TreeNode(stoi(val));\n        node->left = deserializeHelper(in);\n        node->right = deserializeHelper(in);\n        return node;\n    }\n\n  public:\n    string serialize(TreeNode *root) {\n        ostringstream out;\n        serializeHelper(root, out);\n        return out.str();\n    }\n\n    TreeNode *deserialize(string data) {\n        istringstream in(data);\n        return deserializeHelper(in);\n    }\n};"
+    "code": "class Solution74 {\n    void serializeHelper(TreeNode *node, ostringstream &out) {\n        if (!node) {\n            out << \"# \";\n            return;\n        }\n        out << node->val << \" \";\n        serializeHelper(node->left, out);\n        serializeHelper(node->right, out);\n    }\n\n    TreeNode *deserializeHelper(istringstream &in) {\n        string val;\n        if (!(in >> val) || val == \"#\")\n            return nullptr;\n        TreeNode *node = new TreeNode(stoi(val));\n        node->left = deserializeHelper(in);\n        node->right = deserializeHelper(in);\n        return node;\n    }\n\n  public:\n    string serialize(TreeNode *root) {\n        ostringstream out;\n        serializeHelper(root, out);\n        return out.str();\n    }\n\n    TreeNode *deserialize(string data) {\n        istringstream in(data);\n        return deserializeHelper(in);\n    }\n};",
+    "summary": "Preorder String Stream Traversal"
   },
   {
     "id": 57,
@@ -1176,10 +1232,11 @@ const PROBLEMS_DATA = [
       "Post-order DFS calculates max depth of each subtree while updating global diameter at every node.",
       "Runs in O(N) time with O(H) recursion stack space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/diameter-of-binary-tree/",
-    "code": "class Solution75 {\n    int maxDiameter;\n\n    int depth(TreeNode *node) {\n        if (!node)\n            return 0;\n        int l = depth(node->left);\n        int r = depth(node->right);\n        maxDiameter = max(maxDiameter, l + r);\n        return 1 + max(l, r);\n    }\n\n  public:\n    int diameterOfBinaryTree(TreeNode *root) {\n        maxDiameter = 0;\n        depth(root);\n        return maxDiameter;\n    }\n};"
+    "code": "class Solution75 {\n    int maxDiameter;\n\n    int depth(TreeNode *node) {\n        if (!node)\n            return 0;\n        int l = depth(node->left);\n        int r = depth(node->right);\n        maxDiameter = max(maxDiameter, l + r);\n        return 1 + max(l, r);\n    }\n\n  public:\n    int diameterOfBinaryTree(TreeNode *root) {\n        maxDiameter = 0;\n        depth(root);\n        return maxDiameter;\n    }\n};",
+    "summary": "Postorder Max Path Combination"
   },
   {
     "id": 58,
@@ -1197,10 +1254,11 @@ const PROBLEMS_DATA = [
       "Option 3: BST Iterator with two stacks (one forward, one backward) to achieve O(H) space two-pointer.",
       "Hash set approach gives concise O(N) time and O(N) space implementation."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/two-sum-iv-input-is-a-bst/",
-    "code": "class Solution76 {\npublic:\n    void inorder(TreeNode* root, vector<int>& nums) {\n        if (!root) return;\n        inorder(root->left, nums);\n        nums.push_back(root->val);\n        inorder(root->right, nums);\n    }\n    // inorder returns a sorted array of the BST values. Then we can use two pointers to find if there exists a pair that sums to k.\n    bool findTarget(TreeNode* root, int k) {\n        vector<int> nums;\n        inorder(root, nums);\n        int left = 0;\n        int right = nums.size() - 1;\n        while (left < right) {\n            int sum = nums[left] + nums[right];\n            if (sum == k) return true;\n            if (sum < k)\n                left++;\n            else\n                right--;\n        }\n        return false;\n    }\n};"
+    "code": "class Solution76 {\npublic:\n    void inorder(TreeNode* root, vector<int>& nums) {\n        if (!root) return;\n        inorder(root->left, nums);\n        nums.push_back(root->val);\n        inorder(root->right, nums);\n    }\n    // inorder returns a sorted array of the BST values. Then we can use two pointers to find if there exists a pair that sums to k.\n    bool findTarget(TreeNode* root, int k) {\n        vector<int> nums;\n        inorder(root, nums);\n        int left = 0;\n        int right = nums.size() - 1;\n        while (left < right) {\n            int sum = nums[left] + nums[right];\n            if (sum == k) return true;\n            if (sum < k)\n                left++;\n            else\n                right--;\n        }\n        return false;\n    }\n};",
+    "summary": "BST Iterator Two Pointers"
   },
   {
     "id": 59,
@@ -1218,10 +1276,11 @@ const PROBLEMS_DATA = [
       "Second pass: BFS starting from target node moving in 3 directions (left, right, parent).",
       "Maintain visited set to avoid backtracking; stop BFS at level K and collect all frontier nodes."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/",
-    "code": "class Solution77 {\npublic:\n    unordered_map<TreeNode*, TreeNode*> parent;\n\n    void setParent(TreeNode* root) {\n        if (!root) return; // Base case: if the current node is null, return\n\n        if (root->left) {\n            parent[root->left] = root; // Set the parent of the left child to the current node\n            setParent(root->left);\n        }\n        if (root->right) {\n            parent[root->right] = root; // Set the parent of the right child to the current node\n            setParent(root->right);\n        }\n    }\n\n    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {\n        setParent(root);\n        queue<TreeNode*> q;\n        unordered_set<TreeNode*> visited;\n\n        q.push(target);\n        visited.insert(target);\n\n        // BFS for exactly k levels\n        while (k--) {\n            int size = q.size();\n\n            while (size--) {\n                TreeNode* node = q.front();\n                q.pop();\n\n                if (node->left && !visited.count(node->left)) {\n                    visited.insert(node->left);\n                    q.push(node->left);\n                }\n                if (node->right && !visited.count(node->right)) {\n                    visited.insert(node->right);\n                    q.push(node->right);\n                }\n                if (parent[node] && !visited.count(parent[node])) {\n                    visited.insert(parent[node]);\n                    q.push(parent[node]);\n                }\n            }\n        }\n        vector<int> ans;\n        while (!q.empty()) {\n            ans.push_back(q.front()->val);\n            q.pop();\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution77 {\npublic:\n    unordered_map<TreeNode*, TreeNode*> parent;\n\n    void setParent(TreeNode* root) {\n        if (!root) return; // Base case: if the current node is null, return\n\n        if (root->left) {\n            parent[root->left] = root; // Set the parent of the left child to the current node\n            setParent(root->left);\n        }\n        if (root->right) {\n            parent[root->right] = root; // Set the parent of the right child to the current node\n            setParent(root->right);\n        }\n    }\n\n    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {\n        setParent(root);\n        queue<TreeNode*> q;\n        unordered_set<TreeNode*> visited;\n\n        q.push(target);\n        visited.insert(target);\n\n        // BFS for exactly k levels\n        while (k--) {\n            int size = q.size();\n\n            while (size--) {\n                TreeNode* node = q.front();\n                q.pop();\n\n                if (node->left && !visited.count(node->left)) {\n                    visited.insert(node->left);\n                    q.push(node->left);\n                }\n                if (node->right && !visited.count(node->right)) {\n                    visited.insert(node->right);\n                    q.push(node->right);\n                }\n                if (parent[node] && !visited.count(parent[node])) {\n                    visited.insert(parent[node]);\n                    q.push(parent[node]);\n                }\n            }\n        }\n        vector<int> ans;\n        while (!q.empty()) {\n            ans.push_back(q.front()->val);\n            q.pop();\n        }\n        return ans;\n    }\n};",
+    "summary": "Parent Mapping + BFS Radial Wave"
   },
   {
     "id": 60,
@@ -1239,10 +1298,11 @@ const PROBLEMS_DATA = [
       "Use BFS or DFS to collect coordinates into a hash table or sorted map.",
       "Extract columns in increasing column order to produce final vertical column groupings."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree/",
-    "code": "class Solution78 {\npublic:\n    vector<tuple<int, int, int>> nodes;\n\n    void dfs(TreeNode* root, int row, int col) {\n        if (!root) return;\n        nodes.push_back({col, row, root->val});\n        dfs(root->left, row + 1, col - 1);\n        dfs(root->right, row + 1, col + 1);\n    }\n\n    vector<vector<int>> verticalTraversal(TreeNode* root) {\n        dfs(root, 0, 0);\n        // Sort by column -> row -> value\n        sort(nodes.begin(), nodes.end());\n        vector<vector<int>> ans;\n\n        int lastCol = INT_MIN;\n        for (auto [col, row, val] : nodes) {\n            if (col != lastCol) { // New column encountered\n                ans.push_back({}); // Start a new column in the answer\n                lastCol = col; // Update lastCol to the current column\n            }\n\n            ans.back().push_back(val);\n        }\n\n        return ans;\n    }\n};"
+    "code": "class Solution78 {\npublic:\n    vector<tuple<int, int, int>> nodes;\n\n    void dfs(TreeNode* root, int row, int col) {\n        if (!root) return;\n        nodes.push_back({col, row, root->val});\n        dfs(root->left, row + 1, col - 1);\n        dfs(root->right, row + 1, col + 1);\n    }\n\n    vector<vector<int>> verticalTraversal(TreeNode* root) {\n        dfs(root, 0, 0);\n        // Sort by column -> row -> value\n        sort(nodes.begin(), nodes.end());\n        vector<vector<int>> ans;\n\n        int lastCol = INT_MIN;\n        for (auto [col, row, val] : nodes) {\n            if (col != lastCol) { // New column encountered\n                ans.push_back({}); // Start a new column in the answer\n                lastCol = col; // Update lastCol to the current column\n            }\n\n            ans.back().push_back(val);\n        }\n\n        return ans;\n    }\n};",
+    "summary": "Coordinate DFS + Multiset Sorting"
   },
   {
     "id": 61,
@@ -1260,10 +1320,11 @@ const PROBLEMS_DATA = [
       "The single root that is never a leaf must be the global root of the merged tree.",
       "Traverse and graft matching leaves; validate final unified tree satisfies BST range invariants."
     ],
-    "completed": false,
+    "completed": true,
     "starred": true,
     "url": "https://leetcode.com/problems/merge-bsts-to-create-single-bst/",
-    "code": "class Solution79 {\n    unordered_map<int, TreeNode *> rootMap;\n    int mergedCount = 0;\n\n    bool validate(TreeNode *node, long long minVal, long long maxVal, TreeNode *globalRoot) {\n        if (!node)\n            return true;\n        if (node->val <= minVal || node->val >= maxVal)\n            return false;\n\n        if (!node->left && !node->right && rootMap.count(node->val) && node != globalRoot) {\n            TreeNode *match = rootMap[node->val];\n            node->left = match->left;\n            node->right = match->right;\n            rootMap.erase(node->val);\n            mergedCount++;\n        }\n        return validate(node->left, minVal, node->val, globalRoot) &&\n               validate(node->right, node->val, maxVal, globalRoot);\n    }\n\n  public:\n    TreeNode *canMerge(vector<TreeNode *> &trees) {\n        rootMap.clear();\n        unordered_map<int, int> leafFreq;\n        for (TreeNode *t : trees) {\n            rootMap[t->val] = t;\n            if (t->left)\n                leafFreq[t->left->val]++;\n            if (t->right)\n                leafFreq[t->right->val]++;\n        }\n\n        TreeNode *globalRoot = nullptr;\n        for (TreeNode *t : trees) {\n            if (leafFreq.find(t->val) == leafFreq.end()) {\n                if (globalRoot != nullptr)\n                    return nullptr;\n                globalRoot = t;\n            }\n        }\n        if (!globalRoot)\n            return nullptr;\n\n        mergedCount = 0;\n        if (!validate(globalRoot, LLONG_MIN, LLONG_MAX, globalRoot))\n            return nullptr;\n        if (mergedCount != (int)trees.size() - 1)\n            return nullptr;\n        return globalRoot;\n    }\n};"
+    "code": "class Solution79 {\n    unordered_map<int, TreeNode *> rootMap;\n    int mergedCount = 0;\n\n    bool validate(TreeNode *node, long long minVal, long long maxVal, TreeNode *globalRoot) {\n        if (!node)\n            return true;\n        if (node->val <= minVal || node->val >= maxVal)\n            return false;\n\n        if (!node->left && !node->right && rootMap.count(node->val) && node != globalRoot) {\n            TreeNode *match = rootMap[node->val];\n            node->left = match->left;\n            node->right = match->right;\n            rootMap.erase(node->val);\n            mergedCount++;\n        }\n        return validate(node->left, minVal, node->val, globalRoot) &&\n               validate(node->right, node->val, maxVal, globalRoot);\n    }\n\n  public:\n    TreeNode *canMerge(vector<TreeNode *> &trees) {\n        rootMap.clear();\n        unordered_map<int, int> leafFreq;\n        for (TreeNode *t : trees) {\n            rootMap[t->val] = t;\n            if (t->left)\n                leafFreq[t->left->val]++;\n            if (t->right)\n                leafFreq[t->right->val]++;\n        }\n\n        TreeNode *globalRoot = nullptr;\n        for (TreeNode *t : trees) {\n            if (leafFreq.find(t->val) == leafFreq.end()) {\n                if (globalRoot != nullptr)\n                    return nullptr;\n                globalRoot = t;\n            }\n        }\n        if (!globalRoot)\n            return nullptr;\n\n        mergedCount = 0;\n        if (!validate(globalRoot, LLONG_MIN, LLONG_MAX, globalRoot))\n            return nullptr;\n        if (mergedCount != (int)trees.size() - 1)\n            return nullptr;\n        return globalRoot;\n    }\n};",
+    "summary": "Leaf-Root Map + In-Order BST Valid"
   },
   {
     "id": 62,
@@ -1280,10 +1341,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N \u03b1(N))",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/redundant-connection/",
-    "code": "class Solution80 {\n    struct DSU {\n        vector<int> parent;\n        DSU(int n) : parent(n + 1) {\n            iota(parent.begin(), parent.end(), 0);\n        }\n        int find(int x) {\n            return parent[x] == x ? x : parent[x] = find(parent[x]);\n        }\n        bool unite(int x, int y) {\n            int rootX = find(x), rootY = find(y);\n            if (rootX == rootY) return false;\n            parent[rootX] = rootY;\n            return true;\n        }\n    };\n\npublic:\n    vector<int> findRedundantConnection(vector<vector<int>>& edges) {\n        int n = edges.size();\n        DSU dsu(n);\n        for (const auto& edge : edges) {\n            if (!dsu.unite(edge[0], edge[1])) {\n                return edge;\n            }\n        }\n        return {};\n    }\n};"
+    "code": "class Solution80 {\n    struct DSU {\n        vector<int> parent;\n        DSU(int n) : parent(n + 1) {\n            iota(parent.begin(), parent.end(), 0);\n        }\n        int find(int x) {\n            return parent[x] == x ? x : parent[x] = find(parent[x]);\n        }\n        bool unite(int x, int y) {\n            int rootX = find(x), rootY = find(y);\n            if (rootX == rootY) return false;\n            parent[rootX] = rootY;\n            return true;\n        }\n    };\n\npublic:\n    vector<int> findRedundantConnection(vector<vector<int>>& edges) {\n        int n = edges.size();\n        DSU dsu(n);\n        for (const auto& edge : edges) {\n            if (!dsu.unite(edge[0], edge[1])) {\n                return edge;\n            }\n        }\n        return {};\n    }\n};",
+    "summary": "Disjoint Set Union (DSU) Cycle"
   },
   {
     "id": 63,
@@ -1300,10 +1362,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(AlogA)",
       "Space complexity target: O(A)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/accounts-merge/",
-    "code": "class Solution81 {\n    struct DSU {\n        vector<int> parent;\n        DSU(int n) : parent(n) {\n            iota(parent.begin(), parent.end(), 0);\n        }\n        int find(int x) {\n            return parent[x] == x ? x : parent[x] = find(parent[x]);\n        }\n        void unite(int x, int y) {\n            int rootX = find(x), rootY = find(y);\n            if (rootX != rootY) parent[rootX] = rootY;\n        }\n    };\n\npublic:\n    vector<vector<string>> accountsMerge(vector<vector<string>>& accounts) {\n        int n = accounts.size();\n        DSU dsu(n);\n        unordered_map<string, int> emailToId;\n\n        for (int i = 0; i < n; i++) {\n            for (size_t j = 1; j < accounts[i].size(); j++) {\n                const string& email = accounts[i][j];\n                if (emailToId.count(email)) {\n                    dsu.unite(i, emailToId[email]);\n                } else {\n                    emailToId[email] = i;\n                }\n            }\n        }\n\n        unordered_map<int, vector<string>> leaderToEmails;\n        for (const auto& [email, id] : emailToId) {\n            int leader = dsu.find(id);\n            leaderToEmails[leader].push_back(email);\n        }\n\n        vector<vector<string>> mergedAccounts;\n        for (auto& [leader, emails] : leaderToEmails) {\n            sort(emails.begin(), emails.end());\n            vector<string> account = {accounts[leader][0]};\n            account.insert(account.end(), emails.begin(), emails.end());\n            mergedAccounts.push_back(account);\n        }\n        return mergedAccounts;\n    }\n};"
+    "code": "class Solution81 {\n    struct DSU {\n        vector<int> parent;\n        DSU(int n) : parent(n) {\n            iota(parent.begin(), parent.end(), 0);\n        }\n        int find(int x) {\n            return parent[x] == x ? x : parent[x] = find(parent[x]);\n        }\n        void unite(int x, int y) {\n            int rootX = find(x), rootY = find(y);\n            if (rootX != rootY) parent[rootX] = rootY;\n        }\n    };\n\npublic:\n    vector<vector<string>> accountsMerge(vector<vector<string>>& accounts) {\n        int n = accounts.size();\n        DSU dsu(n);\n        unordered_map<string, int> emailToId;\n\n        for (int i = 0; i < n; i++) {\n            for (size_t j = 1; j < accounts[i].size(); j++) {\n                const string& email = accounts[i][j];\n                if (emailToId.count(email)) {\n                    dsu.unite(i, emailToId[email]);\n                } else {\n                    emailToId[email] = i;\n                }\n            }\n        }\n\n        unordered_map<int, vector<string>> leaderToEmails;\n        for (const auto& [email, id] : emailToId) {\n            int leader = dsu.find(id);\n            leaderToEmails[leader].push_back(email);\n        }\n\n        vector<vector<string>> mergedAccounts;\n        for (auto& [leader, emails] : leaderToEmails) {\n            sort(emails.begin(), emails.end());\n            vector<string> account = {accounts[leader][0]};\n            account.insert(account.end(), emails.begin(), emails.end());\n            mergedAccounts.push_back(account);\n        }\n        return mergedAccounts;\n    }\n};",
+    "summary": "DSU Connected Components on Emails"
   },
   {
     "id": 64,
@@ -1321,10 +1384,11 @@ const PROBLEMS_DATA = [
       "Use 3-color DFS cycle detection: 0 = unvisited, 1 = visiting (active stack), 2 = safe.",
       "If a node's neighbor is currently visiting (1), a cycle exists; mark node unsafe. Otherwise mark safe (2)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/find-eventual-safe-states/",
-    "code": "class Solution82 {\n  public:\n    vector<int> eventualSafeNodes(vector<vector<int>> &graph) {\n        int n = graph.size();\n        vector<vector<int>> rev(n);\n        vector<int> outdegree(n, 0);\n\n        for (int i = 0; i < n; i++) {\n            outdegree[i] = graph[i].size();\n            for (int v : graph[i])\n                rev[v].push_back(i);\n        }\n\n        queue<int> q;\n        for (int i = 0; i < n; i++) {\n            if (outdegree[i] == 0)\n                q.push(i);\n        }\n\n        vector<int> safe;\n        while (!q.empty()) {\n            int node = q.front();\n            q.pop();\n            safe.push_back(node);\n            for (int prev : rev[node]) {\n                if (--outdegree[prev] == 0)\n                    q.push(prev);\n            }\n        }\n        sort(safe.begin(), safe.end());\n        return safe;\n    }\n};"
+    "code": "class Solution82 {\n  public:\n    vector<int> eventualSafeNodes(vector<vector<int>> &graph) {\n        int n = graph.size();\n        vector<vector<int>> rev(n);\n        vector<int> outdegree(n, 0);\n\n        for (int i = 0; i < n; i++) {\n            outdegree[i] = graph[i].size();\n            for (int v : graph[i])\n                rev[v].push_back(i);\n        }\n\n        queue<int> q;\n        for (int i = 0; i < n; i++) {\n            if (outdegree[i] == 0)\n                q.push(i);\n        }\n\n        vector<int> safe;\n        while (!q.empty()) {\n            int node = q.front();\n            q.pop();\n            safe.push_back(node);\n            for (int prev : rev[node]) {\n                if (--outdegree[prev] == 0)\n                    q.push(prev);\n            }\n        }\n        sort(safe.begin(), safe.end());\n        return safe;\n    }\n};",
+    "summary": "Reverse Graph Topological Sort"
   },
   {
     "id": 65,
@@ -1342,10 +1406,11 @@ const PROBLEMS_DATA = [
       "Second pass: check every 0 cell in the grid; inspect unique adjacent island IDs in 4 directions.",
       "Potential area = 1 + sum of areas of distinct neighbor islands; global max is the answer."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/making-a-large-island/",
-    "code": "class Solution83 {\n  public:\n    int n;\n    vector<int> area;\n    int dr[4] = {0, 0, 1, -1};\n    int dc[4] = {1, -1, 0, 0};\n\n    int dfs(vector<vector<int>> &grid, int r, int c, int id) {\n        grid[r][c] = id;\n        int count = 1; // count denotes the area of the island with id `id`\n\n        for (int k = 0; k < 4; k++) {\n            int nr = r + dr[k];\n            int nc = c + dc[k];\n\n            if (nr >= 0 && nr < n &&\n                nc >= 0 && nc < n &&\n                grid[nr][nc] == 1) {\n\n                count += dfs(grid, nr, nc, id);\n            }\n        }\n\n        return count;\n    }\n\n    int largestIsland(vector<vector<int>> &grid) {\n        n = grid.size();\n        area.resize(n * n + 2);\n\n        int id = 2; // Start labeling islands from 2 to avoid confusion with 0 and 1\n        int ans = 0;\n\n        // Mark every island with a unique id\n        for (int i = 0; i < n; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] == 1) {\n                    area[id] = dfs(grid, i, j, id);\n                    ans = max(ans, area[id]);\n                    id++;\n                }\n            }\n        }\n        // ans now contains the area of the largest island without any changes.\n        // Try changing each 0 into 1\n        for (int i = 0; i < n; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] != 0)\n                    continue;\n\n                int total = 1; // Start with 1 for the flipped cell\n                unordered_set<int> seen;\n\n                for (int k = 0; k < 4; k++) {\n                    int nr = i + dr[k];\n                    int nc = j + dc[k];\n\n                    if (nr < 0 || nr >= n || nc < 0 || nc >= n)\n                        continue;\n\n                    int id = grid[nr][nc];\n\n                    // Add this island only once\n                    if (id > 1 && !seen.count(id)) {\n                        seen.insert(id);\n                        total += area[id];\n                    }\n                }\n\n                ans = max(ans, total);\n            }\n        }\n\n        return ans;\n    }\n};"
+    "code": "class Solution83 {\n  public:\n    int n;\n    vector<int> area;\n    int dr[4] = {0, 0, 1, -1};\n    int dc[4] = {1, -1, 0, 0};\n\n    int dfs(vector<vector<int>> &grid, int r, int c, int id) {\n        grid[r][c] = id;\n        int count = 1; // count denotes the area of the island with id `id`\n\n        for (int k = 0; k < 4; k++) {\n            int nr = r + dr[k];\n            int nc = c + dc[k];\n\n            if (nr >= 0 && nr < n &&\n                nc >= 0 && nc < n &&\n                grid[nr][nc] == 1) {\n\n                count += dfs(grid, nr, nc, id);\n            }\n        }\n\n        return count;\n    }\n\n    int largestIsland(vector<vector<int>> &grid) {\n        n = grid.size();\n        area.resize(n * n + 2);\n\n        int id = 2; // Start labeling islands from 2 to avoid confusion with 0 and 1\n        int ans = 0;\n\n        // Mark every island with a unique id\n        for (int i = 0; i < n; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] == 1) {\n                    area[id] = dfs(grid, i, j, id);\n                    ans = max(ans, area[id]);\n                    id++;\n                }\n            }\n        }\n        // ans now contains the area of the largest island without any changes.\n        // Try changing each 0 into 1\n        for (int i = 0; i < n; i++) {\n            for (int j = 0; j < n; j++) {\n                if (grid[i][j] != 0)\n                    continue;\n\n                int total = 1; // Start with 1 for the flipped cell\n                unordered_set<int> seen;\n\n                for (int k = 0; k < 4; k++) {\n                    int nr = i + dr[k];\n                    int nc = j + dc[k];\n\n                    if (nr < 0 || nr >= n || nc < 0 || nc >= n)\n                        continue;\n\n                    int id = grid[nr][nc];\n\n                    // Add this island only once\n                    if (id > 1 && !seen.count(id)) {\n                        seen.insert(id);\n                        total += area[id];\n                    }\n                }\n\n                ans = max(ans, total);\n            }\n        }\n\n        return ans;\n    }\n};",
+    "summary": "Component Sizing + Boundary Probe"
   },
   {
     "id": 66,
@@ -1363,10 +1428,11 @@ const PROBLEMS_DATA = [
       "If traversing an edge in the original forward direction (away from 0), it must be reversed (count++).",
       "Tree structure guarantees exactly N - 1 edges visited with zero cycle checks."
     ],
-    "completed": false,
+    "completed": true,
     "starred": true,
     "url": "https://leetcode.com/problems/reorder-routes-to-make-all-paths-lead-to-the-city-zero/",
-    "code": "class Solution84 {\npublic:\n    vector<vector<pair<int, int>>> graph;\n    vector<int> ans;\n\n    // Count reversals needed when starting from node 0\n    int dfs1(int node, int parent) {\n        int cost = 0;\n        for (auto [next, reverse] : graph[node]) {\n            if(next!=parent){\n                cost+= reverse + dfs1(next, node);\n            }\n        }\n        return cost;\n    }\n\n    // Calculate answer for every possible starting node\n    void dfs2(int node, int parent) {\n        for (auto [next, reverse] : graph[node]) {\n            if(next!=parent) {\n                ans[next] = ans[node] + (reverse ? -1 : 1);\n                dfs2(next, node);\n            }\n        }\n    }\n\n    vector<int> minEdgeReversals(int n, vector<vector<int>>& edges) {\n        graph.resize(n);\n        ans.resize(n);\n        for (auto& edge : edges) {\n            int u = edge[0];\n            int v = edge[1];\n            // u -> v is already correct when going from u to v\n            graph[u].push_back({v, 0}); // 0 means no reversal needed\n            // Going from v to u requires reversing the edge\n            graph[v].push_back({u, 1}); // 1 means reversal needed\n        }\n        // Answer when starting from node 0\n        ans[0] = dfs1(0, -1);\n        // Re-root and calculate answers for all nodes\n        dfs2(0, -1);\n        return ans;\n    }\n};"
+    "code": "class Solution84 {\npublic:\n    vector<vector<pair<int, int>>> graph;\n    vector<int> ans;\n\n    // Count reversals needed when starting from node 0\n    int dfs1(int node, int parent) {\n        int cost = 0;\n        for (auto [next, reverse] : graph[node]) {\n            if(next!=parent){\n                cost+= reverse + dfs1(next, node);\n            }\n        }\n        return cost;\n    }\n\n    // Calculate answer for every possible starting node\n    void dfs2(int node, int parent) {\n        for (auto [next, reverse] : graph[node]) {\n            if(next!=parent) {\n                ans[next] = ans[node] + (reverse ? -1 : 1);\n                dfs2(next, node);\n            }\n        }\n    }\n\n    vector<int> minEdgeReversals(int n, vector<vector<int>>& edges) {\n        graph.resize(n);\n        ans.resize(n);\n        for (auto& edge : edges) {\n            int u = edge[0];\n            int v = edge[1];\n            // u -> v is already correct when going from u to v\n            graph[u].push_back({v, 0}); // 0 means no reversal needed\n            // Going from v to u requires reversing the edge\n            graph[v].push_back({u, 1}); // 1 means reversal needed\n        }\n        // Answer when starting from node 0\n        ans[0] = dfs1(0, -1);\n        // Re-root and calculate answers for all nodes\n        dfs2(0, -1);\n        return ans;\n    }\n};",
+    "summary": "Tree Re-Rooting Dynamic Prog."
   },
   {
     "id": 67,
@@ -1384,10 +1450,11 @@ const PROBLEMS_DATA = [
       "Union all connected edges into disjoint sets with path compression and rank.",
       "Answer each query in O(1) by checking if find(u) == find(v)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/path-existence-queries-in-a-graph-i/",
-    "code": "class Solution85 {\npublic:\n    vector<bool> pathExistenceQueries(\n        int n,\n        vector<int>& nums,\n        int maxDiff,\n        vector<vector<int>>& queries\n    ) {\n        vector<int> group(n);\n        int id = 0;\n        // Create connected components\n        for (int i = 1; i < n; i++) {\n            if (nums[i] - nums[i - 1] > maxDiff) id++;\n            group[i] = id;\n        }\n\n        vector<bool> ans;\n\n        for (auto& q : queries) {\n            int u = q[0];\n            int v = q[1];\n            ans.push_back(group[u] == group[v]);\n        }\n\n        return ans;\n    }\n};"
+    "code": "class Solution85 {\npublic:\n    vector<bool> pathExistenceQueries(\n        int n,\n        vector<int>& nums,\n        int maxDiff,\n        vector<vector<int>>& queries\n    ) {\n        vector<int> group(n);\n        int id = 0;\n        // Create connected components\n        for (int i = 1; i < n; i++) {\n            if (nums[i] - nums[i - 1] > maxDiff) id++;\n            group[i] = id;\n        }\n\n        vector<bool> ans;\n\n        for (auto& q : queries) {\n            int u = q[0];\n            int v = q[1];\n            ans.push_back(group[u] == group[v]);\n        }\n\n        return ans;\n    }\n};",
+    "summary": "Union-Find Component Equivalence"
   },
   {
     "id": 68,
@@ -1405,10 +1472,11 @@ const PROBLEMS_DATA = [
       "When encountering ')': pop top index.",
       "If stack empty: push current index as new boundary. If non-empty: maxLen = max(maxLen, i - stack.top())."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/longest-valid-parentheses/",
-    "code": "class Solution86 {\n  public:\n    int longestValidParentheses(string s) {\n        stack<int> st;\n        st.push(-1);\n        int maxLen = 0, n = (int)s.size();\n        for (int i = 0; i < n; ++i) {\n            if (s[i] == '(') {\n                st.push(i);\n            } else {\n                st.pop();\n                if (st.empty()) {\n                    st.push(i);\n                } else {\n                    maxLen = max(maxLen, i - st.top());\n                }\n            }\n        }\n        return maxLen;\n    }\n};"
+    "code": "class Solution86 {\n  public:\n    int longestValidParentheses(string s) {\n        stack<int> st;\n        st.push(-1);\n        int maxLen = 0, n = (int)s.size();\n        for (int i = 0; i < n; ++i) {\n            if (s[i] == '(') {\n                st.push(i);\n            } else {\n                st.pop();\n                if (st.empty()) {\n                    st.push(i);\n                } else {\n                    maxLen = max(maxLen, i - st.top());\n                }\n            }\n        }\n        return maxLen;\n    }\n};",
+    "summary": "Monotonic Index Stack / DP"
   },
   {
     "id": 69,
@@ -1426,10 +1494,11 @@ const PROBLEMS_DATA = [
       "When current bar is smaller than stack top, pop stack top as the rectangle height.",
       "Width is bounded by current index (right limit) and new stack top (left limit); runs in O(N)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
-    "code": "class Solution87 {\n  public:\n    int largestRectangleArea(vector<int> &heights) {\n        int n = (int)heights.size();\n        stack<int> st;\n        int maxArea = 0;\n\n        for (int i = 0; i <= n; ++i) {\n            int h = (i == n) ? 0 : heights[i];\n            while (!st.empty() && h < heights[st.top()]) {\n                int height = heights[st.top()];\n                st.pop();\n                int width = st.empty() ? i : (i - st.top() - 1);\n                maxArea = max(maxArea, height * width);\n            }\n            st.push(i);\n        }\n        return maxArea;\n    }\n};"
+    "code": "class Solution87 {\n  public:\n    int largestRectangleArea(vector<int> &heights) {\n        int n = (int)heights.size();\n        stack<int> st;\n        int maxArea = 0;\n\n        for (int i = 0; i <= n; ++i) {\n            int h = (i == n) ? 0 : heights[i];\n            while (!st.empty() && h < heights[st.top()]) {\n                int height = heights[st.top()];\n                st.pop();\n                int width = st.empty() ? i : (i - st.top() - 1);\n                maxArea = max(maxArea, height * width);\n            }\n            st.push(i);\n        }\n        return maxArea;\n    }\n};",
+    "summary": "Monotonic Increasing Stack"
   },
   {
     "id": 70,
@@ -1447,10 +1516,11 @@ const PROBLEMS_DATA = [
       "Apply Largest Rectangle in Histogram (monotonic stack) algorithm on each row's height array.",
       "Tracks global maximum rectangle area in O(M * N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/maximal-rectangle/",
-    "code": "class Solution88 {\n  public:\n    int maximalRectangle(vector<vector<char>> &matrix) {\n        if (matrix.empty() || matrix[0].empty())\n            return 0;\n        int m = matrix.size(), n = matrix[0].size(), ans = 0;\n        vector<int> height(n, 0);\n\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                height[j] = (matrix[i][j] == '1') ? height[j] + 1 : 0;\n            }\n            stack<int> st;\n            for (int j = 0; j <= n; j++) {\n                int currHeight = (j == n ? 0 : height[j]);\n                while (!st.empty() && currHeight < height[st.top()]) {\n                    int h = height[st.top()];\n                    st.pop();\n                    int width = st.empty() ? j : j - st.top() - 1;\n                    ans = max(ans, h * width);\n                }\n                st.push(j);\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution88 {\n  public:\n    int maximalRectangle(vector<vector<char>> &matrix) {\n        if (matrix.empty() || matrix[0].empty())\n            return 0;\n        int m = matrix.size(), n = matrix[0].size(), ans = 0;\n        vector<int> height(n, 0);\n\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                height[j] = (matrix[i][j] == '1') ? height[j] + 1 : 0;\n            }\n            stack<int> st;\n            for (int j = 0; j <= n; j++) {\n                int currHeight = (j == n ? 0 : height[j]);\n                while (!st.empty() && currHeight < height[st.top()]) {\n                    int h = height[st.top()];\n                    st.pop();\n                    int width = st.empty() ? j : j - st.top() - 1;\n                    ans = max(ans, h * width);\n                }\n                st.push(j);\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Row-Wise Histogram Height Matrix"
   },
   {
     "id": 71,
@@ -1468,10 +1538,11 @@ const PROBLEMS_DATA = [
       "On push(x): push (x, min(x, currentMin)).",
       "getMin() simply inspects the min value of the top element in O(1) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/min-stack/",
-    "code": "class Solution89 {\n  public:\n    class MinStack {\n        stack<pair<int, int>> st; // {val, currentMin}\n      public:\n        MinStack() {}\n        void push(int val) {\n            int curMin = st.empty() ? val : min(val, st.top().second);\n            st.push({val, curMin});\n        }\n        void pop() { st.pop(); }\n        int top() { return st.top().first; }\n        int getMin() { return st.top().second; }\n    };\n};"
+    "code": "class Solution89 {\n  public:\n    class MinStack {\n        stack<pair<int, int>> st; // {val, currentMin}\n      public:\n        MinStack() {}\n        void push(int val) {\n            int curMin = st.empty() ? val : min(val, st.top().second);\n            st.push({val, curMin});\n        }\n        void pop() { st.pop(); }\n        int top() { return st.top().first; }\n        int getMin() { return st.top().second; }\n    };\n};",
+    "summary": "Pair Value-Min Tracking Stack"
   },
   {
     "id": 72,
@@ -1489,10 +1560,11 @@ const PROBLEMS_DATA = [
       "On '(': push current result and sign onto stack, reset result and sign for inner sub-expression.",
       "On ')': complete sub-expression, multiply by popped sign, and add to popped previous result."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/basic-calculator/",
-    "code": "class Solution90 {\n  public:\n    int calculate(string s) {\n        stack<int> st;\n        int result = 0, num = 0, sign = 1;\n\n        for (char c : s) {\n            if (isdigit(c)) {\n                num = num * 10 + (c - '0');\n            } else if (c == '+') {\n                result += sign * num;\n                num = 0;\n                sign = 1;\n            } else if (c == '-') {\n                result += sign * num;\n                num = 0;\n                sign = -1;\n            } else if (c == '(') {\n                st.push(result);\n                st.push(sign);\n                result = 0;\n                sign = 1;\n            } else if (c == ')') {\n                result += sign * num;\n                num = 0;\n                result *= st.top();\n                st.pop();\n                result += st.top();\n                st.pop();\n            }\n        }\n        return result + sign * num;\n    }\n};"
+    "code": "class Solution90 {\n  public:\n    int calculate(string s) {\n        stack<int> st;\n        int result = 0, num = 0, sign = 1;\n\n        for (char c : s) {\n            if (isdigit(c)) {\n                num = num * 10 + (c - '0');\n            } else if (c == '+') {\n                result += sign * num;\n                num = 0;\n                sign = 1;\n            } else if (c == '-') {\n                result += sign * num;\n                num = 0;\n                sign = -1;\n            } else if (c == '(') {\n                st.push(result);\n                st.push(sign);\n                result = 0;\n                sign = 1;\n            } else if (c == ')') {\n                result += sign * num;\n                num = 0;\n                result *= st.top();\n                st.pop();\n                result += st.top();\n                st.pop();\n            }\n        }\n        return result + sign * num;\n    }\n};",
+    "summary": "Sign & Running Total Stack State"
   },
   {
     "id": 73,
@@ -1510,10 +1582,11 @@ const PROBLEMS_DATA = [
       "Remove elements from front of deque that fall outside sliding window boundary (index <= i - k).",
       "Front of deque always holds the maximum element for the current window in amortized O(N) time."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/sliding-window-maximum/",
-    "code": "class Solution91 {\n  public:\n    vector<int> maxSlidingWindow(vector<int> &nums, int k) {\n        deque<int> dq;\n        vector<int> result;\n        result.reserve(nums.size() - k + 1);\n\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            while (!dq.empty() && dq.front() <= i - k)\n                dq.pop_front();\n            while (!dq.empty() && nums[dq.back()] <= nums[i])\n                dq.pop_back();\n            dq.push_back(i);\n            if (i >= k - 1)\n                result.push_back(nums[dq.front()]);\n        }\n        return result;\n    }\n};"
+    "code": "class Solution91 {\n  public:\n    vector<int> maxSlidingWindow(vector<int> &nums, int k) {\n        deque<int> dq;\n        vector<int> result;\n        result.reserve(nums.size() - k + 1);\n\n        for (int i = 0; i < (int)nums.size(); ++i) {\n            while (!dq.empty() && dq.front() <= i - k)\n                dq.pop_front();\n            while (!dq.empty() && nums[dq.back()] <= nums[i])\n                dq.pop_back();\n            dq.push_back(i);\n            if (i >= k - 1)\n                result.push_back(nums[dq.front()]);\n        }\n        return result;\n    }\n};",
+    "summary": "Monotonic Decreasing Deque"
   },
   {
     "id": 74,
@@ -1531,10 +1604,11 @@ const PROBLEMS_DATA = [
       "Pop smallest pair (i, j); push pair to result.",
       "Push next candidate from same row: (nums1[i] + nums2[j + 1], i, j + 1) until k pairs collected."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/find-k-pairs-with-smallest-sums/",
-    "code": "class Solution92 {\n    struct TupleCmp {\n        bool operator()(const tuple<int, int, int> &a, const tuple<int, int, int> &b) const {\n            return get<0>(a) > get<0>(b);\n        }\n    };\n\n  public:\n    vector<vector<int>> kSmallestPairs(vector<int> &nums1, vector<int> &nums2, int k) {\n        vector<vector<int>> ans;\n        if (nums1.empty() || nums2.empty() || k <= 0)\n            return ans;\n\n        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, TupleCmp> pq;\n        for (int i = 0; i < (int)nums1.size() && i < k; ++i) {\n            pq.emplace(nums1[i] + nums2[0], i, 0);\n        }\n\n        while (!pq.empty() && (int)ans.size() < k) {\n            auto [sum, i, j] = pq.top();\n            pq.pop();\n            ans.push_back({nums1[i], nums2[j]});\n            if (j + 1 < (int)nums2.size()) {\n                pq.emplace(nums1[i] + nums2[j + 1], i, j + 1);\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution92 {\n    struct TupleCmp {\n        bool operator()(const tuple<int, int, int> &a, const tuple<int, int, int> &b) const {\n            return get<0>(a) > get<0>(b);\n        }\n    };\n\n  public:\n    vector<vector<int>> kSmallestPairs(vector<int> &nums1, vector<int> &nums2, int k) {\n        vector<vector<int>> ans;\n        if (nums1.empty() || nums2.empty() || k <= 0)\n            return ans;\n\n        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, TupleCmp> pq;\n        for (int i = 0; i < (int)nums1.size() && i < k; ++i) {\n            pq.emplace(nums1[i] + nums2[0], i, 0);\n        }\n\n        while (!pq.empty() && (int)ans.size() < k) {\n            auto [sum, i, j] = pq.top();\n            pq.pop();\n            ans.push_back({nums1[i], nums2[j]});\n            if (j + 1 < (int)nums2.size()) {\n                pq.emplace(nums1[i] + nums2[j + 1], i, j + 1);\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Priority Queue Frontier Expansion"
   },
   {
     "id": 75,
@@ -1552,10 +1626,11 @@ const PROBLEMS_DATA = [
       "Push current element onto stack; remaining stack elements have no next greater (-1).",
       "Answer nums1 queries in O(1) each using the precomputed hash map."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/next-greater-element-i/",
-    "code": "class Solution93 {\n  public:\n    vector<int> nextGreaterElement(vector<int> &nums1, vector<int> &nums2) {\n        unordered_map<int, int> mp;\n        stack<int> st;\n\n        for (int x : nums2) {\n            while (!st.empty() && st.top() < x) {\n                mp[st.top()] = x;\n                st.pop();\n            }\n            st.push(x);\n        }\n\n        vector<int> ans;\n        ans.reserve(nums1.size());\n        for (int x : nums1) {\n            ans.push_back(mp.count(x) ? mp[x] : -1);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution93 {\n  public:\n    vector<int> nextGreaterElement(vector<int> &nums1, vector<int> &nums2) {\n        unordered_map<int, int> mp;\n        stack<int> st;\n\n        for (int x : nums2) {\n            while (!st.empty() && st.top() < x) {\n                mp[st.top()] = x;\n                st.pop();\n            }\n            st.push(x);\n        }\n\n        vector<int> ans;\n        ans.reserve(nums1.size());\n        for (int x : nums1) {\n            ans.push_back(mp.count(x) ? mp[x] : -1);\n        }\n        return ans;\n    }\n};",
+    "summary": "Monotonic Stack + Hash Map Lookup"
   },
   {
     "id": 76,
@@ -1574,9 +1649,10 @@ const PROBLEMS_DATA = [
       "Push index onto stack only during the first pass (i < N) to avoid redundant entries."
     ],
     "completed": false,
-    "starred": false,
+    "starred": true,
     "url": "https://leetcode.com/problems/next-greater-element-ii/",
-    "code": "class Solution94 {\npublic:\n    vector<int> nextGreaterElements(vector<int>& nums) {\n        int n = (int)nums.size();\n        vector<int> result(n, -1);\n        stack<int> st; // stores indices\n\n        // Iterate through array twice to simulate circular traversal\n        for (int i = 0; i < 2 * n; ++i) {\n            int idx = i % n;\n            while (!st.empty() && nums[st.top()] < nums[idx]) {\n                result[st.top()] = nums[idx];\n                st.pop();\n            }\n            if (i < n) {\n                st.push(idx);\n            }\n        }\n        return result;\n    }\n};"
+    "code": "class Solution94 {\npublic:\n    vector<int> nextGreaterElements(vector<int>& nums) {\n        int n = (int)nums.size();\n        vector<int> result(n, -1);\n        stack<int> st; // stores indices\n\n        // Iterate through array twice to simulate circular traversal\n        for (int i = 0; i < 2 * n; ++i) {\n            int idx = i % n;\n            while (!st.empty() && nums[st.top()] < nums[idx]) {\n                result[st.top()] = nums[idx];\n                st.pop();\n            }\n            if (i < n) {\n                st.push(idx);\n            }\n        }\n        return result;\n    }\n};",
+    "summary": "Circular Monotonic Stack (2N)"
   },
   {
     "id": 77,
@@ -1593,10 +1669,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(log K)",
       "Space complexity target: O(K)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
-    "code": "class Solution95 {\npublic:\n    class KthLargest {\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        int k;\n\n    public:\n        KthLargest(int k, vector<int>& nums) : k(k) {\n            for (int num : nums) {\n                add(num);\n            }\n        }\n\n        int add(int val) {\n            if ((int)minHeap.size() < k) {\n                minHeap.push(val);\n            } else if (val > minHeap.top()) {\n                minHeap.pop();\n                minHeap.push(val);\n            }\n            return minHeap.top();\n        }\n    };\n};"
+    "code": "class Solution95 {\npublic:\n    class KthLargest {\n        priority_queue<int, vector<int>, greater<int>> minHeap;\n        int k;\n\n    public:\n        KthLargest(int k, vector<int>& nums) : k(k) {\n            for (int num : nums) {\n                add(num);\n            }\n        }\n\n        int add(int val) {\n            if ((int)minHeap.size() < k) {\n                minHeap.push(val);\n            } else if (val > minHeap.top()) {\n                minHeap.pop();\n                minHeap.push(val);\n            }\n            return minHeap.top();\n        }\n    };\n};",
+    "summary": "Min-Heap Size-K Priority Queue"
   },
   {
     "id": 78,
@@ -1613,10 +1690,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N)",
       "Space complexity target: O(N)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/final-prices-with-special-discount/",
-    "code": "class Solution96 {\npublic:\n    vector<int> finalPrices(vector<int>& prices) {\n        int n = prices.size();\n        vector<int> ans = prices;\n        stack<int> st; // Stores indices of prices awaiting discount\n\n        for (int i = 0; i < n; i++) {\n            while (!st.empty() && prices[st.top()] >= prices[i]) {\n                ans[st.top()] -= prices[i];\n                st.pop();\n            }\n            st.push(i);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution96 {\npublic:\n    vector<int> finalPrices(vector<int>& prices) {\n        int n = prices.size();\n        vector<int> ans = prices;\n        stack<int> st; // Stores indices of prices awaiting discount\n\n        for (int i = 0; i < n; i++) {\n            while (!st.empty() && prices[st.top()] >= prices[i]) {\n                ans[st.top()] -= prices[i];\n                st.pop();\n            }\n            st.push(i);\n        }\n        return ans;\n    }\n};",
+    "summary": "Monotonic Increasing Stack"
   },
   {
     "id": 79,
@@ -1637,7 +1715,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/jump-game-vi/",
-    "code": "class Solution97 {\npublic:\n    int maxResult(vector<int>& nums, int k) {\n        int n = (int)nums.size();\n\n        // dp[i] = maximum score possible when reaching index i\n        vector<int> dp(n);\n\n        // Starting position\n        dp[0] = nums[0];\n\n        // Stores indices.\n        // dp values of these indices are in decreasing order.\n        deque<int> dq;\n\n        dq.push_back(0); // Starting index\n\n        for (int i = 1; i < n; ++i) {\n\n            // Remove indices that are more than k positions behind.\n            while (!dq.empty() && dq.front() < i - k) {\n                dq.pop_front();\n            }\n\n            // Front contains the index with maximum dp value\n            // among the last k reachable positions.\n            dp[i] = nums[i] + dp[dq.front()];\n\n            // Remove indices having smaller or equal dp values.\n            // Current index is better because it has a >= score\n            // and is more recent.\n            while (!dq.empty() && dp[dq.back()] <= dp[i]) {\n                dq.pop_back();\n            }\n\n            // Add current index.\n            dq.push_back(i);\n        }\n\n        return dp[n - 1];\n    }\n};"
+    "code": "class Solution97 {\npublic:\n    int maxResult(vector<int>& nums, int k) {\n        int n = (int)nums.size();\n\n        // dp[i] = maximum score possible when reaching index i\n        vector<int> dp(n);\n\n        // Starting position\n        dp[0] = nums[0];\n\n        // Stores indices.\n        // dp values of these indices are in decreasing order.\n        deque<int> dq;\n\n        dq.push_back(0); // Starting index\n\n        for (int i = 1; i < n; ++i) {\n\n            // Remove indices that are more than k positions behind.\n            while (!dq.empty() && dq.front() < i - k) {\n                dq.pop_front();\n            }\n\n            // Front contains the index with maximum dp value\n            // among the last k reachable positions.\n            dp[i] = nums[i] + dp[dq.front()];\n\n            // Remove indices having smaller or equal dp values.\n            // Current index is better because it has a >= score\n            // and is more recent.\n            while (!dq.empty() && dp[dq.back()] <= dp[i]) {\n                dq.pop_back();\n            }\n\n            // Add current index.\n            dq.push_back(i);\n        }\n\n        return dp[n - 1];\n    }\n};",
+    "summary": "Sliding Window Monotonic Deque DP"
   },
   {
     "id": 80,
@@ -1658,7 +1737,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/regular-expression-matching/",
-    "code": "class Solution98 {\npublic:\n    vector<vector<int>> memo;\n\n    bool solve(int i, int j, string& s, string& p) {\n        // Pattern finished: string must also be finished\n        if (j == p.size()) return i == s.size();\n        // Return cached result\n        if (memo[i][j] != -1) return memo[i][j];\n\n        // Check if current characters match\n        bool firstMatch = i < s.size() && (p[j] == s[i] || p[j] == '.');\n        bool ans;\n        // Next character is '*'\n        if (j + 1 < p.size() && p[j + 1] == '*') {\n            // Skip '*' OR use it to match current character\n            ans = solve(i, j + 2, s, p) || (firstMatch && solve(i + 1, j, s, p));\n        }\n        else {\n            // Match current characters and move forward\n            ans = firstMatch && solve(i + 1, j + 1, s, p);\n        }\n\n        return memo[i][j] = ans;\n    }\n\n    bool isMatch(string s, string p) {\n        int m = s.size();\n        int n = p.size();\n\n        // -1 means not computed\n        memo.assign(m + 1, vector<int>(n + 1, -1));\n\n        return solve(0, 0, s, p);\n    }\n};"
+    "code": "class Solution98 {\npublic:\n    vector<vector<int>> memo;\n\n    bool solve(int i, int j, string& s, string& p) {\n        // Pattern finished: string must also be finished\n        if (j == p.size()) return i == s.size();\n        // Return cached result\n        if (memo[i][j] != -1) return memo[i][j];\n\n        // Check if current characters match\n        bool firstMatch = i < s.size() && (p[j] == s[i] || p[j] == '.');\n        bool ans;\n        // Next character is '*'\n        if (j + 1 < p.size() && p[j + 1] == '*') {\n            // Skip '*' OR use it to match current character\n            ans = solve(i, j + 2, s, p) || (firstMatch && solve(i + 1, j, s, p));\n        }\n        else {\n            // Match current characters and move forward\n            ans = firstMatch && solve(i + 1, j + 1, s, p);\n        }\n\n        return memo[i][j] = ans;\n    }\n\n    bool isMatch(string s, string p) {\n        int m = s.size();\n        int n = p.size();\n\n        // -1 means not computed\n        memo.assign(m + 1, vector<int>(n + 1, -1));\n\n        return solve(0, 0, s, p);\n    }\n};",
+    "summary": "2D Dynamic Programming (., *)"
   },
   {
     "id": 81,
@@ -1675,10 +1755,11 @@ const PROBLEMS_DATA = [
       "Time complexity target: O(N)",
       "Space complexity target: O(1)"
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-subarray/",
-    "code": "class Solution99 {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        int maxSum = nums[0];\n        int currentSum = 0;\n\n        for (int x : nums) {\n            currentSum = max(x, currentSum + x);\n            maxSum = max(maxSum, currentSum);\n        }\n        return maxSum;\n    }\n};"
+    "code": "class Solution99 {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        int maxSum = nums[0];\n        int currentSum = 0;\n\n        for (int x : nums) {\n            currentSum = max(x, currentSum + x);\n            maxSum = max(maxSum, currentSum);\n        }\n        return maxSum;\n    }\n};",
+    "summary": "Kadane's Running Prefix DP"
   },
   {
     "id": 82,
@@ -1696,10 +1777,11 @@ const PROBLEMS_DATA = [
       "Optimize space to 1D array of size N: dp[j] += dp[j-1].",
       "Can also be computed in O(min(M, N)) using combinatorics: C(M + N - 2, M - 1)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": true,
     "url": "https://leetcode.com/problems/unique-paths/",
-    "code": "class Solution100 {\npublic:\n    int uniquePaths(int m, int n) {\n        vector<int> dp(n, 1);\n        for (int i = 1; i < m; i++) {\n            for (int j = 1; j < n; j++) {\n                dp[j] += dp[j - 1];\n            }\n        }\n        return dp[n - 1];\n    }\n};"
+    "code": "class Solution100 {\npublic:\n    int uniquePaths(int m, int n) {\n        vector<int> dp(n, 1);\n        for (int i = 1; i < m; i++) {\n            for (int j = 1; j < n; j++) {\n                dp[j] += dp[j - 1];\n            }\n        }\n        return dp[n - 1];\n    }\n};",
+    "summary": "Combinatorics / 1D DP Space"
   },
   {
     "id": 83,
@@ -1717,10 +1799,11 @@ const PROBLEMS_DATA = [
       "Otherwise take 1 + min of insert (dp[i][j-1]), delete (dp[i-1][j]), or replace (dp[i-1][j-1]).",
       "Space can be optimized to O(min(M, N)) using two 1D rows."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/edit-distance/",
-    "code": "class Solution101 {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0)); // dp[i][j] = min operations to convert word1[0..i-1] to word2[0..j-1]\n\n        for (int i = 1; i <= m; ++i) dp[i][0] = i; // deleting all characters from word1\n        for (int j = 1; j <= n; ++j) dp[0][j] = j; // inserting all characters to word1 to form word2\n\n        for (int i = 1; i <= m; ++i) {\n            for (int j = 1; j <= n; ++j) {\n                if (word1[i - 1] == word2[j - 1]) {\n                    dp[i][j] = dp[i - 1][j - 1]; // if characters match, no operation needed\n                } else { // if they don't match, consider all three operations and take the minimum\n                    dp[i][j] = 1 + min({\n                        dp[i - 1][j],    // Delete\n                        dp[i][j - 1],    // Insert\n                        dp[i - 1][j - 1] // Replace\n                    });\n                }\n            }\n        }\n        return dp[m][n]; // minimum operations to convert word1 to word2\n    }\n};"
+    "code": "class Solution101 {\npublic:\n    int minDistance(string word1, string word2) {\n        int m = word1.size(), n = word2.size();\n        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0)); // dp[i][j] = min operations to convert word1[0..i-1] to word2[0..j-1]\n\n        for (int i = 1; i <= m; ++i) dp[i][0] = i; // deleting all characters from word1\n        for (int j = 1; j <= n; ++j) dp[0][j] = j; // inserting all characters to word1 to form word2\n\n        for (int i = 1; i <= m; ++i) {\n            for (int j = 1; j <= n; ++j) {\n                if (word1[i - 1] == word2[j - 1]) {\n                    dp[i][j] = dp[i - 1][j - 1]; // if characters match, no operation needed\n                } else { // if they don't match, consider all three operations and take the minimum\n                    dp[i][j] = 1 + min({\n                        dp[i - 1][j],    // Delete\n                        dp[i][j - 1],    // Insert\n                        dp[i - 1][j - 1] // Replace\n                    });\n                }\n            }\n        }\n        return dp[m][n]; // minimum operations to convert word1 to word2\n    }\n};",
+    "summary": "2D Levenshtein Distance DP"
   },
   {
     "id": 84,
@@ -1738,10 +1821,11 @@ const PROBLEMS_DATA = [
       "Iterate from second-to-bottom row up to root: dp[j] = triangle[i][j] + min(dp[j], dp[j+1]).",
       "When loop completes, dp[0] holds the minimum path sum in O(N^2) time and O(N) space."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/triangle/",
-    "code": "class Solution102 {\npublic:\n    int minimumTotal(vector<vector<int>>& triangle) {\n        int n = triangle.size();\n        vector<int> dp = triangle[n - 1];\n\n        for (int row = n - 2; row >= 0; row--) {\n            for (int col = 0; col <= row; col++) {\n                dp[col] = triangle[row][col] + min(dp[col], dp[col + 1]);\n            }\n        }\n\n        return dp[0];\n    }\n};"
+    "code": "class Solution102 {\npublic:\n    int minimumTotal(vector<vector<int>>& triangle) {\n        int n = triangle.size();\n        vector<int> dp = triangle[n - 1];\n\n        for (int row = n - 2; row >= 0; row--) {\n            for (int col = 0; col <= row; col++) {\n                dp[col] = triangle[row][col] + min(dp[col], dp[col + 1]);\n            }\n        }\n\n        return dp[0];\n    }\n};",
+    "summary": "Bottom-Up In-Place DP"
   },
   {
     "id": 85,
@@ -1759,10 +1843,11 @@ const PROBLEMS_DATA = [
       "Calculate potential profit: profit = price[i] - minPrice.",
       "Update global max profit; runs in O(N) time and O(1) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
-    "code": "class Solution103 {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int minPrice = INT_MAX;\n        int maxProfitVal = 0;\n\n        for (int p : prices) {\n            minPrice = min(minPrice, p);\n            maxProfitVal = max(maxProfitVal, p - minPrice);\n        }\n        return maxProfitVal;\n    }\n};"
+    "code": "class Solution103 {\npublic:\n    int maxProfit(vector<int>& prices) {\n        int minPrice = INT_MAX;\n        int maxProfitVal = 0;\n\n        for (int p : prices) {\n            minPrice = min(minPrice, p);\n            maxProfitVal = max(maxProfitVal, p - minPrice);\n        }\n        return maxProfitVal;\n    }\n};",
+    "summary": "Running Minimum Price Single-Pass"
   },
   {
     "id": 86,
@@ -1780,10 +1865,11 @@ const PROBLEMS_DATA = [
       "Only the previous two states are needed to compute the current state.",
       "Rolling two variables (prev1, prev2) achieves O(N) time with O(1) auxiliary space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/house-robber/",
-    "code": "class Solution104 {\npublic:\n    int rob(vector<int>& nums) {\n        int prev2 = 0; // dp[i-2]\n        int prev1 = 0; // dp[i-1]\n        // prev2 and prev1 represent the maximum amount of money that can be robbed from the previous two houses.\n\n        for (int x : nums) {\n            int curr = max(prev1, prev2 + x); // either skip or rob current house\n            prev2 = prev1;\n            prev1 = curr;\n        }\n        return prev1; // the maximum amount of money that can be robbed from all houses\n    }\n};"
+    "code": "class Solution104 {\npublic:\n    int rob(vector<int>& nums) {\n        int prev2 = 0; // dp[i-2]\n        int prev1 = 0; // dp[i-1]\n        // prev2 and prev1 represent the maximum amount of money that can be robbed from the previous two houses.\n\n        for (int x : nums) {\n            int curr = max(prev1, prev2 + x); // either skip or rob current house\n            prev2 = prev1;\n            prev1 = curr;\n        }\n        return prev1; // the maximum amount of money that can be robbed from all houses\n    }\n};",
+    "summary": "2-State Constant Space DP"
   },
   {
     "id": 87,
@@ -1801,10 +1887,11 @@ const PROBLEMS_DATA = [
       "If x is greater than all tails, extend sequence by appending x.",
       "Otherwise replace the found element with x to keep future tails as small as possible; runs in O(N log N)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
-    "code": "class Solution105 {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        vector<int> tails;\n\n        for (int x : nums) {\n            auto it = lower_bound(tails.begin(), tails.end(), x);\n            if (it == tails.end()) {\n                tails.push_back(x);\n            } else {\n                *it = x;\n            }\n        }\n        return (int)tails.size();\n    }\n};"
+    "code": "class Solution105 {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        vector<int> tails;\n\n        for (int x : nums) {\n            auto it = lower_bound(tails.begin(), tails.end(), x);\n            if (it == tails.end()) {\n                tails.push_back(x);\n            } else {\n                *it = x;\n            }\n        }\n        return (int)tails.size();\n    }\n};",
+    "summary": "Patience Sorting + Binary Search"
   },
   {
     "id": 88,
@@ -1822,10 +1909,11 @@ const PROBLEMS_DATA = [
       "dp[w] represents whether subset sum w is achievable; iterate backwards: dp[w] |= dp[w - num].",
       "Can be highly optimized using std::bitset for blazing fast O(N * S / 64) execution."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/partition-equal-subset-sum/",
-    "code": "class Solution106 {\npublic:\n    bool canPartition(vector<int>& nums) {\n        int totalSum = accumulate(nums.begin(), nums.end(), 0);\n        // If total sum is odd, it cannot be divided into two equal subsets\n        if (totalSum % 2 != 0) return false;\n        int target = totalSum / 2;\n\n        // dp[sum] = can we make this sum using the elements processed so far?\n        vector<bool> dp(target + 1, false);\n        dp[0] = true; // We can always make sum 0 by choosing no elements\n\n        for (int x : nums) {\n            // Backward loop -> 0/1 Knapsack -> use each element once\n            // Forward loop  -> Unbounded Knapsack -> can reuse elements\n            for (int sum = target; sum >= x; sum--) {\n                dp[sum] = dp[sum] || dp[sum - x];\n            }\n            // Early exit if target sum is reachable\n            if (dp[target]) return true;\n        }\n        return dp[target];\n    }\n};"
+    "code": "class Solution106 {\npublic:\n    bool canPartition(vector<int>& nums) {\n        int totalSum = accumulate(nums.begin(), nums.end(), 0);\n        // If total sum is odd, it cannot be divided into two equal subsets\n        if (totalSum % 2 != 0) return false;\n        int target = totalSum / 2;\n\n        // dp[sum] = can we make this sum using the elements processed so far?\n        vector<bool> dp(target + 1, false);\n        dp[0] = true; // We can always make sum 0 by choosing no elements\n\n        for (int x : nums) {\n            // Backward loop -> 0/1 Knapsack -> use each element once\n            // Forward loop  -> Unbounded Knapsack -> can reuse elements\n            for (int sum = target; sum >= x; sum--) {\n                dp[sum] = dp[sum] || dp[sum - x];\n            }\n            // Early exit if target sum is reachable\n            if (dp[target]) return true;\n        }\n        return dp[target];\n    }\n};",
+    "summary": "0/1 & Unbounded Knapsack DP"
   },
   {
     "id": 89,
@@ -1843,10 +1931,11 @@ const PROBLEMS_DATA = [
       "Before merging, run two pointers: for each left element, count right elements satisfying nums[i] > 2 * nums[j].",
       "Merge two sorted halves standardly; total time complexity is O(N log N)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/reverse-pairs/",
-    "code": "class Solution107 {\n    int count = 0;\n\n    void mergeSort(vector<int>& a, int left, int right) {\n        if (left >= right) return;\n        int mid = left + (right - left) / 2;\n        mergeSort(a, left, mid);\n        mergeSort(a, mid + 1, right);\n\n        int j = mid + 1;\n        int i = left;\n        while (i <= mid) {\n            while (j <= right && (long long)a[i] > 2LL * a[j]) j++;\n            count += (j - (mid + 1)); // add all numbers from mid+1 to j-1 that satisfy condition\n            i++;\n        }\n\n        vector<int> temp;\n        int p1 = left, p2 = mid + 1;\n        while (p1 <= mid && p2 <= right) {\n            if (a[p1] <= a[p2]) temp.push_back(a[p1++]);\n            else temp.push_back(a[p2++]);\n        }\n        while (p1 <= mid) temp.push_back(a[p1++]);\n        while (p2 <= right) temp.push_back(a[p2++]);\n        copy(temp.begin(), temp.end(), a.begin() + left);\n    }\n\npublic:\n    int reversePairs(vector<int>& nums) {\n        count = 0;\n        int n = (int)nums.size();\n        mergeSort(nums, 0, n - 1);\n        return count;\n    }\n};"
+    "code": "class Solution107 {\n    int count = 0;\n\n    void mergeSort(vector<int>& a, int left, int right) {\n        if (left >= right) return;\n        int mid = left + (right - left) / 2;\n        mergeSort(a, left, mid);\n        mergeSort(a, mid + 1, right);\n\n        int j = mid + 1;\n        int i = left;\n        while (i <= mid) {\n            while (j <= right && (long long)a[i] > 2LL * a[j]) j++;\n            count += (j - (mid + 1)); // add all numbers from mid+1 to j-1 that satisfy condition\n            i++;\n        }\n\n        vector<int> temp;\n        int p1 = left, p2 = mid + 1;\n        while (p1 <= mid && p2 <= right) {\n            if (a[p1] <= a[p2]) temp.push_back(a[p1++]);\n            else temp.push_back(a[p2++]);\n        }\n        while (p1 <= mid) temp.push_back(a[p1++]);\n        while (p2 <= right) temp.push_back(a[p2++]);\n        copy(temp.begin(), temp.end(), a.begin() + left);\n    }\n\npublic:\n    int reversePairs(vector<int>& nums) {\n        count = 0;\n        int n = (int)nums.size();\n        mergeSort(nums, 0, n - 1);\n        return count;\n    }\n};",
+    "summary": "Divide-and-Conquer Merge Sort"
   },
   {
     "id": 90,
@@ -1864,10 +1953,11 @@ const PROBLEMS_DATA = [
       "If s[i] == s[j]: dp[i][j] = 2 + dp[i+1][j-1].",
       "If s[i] != s[j]: dp[i][j] = max(dp[i+1][j], dp[i][j-1]); runs in O(N^2) time and O(N) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/longest-palindromic-subsequence/",
-    "code": "class Solution108 {\npublic:\n    int longestPalindromeSubseq(string s) {\n        int n = (int)s.size();\n        vector<int> dp(n, 0);\n\n        for (int i = n - 1; i >= 0; --i) {\n            vector<int> newDp(n, 0);\n            newDp[i] = 1;\n            for (int j = i + 1; j < n; ++j) {\n                if (s[i] == s[j]) {\n                    newDp[j] = dp[j - 1] + 2;\n                } else {\n                    newDp[j] = max(dp[j], newDp[j - 1]);\n                }\n            }\n            dp = std::move(newDp);\n        }\n        return dp[n - 1];\n    }\n};"
+    "code": "class Solution108 {\npublic:\n    int longestPalindromeSubseq(string s) {\n        int n = (int)s.size();\n        vector<int> dp(n, 0);\n\n        for (int i = n - 1; i >= 0; --i) {\n            vector<int> newDp(n, 0);\n            newDp[i] = 1;\n            for (int j = i + 1; j < n; ++j) {\n                if (s[i] == s[j]) {\n                    newDp[j] = dp[j - 1] + 2;\n                } else {\n                    newDp[j] = max(dp[j], newDp[j - 1]);\n                }\n            }\n            dp = std::move(newDp);\n        }\n        return dp[n - 1];\n    }\n};",
+    "summary": "Interval 2D Dynamic Programming"
   },
   {
     "id": 91,
@@ -1885,10 +1975,11 @@ const PROBLEMS_DATA = [
       "For Coin Change II (Total Combos): dp[a] += dp[a - coin], outer loop coins prevents permutations.",
       "Both problems solve cleanly in 1D space O(amount) and O(N * amount) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/coin-change-ii/",
-    "code": "class Solution109 {\npublic:\n    int change(int amount, vector<int>& coins) {\n        vector<int> dp(amount + 1, 0);\n        dp[0] = 1; // One way to make amount 0: use no coins\n\n        // Loop coin on outer level to ensure combinations (not permutations)\n        for (int c : coins) {\n            for (int a = c; a <= amount; ++a) {\n                dp[a] += dp[a - c];\n            }\n        }\n        return dp[amount];\n    }\n};"
+    "code": "class Solution109 {\npublic:\n    int change(int amount, vector<int>& coins) {\n        vector<int> dp(amount + 1, 0);\n        dp[0] = 1; // One way to make amount 0: use no coins\n\n        // Loop coin on outer level to ensure combinations (not permutations)\n        for (int c : coins) {\n            for (int a = c; a <= amount; ++a) {\n                dp[a] += dp[a - c];\n            }\n        }\n        return dp[amount];\n    }\n};",
+    "summary": "Unbounded Knapsack Combinations DP"
   },
   {
     "id": 92,
@@ -1909,7 +2000,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/beautiful-arrangement/",
-    "code": "class Solution110 {\npublic:\n    int countArrangement(int n) {\n        // dp[mask] = number of valid permutations of first __builtin_popcount(mask) elements\n        vector<int> dp(1 << n, 0); // dp[mask] represents the number of valid arrangements for the subset of numbers represented by 'mask'\n        dp[0] = 1; // Base case: one way to arrange zero numbers\n\n        for (int mask = 0; mask < (1 << n); ++mask) {\n            if (dp[mask] == 0) continue; // Skip if no valid arrangements for this mask\n            int pos = __builtin_popcount(mask) + 1; // 1-based index to place next number // \n\n            for (int i = 0; i < n; ++i) {\n                if (!(mask & (1 << i))) {\n                    int val = i + 1;\n                    if (val % pos == 0 || pos % val == 0) {\n                        dp[mask | (1 << i)] += dp[mask];\n                    }\n                }\n            }\n        }\n        return dp[(1 << n) - 1];\n    }\n};"
+    "code": "class Solution110 {\npublic:\n    int countArrangement(int n) {\n        // dp[mask] = number of valid permutations of first __builtin_popcount(mask) elements\n        vector<int> dp(1 << n, 0); // dp[mask] represents the number of valid arrangements for the subset of numbers represented by 'mask'\n        dp[0] = 1; // Base case: one way to arrange zero numbers\n\n        for (int mask = 0; mask < (1 << n); ++mask) {\n            if (dp[mask] == 0) continue; // Skip if no valid arrangements for this mask\n            int pos = __builtin_popcount(mask) + 1; // 1-based index to place next number // \n\n            for (int i = 0; i < n; ++i) {\n                if (!(mask & (1 << i))) {\n                    int val = i + 1;\n                    if (val % pos == 0 || pos % val == 0) {\n                        dp[mask | (1 << i)] += dp[mask];\n                    }\n                }\n            }\n        }\n        return dp[(1 << n) - 1];\n    }\n};",
+    "summary": "Bitmask Dynamic Programming"
   },
   {
     "id": 93,
@@ -1930,7 +2022,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/k-th-symbol-in-grammar/",
-    "code": "class Solution111 {\npublic:\n    int kthGrammar(int n, int k) {\n        // Each row doubles in length; the bit at (k - 1) is flipped for each 1 in binary representation\n        return __builtin_popcount(k - 1) & 1;\n    }\n};"
+    "code": "class Solution111 {\npublic:\n    int kthGrammar(int n, int k) {\n        // Each row doubles in length; the bit at (k - 1) is flipped for each 1 in binary representation\n        return __builtin_popcount(k - 1) & 1;\n    }\n};",
+    "summary": "Binary Tree Symmetry / Popcount"
   },
   {
     "id": 94,
@@ -1951,7 +2044,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/number-of-zigzag-arrays-i/",
-    "code": "class Solution112 {\npublic:\n    static const int MOD = 1e9 + 7;\n\n    int zigZagArrays(int n, int l, int r) {\n        int m = r - l + 1;\n\n        // up[x]   = arrays ending at x where last step was increasing\n        // down[x] = arrays ending at x where last step was decreasing\n        vector<long long> up(m, 1), down(m, 1);\n\n        for (int len = 2; len <= n; len++) { // Iterate through each length from 2 to n\n            vector<long long> newUp(m), newDown(m); // New arrays for the next length\n\n            long long sum = 0;\n\n            // Previous value < current value\n            for (int x = 0; x <= m-1; x++) {\n                newUp[x] = sum;\n                sum = (sum + down[x]) % MOD;\n            }\n\n            sum = 0;\n\n            // Previous value > current value\n            for (int x = m - 1; x >= 0; x--) {\n                newDown[x] = sum;\n                sum = (sum + up[x]) % MOD;\n            }\n\n            up = newUp;\n            down = newDown;\n        }\n\n        long long ans = 0;\n\n        for (int x = 0; x < m; x++)\n            ans = (ans + up[x] + down[x]) % MOD;\n\n        // For n = 1, every value was counted twice\n        if (n == 1) return m;\n\n        return ans;\n    }\n};"
+    "code": "class Solution112 {\npublic:\n    static const int MOD = 1e9 + 7;\n\n    int zigZagArrays(int n, int l, int r) {\n        int m = r - l + 1;\n\n        // up[x]   = arrays ending at x where last step was increasing\n        // down[x] = arrays ending at x where last step was decreasing\n        vector<long long> up(m, 1), down(m, 1);\n\n        for (int len = 2; len <= n; len++) { // Iterate through each length from 2 to n\n            vector<long long> newUp(m), newDown(m); // New arrays for the next length\n\n            long long sum = 0;\n\n            // Previous value < current value\n            for (int x = 0; x <= m-1; x++) {\n                newUp[x] = sum;\n                sum = (sum + down[x]) % MOD;\n            }\n\n            sum = 0;\n\n            // Previous value > current value\n            for (int x = m - 1; x >= 0; x--) {\n                newDown[x] = sum;\n                sum = (sum + up[x]) % MOD;\n            }\n\n            up = newUp;\n            down = newDown;\n        }\n\n        long long ans = 0;\n\n        for (int x = 0; x < m; x++)\n            ans = (ans + up[x] + down[x]) % MOD;\n\n        // For n = 1, every value was counted twice\n        if (n == 1) return m;\n\n        return ans;\n    }\n};",
+    "summary": "Directional DP + Prefix Sums"
   },
   {
     "id": 95,
@@ -1969,10 +2063,11 @@ const PROBLEMS_DATA = [
       "Push candidate to path, recurse with target - candidate, pop candidate on return.",
       "Guarantees all combinations sum to target with zero duplicate permutations."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/combination-sum/",
-    "code": "class Solution113 {\n    vector<vector<int>> ans;\n\n    void dfs(const vector<int>& a, int start, int rem, vector<int>& cur) {\n        if (rem == 0) {\n            ans.push_back(cur);\n            return;\n        }\n\n        for (int i = start; i < (int)a.size() && a[i] <= rem; i++) {\n            cur.push_back(a[i]);\n            dfs(a, i, rem - a[i], cur); // reuse allowed\n            cur.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> combinationSum(vector<int>& a, int target) {\n        sort(a.begin(), a.end());\n        vector<int> cur;\n        dfs(a, 0, target, cur);\n        return ans;\n    }\n};"
+    "code": "class Solution113 {\n    vector<vector<int>> ans;\n\n    void dfs(const vector<int>& a, int start, int rem, vector<int>& cur) {\n        if (rem == 0) {\n            ans.push_back(cur);\n            return;\n        }\n\n        for (int i = start; i < (int)a.size() && a[i] <= rem; i++) {\n            cur.push_back(a[i]);\n            dfs(a, i, rem - a[i], cur); // reuse allowed\n            cur.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> combinationSum(vector<int>& a, int target) {\n        sort(a.begin(), a.end());\n        vector<int> cur;\n        dfs(a, 0, target, cur);\n        return ans;\n    }\n};",
+    "summary": "Backtracking with Element Reuse"
   },
   {
     "id": 96,
@@ -1990,10 +2085,11 @@ const PROBLEMS_DATA = [
       "Main diagonal: row - col is constant; Anti-diagonal: row + col is constant.",
       "Pruning illegal attacks immediately cuts backtracking branches, achieving optimal O(N!) search."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/n-queens/",
-    "code": "class Solution114 {\n    vector<vector<string>> result;\n    vector<string> board;\n    vector<bool> cols, diag1, diag2;\n    int n;\n\n    void backtrack(int r) {\n        if (r == n) {\n            result.push_back(board);\n            return;\n        }\n        for (int c = 0; c < n; ++c) {\n            if (cols[c] || diag1[r - c + n] || diag2[r + c]) continue;\n            board[r][c] = 'Q';\n            cols[c] = diag1[r - c + n] = diag2[r + c] = true;\n            backtrack(r + 1);\n            board[r][c] = '.';\n            cols[c] = diag1[r - c + n] = diag2[r + c] = false;\n        }\n    }\n\npublic:\n    vector<vector<string>> solveNQueens(int nVal) {\n        n = nVal;\n        result.clear();\n        board.assign(n, string(n, '.'));\n        cols.assign(n, false);\n        diag1.assign(2 * n, false);\n        diag2.assign(2 * n, false);\n        backtrack(0);\n        return result;\n    }\n};"
+    "code": "class Solution114 {\n    vector<vector<string>> result;\n    vector<string> board;\n    vector<bool> cols, diag1, diag2;\n    int n;\n\n    void backtrack(int r) {\n        if (r == n) {\n            result.push_back(board);\n            return;\n        }\n        for (int c = 0; c < n; ++c) {\n            if (cols[c] || diag1[r - c + n] || diag2[r + c]) continue;\n            board[r][c] = 'Q';\n            cols[c] = diag1[r - c + n] = diag2[r + c] = true;\n            backtrack(r + 1);\n            board[r][c] = '.';\n            cols[c] = diag1[r - c + n] = diag2[r + c] = false;\n        }\n    }\n\npublic:\n    vector<vector<string>> solveNQueens(int nVal) {\n        n = nVal;\n        result.clear();\n        board.assign(n, string(n, '.'));\n        cols.assign(n, false);\n        diag1.assign(2 * n, false);\n        diag2.assign(2 * n, false);\n        backtrack(0);\n        return result;\n    }\n};",
+    "summary": "Bitmask Constrained Backtracking"
   },
   {
     "id": 97,
@@ -2011,10 +2107,11 @@ const PROBLEMS_DATA = [
       "In bitmasking, the j-th bit of integer i indicates whether nums[j] is included in subset i.",
       "Generates all 2^N subsets in O(N * 2^N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/subsets/",
-    "code": "class Solution115 {\n    vector<vector<int>> result;\n    vector<int> current;\n\n    void backtrack(const vector<int>& nums, int start) {\n        result.push_back(current);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            current.push_back(nums[i]);\n            backtrack(nums, i + 1);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        result.clear();\n        current.clear();\n        backtrack(nums, 0);\n        return result;\n    }\n};"
+    "code": "class Solution115 {\n    vector<vector<int>> result;\n    vector<int> current;\n\n    void backtrack(const vector<int>& nums, int start) {\n        result.push_back(current);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            current.push_back(nums[i]);\n            backtrack(nums, i + 1);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        result.clear();\n        current.clear();\n        backtrack(nums, 0);\n        return result;\n    }\n};",
+    "summary": "Cascading / Backtracking Power Set"
   },
   {
     "id": 98,
@@ -2032,10 +2129,11 @@ const PROBLEMS_DATA = [
       "In backtracking loop, skip element if nums[i] == nums[i - 1] and i > startIndex.",
       "Ensures identical values are only picked in sequential depth order, preventing branching duplicates."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/subsets-ii/",
-    "code": "class Solution116 {\n    vector<vector<int>> result;\n    vector<int> current;\n\n    void backtrack(const vector<int>& nums, int start) {\n        result.push_back(current);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            if (i > start && nums[i] == nums[i - 1]) continue;\n            current.push_back(nums[i]);\n            backtrack(nums, i + 1);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> subsetsWithDup(vector<int>& nums) {\n        result.clear();\n        current.clear();\n        sort(nums.begin(), nums.end());\n        backtrack(nums, 0);\n        return result;\n    }\n};"
+    "code": "class Solution116 {\n    vector<vector<int>> result;\n    vector<int> current;\n\n    void backtrack(const vector<int>& nums, int start) {\n        result.push_back(current);\n        for (int i = start; i < (int)nums.size(); ++i) {\n            if (i > start && nums[i] == nums[i - 1]) continue;\n            current.push_back(nums[i]);\n            backtrack(nums, i + 1);\n            current.pop_back();\n        }\n    }\n\npublic:\n    vector<vector<int>> subsetsWithDup(vector<int>& nums) {\n        result.clear();\n        current.clear();\n        sort(nums.begin(), nums.end());\n        backtrack(nums, 0);\n        return result;\n    }\n};",
+    "summary": "Sorting + Duplicate Skip Pruning"
   },
   {
     "id": 99,
@@ -2056,7 +2154,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": true,
     "url": "https://leetcode.com/problems/concatenated-words/",
-    "code": "class Solution117 {\n    unordered_set<string> st;\n\n    bool dfsConcat(const string& s, int i, vector<int>& memo) {\n        if (i == (int)s.size()) return true;\n        if (memo[i] != -1) return memo[i];\n\n        string cur;\n        for (int j = i; j < (int)s.size(); j++) {\n            cur += s[j];\n            if (st.count(cur) && dfsConcat(s, j + 1, memo)) {\n                return memo[i] = 1;\n            }\n        }\n        return memo[i] = 0;\n    }\n\n    unordered_set<string> dict;\n    unordered_map<string, vector<string>> memoWB;\n\n    vector<string> dfsWordBreak(const string& rem) {\n        if (memoWB.count(rem)) return memoWB[rem];\n        if (rem.empty()) return {\"\"};\n\n        vector<string> subList;\n        for (int len = 1; len <= (int)rem.size(); ++len) {\n            string word = rem.substr(0, len);\n            if (dict.count(word)) {\n                vector<string> subSentences = dfsWordBreak(rem.substr(len));\n                for (const string& sub : subSentences) {\n                    subList.push_back(word + (sub.empty() ? \"\" : \" \") + sub);\n                }\n            }\n        }\n        return memoWB[rem] = subList;\n    }\n\npublic:\n    // LC 472: Concatenated Words\n    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {\n        st = unordered_set<string>(words.begin(), words.end());\n        vector<string> ans;\n        for (const string& word : words) {\n            st.erase(word);\n            vector<int> memo(word.size(), -1);\n            if (dfsConcat(word, 0, memo)) ans.push_back(word);\n            st.insert(word);\n        }\n        return ans;\n    }\n\n    // LC 140: Word Break II\n    vector<string> wordBreak(string s, vector<string>& wordDict) {\n        dict.clear();\n        memoWB.clear();\n        for (const string& w : wordDict) dict.insert(w);\n        return dfsWordBreak(s);\n    }\n};"
+    "code": "class Solution117 {\n    unordered_set<string> st;\n\n    bool dfsConcat(const string& s, int i, vector<int>& memo) {\n        if (i == (int)s.size()) return true;\n        if (memo[i] != -1) return memo[i];\n\n        string cur;\n        for (int j = i; j < (int)s.size(); j++) {\n            cur += s[j];\n            if (st.count(cur) && dfsConcat(s, j + 1, memo)) {\n                return memo[i] = 1;\n            }\n        }\n        return memo[i] = 0;\n    }\n\n    unordered_set<string> dict;\n    unordered_map<string, vector<string>> memoWB;\n\n    vector<string> dfsWordBreak(const string& rem) {\n        if (memoWB.count(rem)) return memoWB[rem];\n        if (rem.empty()) return {\"\"};\n\n        vector<string> subList;\n        for (int len = 1; len <= (int)rem.size(); ++len) {\n            string word = rem.substr(0, len);\n            if (dict.count(word)) {\n                vector<string> subSentences = dfsWordBreak(rem.substr(len));\n                for (const string& sub : subSentences) {\n                    subList.push_back(word + (sub.empty() ? \"\" : \" \") + sub);\n                }\n            }\n        }\n        return memoWB[rem] = subList;\n    }\n\npublic:\n    // LC 472: Concatenated Words\n    vector<string> findAllConcatenatedWordsInADict(vector<string>& words) {\n        st = unordered_set<string>(words.begin(), words.end());\n        vector<string> ans;\n        for (const string& word : words) {\n            st.erase(word);\n            vector<int> memo(word.size(), -1);\n            if (dfsConcat(word, 0, memo)) ans.push_back(word);\n            st.insert(word);\n        }\n        return ans;\n    }\n\n    // LC 140: Word Break II\n    vector<string> wordBreak(string s, vector<string>& wordDict) {\n        dict.clear();\n        memoWB.clear();\n        for (const string& w : wordDict) dict.insert(w);\n        return dfsWordBreak(s);\n    }\n};",
+    "summary": "Memoized DFS Backtracking Trie"
   },
   {
     "id": 100,
@@ -2074,10 +2173,11 @@ const PROBLEMS_DATA = [
       "Overflow condition: rev > INT_MAX / 10 or (rev == INT_MAX / 10 and digit > 7).",
       "Underflow condition: rev < INT_MIN / 10 or (rev == INT_MIN / 10 and digit < -8)."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/reverse-integer/",
-    "code": "class Solution118 {\npublic:\n    int reverse(int x) {\n        int rev = 0;\n        while (x != 0) {\n            int pop = x % 10;\n            x /= 10;\n\n            // Check for 32-bit signed integer overflow before multiplying by 10\n            if (rev > INT_MAX / 10 || (rev == INT_MAX / 10 && pop > 7)) return 0;\n            if (rev < INT_MIN / 10 || (rev == INT_MIN / 10 && pop < -8)) return 0;\n\n            rev = rev * 10 + pop;\n        }\n        return rev;\n    }\n};"
+    "code": "class Solution118 {\npublic:\n    int reverse(int x) {\n        int rev = 0;\n        while (x != 0) {\n            int pop = x % 10;\n            x /= 10;\n\n            // Check for 32-bit signed integer overflow before multiplying by 10\n            if (rev > INT_MAX / 10 || (rev == INT_MAX / 10 && pop > 7)) return 0;\n            if (rev < INT_MIN / 10 || (rev == INT_MIN / 10 && pop < -8)) return 0;\n\n            rev = rev * 10 + pop;\n        }\n        return rev;\n    }\n};",
+    "summary": "Overflow-Safe Modular Reversal"
   },
   {
     "id": 101,
@@ -2095,10 +2195,11 @@ const PROBLEMS_DATA = [
       "Handle negative powers by setting x = 1/x and using 64-bit int for n to prevent overflow on INT_MIN.",
       "Iterative bitwise approach squares base and multiplies result when current bit of n is 1."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/powx-n/",
-    "code": "class Solution119 {\npublic:\n    double myPow(double x, int n) {\n        long long exp = n;\n        if (exp < 0) {\n            x = 1.0 / x;\n            exp = -exp;\n        }\n\n        double result = 1.0;\n        while (exp > 0) {\n            if (exp & 1) {\n                result *= x;\n            }\n            x *= x;\n            exp >>= 1;\n        }\n        return result;\n    }\n};"
+    "code": "class Solution119 {\npublic:\n    double myPow(double x, int n) {\n        long long exp = n;\n        if (exp < 0) {\n            x = 1.0 / x;\n            exp = -exp;\n        }\n\n        double result = 1.0;\n        while (exp > 0) {\n            if (exp & 1) {\n                result *= x;\n            }\n            x *= x;\n            exp >>= 1;\n        }\n        return result;\n    }\n};",
+    "summary": "Fast Binary Exponentiation"
   },
   {
     "id": 102,
@@ -2116,10 +2217,11 @@ const PROBLEMS_DATA = [
       "ones = (ones ^ x) & ~twos: captures bits appearing 1st and 4th times.",
       "twos = (twos ^ x) & ~ones: captures bits appearing 2nd and 5th times; both clear on 3rd."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/single-number-ii/",
-    "code": "class Solution120 {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int ones = 0, twos = 0;\n\n        for (int x : nums) {\n            ones = (ones ^ x) & ~twos;\n            twos = (twos ^ x) & ~ones;\n        }\n        return ones;\n    }\n};"
+    "code": "class Solution120 {\npublic:\n    int singleNumber(vector<int>& nums) {\n        int ones = 0, twos = 0;\n\n        for (int x : nums) {\n            ones = (ones ^ x) & ~twos;\n            twos = (twos ^ x) & ~ones;\n        }\n        return ones;\n    }\n};",
+    "summary": "Bitwise FSM Modulo-3 Counters"
   },
   {
     "id": 103,
@@ -2137,10 +2239,11 @@ const PROBLEMS_DATA = [
       "Iterate i from 2 up to sqrt(N); if isPrime[i], mark all multiples i*i, i*i + i, ... as false.",
       "Count surviving true entries; achieves O(N log log N) time with O(N) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/count-primes/",
-    "code": "class Solution121 {\npublic:\n    int countPrimes(int n) {\n        if (n <= 2) return 0;\n\n        vector<bool> isPrime(n, true);\n        isPrime[0] = isPrime[1] = false;\n\n        for (int i = 2; i * i < n; ++i) {\n            if (isPrime[i]) {\n                for (int j = i * i; j < n; j += i) {\n                    isPrime[j] = false;\n                }\n            }\n        }\n        return count(isPrime.begin(), isPrime.end(), true);\n    }\n};"
+    "code": "class Solution121 {\npublic:\n    int countPrimes(int n) {\n        if (n <= 2) return 0;\n\n        vector<bool> isPrime(n, true);\n        isPrime[0] = isPrime[1] = false;\n\n        for (int i = 2; i * i < n; ++i) {\n            if (isPrime[i]) {\n                for (int j = i * i; j < n; j += i) {\n                    isPrime[j] = false;\n                }\n            }\n        }\n        return count(isPrime.begin(), isPrime.end(), true);\n    }\n};",
+    "summary": "Sieve of Eratosthenes"
   },
   {
     "id": 104,
@@ -2158,10 +2261,11 @@ const PROBLEMS_DATA = [
       "Calculate overlap width: max(0, min(ax2, bx2) - max(ax1, bx1)).",
       "Calculate overlap height: max(0, min(ay2, by2) - max(ay1, by1)); subtract overlap to avoid double-counting."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/rectangle-area/",
-    "code": "class Solution122 {\npublic:\n    int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {\n        int areaA = (ax2 - ax1) * (ay2 - ay1);\n        int areaB = (bx2 - bx1) * (by2 - by1);\n\n        // Compute overlapping rectangle dimensions\n        int overlapX = max(0, min(ax2, bx2) - max(ax1, bx1));\n        int overlapY = max(0, min(ay2, by2) - max(ay1, by1));\n        int overlapArea = overlapX * overlapY;\n\n        return areaA + areaB - overlapArea;\n    }\n};"
+    "code": "class Solution122 {\npublic:\n    int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {\n        int areaA = (ax2 - ax1) * (ay2 - ay1);\n        int areaB = (bx2 - bx1) * (by2 - by1);\n\n        // Compute overlapping rectangle dimensions\n        int overlapX = max(0, min(ax2, bx2) - max(ax1, bx1));\n        int overlapY = max(0, min(ay2, by2) - max(ay1, by1));\n        int overlapArea = overlapX * overlapY;\n\n        return areaA + areaB - overlapArea;\n    }\n};",
+    "summary": "Coordinate Geometry Overlap Area"
   },
   {
     "id": 105,
@@ -2179,10 +2283,11 @@ const PROBLEMS_DATA = [
       "Optimal O(N) Bucket Sort: count papers by citation count up to N (cap citations > N at N).",
       "Accumulate paper counts from N down to 0; first index where accumulated papers >= count is H."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/h-index/",
-    "code": "class Solution123 {\npublic:\n    int hIndex(vector<int>& citations) {\n        int n = (int)citations.size();\n        vector<int> buckets(n + 1, 0);\n\n        for (int c : citations) {\n            if (c >= n) {\n                buckets[n]++;\n            } else {\n                buckets[c]++;\n            }\n        }\n\n        int count = 0;\n        for (int i = n; i >= 0; --i) {\n            count += buckets[i];\n            if (count >= i) {\n                return i;\n            }\n        }\n        return 0;\n    }\n};"
+    "code": "class Solution123 {\npublic:\n    int hIndex(vector<int>& citations) {\n        int n = (int)citations.size();\n        vector<int> buckets(n + 1, 0);\n\n        for (int c : citations) {\n            if (c >= n) {\n                buckets[n]++;\n            } else {\n                buckets[c]++;\n            }\n        }\n\n        int count = 0;\n        for (int i = n; i >= 0; --i) {\n            count += buckets[i];\n            if (count >= i) {\n                return i;\n            }\n        }\n        return 0;\n    }\n};",
+    "summary": "Linear Bucket Counting Sort"
   },
   {
     "id": 106,
@@ -2200,10 +2305,11 @@ const PROBLEMS_DATA = [
       "Loop k starting from 1 while k*(k-1)/2 < N.",
       "Increment count whenever (N - k*(k-1)/2) % k == 0; terminates in O(sqrt(N)) iterations."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/consecutive-numbers-sum/",
-    "code": "class Solution124 {\npublic:\n    int consecutiveNumbersSum(int n) {\n        // n = k * x + k * (k - 1) / 2 where k is number of terms, x >= 1 is first term\n        int count = 0;\n        for (long long k = 1; k * (k - 1) / 2 < n; ++k) {\n            if ((n - k * (k - 1) / 2) % k == 0) {\n                count++;\n            }\n        }\n        return count;\n    }\n};"
+    "code": "class Solution124 {\npublic:\n    int consecutiveNumbersSum(int n) {\n        // n = k * x + k * (k - 1) / 2 where k is number of terms, x >= 1 is first term\n        int count = 0;\n        for (long long k = 1; k * (k - 1) / 2 < n; ++k) {\n            if ((n - k * (k - 1) / 2) % k == 0) {\n                count++;\n            }\n        }\n        return count;\n    }\n};",
+    "summary": "Arithmetic Progression Math Check"
   },
   {
     "id": 107,
@@ -2221,10 +2327,11 @@ const PROBLEMS_DATA = [
       "Summing all local price ascents equals the maximum possible cumulative profit.",
       "Single pass O(N) time with O(1) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/",
-    "code": "class Solution {\npublic:\n    int maxProfit(vector<int>& p) {\n        int ans = 0;\n        for (int i = 1; i < (int)p.size(); ++i) {\n            if (p[i] > p[i - 1]) {\n                ans += p[i] - p[i - 1];\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int maxProfit(vector<int>& p) {\n        int ans = 0;\n        for (int i = 1; i < (int)p.size(); ++i) {\n            if (p[i] > p[i - 1]) {\n                ans += p[i] - p[i - 1];\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Peak Valley Local Profit Accumulation"
   },
   {
     "id": 108,
@@ -2242,10 +2349,11 @@ const PROBLEMS_DATA = [
       "Update maxReach = max(maxReach, i + nums[i]).",
       "If maxReach >= n - 1 at any point, the destination is guaranteed reachable."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/jump-game/",
-    "code": "class Solution {\npublic:\n    bool canJump(vector<int>& a) {\n        int n = a.size();\n        int mx = 0;\n    \n        for (int i = 0; i < n; ++i) {\n            if (i > mx) return false;\n            mx = max(mx, i + a[i]);\n            if (mx >= n - 1) return true; // if the farthest reachable index is beyond or at the last index, we can reach the end\n        }\n        return true;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool canJump(vector<int>& a) {\n        int n = a.size();\n        int mx = 0;\n    \n        for (int i = 0; i < n; ++i) {\n            if (i > mx) return false;\n            mx = max(mx, i + a[i]);\n            if (mx >= n - 1) return true; // if the farthest reachable index is beyond or at the last index, we can reach the end\n        }\n        return true;\n    }\n};",
+    "summary": "Max Reach Boundary Scan"
   },
   {
     "id": 109,
@@ -2263,10 +2371,11 @@ const PROBLEMS_DATA = [
       "Right-to-left pass: if rating[i] > rating[i + 1], candies[i] = max(candies[i], candies[i + 1] + 1).",
       "Sum candies across all children in O(N) time and O(N) space."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/candy/",
-    "code": "class Solution {\npublic:\n    int candy(vector<int>& r) {\n        int n = r.size();\n        vector<int> c(n, 1);\n    \n        for (int i = 1; i < n; ++i) {\n            if (r[i] > r[i - 1]) {\n                c[i] = c[i - 1] + 1;\n            }\n        }\n    \n        for (int i = n - 2; i >= 0; --i) {\n            if (r[i] > r[i + 1]) {\n                c[i] = max(c[i], c[i + 1] + 1);\n            }\n        }\n    \n        return accumulate(c.begin(), c.end(), 0);\n    }\n};"
+    "code": "class Solution {\npublic:\n    int candy(vector<int>& r) {\n        int n = r.size();\n        vector<int> c(n, 1);\n    \n        for (int i = 1; i < n; ++i) {\n            if (r[i] > r[i - 1]) {\n                c[i] = c[i - 1] + 1;\n            }\n        }\n    \n        for (int i = n - 2; i >= 0; --i) {\n            if (r[i] > r[i + 1]) {\n                c[i] = max(c[i], c[i + 1] + 1);\n            }\n        }\n    \n        return accumulate(c.begin(), c.end(), 0);\n    }\n};",
+    "summary": "Two-Pass Left-Right Slope Scan"
   },
   {
     "id": 110,
@@ -2284,10 +2393,11 @@ const PROBLEMS_DATA = [
       "Maintain running boundaries or heap state to validate local feasibility without backtracking.",
       "Achieves optimal runtime in three-stage interval insertion time complexity."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/insert-interval/",
-    "code": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {\n        vector<vector<int>> ans;\n        int i = 0, n = a.size();\n    \n        // 1. Add all intervals ending before nw starts\n        while (i < n && a[i][1] < nw[0]) {\n            ans.push_back(a[i++]);\n        }\n    \n        // 2. Merge all overlapping intervals with nw\n        while (i < n && a[i][0] <= nw[1]) {\n            nw[0] = min(nw[0], a[i][0]);\n            nw[1] = max(nw[1], a[i][1]);\n            i++;\n        }\n        ans.push_back(nw);\n    \n        // 3. Add all remaining intervals\n        while (i < n) {\n            ans.push_back(a[i++]);\n        }\n    \n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {\n        vector<vector<int>> ans;\n        int i = 0, n = a.size();\n    \n        // 1. Add all intervals ending before nw starts\n        while (i < n && a[i][1] < nw[0]) {\n            ans.push_back(a[i++]);\n        }\n    \n        // 2. Merge all overlapping intervals with nw\n        while (i < n && a[i][0] <= nw[1]) {\n            nw[0] = min(nw[0], a[i][0]);\n            nw[1] = max(nw[1], a[i][1]);\n            i++;\n        }\n        ans.push_back(nw);\n    \n        // 3. Add all remaining intervals\n        while (i < n) {\n            ans.push_back(a[i++]);\n        }\n    \n        return ans;\n    }\n};",
+    "summary": "Three-Stage Interval Insertion"
   },
   {
     "id": 111,
@@ -2305,10 +2415,11 @@ const PROBLEMS_DATA = [
       "Greedily retain interval that finishes earliest to leave maximum room for future intervals.",
       "Answer is total intervals minus maximum compatible intervals retained."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/non-overlapping-intervals/",
-    "code": "class Solution {\npublic:\n    bool compareIntervalEnds(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int eraseOverlapIntervals(vector<vector<int>>& a) {\n        if (a.empty()) return 0;\n        sort(a.begin(), a.end(), compareIntervalEnds);\n    \n        int kept = 1;\n        int prevEnd = a[0][1];\n    \n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] >= prevEnd) {\n                kept++;\n                prevEnd = a[i][1];\n            }\n        }\n        return (int)a.size() - kept;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareIntervalEnds(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int eraseOverlapIntervals(vector<vector<int>>& a) {\n        if (a.empty()) return 0;\n        sort(a.begin(), a.end(), compareIntervalEnds);\n    \n        int kept = 1;\n        int prevEnd = a[0][1];\n    \n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] >= prevEnd) {\n                kept++;\n                prevEnd = a[i][1];\n            }\n        }\n        return (int)a.size() - kept;\n    }\n};",
+    "summary": "Sort by End Time + Greedily Drop"
   },
   {
     "id": 112,
@@ -2326,10 +2437,11 @@ const PROBLEMS_DATA = [
       "If intervals overlap, a person cannot attend both meetings (return false).",
       "If no overlaps exist across entire sorted list, return true in O(N log N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/meeting-rooms/",
-    "code": "class Solution {\npublic:\n    bool canAttendMeetings(vector<vector<int>>& a) {\n        sort(a.begin(), a.end());\n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] < a[i - 1][1]) {\n                return false;\n            }\n        }\n        return true;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool canAttendMeetings(vector<vector<int>>& a) {\n        sort(a.begin(), a.end());\n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] < a[i - 1][1]) {\n                return false;\n            }\n        }\n        return true;\n    }\n};",
+    "summary": "Sort by Start Time + Overlap Check"
   },
   {
     "id": 113,
@@ -2347,10 +2459,11 @@ const PROBLEMS_DATA = [
       "If intervals overlap, a person cannot attend both meetings (return false).",
       "If no overlaps exist across entire sorted list, return true in O(N log N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/meeting-rooms-ii/",
-    "code": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& a) {\n        int n = a.size();\n        vector<int> starts(n), ends(n);\n        for (int i = 0; i < n; ++i) {\n            starts[i] = a[i][0];\n            ends[i]   = a[i][1];\n        }\n        sort(starts.begin(), starts.end());\n        sort(ends.begin(), ends.end());\n    \n        int rooms = 0, maxRooms = 0;\n        int i = 0, j = 0;\n    \n        while (i < n) {\n            if (starts[i] < ends[j]) {\n                rooms++;\n                maxRooms = max(maxRooms, rooms);\n                i++;\n            } else {\n                rooms--;\n                j++;\n            }\n        }\n        return maxRooms;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minMeetingRooms(vector<vector<int>>& a) {\n        int n = a.size();\n        vector<int> starts(n), ends(n);\n        for (int i = 0; i < n; ++i) {\n            starts[i] = a[i][0];\n            ends[i]   = a[i][1];\n        }\n        sort(starts.begin(), starts.end());\n        sort(ends.begin(), ends.end());\n    \n        int rooms = 0, maxRooms = 0;\n        int i = 0, j = 0;\n    \n        while (i < n) {\n            if (starts[i] < ends[j]) {\n                rooms++;\n                maxRooms = max(maxRooms, rooms);\n                i++;\n            } else {\n                rooms--;\n                j++;\n            }\n        }\n        return maxRooms;\n    }\n};",
+    "summary": "Min-Heap of Active End Times / Sweepline"
   },
   {
     "id": 114,
@@ -2368,10 +2481,11 @@ const PROBLEMS_DATA = [
       "This arrow bursts all subsequent balloons whose start coordinate <= arrow position.",
       "When a balloon starts after current arrow position, fire a new arrow at its end coordinate."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/",
-    "code": "class Solution {\npublic:\n    bool compareBalloonEnds(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int findMinArrowShots(vector<vector<int>>& a) {\n        if (a.empty()) return 0;\n        sort(a.begin(), a.end(), compareBalloonEnds);\n    \n        int arrows = 1;\n        long long curEnd = a[0][1];\n    \n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] > curEnd) {\n                arrows++;\n                curEnd = a[i][1];\n            }\n        }\n        return arrows;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareBalloonEnds(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int findMinArrowShots(vector<vector<int>>& a) {\n        if (a.empty()) return 0;\n        sort(a.begin(), a.end(), compareBalloonEnds);\n    \n        int arrows = 1;\n        long long curEnd = a[0][1];\n    \n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i][0] > curEnd) {\n                arrows++;\n                curEnd = a[i][1];\n            }\n        }\n        return arrows;\n    }\n};",
+    "summary": "Sort by End Point + Greedy Arrow Shot"
   },
   {
     "id": 115,
@@ -2389,10 +2503,11 @@ const PROBLEMS_DATA = [
       "Maintain running boundaries or heap state to validate local feasibility without backtracking.",
       "Achieves optimal runtime in two pointers max start min end time complexity."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/interval-list-intersections/",
-    "code": "class Solution {\npublic:\n    vector<vector<int>> intervalIntersection(vector<vector<int>>& a, vector<vector<int>>& b) {\n        vector<vector<int>> ans;\n        int i = 0, j = 0;\n        int n = a.size(), m = b.size();\n    \n        while (i < n && j < m) {\n            int lo = max(a[i][0], b[j][0]);\n            int hi = min(a[i][1], b[j][1]);\n    \n            if (lo <= hi) {\n                ans.push_back({lo, hi});\n            }\n    \n            if (a[i][1] < b[j][1]) {\n                i++;\n            } else {\n                j++;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<vector<int>> intervalIntersection(vector<vector<int>>& a, vector<vector<int>>& b) {\n        vector<vector<int>> ans;\n        int i = 0, j = 0;\n        int n = a.size(), m = b.size();\n    \n        while (i < n && j < m) {\n            int lo = max(a[i][0], b[j][0]);\n            int hi = min(a[i][1], b[j][1]);\n    \n            if (lo <= hi) {\n                ans.push_back({lo, hi});\n            }\n    \n            if (a[i][1] < b[j][1]) {\n                i++;\n            } else {\n                j++;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Two Pointers Max Start Min End"
   },
   {
     "id": 116,
@@ -2410,10 +2525,11 @@ const PROBLEMS_DATA = [
       "Compute prefix sum along locations to track current passenger load.",
       "If passenger load exceeds capacity at any stop, return false."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/car-pooling/",
-    "code": "class Solution {\npublic:\n    bool carPooling(vector<vector<int>>& trips, int capacity) {\n        int diff[1001] = {0};\n        for (const auto& t : trips) {\n            diff[t[1]] += t[0];\n            diff[t[2]] -= t[0];\n        }\n    \n        int cur = 0;\n        for (int i = 0; i <= 1000; ++i) {\n            cur += diff[i];\n            if (cur > capacity) return false;\n        }\n        return true;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool carPooling(vector<vector<int>>& trips, int capacity) {\n        int diff[1001] = {0};\n        for (const auto& t : trips) {\n            diff[t[1]] += t[0];\n            diff[t[2]] -= t[0];\n        }\n    \n        int cur = 0;\n        for (int i = 0; i <= 1000; ++i) {\n            cur += diff[i];\n            if (cur > capacity) return false;\n        }\n        return true;\n    }\n};",
+    "summary": "Difference Array / Bucket Sweepline"
   },
   {
     "id": 117,
@@ -2431,10 +2547,11 @@ const PROBLEMS_DATA = [
       "Maintain running boundaries or heap state to validate local feasibility without backtracking.",
       "Achieves optimal runtime in prefix sum difference array time complexity."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/corporate-flight-bookings/",
-    "code": "class Solution {\npublic:\n    vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {\n        vector<int> diff(n + 1, 0);\n        for (const auto& b : bookings) {\n            diff[b[0] - 1] += b[2];\n            diff[b[1]]     -= b[2];\n        }\n    \n        vector<int> ans(n);\n        int cur = 0;\n        for (int i = 0; i < n; ++i) {\n            cur += diff[i];\n            ans[i] = cur;\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {\n        vector<int> diff(n + 1, 0);\n        for (const auto& b : bookings) {\n            diff[b[0] - 1] += b[2];\n            diff[b[1]]     -= b[2];\n        }\n    \n        vector<int> ans(n);\n        int cur = 0;\n        for (int i = 0; i < n; ++i) {\n            cur += diff[i];\n            ans[i] = cur;\n        }\n        return ans;\n    }\n};",
+    "summary": "Prefix Sum Difference Array"
   },
   {
     "id": 118,
@@ -2453,9 +2570,10 @@ const PROBLEMS_DATA = [
       "Achieves optimal runtime in balanced bst / std::map upper_bound time complexity."
     ],
     "completed": false,
-    "starred": false,
+    "starred": true,
     "url": "https://leetcode.com/problems/my-calendar-i/",
-    "code": "class MyCalendar {\n    map<int, int> mp; // start -> end\npublic:\n    MyCalendar() {}\n\n    bool book(int start, int end) {\n        auto it = mp.upper_bound(start);\n        if (it != mp.end() && it->first < end) {\n            return false;\n        }\n        if (it != mp.begin() && prev(it)->second > start) {\n            return false;\n        }\n        mp[start] = end;\n        return true;\n    }\n};"
+    "code": "class MyCalendar {\n    map<int, int> mp; // start -> end\npublic:\n    MyCalendar() {}\n\n    bool book(int start, int end) {\n        auto it = mp.upper_bound(start);\n        if (it != mp.end() && it->first < end) {\n            return false;\n        }\n        if (it != mp.begin() && prev(it)->second > start) {\n            return false;\n        }\n        mp[start] = end;\n        return true;\n    }\n};",
+    "summary": "Balanced BST / std::map upper_bound"
   },
   {
     "id": 119,
@@ -2474,9 +2592,10 @@ const PROBLEMS_DATA = [
       "Achieves optimal runtime in overlapping double booking segments time complexity."
     ],
     "completed": false,
-    "starred": false,
+    "starred": true,
     "url": "https://leetcode.com/problems/my-calendar-ii/",
-    "code": "class MyCalendarTwo {\n    vector<pair<int, int>> bookings;\n    vector<pair<int, int>> overlaps;\npublic:\n    MyCalendarTwo() {}\n\n    bool book(int start, int end) {\n        for (const auto& [s, e] : overlaps) {\n            if (max(start, s) < min(end, e)) return false;\n        }\n        for (const auto& [s, e] : bookings) {\n            if (max(start, s) < min(end, e)) {\n                overlaps.push_back({max(start, s), min(end, e)});\n            }\n        }\n        bookings.push_back({start, end});\n        return true;\n    }\n};"
+    "code": "class MyCalendarTwo {\n    vector<pair<int, int>> bookings;\n    vector<pair<int, int>> overlaps;\npublic:\n    MyCalendarTwo() {}\n\n    bool book(int start, int end) {\n        for (const auto& [s, e] : overlaps) {\n            if (max(start, s) < min(end, e)) return false;\n        }\n        for (const auto& [s, e] : bookings) {\n            if (max(start, s) < min(end, e)) {\n                overlaps.push_back({max(start, s), min(end, e)});\n            }\n        }\n        bookings.push_back({start, end});\n        return true;\n    }\n};",
+    "summary": "Overlapping Double Booking Segments"
   },
   {
     "id": 120,
@@ -2495,9 +2614,10 @@ const PROBLEMS_DATA = [
       "Achieves optimal runtime in boundary event count map sweepline time complexity."
     ],
     "completed": false,
-    "starred": false,
+    "starred": true,
     "url": "https://leetcode.com/problems/my-calendar-iii/",
-    "code": "class MyCalendarThree {\n    map<int, int> mp;\npublic:\n    MyCalendarThree() {}\n\n    int book(int start, int end) {\n        mp[start]++;\n        mp[end]--;\n        int cur = 0, mx = 0;\n        for (const auto& [time, count] : mp) {\n            cur += count;\n            mx = max(mx, cur);\n        }\n        return mx;\n    }\n};"
+    "code": "class MyCalendarThree {\n    map<int, int> mp;\npublic:\n    MyCalendarThree() {}\n\n    int book(int start, int end) {\n        mp[start]++;\n        mp[end]--;\n        int cur = 0, mx = 0;\n        for (const auto& [time, count] : mp) {\n            cur += count;\n            mx = max(mx, cur);\n        }\n        return mx;\n    }\n};",
+    "summary": "Boundary Event Count Map Sweepline"
   },
   {
     "id": 121,
@@ -2515,10 +2635,11 @@ const PROBLEMS_DATA = [
       "Maintain running boundaries or heap state to validate local feasibility without backtracking.",
       "Achieves optimal runtime in dual sort trains arrival vs departure time complexity."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "",
-    "code": "class Solution {\npublic:\n    int findPlatform(vector<int>& arr, vector<int>& dep) {\n        sort(arr.begin(), arr.end());\n        sort(dep.begin(), dep.end());\n    \n        int n = arr.size();\n        int plat = 0, maxPlat = 0;\n        int i = 0, j = 0;\n    \n        while (i < n) {\n            if (arr[i] <= dep[j]) {\n                plat++;\n                maxPlat = max(maxPlat, plat);\n                i++;\n            } else {\n                plat--;\n                j++;\n            }\n        }\n        return maxPlat;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int findPlatform(vector<int>& arr, vector<int>& dep) {\n        sort(arr.begin(), arr.end());\n        sort(dep.begin(), dep.end());\n    \n        int n = arr.size();\n        int plat = 0, maxPlat = 0;\n        int i = 0, j = 0;\n    \n        while (i < n) {\n            if (arr[i] <= dep[j]) {\n                plat++;\n                maxPlat = max(maxPlat, plat);\n                i++;\n            } else {\n                plat--;\n                j++;\n            }\n        }\n        return maxPlat;\n    }\n};",
+    "summary": "Dual Sort Trains Arrival vs Departure"
   },
   {
     "id": 122,
@@ -2539,7 +2660,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "",
-    "code": "class Solution {\npublic:\n    struct Job {\n        int id, dead, profit;\n    };\n    \n    bool compareJobs(const Job& a, const Job& b) {\n        return a.profit > b.profit;\n    }\n    \n    pair<int, int> JobScheduling(vector<Job>& a) {\n        sort(a.begin(), a.end(), compareJobs);\n    \n        int maxDead = 0;\n        for (const auto& j : a) maxDead = max(maxDead, j.dead);\n    \n        vector<int> slot(maxDead + 1, -1);\n        int count = 0, totalProfit = 0;\n    \n        for (const auto& j : a) {\n            for (int d = j.dead; d > 0; --d) {\n                if (slot[d] == -1) {\n                    slot[d] = j.id;\n                    count++;\n                    totalProfit += j.profit;\n                    break;\n                }\n            }\n        }\n        return {count, totalProfit};\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct Job {\n        int id, dead, profit;\n    };\n    \n    bool compareJobs(const Job& a, const Job& b) {\n        return a.profit > b.profit;\n    }\n    \n    pair<int, int> JobScheduling(vector<Job>& a) {\n        sort(a.begin(), a.end(), compareJobs);\n    \n        int maxDead = 0;\n        for (const auto& j : a) maxDead = max(maxDead, j.dead);\n    \n        vector<int> slot(maxDead + 1, -1);\n        int count = 0, totalProfit = 0;\n    \n        for (const auto& j : a) {\n            for (int d = j.dead; d > 0; --d) {\n                if (slot[d] == -1) {\n                    slot[d] = j.id;\n                    count++;\n                    totalProfit += j.profit;\n                    break;\n                }\n            }\n        }\n        return {count, totalProfit};\n    }\n};",
+    "summary": "Greedy Profit + DSU Slot Lookup"
   },
   {
     "id": 123,
@@ -2560,7 +2682,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/course-schedule-iii/",
-    "code": "class Solution {\npublic:\n    bool compareCourseLastDay(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int scheduleCourse(vector<vector<int>>& courses) {\n        sort(courses.begin(), courses.end(), compareCourseLastDay);\n    \n        priority_queue<int> pq; // max-heap of durations\n        int curTime = 0;\n    \n        for (const auto& c : courses) {\n            int dur = c[0], last = c[1];\n            if (curTime + dur <= last) {\n                curTime += dur;\n                pq.push(dur);\n            } else if (!pq.empty() && pq.top() > dur) {\n                curTime += dur - pq.top();\n                pq.pop();\n                pq.push(dur);\n            }\n        }\n        return pq.size();\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareCourseLastDay(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int scheduleCourse(vector<vector<int>>& courses) {\n        sort(courses.begin(), courses.end(), compareCourseLastDay);\n    \n        priority_queue<int> pq; // max-heap of durations\n        int curTime = 0;\n    \n        for (const auto& c : courses) {\n            int dur = c[0], last = c[1];\n            if (curTime + dur <= last) {\n                curTime += dur;\n                pq.push(dur);\n            } else if (!pq.empty() && pq.top() > dur) {\n                curTime += dur - pq.top();\n                pq.pop();\n                pq.push(dur);\n            }\n        }\n        return pq.size();\n    }\n};",
+    "summary": "Max-Heap of Course Durations"
   },
   {
     "id": 124,
@@ -2578,10 +2701,11 @@ const PROBLEMS_DATA = [
       "Sort people by (costB - costA) ascending.",
       "Greedily send the first N people with the largest savings to City B."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/two-city-scheduling/",
-    "code": "class Solution {\npublic:\n    bool compareCityCosts(const vector<int>& a, const vector<int>& b) {\n        return (a[0] - a[1]) < (b[0] - b[1]);\n    }\n    \n    int twoCitySchedCost(vector<vector<int>>& costs) {\n        sort(costs.begin(), costs.end(), compareCityCosts);\n    \n        int total = 0;\n        int n = costs.size() / 2;\n        for (int i = 0; i < n; ++i) {\n            total += costs[i][0];\n        }\n        for (int i = n; i < 2 * n; ++i) {\n            total += costs[i][1];\n        }\n        return total;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareCityCosts(const vector<int>& a, const vector<int>& b) {\n        return (a[0] - a[1]) < (b[0] - b[1]);\n    }\n    \n    int twoCitySchedCost(vector<vector<int>>& costs) {\n        sort(costs.begin(), costs.end(), compareCityCosts);\n    \n        int total = 0;\n        int n = costs.size() / 2;\n        for (int i = 0; i < n; ++i) {\n            total += costs[i][0];\n        }\n        for (int i = n; i < 2 * n; ++i) {\n            total += costs[i][1];\n        }\n        return total;\n    }\n};",
+    "summary": "Sort by Cost Difference (costA - costB)"
   },
   {
     "id": 125,
@@ -2602,7 +2726,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-performance-of-a-team/",
-    "code": "class Solution {\npublic:\n    struct Engineer {\n        int speed, eff;\n    };\n    \n    bool compareEngineers(const Engineer& a, const Engineer& b) {\n        return a.eff > b.eff;\n    }\n    \n    int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {\n        vector<Engineer> eng(n);\n        for (int i = 0; i < n; ++i) {\n            eng[i] = {speed[i], efficiency[i]};\n        }\n        sort(eng.begin(), eng.end(), compareEngineers);\n    \n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of speeds\n        long long sumSpeed = 0, maxPerf = 0;\n    \n        for (int i = 0; i < n; ++i) {\n            pq.push(eng[i].speed);\n            sumSpeed += eng[i].speed;\n    \n            if ((int)pq.size() > k) {\n                sumSpeed -= pq.top();\n                pq.pop();\n            }\n    \n            maxPerf = max(maxPerf, sumSpeed * eng[i].eff);\n        }\n        return maxPerf % MOD;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct Engineer {\n        int speed, eff;\n    };\n    \n    bool compareEngineers(const Engineer& a, const Engineer& b) {\n        return a.eff > b.eff;\n    }\n    \n    int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {\n        vector<Engineer> eng(n);\n        for (int i = 0; i < n; ++i) {\n            eng[i] = {speed[i], efficiency[i]};\n        }\n        sort(eng.begin(), eng.end(), compareEngineers);\n    \n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of speeds\n        long long sumSpeed = 0, maxPerf = 0;\n    \n        for (int i = 0; i < n; ++i) {\n            pq.push(eng[i].speed);\n            sumSpeed += eng[i].speed;\n    \n            if ((int)pq.size() > k) {\n                sumSpeed -= pq.top();\n                pq.pop();\n            }\n    \n            maxPerf = max(maxPerf, sumSpeed * eng[i].eff);\n        }\n        return maxPerf % MOD;\n    }\n};",
+    "summary": "Sort Efficiency Descending + Min-Heap"
   },
   {
     "id": 126,
@@ -2623,7 +2748,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/ipo/",
-    "code": "class Solution {\npublic:\n    struct Project {\n        int cap, prof;\n    };\n    \n    bool compareProjects(const Project& a, const Project& b) {\n        return a.cap < b.cap;\n    }\n    \n    int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {\n        int n = profits.size();\n        vector<Project> p(n);\n        for (int i = 0; i < n; ++i) {\n            p[i] = {capital[i], profits[i]};\n        }\n        sort(p.begin(), p.end(), compareProjects);\n    \n        priority_queue<int> pq; // max-heap of profits\n        int idx = 0;\n    \n        for (int step = 0; step < k; ++step) {\n            while (idx < n && p[idx].cap <= w) {\n                pq.push(p[idx].prof);\n                idx++;\n            }\n    \n            if (pq.empty()) break;\n            w += pq.top();\n            pq.pop();\n        }\n        return w;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct Project {\n        int cap, prof;\n    };\n    \n    bool compareProjects(const Project& a, const Project& b) {\n        return a.cap < b.cap;\n    }\n    \n    int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {\n        int n = profits.size();\n        vector<Project> p(n);\n        for (int i = 0; i < n; ++i) {\n            p[i] = {capital[i], profits[i]};\n        }\n        sort(p.begin(), p.end(), compareProjects);\n    \n        priority_queue<int> pq; // max-heap of profits\n        int idx = 0;\n    \n        for (int step = 0; step < k; ++step) {\n            while (idx < n && p[idx].cap <= w) {\n                pq.push(p[idx].prof);\n                idx++;\n            }\n    \n            if (pq.empty()) break;\n            w += pq.top();\n            pq.pop();\n        }\n        return w;\n    }\n};",
+    "summary": "Two Heaps (Capital Min-Heap + Profit Max-Heap)"
   },
   {
     "id": 127,
@@ -2644,7 +2770,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/single-threaded-cpu/",
-    "code": "class Solution {\npublic:\n    struct CpuTask {\n        int enq, proc, id;\n    };\n    \n    bool compareTaskEnqueue(const CpuTask& a, const CpuTask& b) {\n        return a.enq < b.enq;\n    }\n    \n    struct CpuTaskCompare {\n        bool operator()(const CpuTask& a, const CpuTask& b) const {\n            if (a.proc != b.proc) return a.proc > b.proc;\n            return a.id > b.id;\n        }\n    };\n    \n    vector<int> getOrder(vector<vector<int>>& tasks) {\n        int n = tasks.size();\n        vector<CpuTask> a(n);\n        for (int i = 0; i < n; ++i) {\n            a[i] = {tasks[i][0], tasks[i][1], i};\n        }\n        sort(a.begin(), a.end(), compareTaskEnqueue);\n    \n        priority_queue<CpuTask, vector<CpuTask>, CpuTaskCompare> pq;\n        vector<int> ans;\n        long long curTime = 0;\n        int idx = 0;\n    \n        while (idx < n || !pq.empty()) {\n            if (pq.empty() && curTime < a[idx].enq) {\n                curTime = a[idx].enq;\n            }\n    \n            while (idx < n && a[idx].enq <= curTime) {\n                pq.push(a[idx++]);\n            }\n    \n            CpuTask top = pq.top();\n            pq.pop();\n            curTime += top.proc;\n            ans.push_back(top.id);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct CpuTask {\n        int enq, proc, id;\n    };\n    \n    bool compareTaskEnqueue(const CpuTask& a, const CpuTask& b) {\n        return a.enq < b.enq;\n    }\n    \n    struct CpuTaskCompare {\n        bool operator()(const CpuTask& a, const CpuTask& b) const {\n            if (a.proc != b.proc) return a.proc > b.proc;\n            return a.id > b.id;\n        }\n    };\n    \n    vector<int> getOrder(vector<vector<int>>& tasks) {\n        int n = tasks.size();\n        vector<CpuTask> a(n);\n        for (int i = 0; i < n; ++i) {\n            a[i] = {tasks[i][0], tasks[i][1], i};\n        }\n        sort(a.begin(), a.end(), compareTaskEnqueue);\n    \n        priority_queue<CpuTask, vector<CpuTask>, CpuTaskCompare> pq;\n        vector<int> ans;\n        long long curTime = 0;\n        int idx = 0;\n    \n        while (idx < n || !pq.empty()) {\n            if (pq.empty() && curTime < a[idx].enq) {\n                curTime = a[idx].enq;\n            }\n    \n            while (idx < n && a[idx].enq <= curTime) {\n                pq.push(a[idx++]);\n            }\n    \n            CpuTask top = pq.top();\n            pq.pop();\n            curTime += top.proc;\n            ans.push_back(top.id);\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort by Enqueue Time + Priority Queue"
   },
   {
     "id": 128,
@@ -2665,7 +2792,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/process-tasks-using-servers/",
-    "code": "class Solution {\npublic:\n    struct ServerFreeCompare {\n        bool operator()(const pair<int, int>& a, const pair<int, int>& b) const {\n            if (a.first != b.first) return a.first > b.first; // weight\n            return a.second > b.second;                      // index\n        }\n    };\n    \n    struct ServerBusyCompare {\n        bool operator()(const tuple<long long, int, int>& a, const tuple<long long, int, int>& b) const {\n            if (get<0>(a) != get<0>(b)) return get<0>(a) > get<0>(b); // freeTime\n            if (get<1>(a) != get<1>(b)) return get<1>(a) > get<1>(b); // weight\n            return get<2>(a) > get<2>(b);                             // index\n        }\n    };\n    \n    vector<int> assignTasks(vector<int>& servers, vector<int>& tasks) {\n        int numServers = servers.size();\n        int numTasks = tasks.size();\n    \n        priority_queue<pair<int, int>, vector<pair<int, int>>, ServerFreeCompare> freeServers;\n        for (int i = 0; i < numServers; ++i) {\n            freeServers.push({servers[i], i});\n        }\n    \n        priority_queue<tuple<long long, int, int>, vector<tuple<long long, int, int>>, ServerBusyCompare> busyServers;\n    \n        vector<int> ans(numTasks);\n        long long curTime = 0;\n    \n        for (int i = 0; i < numTasks; ++i) {\n            curTime = max(curTime, (long long)i);\n    \n            while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {\n                auto [t, w, idx] = busyServers.top();\n                busyServers.pop();\n                freeServers.push({w, idx});\n            }\n    \n            if (freeServers.empty()) {\n                curTime = get<0>(busyServers.top());\n                while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {\n                    auto [t, w, idx] = busyServers.top();\n                    busyServers.pop();\n                    freeServers.push({w, idx});\n                }\n            }\n    \n            auto [w, idx] = freeServers.top();\n            freeServers.pop();\n            ans[i] = idx;\n            busyServers.push({curTime + tasks[i], w, idx});\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct ServerFreeCompare {\n        bool operator()(const pair<int, int>& a, const pair<int, int>& b) const {\n            if (a.first != b.first) return a.first > b.first; // weight\n            return a.second > b.second;                      // index\n        }\n    };\n    \n    struct ServerBusyCompare {\n        bool operator()(const tuple<long long, int, int>& a, const tuple<long long, int, int>& b) const {\n            if (get<0>(a) != get<0>(b)) return get<0>(a) > get<0>(b); // freeTime\n            if (get<1>(a) != get<1>(b)) return get<1>(a) > get<1>(b); // weight\n            return get<2>(a) > get<2>(b);                             // index\n        }\n    };\n    \n    vector<int> assignTasks(vector<int>& servers, vector<int>& tasks) {\n        int numServers = servers.size();\n        int numTasks = tasks.size();\n    \n        priority_queue<pair<int, int>, vector<pair<int, int>>, ServerFreeCompare> freeServers;\n        for (int i = 0; i < numServers; ++i) {\n            freeServers.push({servers[i], i});\n        }\n    \n        priority_queue<tuple<long long, int, int>, vector<tuple<long long, int, int>>, ServerBusyCompare> busyServers;\n    \n        vector<int> ans(numTasks);\n        long long curTime = 0;\n    \n        for (int i = 0; i < numTasks; ++i) {\n            curTime = max(curTime, (long long)i);\n    \n            while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {\n                auto [t, w, idx] = busyServers.top();\n                busyServers.pop();\n                freeServers.push({w, idx});\n            }\n    \n            if (freeServers.empty()) {\n                curTime = get<0>(busyServers.top());\n                while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {\n                    auto [t, w, idx] = busyServers.top();\n                    busyServers.pop();\n                    freeServers.push({w, idx});\n                }\n            }\n    \n            auto [w, idx] = freeServers.top();\n            freeServers.pop();\n            ans[i] = idx;\n            busyServers.push({curTime + tasks[i], w, idx});\n        }\n        return ans;\n    }\n};",
+    "summary": "Dual Heaps (Free Servers + Busy Servers)"
   },
   {
     "id": 129,
@@ -2686,7 +2814,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-cost-to-hire-k-workers/",
-    "code": "class Solution {\npublic:\n    struct Worker {\n        double ratio;\n        int qual;\n    };\n    \n    bool compareWorkerRatio(const Worker& a, const Worker& b) {\n        return a.ratio < b.ratio;\n    }\n    \n    double mincostToHireWorkers(vector<int>& qual, vector<int>& wage, int k) {\n        int n = qual.size();\n        vector<Worker> w(n);\n        for (int i = 0; i < n; ++i) {\n            w[i] = {(double)wage[i] / qual[i], qual[i]};\n        }\n        sort(w.begin(), w.end(), compareWorkerRatio);\n    \n        priority_queue<int> pq; // max-heap of qualities\n        int sumQ = 0;\n        double ans = 1e18;\n    \n        for (const auto& worker : w) {\n            pq.push(worker.qual);\n            sumQ += worker.qual;\n    \n            if ((int)pq.size() > k) {\n                sumQ -= pq.top();\n                pq.pop();\n            }\n    \n            if ((int)pq.size() == k) {\n                ans = min(ans, sumQ * worker.ratio);\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct Worker {\n        double ratio;\n        int qual;\n    };\n    \n    bool compareWorkerRatio(const Worker& a, const Worker& b) {\n        return a.ratio < b.ratio;\n    }\n    \n    double mincostToHireWorkers(vector<int>& qual, vector<int>& wage, int k) {\n        int n = qual.size();\n        vector<Worker> w(n);\n        for (int i = 0; i < n; ++i) {\n            w[i] = {(double)wage[i] / qual[i], qual[i]};\n        }\n        sort(w.begin(), w.end(), compareWorkerRatio);\n    \n        priority_queue<int> pq; // max-heap of qualities\n        int sumQ = 0;\n        double ans = 1e18;\n    \n        for (const auto& worker : w) {\n            pq.push(worker.qual);\n            sumQ += worker.qual;\n    \n            if ((int)pq.size() > k) {\n                sumQ -= pq.top();\n                pq.pop();\n            }\n    \n            if ((int)pq.size() == k) {\n                ans = min(ans, sumQ * worker.ratio);\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort Wage/Quality Ratio + Max-Heap"
   },
   {
     "id": 130,
@@ -2707,7 +2836,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/meeting-rooms-iii/",
-    "code": "class Solution {\npublic:\n    bool compareMeetingStart(const vector<int>& a, const vector<int>& b) {\n        return a[0] < b[0];\n    }\n    \n    struct BusyRoomCompare {\n        bool operator()(const pair<long long, int>& a, const pair<long long, int>& b) const {\n            if (a.first != b.first) return a.first > b.first; // freeTime\n            return a.second > b.second;                       // room index\n        }\n    };\n    \n    int mostBooked(int n, vector<vector<int>>& meetings) {\n        sort(meetings.begin(), meetings.end(), compareMeetingStart);\n    \n        priority_queue<int, vector<int>, greater<int>> freeRooms;\n        for (int i = 0; i < n; ++i) freeRooms.push(i);\n    \n        priority_queue<pair<long long, int>, vector<pair<long long, int>>, BusyRoomCompare> busyRooms;\n        vector<int> cnt(n, 0);\n    \n        for (const auto& m : meetings) {\n            long long start = m[0], end = m[1];\n            long long dur = end - start;\n    \n            while (!busyRooms.empty() && busyRooms.top().first <= start) {\n                freeRooms.push(busyRooms.top().second);\n                busyRooms.pop();\n            }\n    \n            if (!freeRooms.empty()) {\n                int room = freeRooms.top();\n                freeRooms.pop();\n                cnt[room]++;\n                busyRooms.push({end, room});\n            } else {\n                auto [freeTime, room] = busyRooms.top();\n                busyRooms.pop();\n                cnt[room]++;\n                busyRooms.push({freeTime + dur, room});\n            }\n        }\n    \n        int bestRoom = 0;\n        for (int i = 1; i < n; ++i) {\n            if (cnt[i] > cnt[bestRoom]) {\n                bestRoom = i;\n            }\n        }\n        return bestRoom;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareMeetingStart(const vector<int>& a, const vector<int>& b) {\n        return a[0] < b[0];\n    }\n    \n    struct BusyRoomCompare {\n        bool operator()(const pair<long long, int>& a, const pair<long long, int>& b) const {\n            if (a.first != b.first) return a.first > b.first; // freeTime\n            return a.second > b.second;                       // room index\n        }\n    };\n    \n    int mostBooked(int n, vector<vector<int>>& meetings) {\n        sort(meetings.begin(), meetings.end(), compareMeetingStart);\n    \n        priority_queue<int, vector<int>, greater<int>> freeRooms;\n        for (int i = 0; i < n; ++i) freeRooms.push(i);\n    \n        priority_queue<pair<long long, int>, vector<pair<long long, int>>, BusyRoomCompare> busyRooms;\n        vector<int> cnt(n, 0);\n    \n        for (const auto& m : meetings) {\n            long long start = m[0], end = m[1];\n            long long dur = end - start;\n    \n            while (!busyRooms.empty() && busyRooms.top().first <= start) {\n                freeRooms.push(busyRooms.top().second);\n                busyRooms.pop();\n            }\n    \n            if (!freeRooms.empty()) {\n                int room = freeRooms.top();\n                freeRooms.pop();\n                cnt[room]++;\n                busyRooms.push({end, room});\n            } else {\n                auto [freeTime, room] = busyRooms.top();\n                busyRooms.pop();\n                cnt[room]++;\n                busyRooms.push({freeTime + dur, room});\n            }\n        }\n    \n        int bestRoom = 0;\n        for (int i = 1; i < n; ++i) {\n            if (cnt[i] > cnt[bestRoom]) {\n                bestRoom = i;\n            }\n        }\n        return bestRoom;\n    }\n};",
+    "summary": "Dual Heaps: Free Rooms & Engaged Rooms"
   },
   {
     "id": 131,
@@ -2728,7 +2858,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-profit-in-job-scheduling/",
-    "code": "class Solution {\npublic:\n    struct JobItem {\n        int start, end, profit;\n    };\n    \n    bool compareJobItemEnd(const JobItem& a, const JobItem& b) {\n        return a.end < b.end;\n    }\n    \n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        int n = startTime.size();\n        vector<JobItem> jobs(n);\n        for (int i = 0; i < n; ++i) {\n            jobs[i] = {startTime[i], endTime[i], profit[i]};\n        }\n        sort(jobs.begin(), jobs.end(), compareJobItemEnd);\n    \n        // dp[i] = {end_time, max_profit}\n        vector<pair<int, int>> dp;\n        dp.push_back({0, 0});\n    \n        for (const auto& j : jobs) {\n            // Binary search for latest non-overlapping job\n            int lo = 0, hi = (int)dp.size() - 1, best = 0;\n            while (lo <= hi) {\n                int mid = lo + (hi - lo) / 2;\n                if (dp[mid].first <= j.start) {\n                    best = mid;\n                    lo = mid + 1;\n                } else {\n                    hi = mid - 1;\n                }\n            }\n    \n            int curProfit = dp[best].second + j.profit;\n            if (curProfit > dp.back().second) {\n                dp.push_back({j.end, curProfit});\n            }\n        }\n        return dp.back().second;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct JobItem {\n        int start, end, profit;\n    };\n    \n    bool compareJobItemEnd(const JobItem& a, const JobItem& b) {\n        return a.end < b.end;\n    }\n    \n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        int n = startTime.size();\n        vector<JobItem> jobs(n);\n        for (int i = 0; i < n; ++i) {\n            jobs[i] = {startTime[i], endTime[i], profit[i]};\n        }\n        sort(jobs.begin(), jobs.end(), compareJobItemEnd);\n    \n        // dp[i] = {end_time, max_profit}\n        vector<pair<int, int>> dp;\n        dp.push_back({0, 0});\n    \n        for (const auto& j : jobs) {\n            // Binary search for latest non-overlapping job\n            int lo = 0, hi = (int)dp.size() - 1, best = 0;\n            while (lo <= hi) {\n                int mid = lo + (hi - lo) / 2;\n                if (dp[mid].first <= j.start) {\n                    best = mid;\n                    lo = mid + 1;\n                } else {\n                    hi = mid - 1;\n                }\n            }\n    \n            int curProfit = dp[best].second + j.profit;\n            if (curProfit > dp.back().second) {\n                dp.push_back({j.end, curProfit});\n            }\n        }\n        return dp.back().second;\n    }\n};",
+    "summary": "DP + Binary Search on Finish Times"
   },
   {
     "id": 132,
@@ -2749,7 +2880,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-difficulty-of-a-job-schedule/",
-    "code": "class Solution {\npublic:\n    int minDifficulty(vector<int>& jobDifficulty, int d) {\n        int n = jobDifficulty.size();\n        if (n < d) return -1;\n    \n        vector<vector<int>> dp(d + 1, vector<int>(n + 1, 1e9));\n        dp[0][0] = 0;\n    \n        for (int day = 1; day <= d; ++day) {\n            for (int i = day; i <= n; ++i) {\n                int maxDiff = 0;\n                for (int j = i; j >= day; --j) {\n                    maxDiff = max(maxDiff, jobDifficulty[j - 1]);\n                    if (dp[day - 1][j - 1] != 1e9) {\n                        dp[day][i] = min(dp[day][i], dp[day - 1][j - 1] + maxDiff);\n                    }\n                }\n            }\n        }\n        return dp[d][n];\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minDifficulty(vector<int>& jobDifficulty, int d) {\n        int n = jobDifficulty.size();\n        if (n < d) return -1;\n    \n        vector<vector<int>> dp(d + 1, vector<int>(n + 1, 1e9));\n        dp[0][0] = 0;\n    \n        for (int day = 1; day <= d; ++day) {\n            for (int i = day; i <= n; ++i) {\n                int maxDiff = 0;\n                for (int j = i; j >= day; --j) {\n                    maxDiff = max(maxDiff, jobDifficulty[j - 1]);\n                    if (dp[day - 1][j - 1] != 1e9) {\n                        dp[day][i] = min(dp[day][i], dp[day - 1][j - 1] + maxDiff);\n                    }\n                }\n            }\n        }\n        return dp[d][n];\n    }\n};",
+    "summary": "DP with Monotonic Decreasing Stack"
   },
   {
     "id": 133,
@@ -2770,7 +2902,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/boats-to-save-people/",
-    "code": "class Solution {\npublic:\n    int numRescueBoats(vector<int>& people, int limit) {\n        sort(people.begin(), people.end());\n    \n        int l = 0, r = (int)people.size() - 1;\n        int boats = 0;\n    \n        while (l <= r) {\n            if (people[l] + people[r] <= limit) {\n                l++;\n            }\n            r--;\n            boats++;\n        }\n        return boats;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int numRescueBoats(vector<int>& people, int limit) {\n        sort(people.begin(), people.end());\n    \n        int l = 0, r = (int)people.size() - 1;\n        int boats = 0;\n    \n        while (l <= r) {\n            if (people[l] + people[r] <= limit) {\n                l++;\n            }\n            r--;\n            boats++;\n        }\n        return boats;\n    }\n};",
+    "summary": "Two Pointers Heaviest + Lightest"
   },
   {
     "id": 134,
@@ -2791,7 +2924,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/queue-reconstruction-by-height/",
-    "code": "class Solution {\npublic:\n    bool compareQueuePeople(const vector<int>& a, const vector<int>& b) {\n        if (a[0] != b[0]) return a[0] > b[0]; // height descending\n        return a[1] < b[1];                   // k ascending\n    }\n    \n    vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {\n        sort(people.begin(), people.end(), compareQueuePeople);\n    \n        vector<vector<int>> ans;\n        for (const auto& p : people) {\n            ans.insert(ans.begin() + p[1], p);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareQueuePeople(const vector<int>& a, const vector<int>& b) {\n        if (a[0] != b[0]) return a[0] > b[0]; // height descending\n        return a[1] < b[1];                   // k ascending\n    }\n    \n    vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {\n        sort(people.begin(), people.end(), compareQueuePeople);\n    \n        vector<vector<int>> ans;\n        for (const auto& p : people) {\n            ans.insert(ans.begin() + p[1], p);\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort Height Descending + Insert at K"
   },
   {
     "id": 135,
@@ -2812,7 +2946,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/advantage-shuffle/",
-    "code": "class Solution {\npublic:\n    vector<int> advantageCount(vector<int>& a, vector<int>& b) {\n        int n = a.size();\n        sort(a.begin(), a.end());\n    \n        vector<pair<int, int>> sortedB(n);\n        for (int i = 0; i < n; ++i) sortedB[i] = {b[i], i};\n        sort(sortedB.begin(), sortedB.end());\n    \n        vector<int> ans(n);\n        int lo = 0, hi = n - 1;\n    \n        for (int x : a) {\n            if (x > sortedB[lo].first) {\n                ans[sortedB[lo].second] = x;\n                lo++;\n            } else {\n                ans[sortedB[hi].second] = x;\n                hi--;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<int> advantageCount(vector<int>& a, vector<int>& b) {\n        int n = a.size();\n        sort(a.begin(), a.end());\n    \n        vector<pair<int, int>> sortedB(n);\n        for (int i = 0; i < n; ++i) sortedB[i] = {b[i], i};\n        sort(sortedB.begin(), sortedB.end());\n    \n        vector<int> ans(n);\n        int lo = 0, hi = n - 1;\n    \n        for (int x : a) {\n            if (x > sortedB[lo].first) {\n                ans[sortedB[lo].second] = x;\n                lo++;\n            } else {\n                ans[sortedB[hi].second] = x;\n                hi--;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Tian Ji Horse Race Two Pointers"
   },
   {
     "id": 136,
@@ -2833,7 +2968,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/bag-of-tokens/",
-    "code": "class Solution {\npublic:\n    int bagOfTokensScore(vector<int>& tokens, int power) {\n        sort(tokens.begin(), tokens.end());\n    \n        int l = 0, r = (int)tokens.size() - 1;\n        int score = 0, maxScore = 0;\n    \n        while (l <= r) {\n            if (power >= tokens[l]) {\n                power -= tokens[l++];\n                score++;\n                maxScore = max(maxScore, score);\n            } else if (score > 0 && l < r) {\n                power += tokens[r--];\n                score--;\n            } else {\n                break;\n            }\n        }\n        return maxScore;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int bagOfTokensScore(vector<int>& tokens, int power) {\n        sort(tokens.begin(), tokens.end());\n    \n        int l = 0, r = (int)tokens.size() - 1;\n        int score = 0, maxScore = 0;\n    \n        while (l <= r) {\n            if (power >= tokens[l]) {\n                power -= tokens[l++];\n                score++;\n                maxScore = max(maxScore, score);\n            } else if (score > 0 && l < r) {\n                power += tokens[r--];\n                score--;\n            } else {\n                break;\n            }\n        }\n        return maxScore;\n    }\n};",
+    "summary": "Sort Tokens + Buy Small Sell Large"
   },
   {
     "id": 137,
@@ -2854,7 +2990,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/reduce-array-size-to-the-half/",
-    "code": "class Solution {\npublic:\n    int minSetSize(vector<int>& arr) {\n        unordered_map<int, int> freq;\n        for (int x : arr) freq[x]++;\n    \n        vector<int> counts;\n        for (const auto& [val, count] : freq) counts.push_back(count);\n        sort(counts.rbegin(), counts.rend());\n    \n        int removed = 0, ans = 0;\n        int half = arr.size() / 2;\n    \n        for (int c : counts) {\n            removed += c;\n            ans++;\n            if (removed >= half) break;\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minSetSize(vector<int>& arr) {\n        unordered_map<int, int> freq;\n        for (int x : arr) freq[x]++;\n    \n        vector<int> counts;\n        for (const auto& [val, count] : freq) counts.push_back(count);\n        sort(counts.rbegin(), counts.rend());\n    \n        int removed = 0, ans = 0;\n        int half = arr.size() / 2;\n    \n        for (int c : counts) {\n            removed += c;\n            ans++;\n            if (removed >= half) break;\n        }\n        return ans;\n    }\n};",
+    "summary": "Frequency Count + Sort Descending"
   },
   {
     "id": 138,
@@ -2875,7 +3012,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-increment-to-make-array-unique/",
-    "code": "class Solution {\npublic:\n    int minIncrementForUnique(vector<int>& a) {\n        sort(a.begin(), a.end());\n    \n        int ans = 0;\n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i] <= a[i - 1]) {\n                int needed = a[i - 1] + 1;\n                ans += needed - a[i];\n                a[i] = needed;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minIncrementForUnique(vector<int>& a) {\n        sort(a.begin(), a.end());\n    \n        int ans = 0;\n        for (int i = 1; i < (int)a.size(); ++i) {\n            if (a[i] <= a[i - 1]) {\n                int needed = a[i - 1] + 1;\n                ans += needed - a[i];\n                a[i] = needed;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort Array + Incremental Strict Monotonicity"
   },
   {
     "id": 139,
@@ -2896,7 +3034,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-moves-to-make-array-complementary/",
-    "code": "class Solution {\npublic:\n    int minMoves(vector<int>& a, int limit) {\n        int n = a.size();\n        vector<int> diff(2 * limit + 2, 0);\n    \n        for (int i = 0; i < n / 2; ++i) {\n            int x = min(a[i], a[n - 1 - i]);\n            int y = max(a[i], a[n - 1 - i]);\n    \n            // [2, 2 * limit] default: 2 moves\n            diff[2] += 2;\n            diff[2 * limit + 1] -= 2;\n    \n            // [1 + x, limit + y]: 1 move\n            diff[1 + x] -= 1;\n            diff[limit + y + 1] += 1;\n    \n            // [x + y]: 0 moves\n            diff[x + y] -= 1;\n            diff[x + y + 1] += 1;\n        }\n    \n        int ans = n, cur = 0;\n        for (int s = 2; s <= 2 * limit; ++s) {\n            cur += diff[s];\n            ans = min(ans, cur);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minMoves(vector<int>& a, int limit) {\n        int n = a.size();\n        vector<int> diff(2 * limit + 2, 0);\n    \n        for (int i = 0; i < n / 2; ++i) {\n            int x = min(a[i], a[n - 1 - i]);\n            int y = max(a[i], a[n - 1 - i]);\n    \n            // [2, 2 * limit] default: 2 moves\n            diff[2] += 2;\n            diff[2 * limit + 1] -= 2;\n    \n            // [1 + x, limit + y]: 1 move\n            diff[1 + x] -= 1;\n            diff[limit + y + 1] += 1;\n    \n            // [x + y]: 0 moves\n            diff[x + y] -= 1;\n            diff[x + y + 1] += 1;\n        }\n    \n        int ans = n, cur = 0;\n        for (int s = 2; s <= 2 * limit; ++s) {\n            cur += diff[s];\n            ans = min(ans, cur);\n        }\n        return ans;\n    }\n};",
+    "summary": "Difference Array Boundary Intervals"
   },
   {
     "id": 140,
@@ -2917,7 +3056,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/divide-array-into-arrays-with-max-difference/",
-    "code": "class Solution {\npublic:\n    vector<vector<int>> divideArray(vector<int>& a, int k) {\n        sort(a.begin(), a.end());\n        vector<vector<int>> ans;\n    \n        for (int i = 0; i < (int)a.size(); i += 3) {\n            if (a[i + 2] - a[i] > k) {\n                return {};\n            }\n            ans.push_back({a[i], a[i + 1], a[i + 2]});\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<vector<int>> divideArray(vector<int>& a, int k) {\n        sort(a.begin(), a.end());\n        vector<vector<int>> ans;\n    \n        for (int i = 0; i < (int)a.size(); i += 3) {\n            if (a[i + 2] - a[i] > k) {\n                return {};\n            }\n            ans.push_back({a[i], a[i + 1], a[i + 2]});\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort Triplet Sliding Window Validation"
   },
   {
     "id": 141,
@@ -2938,7 +3078,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/put-boxes-into-the-warehouse-i/",
-    "code": "class Solution {\npublic:\n    int maxBoxesInWarehouse(vector<int>& boxes, vector<int>& warehouse) {\n        int m = warehouse.size();\n        for (int i = 1; i < m; ++i) {\n            warehouse[i] = min(warehouse[i], warehouse[i - 1]);\n        }\n        sort(boxes.begin(), boxes.end());\n    \n        int ans = 0;\n        int bIdx = 0;\n    \n        for (int i = m - 1; i >= 0 && bIdx < (int)boxes.size(); --i) {\n            if (boxes[bIdx] <= warehouse[i]) {\n                ans++;\n                bIdx++;\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int maxBoxesInWarehouse(vector<int>& boxes, vector<int>& warehouse) {\n        int m = warehouse.size();\n        for (int i = 1; i < m; ++i) {\n            warehouse[i] = min(warehouse[i], warehouse[i - 1]);\n        }\n        sort(boxes.begin(), boxes.end());\n    \n        int ans = 0;\n        int bIdx = 0;\n    \n        for (int i = m - 1; i >= 0 && bIdx < (int)boxes.size(); --i) {\n            if (boxes[bIdx] <= warehouse[i]) {\n                ans++;\n                bIdx++;\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Prefix Minimum Heights + Sort Boxes"
   },
   {
     "id": 142,
@@ -2959,7 +3100,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/put-boxes-into-the-warehouse-ii/",
-    "code": "class Solution {\npublic:\n    int maxBoxesInWarehouse2(vector<int>& boxes, vector<int>& warehouse) {\n        sort(boxes.rbegin(), boxes.rend());\n    \n        int l = 0, r = (int)warehouse.size() - 1;\n        int ans = 0;\n    \n        for (int b : boxes) {\n            if (l > r) break;\n            if (warehouse[l] >= warehouse[r]) {\n                if (warehouse[l] >= b) {\n                    ans++;\n                    l++;\n                }\n            } else {\n                if (warehouse[r] >= b) {\n                    ans++;\n                    r--;\n                }\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int maxBoxesInWarehouse2(vector<int>& boxes, vector<int>& warehouse) {\n        sort(boxes.rbegin(), boxes.rend());\n    \n        int l = 0, r = (int)warehouse.size() - 1;\n        int ans = 0;\n    \n        for (int b : boxes) {\n            if (l > r) break;\n            if (warehouse[l] >= warehouse[r]) {\n                if (warehouse[l] >= b) {\n                    ans++;\n                    l++;\n                }\n            } else {\n                if (warehouse[r] >= b) {\n                    ans++;\n                    r--;\n                }\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Two Pointers Push from Both Entrances"
   },
   {
     "id": 143,
@@ -2980,7 +3122,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/remove-duplicate-letters/",
-    "code": "class Solution {\npublic:\n    string removeDuplicateLetters(string s) {\n        int last[26] = {0};\n        bool inStack[26] = {false};\n        int n = s.size();\n        for (int i = 0; i < n; ++i) last[s[i] - 'a'] = i;\n    \n        string st = \"\";\n        for (int i = 0; i < n; ++i) {\n            int c = s[i] - 'a';\n            if (inStack[c]) continue;\n    \n            while (!st.empty() && st.back() > s[i] && last[st.back() - 'a'] > i) {\n                inStack[st.back() - 'a'] = false;\n                st.pop_back();\n            }\n    \n            st.push_back(s[i]);\n            inStack[c] = true;\n        }\n        return st;\n    }\n};"
+    "code": "class Solution {\npublic:\n    string removeDuplicateLetters(string s) {\n        int last[26] = {0};\n        bool inStack[26] = {false};\n        int n = s.size();\n        for (int i = 0; i < n; ++i) last[s[i] - 'a'] = i;\n    \n        string st = \"\";\n        for (int i = 0; i < n; ++i) {\n            int c = s[i] - 'a';\n            if (inStack[c]) continue;\n    \n            while (!st.empty() && st.back() > s[i] && last[st.back() - 'a'] > i) {\n                inStack[st.back() - 'a'] = false;\n                st.pop_back();\n            }\n    \n            st.push_back(s[i]);\n            inStack[c] = true;\n        }\n        return st;\n    }\n};",
+    "summary": "Monotonic Increasing Stack + Last Index Table"
   },
   {
     "id": 144,
@@ -3001,7 +3144,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/remove-k-digits/",
-    "code": "class Solution {\npublic:\n    string removeKdigits(string num, int k) {\n        string st = \"\";\n        for (char c : num) {\n            while (!st.empty() && k > 0 && st.back() > c) {\n                st.pop_back();\n                k--;\n            }\n            st.push_back(c);\n        }\n    \n        while (k > 0 && !st.empty()) {\n            st.pop_back();\n            k--;\n        }\n    \n        int start = 0;\n        while (start < (int)st.size() && st[start] == '0') {\n            start++;\n        }\n    \n        string ans = st.substr(start);\n        return ans.empty() ? \"0\" : ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    string removeKdigits(string num, int k) {\n        string st = \"\";\n        for (char c : num) {\n            while (!st.empty() && k > 0 && st.back() > c) {\n                st.pop_back();\n                k--;\n            }\n            st.push_back(c);\n        }\n    \n        while (k > 0 && !st.empty()) {\n            st.pop_back();\n            k--;\n        }\n    \n        int start = 0;\n        while (start < (int)st.size() && st[start] == '0') {\n            start++;\n        }\n    \n        string ans = st.substr(start);\n        return ans.empty() ? \"0\" : ans;\n    }\n};",
+    "summary": "Monotonic Increasing Digit Stack"
   },
   {
     "id": 145,
@@ -3022,7 +3166,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/create-maximum-number/",
-    "code": "class Solution {\npublic:\n    vector<int> maxSubsequence(const vector<int>& a, int k) {\n        vector<int> st;\n        int drop = (int)a.size() - k;\n        for (int x : a) {\n            while (!st.empty() && drop > 0 && st.back() < x) {\n                st.pop_back();\n                drop--;\n            }\n            st.push_back(x);\n        }\n        st.resize(k);\n        return st;\n    }\n    \n    vector<int> mergeVectors(vector<int> a, vector<int> b) {\n        vector<int> res;\n        auto itA = a.begin(), itB = b.begin();\n        while (itA != a.end() || itB != b.end()) {\n            if (lexicographical_compare(itA, a.end(), itB, b.end())) {\n                res.push_back(*itB++);\n            } else {\n                res.push_back(*itA++);\n            }\n        }\n        return res;\n    }\n    \n    vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {\n        int n = nums1.size(), m = nums2.size();\n        vector<int> best;\n    \n        for (int i = max(0, k - m); i <= min(k, n); ++i) {\n            vector<int> seq1 = maxSubsequence(nums1, i);\n            vector<int> seq2 = maxSubsequence(nums2, k - i);\n            vector<int> cand = mergeVectors(seq1, seq2);\n            if (best.empty() || cand > best) {\n                best = cand;\n            }\n        }\n        return best;\n    }\n};"
+    "code": "class Solution {\npublic:\n    vector<int> maxSubsequence(const vector<int>& a, int k) {\n        vector<int> st;\n        int drop = (int)a.size() - k;\n        for (int x : a) {\n            while (!st.empty() && drop > 0 && st.back() < x) {\n                st.pop_back();\n                drop--;\n            }\n            st.push_back(x);\n        }\n        st.resize(k);\n        return st;\n    }\n    \n    vector<int> mergeVectors(vector<int> a, vector<int> b) {\n        vector<int> res;\n        auto itA = a.begin(), itB = b.begin();\n        while (itA != a.end() || itB != b.end()) {\n            if (lexicographical_compare(itA, a.end(), itB, b.end())) {\n                res.push_back(*itB++);\n            } else {\n                res.push_back(*itA++);\n            }\n        }\n        return res;\n    }\n    \n    vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {\n        int n = nums1.size(), m = nums2.size();\n        vector<int> best;\n    \n        for (int i = max(0, k - m); i <= min(k, n); ++i) {\n            vector<int> seq1 = maxSubsequence(nums1, i);\n            vector<int> seq2 = maxSubsequence(nums2, k - i);\n            vector<int> cand = mergeVectors(seq1, seq2);\n            if (best.empty() || cand > best) {\n                best = cand;\n            }\n        }\n        return best;\n    }\n};",
+    "summary": "Monotonic Sub-sequences + Merge Greater"
   },
   {
     "id": 146,
@@ -3043,7 +3188,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/reorganize-string/",
-    "code": "class Solution {\npublic:\n    string reorganizeString(string s) {\n        int cnt[26] = {0};\n        int n = s.size();\n        for (char c : s) cnt[c - 'a']++;\n    \n        priority_queue<pair<int, char>> pq;\n        for (int i = 0; i < 26; ++i) {\n            if (cnt[i] > (n + 1) / 2) return \"\";\n            if (cnt[i] > 0) pq.push({cnt[i], (char)('a' + i)});\n        }\n    \n        string ans = \"\";\n        while (pq.size() >= 2) {\n            auto [c1, ch1] = pq.top(); pq.pop();\n            auto [c2, ch2] = pq.top(); pq.pop();\n    \n            ans.push_back(ch1);\n            ans.push_back(ch2);\n    \n            if (--c1 > 0) pq.push({c1, ch1});\n            if (--c2 > 0) pq.push({c2, ch2});\n        }\n    \n        if (!pq.empty()) {\n            ans.push_back(pq.top().second);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    string reorganizeString(string s) {\n        int cnt[26] = {0};\n        int n = s.size();\n        for (char c : s) cnt[c - 'a']++;\n    \n        priority_queue<pair<int, char>> pq;\n        for (int i = 0; i < 26; ++i) {\n            if (cnt[i] > (n + 1) / 2) return \"\";\n            if (cnt[i] > 0) pq.push({cnt[i], (char)('a' + i)});\n        }\n    \n        string ans = \"\";\n        while (pq.size() >= 2) {\n            auto [c1, ch1] = pq.top(); pq.pop();\n            auto [c2, ch2] = pq.top(); pq.pop();\n    \n            ans.push_back(ch1);\n            ans.push_back(ch2);\n    \n            if (--c1 > 0) pq.push({c1, ch1});\n            if (--c2 > 0) pq.push({c2, ch2});\n        }\n    \n        if (!pq.empty()) {\n            ans.push_back(pq.top().second);\n        }\n        return ans;\n    }\n};",
+    "summary": "Max-Heap Frequency Pairing / Even-Odd Interleave"
   },
   {
     "id": 147,
@@ -3064,7 +3210,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/rearrange-string-k-distance-apart/",
-    "code": "class Solution {\npublic:\n    string rearrangeString(string s, int k) {\n        if (k <= 1) return s;\n    \n        unordered_map<char, int> freq;\n        for (char c : s) freq[c]++;\n    \n        priority_queue<pair<int, char>> pq;\n        for (auto& [c, count] : freq) pq.push({count, c});\n    \n        queue<pair<int, char>> waitQ;\n        string ans = \"\";\n    \n        while (!pq.empty()) {\n            auto [count, c] = pq.top();\n            pq.pop();\n    \n            ans.push_back(c);\n            waitQ.push({count - 1, c});\n    \n            if ((int)waitQ.size() >= k) {\n                auto front = waitQ.front();\n                waitQ.pop();\n                if (front.first > 0) pq.push(front);\n            }\n        }\n    \n        return ans.size() == s.size() ? ans : \"\";\n    }\n};"
+    "code": "class Solution {\npublic:\n    string rearrangeString(string s, int k) {\n        if (k <= 1) return s;\n    \n        unordered_map<char, int> freq;\n        for (char c : s) freq[c]++;\n    \n        priority_queue<pair<int, char>> pq;\n        for (auto& [c, count] : freq) pq.push({count, c});\n    \n        queue<pair<int, char>> waitQ;\n        string ans = \"\";\n    \n        while (!pq.empty()) {\n            auto [count, c] = pq.top();\n            pq.pop();\n    \n            ans.push_back(c);\n            waitQ.push({count - 1, c});\n    \n            if ((int)waitQ.size() >= k) {\n                auto front = waitQ.front();\n                waitQ.pop();\n                if (front.first > 0) pq.push(front);\n            }\n        }\n    \n        return ans.size() == s.size() ? ans : \"\";\n    }\n};",
+    "summary": "Max-Heap with Wait Queue of Length K"
   },
   {
     "id": 148,
@@ -3085,7 +3232,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/",
-    "code": "class Solution {\npublic:\n    int minAddToMakeValid(string s) {\n        int open = 0, add = 0;\n        for (char c : s) {\n            if (c == '(') {\n                open++;\n            } else {\n                if (open > 0) {\n                    open--;\n                } else {\n                    add++;\n                }\n            }\n        }\n        return add + open;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minAddToMakeValid(string s) {\n        int open = 0, add = 0;\n        for (char c : s) {\n            if (c == '(') {\n                open++;\n            } else {\n                if (open > 0) {\n                    open--;\n                } else {\n                    add++;\n                }\n            }\n        }\n        return add + open;\n    }\n};",
+    "summary": "Balance Counter / Open & Close Tracking"
   },
   {
     "id": 149,
@@ -3106,7 +3254,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/",
-    "code": "class Solution {\npublic:\n    string minRemoveToMakeValid(string s) {\n        stack<int> st;\n        vector<bool> remove(s.size(), false);\n    \n        for (int i = 0; i < (int)s.size(); ++i) {\n            if (s[i] == '(') {\n                st.push(i);\n            } else if (s[i] == ')') {\n                if (!st.empty()) {\n                    st.pop();\n                } else {\n                    remove[i] = true; // Unmatched closing\n                }\n            }\n        }\n    \n        while (!st.empty()) {\n            remove[st.top()] = true; // Unmatched opening\n            st.pop();\n        }\n    \n        string ans = \"\";\n        for (int i = 0; i < (int)s.size(); ++i) {\n            if (!remove[i]) ans.push_back(s[i]);\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    string minRemoveToMakeValid(string s) {\n        stack<int> st;\n        vector<bool> remove(s.size(), false);\n    \n        for (int i = 0; i < (int)s.size(); ++i) {\n            if (s[i] == '(') {\n                st.push(i);\n            } else if (s[i] == ')') {\n                if (!st.empty()) {\n                    st.pop();\n                } else {\n                    remove[i] = true; // Unmatched closing\n                }\n            }\n        }\n    \n        while (!st.empty()) {\n            remove[st.top()] = true; // Unmatched opening\n            st.pop();\n        }\n    \n        string ans = \"\";\n        for (int i = 0; i < (int)s.size(); ++i) {\n            if (!remove[i]) ans.push_back(s[i]);\n        }\n        return ans;\n    }\n};",
+    "summary": "Index Stack + Marker String Replacement"
   },
   {
     "id": 150,
@@ -3127,7 +3276,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/valid-parenthesis-string/",
-    "code": "class Solution {\npublic:\n    bool checkValidString(string s) {\n        int lo = 0, hi = 0; // Range of possible open bracket counts\n    \n        for (char c : s) {\n            if (c == '(') {\n                lo++;\n                hi++;\n            } else if (c == ')') {\n                lo--;\n                hi--;\n            } else {\n                // '*' can be ')', empty, or '('\n                lo--;\n                hi++;\n            }\n    \n            if (hi < 0) return false;\n            lo = max(lo, 0);\n        }\n        return lo == 0;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool checkValidString(string s) {\n        int lo = 0, hi = 0; // Range of possible open bracket counts\n    \n        for (char c : s) {\n            if (c == '(') {\n                lo++;\n                hi++;\n            } else if (c == ')') {\n                lo--;\n                hi--;\n            } else {\n                // '*' can be ')', empty, or '('\n                lo--;\n                hi++;\n            }\n    \n            if (hi < 0) return false;\n            lo = max(lo, 0);\n        }\n        return lo == 0;\n    }\n};",
+    "summary": "Range of Open Brackets [cmin, cmax]"
   },
   {
     "id": 151,
@@ -3148,7 +3298,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/remove-invalid-parentheses/",
-    "code": "class SolutionRemoveInvalidParentheses {\n    unordered_set<string> validStrings;\n\n    void dfs(const string& s, int idx, int leftRem, int rightRem, int open, string cur) {\n        if (idx == (int)s.size()) {\n            if (leftRem == 0 && rightRem == 0 && open == 0) {\n                validStrings.insert(cur);\n            }\n            return;\n        }\n\n        char c = s[idx];\n        if (c == '(') {\n            // Discard '('\n            if (leftRem > 0) dfs(s, idx + 1, leftRem - 1, rightRem, open, cur);\n            // Keep '('\n            dfs(s, idx + 1, leftRem, rightRem, open + 1, cur + c);\n        } else if (c == ')') {\n            // Discard ')'\n            if (rightRem > 0) dfs(s, idx + 1, leftRem, rightRem - 1, open, cur);\n            // Keep ')' if valid open bracket available\n            if (open > 0) dfs(s, idx + 1, leftRem, rightRem, open - 1, cur + c);\n        } else {\n            dfs(s, idx + 1, leftRem, rightRem, open, cur + c);\n        }\n    }\n\npublic:\n    vector<string> removeInvalidParentheses(string s) {\n        int leftRem = 0, rightRem = 0;\n        for (char c : s) {\n            if (c == '(') leftRem++;\n            else if (c == ')') {\n                if (leftRem > 0) leftRem--;\n                else rightRem++;\n            }\n        }\n\n        validStrings.clear();\n        dfs(s, 0, leftRem, rightRem, 0, \"\");\n        return vector<string>(validStrings.begin(), validStrings.end());\n    }\n};"
+    "code": "class SolutionRemoveInvalidParentheses {\n    unordered_set<string> validStrings;\n\n    void dfs(const string& s, int idx, int leftRem, int rightRem, int open, string cur) {\n        if (idx == (int)s.size()) {\n            if (leftRem == 0 && rightRem == 0 && open == 0) {\n                validStrings.insert(cur);\n            }\n            return;\n        }\n\n        char c = s[idx];\n        if (c == '(') {\n            // Discard '('\n            if (leftRem > 0) dfs(s, idx + 1, leftRem - 1, rightRem, open, cur);\n            // Keep '('\n            dfs(s, idx + 1, leftRem, rightRem, open + 1, cur + c);\n        } else if (c == ')') {\n            // Discard ')'\n            if (rightRem > 0) dfs(s, idx + 1, leftRem, rightRem - 1, open, cur);\n            // Keep ')' if valid open bracket available\n            if (open > 0) dfs(s, idx + 1, leftRem, rightRem, open - 1, cur + c);\n        } else {\n            dfs(s, idx + 1, leftRem, rightRem, open, cur + c);\n        }\n    }\n\npublic:\n    vector<string> removeInvalidParentheses(string s) {\n        int leftRem = 0, rightRem = 0;\n        for (char c : s) {\n            if (c == '(') leftRem++;\n            else if (c == ')') {\n                if (leftRem > 0) leftRem--;\n                else rightRem++;\n            }\n        }\n\n        validStrings.clear();\n        dfs(s, 0, leftRem, rightRem, 0, \"\");\n        return vector<string>(validStrings.begin(), validStrings.end());\n    }\n};",
+    "summary": "Count Invalid + Pruned Backtracking"
   },
   {
     "id": 152,
@@ -3169,7 +3320,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-swap/",
-    "code": "class Solution {\npublic:\n    int maximumSwap(int num) {\n        string s = to_string(num);\n        int last[10] = {0};\n        int n = s.size();\n    \n        for (int i = 0; i < n; ++i) {\n            last[s[i] - '0'] = i;\n        }\n    \n        for (int i = 0; i < n; ++i) {\n            int d = s[i] - '0';\n            for (int larger = 9; larger > d; --larger) {\n                if (last[larger] > i) {\n                    swap(s[i], s[last[larger]]);\n                    return stoi(s);\n                }\n            }\n        }\n        return num;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int maximumSwap(int num) {\n        string s = to_string(num);\n        int last[10] = {0};\n        int n = s.size();\n    \n        for (int i = 0; i < n; ++i) {\n            last[s[i] - '0'] = i;\n        }\n    \n        for (int i = 0; i < n; ++i) {\n            int d = s[i] - '0';\n            for (int larger = 9; larger > d; --larger) {\n                if (last[larger] > i) {\n                    swap(s[i], s[last[larger]]);\n                    return stoi(s);\n                }\n            }\n        }\n        return num;\n    }\n};",
+    "summary": "Last Occurrence Digit Array Scan"
   },
   {
     "id": 153,
@@ -3190,7 +3342,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/largest-number/",
-    "code": "class Solution {\npublic:\n    bool compareLargestNum(const string& a, const string& b) {\n        return (a + b) > (b + a);\n    }\n    \n    string largestNumber(vector<int>& a) {\n        vector<string> s;\n        for (int x : a) s.push_back(to_string(x));\n        sort(s.begin(), s.end(), compareLargestNum);\n    \n        if (s[0] == \"0\") return \"0\";\n    \n        string ans = \"\";\n        for (const string& str : s) ans += str;\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareLargestNum(const string& a, const string& b) {\n        return (a + b) > (b + a);\n    }\n    \n    string largestNumber(vector<int>& a) {\n        vector<string> s;\n        for (int x : a) s.push_back(to_string(x));\n        sort(s.begin(), s.end(), compareLargestNum);\n    \n        if (s[0] == \"0\") return \"0\";\n    \n        string ans = \"\";\n        for (const string& str : s) ans += str;\n        return ans;\n    }\n};",
+    "summary": "Custom Comparator String (a + b > b + a)"
   },
   {
     "id": 154,
@@ -3211,7 +3364,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "",
-    "code": "class Solution {\npublic:\n    long long minCostToConnectRopes(vector<long long>& a) {\n        priority_queue<long long, vector<long long>, greater<long long>> pq(a.begin(), a.end());\n        long long totalCost = 0;\n    \n        while (pq.size() > 1) {\n            long long first = pq.top(); pq.pop();\n            long long second = pq.top(); pq.pop();\n            long long combined = first + second;\n            totalCost += combined;\n            pq.push(combined);\n        }\n        return totalCost;\n    }\n};"
+    "code": "class Solution {\npublic:\n    long long minCostToConnectRopes(vector<long long>& a) {\n        priority_queue<long long, vector<long long>, greater<long long>> pq(a.begin(), a.end());\n        long long totalCost = 0;\n    \n        while (pq.size() > 1) {\n            long long first = pq.top(); pq.pop();\n            long long second = pq.top(); pq.pop();\n            long long combined = first + second;\n            totalCost += combined;\n            pq.push(combined);\n        }\n        return totalCost;\n    }\n};",
+    "summary": "Min-Heap Huffman Style Pair Summing"
   },
   {
     "id": 155,
@@ -3232,7 +3386,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
-    "code": "class Solution {\npublic:\n    int findKthLargest(vector<int>& a, int k) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of size k\n        for (int x : a) {\n            pq.push(x);\n            if ((int)pq.size() > k) {\n                pq.pop();\n            }\n        }\n        return pq.top();\n    }\n};"
+    "code": "class Solution {\npublic:\n    int findKthLargest(vector<int>& a, int k) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of size k\n        for (int x : a) {\n            pq.push(x);\n            if ((int)pq.size() > k) {\n                pq.pop();\n            }\n        }\n        return pq.top();\n    }\n};",
+    "summary": "Min-Heap of Size K / Quickselect"
   },
   {
     "id": 156,
@@ -3253,7 +3408,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/last-stone-weight-ii/",
-    "code": "class Solution {\npublic:\n    int lastStoneWeightII(vector<int>& stones) {\n        int total = accumulate(stones.begin(), stones.end(), 0);\n        int target = total / 2;\n    \n        vector<bool> dp(target + 1, false);\n        dp[0] = true;\n    \n        for (int s : stones) {\n            for (int i = target; i >= s; --i) {\n                dp[i] = dp[i] || dp[i - s];\n            }\n        }\n    \n        for (int i = target; i >= 0; --i) {\n            if (dp[i]) {\n                return total - 2 * i;\n            }\n        }\n        return 0;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int lastStoneWeightII(vector<int>& stones) {\n        int total = accumulate(stones.begin(), stones.end(), 0);\n        int target = total / 2;\n    \n        vector<bool> dp(target + 1, false);\n        dp[0] = true;\n    \n        for (int s : stones) {\n            for (int i = target; i >= s; --i) {\n                dp[i] = dp[i] || dp[i - s];\n            }\n        }\n    \n        for (int i = target; i >= 0; --i) {\n            if (dp[i]) {\n                return total - 2 * i;\n            }\n        }\n        return 0;\n    }\n};",
+    "summary": "0/1 Knapsack Partition Subset Sum"
   },
   {
     "id": 157,
@@ -3274,7 +3430,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/furthest-building-you-can-reach/",
-    "code": "class Solution {\npublic:\n    int furthestBuilding(vector<int>& h, int bricks, int ladders) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs\n    \n        for (int i = 0; i < (int)h.size() - 1; ++i) {\n            int diff = h[i + 1] - h[i];\n            if (diff > 0) {\n                pq.push(diff);\n                if ((int)pq.size() > ladders) {\n                    bricks -= pq.top();\n                    pq.pop();\n                }\n                if (bricks < 0) {\n                    return i;\n                }\n            }\n        }\n        return (int)h.size() - 1;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int furthestBuilding(vector<int>& h, int bricks, int ladders) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs\n    \n        for (int i = 0; i < (int)h.size() - 1; ++i) {\n            int diff = h[i + 1] - h[i];\n            if (diff > 0) {\n                pq.push(diff);\n                if ((int)pq.size() > ladders) {\n                    bricks -= pq.top();\n                    pq.pop();\n                }\n                if (bricks < 0) {\n                    return i;\n                }\n            }\n        }\n        return (int)h.size() - 1;\n    }\n};",
+    "summary": "Min-Heap of Largest Climbs with Ladders"
   },
   {
     "id": 158,
@@ -3295,7 +3452,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/minimum-number-of-refueling-stops/",
-    "code": "class Solution {\npublic:\n    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {\n        priority_queue<int> pq; // max-heap of passed fuel capacities\n        long long curReach = startFuel;\n        int stops = 0, i = 0, n = stations.size();\n    \n        while (curReach < target) {\n            while (i < n && stations[i][0] <= curReach) {\n                pq.push(stations[i][1]);\n                i++;\n            }\n    \n            if (pq.empty()) return -1;\n    \n            curReach += pq.top();\n            pq.pop();\n            stops++;\n        }\n        return stops;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {\n        priority_queue<int> pq; // max-heap of passed fuel capacities\n        long long curReach = startFuel;\n        int stops = 0, i = 0, n = stations.size();\n    \n        while (curReach < target) {\n            while (i < n && stations[i][0] <= curReach) {\n                pq.push(stations[i][1]);\n                i++;\n            }\n    \n            if (pq.empty()) return -1;\n    \n            curReach += pq.top();\n            pq.pop();\n            stops++;\n        }\n        return stops;\n    }\n};",
+    "summary": "Max-Heap of Missed Fuel Stations"
   },
   {
     "id": 159,
@@ -3316,7 +3474,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/trapping-rain-water-ii/",
-    "code": "class Solution {\npublic:\n    struct Cell3D {\n        int h, r, c;\n    };\n    \n    struct Cell3DCompare {\n        bool operator()(const Cell3D& a, const Cell3D& b) const {\n            return a.h > b.h;\n        }\n    };\n    \n    int trapRainWater(vector<vector<int>>& g) {\n        int m = g.size(), n = g[0].size();\n        if (m <= 2 || n <= 2) return 0;\n    \n        priority_queue<Cell3D, vector<Cell3D>, Cell3DCompare> pq;\n        vector<vector<bool>> vis(m, vector<bool>(n, false));\n    \n        for (int r = 0; r < m; ++r) {\n            for (int c = 0; c < n; ++c) {\n                if (r == 0 || r == m - 1 || c == 0 || c == n - 1) {\n                    pq.push({g[r][c], r, c});\n                    vis[r][c] = true;\n                }\n            }\n        }\n    \n        int trapped = 0;\n        int maxBoundary = 0;\n        const int dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};\n    \n        while (!pq.empty()) {\n            auto [h, r, c] = pq.top();\n            pq.pop();\n    \n            maxBoundary = max(maxBoundary, h);\n    \n            for (auto& d : dirs) {\n                int nr = r + d[0], nc = c + d[1];\n                if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc]) {\n                    vis[nr][nc] = true;\n                    if (g[nr][nc] < maxBoundary) {\n                        trapped += maxBoundary - g[nr][nc];\n                    }\n                    pq.push({g[nr][nc], nr, nc});\n                }\n            }\n        }\n        return trapped;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct Cell3D {\n        int h, r, c;\n    };\n    \n    struct Cell3DCompare {\n        bool operator()(const Cell3D& a, const Cell3D& b) const {\n            return a.h > b.h;\n        }\n    };\n    \n    int trapRainWater(vector<vector<int>>& g) {\n        int m = g.size(), n = g[0].size();\n        if (m <= 2 || n <= 2) return 0;\n    \n        priority_queue<Cell3D, vector<Cell3D>, Cell3DCompare> pq;\n        vector<vector<bool>> vis(m, vector<bool>(n, false));\n    \n        for (int r = 0; r < m; ++r) {\n            for (int c = 0; c < n; ++c) {\n                if (r == 0 || r == m - 1 || c == 0 || c == n - 1) {\n                    pq.push({g[r][c], r, c});\n                    vis[r][c] = true;\n                }\n            }\n        }\n    \n        int trapped = 0;\n        int maxBoundary = 0;\n        const int dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};\n    \n        while (!pq.empty()) {\n            auto [h, r, c] = pq.top();\n            pq.pop();\n    \n            maxBoundary = max(maxBoundary, h);\n    \n            for (auto& d : dirs) {\n                int nr = r + d[0], nc = c + d[1];\n                if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc]) {\n                    vis[nr][nc] = true;\n                    if (g[nr][nc] < maxBoundary) {\n                        trapped += maxBoundary - g[nr][nc];\n                    }\n                    pq.push({g[nr][nc], nr, nc});\n                }\n            }\n        }\n        return trapped;\n    }\n};",
+    "summary": "3D Min-Heap Boundary Inward Propagation"
   },
   {
     "id": 160,
@@ -3337,7 +3496,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-average-pass-ratio/",
-    "code": "class Solution {\npublic:\n    struct ClassGain {\n        int p, t;\n        double gain() const {\n            return (double)(p + 1) / (t + 1) - (double)p / t;\n        }\n    };\n    \n    struct ClassGainCompare {\n        bool operator()(const ClassGain& a, const ClassGain& b) const {\n            return a.gain() < b.gain(); // max-heap by marginal gain\n        }\n    };\n    \n    double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {\n        priority_queue<ClassGain, vector<ClassGain>, ClassGainCompare> pq;\n        for (const auto& c : classes) {\n            pq.push({c[0], c[1]});\n        }\n    \n        while (extraStudents-- > 0) {\n            auto top = pq.top();\n            pq.pop();\n            top.p++;\n            top.t++;\n            pq.push(top);\n        }\n    \n        double sumRatio = 0.0;\n        while (!pq.empty()) {\n            auto top = pq.top();\n            pq.pop();\n            sumRatio += (double)top.p / top.t;\n        }\n        return sumRatio / classes.size();\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct ClassGain {\n        int p, t;\n        double gain() const {\n            return (double)(p + 1) / (t + 1) - (double)p / t;\n        }\n    };\n    \n    struct ClassGainCompare {\n        bool operator()(const ClassGain& a, const ClassGain& b) const {\n            return a.gain() < b.gain(); // max-heap by marginal gain\n        }\n    };\n    \n    double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {\n        priority_queue<ClassGain, vector<ClassGain>, ClassGainCompare> pq;\n        for (const auto& c : classes) {\n            pq.push({c[0], c[1]});\n        }\n    \n        while (extraStudents-- > 0) {\n            auto top = pq.top();\n            pq.pop();\n            top.p++;\n            top.t++;\n            pq.push(top);\n        }\n    \n        double sumRatio = 0.0;\n        while (!pq.empty()) {\n            auto top = pq.top();\n            pq.pop();\n            sumRatio += (double)top.p / top.t;\n        }\n        return sumRatio / classes.size();\n    }\n};",
+    "summary": "Max-Heap of Marginal Gain (gain delta)"
   },
   {
     "id": 161,
@@ -3358,7 +3518,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/total-cost-to-hire-k-workers/",
-    "code": "class Solution {\npublic:\n    long long totalCost(vector<int>& costs, int k, int candidates) {\n        int n = costs.size();\n        priority_queue<int, vector<int>, greater<int>> leftPq, rightPq;\n    \n        int l = 0, r = n - 1;\n    \n        for (int i = 0; i < candidates && l <= r; ++i) {\n            leftPq.push(costs[l++]);\n        }\n        for (int i = 0; i < candidates && l <= r; ++i) {\n            rightPq.push(costs[r--]);\n        }\n    \n        long long ans = 0;\n    \n        while (k-- > 0) {\n            int leftVal = leftPq.empty() ? INT_MAX : leftPq.top();\n            int rightVal = rightPq.empty() ? INT_MAX : rightPq.top();\n    \n            if (leftVal <= rightVal) {\n                ans += leftVal;\n                leftPq.pop();\n                if (l <= r) {\n                    leftPq.push(costs[l++]);\n                }\n            } else {\n                ans += rightVal;\n                rightPq.pop();\n                if (l <= r) {\n                    rightPq.push(costs[r--]);\n                }\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    long long totalCost(vector<int>& costs, int k, int candidates) {\n        int n = costs.size();\n        priority_queue<int, vector<int>, greater<int>> leftPq, rightPq;\n    \n        int l = 0, r = n - 1;\n    \n        for (int i = 0; i < candidates && l <= r; ++i) {\n            leftPq.push(costs[l++]);\n        }\n        for (int i = 0; i < candidates && l <= r; ++i) {\n            rightPq.push(costs[r--]);\n        }\n    \n        long long ans = 0;\n    \n        while (k-- > 0) {\n            int leftVal = leftPq.empty() ? INT_MAX : leftPq.top();\n            int rightVal = rightPq.empty() ? INT_MAX : rightPq.top();\n    \n            if (leftVal <= rightVal) {\n                ans += leftVal;\n                leftPq.pop();\n                if (l <= r) {\n                    leftPq.push(costs[l++]);\n                }\n            } else {\n                ans += rightVal;\n                rightPq.pop();\n                if (l <= r) {\n                    rightPq.push(costs[r--]);\n                }\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Two Min-Heaps from Front and Back Candidates"
   },
   {
     "id": 162,
@@ -3379,7 +3540,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/hand-of-straights/",
-    "code": "class Solution {\npublic:\n    bool isNStraightHand(vector<int>& hand, int groupSize) {\n        if ((int)hand.size() % groupSize != 0) return false;\n    \n        map<int, int> mp;\n        for (int x : hand) mp[x]++;\n    \n        while (!mp.empty()) {\n            int start = mp.begin()->first;\n            for (int i = 0; i < groupSize; ++i) {\n                int card = start + i;\n                if (!mp.count(card)) return false;\n                if (--mp[card] == 0) {\n                    mp.erase(card);\n                }\n            }\n        }\n        return true;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool isNStraightHand(vector<int>& hand, int groupSize) {\n        if ((int)hand.size() % groupSize != 0) return false;\n    \n        map<int, int> mp;\n        for (int x : hand) mp[x]++;\n    \n        while (!mp.empty()) {\n            int start = mp.begin()->first;\n            for (int i = 0; i < groupSize; ++i) {\n                int card = start + i;\n                if (!mp.count(card)) return false;\n                if (--mp[card] == 0) {\n                    mp.erase(card);\n                }\n            }\n        }\n        return true;\n    }\n};",
+    "summary": "Ordered Map / Hash Map + Min-Deque"
   },
   {
     "id": 163,
@@ -3400,7 +3562,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/valid-arrangement-of-pairs/",
-    "code": "class SolutionValidArrangement {\n    unordered_map<int, vector<int>> adj;\n    vector<int> path;\n\n    void dfs(int u) {\n        auto& edges = adj[u];\n        while (!edges.empty()) {\n            int v = edges.back();\n            edges.pop_back();\n            dfs(v);\n        }\n        path.push_back(u);\n    }\n\npublic:\n    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {\n        unordered_map<int, int> inDeg, outDeg;\n        for (const auto& p : pairs) {\n            adj[p[0]].push_back(p[1]);\n            outDeg[p[0]]++;\n            inDeg[p[1]]++;\n        }\n\n        int startNode = pairs[0][0];\n        for (const auto& [node, out] : outDeg) {\n            if (out - inDeg[node] == 1) {\n                startNode = node;\n                break;\n            }\n        }\n\n        path.clear();\n        dfs(startNode);\n        reverse(path.begin(), path.end());\n\n        vector<vector<int>> ans;\n        for (int i = 0; i < (int)path.size() - 1; ++i) {\n            ans.push_back({path[i], path[i + 1]});\n        }\n        return ans;\n    }\n};"
+    "code": "class SolutionValidArrangement {\n    unordered_map<int, vector<int>> adj;\n    vector<int> path;\n\n    void dfs(int u) {\n        auto& edges = adj[u];\n        while (!edges.empty()) {\n            int v = edges.back();\n            edges.pop_back();\n            dfs(v);\n        }\n        path.push_back(u);\n    }\n\npublic:\n    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {\n        unordered_map<int, int> inDeg, outDeg;\n        for (const auto& p : pairs) {\n            adj[p[0]].push_back(p[1]);\n            outDeg[p[0]]++;\n            inDeg[p[1]]++;\n        }\n\n        int startNode = pairs[0][0];\n        for (const auto& [node, out] : outDeg) {\n            if (out - inDeg[node] == 1) {\n                startNode = node;\n                break;\n            }\n        }\n\n        path.clear();\n        dfs(startNode);\n        reverse(path.begin(), path.end());\n\n        vector<vector<int>> ans;\n        for (int i = 0; i < (int)path.size() - 1; ++i) {\n            ans.push_back({path[i], path[i + 1]});\n        }\n        return ans;\n    }\n};",
+    "summary": "Hierholzer's Eulerian Path Algorithm"
   },
   {
     "id": 164,
@@ -3421,7 +3584,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/patching-array/",
-    "code": "class Solution {\npublic:\n    int furthestBuilding(vector<int>& h, int bricks, int ladders) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs\n    \n        for (int i = 0; i < (int)h.size() - 1; ++i) {\n            int diff = h[i + 1] - h[i];\n            if (diff > 0) {\n                pq.push(diff);\n                if ((int)pq.size() > ladders) {\n                    bricks -= pq.top();\n                    pq.pop();\n                }\n                if (bricks < 0) {\n                    return i;\n                }\n            }\n        }\n        return (int)h.size() - 1;\n    }\n};"
+    "code": "class Solution {\npublic:\n    int furthestBuilding(vector<int>& h, int bricks, int ladders) {\n        priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs\n    \n        for (int i = 0; i < (int)h.size() - 1; ++i) {\n            int diff = h[i + 1] - h[i];\n            if (diff > 0) {\n                pq.push(diff);\n                if ((int)pq.size() > ladders) {\n                    bricks -= pq.top();\n                    pq.pop();\n                }\n                if (bricks < 0) {\n                    return i;\n                }\n            }\n        }\n        return (int)h.size() - 1;\n    }\n};",
+    "summary": "Greedy Missing Range Doubling (miss += miss)"
   },
   {
     "id": 165,
@@ -3442,7 +3606,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/wiggle-subsequence/",
-    "code": "class Solution {\npublic:\n    int wiggleMaxLength(vector<int>& a) {\n        int n = a.size();\n        if (n < 2) return n;\n    \n        int up = 1, down = 1;\n        for (int i = 1; i < n; ++i) {\n            if (a[i] > a[i - 1]) {\n                up = down + 1;\n            } else if (a[i] < a[i - 1]) {\n                down = up + 1;\n            }\n        }\n        return max(up, down);\n    }\n};"
+    "code": "class Solution {\npublic:\n    int wiggleMaxLength(vector<int>& a) {\n        int n = a.size();\n        if (n < 2) return n;\n    \n        int up = 1, down = 1;\n        for (int i = 1; i < n; ++i) {\n            if (a[i] > a[i - 1]) {\n                up = down + 1;\n            } else if (a[i] < a[i - 1]) {\n                down = up + 1;\n            }\n        }\n        return max(up, down);\n    }\n};",
+    "summary": "Peak and Valley Alternating Flips"
   },
   {
     "id": 166,
@@ -3463,7 +3628,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/monotone-increasing-digits/",
-    "code": "class Solution {\npublic:\n    int monotoneIncreasingDigits(int n) {\n        string s = to_string(n);\n        int mark = s.size();\n    \n        for (int i = (int)s.size() - 1; i > 0; --i) {\n            if (s[i - 1] > s[i]) {\n                s[i - 1]--;\n                mark = i;\n            }\n        }\n    \n        for (int i = mark; i < (int)s.size(); ++i) {\n            s[i] = '9';\n        }\n        return stoi(s);\n    }\n};"
+    "code": "class Solution {\npublic:\n    int monotoneIncreasingDigits(int n) {\n        string s = to_string(n);\n        int mark = s.size();\n    \n        for (int i = (int)s.size() - 1; i > 0; --i) {\n            if (s[i - 1] > s[i]) {\n                s[i - 1]--;\n                mark = i;\n            }\n        }\n    \n        for (int i = mark; i < (int)s.size(); ++i) {\n            s[i] = '9';\n        }\n        return stoi(s);\n    }\n};",
+    "summary": "Right-to-Left Inversion + Set 9s"
   },
   {
     "id": 167,
@@ -3484,7 +3650,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/increasing-triplet-subsequence/",
-    "code": "class Solution {\npublic:\n    bool increasingTriplet(vector<int>& nums) {\n        int first = INT_MAX, second = INT_MAX;\n    \n        for (int x : nums) {\n            if (x <= first) {\n                first = x;\n            } else if (x <= second) {\n                second = x;\n            } else {\n                return true; // x > second > first\n            }\n        }\n        return false;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool increasingTriplet(vector<int>& nums) {\n        int first = INT_MAX, second = INT_MAX;\n    \n        for (int x : nums) {\n            if (x <= first) {\n                first = x;\n            } else if (x <= second) {\n                second = x;\n            } else {\n                return true; // x > second > first\n            }\n        }\n        return false;\n    }\n};",
+    "summary": "Two Running Minimum Variables (first, second)"
   },
   {
     "id": 168,
@@ -3505,7 +3672,8 @@ const PROBLEMS_DATA = [
     "completed": false,
     "starred": false,
     "url": "https://leetcode.com/problems/maximum-length-of-pair-chain/",
-    "code": "class Solution {\npublic:\n    bool comparePairChainEnd(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int findLongestChain(vector<vector<int>>& pairs) {\n        sort(pairs.begin(), pairs.end(), comparePairChainEnd);\n    \n        int ans = 0;\n        int curEnd = -1e9;\n    \n        for (const auto& p : pairs) {\n            if (p[0] > curEnd) {\n                ans++;\n                curEnd = p[1];\n            }\n        }\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool comparePairChainEnd(const vector<int>& a, const vector<int>& b) {\n        return a[1] < b[1];\n    }\n    \n    int findLongestChain(vector<vector<int>>& pairs) {\n        sort(pairs.begin(), pairs.end(), comparePairChainEnd);\n    \n        int ans = 0;\n        int curEnd = -1e9;\n    \n        for (const auto& p : pairs) {\n            if (p[0] > curEnd) {\n                ans++;\n                curEnd = p[1];\n            }\n        }\n        return ans;\n    }\n};",
+    "summary": "Sort by Second Coordinate + Interval Scan"
   },
   {
     "id": 169,
@@ -3523,10 +3691,11 @@ const PROBLEMS_DATA = [
       "Apply Longest Increasing Subsequence (LIS) on heights using binary search patience sorting.",
       "Finds maximum nested envelopes in O(N log N) time."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "https://leetcode.com/problems/russian-doll-envelopes/",
-    "code": "class Solution {\npublic:\n    bool compareEnvelopes(const vector<int>& a, const vector<int>& b) {\n        if (a[0] != b[0]) return a[0] < b[0]; // width ascending\n        return a[1] > b[1];                   // height descending\n    }\n    \n    int maxEnvelopes(vector<vector<int>>& env) {\n        sort(env.begin(), env.end(), compareEnvelopes);\n    \n        vector<int> tails;\n        for (const auto& e : env) {\n            int h = e[1];\n            auto it = lower_bound(tails.begin(), tails.end(), h);\n            if (it == tails.end()) {\n                tails.push_back(h);\n            } else {\n                *it = h;\n            }\n        }\n        return tails.size();\n    }\n};"
+    "code": "class Solution {\npublic:\n    bool compareEnvelopes(const vector<int>& a, const vector<int>& b) {\n        if (a[0] != b[0]) return a[0] < b[0]; // width ascending\n        return a[1] > b[1];                   // height descending\n    }\n    \n    int maxEnvelopes(vector<vector<int>>& env) {\n        sort(env.begin(), env.end(), compareEnvelopes);\n    \n        vector<int> tails;\n        for (const auto& e : env) {\n            int h = e[1];\n            auto it = lower_bound(tails.begin(), tails.end(), h);\n            if (it == tails.end()) {\n                tails.push_back(h);\n            } else {\n                *it = h;\n            }\n        }\n        return tails.size();\n    }\n};",
+    "summary": "Sort (W asc, H desc) + LIS on Height"
   },
   {
     "id": 170,
@@ -3544,10 +3713,11 @@ const PROBLEMS_DATA = [
       "Maintain running boundaries or heap state to validate local feasibility without backtracking.",
       "Achieves optimal runtime in two-way min/max running bounds time complexity."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/shortest-unsorted-continuous-subarray/",
-    "code": "class Solution {\npublic:\n    int findUnsortedSubarray(vector<int>& a) {\n        int n = a.size();\n        int curMax = INT_MIN, right = -1;\n        int curMin = INT_MAX, left = -1;\n    \n        for (int i = 0; i < n; ++i) {\n            curMax = max(curMax, a[i]);\n            if (a[i] < curMax) {\n                right = i;\n            }\n        }\n    \n        for (int i = n - 1; i >= 0; --i) {\n            curMin = min(curMin, a[i]);\n            if (a[i] > curMin) {\n                left = i;\n            }\n        }\n    \n        return (right == -1 ? 0 : right - left + 1);\n    }\n};"
+    "code": "class Solution {\npublic:\n    int findUnsortedSubarray(vector<int>& a) {\n        int n = a.size();\n        int curMax = INT_MIN, right = -1;\n        int curMin = INT_MAX, left = -1;\n    \n        for (int i = 0; i < n; ++i) {\n            curMax = max(curMax, a[i]);\n            if (a[i] < curMax) {\n                right = i;\n            }\n        }\n    \n        for (int i = n - 1; i >= 0; --i) {\n            curMin = min(curMin, a[i]);\n            if (a[i] > curMin) {\n                left = i;\n            }\n        }\n    \n        return (right == -1 ? 0 : right - left + 1);\n    }\n};",
+    "summary": "Two-Way Min/Max Running Bounds"
   },
   {
     "id": 171,
@@ -3565,10 +3735,11 @@ const PROBLEMS_DATA = [
       "Repeatedly merge two lowest frequency trees into a combined node until one tree remains.",
       "Assign '0' to left branch and '1' to right branch; produces optimal variable-length codes."
     ],
-    "completed": false,
-    "starred": false,
+    "completed": true,
+    "starred": true,
     "url": "",
-    "code": "class Solution {\npublic:\n    struct HuffmanNode {\n        char data;\n        int freq;\n        HuffmanNode *left, *right;\n        HuffmanNode(char d, int f) : data(d), freq(f), left(nullptr), right(nullptr) {}\n    };\n    \n    struct HuffmanNodeCompare {\n        bool operator()(HuffmanNode* a, HuffmanNode* b) const {\n            return a->freq > b->freq; // min-heap\n        }\n    };\n    \n    void buildHuffmanCodes(HuffmanNode* root, string code, vector<string>& ans) {\n        if (!root) return;\n        if (!root->left && !root->right) {\n            ans.push_back(code);\n            return;\n        }\n        buildHuffmanCodes(root->left, code + \"0\", ans);\n        buildHuffmanCodes(root->right, code + \"1\", ans);\n    }\n    \n    vector<string> huffmanCodes(string s, vector<int>& f, int n) {\n        priority_queue<HuffmanNode*, vector<HuffmanNode*>, HuffmanNodeCompare> pq;\n        for (int i = 0; i < n; ++i) {\n            pq.push(new HuffmanNode(s[i], f[i]));\n        }\n    \n        while (pq.size() > 1) {\n            HuffmanNode* l = pq.top(); pq.pop();\n            HuffmanNode* r = pq.top(); pq.pop();\n    \n            HuffmanNode* parent = new HuffmanNode('$', l->freq + r->freq);\n            parent->left = l;\n            parent->right = r;\n            pq.push(parent);\n        }\n    \n        vector<string> ans;\n        buildHuffmanCodes(pq.top(), \"\", ans);\n        return ans;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct HuffmanNode {\n        char data;\n        int freq;\n        HuffmanNode *left, *right;\n        HuffmanNode(char d, int f) : data(d), freq(f), left(nullptr), right(nullptr) {}\n    };\n    \n    struct HuffmanNodeCompare {\n        bool operator()(HuffmanNode* a, HuffmanNode* b) const {\n            return a->freq > b->freq; // min-heap\n        }\n    };\n    \n    void buildHuffmanCodes(HuffmanNode* root, string code, vector<string>& ans) {\n        if (!root) return;\n        if (!root->left && !root->right) {\n            ans.push_back(code);\n            return;\n        }\n        buildHuffmanCodes(root->left, code + \"0\", ans);\n        buildHuffmanCodes(root->right, code + \"1\", ans);\n    }\n    \n    vector<string> huffmanCodes(string s, vector<int>& f, int n) {\n        priority_queue<HuffmanNode*, vector<HuffmanNode*>, HuffmanNodeCompare> pq;\n        for (int i = 0; i < n; ++i) {\n            pq.push(new HuffmanNode(s[i], f[i]));\n        }\n    \n        while (pq.size() > 1) {\n            HuffmanNode* l = pq.top(); pq.pop();\n            HuffmanNode* r = pq.top(); pq.pop();\n    \n            HuffmanNode* parent = new HuffmanNode('$', l->freq + r->freq);\n            parent->left = l;\n            parent->right = r;\n            pq.push(parent);\n        }\n    \n        vector<string> ans;\n        buildHuffmanCodes(pq.top(), \"\", ans);\n        return ans;\n    }\n};",
+    "summary": "Min-Heap Prefix Code Construction"
   },
   {
     "id": 172,
@@ -3586,14 +3757,14 @@ const PROBLEMS_DATA = [
       "Greedily take entire items as long as remaining knapsack capacity allows.",
       "Take fractional slice of next item to fill exact remaining capacity."
     ],
-    "completed": false,
+    "completed": true,
     "starred": false,
     "url": "",
-    "code": "class Solution {\npublic:\n    struct KnapsackItem {\n        int value, weight;\n    };\n    \n    bool compareKnapsackRatio(const KnapsackItem& a, const KnapsackItem& b) {\n        double r1 = (double)a.value / a.weight;\n        double r2 = (double)b.value / b.weight;\n        return r1 > r2;\n    }\n    \n    double fractionalKnapsack(int w, vector<KnapsackItem>& arr, int n) {\n        sort(arr.begin(), arr.end(), compareKnapsackRatio);\n    \n        double totalVal = 0.0;\n        for (int i = 0; i < n && w > 0; ++i) {\n            if (w >= arr[i].weight) {\n                totalVal += arr[i].value;\n                w -= arr[i].weight;\n            } else {\n                totalVal += (double)arr[i].value * w / arr[i].weight;\n                w = 0;\n                break;\n            }\n        }\n        return totalVal;\n    }\n};"
+    "code": "class Solution {\npublic:\n    struct KnapsackItem {\n        int value, weight;\n    };\n    \n    bool compareKnapsackRatio(const KnapsackItem& a, const KnapsackItem& b) {\n        double r1 = (double)a.value / a.weight;\n        double r2 = (double)b.value / b.weight;\n        return r1 > r2;\n    }\n    \n    double fractionalKnapsack(int w, vector<KnapsackItem>& arr, int n) {\n        sort(arr.begin(), arr.end(), compareKnapsackRatio);\n    \n        double totalVal = 0.0;\n        for (int i = 0; i < n && w > 0; ++i) {\n            if (w >= arr[i].weight) {\n                totalVal += arr[i].value;\n                w -= arr[i].weight;\n            } else {\n                totalVal += (double)arr[i].value * w / arr[i].weight;\n                w = 0;\n                break;\n            }\n        }\n        return totalVal;\n    }\n};",
+    "summary": "Sort by Value/Weight Ratio Greedy Fill"
   },
   {
     "id": 173,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-1",
     "lcNum": "LC 1208",
@@ -3602,21 +3773,20 @@ const PROBLEMS_DATA = [
     "pattern": "Sliding Window with Cost Budget",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Find maximum length substring where conversion cost abs(s[i] - t[i]) <= maxCost.",
     "intuition": [
       "Maintain a sliding window [l...r] expanding to the right.",
       "Add the conversion cost abs(s[r] - t[r]) to the running cost.",
       "If cost exceeds maxCost, shrink window from left until cost is valid.",
       "Update max window length at each step."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/get-equal-substrings-within-budget/",
     "code": "class Solution1 {\npublic:\n    int equalSubstring(string s, string t, int maxCost) {\n        int l = 0, cost = 0, ans = 0;\n\n        for (int r = 0; r < (int)s.size(); r++) {\n            cost += abs(s[r] - t[r]);\n\n            while (cost > maxCost) {\n                cost -= abs(s[l] - t[l]);\n                l++;\n            }\n\n            ans = max(ans, r - l + 1);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Find maximum length substring where conversion cost abs(s[i] - t[i]) <= maxCost."
   },
   {
     "id": 174,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-2",
     "lcNum": "MS OA",
@@ -3625,21 +3795,20 @@ const PROBLEMS_DATA = [
     "pattern": "26-Bit Parity Mask + HashMap",
     "time": "O(totalChars + 26N)",
     "space": "O(N)",
-    "summary": "Count pairs (i, j) whose concatenation can be rearranged into a palindrome.",
     "intuition": [
       "A concatenated string can form a palindrome iff at most one character has odd frequency.",
       "Represent odd/even character frequencies using a 26-bit binary mask (bit i = 1 if freq is odd).",
       "For each string mask, valid pairs match either the exact same mask (all even) or masks differing by 1 bit (1 odd).",
       "Use an unordered_map to accumulate counts of seen masks dynamically."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=palindrome+pairs",
     "code": "class Solution2 {\npublic:\n    long long countPalindromePairs(vector<string>& words) {\n        unordered_map<int, long long> freq;\n        long long ans = 0;\n\n        for (string& s : words) {\n            int mask = 0;\n\n            for (char c : s)\n                mask ^= (1 << (c - 'a'));\n\n            // All frequencies become even\n            ans += freq[mask];\n\n            // Exactly one character has odd frequency\n            for (int i = 0; i < 26; i++)\n                ans += freq[mask ^ (1 << i)];\n\n            freq[mask]++;\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Count pairs (i, j) whose concatenation can be rearranged into a palindrome."
   },
   {
     "id": 175,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-3",
     "lcNum": "MS OA",
@@ -3648,21 +3817,20 @@ const PROBLEMS_DATA = [
     "pattern": "Opposite Pair Sum + Circular Sliding Window",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "Choose K consecutive sectors in circular farm; opposite sectors harvested too. Maximize profit.",
     "intuition": [
       "For each sector i, harvesting it always includes sector (i + N/2) % N.",
       "Precompute combined value[i] = profit[i] + profit[(i + N/2) % N].",
       "The problem reduces to finding maximum sum of K consecutive elements in circular array value[].",
       "Use circular sliding window over 2N or modulo arithmetic."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution3 {\npublic:\n    long long maxProfit(vector<int>& profit, int K) {\n        int n = profit.size();\n        int half = n / 2;\n\n        vector<long long> value(n);\n\n        for (int i = 0; i < n; i++)\n            value[i] = profit[i] + profit[(i + half) % n];\n\n        long long sum = 0;\n\n        for (int i = 0; i < K; i++)\n            sum += value[i];\n\n        long long ans = sum;\n\n        for (int start = 1; start < n; start++) {\n            sum -= value[start - 1];\n            sum += value[(start + K - 1) % n];\n\n            ans = max(ans, sum);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Choose K consecutive sectors in circular farm; opposite sectors harvested too. Maximize profit."
   },
   {
     "id": 176,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-4",
     "lcNum": "LC 3397",
@@ -3671,21 +3839,20 @@ const PROBLEMS_DATA = [
     "pattern": "Sort + Greedy Smallest Available Assignment",
     "time": "O(N log N)",
     "space": "O(1)",
-    "summary": "Change each element to x-1, x, or x+1 to maximize number of distinct elements.",
     "intuition": [
       "Sort nums in non-decreasing order.",
       "Greedily assign each number to the smallest possible value strictly greater than the last assigned value.",
       "Try x-1 > last, then x > last, then x+1 > last.",
       "This greedy choice leaves maximum headroom for subsequent larger numbers."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/maximum-number-of-distinct-elements-after-operations/",
     "code": "class Solution4 {\npublic:\n    int maxDistinctElements(vector<int>& nums) {\n        sort(nums.begin(), nums.end());\n\n        int ans = 0;\n        int last = INT_MIN;\n\n        for (int x : nums) {\n            if (x - 1 > last) {\n                last = x - 1;\n                ans++;\n            } else if (x > last) {\n                last = x;\n                ans++;\n            } else if (x + 1 > last) {\n                last = x + 1;\n                ans++;\n            }\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Change each element to x-1, x, or x+1 to maximize number of distinct elements."
   },
   {
     "id": 177,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-5",
     "lcNum": "MS OA",
@@ -3694,21 +3861,20 @@ const PROBLEMS_DATA = [
     "pattern": "Rearrangement Inequality (A2 asc, A1 desc)",
     "time": "O(N log N)",
     "space": "O(1)",
-    "summary": "Rearrange A1 and A2 independently to maximize sum of i * (A2[i] - A1[i]).",
     "intuition": [
       "Expression expands to sum(i * A2[i]) - sum(i * A1[i]).",
       "By Rearrangement Inequality, sum(i * A2[i]) is maximized when A2 is sorted ascending (large weights on large indices).",
       "sum(i * A1[i]) is minimized when A1 is sorted descending (large values on smallest indices).",
       "Sort A2 ascending, A1 descending, then compute weighted difference."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution5 {\npublic:\n    long long maximizeWeightedDifference(\n        vector<int>& A1,\n        vector<int>& A2\n    ) {\n        sort(A1.rbegin(), A1.rend());\n        sort(A2.begin(), A2.end());\n\n        long long ans = 0;\n\n        for (int i = 0; i < (int)A1.size(); i++)\n            ans += 1LL * i * (A2[i] - A1[i]);\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Rearrange A1 and A2 independently to maximize sum of i * (A2[i] - A1[i])."
   },
   {
     "id": 178,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-6",
     "lcNum": "MS OA / LC 359",
@@ -3717,21 +3883,20 @@ const PROBLEMS_DATA = [
     "pattern": "Per-User Timestamp Deque / Queue",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "Accept request if user has made < K successful requests in [time - T, time].",
     "intuition": [
       "Store per-user timestamps of accepted requests in an unordered_map<string, queue<int>>.",
       "For each incoming request at 'time', pop timestamps older than time - T from the front.",
       "If queue size < K, accept request, push timestamp into queue, and record 1.",
       "Otherwise, reject request (do NOT push rejected timestamp) and record 0."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/logger-rate-limiter/",
     "code": "class Solution6 {\npublic:\n    vector<int> rateLimiter(\n        vector<string>& users,\n        vector<int>& times,\n        int T,\n        int K\n    ) {\n        unordered_map<string, queue<int>> mp;\n        vector<int> ans;\n\n        for (int i = 0; i < (int)users.size(); i++) {\n            auto& q = mp[users[i]];\n            int time = times[i];\n\n            while (!q.empty() && q.front() < time - T)\n                q.pop();\n\n            if ((int)q.size() < K) {\n                q.push(time);\n                ans.push_back(1);\n            } else {\n                ans.push_back(0);\n            }\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Accept request if user has made < K successful requests in [time - T, time]."
   },
   {
     "id": 179,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-7",
     "lcNum": "MS OA",
@@ -3740,21 +3905,20 @@ const PROBLEMS_DATA = [
     "pattern": "DSU with Max Node Tracking per Component",
     "time": "O((N + Q) \u03b1(N))",
     "space": "O(N)",
-    "summary": "Component strength = largest node in it. After each edge, return sum of component strengths.",
     "intuition": [
       "Initially each node i is its own component with strength i. Total sum = N*(N+1)/2.",
       "When connecting edge (u, v), find roots a = find(u) and b = find(v).",
       "If a != b, remove their previous individual contributions: total -= mx[a] + mx[b].",
       "Merge components and update root maximum mx[root] = max(mx[a], mx[b]), then total += mx[root]."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution7 {\n    vector<int> parent, sz, mx;\n\n    int find(int x) {\n        return parent[x] == x\n            ? x\n            : parent[x] = find(parent[x]);\n    }\n\npublic:\n    vector<long long> getStrength(\n        int n,\n        vector<int>& from,\n        vector<int>& to\n    ) {\n        parent.resize(n + 1);\n        sz.assign(n + 1, 1);\n        mx.resize(n + 1);\n\n        long long total = 0;\n\n        for (int i = 1; i <= n; i++) {\n            parent[i] = i;\n            mx[i] = i;\n            total += i;\n        }\n\n        vector<long long> ans;\n\n        for (int i = 0; i < (int)from.size(); i++) {\n            int a = find(from[i]);\n            int b = find(to[i]);\n\n            if (a != b) {\n                total -= mx[a] + mx[b];\n\n                if (sz[a] < sz[b])\n                    swap(a, b);\n\n                parent[b] = a;\n                sz[a] += sz[b];\n                mx[a] = max(mx[a], mx[b]);\n\n                total += mx[a];\n            }\n\n            ans.push_back(total);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Component strength = largest node in it. After each edge, return sum of component strengths."
   },
   {
     "id": 180,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-8",
     "lcNum": "MS OA",
@@ -3763,7 +3927,6 @@ const PROBLEMS_DATA = [
     "pattern": "Remainder Frequency Counting & Dynamic Pair Table",
     "time": "O(N \u00d7 D)",
     "space": "O(D)",
-    "summary": "Count triplets i < j < k such that (arr[i] + arr[j] + arr[k]) % D == 0.",
     "intuition": [
       "Maintain frequency of single elements mod D in count[rem], and pairs mod D in pairCount[rem].",
       "For current number with remainder r, it completes any pair whose sum mod D is (D - r) % D.",
@@ -3771,14 +3934,14 @@ const PROBLEMS_DATA = [
       "Update pairCount by adding combinations of current r with each previous count[rem].",
       "Increment count[r]."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution8 {\npublic:\n    long long countTriplets(vector<int>& nums, int d) {\n        vector<long long> count(d, 0);\n        vector<long long> pairCount(d, 0);\n\n        long long ans = 0;\n\n        for (int x : nums) {\n            int r = ((x % d) + d) % d;\n\n            // Existing pairs that need remainder -r\n            ans += pairCount[(d - r) % d];\n\n            // Create new pairs with previous elements\n            for (int rem = 0; rem < d; rem++) {\n                pairCount[(rem + r) % d] += count[rem];\n            }\n\n            count[r]++;\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Count triplets i < j < k such that (arr[i] + arr[j] + arr[k]) % D == 0."
   },
   {
     "id": 181,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-9",
     "lcNum": "MS OA",
@@ -3787,21 +3950,20 @@ const PROBLEMS_DATA = [
     "pattern": "Arithmetic Progression Formula i..j and j-1..k",
     "time": "O(1)",
     "space": "O(1)",
-    "summary": "Given i, j, k with j >= i and j >= k, find sum of i..(j) + (j-1)..k.",
     "intuition": [
       "The sequence rises from i to j by step 1, then descends from j-1 down to k by step 1.",
       "Use arithmetic progression sum formula: rangeSum(l, r) = (l + r) * (r - l + 1) / 2.",
       "Total = rangeSum(i, j) + rangeSum(k, j - 1).",
       "Runs in O(1) time and space."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution9 {\n    long long rangeSum(long long l, long long r) {\n        if (l > r) return 0;\n\n        return (l + r) * (r - l + 1) / 2;\n    }\n\npublic:\n    long long sequenceSum(int i, int j, int k) {\n        return rangeSum(i, j)\n             + rangeSum(k, j - 1);\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given i, j, k with j >= i and j >= k, find sum of i..(j) + (j-1)..k."
   },
   {
     "id": 182,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-10",
     "lcNum": "MS OA",
@@ -3810,21 +3972,20 @@ const PROBLEMS_DATA = [
     "pattern": "Brute-force Substring Placement + Greedy 'a' Fill",
     "time": "O(N\u00b2)",
     "space": "O(N)",
-    "summary": "Replace '?' so that 'substr' appears contiguously and result is lexicographically smallest.",
     "intuition": [
       "Iterate over all valid start positions where 'sub' can be placed in 'word'.",
       "Check if 'sub' can match at 'start' (each character is '?' or matches sub[j]).",
       "If valid, fill remaining '?' with 'a' and lowercase all other letters.",
       "Track the lexicographically smallest candidate string found across all start positions."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution10 {\npublic:\n    string smallestString(string word, string sub) {\n        int n = word.size();\n        int m = sub.size();\n\n        string ans = \"\";\n\n        for (int start = 0; start + m <= n; start++) {\n            string cur = word;\n            bool ok = true;\n\n            for (int j = 0; j < m; j++) {\n                int pos = start + j;\n\n                if (cur[pos] != '?' &&\n                    tolower(cur[pos]) != sub[j]) {\n                    ok = false;\n                    break;\n                }\n\n                cur[pos] = sub[j];\n            }\n\n            if (!ok)\n                continue;\n\n            for (char& c : cur) {\n                if (c == '?')\n                    c = 'a';\n                else\n                    c = tolower(c);\n            }\n\n            if (ans.empty() || cur < ans)\n                ans = cur;\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Replace '?' so that 'substr' appears contiguously and result is lexicographically smallest."
   },
   {
     "id": 183,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-11",
     "lcNum": "MS OA",
@@ -3833,21 +3994,20 @@ const PROBLEMS_DATA = [
     "pattern": "Running Monotonic Streak Counter",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Count contiguous subarrays of exactly length K that are strictly increasing.",
     "intuition": [
       "Maintain a running streak counter of strictly increasing adjacent elements.",
       "If nums[i] > nums[i-1], streak increments; otherwise streak resets to 1.",
       "Whenever streak >= K, exactly one valid subarray of length K ends at index i.",
       "Single linear scan in O(N) time and O(1) space."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution11 {\npublic:\n    int countIncreasing(vector<int>& nums, int k) {\n        int n = nums.size();\n\n        if (k == 1)\n            return n;\n\n        int streak = 1;\n        int ans = 0;\n\n        for (int i = 1; i < n; i++) {\n            if (nums[i] > nums[i - 1])\n                streak++;\n            else\n                streak = 1;\n\n            if (streak >= k)\n                ans++;\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Count contiguous subarrays of exactly length K that are strictly increasing."
   },
   {
     "id": 184,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-12",
     "lcNum": "LC 647",
@@ -3856,21 +4016,20 @@ const PROBLEMS_DATA = [
     "pattern": "Expand Around Center (Odd and Even)",
     "time": "O(N\u00b2)",
     "space": "O(1)",
-    "summary": "Count all palindromic substrings in string s.",
     "intuition": [
       "Every palindromic substring has a center (single char or between two chars).",
       "There are 2N - 1 possible centers.",
       "Expand outward from each center while characters match s[l] == s[r].",
       "Increment answer for each valid expansion."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/palindromic-substrings/",
     "code": "class Solution12 {\npublic:\n    int countSubstrings(string s) {\n        int n = s.size();\n        int ans = 0;\n\n        for (int center = 0; center < 2 * n - 1; center++) {\n            int l = center / 2;\n            int r = l + center % 2;\n\n            while (l >= 0 && r < n &&\n                   s[l] == s[r]) {\n                ans++;\n                l--;\n                r++;\n            }\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Count all palindromic substrings in string s."
   },
   {
     "id": 185,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-13",
     "lcNum": "LC 1229 / MS OA",
@@ -3879,7 +4038,6 @@ const PROBLEMS_DATA = [
     "pattern": "Sort + Merge Busy Intervals + Gap Scan",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "Find earliest continuous interval of length K where all people are free.",
     "intuition": [
       "Sort all busy intervals by start time.",
       "Merge overlapping or contiguous busy intervals.",
@@ -3887,14 +4045,14 @@ const PROBLEMS_DATA = [
       "If start - freeStart >= K, freeStart is the earliest available slot.",
       "Update freeStart = max(freeStart, end)."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/meeting-scheduler/",
     "code": "class Solution13 {\npublic:\n    int earliestFreeSlot(\n        vector<pair<int, int>>& intervals,\n        int k\n    ) {\n        sort(intervals.begin(), intervals.end());\n\n        vector<pair<int, int>> merged;\n\n        for (auto [start, end] : intervals) {\n            if (merged.empty() ||\n                start > merged.back().second) {\n                merged.push_back({start, end});\n            } else {\n                merged.back().second =\n                    max(merged.back().second, end);\n            }\n        }\n\n        int freeStart = 0;\n\n        for (auto [start, end] : merged) {\n            if (start - freeStart >= k)\n                return freeStart;\n\n            freeStart = max(freeStart, end);\n        }\n\n        return freeStart;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Find earliest continuous interval of length K where all people are free."
   },
   {
     "id": 186,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-14",
     "lcNum": "LC 2602",
@@ -3903,7 +4061,6 @@ const PROBLEMS_DATA = [
     "pattern": "Sort + Prefix Sums + Binary Search (lower_bound)",
     "time": "O((N + Q) log N)",
     "space": "O(N)",
-    "summary": "For every query q, compute sum of |price[i] - q| for all items.",
     "intuition": [
       "Sort price array and precompute prefix sums.",
       "For each query q, find split index idx = lower_bound(q).",
@@ -3911,14 +4068,14 @@ const PROBLEMS_DATA = [
       "Elements right of idx are >= q: cost is (prefix[n] - prefix[idx]) - q * (n - idx).",
       "Total cost is left + right in O(log N) per query."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-operations-to-make-all-array-elements-equal/",
     "code": "class Solution14 {\npublic:\n    vector<long long> solve(\n        vector<int>& price,\n        vector<int>& queries\n    ) {\n        sort(price.begin(), price.end());\n\n        int n = price.size();\n        vector<long long> prefix(n + 1);\n\n        for (int i = 0; i < n; i++)\n            prefix[i + 1] = prefix[i] + price[i];\n\n        vector<long long> ans;\n\n        for (int q : queries) {\n            int idx = lower_bound(\n                price.begin(),\n                price.end(),\n                q\n            ) - price.begin();\n\n            long long left =\n                1LL * q * idx - prefix[idx];\n\n            long long right =\n                prefix[n] - prefix[idx]\n                - 1LL * q * (n - idx);\n\n            ans.push_back(left + right);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "For every query q, compute sum of |price[i] - q| for all items."
   },
   {
     "id": 187,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-15",
     "lcNum": "LC 1631 / MS OA",
@@ -3927,21 +4084,20 @@ const PROBLEMS_DATA = [
     "pattern": "Minimax Dijkstra with Priority Queue",
     "time": "O((V + E) log V)",
     "space": "O(V)",
-    "summary": "Find path from source to destination minimizing the maximum edge weight encountered.",
     "intuition": [
       "Define distance as maximum edge weight along a path (bottleneck path / minimax).",
       "Initialize dist[] = infinity, dist[source] = 0.",
       "Use min-heap priority queue storing {stress, u}.",
       "Relax edges: nextStress = max(stress, weight). If nextStress < dist[v], update and push."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/path-with-minimum-effort/",
     "code": "class Solution15 {\npublic:\n    int minimumStress(\n        int n,\n        vector<vector<pair<int, int>>>& graph,\n        int source,\n        int destination\n    ) {\n        vector<int> dist(n, INT_MAX);\n\n        priority_queue<\n            pair<int, int>,\n            vector<pair<int, int>>,\n            greater<pair<int, int>>\n        > pq;\n\n        dist[source] = 0;\n        pq.push({0, source});\n\n        while (!pq.empty()) {\n            auto [stress, u] = pq.top();\n            pq.pop();\n\n            if (u == destination)\n                return stress;\n\n            if (stress != dist[u])\n                continue;\n\n            for (auto [v, weight] : graph[u]) {\n                int nextStress = max(stress, weight);\n\n                if (nextStress < dist[v]) {\n                    dist[v] = nextStress;\n                    pq.push({dist[v], v});\n                }\n            }\n        }\n\n        return -1;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Find path from source to destination minimizing the maximum edge weight encountered."
   },
   {
     "id": 188,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-16",
     "lcNum": "LC 2438",
@@ -3950,20 +4106,19 @@ const PROBLEMS_DATA = [
     "pattern": "Set Bit Extraction + Query Range Product",
     "time": "O(log N + Q)",
     "space": "O(log N)",
-    "summary": "Extract powers of 2 from set bits of n. Compute product from index l to r modulo mod.",
     "intuition": [
       "Iterate through bits of n: if bit is set, push (1LL << bit) into powers vector.",
       "The powers array is naturally sorted ascending.",
       "For each query (l, r, mod), compute product of powers[i] from l to r with modulo arithmetic."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/range-product-queries-of-powers/",
     "code": "class Solution16 {\npublic:\n    vector<int> productQueries(\n        int n,\n        vector<vector<int>>& queries\n    ) {\n        vector<long long> powers;\n\n        for (int bit = 0; bit < 31; bit++) {\n            if (n & (1 << bit))\n                powers.push_back(1LL << bit);\n        }\n\n        vector<int> ans;\n\n        for (auto& q : queries) {\n            int l = q[0];\n            int r = q[1];\n            int mod = q[2];\n\n            long long product = 1;\n\n            for (int i = l; i <= r; i++)\n                product = product * powers[i] % mod;\n\n            ans.push_back(product);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Extract powers of 2 from set bits of n. Compute product from index l to r modulo mod."
   },
   {
     "id": 189,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-17",
     "lcNum": "Standard / LC 1167",
@@ -3972,21 +4127,20 @@ const PROBLEMS_DATA = [
     "pattern": "Huffman Min-Heap Pair Summation",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "Repeatedly merge two smallest numbers with cost x + y until one number remains.",
     "intuition": [
       "Always merge the two smallest available numbers first (Huffman's greedy principle).",
       "Use a min-heap priority_queue to extract two minimums a and b.",
       "Cost adds a + b, and sum is pushed back into the heap.",
       "Repeat until heap size is 1."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-cost-to-connect-sticks/",
     "code": "class Solution17 {\npublic:\n    long long minimumCost(vector<int>& nums) {\n        priority_queue<\n            long long,\n            vector<long long>,\n            greater<long long>\n        > pq(nums.begin(), nums.end());\n\n        long long cost = 0;\n\n        while (pq.size() > 1) {\n            long long a = pq.top();\n            pq.pop();\n\n            long long b = pq.top();\n            pq.pop();\n\n            long long sum = a + b;\n\n            cost += sum;\n            pq.push(sum);\n        }\n\n        return cost;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Repeatedly merge two smallest numbers with cost x + y until one number remains."
   },
   {
     "id": 190,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-18",
     "lcNum": "LC 1665",
@@ -3995,20 +4149,19 @@ const PROBLEMS_DATA = [
     "pattern": "Greedy Ordering Comparator on (worstCase - actual)",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "Find minimum initial resources needed to complete all tasks in optimal order.",
     "intuition": [
       "To do task A then B, initial needed is max(worstCase[a], actual[a] + worstCase[b]).",
       "Sort tasks using comparator: ab = max(worstCase[a], actual[a] + worstCase[b]) < max(worstCase[b], actual[b] + worstCase[a]).",
       "Simulate sorted order tracking consumed and required peak initial resources."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-initial-energy-to-finish-tasks/",
     "code": "class Solution18 {\npublic:\n    long long minimumStartingResources(\n        vector<int>& worstCase,\n        vector<int>& actual\n    ) {\n        int n = worstCase.size();\n\n        vector<int> order(n);\n        iota(order.begin(), order.end(), 0);\n\n        sort(order.begin(), order.end(),\n            [&](int a, int b) {\n\n                long long ab = max(\n                    1LL * worstCase[a],\n                    1LL * actual[a] + worstCase[b]\n                );\n\n                long long ba = max(\n                    1LL * worstCase[b],\n                    1LL * actual[b] + worstCase[a]\n                );\n\n                return ab < ba;\n            }\n        );\n\n        long long consumed = 0;\n        long long initial = 0;\n\n        for (int i : order) {\n            initial = max(\n                initial,\n                consumed + worstCase[i]\n            );\n\n            consumed += actual[i];\n        }\n\n        return initial;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Find minimum initial resources needed to complete all tasks in optimal order."
   },
   {
     "id": 191,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-19",
     "lcNum": "MS OA",
@@ -4017,20 +4170,19 @@ const PROBLEMS_DATA = [
     "pattern": "Permutations of 3! = 6 Arrangements",
     "time": "O(1)",
     "space": "O(1)",
-    "summary": "Concatenate three strings a, b, c in an order that produces lexicographically smallest string.",
     "intuition": [
       "There are only 3! = 6 possible concatenation orders of 3 strings.",
       "Use next_permutation on array {a, b, c}.",
       "Track and return the minimum string lexicographically."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution19 {\npublic:\n    string smallestConcat(\n        string a,\n        string b,\n        string c\n    ) {\n        vector<string> v = {a, b, c};\n\n        string ans = a + b + c;\n\n        sort(v.begin(), v.end());\n\n        do {\n            string cur = v[0] + v[1] + v[2];\n            ans = min(ans, cur);\n        } while (next_permutation(v.begin(), v.end()));\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Concatenate three strings a, b, c in an order that produces lexicographically smallest string."
   },
   {
     "id": 192,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-20",
     "lcNum": "MS OA",
@@ -4039,21 +4191,20 @@ const PROBLEMS_DATA = [
     "pattern": "Circular Distance per Target Column",
     "time": "O(N \u00d7 M\u00b2)",
     "space": "O(1)",
-    "summary": "Cyclically shift matrix rows left/right to make at least one column all 1s with min cost.",
     "intuition": [
       "Try every column 'target' from 0 to M-1 as the candidate all-1 column.",
       "For each row, find the nearest 1 to 'target' using circular distance min(dist, M - dist).",
       "Sum minimum shifts for all rows. If any row has no 1, column is impossible.",
       "Return minimum total shifts over all viable target columns."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution20 {\npublic:\n    int minOperations(vector<vector<int>>& grid) {\n        int n = grid.size();\n        int m = grid[0].size();\n\n        int ans = INT_MAX;\n\n        for (int target = 0; target < m; target++) {\n            int total = 0;\n            bool possible = true;\n\n            for (int row = 0; row < n; row++) {\n                int best = INT_MAX;\n\n                for (int col = 0; col < m; col++) {\n                    if (grid[row][col] == 1) {\n                        int dist = abs(col - target);\n                        best = min(best, min(dist, m - dist));\n                    }\n                }\n\n                if (best == INT_MAX) {\n                    possible = false;\n                    break;\n                }\n\n                total += best;\n            }\n\n            if (possible)\n                ans = min(ans, total);\n        }\n\n        return ans == INT_MAX ? -1 : ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Cyclically shift matrix rows left/right to make at least one column all 1s with min cost."
   },
   {
     "id": 193,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-21",
     "lcNum": "LC 3136 variant",
@@ -4062,21 +4213,20 @@ const PROBLEMS_DATA = [
     "pattern": "Word Tokenization + Alphanumeric & Vowel/Consonant Check",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Validate that every word in sentence has length >= 3, is alphanumeric, and has >= 1 vowel and consonant.",
     "intuition": [
       "Tokenize sentence into words using stringstream.",
       "For each word, verify length >= 3 and each character is alphanumeric.",
       "Check presence of at least one vowel and at least one consonant.",
       "Return true iff every word satisfies all constraints."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/valid-word/",
     "code": "class Solution21 {\npublic:\n    bool validWord(string word) {\n        if (word.size() < 3)\n            return false;\n\n        bool vowel = false;\n        bool consonant = false;\n\n        string vowels = \"aeiouAEIOU\";\n\n        for (char c : word) {\n            if (!isalnum(c))\n                return false;\n\n            if (isalpha(c)) {\n                if (vowels.find(c) != string::npos)\n                    vowel = true;\n                else\n                    consonant = true;\n            }\n        }\n\n        return vowel && consonant;\n    }\n\n    bool validate(string sentence) {\n        stringstream ss(sentence);\n        string word;\n\n        while (ss >> word) {\n            if (!validWord(word))\n                return false;\n        }\n\n        return true;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Validate that every word in sentence has length >= 3, is alphanumeric, and has >= 1 vowel and consonant."
   },
   {
     "id": 194,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-22",
     "lcNum": "Standard DP",
@@ -4085,21 +4235,20 @@ const PROBLEMS_DATA = [
     "pattern": "1D Space-Optimized DP (Reverse Scan)",
     "time": "O(N \u00d7 W)",
     "space": "O(W)",
-    "summary": "Maximize total value without exceeding knapsack capacity (each item at most once).",
     "intuition": [
       "Use 1D DP array of size capacity + 1.",
       "For each item, iterate capacity backwards from capacity down to weight[i].",
       "Backward iteration ensures each item is used at most once (0/1 constraint).",
       "dp[w] = max(dp[w], dp[w - weight[i]] + value[i])."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=knapsack",
     "code": "class Solution22 {\npublic:\n    int knapsack(\n        vector<int>& weight,\n        vector<int>& value,\n        int capacity\n    ) {\n        vector<int> dp(capacity + 1, 0);\n\n        for (int i = 0; i < (int)weight.size(); i++) {\n            for (int w = capacity;\n                 w >= weight[i];\n                 w--) {\n\n                dp[w] = max(\n                    dp[w],\n                    dp[w - weight[i]] + value[i]\n                );\n            }\n        }\n\n        return dp[capacity];\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Maximize total value without exceeding knapsack capacity (each item at most once)."
   },
   {
     "id": 195,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-23",
     "lcNum": "MS OA",
@@ -4108,20 +4257,19 @@ const PROBLEMS_DATA = [
     "pattern": "Trial Division Factors + Sieve Flip Array",
     "time": "O(M \u221aX + N log log N)",
     "space": "O(N)",
-    "summary": "For each num, find distinct prime factors p; flip state indices divisible by p.",
     "intuition": [
       "Extract distinct prime factors for each number using trial division up to sqrt(x).",
       "Use a flip array of size N+1. For each prime factor p, flip[i] ^= 1 for i = p, 2p, 3p, ... <= N.",
       "After processing all numbers, apply flip[i] to state[i-1] in O(N)."
     ],
+    "completed": true,
+    "starred": false,
     "url": "",
     "code": "class Solution23 {\n    vector<int> primeFactors(int x) {\n        vector<int> factors;\n\n        for (int p = 2; 1LL * p * p <= x; p++) {\n            if (x % p == 0) {\n                factors.push_back(p);\n\n                while (x % p == 0)\n                    x /= p;\n            }\n        }\n\n        if (x > 1)\n            factors.push_back(x);\n\n        return factors;\n    }\n\npublic:\n    vector<int> finalState(\n        vector<int>& state,\n        vector<int>& nums\n    ) {\n        int n = state.size();\n\n        vector<int> flip(n + 1, 0);\n\n        for (int x : nums) {\n            for (int p : primeFactors(x)) {\n                for (int i = p; i <= n; i += p)\n                    flip[i] ^= 1;\n            }\n        }\n\n        for (int i = 1; i <= n; i++) {\n            if (flip[i])\n                state[i - 1] ^= 1;\n        }\n\n        return state;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "For each num, find distinct prime factors p; flip state indices divisible by p."
   },
   {
     "id": 196,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-24",
     "lcNum": "MS OA",
@@ -4130,21 +4278,20 @@ const PROBLEMS_DATA = [
     "pattern": "Deque Reverse Simulation to Find Priority Order",
     "time": "O(N\u00b2)",
     "space": "O(N)",
-    "summary": "Given count of 0s and 1s, arrange s so that push + reverse yields lexicographically maximum result.",
     "intuition": [
       "The push + reverse operation defines a deterministic index mapping.",
       "Simulate the operation with original indices 0..n-1 in a deque/vector.",
       "The resulting positions array gives the order in which original string indices end up.",
       "Greedily place available '1's into the original indices that appear earliest in the final string."
     ],
+    "completed": true,
+    "starred": true,
     "url": "",
     "code": "class Solution24 {\npublic:\n    string maximize(int zeros, int ones) {\n        int n = zeros + ones;\n\n        deque<int> positions;\n\n        for (int i = 0; i < n; i++) {\n            positions.push_back(i);\n            reverse(positions.begin(), positions.end());\n        }\n\n        string s(n, '0');\n\n        for (int index : positions) {\n            if (ones == 0)\n                break;\n\n            s[index] = '1';\n            ones--;\n        }\n\n        return s;\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "Given count of 0s and 1s, arrange s so that push + reverse yields lexicographically maximum result."
   },
   {
     "id": 197,
-    "source": "pyq1.cpp",
     "file": "pyq1.cpp",
     "classNum": "PYQ1-25",
     "lcNum": "LC 455 variant",
@@ -4153,21 +4300,20 @@ const PROBLEMS_DATA = [
     "pattern": "Sort Requirements & Resources + Greedy Match",
     "time": "O(N log N + M log M)",
     "space": "O(1)",
-    "summary": "Match each requirement with a resource >= requirement to maximize total assignments.",
     "intuition": [
       "Sort requirements and resources ascending.",
       "Use two pointers i and j.",
       "If resource[j] >= requirement[i], the smallest possible viable resource satisfies requirement i.",
       "Advance both pointers; otherwise advance resource pointer j."
     ],
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/assign-cookies/",
     "code": "class Solution25 {\npublic:\n    int maximumAssignments(\n        vector<int>& requirement,\n        vector<int>& resource\n    ) {\n        sort(requirement.begin(), requirement.end());\n        sort(resource.begin(), resource.end());\n\n        int i = 0;\n        int j = 0;\n        int ans = 0;\n\n        while (i < (int)requirement.size() &&\n               j < (int)resource.size()) {\n\n            if (resource[j] >= requirement[i]) {\n                ans++;\n                i++;\n            }\n\n            j++;\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Match each requirement with a resource >= requirement to maximize total assignments."
   },
   {
     "id": 198,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-01",
     "lcNum": "LC 516",
@@ -4176,7 +4322,6 @@ const PROBLEMS_DATA = [
     "pattern": "Interval DP",
     "time": "O(N\u00b2)",
     "space": "O(N\u00b2)",
-    "summary": "Given a lowercase string `s`, return the length of its longest subsequence that is a palindrome.",
     "intuition": [
       "Let dp[i][j] be the length of the longest palindromic subsequence in substring s[i...j].",
       "Base case: dp[i][i] = 1 for all single characters.",
@@ -4185,15 +4330,14 @@ const PROBLEMS_DATA = [
       "If s[i] != s[j]: dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]).",
       "Process substrings in decreasing order of start index i, increasing order of end index j."
     ],
-    "statement": "Given a lowercase string `s`, return the length of its longest subsequence that is a palindrome.\n  A subsequence is formed by deleting zero or more characters without changing the order.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/longest-palindromic-subsequence/",
     "code": "class Solution1 {\npublic:\n    int longestPalindromeSubseq(string s) {\n        int n = s.size();\n        if (n == 0) return 0;\n        vector<vector<int>> dp(n, vector<int>(n, 0));\n        for (int i = n - 1; i >= 0; --i) {\n            dp[i][i] = 1;\n            for (int j = i + 1; j < n; ++j) {\n                if (s[i] == s[j]) dp[i][j] = 2 + dp[i + 1][j - 1];\n                else dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);\n            }\n        }\n        return dp[0][n - 1];\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given a lowercase string `s`, return the length of its longest subsequence that is a palindrome."
   },
   {
     "id": 199,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-02",
     "lcNum": "LC 673",
@@ -4202,7 +4346,6 @@ const PROBLEMS_DATA = [
     "pattern": "Dynamic Programming + Counting",
     "time": "O(N\u00b2)",
     "space": "O(N)",
-    "summary": "Given an integer array `nums`, find the maximum length `L` of a strictly increasing subsequence",
     "intuition": [
       "For each index i, maintain:",
       "len[i]: length of longest increasing subsequence ending at index i.",
@@ -4212,15 +4355,14 @@ const PROBLEMS_DATA = [
       "Else if len[j] + 1 == len[i]: cnt[i] += cnt[j].",
       "Find max_len = max(len[i]), then sum cnt[i] for all i with len[i] == max_len."
     ],
-    "statement": "Given an integer array `nums`, find the maximum length `L` of a strictly increasing subsequence\n  and return how many subsequences have length exactly `L`.\n  Subsequences using different indices are counted separately.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/number-of-longest-increasing-subsequence/",
     "code": "class Solution2 {\npublic:\n    long long countLongestIncreasing(const vector<int>& nums) {\n        int n = nums.size(), best = 0;\n        if (n == 0) return 0;\n        vector<int> len(n, 1);\n        vector<long long> cnt(n, 1);\n        for (int i = 0; i < n; ++i) {\n            for (int j = 0; j < i; ++j) {\n                if (nums[j] < nums[i]) {\n                    if (len[j] + 1 > len[i]) len[i] = len[j] + 1, cnt[i] = cnt[j];\n                    else if (len[j] + 1 == len[i]) cnt[i] += cnt[j];\n                }\n            }\n            best = max(best, len[i]);\n        }\n        long long ans = 0;\n        for (int i = 0; i < n; ++i) {\n            if (len[i] == best) ans += cnt[i];\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given an integer array `nums`, find the maximum length `L` of a strictly increasing subsequence"
   },
   {
     "id": 200,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-03",
     "lcNum": "LC 1358",
@@ -4229,7 +4371,6 @@ const PROBLEMS_DATA = [
     "pattern": "Last Occurrence Tracking / Sliding Window",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Given a string `s` containing only `'a'`, `'b'`, and `'c'`, count the number of substrings",
     "intuition": [
       "Maintain an array `last[3]` storing the most recent 0-based index of `'a'`, `'b'`, and `'c'`.",
       "For each character s[i], update last[s[i] - 'a'] = i.",
@@ -4237,15 +4378,14 @@ const PROBLEMS_DATA = [
       "`start <= min({last[0], last[1], last[2]})`.",
       "The number of valid starting positions is min({last[0], last[1], last[2]}) + 1."
     ],
-    "statement": "Given a string `s` containing only `'a'`, `'b'`, and `'c'`, count the number of substrings\n  containing at least one `'a'`, one `'b'`, and one `'c'`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/number-of-substrings-containing-all-three-characters/",
     "code": "class Solution3 {\npublic:\n    long long countCompleteSubstrings(const string& s) {\n        vector<int> last(3, -1);\n        long long ans = 0;\n        for (int i = 0; i < (int)s.size(); ++i) {\n            last[s[i] - 'a'] = i;\n            ans += min({last[0], last[1], last[2]}) + 1;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given a string `s` containing only `'a'`, `'b'`, and `'c'`, count the number of substrings"
   },
   {
     "id": 201,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-04",
     "lcNum": "MS OA",
@@ -4254,7 +4394,6 @@ const PROBLEMS_DATA = [
     "pattern": "Stack + Suffix Minimum",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "You are given `originalString`.",
     "intuition": [
       "This simulates a stack where temporaryString is the stack.",
       "To make encryptedString lexicographically minimal, we should greedily output characters",
@@ -4263,15 +4402,14 @@ const PROBLEMS_DATA = [
       "Push s[i] to stack. While stack top <= mn[i + 1], pop to result.",
       "Flush remaining characters from stack."
     ],
-    "statement": "You are given `originalString`.\n  You have two strings initially empty: `temporaryString` and `encryptedString`.\n  You may repeatedly:\n  1. Move the first character of `originalString` to the end of `temporaryString`.\n  2. Move the last character of `temporaryString` to the end of `encryptedString`.\n  Continue until all characters are moved into `encryptedString`.\n  Return the lexicographically smallest possible `encryptedString`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Lexicographically%20Smallest%20Encrypted%20String",
     "code": "class Solution4 {\npublic:\n    string getEncryptedString(const string& s) {\n        int n = s.size();\n        vector<char> mn(n + 1, '{');\n        for (int i = n - 1; i >= 0; --i) mn[i] = min(s[i], mn[i + 1]);\n        string st, ans;\n        for (int i = 0; i < n; ++i) {\n            st += s[i];\n            while (!st.empty() && st.back() <= mn[i + 1]) {\n                ans += st.back();\n                st.pop_back();\n            }\n        }\n        while (!st.empty()) {\n            ans += st.back();\n            st.pop_back();\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given `originalString`."
   },
   {
     "id": 202,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-05",
     "lcNum": "LC 735",
@@ -4280,7 +4418,6 @@ const PROBLEMS_DATA = [
     "pattern": "Stack Collision Simulation",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "You are given an array `asteroids`.",
     "intuition": [
       "Asteroids moving left only collide with preceding asteroids moving right.",
       "Use a vector as a stack.",
@@ -4292,15 +4429,14 @@ const PROBLEMS_DATA = [
       "If stack.back() > -x: current asteroid destroyed, alive = false.",
       "If alive after collisions, push x."
     ],
-    "statement": "You are given an array `asteroids`.\n  * Absolute value = asteroid size.\n  * Positive = moving right.\n  * Negative = moving left.\n  When a right-moving asteroid meets a left-moving asteroid:\n  * smaller asteroid is destroyed,\n  * if equal, both are destroyed.\n  Return the asteroids remaining after all collisions.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/asteroid-collision/",
     "code": "class Solution5 {\npublic:\n    vector<long long> asteroidCollision(const vector<long long>& a) {\n        vector<long long> st;\n        for (long long x : a) {\n            bool alive = true;\n            while (alive && x < 0 && !st.empty() && st.back() > 0) {\n                if (st.back() < -x) st.pop_back();\n                else {\n                    if (st.back() == -x) st.pop_back();\n                    alive = false;\n                }\n            }\n            if (alive) st.push_back(x);\n        }\n        return st;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array `asteroids`."
   },
   {
     "id": 203,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-06",
     "lcNum": "MS OA",
@@ -4309,7 +4445,6 @@ const PROBLEMS_DATA = [
     "pattern": "Monotonic Stack (Nearest Strictly Greater Elements)",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "`n` students stand in a line with heights `heights[i]`.",
     "intuition": [
       "The block containing student i where heights[i] is the maximum must not contain",
       "any student with height > heights[i].",
@@ -4317,15 +4452,14 @@ const PROBLEMS_DATA = [
       "The valid region is index range (L[i], R[i]), so its length is R[i] - L[i] - 1.",
       "Sum lengths over all students i."
     ],
-    "statement": "`n` students stand in a line with heights `heights[i]`.\n  The region of student `i` is the longest contiguous block containing `i` such that\n  the maximum height in that block is exactly `heights[i]`.\n  Return the sum of region lengths of all students.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Sum%20Of%20Every%20Student%27S%20Region%20Length",
     "code": "class Solution6 {\npublic:\n    long long calculateTotalRegion(vector<int> h) {\n        int n = h.size();\n        vector<int> L(n), R(n), st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && h[st.back()] <= h[i]) st.pop_back();\n            L[i] = st.empty() ? -1 : st.back();\n            st.push_back(i);\n        }\n        st.clear();\n        for (int i = n - 1; i >= 0; --i) {\n            while (!st.empty() && h[st.back()] <= h[i]) st.pop_back();\n            R[i] = st.empty() ? n : st.back();\n            st.push_back(i);\n        }\n        long long ans = 0;\n        for (int i = 0; i < n; ++i) ans += R[i] - L[i] - 1;\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "`n` students stand in a line with heights `heights[i]`."
   },
   {
     "id": 204,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-07",
     "lcNum": "LC 2208",
@@ -4334,22 +4468,20 @@ const PROBLEMS_DATA = [
     "pattern": "Greedy + Max Heap",
     "time": "O(K log N) where K is number of operations.",
     "space": "O(N)",
-    "summary": "You are given an array of positive integers `nums`.",
     "intuition": [
       "To minimize operations, each operation should achieve the maximum possible sum reduction.",
       "Halving value x reduces the sum by x / 2. Therefore, always choose the currently largest element.",
       "Maintain a max-heap of values. Pop the largest element, halve it, accumulate the reduction,",
       "and push it back until total reduction >= original_sum / 2."
     ],
-    "statement": "You are given an array of positive integers `nums`.\n  In one operation, choose any element and replace it with exactly half its current value.\n  Find the minimum operations required so that the total array sum becomes at most half of its original sum.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-operations-to-halve-array-sum/",
     "code": "class Solution7 {\npublic:\n    long long minOperations(const vector<long long>& nums) {\n        priority_queue<long double> pq;\n        long double sum = 0, reduced = 0;\n        for (auto x : nums) sum += x, pq.push(x);\n        long long ans = 0;\n        while (reduced < sum / 2.0) {\n            long double x = pq.top(); pq.pop();\n            x /= 2.0;\n            reduced += x;\n            pq.push(x);\n            ans++;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array of positive integers `nums`."
   },
   {
     "id": 205,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-08",
     "lcNum": "LC 730",
@@ -4358,7 +4490,6 @@ const PROBLEMS_DATA = [
     "pattern": "Interval DP (Inclusion-Exclusion)",
     "time": "O(N\u00b2)",
     "space": "O(N\u00b2)",
-    "summary": "Given a lowercase string `s`, count all non-empty palindromic subsequences.",
     "intuition": [
       "dp[i][j] = number of palindromic subsequences in substring s[i...j].",
       "If s[i] == s[j]:",
@@ -4367,15 +4498,14 @@ const PROBLEMS_DATA = [
       "dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1] (subtract duplicate middle part).",
       "All additions and subtractions modulo 10^9 + 7."
     ],
-    "statement": "Given a lowercase string `s`, count all non-empty palindromic subsequences.\n  Two subsequences are different if they use different sets of positions, even if they produce the same string.\n  Return the answer modulo 1000000007.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/count-different-palindromic-subsequences/",
     "code": "class Solution8 {\n    static const long long MOD = 1000000007;\npublic:\n    long long countPalindromicSubsequences(const string& s) {\n        int n = s.size();\n        if (n == 0) return 0;\n        vector<vector<long long>> dp(n, vector<long long>(n, 0));\n        for (int i = n - 1; i >= 0; --i) {\n            dp[i][i] = 1;\n            for (int j = i + 1; j < n; ++j) {\n                if (s[i] == s[j]) dp[i][j] = 2 + dp[i + 1][j - 1];\n                else dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);\n                dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;\n            }\n        }\n        return dp[0][n - 1];\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "Given a lowercase string `s`, count all non-empty palindromic subsequences."
   },
   {
     "id": 206,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-09",
     "lcNum": "MS OA",
@@ -4384,7 +4514,6 @@ const PROBLEMS_DATA = [
     "pattern": "Prefix Sum + Binary Search (upper_bound)",
     "time": "O(N + Q log N)",
     "space": "O(N)",
-    "summary": "There are `n` cubicles with non-decreasing prices: prices[1] <= prices[2] <= ... <= prices[n].",
     "intuition": [
       "Since prices are sorted ascending and positive, buying the cheapest available items",
       "greedily from `pos` onward maximizes the count of purchased products.",
@@ -4392,15 +4521,14 @@ const PROBLEMS_DATA = [
       "We require pre[r + 1] - pre[l] <= money <=> pre[r + 1] <= pre[l] + money.",
       "Use `upper_bound` on pre to find largest valid index in O(log N)."
     ],
-    "statement": "There are `n` cubicles with non-decreasing prices: prices[1] <= prices[2] <= ... <= prices[n].\n  For every query `(pos, amount)`:\n  * Alex starts at cubicle `pos` (1-based).\n  * He can visit cubicles from `pos` to `n`.\n  * He may buy at most one product from each cubicle.\n  * Total cost must not exceed `amount`.\n  Return the maximum number of products he can buy for each query.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Maximum%20Products%20Alex%20Can%20Buy",
     "code": "class Solution9 {\npublic:\n    vector<int> maximumProducts(const vector<long long>& prices, const vector<pair<int, long long>>& queries) {\n        int n = prices.size();\n        vector<long long> pre(n + 1, 0);\n        for (int i = 0; i < n; ++i) pre[i + 1] = pre[i] + prices[i];\n        vector<int> ans;\n        for (auto [pos, money] : queries) {\n            int l = pos - 1;\n            long long limit = pre[l] + money;\n            int r = upper_bound(pre.begin() + l, pre.end(), limit) - pre.begin() - 1;\n            ans.push_back(r - l);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "There are `n` cubicles with non-decreasing prices: prices[1] <= prices[2] <= ... <= prices[n]."
   },
   {
     "id": 207,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-10",
     "lcNum": "LC 1851",
@@ -4409,7 +4537,6 @@ const PROBLEMS_DATA = [
     "pattern": "Endpoint Sorting + Binary Search",
     "time": "O((N + Q) log N)",
     "space": "O(N)",
-    "summary": "You are given `n` closed intervals `[l[i], r[i]]` and several query points.",
     "intuition": [
       "An interval [L_i, R_i] covers query point x iff L_i <= x AND R_i >= x.",
       "Total covering intervals = (Intervals with L_i <= x) - (Intervals with R_i < x).",
@@ -4418,15 +4545,14 @@ const PROBLEMS_DATA = [
       "Count of R_i < x: lower_bound(R, x) - R.begin().",
       "Difference gives exact count in O(log N) per query."
     ],
-    "statement": "You are given `n` closed intervals `[l[i], r[i]]` and several query points.\n  For every query `x`, return how many intervals satisfy: `l[i] <= x <= r[i]`.\n  Intervals with identical endpoints are still counted separately.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-interval-to-include-each-query/",
     "code": "class Solution10 {\npublic:\n    vector<int> countContainingIntervals(const vector<int>& l, const vector<int>& r, const vector<int>& queries) {\n        vector<int> L = l, R = r;\n        sort(L.begin(), L.end());\n        sort(R.begin(), R.end());\n        vector<int> ans;\n        for (int x : queries) {\n            int started = upper_bound(L.begin(), L.end(), x) - L.begin();\n            int ended = lower_bound(R.begin(), R.end(), x) - R.begin();\n            ans.push_back(started - ended);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given `n` closed intervals `[l[i], r[i]]` and several query points."
   },
   {
     "id": 208,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-11",
     "lcNum": "MS OA",
@@ -4435,22 +4561,20 @@ const PROBLEMS_DATA = [
     "pattern": "Difference Array / Prefix XOR",
     "time": "O(N + M)",
     "space": "O(M)",
-    "summary": "There are `m` lamps numbered `1` to `m`, initially all OFF.",
     "intuition": [
       "Flipping a range [l, r] is equivalent to XOR-toggling boundary markers:",
       "diff[l] ^= 1 and diff[r + 1] ^= 1.",
       "Maintain running prefix XOR `state`. At lamp i: state ^= diff[i].",
       "If state == 1 (lamp is ON), add lamp index i to total sum."
     ],
-    "statement": "There are `m` lamps numbered `1` to `m`, initially all OFF.\n  You are given `n` operations `[l, r]`. Each operation flips every lamp from `l` to `r` (OFF <-> ON).\n  After all operations, return the sum of the numbers of all lamps that are ON.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Light%20Panel%20Toggle%20Sum",
     "code": "class Solution11 {\npublic:\n    long long lampToggleSum(int m, const vector<pair<int, int>>& ops) {\n        vector<int> diff(m + 2, 0);\n        for (auto [l, r] : ops) {\n            diff[l] ^= 1;\n            diff[r + 1] ^= 1;\n        }\n        long long ans = 0;\n        int state = 0;\n        for (int i = 1; i <= m; ++i) {\n            state ^= diff[i];\n            if (state) ans += i;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "There are `m` lamps numbered `1` to `m`, initially all OFF."
   },
   {
     "id": 209,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-12",
     "lcNum": "LC 1167",
@@ -4459,21 +4583,19 @@ const PROBLEMS_DATA = [
     "pattern": "Min-Heap / Huffman Greedy Optimal Merge",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "You are given an array of positive integers.",
     "intuition": [
       "Earlier merged values participate in subsequent operations, multiplying their impact.",
       "To minimize the total sum, always greedily merge the two smallest available numbers.",
       "Store numbers in a min-heap, pop two smallest, add sum to total cost, and push sum back."
     ],
-    "statement": "You are given an array of positive integers.\n  Repeatedly choose any two elements `x` and `y`:\n  * Remove them.\n  * Insert `x + y`.\n  * Pay a cost of `x + y`.\n  Return the minimum total cost required to reduce the array to one element.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/minimum-cost-to-connect-sticks/",
     "code": "class Solution12 {\npublic:\n    long long min_merge_cost(vector<long long> arr) {\n        priority_queue<long long, vector<long long>, greater<long long>> pq(arr.begin(), arr.end());\n        long long ans = 0;\n        while (pq.size() > 1) {\n            long long a = pq.top(); pq.pop();\n            long long b = pq.top(); pq.pop();\n            ans += a + b;\n            pq.push(a + b);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array of positive integers."
   },
   {
     "id": 210,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-13",
     "lcNum": "MS OA",
@@ -4482,7 +4604,6 @@ const PROBLEMS_DATA = [
     "pattern": "26-Bit Parity Mask + HashMap",
     "time": "O(26N)",
     "space": "O(N)",
-    "summary": "You are given `n` lowercase strings.",
     "intuition": [
       "A concatenated string can form a palindrome iff at most one character has an odd count.",
       "Character parity mask: bit c is 1 if ('a' + c) count is odd, 0 if even.",
@@ -4490,15 +4611,14 @@ const PROBLEMS_DATA = [
       "Valid iff m1 ^ m2 == 0 or m1 ^ m2 == (1 << b) for some 0 <= b < 26.",
       "Query hash map for matching masks, then insert current mask."
     ],
-    "statement": "You are given `n` lowercase strings.\n  For every pair `(i, j)` where `i < j`, combine all characters of both strings.\n  The pair is called palindromic if the combined characters can be rearranged to form a palindrome.\n  Return the number of such pairs.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Palindromic%20Pair%20Count",
     "code": "class Solution13 {\npublic:\n    long long count_palindrome_pairs(const vector<string>& strings) {\n        unordered_map<int, long long> cnt;\n        long long ans = 0;\n        for (const string& s : strings) {\n            int mask = 0;\n            for (char c : s) mask ^= 1 << (c - 'a');\n            ans += cnt[mask];\n            for (int b = 0; b < 26; ++b) ans += cnt[mask ^ (1 << b)];\n            cnt[mask]++;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given `n` lowercase strings."
   },
   {
     "id": 211,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-14",
     "lcNum": "MS OA",
@@ -4507,20 +4627,18 @@ const PROBLEMS_DATA = [
     "pattern": "String Matching",
     "time": "O(8N) \u2248 O(N)",
     "space": "O(1)",
-    "summary": "You are given an item's lowercase name `s`.",
     "intuition": [
       "Check each of the 8 fixed markers using string::find.",
       "As soon as any marker is found as a substring, return true. If none match, return false."
     ],
-    "statement": "You are given an item's lowercase name `s`.\n  The item is worth taking if its name contains at least one of these substrings:\n  `co`, `f`, `ha`, `he`, `ke`, `ok`, `po`, `sc`.\n  Return `true` if at least one marker occurs, `false` otherwise.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Worth%20Taking%20On%20A%20Trip",
     "code": "class Solution14 {\npublic:\n    bool isWorthTaking(const string& s) {\n        static const vector<string> mark = {\"co\", \"f\", \"ha\", \"he\", \"ke\", \"ok\", \"po\", \"sc\"};\n        for (const string& x : mark) {\n            if (s.find(x) != string::npos) return true;\n        }\n        return false;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an item's lowercase name `s`."
   },
   {
     "id": 212,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-15",
     "lcNum": "LC 1335",
@@ -4529,7 +4647,6 @@ const PROBLEMS_DATA = [
     "pattern": "Partition Dynamic Programming",
     "time": "O(D \u00d7 N\u00b2)",
     "space": "O(D \u00d7 N)",
-    "summary": "You are given `n` tasks in a fixed order and must complete them in exactly `D` days.",
     "intuition": [
       "dp[d][i] = minimum total complexity for first i tasks scheduled across d days.",
       "Base case: dp[0][0] = 0, all other dp entries initialized to INF.",
@@ -4537,15 +4654,14 @@ const PROBLEMS_DATA = [
       "dp[d][i] = min_{j} (dp[d - 1][j] + max_{k=j}^{i-1} a[k]).",
       "Iterating j backwards from i - 1 down to d - 1 allows maintaining running max in O(1)."
     ],
-    "statement": "You are given `n` tasks in a fixed order and must complete them in exactly `D` days.\n  Tasks done on each day must form a contiguous block, and every day must receive at least one task.\n  The cost of a day is the maximum complexity among tasks done that day.\n  Return the minimum possible total cost.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/minimum-difficulty-of-a-job-schedule/",
     "code": "class Solution15 {\npublic:\n    long long minTotalComplexity(int n, int days, const vector<long long>& a) {\n        const long long INF = 4e18;\n        vector<vector<long long>> dp(days + 1, vector<long long>(n + 1, INF));\n        dp[0][0] = 0;\n        for (int d = 1; d <= days; ++d) {\n            for (int i = d; i <= n; ++i) {\n                long long mx = 0;\n                for (int j = i - 1; j >= d - 1; --j) {\n                    mx = max(mx, a[j]);\n                    dp[d][i] = min(dp[d][i], dp[d - 1][j] + mx);\n                }\n            }\n        }\n        return dp[days][n];\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "You are given `n` tasks in a fixed order and must complete them in exactly `D` days."
   },
   {
     "id": 213,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-16",
     "lcNum": "LC 926",
@@ -4554,7 +4670,6 @@ const PROBLEMS_DATA = [
     "pattern": "2-State Dynamic Programming",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "You are given a binary string `s`.",
     "intuition": [
       "A string without \"10\" must have all '0's before any '1's (shape: 00...011...1).",
       "Track dp0 (min flips where prefix ends in '0') and dp1 (min flips where prefix ends in '1').",
@@ -4562,15 +4677,14 @@ const PROBLEMS_DATA = [
       "ndp0 = dp0 + (s[i] != '0')",
       "ndp1 = min(dp0, dp1) + (s[i] != '1')"
     ],
-    "statement": "You are given a binary string `s`.\n  A string is bad if it contains the substring `\"10\"`.\n  In one operation, you may flip any one character (`0 -> 1` or `1 -> 0`).\n  Return the minimum number of flips needed so that `\"10\"` does not occur anywhere.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/flip-string-to-monotone-increasing/",
     "code": "class Solution16 {\npublic:\n    long long minFlips(int n, const string& s) {\n        long long dp0 = (s[0] != '0');\n        long long dp1 = (s[0] != '1');\n        for (int i = 1; i < n; ++i) {\n            long long ndp0 = dp0 + (s[i] != '0');\n            long long ndp1 = min(dp0, dp1) + (s[i] != '1');\n            dp0 = ndp0;\n            dp1 = ndp1;\n        }\n        return min(dp0, dp1);\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "You are given a binary string `s`."
   },
   {
     "id": 214,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-17",
     "lcNum": "MS OA",
@@ -4579,7 +4693,6 @@ const PROBLEMS_DATA = [
     "pattern": "Prefix Balance & Minimum Deficit Check",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "You are given a string containing only `'('` and `')'`.",
     "intuition": [
       "For any valid bracket sequence, total balance must be 0, and all prefix balances >= 0.",
       "A single swap of a ')' at index i with a '(' at index j (i < j) increases prefix balances",
@@ -4587,15 +4700,14 @@ const PROBLEMS_DATA = [
       "Therefore, at most one swap can fix a prefix balance deficit of at most 2.",
       "Condition: balance == 0 && min(prefix_balance) >= -2."
     ],
-    "statement": "You are given a string containing only `'('` and `')'`.\n  You may perform at most one swap of two positions.\n  Return `1` if the string is already valid or can become a valid bracket sequence using one swap.\n  Otherwise return `0`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Valid%20Bracket%20Sequence%20With%20At%20Most%20One%20Swap",
     "code": "class Solution17 {\npublic:\n    int canBeValid(const string& s) {\n        int balance = 0, mn = 0;\n        for (char c : s) {\n            balance += (c == '(' ? 1 : -1);\n            mn = min(mn, balance);\n        }\n        return balance == 0 && mn >= -2;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given a string containing only `'('` and `')'`."
   },
   {
     "id": 215,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-18",
     "lcNum": "LC 1552",
@@ -4604,22 +4716,20 @@ const PROBLEMS_DATA = [
     "pattern": "Binary Search on Answer + Greedy Placement",
     "time": "O(N log(max - min))",
     "space": "O(1) extra",
-    "summary": "You are given coordinates of `n` baskets and `m` identical balls.",
     "intuition": [
       "Sort basket positions in ascending order.",
       "Binary search minimum distance `dist` in range [1, position.back() - position.front()].",
       "Greedy check: place first ball at position[0]. For each subsequent basket, place a ball",
       "if position[i] - last >= dist. If >= m balls can be placed, dist is feasible."
     ],
-    "statement": "You are given coordinates of `n` baskets and `m` identical balls.\n  Place all `m` balls into different baskets.\n  The magnetic force between balls at positions `x` and `y` is `|x - y|`.\n  Maximize the minimum magnetic force between any two placed balls.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problems/magnetic-force-between-two-balls/",
     "code": "class Solution18 {\npublic:\n    long long maxDistance(vector<long long>& position, int m) {\n        sort(position.begin(), position.end());\n        auto can = [&](long long dist) {\n            int balls = 1;\n            long long last = position[0];\n            for (size_t i = 1; i < position.size(); ++i) {\n                if (position[i] - last >= dist) {\n                    balls++;\n                    last = position[i];\n                }\n            }\n            return balls >= m;\n        };\n        long long l = 0, r = position.back() - position.front();\n        while (l < r) {\n            long long mid = l + (r - l + 1) / 2;\n            if (can(mid)) l = mid;\n            else r = mid - 1;\n        }\n        return l;\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "You are given coordinates of `n` baskets and `m` identical balls."
   },
   {
     "id": 216,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-19",
     "lcNum": "MS OA",
@@ -4628,7 +4738,6 @@ const PROBLEMS_DATA = [
     "pattern": "Mathematical Observation (Unit Differences)",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "The cost of an array is the sum of squared differences between adjacent elements:",
     "intuition": [
       "Between two integers x and y with difference d = |x - y|, if we insert d - 1 intermediate",
       "integers with step 1, each step contributes 1\u00b2 = 1.",
@@ -4636,15 +4745,14 @@ const PROBLEMS_DATA = [
       "By convexity of f(t) = t\u00b2, unit steps achieve the absolute minimum sum of squares.",
       "Total minimum cost = \u03a3 |a[i] - a[i - 1]|."
     ],
-    "statement": "The cost of an array is the sum of squared differences between adjacent elements:\n  (b[1]-b[0])\u00b2 + (b[2]-b[1])\u00b2 + ...\n  You are given an integer array `a`.\n  You may insert any number of integers anywhere while keeping all original elements in the same relative order.\n  Return the minimum possible cost.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Minimum%20Array%20Cost%20With%20Unlimited%20Insertions",
     "code": "class Solution19 {\npublic:\n    long long minInsertionCost(const vector<long long>& a) {\n        long long ans = 0;\n        for (size_t i = 1; i < a.size(); ++i) {\n            ans += abs(a[i] - a[i - 1]);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "The cost of an array is the sum of squared differences between adjacent elements:"
   },
   {
     "id": 217,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-20",
     "lcNum": "MS OA",
@@ -4653,22 +4761,20 @@ const PROBLEMS_DATA = [
     "pattern": "1D Weighted Median (Independent Dimensions)",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "There are `N` cities. City `i` has coordinates `(xi, yi)` and population `pi`.",
     "intuition": [
       "Manhattan distance splits independently into \u03a3 pi |X - xi| and \u03a3 pi |Y - yi|.",
       "The function f(X) = \u03a3 pi |X - xi| is minimized at the weighted median.",
       "For lexicographical tie-breaking, select the smallest coordinate where cumulative",
       "weight reaches at least half of the total population (2 * sum >= total)."
     ],
-    "statement": "There are `N` cities. City `i` has coordinates `(xi, yi)` and population `pi`.\n  Choose integer coordinates `(X, Y)` minimizing:\n  \u03a3 pi \u00d7 (|X - xi| + |Y - yi|).\n  If multiple optimal answers exist, return the lexicographically smallest `(X, Y)`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Weighted%20Manhattan%20Distance%20City",
     "code": "class Solution20 {\npublic:\n    pair<ll, ll> solve(const vector<array<ll, 3>>& cities) {\n        vector<pair<ll, ll>> xs, ys;\n        ll total = 0;\n        for (auto [x, y, p] : cities) {\n            xs.push_back({x, p});\n            ys.push_back({y, p});\n            total += p;\n        }\n        sort(xs.begin(), xs.end());\n        sort(ys.begin(), ys.end());\n        auto weightedMedian = [&](vector<pair<ll, ll>>& v) {\n            ll sum = 0;\n            for (auto [x, w] : v) {\n                sum += w;\n                if (2 * sum >= total) return x;\n            }\n            return v.back().first;\n        };\n        return {weightedMedian(xs), weightedMedian(ys)};\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "There are `N` cities. City `i` has coordinates `(xi, yi)` and population `pi`."
   },
   {
     "id": 218,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-21",
     "lcNum": "MS OA",
@@ -4677,7 +4783,6 @@ const PROBLEMS_DATA = [
     "pattern": "Prefix XOR Periodicity (Modulo 4)",
     "time": "O(1)",
     "space": "O(1)",
-    "summary": "Given a number `n`, choose an integer `x` such that `x` has the same bit length as `n`, and `x >= n`.",
     "intuition": [
       "Prefix XOR P(x) = 0 ^ 1 ^ ... ^ x repeats with period 4:",
       "x % 4 == 0 -> x",
@@ -4687,15 +4792,14 @@ const PROBLEMS_DATA = [
       "If n % 4 == 0, XOR(n ... x) = P(x).",
       "Test the last 4 valid values <= max_with_same_bits."
     ],
-    "statement": "Given a number `n`, choose an integer `x` such that `x` has the same bit length as `n`, and `x >= n`.\n  Maximize n XOR (n+1) ... XOR x.\n  If there is a tie, choose the smallest `x`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Maximum%20Xor%20With%20The%20Same%20Bit%20Length",
     "code": "class Solution21 {\n    ull pref(ull x) {\n        if (x % 4 == 0) return x;\n        if (x % 4 == 1) return 1;\n        if (x % 4 == 2) return x + 1;\n        return 0;\n    }\npublic:\n    ull solve(ull n) {\n        int bits = 64 - __builtin_clzll(n);\n        ull hi = (bits == 64 ? ULLONG_MAX : (1ULL << bits) - 1);\n        ull ans = n, best = pref(n);\n        for (int i = 0; i < 4 && hi >= n + i; ++i) {\n            ull x = hi - i, v = pref(x);\n            if (v > best || (v == best && x < ans)) {\n                best = v;\n                ans = x;\n            }\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given a number `n`, choose an integer `x` such that `x` has the same bit length as `n`, and `x >= n`."
   },
   {
     "id": 219,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-22",
     "lcNum": "MS OA",
@@ -4704,21 +4808,19 @@ const PROBLEMS_DATA = [
     "pattern": "Maximum Variance Reduction via Midpoint Insertion",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Given an array `a`, the cost is \u03a3 (a[i] - a[i - 1])\u00b2.",
     "intuition": [
       "Inserting x between u and v replaces (u - v)\u00b2 with (u - x)\u00b2 + (x - v)\u00b2.",
       "Choosing x as the integer closest to (u + v) / 2 reduces the difference by floor(d\u00b2 / 2).",
       "Find the pair (a[i-1], a[i]) that gives the maximum reduction floor(d\u00b2 / 2) and subtract it."
     ],
-    "statement": "Given an array `a`, the cost is \u03a3 (a[i] - a[i - 1])\u00b2.\n  You are allowed to insert at most ONE integer `x` between any adjacent pair `a[i-1]` and `a[i]`.\n  Find the minimum possible array cost.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Minimum%20Array%20Cost%20After%20One%20Insertion",
     "code": "class Solution22 {\npublic:\n    long long solve(vector<long long> a) {\n        long long sum = 0, save = 0;\n        for (size_t i = 1; i < a.size(); ++i) {\n            long long d = a[i] - a[i - 1];\n            sum += d * d;\n            save = max(save, (d * d) / 2);\n        }\n        return sum - save;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given an array `a`, the cost is \u03a3 (a[i] - a[i - 1])\u00b2."
   },
   {
     "id": 220,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-23",
     "lcNum": "MS OA",
@@ -4727,7 +4829,6 @@ const PROBLEMS_DATA = [
     "pattern": "Independent Gap Coordinates",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "You are given an array `a` of non-negative integers. In each operation, you can choose a",
     "intuition": [
       "Sort and remove duplicates from a.",
       "Any valid sequence of decrements transforms each gap (a[i] - a[i - 1]) independently into",
@@ -4735,15 +4836,14 @@ const PROBLEMS_DATA = [
       "The smallest element a[0] can become any value in [0, a[0]].",
       "Total reachable configurations = (a[0] + 1) * \u03a0 (a[i] - a[i - 1] + 1) % MOD."
     ],
-    "statement": "You are given an array `a` of non-negative integers. In each operation, you can choose a\n  threshold `T` and decrement all elements that are `>= T` by 1.\n  Count how many distinct arrays can be obtained through any sequence of such operations.\n  Return the count modulo 10^9 + 7.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Count%20Arrays%20Reachable%20By%20Threshold%20Decrements",
     "code": "class Solution23 {\n    static const long long MOD = 1000000007;\npublic:\n    long long solve(vector<long long> a) {\n        sort(a.begin(), a.end());\n        a.erase(unique(a.begin(), a.end()), a.end());\n        long long ans = a[0] + 1;\n        for (size_t i = 1; i < a.size(); ++i) {\n            ans = ans * ((a[i] - a[i - 1] + 1) % MOD) % MOD;\n        }\n        return ans % MOD;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array `a` of non-negative integers. In each operation, you can choose a"
   },
   {
     "id": 221,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-24",
     "lcNum": "MS OA",
@@ -4752,7 +4852,6 @@ const PROBLEMS_DATA = [
     "pattern": "Greedy Left Propagation Reach",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "You are given a binary string `s` and integer `k`.",
     "intuition": [
       "A '1' at index j can propagate leftward to index i (i < j).",
       "Every zero that appears before the last '1' in the string can be converted to '1'.",
@@ -4762,15 +4861,14 @@ const PROBLEMS_DATA = [
       "With at most k operations, we can convert min(k, zeros) zeros into ones.",
       "Total ones = ones + min(k, zeros)."
     ],
-    "statement": "You are given a binary string `s` and integer `k`.\n  In one operation, you can set `s[i] = max(s[i], s[i + 1])`.\n  A `1` can propagate only to the left.\n  Find the maximum number of `'1'`s possible after at most `k` operations.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Maximize%20Ones%20In%20A%20Binary%20String",
     "code": "class Solution24 {\npublic:\n    long long maxOnes(const string& s, long long k) {\n        int n = s.size(), last = -1;\n        long long ones = 0;\n        for (int i = 0; i < n; ++i) {\n            if (s[i] == '1') {\n                ones++;\n                last = i;\n            }\n        }\n        if (last == -1) return 0;\n        long long zeros = last + 1 - ones;\n        return ones + min(k, zeros);\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given a binary string `s` and integer `k`."
   },
   {
     "id": 222,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-25",
     "lcNum": "LC 1962",
@@ -4779,22 +4877,20 @@ const PROBLEMS_DATA = [
     "pattern": "Greedy Max Heap Reduction",
     "time": "O((N + K) log N)",
     "space": "O(N)",
-    "summary": "Given an array `nums` and an integer `k`.",
     "intuition": [
       "Replacing x with ceil(x / 2) reduces the sum by floor(x / 2).",
       "To maximize the reduction at each step, greedily choose the currently largest element.",
       "Use a max priority queue. Pop the largest element, calculate new value ceil(x / 2) = (x + 1) / 2,",
       "decrease running sum, and push the new value back into heap."
     ],
-    "statement": "Given an array `nums` and an integer `k`.\n  In one operation, choose any element `x` and replace it with `ceil(x / 2)`.\n  Find the minimum possible array sum after at most `k` operations.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/remove-stones-to-minimize-the-total/",
     "code": "class Solution25 {\npublic:\n    long long minimumSum(vector<long long> nums, long long k) {\n        priority_queue<long long> pq;\n        long long sum = 0;\n        for (long long x : nums) pq.push(x), sum += x;\n        while (k-- && !pq.empty() && pq.top() > 1) {\n            long long x = pq.top(); pq.pop();\n            long long y = (x + 1) / 2;\n            sum -= (x - y);\n            pq.push(y);\n        }\n        return sum;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given an array `nums` and an integer `k`."
   },
   {
     "id": 223,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-26",
     "lcNum": "MS OA",
@@ -4803,7 +4899,6 @@ const PROBLEMS_DATA = [
     "pattern": "Hash Set / Square Step Chain Exploration",
     "time": "O(N) average",
     "space": "O(N)",
-    "summary": "You are given an array `B` of positive integers.",
     "intuition": [
       "All 1's in the array can form a chain of 1's since 1\u00b2 = 1. Count of 1's is a candidate answer.",
       "Insert all unique elements into an unordered_set.",
@@ -4811,15 +4906,14 @@ const PROBLEMS_DATA = [
       "While set contains x: increment length, and advance x = x * x (guarded against overflow).",
       "Track maximum chain length."
     ],
-    "statement": "You are given an array `B` of positive integers.\n  A subset is a square chain if, when sorted, every element (except the first) is the square of\n  the previous element: B[i] = B[i - 1]\u00b2.\n  Find the maximum size of a square chain subset.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Longest%20Square%20Chain%20Subset",
     "code": "class Solution26 {\npublic:\n    int solution(int n, vector<int>& B) {\n        unordered_set<long long> st;\n        int ones = 0, ans = 0;\n        for (int x : B) {\n            st.insert(x);\n            if (x == 1) ones++;\n        }\n        ans = ones;\n        for (long long start : st) {\n            if (start == 1) continue;\n            long long x = start;\n            int len = 0;\n            while (st.count(x)) {\n                len++;\n                if (x > 1000000000LL / x) break;\n                x *= x;\n            }\n            ans = max(ans, len);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array `B` of positive integers."
   },
   {
     "id": 224,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-27",
     "lcNum": "LC 1797",
@@ -4828,7 +4922,6 @@ const PROBLEMS_DATA = [
     "pattern": "Hash Map Expiry Tracking / Simulation",
     "time": "O(Q) for generate/renew, O(Tokens) per count query.",
     "space": "O(Tokens)",
-    "summary": "Design a time-based authentication token system that manages tokens with a fixed `time_to_live`.",
     "intuition": [
       "Maintain a hash map `expiry[token]` storing the expiry timestamp of each active token.",
       "For \"generate token time\": set `expiry[token] = time + time_to_live`.",
@@ -4836,15 +4929,14 @@ const PROBLEMS_DATA = [
       "(If `expiry[token] <= time`, the token is already expired and cannot be renewed).",
       "For \"count time\": iterate over the map and count how many tokens have `expiry > time`."
     ],
-    "statement": "Design a time-based authentication token system that manages tokens with a fixed `time_to_live`.\n  You are given an integer `time_to_live` and a list of query strings `queries`.\n  Queries are of three types:\n  1. \"generate token time\": Generates a new token at given `time`. The token expires at `time + time_to_live`.\n  2. \"renew token time\": Renews the token at given `time` only if the token exists and is currently valid\n     (i.e. its expiry time is strictly greater than `time`). If valid, its expiry is updated to `time + time_to_live`.\n  3. \"count time\": Returns the number of currently active, unexpired tokens at given `time` (expiry > time).\n  Return a list of integers containing the results for every \"count\" query.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/design-authentication-manager/",
     "code": "class Solution27 {\npublic:\n    vector<int> getUnexpiredTokens(int time_to_live, vector<string> queries) {\n        unordered_map<string, int> expiry;\n        vector<int> ans;\n        for (const string& q : queries) {\n            stringstream ss(q);\n            string type, token;\n            int time;\n            ss >> type;\n            if (type == \"generate\") {\n                ss >> token >> time;\n                expiry[token] = time + time_to_live;\n            } else if (type == \"renew\") {\n                ss >> token >> time;\n                if (expiry.count(token) && expiry[token] > time) {\n                    expiry[token] = time + time_to_live;\n                }\n            } else { // count\n                ss >> time;\n                int cnt = 0;\n                for (const auto& it : expiry) {\n                    if (it.second > time) cnt++;\n                }\n                ans.push_back(cnt);\n            }\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Design a time-based authentication token system that manages tokens with a fixed `time_to_live`."
   },
   {
     "id": 225,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-28",
     "lcNum": "LC 1696",
@@ -4853,7 +4945,6 @@ const PROBLEMS_DATA = [
     "pattern": "Dynamic Programming + Monotonic Deque (Sliding Window Minimum)",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "You are given an integer `n`, an array `cost` of size `n` representing costs of points 0 to n - 1,",
     "intuition": [
       "Transition: dp[i] = cost[i] + min_{j = max(0, i - k)}^{i - 1} dp[j].",
       "Naive evaluation takes O(n * k) time.",
@@ -4861,15 +4952,14 @@ const PROBLEMS_DATA = [
       "Deque front always holds the index with the minimum dp value in the current window [i - k, i - 1].",
       "Pop expired indices (front < i - k) in O(1) amortized time."
     ],
-    "statement": "You are given an integer `n`, an array `cost` of size `n` representing costs of points 0 to n - 1,\n  and a maximum jump capacity `k`.\n  Starting at point 0, you can jump from any point i to any point j where `i < j <= i + k`.\n  The cost to land on point i is `cost[i]`.\n  Find the minimum total cost to reach point `n - 1` starting from point 0.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/jump-game-vi/",
     "code": "class Solution28 {\npublic:\n    long long getMinimumCost(int n, const vector<int>& cost, int k) {\n        vector<long long> dp(n);\n        deque<int> dq;\n        dp[0] = cost[0];\n        dq.push_back(0);\n        for (int i = 1; i < n; ++i) {\n            while (!dq.empty() && dq.front() < i - k) dq.pop_front();\n            dp[i] = dp[dq.front()] + cost[i];\n            while (!dq.empty() && dp[dq.back()] >= dp[i]) dq.pop_back();\n            dq.push_back(i);\n        }\n        return dp[n - 1];\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an integer `n`, an array `cost` of size `n` representing costs of points 0 to n - 1,"
   },
   {
     "id": 226,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-29",
     "lcNum": "MS OA",
@@ -4878,7 +4968,6 @@ const PROBLEMS_DATA = [
     "pattern": "Double Geometric Power Traversal / Bounded Enumeration",
     "time": "O(log3(high) * log5(high)) \u2248 O(1) operations",
     "space": "O(1)",
-    "summary": "An ideal number is defined as a positive integer of the form:",
     "intuition": [
       "Powers of 3 grow exponentially (up to 3^39 for 64-bit integers), and powers of 5 grow up to 5^27.",
       "The total number of pairs (x, y) such that 3^x * 5^y <= high is extremely small (fewer than 1,000 pairs).",
@@ -4887,15 +4976,14 @@ const PROBLEMS_DATA = [
       "If a * b >= low, increment count.",
       "Guard against integer overflow by checking `b > high / 5` and `a > high / 3`."
     ],
-    "statement": "An ideal number is defined as a positive integer of the form:\n      3^x * 5^y, where x >= 0 and y >= 0.\n  Given two 64-bit positive integers `low` and `high`, find the count of ideal numbers that lie\n  within the inclusive range [low, high].",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Ideal%20Numbers%20%283%5EX%20%2A%205%5EY%29",
     "code": "class Solution29 {\npublic:\n    long long getIdealNums(long long low, long long high) {\n        long long ans = 0;\n        for (long long a = 1; a <= high; ) {\n            for (long long b = 1; a * b <= high; ) {\n                long long num = a * b;\n                if (num >= low) ans++;\n                if (b > high / 5) break;\n                b *= 5;\n            }\n            if (a > high / 3) break;\n            a *= 3;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "An ideal number is defined as a positive integer of the form:"
   },
   {
     "id": 227,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-30",
     "lcNum": "MS OA",
@@ -4904,7 +4992,6 @@ const PROBLEMS_DATA = [
     "pattern": "Prefix & Suffix Bitwise OR Sweep",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "You are given an integer array `arr` and an integer `k`.",
     "intuition": [
       "Doubling a number shifts its binary bits to the left, creating higher-order bits.",
       "To maximize the bitwise OR, all k doubling operations should be concentrated on a SINGLE element,",
@@ -4914,15 +5001,14 @@ const PROBLEMS_DATA = [
       "(pre[i] | ((long long)arr[i] << k) | suf[i + 1])",
       "Precomputing prefix OR array `pre` and suffix OR array `suf` allows O(1) evaluation per candidate."
     ],
-    "statement": "You are given an integer array `arr` and an integer `k`.\n  In an operation, you can multiply any element by 2 (which shifts its bits left by 1).\n  You can perform at most `k` such operations in total.\n  Find the maximum possible bitwise OR sum of the entire array:\n      arr[0] | arr[1] | ... | arr[n - 1]\n  after applying at most `k` operations.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Maximum%20Bitwise%20Or-Sum",
     "code": "class Solution30 {\npublic:\n    long long getMaxOrSum(vector<int>& arr, int k) {\n        int n = arr.size();\n        vector<long long> pre(n + 1, 0), suf(n + 1, 0);\n        for (int i = 0; i < n; ++i) pre[i + 1] = pre[i] | arr[i];\n        for (int i = n - 1; i >= 0; --i) suf[i] = suf[i + 1] | arr[i];\n        long long ans = 0;\n        for (int i = 0; i < n; ++i) {\n            ans = max(ans, pre[i] | ((long long)arr[i] << k) | suf[i + 1]);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an integer array `arr` and an integer `k`."
   },
   {
     "id": 228,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-31",
     "lcNum": "LC 1475",
@@ -4931,7 +5017,6 @@ const PROBLEMS_DATA = [
     "pattern": "Next Smaller or Equal Element via Monotonic Stack",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "A shopkeeper gives a discount on item `i` equal to the price of the first subsequent item `j` (j > i)",
     "intuition": [
       "For each item, we need the first element to its right with price <= prices[i].",
       "Use a monotonic stack storing indices of items waiting for their discount.",
@@ -4942,15 +5027,14 @@ const PROBLEMS_DATA = [
       "All indices remaining in the stack received no discount.",
       "Collect remaining indices, reverse them to get increasing index order."
     ],
-    "statement": "A shopkeeper gives a discount on item `i` equal to the price of the first subsequent item `j` (j > i)\n  such that `prices[j] <= prices[i]`.\n  If no such item exists, item `i` receives no discount (discount = 0).\n  Find:\n  1. The total discounted price paid for all items: sum(final_prices).\n  2. The list of indices (in strictly increasing order) of items that received NO discount.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problems/final-prices-with-a-special-discount-in-a-shop/",
     "code": "class Solution31 {\npublic:\n    pair<long long, vector<int>> finalPrice(const vector<int>& prices) {\n        int n = prices.size();\n        vector<int> final = prices;\n        stack<int> st;\n        for (int i = 0; i < n; ++i) {\n            while (!st.empty() && prices[i] <= prices[st.top()]) {\n                final[st.top()] -= prices[i];\n                st.pop();\n            }\n            st.push(i);\n        }\n        long long sum = 0;\n        for (int x : final) sum += x;\n        vector<int> noDiscount;\n        while (!st.empty()) {\n            noDiscount.push_back(st.top());\n            st.pop();\n        }\n        reverse(noDiscount.begin(), noDiscount.end());\n        return {sum, noDiscount};\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "A shopkeeper gives a discount on item `i` equal to the price of the first subsequent item `j` (j > i)"
   },
   {
     "id": 229,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-32",
     "lcNum": "MS OA",
@@ -4959,7 +5043,6 @@ const PROBLEMS_DATA = [
     "pattern": "Left/Right Pair Frequency Counting Around Center",
     "time": "O(4 * N) = O(N)",
     "space": "O(1)",
-    "summary": "Given a binary string `s` (consisting only of `'0'` and `'1'`), count the number of palindromic",
     "intuition": [
       "In `a b c b a`, character c is the center at index i.",
       "The prefix before i must contribute subsequence `a b`.",
@@ -4971,15 +5054,14 @@ const PROBLEMS_DATA = [
       "Scan from left to right, maintaining left-side counts of `a` and pairs `a b`.",
       "At each center index i, add `(leftAB * rightBA) % MOD` to the answer."
     ],
-    "statement": "Given a binary string `s` (consisting only of `'0'` and `'1'`), count the number of palindromic\n  subsequences of length exactly 5.\n  A length-5 palindrome has the form: `a b c b a` where a, b, c in {'0', '1'}.\n  Return the count modulo 10^9 + 7.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Count%20Palindromic%20Subsequences%20Of%20Length%205",
     "code": "class Solution32 {\npublic:\n    int getPalindromesCount(string s) {\n        const long long MOD = 1e9 + 7;\n        int n = s.size();\n        long long ans = 0;\n        for (int a = 0; a < 2; ++a) {\n            for (int b = 0; b < 2; ++b) {\n                long long leftA = 0, leftAB = 0;\n                long long rightB = 0, rightBA = 0;\n                for (int i = n - 1; i >= 0; --i) {\n                    int x = s[i] - '0';\n                    if (x == a) rightBA += rightB;\n                    if (x == b) rightB++;\n                }\n                for (int i = 0; i < n; ++i) {\n                    int x = s[i] - '0';\n                    if (x == b) rightB--;\n                    if (x == a) rightBA -= rightB;\n                    ans = (ans + leftAB * rightBA) % MOD;\n                    if (x == a) leftA++;\n                    if (x == b) leftAB += leftA;\n                }\n            }\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given a binary string `s` (consisting only of `'0'` and `'1'`), count the number of palindromic"
   },
   {
     "id": 230,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-33",
     "lcNum": "MS OA",
@@ -4988,21 +5070,19 @@ const PROBLEMS_DATA = [
     "pattern": "Multi-Key Custom Comparator Sorting",
     "time": "O(N log N)",
     "space": "O(log N) auxiliary space for sorting",
-    "summary": "You are given an array of integers `nums`.",
     "intuition": [
       "Use `__builtin_popcount(x)` to compute binary cardinality in O(1).",
       "Comparator: if popcount(a) != popcount(b), return popcount(a) < popcount(b).",
       "Else return a < b."
     ],
-    "statement": "You are given an array of integers `nums`.\n  Sort the array in ascending order according to the following rules:\n  1. Primary key: The binary cardinality (number of set bits `1` in the binary representation).\n  2. Secondary key (tie-breaker): The numerical value of the integer in ascending order.\n  Return the sorted array.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Binary%20Cardinality%20Sort",
     "code": "class Solution33 {\npublic:\n    vector<int> cardinalitySort(vector<int> nums) {\n        sort(nums.begin(), nums.end(), [](int a, int b) {\n            int ca = __builtin_popcount(a);\n            int cb = __builtin_popcount(b);\n            if (ca != cb) return ca < cb;\n            return a < b;\n        });\n        return nums;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array of integers `nums`."
   },
   {
     "id": 231,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-34",
     "lcNum": "MS OA",
@@ -5011,21 +5091,19 @@ const PROBLEMS_DATA = [
     "pattern": "Single-Pass Bidirectional Threshold Comparison",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "You are given an array `a` of ball speeds on a track, and a 1-based index `x` of a specific ball.",
     "intuition": [
       "Let p = x - 1 (0-based index of pivot ball).",
       "Scan indices i from 0 to p - 1: increment count if a[i] > a[p].",
       "Scan indices i from p + 1 to n - 1: increment count if a[i] < a[p]."
     ],
-    "statement": "You are given an array `a` of ball speeds on a track, and a 1-based index `x` of a specific ball.\n  All balls move in the positive direction.\n  * A ball behind x (index i < x - 1) will collide with ball x if it moves faster (a[i] > a[x - 1]).\n  * A ball in front of x (index i > x - 1) will collide with ball x if it moves slower (a[i] < a[x - 1]).\n  * Balls with speed equal to ball x will never collide.\n  Find the total number of collisions involving ball `x`.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Ball%20Collision%20Around%20Pivot%20Point",
     "code": "class Solution34 {\npublic:\n    long long countCollisions(const vector<long long>& a, int x) {\n        int n = a.size(), p = x - 1;\n        long long ans = 0;\n        for (int i = 0; i < p; ++i) if (a[i] > a[p]) ans++;\n        for (int i = p + 1; i < n; ++i) if (a[i] < a[p]) ans++;\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array `a` of ball speeds on a track, and a 1-based index `x` of a specific ball."
   },
   {
     "id": 232,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-35",
     "lcNum": "MS OA",
@@ -5034,22 +5112,20 @@ const PROBLEMS_DATA = [
     "pattern": "Sorting + Rearrangement Inequality",
     "time": "O(N log N)",
     "space": "O(1) auxiliary space",
-    "summary": "You are given two arrays `arr1` and `arr2` of length `n`.",
     "intuition": [
       "Weight (i) strictly increases: 1, 2, 3, ..., n.",
       "To maximize \u03a3 i * arr2[i], assign largest arr2 values to largest weights: sort arr2 ASCENDING.",
       "To minimize \u03a3 i * arr1[i] (which is subtracted), assign largest arr1 values to smallest weights:",
       "sort arr1 DESCENDING."
     ],
-    "statement": "You are given two arrays `arr1` and `arr2` of length `n`.\n  You can rearrange both arrays independently in any order.\n  Find the maximum value of:\n      \u03a3_{i=1}^{n} i * (arr2[i] - arr1[i])",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Maximum%20Weighted%20Difference%20%281-Based%20Index%29",
     "code": "class Solution35 {\npublic:\n    long long maxWeightedDifference(vector<long long> arr1, vector<long long> arr2) {\n        int n = arr1.size();\n        sort(arr1.rbegin(), arr1.rend());\n        sort(arr2.begin(), arr2.end());\n        long long ans = 0;\n        for (int i = 0; i < n; ++i) {\n            ans += 1LL * (i + 1) * (arr2[i] - arr1[i]);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given two arrays `arr1` and `arr2` of length `n`."
   },
   {
     "id": 233,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-36",
     "lcNum": "MS OA",
@@ -5058,22 +5134,20 @@ const PROBLEMS_DATA = [
     "pattern": "Linked List Two-Pointer Traversal / Sentinel Processing",
     "time": "O(N)",
     "space": "O(1)",
-    "summary": "Given the `head` of a singly linked list, delete every node whose value is odd (`val % 2 != 0`).",
     "intuition": [
       "Advance head while head is non-null and head->val % 2 != 0 to remove leading odd nodes.",
       "Iterate through list with pointer cur:",
       "If cur->next->val % 2 != 0: bypass node by cur->next = cur->next->next.",
       "Else: advance cur = cur->next."
     ],
-    "statement": "Given the `head` of a singly linked list, delete every node whose value is odd (`val % 2 != 0`).\n  Return the head of the modified linked list.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Delete%20Odd-Valued%20Nodes%20From%20A%20Linked%20List",
     "code": "class Solution36 {\npublic:\n    ListNode* deleteOddNodes(ListNode* head) {\n        while (head && head->val % 2 != 0) head = head->next;\n        ListNode* cur = head;\n        while (cur && cur->next) {\n            if (cur->next->val % 2 != 0) cur->next = cur->next->next;\n            else cur = cur->next;\n        }\n        return head;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given the `head` of a singly linked list, delete every node whose value is odd (`val % 2 != 0`)."
   },
   {
     "id": 234,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-37",
     "lcNum": "MS OA",
@@ -5082,7 +5156,6 @@ const PROBLEMS_DATA = [
     "pattern": "Prefix & Suffix Distinct Sets / Two Pointers",
     "time": "O(N)",
     "space": "O(\u03a3) where \u03a3 is alphabet size",
-    "summary": "Given a string `s`, find the minimum length of a contiguous substring that must be deleted",
     "intuition": [
       "The characters kept must form a prefix s[0...l] and a suffix s[r...n-1] (possibly empty) such that:",
       "1. Prefix s[0...l] has all distinct characters.",
@@ -5093,15 +5166,14 @@ const PROBLEMS_DATA = [
       "Scan prefix from l = 0 onward. While extending prefix, remove conflicting suffix characters.",
       "Track minimum deletion length min(ans, r - l - 1)."
     ],
-    "statement": "Given a string `s`, find the minimum length of a contiguous substring that must be deleted\n  so that all remaining characters in the string are unique/distinct.\n  (Deleting 0 characters is allowed if the string already has all distinct characters).",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Shortest%20Substring%20Deletion%20For%20Distinct%20Characters",
     "code": "class Solution37 {\npublic:\n    int findShortestSubstring(const string& s) {\n        int n = s.size(), r = n, ans = n;\n        unordered_set<char> suf, pre;\n        while (r > 0 && !suf.count(s[r - 1])) {\n            suf.insert(s[--r]);\n        }\n        ans = r; // delete prefix s[0...r-1]\n        for (int l = 0; l < n; ++l) {\n            if (pre.count(s[l])) break;\n            pre.insert(s[l]);\n            while (r < n && suf.count(s[l])) {\n                suf.erase(s[r]);\n                r++;\n            }\n            ans = min(ans, r - l - 1);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Given a string `s`, find the minimum length of a contiguous substring that must be deleted"
   },
   {
     "id": 235,
-    "source": "pyq2.cpp",
     "file": "pyq2.cpp",
     "classNum": "PYQ2-38",
     "lcNum": "MS OA",
@@ -5110,7 +5182,6 @@ const PROBLEMS_DATA = [
     "pattern": "Hash Map Message Timestamp Cache",
     "time": "O(N) average",
     "space": "O(Unique Messages)",
-    "summary": "You are given an array `timestamps` and an array of `messages` of length `n`, along with an integer `k`.",
     "intuition": [
       "Map each message string to its last successful delivery timestamp.",
       "For message msg at timestamps[i]:",
@@ -5119,16 +5190,15 @@ const PROBLEMS_DATA = [
       "Else:",
       "Success! Record true, update last[msg] = timestamps[i]."
     ],
-    "statement": "You are given an array `timestamps` and an array of `messages` of length `n`, along with an integer `k`.\n  A message is delivered successfully (returns `true`) unless the exact SAME message was already\n  delivered within the last `k` seconds (`currentTime - lastDeliveredTime <= k`).\n  If a message is dropped (returns `false`), it does NOT update the delivery time.\n  Return a boolean array of delivery outcomes for each message.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Message%20Duplicate%20Detection%20Rate%20Limiter",
     "code": "class Solution38 {\npublic:\n    vector<bool> messageDelivery(const vector<int>& timestamps, const vector<string>& messages, int k) {\n        unordered_map<string, int> last;\n        vector<bool> ans;\n        for (size_t i = 0; i < messages.size(); ++i) {\n            const string& msg = messages[i];\n            if (last.count(msg) && timestamps[i] - last[msg] <= k) {\n                ans.push_back(false);\n            } else {\n                ans.push_back(true);\n                last[msg] = timestamps[i];\n            }\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "You are given an array `timestamps` and an array of `messages` of length `n`, along with an integer `k`."
   },
   {
     "id": 236,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-26",
     "lcNum": "MS OA",
     "name": "Product Constraint \u2014 Count Valid Triplets",
@@ -5136,23 +5206,21 @@ const PROBLEMS_DATA = [
     "pattern": "Disjoint Adjacency Partitioning + Frequency Map",
     "time": "O(N)",
     "space": "O(N)",
-    "summary": "Count triplets with product equal to target where at least two indices are adjacent.",
     "intuition": [
       "For sorted indices i < j < k, at least two adjacent partitions into two disjoint cases:",
       "Case 1: First two are adjacent (j = i + 1) with k strictly in suffix [i + 2, n - 1].",
       "Case 2: Last two are adjacent (k = j + 1) with i strictly in prefix [0, j - 2] (non-adjacent to j).",
       "Querying suffix and prefix frequency maps prevents double counting in O(1) per pair."
     ],
-    "statement": "You are given an integer array A of length N and an integer target. Count the number of unordered triplets of three distinct indices {i, j, k} such that A[i] * A[j] * A[k] == target and at least two chosen indices are adjacent in the array.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problemset/all/?search=Product%20Constraint%20Count%20Valid%20Triplets",
     "code": "class Solution26 {\npublic:\n    long long countTriplets(const vector<int>& A, long long target) {\n        int n = A.size();\n        long long ans = 0;\n\n        auto getCount = [&](const unordered_map<long long, int>& mp, int total, long long x, long long y) -> long long {\n            long long p = x * y;\n            if (p == 0) return target == 0 ? total : 0LL;\n            if (target % p != 0) return 0LL;\n            auto it = mp.find(target / p);\n            return it == mp.end() ? 0LL : it->second;\n        };\n\n        // Case 1: i and i+1 are adjacent, k is strictly in suffix [i + 2, n - 1]\n        unordered_map<long long, int> suf;\n        int sufTotal = 0;\n        for (int i = 2; i < n; i++) {\n            suf[A[i]]++;\n            sufTotal++;\n        }\n        for (int i = 0; i + 1 < n; i++) {\n            ans += getCount(suf, sufTotal, A[i], A[i + 1]);\n            if (i + 2 < n) {\n                if (--suf[A[i + 2]] == 0) suf.erase(A[i + 2]);\n                sufTotal--;\n            }\n        }\n\n        // Case 2: j and j+1 are adjacent, i is strictly in prefix [0, j - 2] (non-adjacent to j)\n        unordered_map<long long, int> pre;\n        int preTotal = 0;\n        for (int j = 2; j + 1 < n; j++) {\n            pre[A[j - 2]]++;\n            preTotal++;\n            ans += getCount(pre, preTotal, A[j], A[j + 1]);\n        }\n\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "Count triplets with product equal to target where at least two indices are adjacent."
   },
   {
     "id": 237,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-27",
     "lcNum": "MS OA",
     "name": "Roll String",
@@ -5160,22 +5228,20 @@ const PROBLEMS_DATA = [
     "pattern": "Difference Array / Prefix Shift Accumulation",
     "time": "O(N + R)",
     "space": "O(N)",
-    "summary": "Cyclically shift prefix characters by 1 for each roll operation.",
     "intuition": [
       "Each roll[k] increments all characters in prefix [0, roll[k] - 1] by 1.",
       "Record boundary deltas: diff[0]++, diff[roll[k]]--.",
       "Accumulate running prefix sum to compute net cyclic shift for each character."
     ],
-    "statement": "A roll advances a lowercase English letter by one position (a -> b -> ... -> z -> a). For every roll[i], advance each of the first roll[i] characters of string s by one position. Return the final string.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Roll%20String",
     "code": "class Solution27 {\npublic:\n    string rollString(string s, const vector<int>& roll) {\n        int n = s.size();\n        vector<int> diff(n + 1, 0);\n        for (int k : roll) {\n            int len = min(k, n);\n            diff[0]++;\n            diff[len]--;\n        }\n        int add = 0;\n        for (int i = 0; i < n; i++) {\n            add = (add + diff[i]) % 26;\n            s[i] = 'a' + (s[i] - 'a' + add) % 26;\n        }\n        return s;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Cyclically shift prefix characters by 1 for each roll operation."
   },
   {
     "id": 238,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-28",
     "lcNum": "MS OA",
     "name": "Longest Subsequence (Subseq of X, Substr of Y)",
@@ -5183,23 +5249,21 @@ const PROBLEMS_DATA = [
     "pattern": "Dynamic Programming (Subsequence vs Substring Matching)",
     "time": "O(|x| * |y|)",
     "space": "O(|y|)",
-    "summary": "Max length of a string that is simultaneously a subsequence of x and a contiguous substring of y.",
     "intuition": [
       "Let dp[j] = max length of substring of y ending at y[j-1] formed as a subsequence of prefix of x.",
       "Skipping char in x preserves previous state: cur[j] = prev[j].",
       "Matching characters extends contiguous match: cur[j] = max(cur[j], prev[j-1] + 1).",
       "Track global maximum across all characters in 1D space."
     ],
-    "statement": "Given two lowercase strings x and y, find the maximum length of a string that is simultaneously a subsequence of x and a contiguous substring of y.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problemset/all/?search=Longest%20Subsequence",
     "code": "class Solution28 {\npublic:\n    int longestSubsequence(const string& x, const string& y) {\n        int m = y.size(), ans = 0;\n        vector<int> prev(m + 1, 0), cur(m + 1, 0);\n        for (char a : x) {\n            cur = prev;\n            for (int j = 1; j <= m; j++) {\n                if (a == y[j - 1]) {\n                    cur[j] = max(cur[j], prev[j - 1] + 1);\n                }\n                ans = max(ans, cur[j]);\n            }\n            prev = cur;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "Max length of a string that is simultaneously a subsequence of x and a contiguous substring of y."
   },
   {
     "id": 239,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-29",
     "lcNum": "MS OA",
     "name": "Closest Numbers",
@@ -5207,22 +5271,20 @@ const PROBLEMS_DATA = [
     "pattern": "Sorting + Adjacent Element Difference Scan",
     "time": "O(N log N)",
     "space": "O(1)",
-    "summary": "Find all pairs of numbers having the minimum absolute difference.",
     "intuition": [
       "In a sorted array, the minimal difference between any two elements must occur between adjacent neighbors.",
       "Pass 1: Find minimum adjacent difference mn.",
       "Pass 2: Collect all pairs (numbers[i-1], numbers[i]) with difference mn."
     ],
-    "statement": "Given an array numbers containing n distinct integers, find every pair whose absolute difference equals the minimum absolute difference between any two elements. Return pairs sorted by their first element.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Closest%20Numbers",
     "code": "class Solution29 {\npublic:\n    vector<pair<long long, long long>> closestNumbers(vector<long long> numbers) {\n        sort(numbers.begin(), numbers.end());\n        long long mn = LLONG_MAX;\n        for (size_t i = 1; i < numbers.size(); i++) {\n            mn = min(mn, numbers[i] - numbers[i - 1]);\n        }\n        vector<pair<long long, long long>> ans;\n        for (size_t i = 1; i < numbers.size(); i++) {\n            if (numbers[i] - numbers[i - 1] == mn) {\n                ans.push_back({numbers[i - 1], numbers[i]});\n            }\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Find all pairs of numbers having the minimum absolute difference."
   },
   {
     "id": 240,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-30",
     "lcNum": "MS OA",
     "name": "Get Minimum Cost (k-Capable ML Models)",
@@ -5230,22 +5292,20 @@ const PROBLEMS_DATA = [
     "pattern": "Greedy Capability Unit Pairing + Two-Way Merge",
     "time": "O(N log N)",
     "space": "O(N)",
-    "summary": "Minimum cost to select models supporting >= k of feature A and >= k of feature B.",
     "intuition": [
       "Capability of both A and B can be increased by 1 via either a single 11 model or a (01 + 10) pair.",
       "Sort costs of 11, 01, and 10 models ascending.",
       "Pair 01 and 10 models greedily, merge with 11 costs, and compute prefix sums."
     ],
-    "statement": "Given n machine learning models with costs and feature availability in {00, 01, 10, 11}. For every k from 1 to n, find the minimum total cost required to form a k-capable set (supporting >= k feature A and >= k feature B), or -1 if impossible.",
+    "completed": true,
+    "starred": true,
     "url": "https://leetcode.com/problemset/all/?search=Get%20Minimum%20Cost",
     "code": "class Solution30 {\npublic:\n    vector<long long> getMinCost(int n, const vector<int>& cost, const vector<string>& featureAvailability) {\n        vector<long long> both, a, b;\n        for (int i = 0; i < n; i++) {\n            if (featureAvailability[i] == \"11\") both.push_back(cost[i]);\n            else if (featureAvailability[i] == \"01\") a.push_back(cost[i]);\n            else if (featureAvailability[i] == \"10\") b.push_back(cost[i]);\n        }\n        sort(both.begin(), both.end());\n        sort(a.begin(), a.end());\n        sort(b.begin(), b.end());\n\n        vector<long long> pairCost;\n        size_t limit = min(a.size(), b.size());\n        for (size_t i = 0; i < limit; i++) {\n            pairCost.push_back(a[i] + b[i]);\n        }\n\n        vector<long long> units;\n        merge(both.begin(), both.end(), pairCost.begin(), pairCost.end(), back_inserter(units));\n\n        vector<long long> ans(n, -1);\n        long long sum = 0;\n        for (size_t i = 0; i < units.size() && (int)i < n; i++) {\n            sum += units[i];\n            ans[i] = sum;\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": true
+    "summary": "Minimum cost to select models supporting >= k of feature A and >= k of feature B."
   },
   {
     "id": 241,
     "file": "pyq1.cpp",
-    "source": "pyq1.cpp",
     "classNum": "PYQ1-31",
     "lcNum": "MS OA",
     "name": "Get Visible Profiles Count",
@@ -5253,16 +5313,15 @@ const PROBLEMS_DATA = [
     "pattern": "Disjoint Set Union (DSU) with Component Sizes",
     "time": "O((E + Q) * \u03b1(N))",
     "space": "O(N)",
-    "summary": "Return the size of the connected component for each queried user in a social network.",
     "intuition": [
       "Transitive profile visibility means all users in the same connected component can view each other.",
       "Build DSU tracking component sizes for all connections.",
       "Query size of component root in O(\u03b1(N)) for each requested user."
     ],
-    "statement": "A social media platform represents users as an undirected graph. Two users directly or indirectly connected can view each other profile. For every user in queries, return the number of profiles they can access, including their own.",
+    "completed": true,
+    "starred": false,
     "url": "https://leetcode.com/problemset/all/?search=Get%20Visible%20Profiles%20Count",
     "code": "class Solution31 {\npublic:\n    vector<int> getVisibleProfilesCount(int nodes, const vector<int>& u, const vector<int>& v, const vector<int>& queries) {\n        vector<int> parent(nodes + 1), sz(nodes + 1, 1);\n        iota(parent.begin(), parent.end(), 0);\n\n        function<int(int)> find = [&](int x) {\n            return parent[x] == x ? x : parent[x] = find(parent[x]);\n        };\n\n        for (size_t i = 0; i < u.size(); i++) {\n            int a = find(u[i]), b = find(v[i]);\n            if (a != b) {\n                if (sz[a] < sz[b]) swap(a, b);\n                parent[b] = a;\n                sz[a] += sz[b];\n            }\n        }\n\n        vector<int> ans;\n        ans.reserve(queries.size());\n        for (int x : queries) {\n            ans.push_back(sz[find(x)]);\n        }\n        return ans;\n    }\n};",
-    "completed": true,
-    "starred": false
+    "summary": "Return the size of the connected component for each queried user in a social network."
   }
 ];

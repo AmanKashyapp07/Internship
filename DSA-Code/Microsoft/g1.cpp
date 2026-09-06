@@ -69,11 +69,8 @@ using vvl = vector<vector<ll>>;
 
 int maxProfit(vector<int>& p) {
     int ans = 0;
-    for (int i = 1; i < (int)p.size(); ++i) {
-        if (p[i] > p[i - 1]) {
-            ans += p[i] - p[i - 1];
-        }
-    }
+    for (int i = 1; i < (int)p.size(); ++i)
+        ans += max(0, p[i] - p[i - 1]);
     return ans;
 }
 // Interview Explanation:
@@ -91,13 +88,10 @@ int maxProfit(vector<int>& p) {
 // =========================================================
 
 bool canJump(vector<int>& a) {
-    int n = a.size();
-    int mx = 0;
-
+    int mx = 0, n = a.size();
     for (int i = 0; i < n; ++i) {
         if (i > mx) return false;
         mx = max(mx, i + a[i]);
-        if (mx >= n - 1) return true; // if the farthest reachable index is beyond or at the last index, we can reach the end
     }
     return true;
 }
@@ -119,19 +113,10 @@ bool canJump(vector<int>& a) {
 int candy(vector<int>& r) {
     int n = r.size();
     vector<int> c(n, 1);
-
-    for (int i = 1; i < n; ++i) {
-        if (r[i] > r[i - 1]) {
-            c[i] = c[i - 1] + 1;
-        }
-    }
-
-    for (int i = n - 2; i >= 0; --i) {
-        if (r[i] > r[i + 1]) {
-            c[i] = max(c[i], c[i + 1] + 1);
-        }
-    }
-
+    for (int i = 1; i < n; ++i)
+        if (r[i] > r[i - 1]) c[i] = c[i - 1] + 1;
+    for (int i = n - 2; i >= 0; --i)
+        if (r[i] > r[i + 1]) c[i] = max(c[i], c[i + 1] + 1);
     return accumulate(c.begin(), c.end(), 0);
 }
 // Interview Explanation:
@@ -152,25 +137,14 @@ int candy(vector<int>& r) {
 vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {
     vector<vector<int>> ans;
     int i = 0, n = a.size();
-
-    // 1. Add all intervals ending before nw starts
-    while (i < n && a[i][1] < nw[0]) {
-        ans.push_back(a[i++]);
-    }
-
-    // 2. Merge all overlapping intervals with nw
+    while (i < n && a[i][1] < nw[0]) ans.push_back(a[i++]);
     while (i < n && a[i][0] <= nw[1]) {
         nw[0] = min(nw[0], a[i][0]);
         nw[1] = max(nw[1], a[i][1]);
         i++;
     }
     ans.push_back(nw);
-
-    // 3. Add all remaining intervals
-    while (i < n) {
-        ans.push_back(a[i++]);
-    }
-
+    while (i < n) ans.push_back(a[i++]);
     return ans;
 }
 // Interview Explanation:
@@ -189,24 +163,14 @@ vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {
 // 5. NON-OVERLAPPING INTERVALS [G-5]
 // =========================================================
 
-bool compareIntervalEnds(const vector<int>& a, const vector<int>& b) {
-    return a[1] < b[1];
-}
-
 int eraseOverlapIntervals(vector<vector<int>>& a) {
-    if (a.empty()) return 0;
-    sort(a.begin(), a.end(), compareIntervalEnds);
-
-    int kept = 1;
-    int prevEnd = a[0][1];
-
-    for (int i = 1; i < (int)a.size(); ++i) {
-        if (a[i][0] >= prevEnd) {
-            kept++;
-            prevEnd = a[i][1];
-        }
+    sort(a.begin(), a.end(), [](auto& x, auto& y) { return x[1] < y[1]; });
+    int ans = 0, prev = INT_MIN;
+    for (auto& v : a) {
+        if (v[0] >= prev) prev = v[1];
+        else ans++;
     }
-    return (int)a.size() - kept;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find minimum intervals to remove to make remaining intervals non-overlapping.
@@ -246,27 +210,15 @@ bool canAttendMeetings(vector<vector<int>>& a) {
 // =========================================================
 // 7. MEETING ROOMS II [G-7]
 // =========================================================
-class Solution {
-public:
-    int minMeetingRooms(vector<vector<int>>& intervals) {
-        if (intervals.empty()) return 0;
-
-        sort(intervals.begin(), intervals.end()); // sort by start time, then by end time
-
-        priority_queue<int, vector<int>, greater<int>> pq;
-
-        for (auto& meeting : intervals) {
-            // Reuse the room whose meeting ends earliest
-            if (!pq.empty() && pq.top() <= meeting[0])
-                pq.pop();
-
-            // Assign current meeting to a room
-            pq.push(meeting[1]);
-        }
-
-        return pq.size();
+int minMeetingRooms(vector<vector<int>>& a) {
+    sort(a.begin(), a.end());
+    priority_queue<int, vector<int>, greater<int>> pq;
+    for (auto& m : a) {
+        if (!pq.empty() && pq.top() <= m[0]) pq.pop();
+        pq.push(m[1]);
     }
-};
+    return pq.size();
+}
 // Interview Explanation:
 // - Problem Statement: Find minimum meeting rooms required to accommodate all intervals.
 // - Approach: Chronological Two-Pointer Sweep on Separate Starts and Ends.
@@ -283,24 +235,17 @@ public:
 // 8. MINIMUM NUMBER OF ARROWS TO BURST BALLOONS [G-8]
 // =========================================================
 
-bool compareBalloonEnds(const vector<int>& a, const vector<int>& b) {
-    return a[1] < b[1];
-}
-
 int findMinArrowShots(vector<vector<int>>& a) {
     if (a.empty()) return 0;
-    sort(a.begin(), a.end(), compareBalloonEnds);
-
-    int arrows = 1;
-    long long curEnd = a[0][1];
-
-    for (int i = 1; i < (int)a.size(); ++i) {
-        if (a[i][0] > curEnd) {
-            arrows++;
-            curEnd = a[i][1];
+    sort(a.begin(), a.end(), [](auto& x, auto& y) { return x[1] < y[1]; });
+    int ans = 1, end = a[0][1];
+    for (auto& b : a) {
+        if (b[0] > end) {
+            ans++;
+            end = b[1];
         }
     }
-    return arrows;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find minimum arrows fired perpendicularly to burst all balloon intervals.
@@ -320,21 +265,11 @@ int findMinArrowShots(vector<vector<int>>& a) {
 vector<vector<int>> intervalIntersection(vector<vector<int>>& a, vector<vector<int>>& b) {
     vector<vector<int>> ans;
     int i = 0, j = 0;
-    int n = a.size(), m = b.size();
-
-    while (i < n && j < m) {
-        int lo = max(a[i][0], b[j][0]);
-        int hi = min(a[i][1], b[j][1]);
-
-        if (lo <= hi) {
-            ans.push_back({lo, hi});
-        }
-
-        if (a[i][1] < b[j][1]) {
-            i++;
-        } else {
-            j++;
-        }
+    while (i < (int)a.size() && j < (int)b.size()) {
+        int lo = max(a[i][0], b[j][0]), hi = min(a[i][1], b[j][1]);
+        if (lo <= hi) ans.push_back({lo, hi});
+        if (a[i][1] < b[j][1]) i++;
+        else j++;
     }
     return ans;
 }
@@ -355,15 +290,13 @@ vector<vector<int>> intervalIntersection(vector<vector<int>>& a, vector<vector<i
 
 bool carPooling(vector<vector<int>>& trips, int capacity) {
     int diff[1001] = {0};
-    for (const auto& t : trips) {
+    for (auto& t : trips) {
         diff[t[1]] += t[0];
         diff[t[2]] -= t[0];
     }
-
-    int cur = 0;
-    for (int i = 0; i <= 1000; ++i) {
-        cur += diff[i];
-        if (cur > capacity) return false;
+    for (int x : diff) {
+        capacity -= x;
+        if (capacity < 0) return false;
     }
     return true;
 }
@@ -383,18 +316,12 @@ bool carPooling(vector<vector<int>>& trips, int capacity) {
 // =========================================================
 
 vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {
-    vector<int> diff(n + 1, 0);
-    for (const auto& b : bookings) {
-        diff[b[0] - 1] += b[2];
-        diff[b[1]]     -= b[2];
-    }
-
     vector<int> ans(n);
-    int cur = 0;
-    for (int i = 0; i < n; ++i) {
-        cur += diff[i];
-        ans[i] = cur;
+    for (auto& b : bookings) {
+        ans[b[0] - 1] += b[2];
+        if (b[1] < n) ans[b[1]] -= b[2];
     }
+    for (int i = 1; i < n; ++i) ans[i] += ans[i - 1];
     return ans;
 }
 // Interview Explanation:
@@ -414,17 +341,14 @@ vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {
 
 class MyCalendar {
     map<int, int> mp; // start -> end
-public:
-    MyCalendar() {}
 
+public:
     bool book(int start, int end) {
         auto it = mp.upper_bound(start);
-        if (it != mp.end() && it->first < end) {
-            return false;
-        }
-        if (it != mp.begin() && prev(it)->second > start) {
-            return false;
-        }
+        // Overlap with next interval
+        if (it != mp.end() && it->first < end) return false;
+        // Overlap with previous interval
+        if (it != mp.begin() && prev(it)->second > start) return false;
         mp[start] = end;
         return true;
     }
@@ -446,21 +370,21 @@ public:
 // =========================================================
 
 class MyCalendarTwo {
-    vector<pair<int, int>> bookings;
-    vector<pair<int, int>> overlaps;
-public:
-    MyCalendarTwo() {}
+    vector<pair<int,int>> booked, overlap;
 
+public:
     bool book(int start, int end) {
-        for (const auto& [s, e] : overlaps) {
-            if (max(start, s) < min(end, e)) return false;
-        }
-        for (const auto& [s, e] : bookings) {
-            if (max(start, s) < min(end, e)) {
-                overlaps.push_back({max(start, s), min(end, e)});
-            }
-        }
-        bookings.push_back({start, end});
+        // Triple booking check
+        for (auto [s, e] : overlap)
+            if (max(start, s) < min(end, e))
+                return false;
+
+        // Create new double-booked intervals
+        for (auto [s, e] : booked)
+            if (max(start, s) < min(end, e))
+                overlap.push_back({max(start, s), min(end, e)});
+
+        booked.push_back({start, end});
         return true;
     }
 };
@@ -482,18 +406,21 @@ public:
 
 class MyCalendarThree {
     map<int, int> mp;
-public:
-    MyCalendarThree() {}
 
+public:
     int book(int start, int end) {
         mp[start]++;
         mp[end]--;
-        int cur = 0, mx = 0;
-        for (const auto& [time, count] : mp) {
-            cur += count;
-            mx = max(mx, cur);
+
+        int cur = 0, ans = 0;
+
+        // Prefix sum = active events
+        for (auto [time, delta] : mp) {
+            cur += delta;
+            ans = max(ans, cur);
         }
-        return mx;
+
+        return ans;
     }
 };
 // Interview Explanation:
@@ -522,12 +449,12 @@ int findPlatform(vector<int>& arr, vector<int>& dep) {
     while (i < n) {
         if (arr[i] <= dep[j]) {
             plat++;
-            maxPlat = max(maxPlat, plat);
             i++;
         } else {
             plat--;
             j++;
         }
+        maxPlat = max(maxPlat, plat);
     }
     return maxPlat;
 }
@@ -551,20 +478,13 @@ struct Job {
     int id, dead, profit;
 };
 
-bool compareJobs(const Job& a, const Job& b) {
-    return a.profit > b.profit;
-}
-
 pair<int, int> JobScheduling(vector<Job>& a) {
-    sort(a.begin(), a.end(), compareJobs);
-
+    sort(a.begin(), a.end(), [](auto& x, auto& y) { return x.profit > y.profit; });
     int maxDead = 0;
-    for (const auto& j : a) maxDead = max(maxDead, j.dead);
-
+    for (auto& j : a) maxDead = max(maxDead, j.dead);
     vector<int> slot(maxDead + 1, -1);
     int count = 0, totalProfit = 0;
-
-    for (const auto& j : a) {
+    for (auto& j : a) {
         for (int d = j.dead; d > 0; --d) {
             if (slot[d] == -1) {
                 slot[d] = j.id;
@@ -591,25 +511,16 @@ pair<int, int> JobScheduling(vector<Job>& a) {
 // 17. COURSE SCHEDULE III [G-17]
 // =========================================================
 
-bool compareCourseLastDay(const vector<int>& a, const vector<int>& b) {
-    return a[1] < b[1];
-}
-
 int scheduleCourse(vector<vector<int>>& courses) {
-    sort(courses.begin(), courses.end(), compareCourseLastDay);
-
-    priority_queue<int> pq; // max-heap of durations
-    int curTime = 0;
-
-    for (const auto& c : courses) {
-        int dur = c[0], last = c[1];
-        if (curTime + dur <= last) {
-            curTime += dur;
-            pq.push(dur);
-        } else if (!pq.empty() && pq.top() > dur) {
-            curTime += dur - pq.top();
+    sort(courses.begin(), courses.end(), [](auto& a, auto& b) { return a[1] < b[1]; });
+    priority_queue<int> pq;
+    int cur = 0;
+    for (auto& c : courses) {
+        cur += c[0];
+        pq.push(c[0]);
+        if (cur > c[1]) {
+            cur -= pq.top();
             pq.pop();
-            pq.push(dur);
         }
     }
     return pq.size();
@@ -630,21 +541,13 @@ int scheduleCourse(vector<vector<int>>& courses) {
 // 18. TWO CITY SCHEDULING [G-18]
 // =========================================================
 
-bool compareCityCosts(const vector<int>& a, const vector<int>& b) {
-    return (a[0] - a[1]) < (b[0] - b[1]);
-}
-
 int twoCitySchedCost(vector<vector<int>>& costs) {
-    sort(costs.begin(), costs.end(), compareCityCosts);
-
-    int total = 0;
-    int n = costs.size() / 2;
-    for (int i = 0; i < n; ++i) {
-        total += costs[i][0];
-    }
-    for (int i = n; i < 2 * n; ++i) {
-        total += costs[i][1];
-    }
+    sort(costs.begin(), costs.end(), [](auto& a, auto& b) {
+        return a[0] - a[1] < b[0] - b[1];
+    });
+    int total = 0, n = costs.size() / 2;
+    for (int i = 0; i < n; ++i)
+        total += costs[i][0] + costs[i + n][1];
     return total;
 }
 // Interview Explanation:
@@ -662,36 +565,23 @@ int twoCitySchedCost(vector<vector<int>>& costs) {
 // 19. MAXIMUM PERFORMANCE OF A TEAM [G-19]
 // =========================================================
 
-struct Engineer {
-    int speed, eff;
-};
-
-bool compareEngineers(const Engineer& a, const Engineer& b) {
-    return a.eff > b.eff;
-}
-
 int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {
-    vector<Engineer> eng(n);
-    for (int i = 0; i < n; ++i) {
-        eng[i] = {speed[i], efficiency[i]};
-    }
-    sort(eng.begin(), eng.end(), compareEngineers);
+    vector<pair<int, int>> eng(n);
+    for (int i = 0; i < n; ++i) eng[i] = {efficiency[i], speed[i]};
+    sort(eng.rbegin(), eng.rend());
 
-    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of speeds
-    long long sumSpeed = 0, maxPerf = 0;
-
-    for (int i = 0; i < n; ++i) {
-        pq.push(eng[i].speed);
-        sumSpeed += eng[i].speed;
-
+    priority_queue<int, vector<int>, greater<int>> pq;
+    long long sum = 0, ans = 0;
+    for (auto [eff, spd] : eng) {
+        pq.push(spd);
+        sum += spd;
         if ((int)pq.size() > k) {
-            sumSpeed -= pq.top();
+            sum -= pq.top();
             pq.pop();
         }
-
-        maxPerf = max(maxPerf, sumSpeed * eng[i].eff);
+        ans = max(ans, sum * eff);
     }
-    return maxPerf % MOD;
+    return ans % (int)(1e9 + 7);
 }
 // Interview Explanation:
 // - Problem Statement: Choose at most k engineers maximizing (sum(speed) * min(efficiency)).
@@ -709,31 +599,16 @@ int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {
 // 20. IPO [G-20]
 // =========================================================
 
-struct Project {
-    int cap, prof;
-};
-
-bool compareProjects(const Project& a, const Project& b) {
-    return a.cap < b.cap;
-}
-
 int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {
     int n = profits.size();
-    vector<Project> p(n);
-    for (int i = 0; i < n; ++i) {
-        p[i] = {capital[i], profits[i]};
-    }
-    sort(p.begin(), p.end(), compareProjects);
+    vector<pair<int, int>> p(n);
+    for (int i = 0; i < n; ++i) p[i] = {capital[i], profits[i]};
+    sort(p.begin(), p.end());
 
-    priority_queue<int> pq; // max-heap of profits
-    int idx = 0;
-
-    for (int step = 0; step < k; ++step) {
-        while (idx < n && p[idx].cap <= w) {
-            pq.push(p[idx].prof);
-            idx++;
-        }
-
+    priority_queue<int> pq;
+    int i = 0;
+    while (k--) {
+        while (i < n && p[i].first <= w) pq.push(p[i++].second);
         if (pq.empty()) break;
         w += pq.top();
         pq.pop();
@@ -756,47 +631,27 @@ int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capita
 // 21. SINGLE-THREADED CPU [G-21]
 // =========================================================
 
-struct CpuTask {
-    int enq, proc, id;
-};
-
-bool compareTaskEnqueue(const CpuTask& a, const CpuTask& b) {
-    return a.enq < b.enq;
-}
-
-struct CpuTaskCompare {
-    bool operator()(const CpuTask& a, const CpuTask& b) const {
-        if (a.proc != b.proc) return a.proc > b.proc;
-        return a.id > b.id;
-    }
-};
-
 vector<int> getOrder(vector<vector<int>>& tasks) {
     int n = tasks.size();
-    vector<CpuTask> a(n);
-    for (int i = 0; i < n; ++i) {
-        a[i] = {tasks[i][0], tasks[i][1], i};
-    }
-    sort(a.begin(), a.end(), compareTaskEnqueue);
+    vector<array<int, 3>> a(n); // {enqueueTime, processingTime, index}
+    for (int i = 0; i < n; ++i) a[i] = {tasks[i][0], tasks[i][1], i};
+    sort(a.begin(), a.end());
 
-    priority_queue<CpuTask, vector<CpuTask>, CpuTaskCompare> pq;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     vector<int> ans;
-    long long curTime = 0;
-    int idx = 0;
+    long long time = 0;
+    int i = 0;
 
-    while (idx < n || !pq.empty()) {
-        if (pq.empty() && curTime < a[idx].enq) {
-            curTime = a[idx].enq;
+    while (i < n || !pq.empty()) {
+        if (pq.empty() && time < a[i][0]) time = a[i][0];
+        while (i < n && a[i][0] <= time) {
+            pq.push({a[i][1], a[i][2]});
+            i++;
         }
-
-        while (idx < n && a[idx].enq <= curTime) {
-            pq.push(a[idx++]);
-        }
-
-        CpuTask top = pq.top();
+        auto [proc, idx] = pq.top();
         pq.pop();
-        curTime += top.proc;
-        ans.push_back(top.id);
+        time += proc;
+        ans.push_back(idx);
     }
     return ans;
 }
@@ -816,57 +671,36 @@ vector<int> getOrder(vector<vector<int>>& tasks) {
 // 22. PROCESS TASKS USING SERVERS [G-22]
 // =========================================================
 
-struct ServerFreeCompare {
-    bool operator()(const pair<int, int>& a, const pair<int, int>& b) const {
-        if (a.first != b.first) return a.first > b.first; // weight
-        return a.second > b.second;                      // index
-    }
-};
-
-struct ServerBusyCompare {
-    bool operator()(const tuple<long long, int, int>& a, const tuple<long long, int, int>& b) const {
-        if (get<0>(a) != get<0>(b)) return get<0>(a) > get<0>(b); // freeTime
-        if (get<1>(a) != get<1>(b)) return get<1>(a) > get<1>(b); // weight
-        return get<2>(a) > get<2>(b);                             // index
-    }
-};
-
 vector<int> assignTasks(vector<int>& servers, vector<int>& tasks) {
-    int numServers = servers.size();
-    int numTasks = tasks.size();
+    int n = servers.size(), m = tasks.size();
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> free;
+    using T = tuple<long long, int, int>;
+    priority_queue<T, vector<T>, greater<T>> busy;
 
-    priority_queue<pair<int, int>, vector<pair<int, int>>, ServerFreeCompare> freeServers;
-    for (int i = 0; i < numServers; ++i) {
-        freeServers.push({servers[i], i});
-    }
+    for (int i = 0; i < n; ++i) free.push({servers[i], i});
 
-    priority_queue<tuple<long long, int, int>, vector<tuple<long long, int, int>>, ServerBusyCompare> busyServers;
+    vector<int> ans(m);
+    long long time = 0;
 
-    vector<int> ans(numTasks);
-    long long curTime = 0;
-
-    for (int i = 0; i < numTasks; ++i) {
-        curTime = max(curTime, (long long)i);
-
-        while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {
-            auto [t, w, idx] = busyServers.top();
-            busyServers.pop();
-            freeServers.push({w, idx});
+    for (int i = 0; i < m; ++i) {
+        time = max(time, (long long)i);
+        while (!busy.empty() && get<0>(busy.top()) <= time) {
+            auto [_, w, idx] = busy.top();
+            busy.pop();
+            free.push({w, idx});
         }
-
-        if (freeServers.empty()) {
-            curTime = get<0>(busyServers.top());
-            while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {
-                auto [t, w, idx] = busyServers.top();
-                busyServers.pop();
-                freeServers.push({w, idx});
+        if (free.empty()) {
+            time = get<0>(busy.top());
+            while (!busy.empty() && get<0>(busy.top()) <= time) {
+                auto [_, w, idx] = busy.top();
+                busy.pop();
+                free.push({w, idx});
             }
         }
-
-        auto [w, idx] = freeServers.top();
-        freeServers.pop();
+        auto [w, idx] = free.top();
+        free.pop();
         ans[i] = idx;
-        busyServers.push({curTime + tasks[i], w, idx});
+        busy.push({time + tasks[i], w, idx});
     }
     return ans;
 }

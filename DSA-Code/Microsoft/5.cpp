@@ -168,16 +168,16 @@ public:
 // 3. MERGE K SORTED LISTS (LC 23)
 // =========================================================
 
-struct CompareListNode {
-    bool operator()(const ListNode* a, const ListNode* b) const {
-        return a->val > b->val;
-    }
-};
-
 class Solution3 {
+    struct Compare {
+        bool operator()(const ListNode* a, const ListNode* b) const {
+            return a->val > b->val;
+        }
+    };
+
 public:
     ListNode* mergeKLists(vector<ListNode*>& lists) {
-        priority_queue<ListNode*, vector<ListNode*>, CompareListNode> pq;
+        priority_queue<ListNode*, vector<ListNode*>, Compare> pq;
         for (ListNode* node : lists) {
             if (node) pq.push(node);
         }

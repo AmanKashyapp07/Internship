@@ -225,39 +225,26 @@ public:
 // =========================================================
 
 class Solution98 {
-public:
     vector<vector<int>> memo;
+    string s, p;
 
-    bool solve(int i, int j, string& s, string& p) {
-        // Pattern finished: string must also be finished
-        if (j == p.size()) return i == s.size();
-        // Return cached result
+    bool solve(int i, int j) {
+        if (j == (int)p.size()) return i == (int)s.size();
         if (memo[i][j] != -1) return memo[i][j];
 
-        // Check if current characters match
-        bool firstMatch = i < s.size() && (p[j] == s[i] || p[j] == '.');
-        bool ans;
-        // Next character is '*'
-        if (j + 1 < p.size() && p[j + 1] == '*') {
-            // Skip '*' OR use it to match current character
-            ans = solve(i, j + 2, s, p) || (firstMatch && solve(i + 1, j, s, p));
+        bool firstMatch = i < (int)s.size() && (p[j] == s[i] || p[j] == '.');
+        if (j + 1 < (int)p.size() && p[j + 1] == '*') {
+            return memo[i][j] = solve(i, j + 2) || (firstMatch && solve(i + 1, j));
         }
-        else {
-            // Match current characters and move forward
-            ans = firstMatch && solve(i + 1, j + 1, s, p);
-        }
-
-        return memo[i][j] = ans;
+        return memo[i][j] = firstMatch && solve(i + 1, j + 1);
     }
 
-    bool isMatch(string s, string p) {
-        int m = s.size();
-        int n = p.size();
-
-        // -1 means not computed
-        memo.assign(m + 1, vector<int>(n + 1, -1));
-
-        return solve(0, 0, s, p);
+public:
+    bool isMatch(string sVal, string pVal) {
+        s = std::move(sVal);
+        p = std::move(pVal);
+        memo.assign(s.size() + 1, vector<int>(p.size() + 1, -1));
+        return solve(0, 0);
     }
 };
 
@@ -813,25 +800,29 @@ public:
 
 class Solution113 {
     vector<vector<int>> ans;
+    vector<int> cur;
+    vector<int> cand;
 
-    void dfs(const vector<int>& a, int start, int rem, vector<int>& cur) {
+    void dfs(int start, int rem) {
         if (rem == 0) {
             ans.push_back(cur);
             return;
         }
 
-        for (int i = start; i < (int)a.size() && a[i] <= rem; i++) {
-            cur.push_back(a[i]);
-            dfs(a, i, rem - a[i], cur); // reuse allowed
+        for (int i = start; i < (int)cand.size() && cand[i] <= rem; ++i) {
+            cur.push_back(cand[i]);
+            dfs(i, rem - cand[i]);
             cur.pop_back();
         }
     }
 
 public:
     vector<vector<int>> combinationSum(vector<int>& a, int target) {
-        sort(a.begin(), a.end());
-        vector<int> cur;
-        dfs(a, 0, target, cur);
+        cand = a;
+        sort(cand.begin(), cand.end());
+        ans.clear();
+        cur.clear();
+        dfs(0, target);
         return ans;
     }
 };
@@ -897,21 +888,23 @@ public:
 class Solution115 {
     vector<vector<int>> result;
     vector<int> current;
+    vector<int> a;
 
-    void backtrack(const vector<int>& nums, int start) {
+    void backtrack(int start) {
         result.push_back(current);
-        for (int i = start; i < (int)nums.size(); ++i) {
-            current.push_back(nums[i]);
-            backtrack(nums, i + 1);
+        for (int i = start; i < (int)a.size(); ++i) {
+            current.push_back(a[i]);
+            backtrack(i + 1);
             current.pop_back();
         }
     }
 
 public:
     vector<vector<int>> subsets(vector<int>& nums) {
+        a = nums;
         result.clear();
         current.clear();
-        backtrack(nums, 0);
+        backtrack(0);
         return result;
     }
 };
@@ -930,23 +923,25 @@ public:
 class Solution116 {
     vector<vector<int>> result;
     vector<int> current;
+    vector<int> a;
 
-    void backtrack(const vector<int>& nums, int start) {
+    void backtrack(int start) {
         result.push_back(current);
-        for (int i = start; i < (int)nums.size(); ++i) {
-            if (i > start && nums[i] == nums[i - 1]) continue;
-            current.push_back(nums[i]);
-            backtrack(nums, i + 1);
+        for (int i = start; i < (int)a.size(); ++i) {
+            if (i > start && a[i] == a[i - 1]) continue;
+            current.push_back(a[i]);
+            backtrack(i + 1);
             current.pop_back();
         }
     }
 
 public:
     vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        a = nums;
+        sort(a.begin(), a.end());
         result.clear();
         current.clear();
-        sort(nums.begin(), nums.end());
-        backtrack(nums, 0);
+        backtrack(0);
         return result;
     }
 };
