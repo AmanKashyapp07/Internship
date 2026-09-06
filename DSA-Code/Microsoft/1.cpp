@@ -481,108 +481,59 @@ public:
         }
         return maxWater;
     }
-};
-// Interview Explanation:
-// - Problem Statement: Find two lines forming a container with the x-axis that stores the maximum water volume.
-// - Approach: Two Pointers Inward Convergence.
-// - Intuition:
-//   * Area is bounded by min(height[left], height[right]) * (right - left).
-//   * Inward movement reduces width by 1. To possibly achieve a larger area, height must increase.
-//   * Moving the taller wall inward cannot increase area because height is capped by shorter wall. Thus, always advance the shorter wall inward.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
+    
 
+class Solution {
+    vector<pair<int,int>> twoSum(vector<int>& a, int l, int target) {
+        vector<pair<int,int>> res;
+        int r = a.size() - 1;
 
-// =========================================================
-// 13. 3SUM (LC 15)
-// =========================================================
+        while (l < r) {
+            int sum = a[l] + a[r];
 
-class Solution13 {
+            if (sum == target) {
+                res.push_back({a[l], a[r]});
+                int x = a[l], y = a[r];
+                while (l < r && a[l] == x) l++;
+                while (l < r && a[r] == y) r--;
+            }
+            else if (sum < target) l++;
+            else r--;
+        }
+        return res;
+    }
+
 public:
-    vector<vector<int>> threeSum(vector<int>& nums) {
-        sort(nums.begin(), nums.end());
-        vector<vector<int>> result;
-        int n = nums.size();
-        for (int i = 0; i < n - 2; ++i) {
-            // Skip duplicates for the first element
-            if (i > 0 && nums[i] == nums[i - 1]) continue;
-            if (nums[i] > 0) break; // Cannot sum to 0 if smallest is positive
-            int left = i + 1;
-            int right = n - 1;
-            // Two pointers for two-sum target = -nums[i]
-            while (left < right) {
-                int sum = nums[i] + nums[left] + nums[right];
-                if (sum == 0) {
-                    result.push_back({nums[i], nums[left], nums[right]});
-                    while (left < right && nums[left] == nums[left + 1]) left++;
-                    while (left < right && nums[right] == nums[right - 1]) right--;
-                    left++;
-                    right--;
-                } else if (sum < 0) {
-                    left++;
-                } else {
-                    right--;
-                }
+    vector<vector<int>> threeSum(vector<int>& a, int target = 0) {
+        sort(a.begin(), a.end());
+        vector<vector<int>> res;
+
+        for (int i = 0; i < a.size() - 2; i++) {
+            if (i && a[i] == a[i - 1]) continue;
+
+            for (auto [x, y] : twoSum(a, i + 1, target - a[i]))
+                res.push_back({a[i], x, y});
+        }
+        return res;
+    }
+
+    vector<vector<int>> fourSum(vector<int>& a, int target) {
+        sort(a.begin(), a.end());
+        vector<vector<int>> res;
+
+        for (int i = 0; i < a.size() - 3; i++) {
+            if (i && a[i] == a[i - 1]) continue;
+
+            for (int j = i + 1; j < a.size() - 2; j++) {
+                if (j > i + 1 && a[j] == a[j - 1]) continue;
+
+                for (auto [x, y] : twoSum(a, j + 1, target - a[i] - a[j]))
+                    res.push_back({a[i], a[j], x, y});
             }
         }
-        return result;
+        return res;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Find all unique triplets [nums[i], nums[j], nums[k]] summing to 0.
-// - Approach: Sorting + Fixed Outer Loop + Two-Pointer Convergence with Duplicate Pruning.
-// - Intuition:
-//   * Sort array. Fix nums[i] as the first element.
-//   * Use two pointers left = i + 1 and right = n - 1 to find pairs summing to -nums[i].
-//   * Skip duplicate values for i, left, and right to guarantee unique triplets.
-//   * If nums[i] > 0, sum cannot equal 0; break early.
-// - Complexity: Time: O(N^2), Space: O(1) auxiliary space (excluding result).
-
-
-// =========================================================
-// 14. 4SUM (LC 18)
-// =========================================================
-
-class Solution14 {
-public:
-    vector<vector<int>> fourSum(vector<int>& nums, int target) {
-        sort(nums.begin(), nums.end());
-        vector<vector<int>> result;
-        int n = nums.size();
-        for (int i = 0; i < n - 3; ++i) {
-            if (i > 0 && nums[i] == nums[i - 1]) continue; // Skip duplicates for 1st num
-            for (int j = i + 1; j < n - 2; ++j) {
-                if (j > i + 1 && nums[j] == nums[j - 1]) continue; // Skip duplicates for 2nd num
-                int left = j + 1;
-                int right = n - 1;
-                // Two pointers for remaining two numbers
-                while (left < right) {
-                    long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];
-                    if (sum == target) {
-                        result.push_back({nums[i], nums[j], nums[left], nums[right]});
-                        while (left < right && nums[left] == nums[left + 1]) left++;
-                        while (left < right && nums[right] == nums[right - 1]) right--;
-                        left++;
-                        right--;
-                    } else if (sum < target) {
-                        left++;
-                    } else {
-                        right--;
-                    }
-                }
-            }
-        }
-        return result;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Find all unique quadruplets summing to target.
-// - Approach: Sorting + Two Nested Fixed Loops + Two-Pointer Convergence with Duplicate Pruning.
-// - Intuition:
-//   * Sort array. Fix outer two elements i and j, reducing problem to 2Sum for left and right.
-//   * Use 64-bit integer arithmetic (long long) to prevent integer overflow when adding 4 numbers.
-//   * Skip duplicates at every pointer level (i, j, left, right) to prevent duplicate quadruplets.
-// - Complexity: Time: O(N^3), Space: O(1) auxiliary space (excluding result).
-
 class Solution15 {
 public:
     int trap(vector<int>& h) {
@@ -597,8 +548,9 @@ public:
                 if (st.empty()) break;
 
                 int left = st.top();
-                int width = i - left - 1;
-                int boundedHeight = min(h[left], h[i]) - h[mid];
+                int right = i;
+                int width = right - left - 1;
+                int boundedHeight = min(h[left], h[i]) - h[mid]; // height of water trapped above mid
 
                 water += width * boundedHeight;
             }
@@ -629,6 +581,7 @@ public:
         int mid = 0;
         int high = (int)nums.size() - 1;
         // Dutch National Flag: 3-way partition (0s at low, 2s at high)
+        // run loop until mid crosses high
         while (mid <= high) {
             if (nums[mid] == 0) {
                 swap(nums[low], nums[mid]);
@@ -658,43 +611,36 @@ public:
 // 17. MINIMUM WINDOW SUBSTRING (LC 76)
 // =========================================================
 
-class Solution17 {
+class Solution {
 public:
     string minWindow(string s, string t) {
         vector<int> need(128, 0);
-        int required = 0;
-        // Count frequency of required characters
-        for (char c : t) {
-            if (need[(unsigned char)c] == 0) required++;
-            need[(unsigned char)c]++;
-        }
-        vector<int> window(128, 0);
-        int have = 0;
-        int bestLen = INT_MAX;
-        int bestStart = 0;
+        // Count characters needed from t
+        for (char c : t) need[c]++;
         int left = 0;
-        // Expand window to the right
-        for (int right = 0; right < (int)s.size(); ++right) {
-            unsigned char c = s[right];
-            window[c]++;
-            if (need[c] > 0 && window[c] == need[c]) {
-                have++;
-            }
-            // Contract window from left while condition is satisfied
-            while (have == required) {
-                if (right - left + 1 < bestLen) {
-                    bestLen = right - left + 1;
-                    bestStart = left;
+        int remaining = t.size();
+        int minLen = INT_MAX;
+        int start = 0;
+        for (int right = 0; right < s.size(); right++) {
+            char c = s[right];
+            // Add current character to window
+            if (need[c] > 0) remaining--;
+            need[c]--;
+            // Window contains all required characters
+            while (remaining == 0) {
+                // Update minimum window
+                if (right - left + 1 < minLen) {
+                    minLen = right - left + 1;
+                    start = left;
                 }
-                unsigned char leftChar = s[left];
-                window[leftChar]--;
-                if (need[leftChar] > 0 && window[leftChar] < need[leftChar]) {
-                    have--;
-                }
+                // Remove left character
+                need[s[left]]++;
+                // Window becomes invalid
+                if (need[s[left]] > 0) remaining++;
                 left++;
             }
         }
-        return (bestLen == INT_MAX) ? "" : s.substr(bestStart, bestLen);
+        return minLen == INT_MAX ? "" : s.substr(start, minLen);
     }
 };
 // Interview Explanation:
@@ -721,12 +667,12 @@ public:
         vector<int> result;
         // Fixed-size sliding window of length |p|
         for (int i = 0; i < ns; ++i) {
-            sCount[s[i] - 'a']++;
-            if (i >= np) {
-                sCount[s[i - np] - 'a']--;
+            sCount[s[i] - 'a']++; // Add current character to window
+            if (i >= np) { // if window exceeds size |p|, remove leftmost character
+                sCount[s[i - np] - 'a']--; // Remove character leaving the window
             }
-            if (sCount == pCount) {
-                result.push_back(i - np + 1);
+            if (sCount == pCount) { // Direct comparison of frequency tables
+                result.push_back(i - np + 1); // Record starting index of anagram
             }
         }
         return result;
@@ -823,7 +769,7 @@ public:
         // Sliding window: operations needed to make [left..right] equal to nums[right]
         for (int right = 0; right < nums.size(); right++) {
             sum += nums[right];
-            while (1LL * nums[right] * (right - left + 1) - sum > k)
+            while (1LL * nums[right] * (right - left + 1) - sum > k) // until sum exceeds budget k, shrink window
                 sum -= nums[left++];
             ans = max(ans, right - left + 1);
         }

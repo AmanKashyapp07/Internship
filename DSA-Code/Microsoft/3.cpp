@@ -508,6 +508,105 @@ class Solution79 {
 // - Complexity: Time: O(N), Space: O(N).
 
 // =========================================================
+// 80. REDUNDANT CONNECTION (LC 684)
+// =========================================================
+
+class Solution80 {
+    struct DSU {
+        vector<int> parent;
+        DSU(int n) : parent(n + 1) {
+            iota(parent.begin(), parent.end(), 0);
+        }
+        int find(int x) {
+            return parent[x] == x ? x : parent[x] = find(parent[x]);
+        }
+        bool unite(int x, int y) {
+            int rootX = find(x), rootY = find(y);
+            if (rootX == rootY) return false;
+            parent[rootX] = rootY;
+            return true;
+        }
+    };
+
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int n = edges.size();
+        DSU dsu(n);
+        for (const auto& edge : edges) {
+            if (!dsu.unite(edge[0], edge[1])) {
+                return edge;
+            }
+        }
+        return {};
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find edge that can be removed so graph becomes a tree of n nodes.
+// - Approach: Disjoint Set Union (DSU). Process edges sequentially; first edge connecting already-connected vertices is redundant.
+// - Intuition: A tree with an extra edge contains exactly one cycle. The edge completing that cycle is the answer.
+// - Complexity: Time: O(N * alpha(N)), Space: O(N).
+
+
+// =========================================================
+// 81. ACCOUNTS MERGE (LC 721)
+// =========================================================
+
+class Solution81 {
+    struct DSU {
+        vector<int> parent;
+        DSU(int n) : parent(n) {
+            iota(parent.begin(), parent.end(), 0);
+        }
+        int find(int x) {
+            return parent[x] == x ? x : parent[x] = find(parent[x]);
+        }
+        void unite(int x, int y) {
+            int rootX = find(x), rootY = find(y);
+            if (rootX != rootY) parent[rootX] = rootY;
+        }
+    };
+
+public:
+    vector<vector<string>> accountsMerge(vector<vector<string>>& accounts) {
+        int n = accounts.size();
+        DSU dsu(n);
+        unordered_map<string, int> emailToId;
+
+        for (int i = 0; i < n; i++) {
+            for (size_t j = 1; j < accounts[i].size(); j++) {
+                const string& email = accounts[i][j];
+                if (emailToId.count(email)) {
+                    dsu.unite(i, emailToId[email]);
+                } else {
+                    emailToId[email] = i;
+                }
+            }
+        }
+
+        unordered_map<int, vector<string>> leaderToEmails;
+        for (const auto& [email, id] : emailToId) {
+            int leader = dsu.find(id);
+            leaderToEmails[leader].push_back(email);
+        }
+
+        vector<vector<string>> mergedAccounts;
+        for (auto& [leader, emails] : leaderToEmails) {
+            sort(emails.begin(), emails.end());
+            vector<string> account = {accounts[leader][0]};
+            account.insert(account.end(), emails.begin(), emails.end());
+            mergedAccounts.push_back(account);
+        }
+        return mergedAccounts;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Merge accounts sharing common email addresses and return sorted email lists per owner.
+// - Approach: Union-Find (DSU) where accounts are nodes and common emails create edges between account indices.
+// - Intuition: Map each email to first account seen; if seen again, union current account with previous. Group by DSU component representative.
+// - Complexity: Time: O(A log A) where A is total emails across all accounts (due to sorting), Space: O(A).
+
+
+// =========================================================
 // 82. FIND EVENTUAL SAFE STATES (LC 802)
 // =========================================================
 

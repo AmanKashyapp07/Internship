@@ -67,6 +67,150 @@ using vvl = vector<vector<ll>>;
  ====================================================================================================
 */
 
+// =========================================================
+// 32. PARTITION ARRAY ACCORDING TO GIVEN PIVOT (LC 2161)
+// =========================================================
+
+class Solution32 {
+public:
+    vector<int> pivotArray(vector<int>& nums, int pivot) {
+        vector<int> result;
+        result.reserve(nums.size());
+        for (int x : nums) if (x < pivot) result.push_back(x);
+        for (int x : nums) if (x == pivot) result.push_back(x);
+        for (int x : nums) if (x > pivot) result.push_back(x);
+        return result;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Rearrange nums such that elements < pivot appear first, then == pivot, then > pivot, preserving relative order.
+// - Approach: Three-pass stable collection.
+// - Intuition: Three linear scans collect elements in the exact specified partition categories without reordering within groups.
+// - Complexity: Time: O(N), Space: O(N).
+
+
+// =========================================================
+// 33. COUNT SUBARRAYS WITH MAJORITY ELEMENT I (LC 3737)
+// =========================================================
+
+class Solution33 {
+public:
+    long long countSubarrays(vector<int>& nums, int target) {
+        int n = nums.size();
+        long long count = 0;
+        for (int i = 0; i < n; i++) {
+            int freq = 0;
+            for (int j = i; j < n; j++) {
+                if (nums[j] == target) freq++;
+                int len = j - i + 1;
+                if (freq > len / 2) count++;
+            }
+        }
+        return count;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Count subarrays where target appears strictly more than half the time (majority element).
+// - Approach: Running frequency prefix transform / scan.
+// - Intuition: For each subarray, check if target count > length / 2.
+// - Complexity: Time: O(N^2), Space: O(1).
+
+
+// =========================================================
+// 34. MIN DISTANCE BETWEEN MIRROR PAIRS (LC 3761)
+// =========================================================
+
+class Solution34 {
+    int reverseNum(int n) {
+        int rev = 0;
+        while (n > 0) {
+            rev = rev * 10 + (n % 10);
+            n /= 10;
+        }
+        return rev;
+    }
+
+public:
+    int minMirrorPairDistance(vector<int>& nums) {
+        unordered_map<int, int> lastSeen;
+        int minDistance = INT_MAX;
+
+        for (int j = 0; j < (int)nums.size(); j++) {
+            if (lastSeen.count(nums[j])) {
+                minDistance = min(minDistance, j - lastSeen[nums[j]]);
+            }
+            int rev = reverseNum(nums[j]);
+            lastSeen[rev] = j;
+        }
+        return minDistance == INT_MAX ? -1 : minDistance;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find minimum |i - j| for pair (i, j) with i < j and reverse(nums[i]) == nums[j]. Return -1 if none.
+// - Approach: Hash Map + Digit Reversal. Store latest index of reverse(nums[i]); match at index j with nums[j].
+// - Intuition: Mapping reversed values to indices allows immediate lookup of valid mirror pair candidates.
+// - Complexity: Time: O(N log10 V), Space: O(N).
+
+
+// =========================================================
+// 35. VALID SUDOKU (LC 36)
+// =========================================================
+
+class Solution35 {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        int rows[9] = {0}, cols[9] = {0}, boxes[9] = {0};
+
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == '.') continue;
+                int digit = board[r][c] - '1';
+                int mask = 1 << digit;
+                int boxIndex = (r / 3) * 3 + (c / 3);
+
+                if ((rows[r] & mask) || (cols[c] & mask) || (boxes[boxIndex] & mask)) {
+                    return false;
+                }
+                rows[r] |= mask;
+                cols[c] |= mask;
+                boxes[boxIndex] |= mask;
+            }
+        }
+        return true;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Determine if a 9x9 Sudoku board is valid according to row, column, and 3x3 sub-box rules.
+// - Approach: Bitmask frequency matrices.
+// - Intuition: Use 9-bit bitmask per row, column, and 3x3 box to test duplicate digits in O(1) time and memory.
+// - Complexity: Time: O(1) (fixed 81 cells), Space: O(1).
+
+
+// =========================================================
+// 36. ROTATE IMAGE (LC 48)
+// =========================================================
+
+class Solution36 {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        // Step 1: Transpose matrix (swap matrix[i][j] with matrix[j][i])
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                swap(matrix[i][j], matrix[j][i]);
+            }
+        }
+        // Step 2: Reverse each row
+        for (int i = 0; i < n; i++) {
+            ::reverse(matrix[i].begin(), matrix[i].end());
+        }
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Rotate an N x N 2D matrix by 90 degrees clockwise in-place.
+// - Approach: Transpose + Row Reversal.
+// - Intuition: Matrix clockwise rotation is mathematically equivalent to reflection along the main diagonal followed by vertical axis flip.
+// - Complexity: Time: O(N^2), Space: O(1) auxiliary space.
 
 
 // =========================================================
@@ -127,6 +271,33 @@ public:
 
 
 // =========================================================
+// 38. SEARCH A 2D MATRIX (LC 74)
+// =========================================================
+
+class Solution38 {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int m = matrix.size(), n = matrix[0].size();
+        int low = 0, high = m * n - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            int r = mid / n, c = mid % n;
+            if (matrix[r][c] == target) return true;
+            if (matrix[r][c] < target) low = mid + 1;
+            else high = mid - 1;
+        }
+        return false;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Determine if target exists in M x N matrix with sorted rows and first element of each row > last of previous.
+// - Approach: Virtual 1D Binary Search.
+// - Intuition: Matrix is strictly monotonically sorted across all M*N elements; index `mid` maps to `(mid / N, mid % N)`.
+// - Complexity: Time: O(log(M * N)), Space: O(1).
+
+
+// =========================================================
 // 39. SURROUNDED REGIONS (LC 130)
 // =========================================================
 
@@ -144,35 +315,73 @@ class Solution39 {
 
 public:
     void solve(vector<vector<char>>& board) {
-        m = (int)board.size();
-        if (m == 0) return;
-        n = (int)board[0].size();
+        if (board.empty()) return;
+        m = board.size();
+        n = board[0].size();
 
-        for (int i = 0; i < m; ++i) {
+        // Step 1: Run DFS from border cells
+        for (int i = 0; i < m; i++) {
             if (board[i][0] == 'O') dfs(board, i, 0);
             if (board[i][n - 1] == 'O') dfs(board, i, n - 1);
         }
-        for (int j = 0; j < n; ++j) {
+        for (int j = 0; j < n; j++) {
             if (board[0][j] == 'O') dfs(board, 0, j);
             if (board[m - 1][j] == 'O') dfs(board, m - 1, j);
         }
 
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
+        // Step 2: Flip remaining 'O' to 'X', restore '#' to 'O'
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
                 if (board[i][j] == 'O') board[i][j] = 'X';
-                else if (board[i][j] == '#') board[i][j] = 'O'; 
+                else if (board[i][j] == '#') board[i][j] = 'O';
             }
         }
     }
 };
 // Interview Explanation:
-// - Problem Statement: Capture all regions on an M x N board that are 4-directionally surrounded by 'X'.
+// - Problem Statement: Capture all regions surrounded by 'X' by flipping all surrounded 'O' cells into 'X'.
 // - Approach: Boundary Flood-Fill (DFS/BFS) Inversion.
 // - Intuition:
 //   * Any 'O' connected to the outer boundary can never be surrounded.
 //   * Run DFS/BFS from all border 'O' cells, temporarily marking them '#'.
 //   * Remaining 'O' cells are completely surrounded -> flip to 'X'. Finally, restore '#' back to 'O'.
 // - Complexity: Time: O(M * N), Space: O(M * N) recursion depth.
+
+
+// =========================================================
+// 40. NUMBER OF ISLANDS (LC 200)
+// =========================================================
+
+class Solution40 {
+    void dfs(vector<vector<char>>& grid, int r, int c, int m, int n) {
+        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') return;
+        grid[r][c] = '0'; // Sink island in-place
+        dfs(grid, r + 1, c, m, n);
+        dfs(grid, r - 1, c, m, n);
+        dfs(grid, r, c + 1, m, n);
+        dfs(grid, r, c - 1, m, n);
+    }
+
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        int count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(grid, i, j, m, n);
+                }
+            }
+        }
+        return count;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Count number of connected land components ('1's surrounded by '0's).
+// - Approach: Connected Components DFS (In-place Sinking).
+// - Intuition: When encountering unvisited land, increment count and flood-fill sink all connected land to '0'.
+// - Complexity: Time: O(M * N), Space: O(M * N) recursion stack.
 
 
 // =========================================================
@@ -231,6 +440,41 @@ public:
 // - Complexity: Time: O(M * N), Space: O(M * N).
 
 
+// =========================================================
+// 42. LONGEST PALINDROMIC SUBSTRING (LC 5)
+// =========================================================
+
+class Solution42 {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        if (n <= 1) return s;
+        int start = 0, maxLen = 1;
+
+        auto expand = [&](int l, int r) {
+            while (l >= 0 && r < n && s[l] == s[r]) {
+                if (r - l + 1 > maxLen) {
+                    start = l;
+                    maxLen = r - l + 1;
+                }
+                l--;
+                r++;
+            }
+        };
+
+        for (int i = 0; i < n; i++) {
+            expand(i, i);     // Odd-length palindromes
+            expand(i, i + 1); // Even-length palindromes
+        }
+        return s.substr(start, maxLen);
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find the longest palindromic substring in string s.
+// - Approach: Expand Around Center.
+// - Intuition: A palindrome mirrors around its center. There are 2N - 1 possible centers (single character or character pair).
+// - Complexity: Time: O(N^2), Space: O(1) auxiliary space.
+
 
 // =========================================================
 // 43. ZIGZAG CONVERSION (LC 6)
@@ -242,9 +486,11 @@ public:
         if (numRows == 1) return s;
         vector<string> rows(numRows);
         int row = 0, dir = 1;
+        // row index moves down until numRows-1, then up until 0, and repeats
+        // dir is +1 for down, -1 for up
         for (char c : s) {
             rows[row] += c;
-            if (row == 0) dir = 1;
+            if (row == 0) dir = 1; 
             if (row == numRows - 1) dir = -1;
             row += dir;
         }
@@ -261,6 +507,71 @@ public:
 //   * Append characters to their corresponding row buffer and concatenate all rows at the end.
 // - Complexity: Time: O(N), Space: O(N).
 
+
+// =========================================================
+// 44. INTEGER TO ROMAN (LC 12)
+// =========================================================
+
+class Solution44 {
+public:
+    string intToRoman(int num) {
+        static const vector<pair<int, string>> roman = {
+            {1000, "M"}, {900, "CM"}, {500, "D"}, {400, "CD"},
+            {100, "C"},  {90, "XC"},  {50, "L"},  {40, "XL"},
+            {10, "X"},   {9, "IX"},   {5, "V"},   {4, "IV"},
+            {1, "I"}
+        };
+        string result;
+        for (const auto& [val, sym] : roman) {
+            while (num >= val) {
+                result += sym;
+                num -= val;
+            }
+        }
+        return result;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Convert integer to Roman numeral string representation.
+// - Approach: Greedy Value-Symbol Matching.
+// - Intuition: Greedily subtract largest available Roman numeral symbol values from largest to smallest.
+// - Complexity: Time: O(1) (bounded by maximum integer value 3999), Space: O(1).
+
+
+// =========================================================
+// 45. LETTER COMBINATIONS OF A PHONE NUMBER (LC 17)
+// =========================================================
+
+class Solution45 {
+    void backtrack(const string& digits, int index, string& current, vector<string>& result, const vector<string>& mapping) {
+        if (index == (int)digits.size()) {
+            result.push_back(current);
+            return;
+        }
+        for (char letter : mapping[digits[index] - '0']) {
+            current.push_back(letter);
+            backtrack(digits, index + 1, current, result, mapping);
+            current.pop_back();
+        }
+    }
+
+public:
+    vector<string> letterCombinations(string digits) {
+        if (digits.empty()) return {};
+        const vector<string> mapping = {
+            "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
+        };
+        vector<string> result;
+        string current;
+        backtrack(digits, 0, current, result, mapping);
+        return result;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Return all possible letter combinations that the number could represent from phone keypad.
+// - Approach: Backtracking / Depth-First Search.
+// - Intuition: Branch recursion for each mapped letter of the current digit.
+// - Complexity: Time: O(4^N * N), Space: O(N) recursion stack.
 
 
 // =========================================================
@@ -306,7 +617,7 @@ public:
     vector<string> ans;
 
     void solve(string s, int open, int close, int n) {
-        if (s.size() == 2 * n) {
+        if (s.size() == 2 * n) { // Base case: valid combination of length 2n
             ans.push_back(s);
             return;
         }
@@ -314,7 +625,7 @@ public:
         if (open < n) // If we can still add an opening parenthesis
             solve(s + "(", open + 1, close, n);
 
-        if (close < open) // If we can add a closing parenthesis without violating the balance
+        if (close < open) // If we can add a closing parenthesis without invalidating the string
             solve(s + ")", open, close + 1, n);
     }
 
@@ -331,7 +642,12 @@ public:
 //   * We can add ')' if closeCount < openCount (ensures valid prefix invariant).
 // - Complexity: Time: O(4^N / sqrt(N)) (nth Catalan number), Space: O(N) recursion stack.
 
-class Solution {
+
+// =========================================================
+// 48. SUBSTRING WITH CONCATENATION OF ALL WORDS (LC 30)
+// =========================================================
+
+class Solution48 {
 public:
     vector<int> findSubstring(string s, vector<string>& words) {
         vector<int> ans;
@@ -405,11 +721,11 @@ public:
 };
 // Interview Explanation:
 // - Problem Statement: Given an array of strings, group the anagrams together in any order.
-// - Approach: Canonical Sorted Representation as Hash Map Key.
+// - Approach: Sorted String Canonical Form Hash Map Grouping.
 // - Intuition:
-//   * Any two anagrams become identical strings after sorting their characters.
-//   * Use sorted string as key in hash map to collect all matching original words.
-// - Complexity: Time: O(N * K log K) where K is max string length, Space: O(N * K).
+//   * Two strings are anagrams if and only if their sorted character sequences are identical.
+//   * Use sorted string as the hash map key and append matching strings to the bucket vector.
+// - Complexity: Time: O(N * K log K) where N = number of strings, K = max string length, Space: O(N * K).
 
 
 // =========================================================
@@ -419,25 +735,27 @@ public:
 class Solution50 {
 public:
     bool isIsomorphic(string s, string t) {
-        if (s.size() != t.size()) return false;
-        int a[256] = {}, b[256] = {};
+        if (s.length() != t.length()) return false;
 
-        for (int i = 0; i < s.size(); i++) {
-            if (a[s[i]] != b[t[i]]) return false;
-            a[s[i]] = i + 1; // Store last seen index + 1 to avoid default 0 confusion
-            b[t[i]] = i + 1; // Store last seen index + 1 to avoid default 0 confusion
+        vector<int> m1(256, -1);
+        vector<int> m2(256, -1);
+
+        for (int i = 0; i < s.length(); i++) {
+            if (m1[s[i]] != m2[t[i]]) return false;
+            m1[s[i]] = i;
+            m2[t[i]] = i;
         }
 
         return true;
     }
 };
 // Interview Explanation:
-// - Problem Statement: Determine if two strings s and t are isomorphic (one-to-one character mapping preserving order).
-// - Approach: Bi-Directional Last Seen Index Comparison.
+// - Problem Statement: Determine if two strings s and t are isomorphic (characters can be replaced to get t, preserving character order).
+// - Approach: Bi-directional Character Mapping using Last-Seen Index Arrays.
 // - Intuition:
-//   * If two characters map to each other, they must have appeared at identical earlier indices across both strings.
-//   * Using fixed arrays of size 256 avoids dynamic hash table overhead.
-// - Complexity: Time: O(N), Space: O(1) (fixed 256 integers).
+//   * Both characters s[i] and t[i] must share the exact same last-seen index position at all times.
+//   * If their recorded positions diverge, a character was mapped to multiple targets -> return false.
+// - Complexity: Time: O(N), Space: O(1) auxiliary space (fixed alphabet array size 256).
 
 
 // =========================================================
@@ -446,50 +764,43 @@ public:
 
 class Solution51 {
 public:
-    int findKthElementinSortedArrays(const vector<int> &a, const vector<int> &b, int k) {
-        if (a.size() > b.size())
-            return findKthElementinSortedArrays(b, a, k);
+    int kthElement(vector<int>& a, vector<int>& b, int k) {
+        if (a.size() > b.size()) return kthElement(b, a, k);
+
         int n = a.size(), m = b.size();
-        int low = max(0, k - m);
-        int high = min(k, n);
+        int l = max(0, k - m), r = min(k, n);
 
-        while (low <= high) {
-            int p1 = (low + high) / 2;
-            int p2 = k - p1;
-            int left1 = (p1 == 0) ? INT_MIN : a[p1 - 1];
-            int left2 = (p2 == 0) ? INT_MIN : b[p2 - 1];
-            int right1 = (p1 == n) ? INT_MAX : a[p1];
-            int right2 = (p2 == m) ? INT_MAX : b[p2];
+        while (l <= r) {
+            int x = (l + r) / 2;
+            int y = k - x;
 
-            if (left1 <= right2 && left2 <= right1)
-                return max(left1, left2);
-            if (left1 > right2)
-                high = p1 - 1;
-            else
-                low = p1 + 1;
+            int aL = x ? a[x - 1] : INT_MIN;
+            int aR = x < n ? a[x] : INT_MAX;
+            int bL = y ? b[y - 1] : INT_MIN;
+            int bR = y < m ? b[y] : INT_MAX;
+
+            if (aL <= bR && bL <= aR)
+                return max(aL, bL);
+
+            if (aL > bR) r = x - 1;
+            else l = x + 1;
         }
-
         return -1;
-    }
-    int findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-        int totalLen = (int)nums1.size() + (int)nums2.size();
-        if (totalLen % 2 == 1) {
-            return findKthElementinSortedArrays(nums1, nums2, totalLen / 2 + 1);
-        } else {
-            int leftMedian = findKthElementinSortedArrays(nums1, nums2, totalLen / 2);
-            int rightMedian = findKthElementinSortedArrays(nums1, nums2, totalLen / 2 + 1);
-            return (leftMedian + rightMedian) / 2.0;
-        }
-    }
+    } // k is 1-based index
+    
 };
 // Interview Explanation:
-// - Problem Statement: Find median of two sorted arrays nums1 and nums2 in O(log(m + n)) time.
+// - Problem Statement: Find median of two sorted arrays nums1 and nums2 in O(log (m+n)) runtime.
 // - Approach: Binary Search on Partitioning of the Smaller Array.
 // - Intuition:
-//   * Partition both arrays into left and right halves such that combined left half has (m + n + 1)/2 elements.
-//   * Condition for valid median partition: max(left1, left2) <= min(right1, right2).
-//   * Binary searching partition i in smaller array directly determines j = halfLen - i.
+//   * Partition both arrays such that left half contains (m + n + 1) / 2 elements and all left elements <= all right elements.
+//   * Binary search partition point `i` in the smaller array; corresponding partition `j = (m + n + 1) / 2 - i` in larger array.
 // - Complexity: Time: O(log(min(M, N))), Space: O(1).
+
+
+// =========================================================
+// 52. SEARCH IN ROTATED SORTED ARRAY (LC 33)
+// =========================================================
 
 class Solution52 {
 public:
@@ -530,6 +841,50 @@ public:
 
 
 // =========================================================
+// 53. SPLIT ARRAY LARGEST SUM (LC 410)
+// =========================================================
+
+class Solution53 {
+    bool canSplit(const vector<int>& nums, int k, long long maxCap) {
+        int subarrays = 1;
+        long long currentSum = 0;
+        for (int x : nums) {
+            if (currentSum + x > maxCap) {
+                subarrays++;
+                currentSum = x;
+            } else {
+                currentSum += x;
+            }
+        }
+        return subarrays <= k;
+    }
+
+public:
+    int splitArray(vector<int>& nums, int k) {
+        long long low = *max_element(nums.begin(), nums.end());
+        long long high = accumulate(nums.begin(), nums.end(), 0LL);
+        long long ans = high;
+
+        while (low <= high) {
+            long long mid = low + (high - low) / 2;
+            if (canSplit(nums, k, mid)) {
+                ans = mid;
+                high = mid - 1; // Try smaller maximum sum
+            } else {
+                low = mid + 1;
+            }
+        }
+        return (int)ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Split array into k non-empty subarrays minimizing the maximum sum among subarrays.
+// - Approach: Binary Search on Answer + Greedy Capacity Validation.
+// - Intuition: Feasibility function is monotonic: if max sum M is achievable with <= k parts, any M' > M is also achievable.
+// - Complexity: Time: O(N log(Sum)), Space: O(1).
+
+
+// =========================================================
 // 54. SINGLE ELEMENT IN A SORTED ARRAY (LC 540)
 // =========================================================
 
@@ -560,3 +915,119 @@ public:
 // - Complexity: Time: O(log N), Space: O(1).
 
 
+// =========================================================
+// 55. KOKO EATING BANANAS (LC 875)
+// =========================================================
+
+class Solution55 {
+    bool canEatAll(const vector<int>& piles, int h, int speed) {
+        long long hours = 0;
+        for (int pile : piles) {
+            hours += (pile + speed - 1) / speed;
+        }
+        return hours <= h;
+    }
+
+public:
+    int minEatingSpeed(vector<int>& piles, int h) {
+        int low = 1, high = *max_element(piles.begin(), piles.end());
+        int ans = high;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (canEatAll(piles, h, mid)) {
+                ans = mid;
+                high = mid - 1; // Try slower speed
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find minimum eating speed k such that Koko eats all bananas within h hours.
+// - Approach: Binary Search on Answer (Monotonic Eating Speed).
+// - Intuition: Total hours required decreases monotonically with increasing speed. Binary search in range [1, max(pile)].
+// - Complexity: Time: O(N log(maxPile)), Space: O(1).
+
+
+// =========================================================
+// 56. CAPACITY TO SHIP PACKAGES WITHIN D DAYS (LC 1011)
+// =========================================================
+
+class Solution56 {
+    bool canShip(const vector<int>& weights, int days, int cap) {
+        int neededDays = 1;
+        int currentWeight = 0;
+        for (int w : weights) {
+            if (currentWeight + w > cap) {
+                neededDays++;
+                currentWeight = w;
+            } else {
+                currentWeight += w;
+            }
+        }
+        return neededDays <= days;
+    }
+
+public:
+    int shipWithinDays(vector<int>& weights, int days) {
+        int low = *max_element(weights.begin(), weights.end());
+        int high = accumulate(weights.begin(), weights.end(), 0);
+        int ans = high;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (canShip(weights, days, mid)) {
+                ans = mid;
+                high = mid - 1; // Try smaller capacity
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find least ship weight capacity to ship all packages within given days.
+// - Approach: Binary Search on Capacity Answer.
+// - Intuition: Minimum capacity must be at least max(weight), maximum sum(weights). Check feasibility in O(N).
+// - Complexity: Time: O(N log(Sum)), Space: O(1).
+
+
+// =========================================================
+// 57. FIND SMALLEST DIVISOR GIVEN THRESHOLD (LC 1283)
+// =========================================================
+
+class Solution57 {
+    bool check(const vector<int>& nums, int threshold, int divisor) {
+        long long sum = 0;
+        for (int x : nums) {
+            sum += (x + divisor - 1) / divisor;
+        }
+        return sum <= threshold;
+    }
+
+public:
+    int smallestDivisor(vector<int>& nums, int threshold) {
+        int low = 1, high = *max_element(nums.begin(), nums.end());
+        int ans = high;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (check(nums, threshold, mid)) {
+                ans = mid;
+                high = mid - 1; // Try smaller divisor
+            } else {
+                low = mid + 1;
+            }
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find smallest divisor such that sum of divisions (rounded up) <= threshold.
+// - Approach: Monotonic Binary Search on Divisor.
+// - Intuition: Sum is monotonically non-increasing with respect to divisor. Binary search in range [1, max(nums)].
+// - Complexity: Time: O(N log(maxVal)), Space: O(1).

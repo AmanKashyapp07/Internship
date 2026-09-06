@@ -65,7 +65,7 @@ using vvl = vector<vector<ll>>;
  | 118 | Reverse Integer                            | Overflow-Safe Modular Reversal    | O(log X) | O(1)     |
  | 119 | Pow(x, n)                                  | Fast Binary Exponentiation        | O(log N) | O(1)     |
  | 120 | Single Number II                           | Bitwise FSM Modulo-3 Counters     | O(N)     | O(1)     |
- | 121 | Count Primes                               | Sieve of Eratosthenes             | O(N loglogN) O(N)   |
+ | 121 | Count Primes                               | Sieve of Eratosthenes             | O(N loglogN)| O(N)     |
  | 122 | Rectangle Area                             | Coordinate Geometry Overlap Area  | O(1)     | O(1)     |
  | 123 | H-Index                                    | Linear Bucket Counting Sort       | O(N)     | O(N)     |
  | 124 | Consecutive Numbers Sum                    | Arithmetic Progression Math Check | O(√N)    | O(1)     |
@@ -103,6 +103,71 @@ public:
 // - Intuition:
 //   * A circular array of length N is equivalent to an array traversed up to 2N - 1 indices using `i % n`.
 //   * Only push indices during the first pass (0 to n - 1) to avoid redundant entries.
+// - Complexity: Time: O(N), Space: O(N).
+
+
+// =========================================================
+// 95. KTH LARGEST ELEMENT IN A STREAM (LC 703)
+// =========================================================
+
+class Solution95 {
+public:
+    class KthLargest {
+        priority_queue<int, vector<int>, greater<int>> minHeap;
+        int k;
+
+    public:
+        KthLargest(int k, vector<int>& nums) : k(k) {
+            for (int num : nums) {
+                add(num);
+            }
+        }
+
+        int add(int val) {
+            if ((int)minHeap.size() < k) {
+                minHeap.push(val);
+            } else if (val > minHeap.top()) {
+                minHeap.pop();
+                minHeap.push(val);
+            }
+            return minHeap.top();
+        }
+    };
+};
+using KthLargest = Solution95::KthLargest;
+
+// Interview Explanation:
+// - Problem Statement: Design a class to find the k-th largest element in a stream of numbers.
+// - Approach: Maintain a min-heap of capacity k. The heap top always holds the k-th largest value.
+// - Intuition: Elements smaller than top cannot be in top-k; pushing larger elements and evicting smallest keeps top at k-th largest.
+// - Complexity: Time: O(log K) per add operation, Space: O(K).
+
+
+// =========================================================
+// 96. FINAL PRICES WITH A SPECIAL DISCOUNT IN A SHOP (LC 1475)
+// =========================================================
+
+class Solution96 {
+public:
+    vector<int> finalPrices(vector<int>& prices) {
+        int n = prices.size();
+        vector<int> ans = prices;
+        stack<int> st; // Stores indices of prices awaiting discount
+
+        for (int i = 0; i < n; i++) {
+            while (!st.empty() && prices[st.top()] >= prices[i]) {
+                ans[st.top()] -= prices[i];
+                st.pop();
+            }
+            st.push(i);
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Apply discount to prices[i] equal to first subsequent price prices[j] <= prices[i].
+// - Approach: Monotonic Stack. Maintain stack of indices whose next smaller/equal element hasn't been found.
+// - Intuition: When encountering prices[i] <= prices[st.top()], prices[i] acts as discount for all stack elements >= prices[i].
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -196,6 +261,30 @@ public:
     }
 };
 
+
+
+// =========================================================
+// 99. MAXIMUM SUBARRAY (LC 53)
+// =========================================================
+
+class Solution99 {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int maxSum = nums[0];
+        int currentSum = 0;
+
+        for (int x : nums) {
+            currentSum = max(x, currentSum + x);
+            maxSum = max(maxSum, currentSum);
+        }
+        return maxSum;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find contiguous subarray with the largest sum and return its sum.
+// - Approach: Kadane's Algorithm. Maintain running sum, resetting to current element if running sum becomes negative.
+// - Intuition: A negative prefix degrades any subsequent subarray; start fresh whenever current sum dips below the current element.
+// - Complexity: Time: O(N), Space: O(1).
 
 
 // =========================================================
