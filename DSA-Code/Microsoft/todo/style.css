@@ -775,7 +775,8 @@ body {
   border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
-.f-pyq {
+.f-pyq,
+.f-pyq1 {
   color: #39c5bb;
   background-color: rgba(57, 197, 187, 0.08);
   border: 1px solid rgba(57, 197, 187, 0.25);

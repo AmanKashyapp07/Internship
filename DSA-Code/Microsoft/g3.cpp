@@ -34,745 +34,893 @@ using vvl = vector<vector<ll>>;
 
 /*
  ====================================================================================================
-                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+                    PROBLEM SUMMARY & COMPLEXITY TABLE: G3.CPP (Problems 45 - 66)                    
  ====================================================================================================
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
- | 41 | Minimum Cost to Hire K Workers              | Greedy Ratio Sort + Max-Heap Qual | O(N logN)| O(N + K) |
- | 42 | Maximum Number of Events Attended           | Day Sweep + Min-Heap End Day      | O(N logN)| O(N)     |
- | 43 | Meeting Rooms III                           | Dual Priority Queue Scheduling    | O(M logM)| O(N)     |
- | 44 | Maximum Profit in Job Scheduling            | End-Time Sort + DP + Binary Search| O(N logN)| O(N)     |
- | 45 | Minimum Difficulty of a Job Schedule        | Dynamic Programming (Day Chunks)  | O(D * N^2| O(D * N) |
- | 46 | Boats to Save People                        | Two Pointers Greedy Pairing       | O(N logN)| O(1)     |
- | 47 | Queue Reconstruction by Height              | Descending Height List Insertion  | O(N^2)   | O(N)     |
- | 48 | Advantage Shuffle                           | Greedy Sorted Tian Ji Strategy    | O(N logN)| O(N)     |
- | 49 | Bag of Tokens                               | Two Pointers Face-Up/Down Greed   | O(N logN)| O(1)     |
- | 50 | Reduce Array Size to The Half               | Frequency Map + Greedy Sort       | O(N logN)| O(N)     |
- | 51 | Minimum Increment to Make Array Unique      | In-Place Running Floor Propagation| O(N logN)| O(1)     |
- | 52 | Min Moves Make Array Complementary          | Difference Array Event Sweep      | O(N + L) | O(L)     |
- | 53 | Divide Array Into Arrays With Max Difference| Triplet Contiguous Window Check   | O(N logN)| O(N)     |
- | 54 | Maximum Ice Cream Bars                      | Greedy Price-Ascending Purchase   | O(N logN)| O(1)     |
- | 55 | Put Boxes Into the Warehouse I              | Preprocessed Ceiling + Greedy Fill| O(N logN)| O(1)     |
- | 56 | Put Boxes Into the Warehouse II             | Two-Ended Inward Warehouse Pointers| O(N logN)| O(1)    |
- | 57 | Maximum Bags With Full Capacity of Rocks    | Remaining Deficit Sorting         | O(N logN)| O(N)     |
- | 58 | Max Element Decreasing & Rearranging        | In-Place Neighbor Gap Clamping    | O(N logN)| O(1)     |
- | 59 | Min Difference Highest & Lowest of K Scores | Fixed-Size Sliding Window Sort    | O(N logN)| O(1)     |
- | 60 | Maximum Number of Coins You Can Get         | Sorted Stride-2 Second-Largest Sum| O(N logN)| O(1)     |
+ | 45 | Remove Invalid Parentheses                  | Backtracking DFS Pruning          | O(2^N)   | O(N)     |
+ | 46 | Maximum Swap                                | Last Digit Occurrence Table       | O(N)     | O(1)     |
+ | 47 | Largest Number                              | Custom Lexicographical Sort       | O(N logN) | O(N)     |
+ | 48 | Connect Ropes With Minimum Cost             | Min-Heap Huffman Optimal Merge    | O(N logN) | O(N)     |
+ | 49 | Kth Largest Element in an Array             | Min-Heap Fixed-Size Window        | O(N logK) | O(K)     |
+ | 50 | Last Stone Weight II                        | 0/1 Knapsack Subset Sum Reduction | O(N * S) | O(S)     |
+ | 51 | Furthest Building You Can Reach             | Min-Heap Ladders / Bricks Greed   | O(N logL) | O(L)     |
+ | 52 | Minimum Refueling Stops                     | Max-Heap Past Gas Stations        | O(N logN) | O(N)     |
+ | 53 | Trapping Rain Water II (3D)                 | Min-Heap Boundary Priority Queue  | O(MNlogMN | O(MN)    |
+ | 54 | Maximum Average Pass Ratio                  | Max-Heap Marginal Gain Extraction | O(E logN) | O(N)     |
+ | 55 | Total Cost to Hire K Workers                | Dual Min-Heaps Two-Ended Window   | O(K logC) | O(C)     |
+ | 56 | Hand of Straights                           | Ordered Map Consecutive Grouping  | O(N logN) | O(N)     |
+ | 57 | Valid Arrangement of Pairs                  | Hierholzer's Directed Euler Path  | O(V + E) | O(V + E) |
+ | 58 | Patching Array                              | Greedy Reachable Range Doubling   | O(M+logN) | O(1)     |
+ | 59 | Wiggle Subsequence                          | Greedy Alternating Extremes Peak  | O(N)     | O(1)     |
+ | 60 | Monotone Increasing Digits                  | Reverse Inversion Scan + Suffix 9 | O(D)     | O(D)     |
+ | 61 | Increasing Triplet Subsequence              | Two-Threshold Greedy Smallest     | O(N)     | O(1)     |
+ | 62 | Maximum Length of Pair Chain                | Interval Scheduling by End Time   | O(N logN) | O(1)     |
+ | 63 | Russian Doll Envelopes                      | Width Sort + Patience LIS         | O(N logN) | O(N)     |
+ | 64 | Shortest Unsorted Continuous Subarray       | Two Pointers Running Min/Max Pass | O(N)     | O(1)     |
+ | 65 | Huffman Encoding                            | Min-Heap Tree Merge + DFS Codes   | O(N logN) | O(N)     |
+ | 66 | Fractional Knapsack                         | Value-to-Weight Ratio Descending  | O(N logN) | O(1)     |
  ====================================================================================================
 */
 
 // =========================================================
-// 41. MINIMUM COST TO HIRE K WORKERS
+// 45. REMOVE INVALID PARENTHESES [G-45]
 // =========================================================
 
-struct Worker {
-    double ratio;
-    int qual;
-};
+class SolutionRemoveInvalidParentheses {
+    unordered_set<string> validStrings;
 
-bool compareWorkerRatio(const Worker& a, const Worker& b) {
-    return a.ratio < b.ratio;
+    void dfs(const string& s, int idx, int leftRem, int rightRem, int open, string cur) {
+        if (idx == (int)s.size()) {
+            if (leftRem == 0 && rightRem == 0 && open == 0) {
+                validStrings.insert(cur);
+            }
+            return;
+        }
+
+        char c = s[idx];
+        if (c == '(') {
+            // Discard '('
+            if (leftRem > 0) dfs(s, idx + 1, leftRem - 1, rightRem, open, cur);
+            // Keep '('
+            dfs(s, idx + 1, leftRem, rightRem, open + 1, cur + c);
+        } else if (c == ')') {
+            // Discard ')'
+            if (rightRem > 0) dfs(s, idx + 1, leftRem, rightRem - 1, open, cur);
+            // Keep ')' if valid open bracket available
+            if (open > 0) dfs(s, idx + 1, leftRem, rightRem, open - 1, cur + c);
+        } else {
+            dfs(s, idx + 1, leftRem, rightRem, open, cur + c);
+        }
+    }
+
+public:
+    vector<string> removeInvalidParentheses(string s) {
+        int leftRem = 0, rightRem = 0;
+        for (char c : s) {
+            if (c == '(') leftRem++;
+            else if (c == ')') {
+                if (leftRem > 0) leftRem--;
+                else rightRem++;
+            }
+        }
+
+        validStrings.clear();
+        dfs(s, 0, leftRem, rightRem, 0, "");
+        return vector<string>(validStrings.begin(), validStrings.end());
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Remove minimum invalid parentheses and return all unique valid results.
+// - Approach: Backtracking DFS with Exact Discard Count Pruning.
+// - Intuition:
+//   * Pass 1: compute the exact count of misplaced '(' (leftRem) and ')' (rightRem).
+//   * Launch backtracking DFS tracking running balance open.
+//   * Only branch to discard '(' if leftRem > 0; only discard ')' if rightRem > 0.
+//   * Only keep ')' if open > 0 to maintain prefix validity.
+//   * Deduplicate leaf results using a hash set.
+// - Complexity: Time: O(2^N) bounded by exact removals, Space: O(N).
+
+
+// =========================================================
+// 46. MAXIMUM SWAP [G-46]
+// =========================================================
+
+int maximumSwap(int num) {
+    string s = to_string(num);
+    int last[10] = {0};
+    int n = s.size();
+
+    for (int i = 0; i < n; ++i) {
+        last[s[i] - '0'] = i;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        int d = s[i] - '0';
+        for (int larger = 9; larger > d; --larger) {
+            if (last[larger] > i) {
+                swap(s[i], s[last[larger]]);
+                return stoi(s);
+            }
+        }
+    }
+    return num;
+}
+// Interview Explanation:
+// - Problem Statement: Swap two digits at most once to get maximum possible value.
+// - Approach: Last Digit Occurrence Table + Greedy Left-to-Right Scan.
+// - Intuition:
+//   * Modifying more significant (leftmost) digits provides the greatest value increase.
+//   * Precompute the last index of each digit 0..9.
+//   * Scan digits from left to right.
+//   * For each digit d, check if any larger digit (9 down to d+1) occurs at an index greater than current index i.
+//   * Perform the swap with the largest available digit's last occurrence and return immediately.
+// - Complexity: Time: O(N) where N <= 9 digits, Space: O(1).
+
+
+// =========================================================
+// 47. LARGEST NUMBER [G-47]
+// =========================================================
+
+bool compareLargestNum(const string& a, const string& b) {
+    return (a + b) > (b + a);
 }
 
-double mincostToHireWorkers(vector<int>& qual, vector<int>& wage, int k) {
-    int n = qual.size();
-    vector<Worker> w(n);
-    for (int i = 0; i < n; ++i) {
-        w[i] = {(double)wage[i] / qual[i], qual[i]};
-    }
-    sort(w.begin(), w.end(), compareWorkerRatio);
+string largestNumber(vector<int>& a) {
+    vector<string> s;
+    for (int x : a) s.push_back(to_string(x));
+    sort(s.begin(), s.end(), compareLargestNum);
 
-    priority_queue<int> pq; // max-heap of qualities
-    int sumQ = 0;
-    double ans = 1e18;
+    if (s[0] == "0") return "0";
 
-    for (const auto& worker : w) {
-        pq.push(worker.qual);
-        sumQ += worker.qual;
-
-        if ((int)pq.size() > k) {
-            sumQ -= pq.top();
-            pq.pop();
-        }
-
-        if ((int)pq.size() == k) {
-            ans = min(ans, sumQ * worker.ratio);
-        }
-    }
+    string ans = "";
+    for (const string& str : s) ans += str;
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Hire k workers minimizing total cost while paying each worker in proportion to their quality.
-// - Approach: Greedy Wage/Quality Ratio Sort + Max-Heap of Qualities.
+// - Problem Statement: Arrange list of non-negative integers such that they form the largest number.
+// - Approach: Custom Lexicographical String Sorting.
 // - Intuition:
-//   * Each worker receives max_ratio * quality[i] to satisfy wage constraints across all hired workers.
-//   * Sort workers by wage/quality ratio ascending.
-//   * When considering worker i, their ratio is guaranteed to be the maximum ratio among all workers seen so far.
-//   * To minimize total pay (ratio * sum_quality), maintain a max-heap of qualities of size k.
-//   * Evict the worker with the highest quality to keep sumQ minimized.
-// - Complexity: Time: O(N log N + N log K), Space: O(N + K).
+//   * Standard integer or single-string comparison fails (e.g., "3" vs "30": "330" > "303").
+//   * Define custom comparator: string a precedes b iff (a + b) > (b + a).
+//   * This relation is transitive and defines a strict weak ordering.
+//   * Sort strings under this comparator and concatenate.
+//   * Handle edge case where highest element is "0" (return "0").
+// - Complexity: Time: O(N log N * L), Space: O(N * L).
 
 
 // =========================================================
-// 42. MAXIMUM NUMBER OF EVENTS THAT CAN BE ATTENDED
+// 48. CONNECT ROPES WITH MINIMUM COST [G-48]
 // =========================================================
 
-bool compareEventStart(const vector<int>& a, const vector<int>& b) {
-    return a[0] < b[0];
+long long minCostToConnectRopes(vector<long long>& a) {
+    priority_queue<long long, vector<long long>, greater<long long>> pq(a.begin(), a.end());
+    long long totalCost = 0;
+
+    while (pq.size() > 1) {
+        long long first = pq.top(); pq.pop();
+        long long second = pq.top(); pq.pop();
+        long long combined = first + second;
+        totalCost += combined;
+        pq.push(combined);
+    }
+    return totalCost;
 }
+// Interview Explanation:
+// - Problem Statement: Connect n ropes with minimum total cost where cost to connect two ropes is sum of their lengths.
+// - Approach: Min-Heap Greedy Huffman Optimal Merge Pattern.
+// - Intuition:
+//   * Ropes combined earlier contribute to multiple subsequent additions in the merge tree.
+//   * To minimize total cost, shorter ropes should participate in more merges, while longer ropes should participate in fewer.
+//   * Push all lengths into a min-heap.
+//   * Repeatedly extract the two shortest ropes, combine them, accumulate cost, and push the combined rope back.
+// - Complexity: Time: O(N log N), Space: O(N).
 
-int maxEvents(vector<vector<int>>& events) {
-    sort(events.begin(), events.end(), compareEventStart);
 
-    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of end days
-    int ans = 0, i = 0, n = events.size();
+// =========================================================
+// 49. KTH LARGEST ELEMENT IN AN ARRAY [G-49]
+// =========================================================
 
-    for (int d = 1; d <= 100000; ++d) {
-        while (i < n && events[i][0] <= d) {
-            pq.push(events[i][1]);
+int findKthLargest(vector<int>& a, int k) {
+    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of size k
+    for (int x : a) {
+        pq.push(x);
+        if ((int)pq.size() > k) {
+            pq.pop();
+        }
+    }
+    return pq.top();
+}
+// Interview Explanation:
+// - Problem Statement: Find k-th largest element in an unsorted array.
+// - Approach: Min-Heap Fixed-Size Window of Size k.
+// - Intuition:
+//   * Maintain the k largest elements seen so far in a min-heap.
+//   * The top of the min-heap always holds the smallest among the k largest elements.
+//   * When heap size exceeds k, evict pq.top().
+//   * At the end of traversal, pq.top() is precisely the k-th largest element in the entire array.
+// - Complexity: Time: O(N log K), Space: O(K).
+
+
+// =========================================================
+// 50. LAST STONE WEIGHT II [G-50]
+// =========================================================
+
+int lastStoneWeightII(vector<int>& stones) {
+    int total = accumulate(stones.begin(), stones.end(), 0);
+    int target = total / 2;
+
+    vector<bool> dp(target + 1, false);
+    dp[0] = true;
+
+    for (int s : stones) {
+        for (int i = target; i >= s; --i) {
+            dp[i] = dp[i] || dp[i - s];
+        }
+    }
+
+    for (int i = target; i >= 0; --i) {
+        if (dp[i]) {
+            return total - 2 * i;
+        }
+    }
+    return 0;
+}
+// Interview Explanation:
+// - Problem Statement: Minimize remaining stone weight after arbitrary smash orders.
+// - Approach: 0/1 Knapsack Subset Sum Mathematical Reduction.
+// - Intuition:
+//   * Any sequence of stone smashes assigns '+' or '-' signs to each stone weight: sum(S1) - sum(S2).
+//   * Minimizing the difference is equivalent to finding a subset S1 whose sum is as close to total / 2 as possible.
+//   * Use 0/1 Knapsack boolean DP with target = total / 2.
+//   * Best achievable subset sum i <= total / 2 yields minimal final weight (total - 2*i).
+// - Complexity: Time: O(N * (Total / 2)), Space: O(Total / 2).
+
+
+// =========================================================
+// 51. FURTHEST BUILDING YOU CAN REACH [G-51]
+// =========================================================
+
+int furthestBuilding(vector<int>& h, int bricks, int ladders) {
+    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of ladder climbs
+
+    for (int i = 0; i < (int)h.size() - 1; ++i) {
+        int diff = h[i + 1] - h[i];
+        if (diff > 0) {
+            pq.push(diff);
+            if ((int)pq.size() > ladders) {
+                bricks -= pq.top();
+                pq.pop();
+            }
+            if (bricks < 0) {
+                return i;
+            }
+        }
+    }
+    return (int)h.size() - 1;
+}
+// Interview Explanation:
+// - Problem Statement: Find furthest building reachable using limited bricks and ladders.
+// - Approach: Min-Heap Greedy Allocation (Ladders for Largest Climbs, Bricks for Smallest).
+// - Intuition:
+//   * Ladders can cover any height difference regardless of magnitude; bricks scale linearly with height.
+//   * Therefore, ladders should greedily be reserved for the largest climbs encountered.
+//   * Tentatively assign ladders to all climbs by pushing climb heights into a min-heap.
+//   * If ladder count is exceeded, convert the smallest climb seen so far into a brick expenditure (pq.top()).
+//   * If required bricks exceed available supply, no further progress is possible; return building index i.
+// - Complexity: Time: O(N log(Ladders)), Space: O(Ladders).
+
+
+// =========================================================
+// 52. MINIMUM REFUELING STOPS [G-52]
+// =========================================================
+
+int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {
+    priority_queue<int> pq; // max-heap of passed fuel capacities
+    long long curReach = startFuel;
+    int stops = 0, i = 0, n = stations.size();
+
+    while (curReach < target) {
+        while (i < n && stations[i][0] <= curReach) {
+            pq.push(stations[i][1]);
             i++;
         }
 
-        while (!pq.empty() && pq.top() < d) {
-            pq.pop();
-        }
+        if (pq.empty()) return -1;
 
-        if (!pq.empty()) {
-            pq.pop();
-            ans++;
-        }
-
-        if (i >= n && pq.empty()) break;
+        curReach += pq.top();
+        pq.pop();
+        stops++;
     }
-    return ans;
+    return stops;
 }
 // Interview Explanation:
-// - Problem Statement: Attend the maximum number of events where you can attend at most one event per day.
-// - Approach: Day-by-Day Chronological Sweep with Min-Heap of End Days.
+// - Problem Statement: Find minimum refueling stops to reach target starting with startFuel.
+// - Approach: Max-Heap of Passed Gas Stations.
 // - Intuition:
-//   * On any day d, add all events that have started (events[i][0] <= d) into a min-heap tracking their closing day.
-//   * Discard any events from the heap that have already expired (closing day < d).
-//   * Greedily attend the event that closes earliest (pq.top()); this preserves future days for events with later deadlines.
-// - Complexity: Time: O(N log N + D log N), Space: O(N).
-
-
-// =========================================================
-// 43. MEETING ROOMS III
-// =========================================================
-
-bool compareMeetingStart(const vector<int>& a, const vector<int>& b) {
-    return a[0] < b[0];
-}
-
-struct BusyRoomCompare {
-    bool operator()(const pair<long long, int>& a, const pair<long long, int>& b) const {
-        if (a.first != b.first) return a.first > b.first; // freeTime
-        return a.second > b.second;                       // room index
-    }
-};
-
-int mostBooked(int n, vector<vector<int>>& meetings) {
-    sort(meetings.begin(), meetings.end(), compareMeetingStart);
-
-    priority_queue<int, vector<int>, greater<int>> freeRooms;
-    for (int i = 0; i < n; ++i) freeRooms.push(i);
-
-    priority_queue<pair<long long, int>, vector<pair<long long, int>>, BusyRoomCompare> busyRooms;
-    vector<int> cnt(n, 0);
-
-    for (const auto& m : meetings) {
-        long long start = m[0], end = m[1];
-        long long dur = end - start;
-
-        while (!busyRooms.empty() && busyRooms.top().first <= start) {
-            freeRooms.push(busyRooms.top().second);
-            busyRooms.pop();
-        }
-
-        if (!freeRooms.empty()) {
-            int room = freeRooms.top();
-            freeRooms.pop();
-            cnt[room]++;
-            busyRooms.push({end, room});
-        } else {
-            auto [freeTime, room] = busyRooms.top();
-            busyRooms.pop();
-            cnt[room]++;
-            busyRooms.push({freeTime + dur, room});
-        }
-    }
-
-    int bestRoom = 0;
-    for (int i = 1; i < n; ++i) {
-        if (cnt[i] > cnt[bestRoom]) {
-            bestRoom = i;
-        }
-    }
-    return bestRoom;
-}
-// Interview Explanation:
-// - Problem Statement: Find room hosting the most meetings under lowest-index-first and delayed-allocation rules.
-// - Approach: Dual Priority Queue Scheduling (Free Rooms & Busy Rooms).
-// - Intuition:
-//   * Free rooms min-heap orders rooms by lowest index.
-//   * Busy rooms min-heap orders active meetings by {freeTime, room_index}.
-//   * For each incoming meeting, release all rooms whose meetings finished on or before current start time.
-//   * If a room is free, assign immediately.
-//   * If all rooms are busy, fast-forward to earliest finished meeting (busyRooms.top()), reuse that room, and delay the meeting.
-// - Complexity: Time: O(M log M + M log N), Space: O(N).
-
-
-// =========================================================
-// 44. MAXIMUM PROFIT IN JOB SCHEDULING
-// =========================================================
-
-struct JobItem {
-    int start, end, profit;
-};
-
-bool compareJobItemEnd(const JobItem& a, const JobItem& b) {
-    return a.end < b.end;
-}
-
-int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {
-    int n = startTime.size();
-    vector<JobItem> jobs(n);
-    for (int i = 0; i < n; ++i) {
-        jobs[i] = {startTime[i], endTime[i], profit[i]};
-    }
-    sort(jobs.begin(), jobs.end(), compareJobItemEnd);
-
-    // dp[i] = {end_time, max_profit}
-    vector<pair<int, int>> dp;
-    dp.push_back({0, 0});
-
-    for (const auto& j : jobs) {
-        // Binary search for latest non-overlapping job
-        int lo = 0, hi = (int)dp.size() - 1, best = 0;
-        while (lo <= hi) {
-            int mid = lo + (hi - lo) / 2;
-            if (dp[mid].first <= j.start) {
-                best = mid;
-                lo = mid + 1;
-            } else {
-                hi = mid - 1;
-            }
-        }
-
-        int curProfit = dp[best].second + j.profit;
-        if (curProfit > dp.back().second) {
-            dp.push_back({j.end, curProfit});
-        }
-    }
-    return dp.back().second;
-}
-// Interview Explanation:
-// - Problem Statement: Select non-overlapping jobs to maximize total profit.
-// - Approach: End-Time Sorting + 1D DP with Binary Search.
-// - Intuition:
-//   * Sort jobs ascending by end time.
-//   * For each job, either skip it (keep previous maximum profit) or schedule it.
-//   * If scheduled, add its profit to the max profit achievable from jobs finishing on or before its start time.
-//   * Use binary search on previously recorded {end_time, profit} entries to find the compatible predecessor in O(log N).
+//   * Drive as far as possible with current fuel.
+//   * Enqueue the fuel of every gas station passed along the way into a max-heap.
+//   * When fuel is insufficient to reach the next station or target, retroactively refuel at the station with the largest fuel capacity seen so far.
+//   * If the heap empties before reaching the destination, the target is unreachable; return -1.
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
 // =========================================================
-// 45. MINIMUM DIFFICULTY OF A JOB SCHEDULE
+// 53. TRAPPING RAIN WATER II [G-53]
 // =========================================================
 
-int minDifficulty(vector<int>& jobDifficulty, int d) {
-    int n = jobDifficulty.size();
-    if (n < d) return -1;
+struct Cell3D {
+    int h, r, c;
+};
 
-    vector<vector<int>> dp(d + 1, vector<int>(n + 1, 1e9));
-    dp[0][0] = 0;
+struct Cell3DCompare {
+    bool operator()(const Cell3D& a, const Cell3D& b) const {
+        return a.h > b.h;
+    }
+};
 
-    for (int day = 1; day <= d; ++day) {
-        for (int i = day; i <= n; ++i) {
-            int maxDiff = 0;
-            for (int j = i; j >= day; --j) {
-                maxDiff = max(maxDiff, jobDifficulty[j - 1]);
-                if (dp[day - 1][j - 1] != 1e9) {
-                    dp[day][i] = min(dp[day][i], dp[day - 1][j - 1] + maxDiff);
+int trapRainWater(vector<vector<int>>& g) {
+    int m = g.size(), n = g[0].size();
+    if (m <= 2 || n <= 2) return 0;
+
+    priority_queue<Cell3D, vector<Cell3D>, Cell3DCompare> pq;
+    vector<vector<bool>> vis(m, vector<bool>(n, false));
+
+    for (int r = 0; r < m; ++r) {
+        for (int c = 0; c < n; ++c) {
+            if (r == 0 || r == m - 1 || c == 0 || c == n - 1) {
+                pq.push({g[r][c], r, c});
+                vis[r][c] = true;
+            }
+        }
+    }
+
+    int trapped = 0;
+    int maxBoundary = 0;
+    const int dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    while (!pq.empty()) {
+        auto [h, r, c] = pq.top();
+        pq.pop();
+
+        maxBoundary = max(maxBoundary, h);
+
+        for (auto& d : dirs) {
+            int nr = r + d[0], nc = c + d[1];
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && !vis[nr][nc]) {
+                vis[nr][nc] = true;
+                if (g[nr][nc] < maxBoundary) {
+                    trapped += maxBoundary - g[nr][nc];
                 }
+                pq.push({g[nr][nc], nr, nc});
             }
         }
     }
-    return dp[d][n];
+    return trapped;
 }
 // Interview Explanation:
-// - Problem Statement: Schedule n jobs over d days with at least 1 job per day minimizing sum of daily maximum difficulties.
-// - Approach: Dynamic Programming on Days and Subarrays.
+// - Problem Statement: Find volume of water trapped after rain in a 3D elevation matrix.
+// - Approach: Min-Heap Boundary Priority Queue (Dijkstra-like Contraction).
 // - Intuition:
-//   * If jobs count n < days d, scheduling is impossible; return -1.
-//   * Let dp[day][i] be the minimum difficulty scheduling the first i jobs across day days.
-//   * Transition: iterate partition boundary j for the current day's chunk jobs[j-1..i-1].
-//   * Track max difficulty in the chunk, updating dp[day][i] = min(dp[day-1][j-1] + chunkMax).
-// - Complexity: Time: O(D * N^2), Space: O(D * N).
+//   * Water spill is bounded by the lowest point along the entire surrounding perimeter.
+//   * Initialize a min-heap containing all boundary cells of the grid.
+//   * Repeatedly pop the lowest boundary cell and maintain maxBoundary seen so far.
+//   * For each unvisited neighbor, if its height is lower than maxBoundary, it traps (maxBoundary - height) water.
+//   * Push the neighbor into the heap, effectively contracting the boundary inward.
+// - Complexity: Time: O(M * N log(M * N)), Space: O(M * N).
 
 
 // =========================================================
-// 46. BOATS TO SAVE PEOPLE
+// 54. MAXIMUM AVERAGE PASS RATIO [G-54]
 // =========================================================
 
-int numRescueBoats(vector<int>& people, int limit) {
-    sort(people.begin(), people.end());
-
-    int l = 0, r = (int)people.size() - 1;
-    int boats = 0;
-
-    while (l <= r) {
-        if (people[l] + people[r] <= limit) {
-            l++;
-        }
-        r--;
-        boats++;
+struct ClassGain {
+    int p, t;
+    double gain() const {
+        return (double)(p + 1) / (t + 1) - (double)p / t;
     }
-    return boats;
+};
+
+struct ClassGainCompare {
+    bool operator()(const ClassGain& a, const ClassGain& b) const {
+        return a.gain() < b.gain(); // max-heap by marginal gain
+    }
+};
+
+double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
+    priority_queue<ClassGain, vector<ClassGain>, ClassGainCompare> pq;
+    for (const auto& c : classes) {
+        pq.push({c[0], c[1]});
+    }
+
+    while (extraStudents-- > 0) {
+        auto top = pq.top();
+        pq.pop();
+        top.p++;
+        top.t++;
+        pq.push(top);
+    }
+
+    double sumRatio = 0.0;
+    while (!pq.empty()) {
+        auto top = pq.top();
+        pq.pop();
+        sumRatio += (double)top.p / top.t;
+    }
+    return sumRatio / classes.size();
 }
 // Interview Explanation:
-// - Problem Statement: Minimize rescue boats where each boat carries at most 2 people whose sum weight <= limit.
-// - Approach: Greedy Two Pointers on Sorted Weights.
+// - Problem Statement: Assign extraStudents to classes maximizing average pass ratio (passi / totali).
+// - Approach: Max-Heap Marginal Gain Greedy Assignment.
 // - Intuition:
-//   * The heaviest person (people[r]) must board a boat.
-//   * To optimize boat capacity, check if the lightest remaining person (people[l]) can share this boat.
-//   * If people[l] + people[r] <= limit, pair both onto the boat (l++, r--).
-//   * Otherwise, the heaviest person must travel alone (r--).
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+//   * Adding 1 student increases a class pass ratio by marginal gain: (p+1)/(t+1) - p/t.
+//   * To maximize overall average, each extra student must greedily be allocated to the class offering the highest marginal gain.
+//   * Maintain a max-heap of classes prioritized by current marginal gain.
+//   * In each step, assign 1 student to top class and reinsert with updated marginal gain.
+// - Complexity: Time: O((N + Extra) log N), Space: O(N).
 
 
 // =========================================================
-// 47. QUEUE RECONSTRUCTION BY HEIGHT
+// 55. TOTAL COST TO HIRE K WORKERS [G-55]
 // =========================================================
 
-bool compareQueuePeople(const vector<int>& a, const vector<int>& b) {
-    if (a[0] != b[0]) return a[0] > b[0]; // height descending
-    return a[1] < b[1];                   // k ascending
-}
+long long totalCost(vector<int>& costs, int k, int candidates) {
+    int n = costs.size();
+    priority_queue<int, vector<int>, greater<int>> leftPq, rightPq;
 
-vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
-    sort(people.begin(), people.end(), compareQueuePeople);
+    int l = 0, r = n - 1;
 
-    vector<vector<int>> ans;
-    for (const auto& p : people) {
-        ans.insert(ans.begin() + p[1], p);
+    for (int i = 0; i < candidates && l <= r; ++i) {
+        leftPq.push(costs[l++]);
+    }
+    for (int i = 0; i < candidates && l <= r; ++i) {
+        rightPq.push(costs[r--]);
+    }
+
+    long long ans = 0;
+
+    while (k-- > 0) {
+        int leftVal = leftPq.empty() ? INT_MAX : leftPq.top();
+        int rightVal = rightPq.empty() ? INT_MAX : rightPq.top();
+
+        if (leftVal <= rightVal) {
+            ans += leftVal;
+            leftPq.pop();
+            if (l <= r) {
+                leftPq.push(costs[l++]);
+            }
+        } else {
+            ans += rightVal;
+            rightPq.pop();
+            if (l <= r) {
+                rightPq.push(costs[r--]);
+            }
+        }
     }
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Reconstruct queue from [height, k] where k is count of people in front with height >= h.
-// - Approach: Descending Height Sort + Index Insertion.
+// - Problem Statement: Hire k workers with minimum total cost choosing from first or last candidates workers in each step.
+// - Approach: Dual Min-Heaps with Two-Ended Inward Window.
 // - Intuition:
-//   * Taller people do not perceive shorter people in front of them.
-//   * Sort people primarily by height descending; tie-break by k ascending.
-//   * Insert each person directly at index k of the output list.
-//   * Since all previously inserted people are taller or equal, placing at index k guarantees exactly k taller people are in front.
-// - Complexity: Time: O(N^2), Space: O(N).
+//   * Maintain two min-heaps: leftPq storing up to candidates workers from the front, and rightPq from the back.
+//   * Compare the tops of both heaps. Select the worker with the smaller cost (tie-broken by left heap).
+//   * Replenish the chosen heap with the next unselected worker from inward pointers (l or r).
+//   * Repeats k times in O(K log(candidates)) total time.
+// - Complexity: Time: O(K log(Candidates)), Space: O(Candidates).
 
 
 // =========================================================
-// 48. ADVANTAGE SHUFFLE
+// 56. HAND OF STRAIGHTS [G-56]
 // =========================================================
 
-vector<int> advantageCount(vector<int>& a, vector<int>& b) {
+bool isNStraightHand(vector<int>& hand, int groupSize) {
+    if ((int)hand.size() % groupSize != 0) return false;
+
+    map<int, int> mp;
+    for (int x : hand) mp[x]++;
+
+    while (!mp.empty()) {
+        int start = mp.begin()->first;
+        for (int i = 0; i < groupSize; ++i) {
+            int card = start + i;
+            if (!mp.count(card)) return false;
+            if (--mp[card] == 0) {
+                mp.erase(card);
+            }
+        }
+    }
+    return true;
+}
+// Interview Explanation:
+// - Problem Statement: Reorder cards into groups of groupSize where each group consists of consecutive cards.
+// - Approach: Ordered Map Frequency Greedy Extraction.
+// - Intuition:
+//   * Total cards must be divisible by groupSize.
+//   * The smallest remaining card start must form the base of the next group [start, start + groupSize - 1].
+//   * Count frequencies in an ordered map.
+//   * Repeatedly inspect mp.begin()->first; verify and decrement frequencies for the subsequent (groupSize - 1) cards.
+//   * If any consecutive card is missing, valid grouping is impossible.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+
+// =========================================================
+// 57. VALID ARRANGEMENT OF PAIRS [G-57]
+// =========================================================
+
+class SolutionValidArrangement {
+    unordered_map<int, vector<int>> adj;
+    vector<int> path;
+
+    void dfs(int u) {
+        auto& edges = adj[u];
+        while (!edges.empty()) {
+            int v = edges.back();
+            edges.pop_back();
+            dfs(v);
+        }
+        path.push_back(u);
+    }
+
+public:
+    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {
+        unordered_map<int, int> inDeg, outDeg;
+        for (const auto& p : pairs) {
+            adj[p[0]].push_back(p[1]);
+            outDeg[p[0]]++;
+            inDeg[p[1]]++;
+        }
+
+        int startNode = pairs[0][0];
+        for (const auto& [node, out] : outDeg) {
+            if (out - inDeg[node] == 1) {
+                startNode = node;
+                break;
+            }
+        }
+
+        path.clear();
+        dfs(startNode);
+        reverse(path.begin(), path.end());
+
+        vector<vector<int>> ans;
+        for (int i = 0; i < (int)path.size() - 1; ++i) {
+            ans.push_back({path[i], path[i + 1]});
+        }
+        return ans;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Arrange pairs such that end of pair i equals start of pair i + 1 for all pairs.
+// - Approach: Hierholzer's Algorithm for Directed Eulerian Path.
+// - Intuition:
+//   * Each pair [u, v] forms a directed edge u -> v. The problem asks for an Eulerian path visiting every edge exactly once.
+//   * In a directed Eulerian graph, the start node has outDegree - inDegree == 1 (or any node if all degrees balanced).
+//   * Use Hierholzer's algorithm: traverse edges, pop used edges, push to path upon backtracking (post-order).
+//   * Reversing path yields the complete valid Eulerian trail.
+// - Complexity: Time: O(V + E), Space: O(V + E).
+
+
+// =========================================================
+// 58. PATCHING ARRAY [G-58]
+// =========================================================
+
+int minPatches(vector<int>& nums, int n) {
+    long long miss = 1;
+    int patches = 0, i = 0, m = nums.size();
+
+    while (miss <= n) {
+        if (i < m && nums[i] <= miss) {
+            miss += nums[i];
+            i++;
+        } else {
+            miss += miss; // greedily patch miss itself
+            patches++;
+        }
+    }
+    return patches;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum patches added to sorted array nums so any number in [1, n] can be formed by a subset.
+// - Approach: Greedy Range Doubling Invariant.
+// - Intuition:
+//   * Let miss be the smallest number in [1, n] that cannot currently be formed.
+//   * The current formed range is [1, miss - 1].
+//   * If nums[i] <= miss, incorporating nums[i] extends the reachable range to [1, miss + nums[i] - 1]; update miss += nums[i].
+//   * If nums[i] > miss (or array exhausted), we must patch miss greedily; adding miss doubles reach to [1, 2*miss - 1].
+// - Complexity: Time: O(M + log N), Space: O(1).
+
+
+// =========================================================
+// 59. WIGGLE SUBSEQUENCE [G-59]
+// =========================================================
+
+int wiggleMaxLength(vector<int>& a) {
     int n = a.size();
-    sort(a.begin(), a.end());
+    if (n < 2) return n;
 
-    vector<pair<int, int>> sortedB(n);
-    for (int i = 0; i < n; ++i) sortedB[i] = {b[i], i};
-    sort(sortedB.begin(), sortedB.end());
-
-    vector<int> ans(n);
-    int lo = 0, hi = n - 1;
-
-    for (int x : a) {
-        if (x > sortedB[lo].first) {
-            ans[sortedB[lo].second] = x;
-            lo++;
-        } else {
-            ans[sortedB[hi].second] = x;
-            hi--;
+    int up = 1, down = 1;
+    for (int i = 1; i < n; ++i) {
+        if (a[i] > a[i - 1]) {
+            up = down + 1;
+        } else if (a[i] < a[i - 1]) {
+            down = up + 1;
         }
     }
-    return ans;
+    return max(up, down);
 }
 // Interview Explanation:
-// - Problem Statement: Permute array a to maximize count of indices where a[i] > b[i].
-// - Approach: Greedy Tian Ji Horse Racing Strategy.
+// - Problem Statement: Find length of longest subsequence with strictly alternating positive and negative differences.
+// - Approach: Greedy Alternating Peak / Valley Tracking.
 // - Intuition:
-//   * Sort both a and b (tracking original indices for b).
-//   * If the smallest available element in a can beat the smallest element in b, greedily take that win!
-//   * If it cannot beat the smallest element in b, it cannot beat any element in b; sacrifice this weakest horse against b's strongest horse (sortedB[hi]).
-// - Complexity: Time: O(N log N), Space: O(N).
+//   * Maintain up (length of longest wiggle ending with an upward slope) and down (ending with a downward slope).
+//   * If a[i] > a[i-1], an upward slope can extend any valid downward sequence: up = down + 1.
+//   * If a[i] < a[i-1], a downward slope can extend any valid upward sequence: down = up + 1.
+//   * Consecutive rises or falls naturally update the extreme without artificially inflating the alternating count.
+// - Complexity: Time: O(N), Space: O(1).
 
 
 // =========================================================
-// 49. BAG OF TOKENS
+// 60. MONOTONE INCREASING DIGITS [G-60]
 // =========================================================
 
-int bagOfTokensScore(vector<int>& tokens, int power) {
-    sort(tokens.begin(), tokens.end());
+int monotoneIncreasingDigits(int n) {
+    string s = to_string(n);
+    int mark = s.size();
 
-    int l = 0, r = (int)tokens.size() - 1;
-    int score = 0, maxScore = 0;
-
-    while (l <= r) {
-        if (power >= tokens[l]) {
-            power -= tokens[l++];
-            score++;
-            maxScore = max(maxScore, score);
-        } else if (score > 0 && l < r) {
-            power += tokens[r--];
-            score--;
-        } else {
-            break;
+    for (int i = (int)s.size() - 1; i > 0; --i) {
+        if (s[i - 1] > s[i]) {
+            s[i - 1]--;
+            mark = i;
         }
     }
-    return maxScore;
-}
-// Interview Explanation:
-// - Problem Statement: Maximize score using tokens to gain score (face-up, costs power) or gain power (face-down, costs 1 score).
-// - Approach: Greedy Two Pointers on Sorted Tokens.
-// - Intuition:
-//   * To gain score, spend power on the cheapest available tokens (tokens[l]).
-//   * When power is exhausted, trade 1 score to purchase the largest available power source (tokens[r]).
-//   * Never trade score if no cheaper tokens remain to be bought (l < r).
-//   * Maintain maxScore across all intermediate states.
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 50. REDUCE ARRAY SIZE TO THE HALF
-// =========================================================
-
-int minSetSize(vector<int>& arr) {
-    unordered_map<int, int> freq;
-    for (int x : arr) freq[x]++;
-
-    vector<int> counts;
-    for (const auto& [val, count] : freq) counts.push_back(count);
-    sort(counts.rbegin(), counts.rend());
-
-    int removed = 0, ans = 0;
-    int half = arr.size() / 2;
-
-    for (int c : counts) {
-        removed += c;
-        ans++;
-        if (removed >= half) break;
+    for (int i = mark; i < (int)s.size(); ++i) {
+        s[i] = '9';
     }
-    return ans;
+    return stoi(s);
 }
 // Interview Explanation:
-// - Problem Statement: Find minimum size of integer set to remove so at least half of the array is removed.
-// - Approach: Frequency Hash Map + Greedy Count Sorting.
+// - Problem Statement: Find largest integer <= n whose digits are monotonically increasing.
+// - Approach: Reverse Inversion Scan + Suffix 9s Greedy Substitution.
 // - Intuition:
-//   * Removing numbers with the highest frequencies deletes the most elements per unique choice.
-//   * Compute frequencies using a hash map and sort them in descending order.
-//   * Greedily pick the largest frequencies until the cumulative sum reaches at least n / 2.
-// - Complexity: Time: O(N log N), Space: O(N).
+//   * Scan digits from right to left.
+//   * Whenever s[i-1] > s[i], monotonicity is violated. Decrement s[i-1]-- and record split index mark = i.
+//   * Decrementing s[i-1] allows all subsequent digits to be set to the maximum possible digit '9' without exceeding n.
+//   * Set all digits from mark to end to '9'.
+// - Complexity: Time: O(D) where D is number of digits (<= 10), Space: O(D).
 
 
 // =========================================================
-// 51. MINIMUM INCREMENT TO MAKE ARRAY UNIQUE
+// 61. INCREASING TRIPLET SUBSEQUENCE [G-61]
 // =========================================================
 
-int minIncrementForUnique(vector<int>& a) {
-    sort(a.begin(), a.end());
+bool increasingTriplet(vector<int>& nums) {
+    int first = INT_MAX, second = INT_MAX;
+
+    for (int x : nums) {
+        if (x <= first) {
+            first = x;
+        } else if (x <= second) {
+            second = x;
+        } else {
+            return true; // x > second > first
+        }
+    }
+    return false;
+}
+// Interview Explanation:
+// - Problem Statement: Determine if there exists a triplet of indices i < j < k with nums[i] < nums[j] < nums[k].
+// - Approach: Two-Threshold Greedy Smallest Values Tracking.
+// - Intuition:
+//   * Maintain the smallest value first and second smallest value second in an increasing pair.
+//   * If current x <= first, greedily update first = x.
+//   * Else if x <= second, update second = x (a smaller upper bound for the second element is always preferable).
+//   * If x > second, we have found an element greater than both first and second; return true!
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// =========================================================
+// 62. MAXIMUM LENGTH OF PAIR CHAIN [G-62]
+// =========================================================
+
+bool comparePairChainEnd(const vector<int>& a, const vector<int>& b) {
+    return a[1] < b[1];
+}
+
+int findLongestChain(vector<vector<int>>& pairs) {
+    sort(pairs.begin(), pairs.end(), comparePairChainEnd);
 
     int ans = 0;
-    for (int i = 1; i < (int)a.size(); ++i) {
-        if (a[i] <= a[i - 1]) {
-            int needed = a[i - 1] + 1;
-            ans += needed - a[i];
-            a[i] = needed;
-        }
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find minimum increment operations so that every array element is unique.
-// - Approach: In-Place Running Floor Propagation on Sorted Array.
-// - Intuition:
-//   * Sort the array ascending.
-//   * If element a[i] <= a[i-1], a[i] must be incremented to at least a[i-1] + 1 to maintain uniqueness.
-//   * Accumulate the delta (a[i-1] + 1 - a[i]) into ans and update a[i] in-place.
-//   * A single forward pass resolves all duplicates optimally.
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+    int curEnd = -1e9;
 
-
-// =========================================================
-// 52. MINIMUM NUMBER OF MOVES TO MAKE ARRAY COMPLEMENTARY
-// =========================================================
-
-int minMoves(vector<int>& a, int limit) {
-    int n = a.size();
-    vector<int> diff(2 * limit + 2, 0);
-
-    for (int i = 0; i < n / 2; ++i) {
-        int x = min(a[i], a[n - 1 - i]);
-        int y = max(a[i], a[n - 1 - i]);
-
-        // [2, 2 * limit] default: 2 moves
-        diff[2] += 2;
-        diff[2 * limit + 1] -= 2;
-
-        // [1 + x, limit + y]: 1 move
-        diff[1 + x] -= 1;
-        diff[limit + y + 1] += 1;
-
-        // [x + y]: 0 moves
-        diff[x + y] -= 1;
-        diff[x + y + 1] += 1;
-    }
-
-    int ans = n, cur = 0;
-    for (int s = 2; s <= 2 * limit; ++s) {
-        cur += diff[s];
-        ans = min(ans, cur);
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Find min moves to make all complementary pairs (a[i] + a[n-1-i]) equal across an array.
-// - Approach: Difference Array Interval Range Overlap.
-// - Intuition:
-//   * For pair (x, y) with x <= y:
-//     - Sum in [2, 2*limit]: 2 replacements needed.
-//     - Sum in [1 + x, limit + y]: only 1 replacement needed.
-//     - Sum == x + y: exactly 0 replacements needed.
-//   * Record delta changes for each pair into a difference array.
-//   * Prefix sum across all possible target sums 2..2*limit finds the minimum moves.
-// - Complexity: Time: O(N + Limit), Space: O(Limit).
-
-
-// =========================================================
-// 53. DIVIDE ARRAY INTO ARRAYS WITH MAX DIFFERENCE
-// =========================================================
-
-vector<vector<int>> divideArray(vector<int>& a, int k) {
-    sort(a.begin(), a.end());
-    vector<vector<int>> ans;
-
-    for (int i = 0; i < (int)a.size(); i += 3) {
-        if (a[i + 2] - a[i] > k) {
-            return {};
-        }
-        ans.push_back({a[i], a[i + 1], a[i + 2]});
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Divide array into triplets such that max difference in each triplet <= k.
-// - Approach: Sorted Triplet Contiguous Window Check.
-// - Intuition:
-//   * In a sorted array, adjacent elements have the smallest pairwise differences.
-//   * If a valid division exists, contiguous triplets [a[i], a[i+1], a[i+2]] offer the tightest spreads.
-//   * Check if a[i+2] - a[i] <= k. If violated for any triplet, no valid grouping is possible; return empty.
-// - Complexity: Time: O(N log N), Space: O(N).
-
-
-// =========================================================
-// 54. MAXIMUM ICE CREAM BARS
-// =========================================================
-
-int maxIceCream(vector<int>& costs, int coins) {
-    sort(costs.begin(), costs.end());
-
-    int ans = 0;
-    for (int c : costs) {
-        if (coins >= c) {
-            coins -= c;
+    for (const auto& p : pairs) {
+        if (p[0] > curEnd) {
             ans++;
-        } else {
-            break;
+            curEnd = p[1];
         }
     }
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Maximize number of ice cream bars bought with initial coins.
-// - Approach: Greedy Price-Ascending Purchase.
+// - Problem Statement: Find longest chain of pairs where pair [c, d] can follow [a, b] iff b < c.
+// - Approach: Interval Scheduling by Earliest End Coordinate.
 // - Intuition:
-//   * Each ice cream bar counts equally as 1 bar toward the objective.
-//   * Buying cheaper bars leaves the maximal amount of coins to purchase subsequent bars.
-//   * Sort prices ascending and purchase greedily until coins are depleted.
+//   * Equivalent to classic interval scheduling / activity selection.
+//   * Sort pairs ascending by their second element pairs[i][1].
+//   * Greedily append pairs that finish earliest to leave maximum room for future chain links.
+//   * Increment count whenever p[0] > curEnd and update curEnd = p[1].
 // - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
 
 
 // =========================================================
-// 55. PUT BOXES INTO THE WAREHOUSE I
+// 63. RUSSIAN DOLL ENVELOPES [G-63]
 // =========================================================
 
-int maxBoxesInWarehouse(vector<int>& boxes, vector<int>& warehouse) {
-    int m = warehouse.size();
-    for (int i = 1; i < m; ++i) {
-        warehouse[i] = min(warehouse[i], warehouse[i - 1]);
-    }
-    sort(boxes.begin(), boxes.end());
-
-    int ans = 0;
-    int bIdx = 0;
-
-    for (int i = m - 1; i >= 0 && bIdx < (int)boxes.size(); --i) {
-        if (boxes[bIdx] <= warehouse[i]) {
-            ans++;
-            bIdx++;
-        }
-    }
-    return ans;
+bool compareEnvelopes(const vector<int>& a, const vector<int>& b) {
+    if (a[0] != b[0]) return a[0] < b[0]; // width ascending
+    return a[1] > b[1];                   // height descending
 }
-// Interview Explanation:
-// - Problem Statement: Push boxes into a warehouse from left to right maximizing boxes stored.
-// - Approach: Preprocessed Effective Ceiling + Right-to-Left Greedy Sweep.
-// - Intuition:
-//   * A box cannot pass through any doorway smaller than its height.
-//   * Preprocess effective height from left to right: warehouse[i] = min(warehouse[i], warehouse[i-1]).
-//   * Fill from the deepest room (rightmost) back toward room 0.
-//   * Match the smallest available box into the deepest room possible.
-// - Complexity: Time: O(N log N + M), Space: O(1) auxiliary space.
 
+int maxEnvelopes(vector<vector<int>>& env) {
+    sort(env.begin(), env.end(), compareEnvelopes);
 
-// =========================================================
-// 56. PUT BOXES INTO THE WAREHOUSE II
-// =========================================================
-
-int maxBoxesInWarehouse2(vector<int>& boxes, vector<int>& warehouse) {
-    sort(boxes.rbegin(), boxes.rend());
-
-    int l = 0, r = (int)warehouse.size() - 1;
-    int ans = 0;
-
-    for (int b : boxes) {
-        if (l > r) break;
-        if (warehouse[l] >= warehouse[r]) {
-            if (warehouse[l] >= b) {
-                ans++;
-                l++;
-            }
+    vector<int> tails;
+    for (const auto& e : env) {
+        int h = e[1];
+        auto it = lower_bound(tails.begin(), tails.end(), h);
+        if (it == tails.end()) {
+            tails.push_back(h);
         } else {
-            if (warehouse[r] >= b) {
-                ans++;
-                r--;
-            }
+            *it = h;
         }
     }
-    return ans;
+    return tails.size();
 }
 // Interview Explanation:
-// - Problem Statement: Push boxes from either left or right entrance maximizing boxes stored.
-// - Approach: Two-Ended Inward Warehouse Pointers + Largest-Box Matching.
+// - Problem Statement: Find maximum envelopes that can be Russian-dolled (one inside another).
+// - Approach: Dual-Key Sorting + Patience Sorting (LIS) on Heights.
 // - Intuition:
-//   * Boxes can enter from either end.
-//   * Sort boxes in descending order to place the hardest-to-fit (largest) boxes first.
-//   * Compare the entrance capacities at left (l) and right (r); push into whichever side has greater clearance.
-// - Complexity: Time: O(N log N + M), Space: O(1) auxiliary space.
+//   * Sort envelopes primarily by width ascending, and secondarily by height descending.
+//   * Height descending prevents envelopes of the same width from nesting inside each other.
+//   * With widths sorted, the problem reduces strictly to finding the Longest Increasing Subsequence (LIS) on heights.
+//   * Solve LIS in O(N log N) using binary search (std::lower_bound) on tails array.
+// - Complexity: Time: O(N log N), Space: O(N).
 
 
 // =========================================================
-// 57. MAXIMUM BAGS WITH FULL CAPACITY OF ROCKS
+// 64. SHORTEST UNSORTED CONTINUOUS SUBARRAY [G-64]
 // =========================================================
 
-int maximumBags(vector<int>& capacity, vector<int>& rocks, int additionalRocks) {
-    int n = capacity.size();
-    vector<int> diff(n);
+class Solution {
+public:
+    int findUnsortedSubarray(vector<int>& nums) {
+        int n = nums.size();
+        int left = -1, right = -1;
+        int mx = INT_MIN, mn = INT_MAX;
+
+        for (int i = 0; i < n; i++) {
+            // Left -> Right
+            mx = max(mx, nums[i]);
+            if (nums[i] < mx) right = i;
+
+            // Right -> Left
+            int j = n - 1 - i;
+            mn = min(mn, nums[j]);
+            if (nums[j] > mn) left = j;
+        }
+
+        return right == -1 ? 0 : right - left + 1;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find shortest continuous subarray whose sorting sorts the whole array.
+// - Approach: Two Pointers Running Min/Max Extremes Sweep.
+// - Intuition:
+//   * In a sorted array, every element a[i] must be >= max(a[0..i-1]).
+//   * Forward pass: if a[i] < curMax, a[i] is misplaced; rightmost such index is right.
+//   * Backward pass: if a[i] > curMin, a[i] is misplaced; leftmost such index is left.
+//   * If no misplaced elements exist (right == -1), array is already sorted; return 0.
+//   * Otherwise, the required subarray length is right - left + 1.
+// - Complexity: Time: O(N), Space: O(1).
+
+
+// =========================================================
+// 65. HUFFMAN ENCODING [G-65]
+// =========================================================
+
+struct HuffmanNode {
+    char data;
+    int freq;
+    HuffmanNode *left, *right;
+    HuffmanNode(char d, int f) : data(d), freq(f), left(nullptr), right(nullptr) {}
+};
+
+struct HuffmanNodeCompare {
+    bool operator()(HuffmanNode* a, HuffmanNode* b) const {
+        return a->freq > b->freq; // min-heap
+    }
+};
+
+void buildHuffmanCodes(HuffmanNode* root, string code, vector<string>& ans) {
+    if (!root) return;
+    if (!root->left && !root->right) {
+        ans.push_back(code);
+        return;
+    }
+    buildHuffmanCodes(root->left, code + "0", ans);
+    buildHuffmanCodes(root->right, code + "1", ans);
+}
+
+vector<string> huffmanCodes(string s, vector<int>& f, int n) {
+    priority_queue<HuffmanNode*, vector<HuffmanNode*>, HuffmanNodeCompare> pq;
     for (int i = 0; i < n; ++i) {
-        diff[i] = capacity[i] - rocks[i];
+        pq.push(new HuffmanNode(s[i], f[i]));
     }
-    sort(diff.begin(), diff.end());
 
-    int ans = 0;
-    for (int d : diff) {
-        if (additionalRocks >= d) {
-            additionalRocks -= d;
-            ans++;
-        } else {
-            break;
-        }
+    while (pq.size() > 1) {
+        HuffmanNode* l = pq.top(); pq.pop();
+        HuffmanNode* r = pq.top(); pq.pop();
+
+        HuffmanNode* parent = new HuffmanNode('$', l->freq + r->freq);
+        parent->left = l;
+        parent->right = r;
+        pq.push(parent);
     }
+
+    vector<string> ans;
+    buildHuffmanCodes(pq.top(), "", ans);
     return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Find maximum bags filled to capacity using additional rocks.
-// - Approach: Remaining Deficit Sorting + Greedy Placement.
+// - Problem Statement: Generate optimal prefix Huffman codes for characters given their frequencies.
+// - Approach: Min-Heap Optimal Binary Tree Construction.
 // - Intuition:
-//   * Each bag needs diff[i] = capacity[i] - rocks[i] additional rocks to become full.
-//   * Filling bags with smaller deficits maximizes total full bags for a given rock budget.
-//   * Sort diff ascending and fill bags greedily.
+//   * More frequent characters should receive shorter bit sequences.
+//   * Maintain a min-heap of tree nodes.
+//   * Greedily combine the two nodes with the lowest frequencies into a new parent node with combined frequency.
+//   * Repeat until 1 root node remains.
+//   * Preorder traversal outputs prefix codes ('0' for left edge, '1' for right edge).
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
 // =========================================================
-// 58. MAXIMUM ELEMENT AFTER DECREASING AND REARRANGING
+// 66. FRACTIONAL KNAPSACK [G-66]
 // =========================================================
 
-int maximumElementAfterDecrementingAndRearranging(vector<int>& a) {
-    sort(a.begin(), a.end());
-    a[0] = 1;
+struct KnapsackItem {
+    int value, weight;
+};
 
-    for (int i = 1; i < (int)a.size(); ++i) {
-        a[i] = min(a[i], a[i - 1] + 1);
+bool compareKnapsackRatio(const KnapsackItem& a, const KnapsackItem& b) {
+    double r1 = (double)a.value / a.weight;
+    double r2 = (double)b.value / b.weight;
+    return r1 > r2;
+}
+
+double fractionalKnapsack(int w, vector<KnapsackItem>& arr, int n) {
+    sort(arr.begin(), arr.end(), compareKnapsackRatio);
+
+    double totalVal = 0.0;
+    for (int i = 0; i < n && w > 0; ++i) {
+        if (w >= arr[i].weight) {
+            totalVal += arr[i].value;
+            w -= arr[i].weight;
+        } else {
+            totalVal += (double)arr[i].value * w / arr[i].weight;
+            w = 0;
+            break;
+        }
     }
-    return a.back();
+    return totalVal;
 }
 // Interview Explanation:
-// - Problem Statement: Rearrange and decrement elements so a[0] == 1 and adjacent differences <= 1, maximizing final value.
-// - Approach: Sorting + In-Place Neighbor Gap Clamping.
+// - Problem Statement: Maximize total value in knapsack of capacity w allowing fractional item takes.
+// - Approach: Greedy Value-to-Weight Ratio Descending Sort.
 // - Intuition:
-//   * Sorting organizes numbers into optimal ascending order.
-//   * Anchor a[0] = 1.
-//   * For each subsequent element, it can increase by at most 1 over its predecessor: a[i] = min(a[i], a[i-1] + 1).
-//   * Returning the last element gives the maximum possible terminal value.
+//   * Items with higher value density (value / weight) give the most profit per unit capacity.
+//   * Sort items descending by value-to-weight ratio.
+//   * Greedily take whole items as long as remaining capacity permits.
+//   * For the final fitting item, take the exact fraction required to fill the remaining capacity w.
 // - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 59. MINIMUM DIFFERENCE BETWEEN HIGHEST AND LOWEST OF K SCORES
-// =========================================================
-
-int minimumDifference(vector<int>& a, int k) {
-    if (k <= 1) return 0;
-    sort(a.begin(), a.end());
-
-    int ans = INT_MAX;
-    for (int i = 0; i + k - 1 < (int)a.size(); ++i) {
-        ans = min(ans, a[i + k - 1] - a[i]);
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Choose k scores minimizing the difference between highest and lowest chosen scores.
-// - Approach: Fixed-Size Sliding Window on Sorted Array.
-// - Intuition:
-//   * Any optimal subset of size k corresponds to a contiguous subsegment in the sorted array.
-//   * Sort scores ascending.
-//   * Slide a window of length k: diff = a[i + k - 1] - a[i].
-//   * Track the minimum difference across all windows.
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 60. MAXIMUM NUMBER OF COINS YOU CAN GET
-// =========================================================
-
-int maxCoins(vector<int>& piles) {
-    sort(piles.begin(), piles.end());
-
-    int n = piles.size();
-    int rounds = n / 3;
-    int ans = 0;
-
-    for (int i = 0; i < rounds; ++i) {
-        ans += piles[n - 2 - 2 * i];
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: In each step, pick 3 piles where Alice takes the largest, you take second largest, Bob takes smallest. Maximize your coins.
-// - Approach: Sorted Stride-2 Second-Largest Accumulation.
-// - Intuition:
-//   * In each round of 3, Bob gets the absolute smallest piles available (the first n/3 elements).
-//   * From the remaining 2n/3 elements, Alice takes the largest and you take the second largest.
-//   * Sort ascending and pick every second element from the right: piles[n - 2 - 2*i].
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.

@@ -34,65 +34,37 @@ using vvl = vector<vector<ll>>;
 
 /*
  ====================================================================================================
-                                      PROBLEM SUMMARY & COMPLEXITY TABLE
+                     PROBLEM SUMMARY & COMPLEXITY TABLE: G1.CPP (Problems 1 - 22)                    
  ====================================================================================================
  | #  | Problem Name                                | Pattern / Technique               | Time     | Space    |
  |----|---------------------------------------------|-----------------------------------|----------|----------|
- | 1  | Assign Cookies                              | Two Pointers on Sorted Arrays     | O(N logN)| O(1)     |
- | 2  | Best Time to Buy and Sell Stock II          | Greedy Valley-to-Peak Accumulation| O(N)     | O(1)     |
- | 3  | Jump Game                                   | Greedy Farthest Reachable Index   | O(N)     | O(1)     |
- | 4  | Jump Game II                                | Implicit BFS Window Extension      | O(N)     | O(1)     |
- | 5  | Gas Station                                 | Greedy Net Balance Reset          | O(N)     | O(1)     |
- | 6  | Candy                                       | Two-Pass Left & Right Sweeps      | O(N)     | O(N)     |
- | 7  | Lemonade Change                             | Greedy Change Denomination Cache  | O(N)     | O(1)     |
- | 8  | Can Place Flowers                           | Adjacent Zero Boundary Check      | O(N)     | O(1)     |
- | 9  | Maximum Units on a Truck                    | Value Density Sorting + Greedy Fill| O(N logN)| O(1)     |
- | 10 | Maximum 69 Number                           | Most Significant Digit Flip       | O(D)     | O(D)     |
- | 11 | Minimum Sum of Four Digit Number            | Ascending Digit Interleaving      | O(1)     | O(1)     |
- | 12 | Largest Odd Number in String                | Reverse Scan Suffix Truncation    | O(N)     | O(1)     |
- | 13 | Min Partitions Deci-Binary Numbers          | Maximum Character Digit Reduction | O(N)     | O(1)     |
- | 14 | Max Product Difference Between Two Pairs    | Single-Pass 2-Extremes Tracking    | O(N)     | O(1)     |
- | 15 | Buy Two Chocolates                          | Two Smallest Values Accumulation  | O(N)     | O(1)     |
- | 16 | Merge Intervals                             | Interval Sorting + Greedy Merge   | O(N logN)| O(1)     |
- | 17 | Insert Interval                             | 3-Stage Linear Sweep              | O(N)     | O(1)     |
- | 18 | Non-overlapping Intervals                   | Interval Scheduling by End Time   | O(N logN)| O(1)     |
- | 19 | Meeting Rooms II                            | Chronological Event Line-Sweep    | O(N logN)| O(N)     |
- | 20 | Meeting Rooms                               | Interval Start-End Overlap Check  | O(N logN)| O(1)     |
+ | 1  | Best Time to Buy and Sell Stock II          | Greedy Valley-to-Peak Accumulation | O(N)     | O(1)     |
+ | 2  | Jump Game                                   | Greedy Farthest Reachable Index   | O(N)     | O(1)     |
+ | 3  | Candy                                       | Two-Pass Left & Right Sweeps      | O(N)     | O(N)     |
+ | 4  | Insert Interval                             | 3-Stage Linear Sweep              | O(N)     | O(1)     |
+ | 5  | Non-overlapping Intervals                   | Interval Scheduling by End Time   | O(N logN) | O(1)     |
+ | 6  | Meeting Rooms                               | Interval Start-End Overlap Check  | O(N logN) | O(1)     |
+ | 7  | Meeting Rooms II                            | Chronological Event Line-Sweep    | O(N logN) | O(N)     |
+ | 8  | Min Number Arrows to Burst Balloons         | Interval Scheduling by End Point  | O(N logN) | O(1)     |
+ | 9  | Interval List Intersections                 | Two-Pointer Boundary Overlap      | O(N + M) | O(1)     |
+ | 10 | Car Pooling                                 | Difference Array Sweep-Line       | O(N + S) | O(S)     |
+ | 11 | Corporate Flight Bookings                   | Difference Array Prefix Sum       | O(N + B) | O(N)     |
+ | 12 | My Calendar I                               | Ordered Map Adjacent Intersection | O(N logN) | O(N)     |
+ | 13 | My Calendar II                              | Double-Booking Conflict Tracking  | O(N^2)   | O(N)     |
+ | 14 | My Calendar III                             | Line Sweep Point Concurrency      | O(N^2)   | O(N)     |
+ | 15 | Minimum Number of Platforms                 | Chronological Arrival/Departure   | O(N logN) | O(1)     |
+ | 16 | Job Sequencing Problem                      | Profit-Descending Slot Allocation | O(N*Dead) | O(Dead)  |
+ | 17 | Course Schedule III                         | Greedy Duration Swap Max-Heap     | O(N logN) | O(N)     |
+ | 18 | Two City Scheduling                         | Cost Delta Sorting Partition      | O(N logN) | O(1)     |
+ | 19 | Maximum Performance of a Team               | Efficiency Sweep + Min-Heap Speed | O(N logN) | O(N + K) |
+ | 20 | IPO                                         | Capital-Sorted Scan + Max-Heap W  | O(N logN) | O(N)     |
+ | 21 | Single-Threaded CPU                         | Enqueue Sweep + Min-Heap Shortest | O(N logN) | O(N)     |
+ | 22 | Process Tasks Using Servers                 | Dual Priority Queues (Free & Busy) | O(M logN) | O(N)     |
  ====================================================================================================
 */
 
 // =========================================================
-// 1. ASSIGN COOKIES
-// =========================================================
-
-int findContentChildren(vector<int>& g, vector<int>& s) {
-    sort(g.begin(), g.end());
-    sort(s.begin(), s.end());
-
-    int i = 0, j = 0;
-    int n = g.size(), m = s.size();
-
-    while (i < n && j < m) {
-        if (s[j] >= g[i]) {
-            i++;
-        }
-        j++;
-    }
-    return i;
-}
-// Interview Explanation:
-// - Problem Statement: Maximize number of children satisfied with cookies where child i needs cookie >= g[i].
-// - Approach: Sort both arrays and apply two pointers greedily.
-// - Intuition:
-//   * A larger cookie can satisfy a child with smaller greed, but wasting large cookies hurts future optimal assignments.
-//   * Sort children greed factors and cookie sizes in ascending order.
-//   * Greedily match the smallest available cookie that can satisfy the child with the smallest greed factor.
-//   * If cookie s[j] satisfies child g[i], advance both child and cookie pointers; otherwise, discard cookie s[j].
-// - Complexity: Time: O(N log N + M log M), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 2. BEST TIME TO BUY AND SELL STOCK II
+// 1. BEST TIME TO BUY AND SELL STOCK II [G-1]
 // =========================================================
 
 int maxProfit(vector<int>& p) {
@@ -115,7 +87,7 @@ int maxProfit(vector<int>& p) {
 
 
 // =========================================================
-// 3. JUMP GAME
+// 2. JUMP GAME [G-2]
 // =========================================================
 
 bool canJump(vector<int>& a) {
@@ -141,68 +113,7 @@ bool canJump(vector<int>& a) {
 
 
 // =========================================================
-// 4. JUMP GAME II
-// =========================================================
-
-int jump(vector<int>& a) {
-    int n = a.size();
-    if (n <= 1) return 0;
-
-    int jumps = 0, curEnd = 0, curFarthest = 0;
-
-    for (int i = 0; i < n - 1; ++i) {
-        curFarthest = max(curFarthest, i + a[i]);
-        if (i == curEnd) {
-            jumps++;
-            curEnd = curFarthest;
-            if (curEnd >= n - 1) break;
-        }
-    }
-    return jumps;
-}
-// Interview Explanation:
-// - Problem Statement: Return minimum number of jumps required to reach index n - 1.
-// - Approach: Implicit BFS Level Window Extension.
-// - Intuition:
-//   * Each jump transition expands the current reach from [prevEnd, curEnd] to curFarthest.
-//   * Iterate up to n - 2, continuously updating the maximum index reachable from any node in the current window.
-//   * When the index pointer reaches curEnd, a jump must be taken; set curEnd = curFarthest and increment jumps.
-//   * Terminates in a single linear sweep without constructing an explicit BFS queue.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 5. GAS STATION
-// =========================================================
-
-int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
-    int n = gas.size();
-    int tot = 0, cur = 0, start = 0;
-
-    for (int i = 0; i < n; ++i) {
-        int diff = gas[i] - cost[i];
-        tot += diff;
-        cur += diff;
-        if (cur < 0) {
-            start = i + 1;
-            cur = 0;
-        }
-    }
-    return (tot >= 0 ? start : -1);
-}
-// Interview Explanation:
-// - Problem Statement: Find starting gas station index to complete a circular circuit clockwise once.
-// - Approach: Net Balance Invariant with Greedy Failure Reset.
-// - Intuition:
-//   * If total gas sum is strictly less than total cost sum, completion is mathematically impossible; return -1.
-//   * If starting from station A, running fuel balance drops below zero at station B, no station between A and B can reach B either.
-//   * Reset candidate start station greedily to B + 1 and reset current fuel tank to 0.
-//   * When tot >= 0, the remaining candidate start index is uniquely guaranteed to complete the circuit.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 6. CANDY
+// 3. CANDY [G-3]
 // =========================================================
 
 int candy(vector<int>& r) {
@@ -235,298 +146,7 @@ int candy(vector<int>& r) {
 
 
 // =========================================================
-// 7. LEMONADE CHANGE
-// =========================================================
-
-bool lemonadeChange(vector<int>& bills) {
-    int five = 0, ten = 0;
-
-    for (int b : bills) {
-        if (b == 5) {
-            five++;
-        } else if (b == 10) {
-            if (five == 0) return false;
-            five--;
-            ten++;
-        } else {
-            // Bill is 20: prefer giving 10 + 5 over 5 + 5 + 5
-            if (ten > 0 && five > 0) {
-                ten--;
-                five--;
-            } else if (five >= 3) {
-                five -= 3;
-            } else {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-// Interview Explanation:
-// - Problem Statement: Determine if correct change can be provided to every customer paying with $5, $10, or $20 bills.
-// - Approach: Greedy Cash Register Balance Tracking.
-// - Intuition:
-//   * $5 bills are strictly more versatile than $10 bills because $5 can serve both $10 and $20 customers.
-//   * On receiving $10: must give one $5 bill.
-//   * On receiving $20: change needed is $15. Greedily prioritize giving (1x $10 + 1x $5) over (3x $5) to preserve precious $5 bills.
-//   * If required denominations are unavailable at any transaction, return false immediately.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 8. CAN PLACE FLOWERS
-// =========================================================
-
-bool canPlaceFlowers(vector<int>& fb, int k) {
-    int n = fb.size();
-    for (int i = 0; i < n && k > 0; ++i) {
-        if (fb[i] == 0) {
-            bool emptyLeft  = (i == 0 || fb[i - 1] == 0);
-            bool emptyRight = (i == n - 1 || fb[i + 1] == 0);
-            if (emptyLeft && emptyRight) {
-                fb[i] = 1;
-                k--;
-            }
-        }
-    }
-    return k <= 0;
-}
-// Interview Explanation:
-// - Problem Statement: Determine if k new flowers can be planted without violating no-adjacent-flowers rule.
-// - Approach: Greedy Linear Scan with Virtual Boundary Checks.
-// - Intuition:
-//   * Planting as early as possible never worsens subsequent planting opportunities.
-//   * A plot at index i can host a flower iff plot i is empty, and both neighbor plots (i-1 and i+1) are empty.
-//   * Array boundaries are treated as empty plots: index 0 needs only right plot empty, and index n-1 needs only left plot empty.
-//   * Greedily plant upon finding a valid plot and decrement k until k reaches 0.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 9. MAXIMUM UNITS ON A TRUCK
-// =========================================================
-
-bool compareBoxTypes(const vector<int>& a, const vector<int>& b) {
-    return a[1] > b[1];
-}
-
-int maximumUnits(vector<vector<int>>& boxTypes, int truckSize) {
-    sort(boxTypes.begin(), boxTypes.end(), compareBoxTypes);
-
-    int ans = 0;
-    for (const auto& box : boxTypes) {
-        int take = min(box[0], truckSize);
-        ans += take * box[1];
-        truckSize -= take;
-        if (truckSize == 0) break;
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Maximize units loaded onto a truck with capacity truckSize boxes.
-// - Approach: Greedy Fractional Knapsack by Unit Density.
-// - Intuition:
-//   * Each box takes identical capacity (1 unit of truck space).
-//   * Greedily prioritize boxes providing the highest units-per-box value.
-//   * Sort boxTypes in descending order of units per box.
-//   * Take min(available_boxes, remaining_truck_capacity) for each box type until the truck is full.
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 10. MAXIMUM 69 NUMBER
-// =========================================================
-
-int maximum69Number(int num) {
-    string s = to_string(num);
-    for (char& c : s) {
-        if (c == '6') {
-            c = '9';
-            break;
-        }
-    }
-    return stoi(s);
-}
-// Interview Explanation:
-// - Problem Statement: Maximize number composed of digits 6 and 9 by flipping at most one digit from 6 to 9.
-// - Approach: Greedy Most-Significant-Digit Modification.
-// - Intuition:
-//   * Flipping a digit at power 10^k contributes an increase of 3 * 10^k to the total value.
-//   * Larger powers of 10 dominate all smaller powers combined (3000 > 300 + 30 + 3).
-//   * Greedily flip the leftmost (most significant) occurrence of digit '6' to '9'.
-// - Complexity: Time: O(D) where D is number of digits (<= 5), Space: O(D).
-
-
-// =========================================================
-// 11. MINIMUM SUM OF FOUR DIGIT NUMBER AFTER SPLITTING DIGITS
-// =========================================================
-
-int minimumSum(int num) {
-    vector<int> d;
-    while (num > 0) {
-        d.push_back(num % 10);
-        num /= 10;
-    }
-    sort(d.begin(), d.end());
-
-    // Pair smallest two digits as tens digits
-    return (d[0] * 10 + d[2]) + (d[1] * 10 + d[3]);
-}
-// Interview Explanation:
-// - Problem Statement: Split 4-digit number into two numbers new1 and new2 minimizing their sum.
-// - Approach: Greedy Ascending Digit Interleaving.
-// - Intuition:
-//   * Minimizing the sum requires placing the smallest available digits into the most significant (tens) places.
-//   * Sort the 4 digits: d[0] <= d[1] <= d[2] <= d[3].
-//   * Assign d[0] and d[1] as the tens digits: new1 = d[0]*10 + d[2], new2 = d[1]*10 + d[3].
-//   * Total sum equals 10 * (d[0] + d[1]) + (d[2] + d[3]).
-// - Complexity: Time: O(1), Space: O(1).
-
-
-// =========================================================
-// 12. LARGEST ODD NUMBER IN STRING
-// =========================================================
-
-string largestOddNumber(string s) {
-    for (int i = (int)s.size() - 1; i >= 0; --i) {
-        if ((s[i] - '0') % 2 != 0) {
-            return s.substr(0, i + 1);
-        }
-    }
-    return "";
-}
-// Interview Explanation:
-// - Problem Statement: Find the largest-valued odd integer substring from a large numeric string.
-// - Approach: Reverse Scan for Last Odd Digit.
-// - Intuition:
-//   * Any integer's parity is entirely dictated by its final digit.
-//   * A longer prefix starting at index 0 produces an exponentially larger numerical value.
-//   * Scan backwards from the rightmost character until encountering the first odd digit.
-//   * Prefix s[0..i] forms the largest possible odd integer substring.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 13. PARTITIONING INTO MINIMUM NUMBER OF DECI-BINARY NUMBERS
-// =========================================================
-
-int minPartitions(string s) {
-    char mx = '0';
-    for (char c : s) {
-        mx = max(mx, c);
-    }
-    return mx - '0';
-}
-// Interview Explanation:
-// - Problem Statement: Find minimum number of positive deci-binary numbers (digits only 0 or 1) that sum to s.
-// - Approach: Maximum Digit Value Reduction.
-// - Intuition:
-//   * A deci-binary number contributes at most 1 to any decimal column per term.
-//   * To form a column with digit d, we must sum at least d individual 1s in that column.
-//   * The bottleneck column is the one with the maximum decimal digit across the entire string.
-//   * Hence, exactly max(s[i] - '0') deci-binary numbers are necessary and sufficient.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 14. MAXIMUM PRODUCT DIFFERENCE BETWEEN TWO PAIRS
-// =========================================================
-
-int maxProductDifference(vector<int>& a) {
-    int mx1 = INT_MIN, mx2 = INT_MIN;
-    int mn1 = INT_MAX, mn2 = INT_MAX;
-
-    for (int x : a) {
-        if (x > mx1) {
-            mx2 = mx1;
-            mx1 = x;
-        } else if (x > mx2) {
-            mx2 = x;
-        }
-
-        if (x < mn1) {
-            mn2 = mn1;
-            mn1 = x;
-        } else if (x < mn2) {
-            mn2 = x;
-        }
-    }
-
-    return (mx1 * mx2) - (mn1 * mn2);
-}
-// Interview Explanation:
-// - Problem Statement: Maximize (a[w] * a[x]) - (a[y] * a[z]) using four distinct indices.
-// - Approach: Single-Pass Extremes Tracking.
-// - Intuition:
-//   * To maximize product difference, maximize the positive minuend and minimize the subtrahend.
-//   * Since all values are positive, the two largest numbers yield the maximum product.
-//   * The two smallest numbers yield the minimum product.
-//   * Maintain the two largest and two smallest elements in a single O(N) pass without sorting.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 15. BUY TWO CHOCOLATES
-// =========================================================
-
-int buyChoco(vector<int>& p, int money) {
-    int mn1 = INT_MAX, mn2 = INT_MAX;
-
-    for (int x : p) {
-        if (x < mn1) {
-            mn2 = mn1;
-            mn1 = x;
-        } else if (x < mn2) {
-            mn2 = x;
-        }
-    }
-
-    int cost = mn1 + mn2;
-    return (cost <= money ? money - cost : money);
-}
-// Interview Explanation:
-// - Problem Statement: Buy exactly two chocolates minimizing remaining debt; return leftover money or original money if unaffordable.
-// - Approach: Greedy Two Smallest Values Tracking.
-// - Intuition:
-//   * To minimize cost and avoid non-negative balance, select the two cheapest available chocolates.
-//   * Single pass tracks the first and second minimum prices.
-//   * If mn1 + mn2 <= money, spend money - (mn1 + mn2); otherwise return money unchanged.
-// - Complexity: Time: O(N), Space: O(1).
-
-
-// =========================================================
-// 16. MERGE INTERVALS
-// =========================================================
-
-vector<vector<int>> merge(vector<vector<int>>& a) {
-    if (a.empty()) return {};
-    sort(a.begin(), a.end());
-
-    vector<vector<int>> ans;
-    ans.push_back(a[0]);
-
-    for (int i = 1; i < (int)a.size(); ++i) {
-        if (a[i][0] <= ans.back()[1]) {
-            ans.back()[1] = max(ans.back()[1], a[i][1]);
-        } else {
-            ans.push_back(a[i]);
-        }
-    }
-    return ans;
-}
-// Interview Explanation:
-// - Problem Statement: Merge all overlapping intervals.
-// - Approach: Interval Sorting + Greedy Sequential Merge.
-// - Intuition:
-//   * Sort intervals by start time. Overlapping intervals become contiguous in sorted order.
-//   * If current interval starts before or at the end of the previous merged interval (a[i][0] <= ans.back()[1]), they overlap.
-//   * Extend merged end: ans.back()[1] = max(ans.back()[1], a[i][1]).
-//   * Otherwise, push current interval as a new disjoint entry in ans.
-// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
-
-
-// =========================================================
-// 17. INSERT INTERVAL
+// 4. INSERT INTERVAL [G-4]
 // =========================================================
 
 vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {
@@ -566,7 +186,7 @@ vector<vector<int>> insert(vector<vector<int>>& a, vector<int>& nw) {
 
 
 // =========================================================
-// 18. NON-OVERLAPPING INTERVALS
+// 5. NON-OVERLAPPING INTERVALS [G-5]
 // =========================================================
 
 bool compareIntervalEnds(const vector<int>& a, const vector<int>& b) {
@@ -601,7 +221,30 @@ int eraseOverlapIntervals(vector<vector<int>>& a) {
 
 
 // =========================================================
-// 19. MEETING ROOMS II
+// 6. MEETING ROOMS [G-6]
+// =========================================================
+
+bool canAttendMeetings(vector<vector<int>>& a) {
+    sort(a.begin(), a.end());
+    for (int i = 1; i < (int)a.size(); ++i) {
+        if (a[i][0] < a[i - 1][1]) {
+            return false;
+        }
+    }
+    return true;
+}
+// Interview Explanation:
+// - Problem Statement: Determine if person can attend all meetings without overlap.
+// - Approach: Sort by Start Time and Check Adjacencies.
+// - Intuition:
+//   * Sort meetings in chronological order by start time.
+//   * If any meeting starts strictly before the previous meeting finishes (a[i][0] < a[i-1][1]), a conflict exists.
+//   * If no adjacent overlaps occur throughout the sorted sequence, all meetings can be attended.
+// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+
+
+// =========================================================
+// 7. MEETING ROOMS II [G-7]
 // =========================================================
 class Solution {
 public:
@@ -637,23 +280,604 @@ public:
 
 
 // =========================================================
-// 20. MEETING ROOMS
+// 8. MINIMUM NUMBER OF ARROWS TO BURST BALLOONS [G-8]
 // =========================================================
 
-bool canAttendMeetings(vector<vector<int>>& a) {
-    sort(a.begin(), a.end());
+bool compareBalloonEnds(const vector<int>& a, const vector<int>& b) {
+    return a[1] < b[1];
+}
+
+int findMinArrowShots(vector<vector<int>>& a) {
+    if (a.empty()) return 0;
+    sort(a.begin(), a.end(), compareBalloonEnds);
+
+    int arrows = 1;
+    long long curEnd = a[0][1];
+
     for (int i = 1; i < (int)a.size(); ++i) {
-        if (a[i][0] < a[i - 1][1]) {
-            return false;
+        if (a[i][0] > curEnd) {
+            arrows++;
+            curEnd = a[i][1];
         }
+    }
+    return arrows;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum arrows fired perpendicularly to burst all balloon intervals.
+// - Approach: Interval Scheduling by Earliest End Coordinate.
+// - Intuition:
+//   * Sort balloons by their end coordinate in ascending order.
+//   * Greedily place the arrow at the end coordinate of the earliest-finishing unburst balloon.
+//   * Any subsequent balloon starting before or at this arrow coordinate is simultaneously burst for free.
+//   * When a balloon starts strictly after curEnd, a new arrow is unavoidable; fire at its end coordinate.
+// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+
+
+// =========================================================
+// 9. INTERVAL LIST INTERSECTIONS [G-9]
+// =========================================================
+
+vector<vector<int>> intervalIntersection(vector<vector<int>>& a, vector<vector<int>>& b) {
+    vector<vector<int>> ans;
+    int i = 0, j = 0;
+    int n = a.size(), m = b.size();
+
+    while (i < n && j < m) {
+        int lo = max(a[i][0], b[j][0]);
+        int hi = min(a[i][1], b[j][1]);
+
+        if (lo <= hi) {
+            ans.push_back({lo, hi});
+        }
+
+        if (a[i][1] < b[j][1]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find the intersection of two closed sorted disjoint interval lists.
+// - Approach: Two Pointers with Endpoint Comparisons.
+// - Intuition:
+//   * An intersection between a[i] and b[j] exists iff max(start_a, start_b) <= min(end_a, end_b).
+//   * If valid, append the intersecting segment [lo, hi] to ans.
+//   * Advance the pointer of the interval that ends first, because it cannot overlap with any subsequent intervals.
+//   * Disjointness guarantees each interval is advanced at most once.
+// - Complexity: Time: O(N + M), Space: O(1) auxiliary space.
+
+
+// =========================================================
+// 10. CAR POOLING [G-10]
+// =========================================================
+
+bool carPooling(vector<vector<int>>& trips, int capacity) {
+    int diff[1001] = {0};
+    for (const auto& t : trips) {
+        diff[t[1]] += t[0];
+        diff[t[2]] -= t[0];
+    }
+
+    int cur = 0;
+    for (int i = 0; i <= 1000; ++i) {
+        cur += diff[i];
+        if (cur > capacity) return false;
     }
     return true;
 }
 // Interview Explanation:
-// - Problem Statement: Determine if person can attend all meetings without overlap.
-// - Approach: Sort by Start Time and Check Adjacencies.
+// - Problem Statement: Determine if car can complete all trips without exceeding passenger capacity.
+// - Approach: Difference Array / Chronological Line Sweep.
 // - Intuition:
-//   * Sort meetings in chronological order by start time.
-//   * If any meeting starts strictly before the previous meeting finishes (a[i][0] < a[i-1][1]), a conflict exists.
-//   * If no adjacent overlaps occur throughout the sorted sequence, all meetings can be attended.
+//   * For each trip, passenger count changes at discrete locations: +passengers at 'from', -passengers at 'to'.
+//   * Apply difference array updates: diff[from] += num, diff[to] -= num.
+//   * Accumulate running sum across all stops 0 to 1000.
+//   * If the passenger count exceeds capacity at any stop, return false immediately.
+// - Complexity: Time: O(N + S) where S = 1001 stops, Space: O(S) = O(1).
+
+
+// =========================================================
+// 11. CORPORATE FLIGHT BOOKINGS [G-11]
+// =========================================================
+
+vector<int> corpFlightBookings(vector<vector<int>>& bookings, int n) {
+    vector<int> diff(n + 1, 0);
+    for (const auto& b : bookings) {
+        diff[b[0] - 1] += b[2];
+        diff[b[1]]     -= b[2];
+    }
+
+    vector<int> ans(n);
+    int cur = 0;
+    for (int i = 0; i < n; ++i) {
+        cur += diff[i];
+        ans[i] = cur;
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Return total seats reserved for each of n flights given interval bookings.
+// - Approach: 1D Difference Array with Prefix Sum Accumulation.
+// - Intuition:
+//   * Directly updating intervals takes O(N * B) time, leading to TLE.
+//   * A reservation of k seats on flights [first, last] adds +k at (first - 1) and -k at last.
+//   * Compute running prefix sum across the difference array in a single O(N) pass.
+//   * Directly yields the net seats booked on each flight in O(N + B) time.
+// - Complexity: Time: O(N + B), Space: O(N).
+
+
+// =========================================================
+// 12. MY CALENDAR I [G-12]
+// =========================================================
+
+class MyCalendar {
+    map<int, int> mp; // start -> end
+public:
+    MyCalendar() {}
+
+    bool book(int start, int end) {
+        auto it = mp.upper_bound(start);
+        if (it != mp.end() && it->first < end) {
+            return false;
+        }
+        if (it != mp.begin() && prev(it)->second > start) {
+            return false;
+        }
+        mp[start] = end;
+        return true;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Book events without double booking using dynamic interval insertions.
+// - Approach: Balanced Binary Search Tree (std::map) Neighbor Verification.
+// - Intuition:
+//   * Existing booked events are kept sorted by start time in std::map.
+//   * On book(start, end), binary search for the first event starting strictly after start using upper_bound.
+//   * Check conflict with successor: if it->start < end, overlap exists.
+//   * Check conflict with predecessor: if prev(it)->end > start, overlap exists.
+//   * If both adjacent checks pass, insert {start, end} in O(log N) time.
+// - Complexity: Time: O(log N) per booking, Space: O(N).
+
+
+// =========================================================
+// 13. MY CALENDAR II [G-13]
+// =========================================================
+
+class MyCalendarTwo {
+    vector<pair<int, int>> bookings;
+    vector<pair<int, int>> overlaps;
+public:
+    MyCalendarTwo() {}
+
+    bool book(int start, int end) {
+        for (const auto& [s, e] : overlaps) {
+            if (max(start, s) < min(end, e)) return false;
+        }
+        for (const auto& [s, e] : bookings) {
+            if (max(start, s) < min(end, e)) {
+                overlaps.push_back({max(start, s), min(end, e)});
+            }
+        }
+        bookings.push_back({start, end});
+        return true;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Book events without triple bookings (at most 2 overlapping events allowed).
+// - Approach: Explicit Overlap Tracking List.
+// - Intuition:
+//   * A triple booking occurs if the new event intersects any interval that is already doubly booked.
+//   * Maintain a list of double bookings overlaps.
+//   * If [start, end) intersects any interval in overlaps (max(start, s) < min(end, e)), reject booking.
+//   * Otherwise, intersect [start, end) with all single bookings to generate new double bookings.
+//   * Append the new event to single bookings list.
+// - Complexity: Time: O(N) per booking, Space: O(N).
+
+
+// =========================================================
+// 14. MY CALENDAR III [G-14]
+// =========================================================
+
+class MyCalendarThree {
+    map<int, int> mp;
+public:
+    MyCalendarThree() {}
+
+    int book(int start, int end) {
+        mp[start]++;
+        mp[end]--;
+        int cur = 0, mx = 0;
+        for (const auto& [time, count] : mp) {
+            cur += count;
+            mx = max(mx, cur);
+        }
+        return mx;
+    }
+};
+// Interview Explanation:
+// - Problem Statement: Find maximum k-booking (maximum overlapping intervals) after each booking.
+// - Approach: Boundary Line Sweep on Ordered Map.
+// - Intuition:
+//   * Each event [start, end) increases concurrency by +1 at start and decreases it by -1 at end.
+//   * Insert boundary delta points into an ordered map: mp[start]++, mp[end]--.
+//   * Traverse map chronologically: running prefix sum calculates concurrent active events at every timestamp.
+//   * Return maximum concurrency observed.
+// - Complexity: Time: O(N) per booking, Space: O(N).
+
+
+// =========================================================
+// 15. MINIMUM NUMBER OF PLATFORMS [G-15]
+// =========================================================
+
+int findPlatform(vector<int>& arr, vector<int>& dep) {
+    sort(arr.begin(), arr.end());
+    sort(dep.begin(), dep.end());
+
+    int n = arr.size();
+    int plat = 0, maxPlat = 0;
+    int i = 0, j = 0;
+
+    while (i < n) {
+        if (arr[i] <= dep[j]) {
+            plat++;
+            maxPlat = max(maxPlat, plat);
+            i++;
+        } else {
+            plat--;
+            j++;
+        }
+    }
+    return maxPlat;
+}
+// Interview Explanation:
+// - Problem Statement: Find minimum train platforms needed so no train waits.
+// - Approach: Chronological Two-Pointer Sweep on Arrival and Departure.
+// - Intuition:
+//   * A platform is required whenever a train arrives before an earlier arrived train departs.
+//   * Sort arrival and departure arrays independently.
+//   * When arr[i] <= dep[j], a train arrives before a platform is freed; increment plat and advance i.
+//   * When arr[i] > dep[j], a platform is vacated; decrement plat and advance j.
+//   * The maximum simultaneous platform count represents the answer.
 // - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+
+
+// =========================================================
+// 16. JOB SEQUENCING PROBLEM [G-16]
+// =========================================================
+
+struct Job {
+    int id, dead, profit;
+};
+
+bool compareJobs(const Job& a, const Job& b) {
+    return a.profit > b.profit;
+}
+
+pair<int, int> JobScheduling(vector<Job>& a) {
+    sort(a.begin(), a.end(), compareJobs);
+
+    int maxDead = 0;
+    for (const auto& j : a) maxDead = max(maxDead, j.dead);
+
+    vector<int> slot(maxDead + 1, -1);
+    int count = 0, totalProfit = 0;
+
+    for (const auto& j : a) {
+        for (int d = j.dead; d > 0; --d) {
+            if (slot[d] == -1) {
+                slot[d] = j.id;
+                count++;
+                totalProfit += j.profit;
+                break;
+            }
+        }
+    }
+    return {count, totalProfit};
+}
+// Interview Explanation:
+// - Problem Statement: Schedule jobs to maximize total profit where each job takes 1 unit of time and has a deadline.
+// - Approach: Greedy Profit-Descending Slot Allocation.
+// - Intuition:
+//   * High-profit jobs should be scheduled first to guarantee their inclusion.
+//   * Sort jobs in descending order of profit.
+//   * For each job, greedily assign it to the latest possible vacant time slot <= its deadline.
+//   * Delaying execution as close to the deadline as possible preserves earlier time slots for jobs with tighter deadlines.
+// - Complexity: Time: O(N log N + N * MaxDeadline), Space: O(MaxDeadline).
+
+
+// =========================================================
+// 17. COURSE SCHEDULE III [G-17]
+// =========================================================
+
+bool compareCourseLastDay(const vector<int>& a, const vector<int>& b) {
+    return a[1] < b[1];
+}
+
+int scheduleCourse(vector<vector<int>>& courses) {
+    sort(courses.begin(), courses.end(), compareCourseLastDay);
+
+    priority_queue<int> pq; // max-heap of durations
+    int curTime = 0;
+
+    for (const auto& c : courses) {
+        int dur = c[0], last = c[1];
+        if (curTime + dur <= last) {
+            curTime += dur;
+            pq.push(dur);
+        } else if (!pq.empty() && pq.top() > dur) {
+            curTime += dur - pq.top();
+            pq.pop();
+            pq.push(dur);
+        }
+    }
+    return pq.size();
+}
+// Interview Explanation:
+// - Problem Statement: Find maximum courses you can take given [duration, lastDay].
+// - Approach: Greedy Deadline Sort + Max-Heap Duration Replacement.
+// - Intuition:
+//   * Sort courses by deadline lastDay. Courses with tighter deadlines must be resolved earlier.
+//   * Maintain a max-heap of durations for currently scheduled courses.
+//   * If adding current course fits within lastDay, take it.
+//   * If it exceeds lastDay, compare its duration with the longest scheduled course (pq.top()).
+//   * If current duration is shorter, swap it in: total course count stays same, but curTime decreases, leaving more headroom for future courses!
+// - Complexity: Time: O(N log N), Space: O(N).
+
+
+// =========================================================
+// 18. TWO CITY SCHEDULING [G-18]
+// =========================================================
+
+bool compareCityCosts(const vector<int>& a, const vector<int>& b) {
+    return (a[0] - a[1]) < (b[0] - b[1]);
+}
+
+int twoCitySchedCost(vector<vector<int>>& costs) {
+    sort(costs.begin(), costs.end(), compareCityCosts);
+
+    int total = 0;
+    int n = costs.size() / 2;
+    for (int i = 0; i < n; ++i) {
+        total += costs[i][0];
+    }
+    for (int i = n; i < 2 * n; ++i) {
+        total += costs[i][1];
+    }
+    return total;
+}
+// Interview Explanation:
+// - Problem Statement: Send exactly N people to city A and N people to city B minimizing total cost.
+// - Approach: Cost Delta Sorting Partition.
+// - Intuition:
+//   * Sending a person to A instead of B provides a relative savings of (costA - costB).
+//   * Sort people in ascending order of (costA - costB).
+//   * The first N people have the smallest (most negative) delta; sending them to city A saves the most money.
+//   * The remaining N people are assigned to city B.
+// - Complexity: Time: O(N log N), Space: O(1) auxiliary space.
+
+
+// =========================================================
+// 19. MAXIMUM PERFORMANCE OF A TEAM [G-19]
+// =========================================================
+
+struct Engineer {
+    int speed, eff;
+};
+
+bool compareEngineers(const Engineer& a, const Engineer& b) {
+    return a.eff > b.eff;
+}
+
+int maxPerformance(int n, vector<int>& speed, vector<int>& efficiency, int k) {
+    vector<Engineer> eng(n);
+    for (int i = 0; i < n; ++i) {
+        eng[i] = {speed[i], efficiency[i]};
+    }
+    sort(eng.begin(), eng.end(), compareEngineers);
+
+    priority_queue<int, vector<int>, greater<int>> pq; // min-heap of speeds
+    long long sumSpeed = 0, maxPerf = 0;
+
+    for (int i = 0; i < n; ++i) {
+        pq.push(eng[i].speed);
+        sumSpeed += eng[i].speed;
+
+        if ((int)pq.size() > k) {
+            sumSpeed -= pq.top();
+            pq.pop();
+        }
+
+        maxPerf = max(maxPerf, sumSpeed * eng[i].eff);
+    }
+    return maxPerf % MOD;
+}
+// Interview Explanation:
+// - Problem Statement: Choose at most k engineers maximizing (sum(speed) * min(efficiency)).
+// - Approach: Efficiency-Descending Sweep with Min-Heap Speed Window.
+// - Intuition:
+//   * The bottleneck multiplier is min(efficiency).
+//   * Sort engineers in descending order of efficiency.
+//   * When considering engineer i, their efficiency is guaranteed to be the minimum of any engineer seen so far.
+//   * To maximize the product, maintain the k largest speeds among engineers processed so far using a min-heap.
+//   * If heap size exceeds k, evict the smallest speed.
+// - Complexity: Time: O(N log N + N log K), Space: O(N + K).
+
+
+// =========================================================
+// 20. IPO [G-20]
+// =========================================================
+
+struct Project {
+    int cap, prof;
+};
+
+bool compareProjects(const Project& a, const Project& b) {
+    return a.cap < b.cap;
+}
+
+int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {
+    int n = profits.size();
+    vector<Project> p(n);
+    for (int i = 0; i < n; ++i) {
+        p[i] = {capital[i], profits[i]};
+    }
+    sort(p.begin(), p.end(), compareProjects);
+
+    priority_queue<int> pq; // max-heap of profits
+    int idx = 0;
+
+    for (int step = 0; step < k; ++step) {
+        while (idx < n && p[idx].cap <= w) {
+            pq.push(p[idx].prof);
+            idx++;
+        }
+
+        if (pq.empty()) break;
+        w += pq.top();
+        pq.pop();
+    }
+    return w;
+}
+// Interview Explanation:
+// - Problem Statement: Start with capital w, choose at most k distinct projects maximizing final capital.
+// - Approach: Capital-Sorted Scan + Max-Heap of Available Profits.
+// - Intuition:
+//   * Sort projects in ascending order of required initial capital.
+//   * At any point, all projects with required capital <= current capital w can be undertaken.
+//   * Push profits of all newly affordable projects into a max-heap.
+//   * Greedily undertake the project yielding the maximum profit (pq.top()), adding its profit to w.
+//   * Repeat for up to k rounds or until no affordable projects remain.
+// - Complexity: Time: O(N log N + K log N), Space: O(N).
+
+
+// =========================================================
+// 21. SINGLE-THREADED CPU [G-21]
+// =========================================================
+
+struct CpuTask {
+    int enq, proc, id;
+};
+
+bool compareTaskEnqueue(const CpuTask& a, const CpuTask& b) {
+    return a.enq < b.enq;
+}
+
+struct CpuTaskCompare {
+    bool operator()(const CpuTask& a, const CpuTask& b) const {
+        if (a.proc != b.proc) return a.proc > b.proc;
+        return a.id > b.id;
+    }
+};
+
+vector<int> getOrder(vector<vector<int>>& tasks) {
+    int n = tasks.size();
+    vector<CpuTask> a(n);
+    for (int i = 0; i < n; ++i) {
+        a[i] = {tasks[i][0], tasks[i][1], i};
+    }
+    sort(a.begin(), a.end(), compareTaskEnqueue);
+
+    priority_queue<CpuTask, vector<CpuTask>, CpuTaskCompare> pq;
+    vector<int> ans;
+    long long curTime = 0;
+    int idx = 0;
+
+    while (idx < n || !pq.empty()) {
+        if (pq.empty() && curTime < a[idx].enq) {
+            curTime = a[idx].enq;
+        }
+
+        while (idx < n && a[idx].enq <= curTime) {
+            pq.push(a[idx++]);
+        }
+
+        CpuTask top = pq.top();
+        pq.pop();
+        curTime += top.proc;
+        ans.push_back(top.id);
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Simulate single-threaded CPU processing tasks by shortest processing time, breaking ties by smaller index.
+// - Approach: Event-Time Sweep with Priority Queue.
+// - Intuition:
+//   * Tag each task with its original index and sort tasks ascending by enqueueTime.
+//   * Maintain a min-heap prioritized by {processingTime, originalIndex}.
+//   * Advance curTime to next available task's enqueueTime if the CPU is idle.
+//   * Enqueue all tasks whose enqueueTime <= curTime into the heap.
+//   * Pop and execute the top task: curTime += procTime, record original index.
+// - Complexity: Time: O(N log N), Space: O(N).
+
+
+// =========================================================
+// 22. PROCESS TASKS USING SERVERS [G-22]
+// =========================================================
+
+struct ServerFreeCompare {
+    bool operator()(const pair<int, int>& a, const pair<int, int>& b) const {
+        if (a.first != b.first) return a.first > b.first; // weight
+        return a.second > b.second;                      // index
+    }
+};
+
+struct ServerBusyCompare {
+    bool operator()(const tuple<long long, int, int>& a, const tuple<long long, int, int>& b) const {
+        if (get<0>(a) != get<0>(b)) return get<0>(a) > get<0>(b); // freeTime
+        if (get<1>(a) != get<1>(b)) return get<1>(a) > get<1>(b); // weight
+        return get<2>(a) > get<2>(b);                             // index
+    }
+};
+
+vector<int> assignTasks(vector<int>& servers, vector<int>& tasks) {
+    int numServers = servers.size();
+    int numTasks = tasks.size();
+
+    priority_queue<pair<int, int>, vector<pair<int, int>>, ServerFreeCompare> freeServers;
+    for (int i = 0; i < numServers; ++i) {
+        freeServers.push({servers[i], i});
+    }
+
+    priority_queue<tuple<long long, int, int>, vector<tuple<long long, int, int>>, ServerBusyCompare> busyServers;
+
+    vector<int> ans(numTasks);
+    long long curTime = 0;
+
+    for (int i = 0; i < numTasks; ++i) {
+        curTime = max(curTime, (long long)i);
+
+        while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {
+            auto [t, w, idx] = busyServers.top();
+            busyServers.pop();
+            freeServers.push({w, idx});
+        }
+
+        if (freeServers.empty()) {
+            curTime = get<0>(busyServers.top());
+            while (!busyServers.empty() && get<0>(busyServers.top()) <= curTime) {
+                auto [t, w, idx] = busyServers.top();
+                busyServers.pop();
+                freeServers.push({w, idx});
+            }
+        }
+
+        auto [w, idx] = freeServers.top();
+        freeServers.pop();
+        ans[i] = idx;
+        busyServers.push({curTime + tasks[i], w, idx});
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Assign incoming tasks to free server with smallest weight (tie broken by smallest index).
+// - Approach: Dual Priority Queues (Free Servers & Busy Servers).
+// - Intuition:
+//   * Free servers are ordered by {weight, index}.
+//   * Busy servers are ordered by {freeTime, weight, index}.
+//   * For task i arriving at time i, first free all servers whose freeTime <= curTime.
+//   * If no servers are free, fast-forward curTime to the earliest freeTime in busyServers and release them.
+//   * Pop the optimal server from freeServers, assign task i, and push to busyServers with its completion time.
+// - Complexity: Time: O((M + N) log N), Space: O(N).
+

@@ -33,7 +33,8 @@ function getFileBadgeClass(file) {
     case '4.cpp': return 'f-4';
     case '5.cpp': return 'f-5';
     case 'greedy.md': return 'f-greedy';
-    case 'pyq.cpp': return 'f-pyq';
+    case 'pyq.cpp':
+    case 'pyq1.cpp': return 'f-pyq1';
     case 'pyq2.cpp': return 'f-pyq2';
     default: return 'f-1';
   }
@@ -96,7 +97,7 @@ function updatePillCounts() {
     '4.cpp': 0,
     '5.cpp': 0,
     'greedy.md': 0,
-    'pyq.cpp': 0,
+    'pyq1.cpp': 0,
     'pyq2.cpp': 0
   };
 

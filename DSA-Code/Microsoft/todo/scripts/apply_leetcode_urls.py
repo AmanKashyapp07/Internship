@@ -2,10 +2,11 @@ import json
 import re
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CACHE_PATH = os.path.join(BASE_DIR, 'leetcode_slugs_cache.json')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BACKUP_DIR = os.path.join(BASE_DIR, 'backups')
+CACHE_PATH = os.path.join(BACKUP_DIR, 'leetcode_slugs_cache.json')
 PROBLEMS_JSON = os.path.join(BASE_DIR, 'problems.json')
-BACKUP_5CPP = os.path.join(BASE_DIR, 'backup_5cpp_problems.json')
+BACKUP_5CPP = os.path.join(BACKUP_DIR, 'backup_5cpp_problems.json')
 PROBLEMS_JS = os.path.join(BASE_DIR, 'problems.js')
 
 with open(CACHE_PATH, 'r', encoding='utf-8') as f:

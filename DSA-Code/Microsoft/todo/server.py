@@ -128,7 +128,7 @@ class RequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     # Initialize DB (preserves completed states)
-    init_db(force=True)
+    init_db(force=False)
 
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), RequestHandler) as httpd:

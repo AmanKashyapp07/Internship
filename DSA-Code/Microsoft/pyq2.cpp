@@ -835,10 +835,7 @@ public:
   CONCLUSION / TAKEAWAY:
   Max-min / min-max bottleneck spacing problems always reduce to binary search on the distance with greedy check.
 */
-#include <bits/stdc++.h>
-using namespace std;
-
-class Solution {
+class Solution18 {
     bool canPlace(vector<int>& pos, int m, int dist) {
         int balls = 1;
         int last = pos[0];
@@ -1632,30 +1629,51 @@ public:
 };
 
 
+// ====================================================================================================
+// 37. SHORTEST SUBSTRING DELETION FOR DISTINCT CHARACTERS [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given a string `s`, find the minimum length of a contiguous substring that must be deleted
+  so that all remaining characters in the string are unique/distinct.
+  (Deleting 0 characters is allowed if the string already has all distinct characters).
 
-class Solution {
+  PATTERN TO REMEMBER:
+  Prefix & Suffix Distinct Sets / Two Pointers
+
+  CORE INTUITION & STEPS:
+  - The kept characters form a prefix s[0...l] and a suffix s[r...n-1] (either can be empty).
+  - Both prefix and suffix must contain pairwise distinct characters, and their intersection must be empty.
+  - Step 1: Scan right-to-left to find the largest suffix s[r...n-1] with distinct characters. Initial ans = r.
+  - Step 2: Scan left-to-right to grow prefix s[0...l] of distinct characters.
+    For each character s[l], shrink the suffix (advance r) until s[l] is not in the suffix.
+  - ans = min(ans, r - l - 1). Stop if prefix itself sees a duplicate character.
+
+  COMPLEXITY:
+  - Time:  O(N)
+  - Space: O(Σ) where Σ <= 26 (alphabet size)
+
+  CONCLUSION / TAKEAWAY:
+  Fixing a distinct prefix and sliding a distinct suffix shrinks deletions to the minimal gap between them.
+*/
+class Solution37 {
 public:
-    int findShortestSubstring(string s) {
-        int n = s.size();
-        int r = n-1, ans = n;
+    int findShortestSubstring(const string& s) {
+        int n = s.size(), r = n, ans = n;
+        unordered_set<char> suf, pre;
 
-        unordered_set<char> pre, suf;
+        while (r > 0 && !suf.count(s[r - 1])) {
+            suf.insert(s[--r]);
+        }
+        ans = r; // delete prefix s[0...r-1]
 
-        while(r >= 0 && suf.count(s[r])) r--; // find longest suffix of unique characters
-        // Delete prefix [0 ... r-1]
-        ans = r;
-
-        // Build unique prefix
-        for (int l = 0; l < n; l++) {
-            if(pre.count(s[l])) break; // stop if duplicate in prefix
+        for (int l = 0; l < n; ++l) {
+            if (pre.count(s[l])) break;
             pre.insert(s[l]);
-            // Remove suffix characters until no conflict
             while (r < n && suf.count(s[l])) {
                 suf.erase(s[r]);
                 r++;
             }
-
-            // Delete middle part
             ans = min(ans, r - l - 1);
         }
 

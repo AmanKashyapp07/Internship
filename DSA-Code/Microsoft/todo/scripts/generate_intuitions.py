@@ -2,7 +2,7 @@ import json
 import re
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, 'problems.json')
 
 with open(JSON_PATH, 'r', encoding='utf-8') as f:

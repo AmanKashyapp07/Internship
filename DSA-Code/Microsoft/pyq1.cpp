@@ -62,6 +62,12 @@ using vvl = vector<vector<ll>>;
  | 23 | Prime Factor Multiples Flip                 | Sieve Toggling on Multiples       | O(M√X+Nlg| O(N)     |
  | 24 | Binary String Push + Reverse Construction   | Alternating Deque Simulation      | O(N)     | O(N)     |
  | 25 | Greedy Resource Allocation (LC 455)         | Sort + Dual Pointer Matching      | O(N logN)| O(1)     |
+ | 26 | Product Constraint — Count Triplets         | Disjoint Adjacency + Hash Map     | O(N)     | O(N)     |
+ | 27 | Roll String                                 | Difference Array (Prefix Shifts)  | O(N + R) | O(N)     |
+ | 28 | Longest Subsequence (Subseq X, Substr Y)    | 1D Dynamic Programming            | O(|x|·|y|)| O(|y|)   |
+ | 29 | Closest Numbers                             | Sorting + Adjacent Scan           | O(N logN)| O(1)     |
+ | 30 | Get Minimum Cost (k-Capable ML Models)      | Capability Units + 2-Way Merge    | O(N logN)| O(N)     |
+ | 31 | Get Visible Profiles Count                  | DSU with Component Size Tracking  | O((E+Q)α)| O(N)     |
  ====================================================================================================
 */
 
@@ -1164,5 +1170,320 @@ public:
             j++;
         }
         return i;
+    }
+};
+
+// ====================================================================================================
+// 26. PRODUCT CONSTRAINT — COUNT VALID TRIPLETS [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given an integer array `A` and `target`, count the number of unordered triplets of distinct
+  indices {i, j, k} such that A[i] * A[j] * A[k] == target and at least two indices are adjacent.
+
+  PATTERN TO REMEMBER:
+  Disjoint Adjacency Partitioning + Frequency Map Lookup
+
+  CORE INTUITION & STEPS:
+  - For sorted indices i < j < k, "at least two adjacent" partitions into two disjoint sets:
+    1. First two are adjacent: j = i + 1, with k in [i + 2, n - 1].
+    2. Last two are adjacent but first two are NOT: k = j + 1, with i in [0, j - 2].
+  - Maintain frequency maps for candidate values:
+    * In Case 1: Suffix frequency map over A[i+2..n-1].
+    * In Case 2: Prefix frequency map over A[0..j-2].
+  - Required third value is `target / (A[x] * A[y])` when product divides target.
+
+  COMPLEXITY:
+  - Time:  O(N) average
+  - Space: O(N)
+
+  CONCLUSION / TAKEAWAY:
+  Partition "at least two adjacent" into mutually exclusive cases (first pair adjacent vs last pair
+  adjacent with gap) to prevent double counting while querying frequency maps in O(1).
+*/
+class Solution26 {
+public:
+    long long countTriplets(const vector<int>& A, long long target) {
+        int n = A.size();
+        long long ans = 0;
+
+        auto getCount = [&](const unordered_map<long long, int>& mp, int total, long long x, long long y) -> long long {
+            long long p = x * y;
+            if (p == 0) return target == 0 ? total : 0LL;
+            if (target % p != 0) return 0LL;
+            auto it = mp.find(target / p);
+            return it == mp.end() ? 0LL : it->second;
+        };
+
+        // Case 1: i and i+1 are adjacent, k is strictly in suffix [i + 2, n - 1]
+        unordered_map<long long, int> suf;
+        int sufTotal = 0;
+        for (int i = 2; i < n; i++) {
+            suf[A[i]]++;
+            sufTotal++;
+        }
+        for (int i = 0; i + 1 < n; i++) {
+            ans += getCount(suf, sufTotal, A[i], A[i + 1]);
+            if (i + 2 < n) {
+                if (--suf[A[i + 2]] == 0) suf.erase(A[i + 2]);
+                sufTotal--;
+            }
+        }
+
+        // Case 2: j and j+1 are adjacent, i is strictly in prefix [0, j - 2] (non-adjacent to j)
+        unordered_map<long long, int> pre;
+        int preTotal = 0;
+        for (int j = 2; j + 1 < n; j++) {
+            pre[A[j - 2]]++;
+            preTotal++;
+            ans += getCount(pre, preTotal, A[j], A[j + 1]);
+        }
+
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 27. ROLL STRING [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given lowercase string `s` and array `roll`, each operation advances the first `roll[i]` characters
+  by one position cyclically ('a' -> 'b', ..., 'z' -> 'a'). Return the final string.
+
+  PATTERN TO REMEMBER:
+  Difference Array / Prefix Shift Accumulation
+
+  CORE INTUITION & STEPS:
+  - Each `roll[k]` adds +1 to all indices in [0, roll[k] - 1].
+  - Use a difference array: `diff[0]++`, `diff[roll[k]]--`.
+  - Prefix sum accumulation calculates net shift for each index i.
+  - Apply net shift: `s[i] = 'a' + (s[i] - 'a' + totalShifts % 26) % 26`.
+
+  COMPLEXITY:
+  - Time:  O(N + roll.size())
+  - Space: O(N) for difference array
+
+  CONCLUSION / TAKEAWAY:
+  Multiple prefix range increments are accumulated efficiently via a difference array in a single pass.
+*/
+class Solution27 {
+public:
+    string rollString(string s, const vector<int>& roll) {
+        int n = s.size();
+        vector<int> diff(n + 1, 0);
+        for (int k : roll) {
+            int len = min(k, n);
+            diff[0]++;
+            diff[len]--;
+        }
+        int add = 0;
+        for (int i = 0; i < n; i++) {
+            add = (add + diff[i]) % 26;
+            s[i] = 'a' + (s[i] - 'a' + add) % 26;
+        }
+        return s;
+    }
+};
+
+// ====================================================================================================
+// 28. LONGEST SUBSEQUENCE (SUBSEQUENCE OF X, SUBSTRING OF Y) [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given strings `x` and `y`, find the maximum length of a string that is simultaneously a subsequence
+  of `x` and a contiguous substring of `y`.
+
+  PATTERN TO REMEMBER:
+  Dynamic Programming (Subsequence vs Substring Matching)
+
+  CORE INTUITION & STEPS:
+  - Let `prev[j]` = max length of a substring ending at y[j-1] that is a subsequence of processed prefix of x.
+  - When scanning char `a` from x:
+    * Skipping `a` preserves `cur[j] = prev[j]`.
+    * Matching `a == y[j-1]` allows extending the contiguous match: `cur[j] = max(cur[j], prev[j-1] + 1)`.
+  - Track global maximum over all positions.
+
+  COMPLEXITY:
+  - Time:  O(|x| * |y|)
+  - Space: O(|y|) 1D space optimized
+
+  CONCLUSION / TAKEAWAY:
+  Subsequence allows character skips in x; substring enforces contiguous increment in y:
+  `dp[j] = prev[j-1] + 1` when characters match.
+*/
+class Solution28 {
+public:
+    int longestSubsequence(const string& x, const string& y) {
+        int m = y.size(), ans = 0;
+        vector<int> prev(m + 1, 0), cur(m + 1, 0);
+        for (char a : x) {
+            cur = prev;
+            for (int j = 1; j <= m; j++) {
+                if (a == y[j - 1]) {
+                    cur[j] = max(cur[j], prev[j - 1] + 1);
+                }
+                ans = max(ans, cur[j]);
+            }
+            prev = cur;
+        }
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 29. CLOSEST NUMBERS [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given an array of distinct integers, find all pairs with the minimum absolute difference.
+  Return pairs sorted by the first element, with smaller number first in each pair.
+
+  PATTERN TO REMEMBER:
+  Sorting + Adjacent Element Difference Scan
+
+  CORE INTUITION & STEPS:
+  - In a sorted array, the minimum difference between any two elements must occur between adjacent neighbors.
+  - Sort the array in ascending order.
+  - Pass 1: Find the minimum adjacent difference `mn`.
+  - Pass 2: Collect all pairs `(numbers[i-1], numbers[i])` where difference equals `mn`.
+
+  COMPLEXITY:
+  - Time:  O(N log N) dominated by sorting
+  - Space: O(1) auxiliary space beyond output
+
+  CONCLUSION / TAKEAWAY:
+  Sorting collapses 2D pairwise minimum difference search into a 1D adjacent neighbor scan.
+*/
+class Solution29 {
+public:
+    vector<pair<long long, long long>> closestNumbers(vector<long long> numbers) {
+        sort(numbers.begin(), numbers.end());
+        long long mn = LLONG_MAX;
+        for (size_t i = 1; i < numbers.size(); i++) {
+            mn = min(mn, numbers[i] - numbers[i - 1]);
+        }
+        vector<pair<long long, long long>> ans;
+        for (size_t i = 1; i < numbers.size(); i++) {
+            if (numbers[i] - numbers[i - 1] == mn) {
+                ans.push_back({numbers[i - 1], numbers[i]});
+            }
+        }
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 30. GET MINIMUM COST (K-CAPABLE ML MODELS) [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given `n` ML models with `cost[i]` and features in {"00", "01", "10", "11"}. A set is k-capable
+  if >= k models support feature A and >= k support feature B. For each k from 1 to n, find the
+  minimum total cost, or -1 if impossible.
+
+  PATTERN TO REMEMBER:
+  Greedy Capability Unit Pairing + Two-Way Merge
+
+  CORE INTUITION & STEPS:
+  - Discard "00" models.
+  - Capability of both A and B by +1 can be obtained in two ways:
+    1. Single "11" model.
+    2. Paired combination of one "01" and one "10" model.
+  - Sort "11", "01", and "10" models by cost.
+  - Form paired costs `pairCost[i] = a[i] + b[i]` for i < min(|a|, |b|).
+  - Merge sorted "11" and `pairCost` arrays into a single sorted list of capability units.
+  - Compute prefix sums: the answer for k is the sum of the first k capability units.
+
+  COMPLEXITY:
+  - Time:  O(N log N)
+  - Space: O(N)
+
+  CONCLUSION / TAKEAWAY:
+  Reduce multi-requirement coverage to atomic capability units ("11" vs "01"+"10"), then greedily
+  pick cheapest units via prefix sum.
+*/
+class Solution30 {
+public:
+    vector<long long> getMinCost(int n, const vector<int>& cost, const vector<string>& featureAvailability) {
+        vector<long long> both, a, b;
+        for (int i = 0; i < n; i++) {
+            if (featureAvailability[i] == "11") both.push_back(cost[i]);
+            else if (featureAvailability[i] == "01") a.push_back(cost[i]);
+            else if (featureAvailability[i] == "10") b.push_back(cost[i]);
+        }
+        sort(both.begin(), both.end());
+        sort(a.begin(), a.end());
+        sort(b.begin(), b.end());
+
+        vector<long long> pairCost;
+        size_t limit = min(a.size(), b.size());
+        for (size_t i = 0; i < limit; i++) {
+            pairCost.push_back(a[i] + b[i]);
+        }
+
+        vector<long long> units;
+        merge(both.begin(), both.end(), pairCost.begin(), pairCost.end(), back_inserter(units));
+
+        vector<long long> ans(n, -1);
+        long long sum = 0;
+        for (size_t i = 0; i < units.size() && (int)i < n; i++) {
+            sum += units[i];
+            ans[i] = sum;
+        }
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 31. GET VISIBLE PROFILES COUNT [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given an undirected graph of users with edges (u[i], v[i]), users connected directly or indirectly
+  can view each other's profiles. For each user in `queries`, return the number of accessible profiles
+  (including their own).
+
+  PATTERN TO REMEMBER:
+  Disjoint Set Union (DSU) with Component Sizes
+
+  CORE INTUITION & STEPS:
+  - Transitive access implies all users in the same connected component can view each other.
+  - Build DSU over nodes 1..nodes tracking `sz[root]`.
+  - For each edge (u, v), union components and sum their sizes: `sz[rootA] += sz[rootB]`.
+  - For each query `x`, return `sz[find(x)]`.
+
+  COMPLEXITY:
+  - Time:  O((E + Q) * α(N))
+  - Space: O(N) for DSU parent and size arrays
+
+  CONCLUSION / TAKEAWAY:
+  Social graph reachability is standard connected components; DSU answers component size queries in O(α(N)).
+*/
+class Solution31 {
+public:
+    vector<int> getVisibleProfilesCount(int nodes, const vector<int>& u, const vector<int>& v, const vector<int>& queries) {
+        vector<int> parent(nodes + 1), sz(nodes + 1, 1);
+        iota(parent.begin(), parent.end(), 0);
+
+        function<int(int)> find = [&](int x) {
+            return parent[x] == x ? x : parent[x] = find(parent[x]);
+        };
+
+        for (size_t i = 0; i < u.size(); i++) {
+            int a = find(u[i]), b = find(v[i]);
+            if (a != b) {
+                if (sz[a] < sz[b]) swap(a, b);
+                parent[b] = a;
+                sz[a] += sz[b];
+            }
+        }
+
+        vector<int> ans;
+        ans.reserve(queries.size());
+        for (int x : queries) {
+            ans.push_back(sz[find(x)]);
+        }
+        return ans;
     }
 };
