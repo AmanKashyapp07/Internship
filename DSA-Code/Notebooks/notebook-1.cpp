@@ -53,15 +53,15 @@ const ll MOD = 1e9 + 7;
  | 11 | Shortest Path Visiting All Nodes (LC 847)   | Multi-Source Bitmask BFS          | O(V 2^V) | O(V 2^V) |
  | 12 | Maximum Sum BST in Binary Tree (LC 1373)    | Post-Order Bottom-Up DFS          | O(N)     | O(H)     |
  | 13 | Remove Leaf Nodes with Target Value (1325)  | Post-Order Recursive Tree Pruning | O(N)     | O(H)     |
- | 14 | Possible Path Lengths in DAG                | TopoSort + 2D Reachability DP     | O(VN+EN) | O(V * N) |
- | 15 | Max Components Tree Split with Equal Sum    | Divisors + Subtree DFS Cuts       | O(N div) | O(N)     |
+ | 14 | Possible Path Lengths in DAG                | TopoSort + 2D Reachability DP     | O(V*N/64)| O(V*N/64)|
+ | 15 | Max Components Tree Split with Equal Sum    | Divisors + Subtree DFS Cuts       | O(N*div) | O(N)     |
  | 16 | Binary Lifting (LCA, K-th Ancestor)         | Ancestor Doubling Table up[u][j]  | O(N logN)| O(N logN)|
- | 17 | Cycle Detection & Reconstruction            | DFS Parent Trace / Bellman-Ford   | O(V + E) | O(V)     |
+ | 17 | Cycle Detection & Reconstruction            | DFS Parent Trace / Back-Edge Check| O(V + E) | O(V)     |
  | 18 | Bidirectional BFS Template                  | Two-Ended BFS (Smaller Frontier)  | O(B^(D/2))| O(B^(D/2))|
  | 19 | Jump Game III (LeetCode 1306)               | Graph BFS Reachability            | O(N)     | O(N)     |
- | 20 | Jump Game IV (LeetCode 1345)               | BFS + Same-Value Pruning          | O(N)     | O(N)     |
- | 21 | Jump Game V (LeetCode 1340)                | Memoized DFS / DAG Longest Path   | O(N * D) | O(N)     |
- | 22 | Jump Game VII (LeetCode 1871)              | Sliding Window Reachability DP    | O(N)     | O(N)     |
+ | 20 | Jump Game IV (LeetCode 1345)                | BFS + Same-Value Pruning          | O(N)     | O(N)     |
+ | 21 | Jump Game V (LeetCode 1340)                 | Memoized DFS / DAG Longest Path   | O(N * D) | O(N)     |
+ | 22 | Jump Game VII (LeetCode 1871)               | Sliding Window Reachability DP    | O(N)     | O(N)     |
  ====================================================================================================
 */
 
@@ -73,9 +73,9 @@ struct TreeCentroid {
     int n;
     vvi adj;
     vi sz;
-    int centroid;
+    int ans;
 
-    TreeCentroid(int n) : n(n), adj(n), sz(n, 0), centroid(-1) {}
+    TreeCentroid(int n) : n(n), adj(n), sz(n, 0), ans(-1) {}
 
     void add_edge(int u, int v) {
         adj[u].push_back(v);
@@ -92,24 +92,29 @@ struct TreeCentroid {
         }
     }
 
-    int find_centroid(int u, int p, int total_sz) {
+    int find_centroid(int u, int p, int tot) {
         for (int v : adj[u]) {
-            if (v != p && sz[v] > total_sz / 2)
-                return find_centroid(v, u, total_sz);
+            if (v != p && sz[v] > tot / 2)
+                return find_centroid(v, u, tot);
         }
         return u;
     }
 
     int get_centroid() {
         dfs_size(0, -1);
-        centroid = find_centroid(0, -1, sz[0]);
-        return centroid;
+        ans = find_centroid(0, -1, sz[0]);
+        return ans;
     }
 };
 // Interview Explanation:
-// - Problem Statement: Find the centroid of a tree (a node whose removal splits the tree into components each of size <= N/2).
-// - Approach: Compute subtree sizes using DFS, then walk down towards any child with size > N/2.
-// - Intuition: A tree always has 1 or 2 centroids. Walking down the heavy child guarantees reaching the centroid in O(N).
+// - Problem Statement: Find centroid of tree (node whose removal splits tree into components each of size <= N/2).
+// - Approach: Subtree Size DFS + Heavy Child Descent.
+// - Intuition:
+//   * A tree always possesses either 1 or 2 centroids.
+//   * Pass 1: Run DFS from arbitrary root (node 0) to compute subtree sizes sz[u].
+//   * Pass 2: Start at root; examine all adjacent neighbors. If any child v has sz[v] > totalNodes / 2, move to v.
+//   * Because at most one child can contain > N/2 nodes, this greedy descent never branches and terminates at the centroid.
+//   * Total time is strictly O(N) with O(N) recursion stack.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -120,13 +125,13 @@ struct TreeCentroid {
 struct DAGPaths {
     int n;
     vector<vector<pair<int, ll>>> adj;
-    vi in_deg;
+    vi deg;
 
-    DAGPaths(int n) : n(n), adj(n), in_deg(n, 0) {}
+    DAGPaths(int n) : n(n), adj(n), deg(n, 0) {}
 
     void add_edge(int u, int v, ll w = 1) {
         adj[u].push_back({v, w});
-        in_deg[v]++;
+        deg[v]++;
     }
 
     pair<vl, vl> solve(int src) {
@@ -135,14 +140,13 @@ struct DAGPaths {
         ways[src] = 1;
 
         queue<int> q;
-        vi deg = in_deg;
-        for (int i = 0; i < n; i++) if (deg[i] == 0) q.push(i);
+        vi inDeg = deg;
+        for (int i = 0; i < n; i++) if (inDeg[i] == 0) q.push(i);
 
         while (!q.empty()) {
-            int u = q.front(); q.pop();
-            for (auto& edge : adj[u]) {
-                int v = edge.first;
-                ll w = edge.second;
+            int u = q.front();
+            q.pop();
+            for (auto& [v, w] : adj[u]) {
                 if (dist[u] != -1e18) {
                     if (dist[u] + w > dist[v]) {
                         dist[v] = dist[u] + w;
@@ -151,16 +155,22 @@ struct DAGPaths {
                         ways[v] = (ways[v] + ways[u]) % MOD;
                     }
                 }
-                if (--deg[v] == 0) q.push(v);
+                if (--inDeg[v] == 0) q.push(v);
             }
         }
         return {dist, ways};
     }
 };
 // Interview Explanation:
-// - Problem Statement: Find the longest path and number of longest paths from a source in a DAG.
-// - Approach: Topological sort + dynamic programming relaxation.
-// - Intuition: DAG has no cycles, so relaxing in topological order guarantees optimal prefix subproblems.
+// - Problem Statement: Find longest path and count of distinct longest paths from src in a DAG.
+// - Approach: Kahn's Topological Sort + Dynamic Programming Relaxation.
+// - Intuition:
+//   * Directed Acyclic Graphs have no cycles; topological ordering guarantees all predecessors of v are evaluated before v.
+//   * Initialize dist[src] = 0, ways[src] = 1, and other distances to -infinity.
+//   * When processing node u, relax outgoing edge (u, v, w):
+//     - If dist[u] + w > dist[v]: update dist[v] and reset ways[v] = ways[u].
+//     - If dist[u] + w == dist[v]: accumulate ways[v] = (ways[v] + ways[u]) % MOD.
+//   * Resolves longest path in O(V + E) without Bellman-Ford or Dijkstra overhead.
 // - Complexity: Time: O(V + E), Space: O(V + E).
 
 
@@ -171,8 +181,8 @@ struct DAGPaths {
 struct TreeRerooting {
     int n;
     vvi adj;
-    vi sz;
-    vl ans, dp;
+    vi sz; // sz[i] = size of subtree rooted at i
+    vl ans, dp; // ans[i] = sum of distances from i to all other nodes, dp[i] = sum of distances from i to all nodes in its subtree
 
     TreeRerooting(int n) : n(n), adj(n), sz(n, 0), ans(n, 0), dp(n, 0) {}
 
@@ -188,7 +198,7 @@ struct TreeRerooting {
             if (v != p) {
                 dfs1(v, u);
                 sz[u] += sz[v];
-                dp[u] += dp[v] + sz[v];
+                dp[u] += dp[v] + sz[v]; // why + sz[v]? because each node in v's subtree is 1 edge further from u than from v
             }
         }
     }
@@ -196,6 +206,9 @@ struct TreeRerooting {
     void dfs2(int u, int p) {
         for (int v : adj[u]) {
             if (v != p) {
+                // When shifting root from u to v, the sum of distances changes as follows:
+                // - Nodes in v's subtree (size sz[v]) move 1 unit CLOSER to the root: subtract sz[v].
+                // - All other nodes in the tree (size n - sz[v]) move 1 unit FURTHER: add (n - sz[v]).
                 ans[v] = ans[u] - sz[v] + (n - sz[v]);
                 dfs2(v, u);
             }
@@ -211,8 +224,15 @@ struct TreeRerooting {
 };
 // Interview Explanation:
 // - Problem Statement: Compute sum of distances from every node to all other nodes in a tree.
-// - Approach: 2-pass tree DP (Bottom-up subtree aggregation, Top-down rerooting transfer).
-// - Intuition: Moving root from u to child v increases distance for (N - sz[v]) nodes and decreases for sz[v] nodes.
+// - Approach: 2-Pass Tree Rerooting DP (Bottom-Up Aggregation + Top-Down Transfer).
+// - Intuition:
+//   * Running independent BFS/DFS from every node takes O(N^2) time.
+//   * Pass 1 (dfs1): Root arbitrarily at 0; compute subtree sizes sz[u] and distance sum dp[u] from u to all nodes in its subtree.
+//   * Pass 2 (dfs2): When shifting root from u to neighbor v:
+//     - Nodes in v's subtree (size sz[v]) move 1 unit CLOSER to the root: subtract sz[v].
+//     - All other nodes in the tree (size N - sz[v]) move 1 unit FURTHER: add (N - sz[v]).
+//     - Recurrence: ans[v] = ans[u] - sz[v] + (N - sz[v]).
+//   * Computes exact distance sum for all N nodes in O(N) total time.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -223,7 +243,7 @@ struct TreeRerooting {
 struct TreeDiameter {
     int n;
     vvi adj;
-
+    // adj[i] contains the neighbors of node i
     TreeDiameter(int n) : n(n), adj(n) {}
 
     void add_edge(int u, int v) {
@@ -236,10 +256,11 @@ struct TreeDiameter {
         queue<int> q;
         q.push(src);
         dist[src] = 0;
-        int farthest = src;
+        int far = src;
         while (!q.empty()) {
-            int u = q.front(); q.pop();
-            if (dist[u] > dist[farthest]) farthest = u;
+            int u = q.front();
+            q.pop();
+            if (dist[u] > dist[far]) far = u;
             for (int v : adj[u]) {
                 if (dist[v] == -1) {
                     dist[v] = dist[u] + 1;
@@ -247,19 +268,23 @@ struct TreeDiameter {
                 }
             }
         }
-        return {farthest, dist[farthest]};
+        return {far, dist[far]};
     }
 
     int diameter() {
-        auto p1 = bfs(0);
-        auto p2 = bfs(p1.first);
-        return p2.second;
+        auto [u, _] = bfs(0);
+        auto [v, d] = bfs(u);
+        return d;
     }
 };
 // Interview Explanation:
-// - Problem Statement: Find diameter of an unweighted tree.
-// - Approach: Double BFS/DFS (from node 0 -> farthest node u -> farthest node v).
-// - Intuition: The farthest node from ANY starting node in a tree is always one endpoint of a diameter.
+// - Problem Statement: Find diameter (longest path between any two nodes) of an unweighted tree.
+// - Approach: Double BFS / 2-Pass Traversal.
+// - Intuition:
+//   * Tree Property: Starting from ANY arbitrary node (e.g. node 0), the furthest reachable node u is guaranteed to be one endpoint of a diameter.
+//   * Run BFS 1 from 0 to locate endpoint u.
+//   * Run BFS 2 from u; the furthest node reached is endpoint v, and dist[v] is the exact tree diameter.
+//   * Two standard linear traversals achieve O(N) time and O(N) space.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -290,9 +315,14 @@ struct FunctionalGraph {
     }
 };
 // Interview Explanation:
-// - Problem Statement: Move k steps in a functional graph (where out-degree = 1 for each node).
-// - Approach: Binary lifting (jump doubling table).
-// - Intuition: Any transition sequence can be binary decomposed in O(log K) per query.
+// - Problem Statement: Advance k steps in a functional graph (each node has out-degree 1).
+// - Approach: Binary Lifting / Successor Doubling Table.
+// - Intuition:
+//   * Walking k steps one by one takes O(k) per query, which is too slow for large k (e.g. k <= 10^18).
+//   * Precompute table up[j][i] = node reached after 2^j jumps from node i.
+//   * Recurrence: up[j][i] = up[j - 1][up[j - 1][i]].
+//   * Decompose query jump k into binary powers: jump 2^j wherever bit j of k is 1.
+//   * Reduces query latency from O(k) to O(log k).
 // - Complexity: Build: O(N log N), Query: O(log K), Space: O(N log N).
 
 
@@ -303,7 +333,6 @@ struct FunctionalGraph {
 struct TreeIsomorphism {
     int n;
     vvi adj;
-    map<vector<ull>, ull> memo;
 
     TreeIsomorphism(int n) : n(n), adj(n) {}
 
@@ -313,22 +342,27 @@ struct TreeIsomorphism {
     }
 
     ull hash_subtree(int u, int p) {
-        vector<ull> child_hashes;
+        vector<ull> ch;
         for (int v : adj[u]) {
-            if (v != p) child_hashes.push_back(hash_subtree(v, u));
+            if (v != p) ch.push_back(hash_subtree(v, u));
         }
-        sort(child_hashes.begin(), child_hashes.end());
+        sort(ch.begin(), ch.end());
         ull h = 0x9e3779b97f4a7c15ULL;
-        for (ull ch : child_hashes) {
-            h ^= ch + 0x517cc1b727220a95ULL + (h << 6) + (h >> 2);
+        for (ull val : ch) {
+            h ^= val + 0x517cc1b727220a95ULL + (h << 6) + (h >> 2);
         }
         return h;
     }
 };
 // Interview Explanation:
-// - Problem Statement: Determine if two unrooted trees are isomorphic (structurally identical).
-// - Approach: Canonical subtree hashing (AHU Algorithm) with centroid root normalization.
-// - Intuition: Sort child hashes recursively; two subtrees match iff their canonical tuple hashes match.
+// - Problem Statement: Determine if two unrooted trees are structurally isomorphic.
+// - Approach: Canonical Subtree Hashing (AHU Algorithm) with Centroid Rooting.
+// - Intuition:
+//   * Unrooted trees must first be rooted at their centroids (at most 2 candidates) to fix root orientation.
+//   * Recursively compute canonical hashes for every subtree.
+//   * Sort child subtree hashes lexicographically to eliminate ordering ambiguity among sibling branches.
+//   * Combine sorted hashes into parent hash using standard 64-bit splitmix/Murmur hash mixers.
+//   * Two trees are isomorphic iff their root canonical hashes match.
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
@@ -344,74 +378,36 @@ vi findTreeCenters(int n, vvi& adj) {
     queue<int> q;
     for (int i = 0; i < n; i++) if (deg[i] == 1) q.push(i);
 
-    int remaining = n;
-    while (remaining > 2) {
+    int rem = n;
+    while (rem > 2) {
         int sz = q.size();
-        remaining -= sz;
+        rem -= sz;
         for (int i = 0; i < sz; i++) {
-            int u = q.front(); q.pop();
+            int u = q.front();
+            q.pop();
             for (int v : adj[u]) {
                 if (--deg[v] == 1) q.push(v);
             }
         }
     }
 
-    vi centers;
-    while (!q.empty()) { centers.push_back(q.front()); q.pop(); }
-    return centers;
+    vi ans;
+    while (!q.empty()) {
+        ans.push_back(q.front());
+        q.pop();
+    }
+    return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Find the center(s) of a tree (minimizing maximum distance to any other node).
-// - Approach: Iterative leaf peeling (Topological BFS layer reduction).
-// - Intuition: Trimming leaves symmetrically preserves tree center; 1 or 2 nodes remain at the core.
+// - Problem Statement: Find center node(s) of a tree that minimize maximum distance to any other node.
+// - Approach: Topological Leaf Peeling (Degree-1 BFS Layer Reduction).
+// - Intuition:
+//   * Tree centers always lie at the middle of every diameter; a tree has either 1 or 2 centers.
+//   * Enqueue all current leaves (deg[i] == 1).
+//   * Peel off outer leaf layers level-by-level, decrementing degrees of adjacent nodes.
+//   * Continue peeling until at most 2 nodes remain in the core.
+//   * The remaining 1 or 2 nodes are the exact tree centers.
 // - Complexity: Time: O(N), Space: O(N).
-
-
-// ============================================================
-// 8. RECONSTRUCT CYCLE
-// ============================================================
-
-vector<int> reconstructCycle(int n, vector<vector<int>>& adj) {
-    vector<int> parent(n, -1), color(n, 0); // 0: unvisited, 1: visiting, 2: visited
-    int cycleStart = -1, cycleEnd = -1;
-
-    function<bool(int, int)> dfs = [&](int u, int p) {
-        color[u] = 1;
-        for (int v : adj[u]) {
-            if (v == p) continue;
-            if (color[v] == 1) {
-                cycleStart = v;
-                cycleEnd = u;
-                return true;
-            }
-            if (color[v] == 0) {
-                parent[v] = u;
-                if (dfs(v, u)) return true;
-            }
-        }
-        color[u] = 2;
-        return false;
-    };
-
-    for (int i = 0; i < n; i++) {
-        if (color[i] == 0 && dfs(i, -1)) break;
-    }
-
-    if (cycleStart == -1) return {};
-    vector<int> cycle;
-    cycle.push_back(cycleStart);
-    for (int curr = cycleEnd; curr != cycleStart; curr = parent[curr]) {
-        cycle.push_back(curr);
-    }
-    cycle.push_back(cycleStart);
-    reverse(cycle.begin(), cycle.end());
-    return cycle;
-}
-// Interview Explanation:
-// - Problem Statement: Detect and reconstruct any cycle in an undirected graph.
-// - Approach: 3-Color DFS with Parent Pointers.
-// - Intuition: Back-edge to an in-stack ancestor (color 1) identifies a cycle. Backtrack via parent pointers.
-// - Complexity: Time: O(V + E), Space: O(V).
 
 
 // ============================================================
@@ -419,34 +415,36 @@ vector<int> reconstructCycle(int n, vector<vector<int>>& adj) {
 // ============================================================
 
 vector<bool> findNodesInCycles(int n, vector<vector<int>>& adj) {
-    vector<int> inDegree(n, 0);
-    vector<vector<int>> revAdj(n);
+    vi deg(n, 0);
     for (int u = 0; u < n; u++) {
-        for (int v : adj[u]) {
-            inDegree[v]++;
-            revAdj[v].push_back(u);
-        }
+        for (int v : adj[u]) deg[v]++;
     }
     queue<int> q;
-    for (int i = 0; i < n; i++) if (inDegree[i] == 0) q.push(i);
+    for (int i = 0; i < n; i++) if (deg[i] == 0) q.push(i);
 
     while (!q.empty()) {
-        int u = q.front(); q.pop();
+        int u = q.front();
+        q.pop();
         for (int v : adj[u]) {
-            if (--inDegree[v] == 0) q.push(v);
+            if (--deg[v] == 0) q.push(v);
         }
     }
 
-    vector<bool> inCycle(n, false);
+    vector<bool> inC(n, false);
     for (int i = 0; i < n; i++) {
-        if (inDegree[i] > 0) inCycle[i] = true;
+        if (deg[i] > 0) inC[i] = true; // if deg[i] > 0, node i is part of a cycle
     }
-    return inCycle;
+    return inC;
 }
 // Interview Explanation:
-// - Problem Statement: Identify all vertices that participate in at least one directed cycle.
-// - Approach: Kahn's Algorithm / In-Degree 0 Peeling.
-// - Intuition: Nodes with inDegree == 0 cannot be part of a cycle. After iterative queue peeling, all remaining nodes with inDegree > 0 belong to or reach cycles.
+// - Problem Statement: Identify all vertices that belong to or are trapped within directed cycles.
+// - Approach: Kahn's Algorithm / In-Degree Zero Peeling.
+// - Intuition:
+//   * A vertex with in-degree 0 can never be part of a cycle (it has no incoming edge).
+//   * Enqueue all vertices with in-degree 0.
+//   * When vertex u is removed, decrement in-degree of downstream neighbors; if any neighbor reaches 0, enqueue it.
+//   * Nodes belonging to cycles can never have their in-degree drop to 0 because cycles maintain cyclic dependencies.
+//   * After queue empties, any node with deg[i] > 0 belongs to a cycle.
 // - Complexity: Time: O(V + E), Space: O(V + E).
 
 
@@ -455,31 +453,36 @@ vector<bool> findNodesInCycles(int n, vector<vector<int>>& adj) {
 // ============================================================
 
 vector<int> lexicographicalTopoSort(int n, vector<vector<int>>& adj) {
-    vector<int> inDegree(n, 0);
+    vi deg(n, 0);
     for (int u = 0; u < n; u++) {
-        for (int v : adj[u]) inDegree[v]++;
+        for (int v : adj[u]) deg[v]++;
     }
 
-    priority_queue<int, vector<int>, greater<int>> minHeap;
+    priority_queue<int, vector<int>, greater<int>> pq;
     for (int i = 0; i < n; i++) {
-        if (inDegree[i] == 0) minHeap.push(i);
+        if (deg[i] == 0) pq.push(i);
     }
 
-    vector<int> order;
-    while (!minHeap.empty()) {
-        int u = minHeap.top(); minHeap.pop();
-        order.push_back(u);
+    vi ans;
+    while (!pq.empty()) {
+        int u = pq.top();
+        pq.pop();
+        ans.push_back(u);
         for (int v : adj[u]) {
-            if (--inDegree[v] == 0) minHeap.push(v);
+            if (--deg[v] == 0) pq.push(v);
         }
     }
 
-    return (int)order.size() == n ? order : vector<int>{};
+    return (int)ans.size() == n ? ans : vector<int>{};
 }
 // Interview Explanation:
-// - Problem Statement: Find the lexicographically smallest topological sort ordering in a DAG.
+// - Problem Statement: Find lexicographically smallest topological sort ordering in a DAG.
 // - Approach: Kahn's Algorithm with Min-Heap Priority Queue.
-// - Intuition: Always extract the smallest available in-degree 0 node from a min-heap.
+// - Intuition:
+//   * Standard topological sort uses a FIFO queue, which selects candidate zero-in-degree nodes arbitrarily.
+//   * Replacing the queue with a min-heap guarantees that whenever multiple nodes have in-degree 0, the node with the smallest numerical label is chosen first.
+//   * Decrement neighbor in-degrees and push newly freed nodes into min-heap.
+//   * If ans.size() < n at the end, graph contains cycles; return empty array.
 // - Complexity: Time: O(V log V + E), Space: O(V + E).
 
 
@@ -487,40 +490,47 @@ vector<int> lexicographicalTopoSort(int n, vector<vector<int>>& adj) {
 // 11. SHORTEST PATH VISITING ALL NODES — LeetCode 847
 // ============================================================
 
-int shortestPathLength(vector<vector<int>>& graph) {
-    int n = graph.size();
-    int targetMask = (1 << n) - 1;
+int shortestPathLength(vector<vector<int>>& g) {
+    int n = g.size();
+    int target = (1 << n) - 1;
     queue<tuple<int, int, int>> q; // {node, mask, dist}
-    vector<vector<bool>> visited(n, vector<bool>(1 << n, false));
-
+    vector<vector<bool>> vis(n, vector<bool>(1 << n, false)); // vis[node][mask] = true if state (node, mask) has been visited
+    // Initialize the queue with all nodes and their initial bitmask
     for (int i = 0; i < n; i++) {
         q.push({i, 1 << i, 0});
-        visited[i][1 << i] = true;
+        vis[i][1 << i] = true;
     }
 
     while (!q.empty()) {
-        auto [u, mask, dist] = q.front(); q.pop();
-        if (mask == targetMask) return dist;
+        // Dequeue the front element
+        auto [u, mask, d] = q.front();
+        q.pop();
+        if (mask == target) return d;
 
-        for (int v : graph[u]) {
-            int nextMask = mask | (1 << v);
-            if (!visited[v][nextMask]) {
-                visited[v][nextMask] = true;
-                q.push({v, nextMask, dist + 1});
+        for (int v : g[u]) {
+            int nxtMask = mask | (1 << v);
+            if (!vis[v][nxtMask]) {
+                vis[v][nxtMask] = true;
+                q.push({v, nxtMask, d + 1});
             }
         }
     }
     return 0;
 }
 // Interview Explanation:
-// - Problem Statement: Find shortest path length visiting all nodes in an undirected graph (LeetCode 847).
-// - Approach: Multi-Source Bitmask BFS.
-// - Intuition: State is pair (node, bitmask). BFS guarantees finding minimal step count when all bits are set.
+// - Problem Statement: Find shortest path visiting every node in an unweighted undirected graph (LeetCode 847).
+// - Approach: Multi-Source State Bitmask BFS.
+// - Intuition:
+//   * Nodes and edges can be revisited; state must track both current node and bitmask of visited nodes.
+//   * Start BFS simultaneously from all nodes with initial bitmasks (1 << i) and distance 0.
+//   * At each transition to neighbor v, update bitmask to (mask | (1 << v)).
+//   * BFS explores states in strictly non-decreasing step count.
+//   * The first time any state with mask == (1 << n) - 1 is popped, distance d is guaranteed minimal.
 // - Complexity: Time: O(V * 2^V), Space: O(V * 2^V).
 
 
 // ============================================================
-// 12. MAXIMUM SUM BST IN BINARY TREE — LeetCode 1373
+// 12. MAXIMUM SUM BST IN BINARY TREE (LEETCODE 1373)
 // ============================================================
 
 struct TreeNode {
@@ -531,33 +541,36 @@ struct TreeNode {
 
 struct BSTSubtreeInfo {
     bool isBST;
-    int minVal, maxVal, sumVal;
+    int mn, mx, sum;
 };
 
+BSTSubtreeInfo dfsMaxSumBST(TreeNode* node, int& ans) {
+    if (!node) return {true, INT_MAX, INT_MIN, 0};
+
+    auto l = dfsMaxSumBST(node->left, ans);
+    auto r = dfsMaxSumBST(node->right, ans);
+
+    if (l.isBST && r.isBST && node->val > l.mx && node->val < r.mn) {
+        int curSum = node->val + l.sum + r.sum;
+        ans = max(ans, curSum);
+        return {true, min(node->val, l.mn), max(node->val, r.mx), curSum};
+    }
+    return {false, 0, 0, 0};
+}
+
 int maxSumBST(TreeNode* root) {
-    int globalMaxSum = 0;
-
-    function<BSTSubtreeInfo(TreeNode*)> dfs = [&](TreeNode* node) -> BSTSubtreeInfo {
-        if (!node) return {true, INT_MAX, INT_MIN, 0};
-
-        auto left = dfs(node->left);
-        auto right = dfs(node->right);
-
-        if (left.isBST && right.isBST && node->val > left.maxVal && node->val < right.minVal) {
-            int currentSum = node->val + left.sumVal + right.sumVal;
-            globalMaxSum = max(globalMaxSum, currentSum);
-            return {true, min(node->val, left.minVal), max(node->val, right.maxVal), currentSum};
-        }
-        return {false, 0, 0, 0};
-    };
-
-    dfs(root);
-    return globalMaxSum;
+    int ans = 0;
+    dfsMaxSumBST(root, ans);
+    return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Find maximum sum of all keys of any sub-tree which is also a Binary Search Tree (LeetCode 1373).
+// - Problem Statement: Find maximum sum of any subtree that is also a valid Binary Search Tree (LeetCode 1373).
 // - Approach: Post-Order Bottom-Up DFS returning {isBST, minVal, maxVal, sumVal}.
-// - Intuition: A node forms a BST iff its left and right children are BSTs and left.max < node.val < right.min.
+// - Intuition:
+//   * A subtree rooted at node is a BST iff: (1) left child is BST, (2) right child is BST, and (3) l.max < node->val < r.min.
+//   * In a bottom-up post-order traversal, children report their min, max, and sum to parent.
+//   * If valid BST condition holds, calculate curSum = node->val + l.sum + r.sum and update global max ans.
+//   * If invalid, propagate isBST = false up the tree in O(1).
 // - Complexity: Time: O(N), Space: O(H).
 
 
@@ -565,17 +578,22 @@ int maxSumBST(TreeNode* root) {
 // 13. REMOVE LEAF NODES WITH TARGET VALUE — LeetCode 1325
 // ============================================================
 
-TreeNode* removeLeafNodes(TreeNode* root, int target) {
+TreeNode* removeLeafNodes(TreeNode* root, int t) {
     if (!root) return nullptr;
-    root->left = removeLeafNodes(root->left, target);
-    root->right = removeLeafNodes(root->right, target);
-    if (!root->left && !root->right && root->val == target) return nullptr;
+    root->left = removeLeafNodes(root->left, t);
+    root->right = removeLeafNodes(root->right, t);
+    if (!root->left && !root->right && root->val == t) return nullptr;
     return root;
 }
 // Interview Explanation:
 // - Problem Statement: Delete all leaf nodes with value target, repeating until no such leaves remain (LeetCode 1325).
 // - Approach: Post-Order Recursive Tree Pruning.
-// - Intuition: Recursively prune subtrees first. If current node becomes a leaf and matches target, delete it by returning null.
+// - Intuition:
+//   * Deleting leaves can cause their parent nodes to become new leaves.
+//   * Post-order traversal processes children before the current node.
+//   * Recurse on left and right subtrees first.
+//   * If both children become null and current node value equals target t, delete current node by returning nullptr.
+//   * Prunes bottom-up in a single pass without multiple iterations.
 // - Complexity: Time: O(N), Space: O(H).
 
 
@@ -583,36 +601,42 @@ TreeNode* removeLeafNodes(TreeNode* root, int target) {
 // 14. POSSIBLE PATH LENGTHS IN DAG
 // ============================================================
 
-vector<bool> possiblePathLengths(int n, vector<vector<int>>& adj, int src, int dest) {
-    vector<int> inDegree(n, 0);
+vector<bool> possiblePathLengths(int n, vector<vector<int>>& adj, int src, int dst) {
+    vi deg(n, 0);
     for (int u = 0; u < n; u++) {
-        for (int v : adj[u]) inDegree[v]++;
+        for (int v : adj[u]) deg[v]++;
     }
 
     queue<int> q;
-    for (int i = 0; i < n; i++) if (inDegree[i] == 0) q.push(i);
+    for (int i = 0; i < n; i++) if (deg[i] == 0) q.push(i);
 
     vector<bitset<1001>> dp(n);
     dp[src].set(0);
 
     while (!q.empty()) {
-        int u = q.front(); q.pop();
+        int u = q.front();
+        q.pop();
         for (int v : adj[u]) {
             dp[v] |= (dp[u] << 1);
-            if (--inDegree[v] == 0) q.push(v);
+            if (--deg[v] == 0) q.push(v);
         }
     }
 
-    vector<bool> reachable(n + 1, false);
+    vector<bool> ans(n + 1, false);
     for (int len = 0; len <= n; len++) {
-        if (dp[dest].test(len)) reachable[len] = true;
+        if (dp[dst].test(len)) ans[len] = true;
     }
-    return reachable;
+    return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Determine all possible path lengths from src to dest in a DAG.
-// - Approach: TopoSort + 2D Bitset Reachability DP.
-// - Intuition: `dp[v] |= (dp[u] << 1)` shifts bitmask by 1 step for every edge u -> v in topological order.
+// - Problem Statement: Determine all possible path lengths from src to dst in a DAG.
+// - Approach: Kahn's TopoSort + Bitset Shift DP.
+// - Intuition:
+//   * Let dp[u] be a bitset where bit k is 1 if there exists a path of length k from src to u.
+//   * Initialize dp[src][0] = 1.
+//   * Process vertices in topological order.
+//   * Traversing edge (u, v) increases path length by 1: dp[v] |= (dp[u] << 1).
+//   * Bitset operations execute 64 bits in parallel, providing extreme speed and compact memory.
 // - Complexity: Time: O((V + E) * N / 64), Space: O(V * N / 64).
 
 
@@ -620,43 +644,44 @@ vector<bool> possiblePathLengths(int n, vector<vector<int>>& adj, int src, int d
 // 15. MAX COMPONENTS TREE SPLIT WITH EQUAL SUM — LeetCode 2440
 // ============================================================
 
-int componentValue(vector<int>& nums, vector<vector<int>>& edges) {
-    int n = nums.size();
-    int total = accumulate(nums.begin(), nums.end(), 0);
-    vector<vector<int>> adj(n);
+int dfsComponentValue(int u, int p, int t, const vi& a, const vvi& adj, bool& ok) {
+    int sum = a[u];
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        sum += dfsComponentValue(v, u, t, a, adj, ok);
+        if (!ok) return 0;
+    }
+    if (sum > t) { ok = false; return 0; }
+    if (sum == t) return 0;
+    return sum;
+}
+
+int componentValue(vector<int>& a, vector<vector<int>>& edges) {
+    int n = a.size();
+    vvi adj(n);
     for (auto& e : edges) {
         adj[e[0]].push_back(e[1]);
         adj[e[1]].push_back(e[0]);
     }
-
-    auto check = [&](int target) {
-        function<int(int, int)> dfs = [&](int u, int p) -> int {
-            int sum = nums[u];
-            for (int v : adj[u]) {
-                if (v != p) {
-                    int sub = dfs(v, u);
-                    if (sub == -1) return -1;
-                    sum += sub;
-                }
-            }
-            if (sum == target) return 0;
-            if (sum > target) return -1;
-            return sum;
-        };
-        return dfs(0, -1) == 0;
-    };
+    int tot = accumulate(a.begin(), a.end(), 0);
 
     for (int k = n; k >= 1; k--) {
-        if (total % k == 0 && check(total / k)) {
-            return k - 1;
+        if (tot % k == 0) {
+            bool ok = true;
+            if (dfsComponentValue(0, -1, tot / k, a, adj, ok) == 0 && ok) return k - 1;
         }
     }
     return 0;
 }
 // Interview Explanation:
-// - Problem Statement: Split a tree into maximum number of connected components with equal sum (LeetCode 2440).
-// - Approach: Divisor Enumeration + Subtree DFS Cut Verification.
-// - Intuition: Component sum `target` must divide `totalSum`. A bottom-up DFS verifies if valid cuts sum exactly to `target`.
+// - Problem Statement: Split tree into maximum number of components with equal sum (LeetCode 2440).
+// - Approach: Divisor Enumeration + Bottom-Up Subtree Cut Verification.
+// - Intuition:
+//   * If tree splits into k components with equal sum, each component must sum to target t = total / k.
+//   * Test k from n down to 1 (maximizing component count, which maximizes edges removed k - 1).
+//   * Bottom-up DFS: accumulate subtree sum.
+//   * When subtree sum equals t, cut it off (returns 0 to parent).
+//   * If subtree sum exceeds t, valid split is impossible with this target.
 // - Complexity: Time: O(N * divisors(Total)), Space: O(N).
 
 
@@ -666,12 +691,12 @@ int componentValue(vector<int>& nums, vector<vector<int>>& edges) {
 
 struct TreeLifting {
     int n, LOG;
-    vector<vector<int>> adj;
-    vector<vector<int>> up;
-    vector<int> depth;
+    vvi adj;
+    vvi up;
+    vi dep;
 
-    TreeLifting(int n) : n(n), LOG(20), adj(n), depth(n, 0) {
-        up.assign(n, vector<int>(LOG, 0));
+    TreeLifting(int n) : n(n), LOG(20), adj(n), dep(n, 0) {
+        up.assign(n, vi(LOG, 0));
     }
 
     void add_edge(int u, int v) {
@@ -680,7 +705,7 @@ struct TreeLifting {
     }
 
     void dfs(int u, int p, int d) {
-        depth[u] = d;
+        dep[u] = d;
         up[u][0] = p;
         for (int j = 1; j < LOG; j++) {
             up[u][j] = up[up[u][j - 1]][j - 1];
@@ -694,16 +719,16 @@ struct TreeLifting {
         dfs(root, root, 0);
     }
 
-    int get_kth_ancestor(int node, int k) {
+    int get_kth_ancestor(int u, int k) {
         for (int j = 0; j < LOG; j++) {
-            if ((k >> j) & 1) node = up[node][j];
+            if ((k >> j) & 1) u = up[u][j];
         }
-        return node;
+        return u;
     }
 
     int lca(int u, int v) {
-        if (depth[u] < depth[v]) swap(u, v);
-        u = get_kth_ancestor(u, depth[u] - depth[v]);
+        if (dep[u] < dep[v]) swap(u, v);
+        u = get_kth_ancestor(u, dep[u] - dep[v]);
         if (u == v) return u;
 
         for (int j = LOG - 1; j >= 0; j--) {
@@ -717,32 +742,56 @@ struct TreeLifting {
 };
 // Interview Explanation:
 // - Problem Statement: Compute Lowest Common Ancestor (LCA) and k-th ancestor in a tree.
-// - Approach: Binary Lifting table `up[u][j] = 2^j`-th ancestor.
-// - Intuition: Powers of 2 allow O(log N) jump queries for both k-th ancestor and LCA.
+// - Approach: Binary Lifting Table up[u][j] = 2^j-th ancestor.
+// - Intuition:
+//   * Precompute ancestor table where up[u][j] = up[up[u][j-1]][j-1].
+//   * For LCA: equalize depths by lifting the deeper node up by (dep[u] - dep[v]).
+//   * If nodes coincide, LCA is found.
+//   * Otherwise, lift both u and v in decreasing powers of 2 (LOG - 1 down to 0) as long as their ancestors differ.
+//   * The parent of either node up[u][0] is the exact LCA in O(log N).
 // - Complexity: Build: O(N log N), Query: O(log N), Space: O(N log N).
 
 
 // ============================================================
-// 17. CYCLE DETECTION & RECONSTRUCTION (UNDIRECTED / DIRECTED)
+// 17. CYCLE DETECTION & RECONSTRUCTION (UNDIRECTED GRAPH)
 // ============================================================
 
-bool detectCycleUndirected(int n, vector<vector<int>>& adj) {
-    vector<bool> vis(n, false);
-    function<bool(int, int)> dfs = [&](int u, int p) {
-        vis[u] = true;
-        for (int v : adj[u]) {
-            if (!vis[v]) { if (dfs(v, u)) return true; }
-            else if (v != p) return true;
+bool dfsDetectCycle(int u, int p, const vvi& adj, vector<bool>& vis, vi& par, int& cs, int& ce) {
+    vis[u] = true;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (vis[v]) {
+            cs = v;
+            ce = u;
+            return true;
         }
-        return false;
-    };
-    for (int i = 0; i < n; i++) if (!vis[i] && dfs(i, -1)) return true;
+        par[v] = u;
+        if (dfsDetectCycle(v, u, adj, vis, par, cs, ce)) return true;
+    }
     return false;
 }
+
+vector<int> detectCycleUndirected(int n, vector<vector<int>>& adj) {
+    vector<bool> vis(n, false);
+    vi par(n, -1);
+    int cs = -1, ce = -1;
+    for (int i = 0; i < n; i++) {
+        if (!vis[i] && dfsDetectCycle(i, -1, adj, vis, par, cs, ce)) break;
+    }
+    if (cs == -1) return {};
+    vi cycle = {cs};
+    for (int v = ce; v != cs; v = par[v]) cycle.push_back(v);
+    cycle.push_back(cs);
+    return cycle;
+}
 // Interview Explanation:
-// - Problem Statement: Detect cycles in general graphs.
-// - Approach: DFS back-edge inspection.
-// - Intuition: Encountering an already visited node that is not the direct parent signifies a cycle.
+// - Problem Statement: Detect cycles in undirected graph and output vertex sequence.
+// - Approach: DFS Back-Edge Inspection with Parent Tracing.
+// - Intuition:
+//   * Traverse undirected graph with DFS, passing immediate parent p.
+//   * If neighbor v has already been visited and v != p, edge (u, v) is a back-edge forming a cycle.
+//   * Record endpoints cs = v and ce = u.
+//   * Trace backwards from ce to cs via parent pointers par to collect the cycle vertices.
 // - Complexity: Time: O(V + E), Space: O(V).
 
 
@@ -750,43 +799,42 @@ bool detectCycleUndirected(int n, vector<vector<int>>& adj) {
 // 18. BIDIRECTIONAL BFS TEMPLATE
 // ============================================================
 
-int bidirectionalBFS(int start, int target, const function<vector<int>(int)>& getNeighbors) {
+template <typename NeighborFunc>
+int bidirectionalBFS(int start, int target, const NeighborFunc& getNeighbors) {
     if (start == target) return 0;
-    unordered_set<int> forwardVisited = {start};
-    unordered_set<int> backwardVisited = {target};
-    queue<pair<int, int>> forwardQueue;
-    queue<pair<int, int>> backwardQueue;
+    unordered_set<int> fwd = {start}, bwd = {target}; 
+    unordered_set<int> vf = {start}, vb = {target}; // vf and vb are for checking visited nodes in each direction
+    int steps = 0;
 
-    forwardQueue.push({start, 0});
-    backwardQueue.push({target, 0});
-
-    while (!forwardQueue.empty() && !backwardQueue.empty()) {
-        if (forwardQueue.size() <= backwardQueue.size()) {
-            auto [current, dist] = forwardQueue.front(); forwardQueue.pop();
-            for (int neighbor : getNeighbors(current)) {
-                if (backwardVisited.count(neighbor)) return dist + 1;
-                if (!forwardVisited.count(neighbor)) {
-                    forwardVisited.insert(neighbor);
-                    forwardQueue.push({neighbor, dist + 1});
-                }
-            }
-        } else {
-            auto [current, dist] = backwardQueue.front(); backwardQueue.pop();
-            for (int neighbor : getNeighbors(current)) {
-                if (forwardVisited.count(neighbor)) return dist + 1;
-                if (!backwardVisited.count(neighbor)) {
-                    backwardVisited.insert(neighbor);
-                    backwardQueue.push({neighbor, dist + 1});
+    while (!fwd.empty() && !bwd.empty()) {
+        if (fwd.size() > bwd.size()) { 
+            swap(fwd, bwd);
+            swap(vf, vb);
+        } // this is done to ensure we always expand the smaller frontier, minimizing branching factor
+        unordered_set<int> nxt;
+        steps++;
+        for (int u : fwd) {
+            for (int v : getNeighbors(u)) {
+                if (bwd.count(v)) return steps; // if neighbor v is in the opposite frontier, we have found a connection
+                if (!vf.count(v)) { // else if not in visited set, add to next frontier
+                    vf.insert(v);
+                    nxt.insert(v);
                 }
             }
         }
+        fwd = std::move(nxt); // move does not copy, it transfers ownership of the set to fwd
     }
     return -1;
 }
 // Interview Explanation:
 // - Problem Statement: Find shortest distance between two states when branching factor is high.
 // - Approach: Bidirectional BFS expanding smaller frontier.
-// - Intuition: Reduces search space from O(B^D) to O(B^(D/2)).
+// - Intuition:
+//   * Unidirectional BFS visits O(B^D) states, which explodes with branching factor B and depth D.
+//   * Bidirectional BFS expands frontiers from both start and target simultaneously.
+//   * Always expand the smaller frontier set to minimize branching overhead.
+//   * When a neighbor of one frontier collides with the other frontier, shortest path is found.
+//   * Reduces complexity from O(B^D) to O(B^(D/2)).
 // - Complexity: Time: O(B^(D/2)), Space: O(B^(D/2)).
 
 
@@ -794,24 +842,35 @@ int bidirectionalBFS(int start, int target, const function<vector<int>(int)>& ge
 // 19. JUMP GAME III — LeetCode 1306
 // ============================================================
 
-bool canReach(vector<int>& arr, int start) {
-    int n = arr.size();
+bool canReach(vector<int>& a, int start) {
+    int n = a.size();
     queue<int> q;
     vector<bool> vis(n, false);
-    q.push(start); vis[start] = true;
+    q.push(start);
+    vis[start] = true;
+
     while (!q.empty()) {
-        int u = q.front(); q.pop();
-        if (arr[u] == 0) return true;
-        for (int v : {u + arr[u], u - arr[u]}) {
-            if (v >= 0 && v < n && !vis[v]) { vis[v] = true; q.push(v); }
+        int u = q.front();
+        q.pop();
+        if (a[u] == 0) return true;
+        for (int v : {u + a[u], u - a[u]}) {
+            if (v >= 0 && v < n && !vis[v]) {
+                vis[v] = true;
+                q.push(v);
+            }
         }
     }
     return false;
 }
 // Interview Explanation:
-// - Problem Statement: Determine if you can reach any index with value 0 from start, jumping +/- arr[i] (LeetCode 1306).
-// - Approach: Breadth-First Search (BFS) / Graph Reachability.
-// - Intuition: Treat array indices as graph vertices with directed edges to i + arr[i] and i - arr[i].
+// - Problem Statement: Check if you can reach any index with value 0 starting from start, jumping +/- a[i] (LeetCode 1306).
+// - Approach: Queue BFS / Graph Reachability.
+// - Intuition:
+//   * Model indices as graph vertices with directed transitions u -> u + a[u] and u -> u - a[u].
+//   * Push starting index into queue and mark visited.
+//   * Pop index u; if a[u] == 0, target is reached, return true.
+//   * Otherwise enqueue valid in-bounds unvisited neighbors.
+//   * Linear traversal ensures every index is visited at most once.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -819,63 +878,85 @@ bool canReach(vector<int>& arr, int start) {
 // 20. JUMP GAME IV — LeetCode 1345
 // ============================================================
 
-int minJumps(vector<int>& arr) {
-    int n = arr.size();
+int minJumps(vector<int>& a) {
+    int n = a.size();
     unordered_map<int, vector<int>> pos;
-    for (int i = 0; i < n; i++) pos[arr[i]].push_back(i);
+    for (int i = 0; i < n; i++) pos[a[i]].push_back(i);
+
     queue<int> q;
     vector<bool> vis(n, false);
-    q.push(0); vis[0] = true;
-    int steps = 0;
+    q.push(0);
+    vis[0] = true;
+    int ans = 0;
+
     while (!q.empty()) {
-        for (int sz = q.size(); sz > 0; sz--) {
-            int u = q.front(); q.pop();
-            if (u == n - 1) return steps;
-            if (u - 1 >= 0 && !vis[u - 1]) { vis[u - 1] = true; q.push(u - 1); }
-            if (u + 1 < n && !vis[u + 1]) { vis[u + 1] = true; q.push(u + 1); }
-            if (pos.count(arr[u])) {
-                for (int v : pos[arr[u]]) if (!vis[v]) { vis[v] = true; q.push(v); }
-                pos.erase(arr[u]);
+        for (int sz = q.size(); sz > 0; sz--) { // Process all nodes at current BFS level
+            int u = q.front();
+            q.pop();
+            if (u == n - 1) return ans; // Reached last index
+
+            if (u - 1 >= 0 && !vis[u - 1]) { // Check left neighbor
+                vis[u - 1] = true;
+                q.push(u - 1);
+            }
+            if (u + 1 < n && !vis[u + 1]) { // Check right neighbor
+                vis[u + 1] = true;
+                q.push(u + 1);
+            }
+            if (pos.count(a[u])) {
+                for (int v : pos[a[u]]) {
+                    if (!vis[v]) {
+                        vis[v] = true;
+                        q.push(v);
+                    }
+                }
+                pos.erase(a[u]); // Critical: prune value list to prevent O(N^2) loops, this is important, otherwise we may revisit the same value's indices multiple times, leading to TLE.
             }
         }
-        steps++;
+        ans++;
     }
     return -1;
 }
 // Interview Explanation:
-// - Problem Statement: Find minimum jumps to reach the last index jumping to i-1, i+1, or any j where arr[j] == arr[i] (LeetCode 1345).
+// - Problem Statement: Minimum jumps to reach last index jumping to i-1, i+1, or any j with matching value (LeetCode 1345).
 // - Approach: Level-Order BFS with Value Group Pruning.
-// - Intuition: Group indices by value in a hash map. Erase map entry once visited to prevent O(N^2) expansions.
+// - Intuition:
+//   * Group all indices sharing identical values in hash map pos.
+//   * Level-order BFS guarantees finding the minimum jump distance.
+//   * Key optimization: once all indices for value a[u] are enqueued, erase pos[a[u]] immediately.
+//   * Erasing prevents subsequent visits from re-iterating over the same large index lists, maintaining linear O(N) runtime.
 // - Complexity: Time: O(N), Space: O(N).
 
 
 // ============================================================
-// 21. JUMP GAME V — LeetCode 1340
+// 21. JUMP GAME V (LEETCODE 1340)
 // ============================================================
 
-int maxJumps(vector<int>& arr, int d) {
-    int n = arr.size(), ans = 0;
-    vector<int> dp(n, -1);
-    function<int(int)> dfs = [&](int i) {
-        if (dp[i] != -1) return dp[i];
-        int best = 1;
-        for (int j = i + 1; j < n && j <= i + d; j++) {
-            if (arr[j] >= arr[i]) break;
-            best = max(best, 1 + dfs(j));
-        }
-        for (int j = i - 1; j >= 0 && j >= i - d; j--) {
-            if (arr[j] >= arr[i]) break;
-            best = max(best, 1 + dfs(j));
-        }
-        return dp[i] = best;
-    };
-    for (int i = 0; i < n; i++) ans = max(ans, dfs(i));
+int dfsMaxJumps(int i, int d, const vector<int>& a, vector<int>& dp) {
+    if (dp[i] != 0) return dp[i];
+    int n = a.size(), res = 1;
+    for (int j = i + 1; j <= min(i + d, n - 1) && a[j] < a[i]; j++)
+        res = max(res, 1 + dfsMaxJumps(j, d, a, dp));
+    for (int j = i - 1; j >= max(i - d, 0) && a[j] < a[i]; j--)
+        res = max(res, 1 + dfsMaxJumps(j, d, a, dp));
+    return dp[i] = res;
+}
+
+int maxJumps(vector<int>& a, int d) {
+    int n = a.size(), ans = 1;
+    vector<int> dp(n, 0);
+    for (int i = 0; i < n; i++) ans = max(ans, dfsMaxJumps(i, d, a, dp));
     return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find maximum indices you can visit jumping <= d steps strictly to smaller values (LeetCode 1340).
-// - Approach: Memoized DFS / Dynamic Programming on DAG.
-// - Intuition: Jumps go only to strictly smaller values, forming a DAG.
+// - Approach: Memoized DFS / Longest Path on DAG.
+// - Intuition:
+//   * Jumps are strictly valid only to lower bars without taller obstacles in between (a[j] < a[i]).
+//   * Since height strictly decreases with every jump, cycles are impossible; transitions form a DAG.
+//   * Let dp[i] be the maximum jumps starting from index i.
+//   * Recurse in both left and right directions up to distance d, breaking early if a taller bar is met.
+//   * Memoize results in dp[i]; evaluate each state once in O(N * D) time.
 // - Complexity: Time: O(N * D), Space: O(N).
 
 
@@ -884,19 +965,26 @@ int maxJumps(vector<int>& arr, int d) {
 // ============================================================
 
 bool canReach(string s, int minJump, int maxJump) {
-    int n = s.size(), reach = 0;
+    int n = s.size(), reach = 0; // reach denotes the count of reachable indices in the sliding window [i - maxJump, i - minJump]
     if (s[n - 1] != '0') return false;
-    vector<bool> dp(n, false);
-    dp[0] = true;
+    vector<bool> dp(n, false); // dp[i] = true if index i is reachable
+    dp[0] = true; // starting index is always reachable
+
     for (int i = 1; i < n; i++) {
         if (i >= minJump && dp[i - minJump]) reach++;
         if (i > maxJump && dp[i - maxJump - 1]) reach--;
+        // Update the reach count based on the current index
         if (s[i] == '0' && reach > 0) dp[i] = true;
     }
     return dp[n - 1];
 }
 // Interview Explanation:
-// - Problem Statement: Check if last index can be reached where s[i] == '0' and jump range is [minJump, maxJump] (LeetCode 1871).
-// - Approach: Sliding Window Reachability Count DP.
-// - Intuition: Maintain running count `reach` of true DP states in the valid sliding window [i - maxJump, i - minJump].
+// - Problem Statement: Check if last index can be reached where s[i] == '0' and jump is in [minJump, maxJump] (LeetCode 1871).
+// - Approach: Sliding Window Reachability Count DP in O(N).
+// - Intuition:
+//   * Index i is reachable if s[i] == '0' and there is at least one reachable index in [i - maxJump, i - minJump].
+//   * Naively checking all valid predecessors takes O(N * (maxJump - minJump)) = O(N^2).
+//   * Maintain a sliding window counter reach tracking the count of reachable DP states in [i - maxJump, i - minJump].
+//   * As i advances: increment reach if index i - minJump is reachable; decrement if index i - maxJump - 1 leaves window.
+//   * If s[i] == '0' and reach > 0, set dp[i] = true in O(1) per index.
 // - Complexity: Time: O(N), Space: O(N).

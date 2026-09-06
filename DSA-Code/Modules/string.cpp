@@ -79,6 +79,7 @@ const ll P = 31;
  | 29 | Distinct Subsequences II (CSES 1149 / LC 940)| 1D DP + Last Occurrence Deduplication| O(N)   | O(N + S) |
  | 30 | Dynamic Palindrome Queries (CSES 2420)      | Dual Fenwick Trees + Rolling Hash  | O((N+Q)lgN| O(N)    |
  | 31 | String Functions: KMP Pi & Z-Array (CSES 2107)| Dual Prefix-Function & LCP Arrays | O(N)     | O(N)     |
+ | 32 | Valid Palindrome II (LC 680)                | 2-Pointer Greedy Mismatch Check    | O(N)     | O(1)     |
  ====================================================================================================
 */
 
@@ -116,6 +117,31 @@ struct FastHash {
 // - Approach: Precomputed prefix hash array and base power powers of P modulo 10^9+7.
 // - Intuition: Substring hash s[l..r] = (pref[r+1] - pref[l] * P^{r-l+1}) % MOD.
 // - Complexity: Time: O(N) precomputation, O(1) range query, Space: O(N).
+
+bool isPalindromeRange(const string &s, int l, int r) {
+    while (l < r) {
+        if (s[l] != s[r]) return false;
+        l++; r--;
+    }
+    return true;
+}
+
+bool isPalindromeAfterOneDeletion(const string &s) {
+    int n = s.size();
+    int l = 0, r = n - 1;
+    while (l < r) {
+        if (s[l] != s[r]) {
+            return isPalindromeRange(s, l + 1, r) || isPalindromeRange(s, l, r - 1);
+        }
+        l++; r--;
+    }
+    return true;
+}
+// Interview Explanation:
+// - Problem Statement: Check if string can be a palindrome after deleting at most one character (LeetCode 680).
+// - Approach: Two Pointers inward convergence with single mismatch branch.
+// - Intuition: On first mismatched characters s[l] != s[r], the string is valid iff either s[l+1..r] or s[l..r-1] is a palindrome.
+// - Complexity: Time: O(N), Space: O(1).
 
 
 // 1. String Pattern Matching Occurrences (Rabin-Karp)
@@ -371,19 +397,20 @@ pair<vi, vi> manacher(const string &s) {
 }
 
 // 4. Longest Palindromic Substring (LeetCode 5 - Expand Around Center)
+void expandAroundCenter(const string& s, int l, int r, int& start, int& maxLen) {
+    while (l >= 0 && r < (int)s.size() && s[l] == s[r]) { l--; r++; }
+    if (r - l - 1 > maxLen) {
+        start = l + 1;
+        maxLen = r - l - 1;
+    }
+}
+
 string longestPalindromeSubstring(string s) {
     if (s.empty()) return "";
     int start = 0, maxLen = 0;
-    auto expand = [&](int l, int r) {
-        while (l >= 0 && r < (int)s.size() && s[l] == s[r]) { l--; r++; }
-        if (r - l - 1 > maxLen) {
-            start = l + 1;
-            maxLen = r - l - 1;
-        }
-    };
     for (int i = 0; i < (int)s.size(); i++) {
-        expand(i, i);     // Odd length center
-        expand(i, i + 1); // Even length center
+        expandAroundCenter(s, i, i, start, maxLen);     // Odd length center
+        expandAroundCenter(s, i, i + 1, start, maxLen); // Even length center
     }
     return s.substr(start, maxLen);
 }
@@ -719,25 +746,27 @@ vector<string> decodeStrings(const string& s) {
 // 27. REPEATING SUBSTRING (CSES 2106 / LEETCODE 1062)
 // ====================================================================================================
 
-string longestRepeatingSubstring(const string& s) {
-    int n = s.size();
-    if (n <= 1) return "";
+struct DoubleStringHash {
+    int n;
     const ll MOD1 = 1e9 + 7, MOD2 = 1e9 + 9, BASE = 31;
-    vll p1(n + 1, 1), p2(n + 1, 1), h1(n + 1, 0), h2(n + 1, 0);
-    for (int i = 0; i < n; i++) {
-        p1[i + 1] = p1[i] * BASE % MOD1;
-        p2[i + 1] = p2[i] * BASE % MOD2;
-        h1[i + 1] = (h1[i] * BASE + (s[i] - 'a' + 1)) % MOD1;
-        h2[i + 1] = (h2[i] * BASE + (s[i] - 'a' + 1)) % MOD2;
+    vll p1, p2, h1, h2;
+
+    DoubleStringHash(const string& s) : n(s.size()), p1(n + 1, 1), p2(n + 1, 1), h1(n + 1, 0), h2(n + 1, 0) {
+        for (int i = 0; i < n; i++) {
+            p1[i + 1] = p1[i] * BASE % MOD1;
+            p2[i + 1] = p2[i] * BASE % MOD2;
+            h1[i + 1] = (h1[i] * BASE + (s[i] - 'a' + 1)) % MOD1;
+            h2[i + 1] = (h2[i] * BASE + (s[i] - 'a' + 1)) % MOD2;
+        }
     }
 
-    auto getHash = [&](int l, int r) -> pair<ll, ll> {
+    pair<ll, ll> getHash(int l, int r) const {
         ll x1 = (h1[r + 1] - h1[l] * p1[r - l + 1] % MOD1 + MOD1) % MOD1;
         ll x2 = (h2[r + 1] - h2[l] * p2[r - l + 1] % MOD2 + MOD2) % MOD2;
         return {x1, x2};
-    };
+    }
 
-    auto check = [&](int len) -> int {
+    int checkDuplicate(int len) const {
         map<pair<ll, ll>, int> seen;
         for (int i = 0; i + len <= n; i++) {
             auto h = getHash(i, i + len - 1);
@@ -745,12 +774,18 @@ string longestRepeatingSubstring(const string& s) {
             seen[h] = i;
         }
         return -1;
-    };
+    }
+};
+
+string repeatingSubstring(const string& s) {
+    int n = s.size();
+    if (n <= 1) return "";
+    DoubleStringHash dsh(s);
 
     int lo = 1, hi = n - 1, bestLen = 0, bestPos = -1;
     while (lo <= hi) {
         int mid = lo + (hi - lo) / 2;
-        int pos = check(mid);
+        int pos = dsh.checkDuplicate(mid);
         if (pos != -1) {
             bestLen = mid;
             bestPos = pos;
@@ -759,8 +794,7 @@ string longestRepeatingSubstring(const string& s) {
             hi = mid - 1;
         }
     }
-    if (bestLen == 0) return "";
-    return s.substr(bestPos, bestLen);
+    return bestPos == -1 ? "" : s.substr(bestPos, bestLen);
 }
 // Interview Explanation:
 // - Problem Statement: Find the longest substring of s that occurs at least twice (CSES 2106 / LC 1062).
@@ -824,7 +858,7 @@ int distinctSubsequencesII(const string& s) {
     vi last(26, 0);
 
     for (int i = 1; i <= n; i++) {
-        int c = s[i - 1] - 'a\;
+        int c = s[i - 1] - 'a';
         dp[i] = (2 * dp[i - 1]) % MOD;
         if (last[c] != 0) {
             dp[i] = (dp[i] - dp[last[c] - 1] + MOD) % MOD;

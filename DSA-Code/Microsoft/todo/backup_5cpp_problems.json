@@ -1,0 +1,632 @@
+[
+  {
+    "id": 87,
+    "file": "5.cpp",
+    "classNum": "Solution1",
+    "lcNum": "LC 206",
+    "name": "Reverse Linked List",
+    "category": "Linked List",
+    "pattern": "Iterative Pointer Reversal",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Maintain three pointers: prev (null), curr (head), and nextNode.",
+      "Save curr->next into nextNode to preserve reference to remainder of the list.",
+      "Reverse current pointer: curr->next = prev.",
+      "Advance prev = curr and curr = nextNode until curr is null; return prev as new head."
+    ],
+    "url": "https://leetcode.com/problems/reverse-linked-list/"
+  },
+  {
+    "id": 88,
+    "file": "5.cpp",
+    "classNum": "Solution2",
+    "lcNum": "LC 92",
+    "name": "Reverse Linked List II",
+    "category": "Linked List",
+    "pattern": "Sublist Pointer Inversion",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Navigate dummy node and advance pointer to node left - 1 (node preceding reversal window).",
+      "Use pointer manipulation to repeatedly move curr->next to the front of the sublist.",
+      "Preserve connections: pre->next connects to inverted node, curr->next bridges to remainder.",
+      "Single pass O(N) modifies pointers in-place without needing list cut/reconnection."
+    ],
+    "url": "https://leetcode.com/problems/reverse-linked-list-ii/"
+  },
+  {
+    "id": 89,
+    "file": "5.cpp",
+    "classNum": "Solution3",
+    "lcNum": "LC 25",
+    "name": "Reverse Nodes in k-Group",
+    "category": "Linked List",
+    "pattern": "Group Length Check + Sublist Rev",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Count ahead k nodes; if fewer than k nodes remain, leave them unchanged.",
+      "Reverse the current k nodes standardly using iterative pointer reversal.",
+      "Connect previous group's tail to current group's new head.",
+      "Recursively or iteratively proceed to next k-group; achieves O(N) time and O(1) space."
+    ],
+    "url": "https://leetcode.com/problems/reverse-nodes-in-k-group/"
+  },
+  {
+    "id": 90,
+    "file": "5.cpp",
+    "classNum": "Solution4",
+    "lcNum": "LC 21",
+    "name": "Merge Two Sorted Lists",
+    "category": "Linked List",
+    "pattern": "Two-Pointer Linked Splice",
+    "time": "O(N + M)",
+    "space": "O(1)",
+    "intuition": [
+      "Create dummy head node to eliminate special edge cases for list head initialization.",
+      "Compare head values of list1 and list2; attach smaller node to tail of merged list.",
+      "Advance chosen list's pointer and tail pointer.",
+      "Attach remaining non-null list suffix directly to tail in O(1) step; runs in O(N + M)."
+    ],
+    "url": "https://leetcode.com/problems/merge-two-sorted-lists/"
+  },
+  {
+    "id": 91,
+    "file": "5.cpp",
+    "classNum": "Solution5",
+    "lcNum": "LC 23",
+    "name": "Merge k Sorted Lists",
+    "category": "Linked List & Heap",
+    "pattern": "Min-Heap Priority Queue Merge",
+    "time": "O(N log K)",
+    "space": "O(K)",
+    "intuition": [
+      "Min-heap stores current head node of each of the K sorted lists.",
+      "Pop smallest node from heap, attach to merged list tail.",
+      "If popped node has a next pointer, push node->next into min-heap.",
+      "Heap size stays bounded by K, ensuring O(N log K) time where N is total node count."
+    ],
+    "url": "https://leetcode.com/problems/merge-k-sorted-lists/"
+  },
+  {
+    "id": 92,
+    "file": "5.cpp",
+    "classNum": "Solution6",
+    "lcNum": "LC 148",
+    "name": "Sort List",
+    "category": "Linked List & Sorting",
+    "pattern": "Merge Sort (Slow/Fast Split)",
+    "time": "O(N log N)",
+    "space": "O(log N)",
+    "intuition": [
+      "Apply Merge Sort on linked list to achieve guaranteed O(N log N) time and O(log N) stack.",
+      "Use Slow/Fast pointer technique to locate exact middle node of list.",
+      "Sever middle node (mid->next = null) to split into two independent sublists.",
+      "Recursively sort both halves and merge using standard Merge Two Sorted Lists routine."
+    ],
+    "url": "https://leetcode.com/problems/sort-list/"
+  },
+  {
+    "id": 93,
+    "file": "5.cpp",
+    "classNum": "Solution7",
+    "lcNum": "LC 141",
+    "name": "Linked List Cycle",
+    "category": "Linked List & Two Pointers",
+    "pattern": "Floyd's Tortoise & Hare",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Floyd's Tortoise and Hare algorithm uses two pointers moving at different speeds.",
+      "Slow pointer moves 1 step per iteration; Fast pointer moves 2 steps per iteration.",
+      "If list contains a cycle, fast pointer will inevitably lap and meet slow pointer.",
+      "If fast pointer hits null, list is acyclic; runs in O(N) time and O(1) space."
+    ],
+    "url": "https://leetcode.com/problems/linked-list-cycle/"
+  },
+  {
+    "id": 94,
+    "file": "5.cpp",
+    "classNum": "Solution8",
+    "lcNum": "LC 142",
+    "name": "Linked List Cycle II",
+    "category": "Linked List & Two Pointers",
+    "pattern": "Floyd's Cycle + Reset Pointer",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "First phase: run Floyd's Tortoise and Hare until slow and fast pointers collide.",
+      "Mathematical proof: distance from head to cycle entrance equals distance from meeting point to cycle entrance.",
+      "Second phase: reset slow pointer to head, keep fast pointer at meeting point.",
+      "Advance both pointers 1 step at a time; the node where they meet is the exact cycle entrance."
+    ],
+    "url": "https://leetcode.com/problems/linked-list-cycle-ii/"
+  },
+  {
+    "id": 95,
+    "file": "5.cpp",
+    "classNum": "Solution9",
+    "lcNum": "LC 876",
+    "name": "Middle of the Linked List",
+    "category": "Linked List & Two Pointers",
+    "pattern": "Slow/Fast Pointer",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Use two pointers (slow and fast) starting at head.",
+      "Slow pointer advances 1 node; Fast pointer advances 2 nodes.",
+      "When fast reaches null (even length) or fast->next is null (odd length), slow is at middle.",
+      "Single pass O(N) avoids two-pass length counting."
+    ],
+    "url": "https://leetcode.com/problems/middle-of-the-linked-list/"
+  },
+  {
+    "id": 96,
+    "file": "5.cpp",
+    "classNum": "Solution10",
+    "lcNum": "LC 19",
+    "name": "Remove Nth Node From End of List",
+    "category": "Linked List & Two Pointers",
+    "pattern": "Two-Pointer Gap Technique",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Use dummy head to cleanly handle edge case of removing the first node.",
+      "Advance fast pointer n + 1 steps ahead of slow pointer to establish fixed gap.",
+      "Advance both slow and fast pointers together until fast hits null.",
+      "slow->next points directly to target node; bypass target with slow->next = slow->next->next."
+    ],
+    "url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/"
+  },
+  {
+    "id": 97,
+    "file": "5.cpp",
+    "classNum": "Solution11",
+    "lcNum": "LC 143",
+    "name": "Reorder List",
+    "category": "Linked List",
+    "pattern": "Mid Find + Reverse + Interleave",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Step 1: Find middle of linked list using slow and fast pointers.",
+      "Step 2: Split list and reverse the second half completely.",
+      "Step 3: Interleave nodes alternately from first half and reversed second half.",
+      "In-place O(N) time and O(1) space modification without external arrays."
+    ],
+    "url": "https://leetcode.com/problems/reorder-list/"
+  },
+  {
+    "id": 98,
+    "file": "5.cpp",
+    "classNum": "Solution12",
+    "lcNum": "LC 234",
+    "name": "Palindrome Linked List",
+    "category": "Linked List",
+    "pattern": "Mid Find + Reverse + Compare",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Find middle of linked list using slow and fast pointers.",
+      "Reverse second half of list starting from middle node.",
+      "Compare values node-by-node between first half and reversed second half.",
+      "Optionally restore original list structure; achieves O(N) time and O(1) space."
+    ],
+    "url": "https://leetcode.com/problems/palindrome-linked-list/"
+  },
+  {
+    "id": 99,
+    "file": "5.cpp",
+    "classNum": "Solution13",
+    "lcNum": "LC 328",
+    "name": "Odd Even Linked List",
+    "category": "Linked List",
+    "pattern": "In-place Bucket Splitting",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Maintain two separate sublist pointers: odd head/tail and even head/tail.",
+      "Iterate list: odd->next = even->next; odd = odd->next; even->next = odd->next; even = even->next.",
+      "Splits odd-indexed and even-indexed nodes in-place in a single pass.",
+      "Connect odd tail to preserved even head at the end."
+    ],
+    "url": "https://leetcode.com/problems/odd-even-linked-list/"
+  },
+  {
+    "id": 100,
+    "file": "5.cpp",
+    "classNum": "Solution14",
+    "lcNum": "LC 24",
+    "name": "Swap Nodes in Pairs",
+    "category": "Linked List",
+    "pattern": "Adjacent Node Pointer Swap",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Use dummy head pointing to head of list.",
+      "Maintain prev pointer; identify first = prev->next and second = first->next.",
+      "Swap pointers: first->next = second->next; second->next = first; prev->next = second.",
+      "Advance prev to first and repeat while prev->next and prev->next->next exist."
+    ],
+    "url": "https://leetcode.com/problems/swap-nodes-in-pairs/"
+  },
+  {
+    "id": 101,
+    "file": "5.cpp",
+    "classNum": "Solution15",
+    "lcNum": "LC 61",
+    "name": "Rotate List",
+    "category": "Linked List",
+    "pattern": "Ring Formation & Modular Cut",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Traverse list to calculate total length and locate tail node.",
+      "Connect tail->next back to head to form a temporary circular ring.",
+      "Calculate effective rotations k = k % len; new tail is at index len - k - 1 from start.",
+      "Advance to new tail, set newHead = newTail->next, and sever newTail->next = null."
+    ],
+    "url": "https://leetcode.com/problems/rotate-list/"
+  },
+  {
+    "id": 102,
+    "file": "5.cpp",
+    "classNum": "Solution16",
+    "lcNum": "LC 86",
+    "name": "Partition List",
+    "category": "Linked List",
+    "pattern": "Two Dummy Heads (Less/GreaterEq)",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Create two dummy head chains: lessHead (nodes < x) and greaterHead (nodes >= x).",
+      "Traverse original list; append each node to lessTail or greaterTail based on val.",
+      "Sever greaterTail->next = null to prevent cycles.",
+      "Connect lessTail->next = greaterHead->next to merge both partitions preserving original relative order."
+    ],
+    "url": "https://leetcode.com/problems/partition-list/"
+  },
+  {
+    "id": 103,
+    "file": "5.cpp",
+    "classNum": "Solution17",
+    "lcNum": "LC 83",
+    "name": "Remove Duplicates from Sorted List",
+    "category": "Linked List",
+    "pattern": "Single Pass Skip",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "List is already sorted, so duplicate values are strictly adjacent.",
+      "Traverse with curr pointer; compare curr->val with curr->next->val.",
+      "If equal, bypass duplicate: curr->next = curr->next->next without advancing curr.",
+      "If different, advance curr = curr->next; runs in O(N) time and O(1) space."
+    ],
+    "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-list/"
+  },
+  {
+    "id": 104,
+    "file": "5.cpp",
+    "classNum": "Solution18",
+    "lcNum": "LC 82",
+    "name": "Remove Duplicates from Sorted List II",
+    "category": "Linked List",
+    "pattern": "Dummy Node + Skip Entire Runs",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Must remove all nodes that have duplicate numbers, leaving only distinct numbers.",
+      "Use dummy head pointing to head in case initial nodes are duplicates.",
+      "Detect consecutive identical values: while curr->next and curr->next->next have same val, advance.",
+      "If duplicates detected, link prev->next = curr->next->next; else advance prev."
+    ],
+    "url": "https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/"
+  },
+  {
+    "id": 105,
+    "file": "5.cpp",
+    "classNum": "Solution19",
+    "lcNum": "LC 203",
+    "name": "Remove Linked List Elements",
+    "category": "Linked List",
+    "pattern": "Dummy Node + Value Filter",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Use dummy head pointing to original list head to eliminate special case of removing head.",
+      "Traverse list with curr pointer starting at dummy.",
+      "If curr->next->val == target, unlink node: curr->next = curr->next->next.",
+      "Only advance curr = curr->next when no deletion occurred at the current step."
+    ],
+    "url": "https://leetcode.com/problems/remove-linked-list-elements/"
+  },
+  {
+    "id": 106,
+    "file": "5.cpp",
+    "classNum": "Solution20",
+    "lcNum": "LC 2",
+    "name": "Add Two Numbers",
+    "category": "Linked List & Math",
+    "pattern": "Dummy Node + Carry Propagation",
+    "time": "O(max(N, M))",
+    "space": "O(max(N, M))",
+    "intuition": [
+      "Simulate column-by-column addition starting from least significant digit (head).",
+      "Maintain running carry = sum / 10 and digit = sum % 10.",
+      "Continue loop while list1, list2, or non-zero carry remains.",
+      "Attach new digit node to dummy head; handles lists of unequal lengths cleanly."
+    ],
+    "url": "https://leetcode.com/problems/add-two-numbers/"
+  },
+  {
+    "id": 107,
+    "file": "5.cpp",
+    "classNum": "Solution21",
+    "lcNum": "LC 445",
+    "name": "Add Two Numbers II",
+    "category": "Linked List & Stack",
+    "pattern": "Stack Reversal + Carry Propagation",
+    "time": "O(N + M)",
+    "space": "O(N + M)",
+    "intuition": [
+      "Numbers are stored in most significant digit first order; cannot reverse inputs directly.",
+      "Push digits of list1 and list2 onto two separate stacks to access least significant digits first.",
+      "Pop from stacks, compute sum with carry, and prepend new nodes to result list.",
+      "Prepending new node (node->next = head; head = node) avoids reversing the final output list."
+    ],
+    "url": "https://leetcode.com/problems/add-two-numbers-ii/"
+  },
+  {
+    "id": 108,
+    "file": "5.cpp",
+    "classNum": "Solution22",
+    "lcNum": "LC 160",
+    "name": "Intersection of Two Linked Lists",
+    "category": "Linked List & Two Pointers",
+    "pattern": "Two-Pointer Switch-Path Alignment",
+    "time": "O(N + M)",
+    "space": "O(1)",
+    "intuition": [
+      "Two pointers ptrA and ptrB start at headA and headB respectively.",
+      "Advance each pointer 1 step; when ptrA reaches end, redirect it to headB; similarly ptrB to headA.",
+      "Both pointers travel total distance of lenA + lenB, equalizing path length differences.",
+      "Pointers will collide at intersection node, or both hit null if disjoint."
+    ],
+    "url": "https://leetcode.com/problems/intersection-of-two-linked-lists/"
+  },
+  {
+    "id": 109,
+    "file": "5.cpp",
+    "classNum": "Solution23",
+    "lcNum": "LC 138",
+    "name": "Copy List with Random Pointer",
+    "category": "Linked List",
+    "pattern": "Interleaving Clone Nodes",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Step 1: Interleave clone nodes immediately after original nodes (curr->next = clone).",
+      "Step 2: Assign random pointers for clones: curr->next->random = curr->random->next.",
+      "Step 3: Separate original list and cloned list by restoring original next pointers.",
+      "Achieves deep copy in O(N) time with O(1) extra auxiliary space."
+    ],
+    "url": "https://leetcode.com/problems/copy-list-with-random-pointer/"
+  },
+  {
+    "id": 110,
+    "file": "5.cpp",
+    "classNum": "Solution24",
+    "lcNum": "LC 430",
+    "name": "Flatten a Multilevel Doubly Linked List",
+    "category": "Linked List & DFS",
+    "pattern": "DFS Stack-Based Flattening",
+    "time": "O(N)",
+    "space": "O(N)",
+    "intuition": [
+      "Iterate through list; when a node with child pointer is encountered, flatten child branch.",
+      "Save curr->next into a stack or traverse to end of child chain.",
+      "Splice child chain directly between curr and curr->next, updating prev and next pointers.",
+      "Set child pointer to null; continue traversal along newly flattened chain."
+    ],
+    "url": "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/"
+  },
+  {
+    "id": 111,
+    "file": "5.cpp",
+    "classNum": "Solution25",
+    "lcNum": "LC 426",
+    "name": "Convert BST to Sorted Doubly Linked List",
+    "category": "BST & Linked List",
+    "pattern": "In-order Traversal + Node Relinking",
+    "time": "O(N)",
+    "space": "O(H)",
+    "intuition": [
+      "In-order traversal (left, root, right) of BST visits nodes in strictly ascending order.",
+      "Maintain prev pointer to most recently visited node and first pointer to smallest node.",
+      "Link prev->right = curr and curr->left = prev during in-order visit.",
+      "At end of traversal, close circular ring by linking first->left = prev and prev->right = first."
+    ],
+    "url": "https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/"
+  },
+  {
+    "id": 112,
+    "file": "5.cpp",
+    "classNum": "Solution26",
+    "lcNum": "LC 725",
+    "name": "Split Linked List in Parts",
+    "category": "Linked List",
+    "pattern": "Size Calc + Balanced Chunking",
+    "time": "O(N + K)",
+    "space": "O(K)",
+    "intuition": [
+      "Count total list length N to determine part sizes.",
+      "Base part size is N / k; the first N % k parts receive 1 extra node for even distribution.",
+      "Traverse list, chopping off sublists of computed lengths by severing tail->next = null.",
+      "Store each part head in result vector, padding with null pointers if k > N."
+    ],
+    "url": "https://leetcode.com/problems/split-linked-list-in-parts/"
+  },
+  {
+    "id": 113,
+    "file": "5.cpp",
+    "classNum": "Solution27",
+    "lcNum": "LC 1019",
+    "name": "Next Greater Node In Linked List",
+    "category": "Linked List & Monotonic Stack",
+    "pattern": "Stack (Monotonic) on Array Convert",
+    "time": "O(N)",
+    "space": "O(N)",
+    "intuition": [
+      "Convert linked list values into an array for indexed lookups.",
+      "Maintain a monotonic decreasing stack storing indices of elements.",
+      "For each value, pop indices with smaller values and record current value as their next greater.",
+      "Push current index to stack; unpopped indices default to 0."
+    ],
+    "url": "https://leetcode.com/problems/next-greater-node-in-linked-list/"
+  },
+  {
+    "id": 114,
+    "file": "5.cpp",
+    "classNum": "Solution28",
+    "lcNum": "LC 708",
+    "name": "Insert into a Sorted Circular Linked List",
+    "category": "Linked List",
+    "pattern": "Circular Traversal Edge Handling",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Traverse circular list looking for insertion slot: prev->val <= insertVal <= curr->val.",
+      "Also detect maximum-to-minimum boundary (prev->val > curr->val): insert if val is global min or max.",
+      "If entire cycle completes without condition match (all nodes equal), insert anywhere.",
+      "Splice new node between prev and curr: prev->next = new Node(insertVal, curr)."
+    ],
+    "url": "https://leetcode.com/problems/insert-into-a-sorted-circular-linked-list/"
+  },
+  {
+    "id": 115,
+    "file": "5.cpp",
+    "classNum": "Solution29",
+    "lcNum": "LC 1669",
+    "name": "Merge In Between Linked Lists",
+    "category": "Linked List",
+    "pattern": "Pointer Splice at Boundaries",
+    "time": "O(N + M)",
+    "space": "O(1)",
+    "intuition": [
+      "Traverse list1 to find node at index a - 1 (preA) and node at index b + 1 (postB).",
+      "Connect preA->next to head of list2.",
+      "Traverse to the tail of list2.",
+      "Connect list2 tail->next to postB; completes in-place splice in O(N + M) time."
+    ],
+    "url": "https://leetcode.com/problems/merge-in-between-linked-lists/"
+  },
+  {
+    "id": 116,
+    "file": "5.cpp",
+    "classNum": "Solution30",
+    "lcNum": "LC 237",
+    "name": "Delete Node in a Linked List",
+    "category": "Linked List",
+    "pattern": "Value/Next Copy Trick",
+    "time": "O(1)",
+    "space": "O(1)",
+    "intuition": [
+      "Only given access to target node to be deleted, not the head of the list.",
+      "Cannot modify predecessor pointer directly.",
+      "Copy value of next node into target node: node->val = node->next->val.",
+      "Bypass next node: node->next = node->next->next in O(1) time."
+    ],
+    "url": "https://leetcode.com/problems/delete-node-in-a-linked-list/"
+  },
+  {
+    "id": 117,
+    "file": "5.cpp",
+    "classNum": "Solution31",
+    "lcNum": "LC 707",
+    "name": "Design Linked List",
+    "category": "Linked List & Design",
+    "pattern": "Custom Doubly Implementation",
+    "time": "O(index)",
+    "space": "O(N)",
+    "intuition": [
+      "Implement custom doubly-linked list with dummy head and tail to eliminate boundary edge cases.",
+      "Maintain size counter to validate index bounds in O(1).",
+      "get(index): optimize traversal by starting from head if index < size/2, else from tail.",
+      "addAtIndex and deleteAtIndex relink prev and next pointers in O(index) time."
+    ],
+    "url": "https://leetcode.com/problems/design-linked-list/"
+  },
+  {
+    "id": 118,
+    "file": "5.cpp",
+    "classNum": "Solution32",
+    "lcNum": "LC 146",
+    "name": "LRU Cache",
+    "category": "Design & Hash Map",
+    "pattern": "Hash Map + Doubly-Linked List",
+    "time": "O(1) ops",
+    "space": "O(C)",
+    "intuition": [
+      "Requires O(1) get and put operations; combine Hash Map with Doubly-Linked List.",
+      "Hash map stores key -> Node pointer; Doubly linked list maintains access recency with dummy head and tail.",
+      "On access (get or put overwrite), splice node and move it directly behind head (most recently used).",
+      "On capacity overflow, evict node immediately preceding tail (least recently used) and erase from map."
+    ],
+    "url": "https://leetcode.com/problems/lru-cache/"
+  },
+  {
+    "id": 119,
+    "file": "5.cpp",
+    "classNum": "Solution33",
+    "lcNum": "LC 460",
+    "name": "LFU Cache",
+    "category": "Design & Hash Map",
+    "pattern": "Hash Map + Doubly-Linked Buckets",
+    "time": "O(1) ops",
+    "space": "O(C)",
+    "intuition": [
+      "Track access frequency and recency: combine key-to-node map with freq-to-doubly-linked-list map.",
+      "Maintain minFreq variable representing current minimum frequency across all stored items.",
+      "On access, increment item's frequency, move it to new frequency list, and update minFreq if needed.",
+      "On eviction, remove least recently used item from minFreq list and clean up in O(1) time."
+    ],
+    "url": "https://leetcode.com/problems/lfu-cache/"
+  },
+  {
+    "id": 120,
+    "file": "5.cpp",
+    "classNum": "Solution34",
+    "lcNum": "LC 287",
+    "name": "Find the Duplicate Number",
+    "category": "Arrays & Linked List",
+    "pattern": "Array-as-Linked-List Floyd Cycle",
+    "time": "O(N)",
+    "space": "O(1)",
+    "intuition": [
+      "Array of size N + 1 with values in range 1..N forms a functional graph where i -> nums[i].",
+      "Since at least two indices point to same value, a cycle must exist.",
+      "Apply Floyd's Tortoise and Hare cycle detection algorithm directly on array indices.",
+      "Phase 1 finds collision; Phase 2 resets one pointer to start and steps to find cycle entrance (duplicate)."
+    ],
+    "url": "https://leetcode.com/problems/find-the-duplicate-number/"
+  },
+  {
+    "id": 121,
+    "file": "5.cpp",
+    "classNum": "Solution35",
+    "lcNum": "LC 1472",
+    "name": "Design Browser History",
+    "category": "Design & Linked List",
+    "pattern": "Doubly-Linked List / Two Stacks",
+    "time": "O(1) avg",
+    "space": "O(N)",
+    "intuition": [
+      "Doubly-linked list or dynamic array with current pointer efficiently simulates browser history.",
+      "visit(url): clear forward history, append new url, and advance current pointer.",
+      "back(steps): retreat current pointer by min(steps, stepsAvailableToRoot).",
+      "forward(steps): advance current pointer by min(steps, stepsAvailableToTail) in O(steps) or O(1) array."
+    ],
+    "url": "https://leetcode.com/problems/design-browser-history/"
+  }
+]

@@ -1,6 +1,6 @@
-# Master Problem Summary & Complexity Reference (Notebooks 1–5)
+# Master Problem Summary & Complexity Reference (Notebooks 1–6)
 
-A unified reference catalog of **109 unique Data Structures & Algorithms problems** consolidated across `notebook-1.cpp` through `notebook-5.cpp` (all problems existing in `Modules/` have been deduplicated and removed). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A unified reference catalog of **114 unique Data Structures & Algorithms problems** consolidated across `notebook-1.cpp` through `notebook-6.cpp` (all problems existing in `Modules/` have been deduplicated and removed). Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
 
 ## High-Level Problem Distribution
 
@@ -11,7 +11,8 @@ A unified reference catalog of **109 unique Data Structures & Algorithms problem
 | **Notebook 3** | Dynamic Programming, Knapsacks, Supersequences & Slope Trick | **22** |
 | **Notebook 4** | Dynamic Intervals, Sweep-Line, Difference Arrays & Specialized Sorting | **21** |
 | **Notebook 5** | System Design, Online Data Streams, Caches (LRU/TTL) & Concurrency | **20** |
-| **TOTAL** | | **109** |
+| **Notebook 6** | Bucket Windows, Two-Pointer Shifts, Tree Reconstructions & Factor DSU | **10** |
+| **TOTAL** | | **119** |
 
 ---
 
@@ -158,3 +159,20 @@ A unified reference catalog of **109 unique Data Structures & Algorithms problem
 | **18** | Majority Checker in Subarray (LC 1154) | Boyer-Moore Random Sampling + UB | `O(K log N)` per query | `O(N)` |
 | **19** | Design Authentication Manager (LC 1797) | Hash Map Expiry with Lazy Purge | `O(1)` gen, `O(N)` count | `O(T)` |
 | **20** | Multi-Policy Online Cache Engine (LRU/TTL) | DLL + Hash Map + Expiry Min-Heap | `O(1)` avg get/put | `O(Cap)` |
+
+---
+
+### Notebook 6: Bucket Windows, Two-Pointer Shifts, Tree Reconstructions & Factor DSU
+
+| # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | Contains Duplicate III (LeetCode 220) | Bucket Sort / Width Partitioning | `O(N)` | `O(K)` |
+| **2** | Move Zeroes (LeetCode 283) | Two Pointers (Slow/Fast In-Place) | `O(N)` | `O(1)` |
+| **3** | Construct Tree from Pre & Post (LC 889) | Divide & Conquer Subtree Partition | `O(N^2)` | `O(N)` |
+| **4** | Numbers With Same Consec Diff (LC 967) | Digit DP / Multi-Branching DFS | `O(2^N)` | `O(2^N)` |
+| **5** | Largest Component by Common Factor (LC 952) | DSU + Prime Factor Indexing | `O(N sqrt(MaxVal))` | `O(N + P)` |
+| **6** | Generalized K-Sum (LeetCode 18 / 15 / 1) | Sort + Pruning + 2-Pointer Base | `O(N^(K-1))` | `O(K)` |
+| **7** | Delete Odd-Valued Nodes from Linked List | Dummy Node + Single-Pass Deletion | `O(N)` | `O(1)` |
+| **8** | Equalize Heights with Asymmetric Costs | Ternary Search on Convex Cost | `O(N log(maxH - minH))` | `O(1)` |
+| **9** | In-Place BST to Doubly Linked List | In-Order Traversal In-Place Rewire | `O(N)` | `O(H)` |
+| **10** | Median of BST (Morris Traversal) | 2-Pass Morris In-Order Threading | `O(N)` | `O(1)` |

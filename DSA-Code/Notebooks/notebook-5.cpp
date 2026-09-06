@@ -55,7 +55,7 @@ const ll MOD = 1e9 + 7;
  | 11 | Snapshot Array (LeetCode 1146)              | History Vectors + Binary Search   | O(log S) | O(N + U) |
  | 12 | Stock Price Fluctuation (LeetCode 2034)     | Hash Map + Balanced Multiset      | O(log N) | O(N)     |
  | 13 | Seat Reservation Manager (LeetCode 1845)    | Min-Heap of Free Seat IDs         | O(log N) | O(N)     |
- | 14 | Design Underground System (LeetCode 1396)   | Dual Hash Maps (Transit & Stats)  | O(1) all | O(P + S2)|
+ | 14 | Design Underground System (LeetCode 1396)   | Dual Hash Maps (Transit & Stats)  | O(1) all | O(P + S^2)|
  | 15 | Number of Recent Calls (LeetCode 933)       | Sliding Window Queue [t-3000, t]  | O(1) avg | O(W)     |
  | 16 | Design Leaderboard (LeetCode 1244)          | Hash Map + Min-Heap Top-K         | O(N logK)| O(P)     |
  | 17 | Bounded Blocking Queue (LeetCode 1188)      | Mutex + Dual Condition Variables  | O(1) all | O(Cap)   |
@@ -70,31 +70,35 @@ const ll MOD = 1e9 + 7;
 // ============================================================
 
 class MyHashMap {
-    static const int SIZE = 1000;
-    vector<list<pair<int, int>>> buckets;
-    int hash(int key) { return key % SIZE; }
+    static const int SZ = 1000;
+    vector<list<pair<int, int>>> b;
+    int h(int k) { return k % SZ; }
 public:
-    MyHashMap() : buckets(SIZE) {}
-    void put(int key, int value) {
-        int idx = hash(key);
-        for (auto& [k, v] : buckets[idx]) if (k == key) { v = value; return; }
-        buckets[idx].push_back({key, value});
+    MyHashMap() : b(SZ) {}
+    void put(int k, int v) {
+        int idx = h(k);
+        for (auto& [key, val] : b[idx]) if (key == k) { val = v; return; }
+        b[idx].push_back({k, v});
     }
-    int get(int key) {
-        for (auto& [k, v] : buckets[hash(key)]) if (k == key) return v;
+    int get(int k) {
+        for (auto& [key, val] : b[h(k)]) if (key == k) return val;
         return -1;
     }
-    void remove(int key) {
-        int idx = hash(key);
-        for (auto it = buckets[idx].begin(); it != buckets[idx].end(); ++it)
-            if (it->first == key) { buckets[idx].erase(it); return; }
+    void remove(int k) {
+        int idx = h(k);
+        for (auto it = b[idx].begin(); it != b[idx].end(); ++it)
+            if (it->first == k) { b[idx].erase(it); return; }
     }
 };
 // Interview Explanation:
 // - Problem Statement: Implement a basic HashMap with put, get, and remove operations (LC 706).
-// - Approach: Chaining via array of linked lists (buckets).
-// - Intuition: Hash function maps keys to bucket indices; separate chaining handles collisions.
-// - Complexity: Time: O(1) average, Space: O(N).
+// - Approach: Separate Chaining via array of linked lists (buckets).
+// - Intuition:
+//   * A hash map maps arbitrary integer keys to bounded array slots using modulo hashing `k % SZ`.
+//   * Hash collisions occur when different keys hash to the same bucket index.
+//   * Separate chaining resolves collisions by storing key-value pairs in a linked list per bucket.
+//   * Operations scan the target bucket: update value if key exists, append if new, erase if removed.
+// - Complexity: Time: O(1) average per op, Space: O(N).
 
 
 // ============================================================
@@ -102,26 +106,30 @@ public:
 // ============================================================
 
 class SummaryRanges {
-    set<int> nums;
+    set<int> st;
 public:
     SummaryRanges() {}
-    void addNum(int val) { nums.insert(val); }
-    vector<vector<int>> getIntervals() {
-        if (nums.empty()) return {};
-        vector<vector<int>> intervals;
-        int start = *nums.begin(), end = start;
-        for (int x : nums) {
-            if (x == end + 1) end = x;
-            else if (x != start) { intervals.push_back({start, end}); start = end = x; }
+    void addNum(int x) { st.insert(x); }
+    vvi getIntervals() {
+        if (st.empty()) return {};
+        vvi ans;
+        int s = *st.begin(), e = s;
+        for (int x : st) {
+            if (x == e + 1) e = x;
+            else if (x != s) { ans.push_back({s, e}); s = e = x; }
         }
-        intervals.push_back({start, end});
-        return intervals;
+        ans.push_back({s, e});
+        return ans;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Maintain disjoint intervals as numbers are added dynamically (LC 352).
 // - Approach: Sorted Set + Linear Interval grouping.
-// - Intuition: Iterate through sorted unique values and group consecutive numbers into [start, end].
+// - Intuition:
+//   * An ordered set automatically stores elements in ascending unique order with logarithmic insertion.
+//   * Traversing the sorted elements from left to right allows merging contiguous integers into closed intervals [s, e].
+//   * If current element x equals e + 1, it extends the current interval to e = x.
+//   * Otherwise, save the completed interval [s, e] and start a new range with s = e = x.
 // - Complexity: Time: O(log N) for addNum, O(N) for getIntervals, Space: O(N).
 
 
@@ -129,26 +137,30 @@ public:
 // 3. WATER AND JUG PROBLEM (BFS) — LeetCode 365
 // ============================================================
 
-bool canMeasureWater(int x, int y, int target) {
-    if (target > x + y) return false;
+bool canMeasureWater(int x, int y, int t) {
+    if (t > x + y) return false;
     queue<pair<int, int>> q; set<pair<int, int>> vis;
     q.push({0, 0}); vis.insert({0, 0});
     while (!q.empty()) {
         auto [a, b] = q.front(); q.pop();
-        if (a + b == target) return true;
-        vector<pair<int, int>> next = {
+        if (a + b == t) return true;
+        vector<pair<int, int>> nxt = {
             {x, b}, {a, y}, {0, b}, {a, 0},
             {max(0, a - (y - b)), min(y, b + a)}, {min(x, a + b), max(0, b - (x - a))}
         };
-        for (auto state : next) if (!vis.count(state)) { vis.insert(state); q.push(state); }
+        for (auto state : nxt) if (!vis.count(state)) { vis.insert(state); q.push(state); }
     }
     return false;
 }
 // Interview Explanation:
 // - Problem Statement: Determine if exactly target liters can be measured using two jugs (LC 365).
-// - Approach: BFS state-space search over 6 transitions (fill, empty, pour).
-// - Intuition: Model each jug state as (a, b) and traverse reachable states using BFS with visited set.
-// - Complexity: Time: O(x * y), Space: O(x * y).
+// - Approach: BFS state-space search over 6 deterministic transitions.
+// - Intuition:
+//   * State of the system at any moment is uniquely identified by the pair (a, b) of current water volumes in both jugs.
+//   * From state (a, b), exactly 6 operations are possible: fill jug 1, fill jug 2, empty jug 1, empty jug 2, pour jug 1 -> 2, pour jug 2 -> 1.
+//   * Breadth-First Search (BFS) explores the state graph level-by-level with a visited set preventing infinite cycles.
+//   * Target is achievable as soon as any reachable state has total volume a + b == target.
+// - Complexity: Time: O(X * Y), Space: O(X * Y).
 
 
 // ============================================================
@@ -157,15 +169,15 @@ bool canMeasureWater(int x, int y, int target) {
 
 class MovingAverage {
     queue<int> q;
-    int maxSize;
+    int cap;
     double sum;
 public:
-    MovingAverage(int size) : maxSize(size), sum(0.0) {}
+    MovingAverage(int sz) : cap(sz), sum(0.0) {}
 
-    double next(int val) {
-        q.push(val);
-        sum += val;
-        if ((int)q.size() > maxSize) {
+    double next(int x) {
+        q.push(x);
+        sum += x;
+        if ((int)q.size() > cap) {
             sum -= q.front();
             q.pop();
         }
@@ -175,7 +187,11 @@ public:
 // Interview Explanation:
 // - Problem Statement: Calculate the moving average of integers in sliding window of size w (LeetCode 346).
 // - Approach: Sliding FIFO Queue with Running Window Sum.
-// - Intuition: Push incoming values and add to running sum; when size exceeds w, pop oldest from queue.
+// - Intuition:
+//   * Recomputing the sum over the window naively takes O(W) per call.
+//   * Maintain a running sum and a FIFO queue of window elements.
+//   * Push incoming value x and add it to sum.
+//   * If queue size exceeds capacity, subtract the oldest element `q.front()` from sum and pop it from queue, achieving strict O(1) time.
 // - Complexity: Time: O(1) per `next`, Space: O(W).
 
 
@@ -185,33 +201,37 @@ public:
 
 class FirstUnique {
     list<int> dll;
-    unordered_map<int, list<int>::iterator> nodeMap;
-    unordered_set<int> duplicates;
+    unordered_map<int, list<int>::iterator> mp;
+    unordered_set<int> dup;
 public:
-    FirstUnique(vector<int>& nums) {
-        for (int x : nums) add(x);
+    FirstUnique(vi& a) {
+        for (int x : a) add(x);
     }
 
     int showFirstUnique() {
         return dll.empty() ? -1 : dll.front();
     }
 
-    void add(int value) {
-        if (duplicates.count(value)) return;
-        if (nodeMap.count(value)) {
-            dll.erase(nodeMap[value]);
-            nodeMap.erase(value);
-            duplicates.insert(value);
+    void add(int x) {
+        if (dup.count(x)) return;
+        if (mp.count(x)) {
+            dll.erase(mp[x]);
+            mp.erase(x);
+            dup.insert(x);
         } else {
-            dll.push_back(value);
-            nodeMap[value] = prev(dll.end());
+            dll.push_back(x);
+            mp[x] = prev(dll.end());
         }
     }
 };
 // Interview Explanation:
 // - Problem Statement: Maintain data stream to return first unique integer added in O(1) (LeetCode 1429).
-// - Approach: Doubly Linked List + Hash Map (Iterator Locator) + Duplicate Set.
-// - Intuition: Store unique items in DLL order; on repeat, erase node from DLL via stored iterator.
+// - Approach: Doubly Linked List + Hash Map (Node Iterator Locator) + Duplicate Set.
+// - Intuition:
+//   * Maintain ordering of currently unique elements in a doubly linked list (DLL) so the first unique is always at `dll.front()`.
+//   * A hash map `mp` maps each unique value to its iterator in the DLL for O(1) splice/erasure.
+//   * A set `dup` stores numbers that have already appeared more than once.
+//   * When adding x: if in `dup`, ignore; if already in `mp`, erase from DLL, remove from map, and add to `dup`; else push to DLL.
 // - Complexity: Time: O(1) for both `showFirstUnique` and `add`, Space: O(N).
 
 
@@ -220,15 +240,15 @@ public:
 // ============================================================
 
 class StreamFirstNonRepeatingChar {
-    int freq[26] = {0};
+    int cnt[26] = {0};
     queue<char> q;
 public:
     StreamFirstNonRepeatingChar() {}
 
     char add(char c) {
-        freq[c - 'a']++;
+        cnt[c - 'a']++;
         q.push(c);
-        while (!q.empty() && freq[q.front() - 'a'] > 1) {
+        while (!q.empty() && cnt[q.front() - 'a'] > 1) {
             q.pop();
         }
         return q.empty() ? '#' : q.front();
@@ -237,7 +257,11 @@ public:
 // Interview Explanation:
 // - Problem Statement: Find first non-repeating character after reading each character in stream.
 // - Approach: Frequency Array + Queue with Lazy Pop.
-// - Intuition: Increment frequency and push to queue; discard front elements whose frequency > 1.
+// - Intuition:
+//   * Append every incoming character to a FIFO queue and increment its frequency counter.
+//   * Characters at the front of the queue that have frequency > 1 are permanently invalid and will never become unique again.
+//   * Pop stale characters lazily from the front until the front character has frequency == 1 or queue becomes empty.
+//   * Each character enters and leaves the queue at most once, yielding O(1) amortized cost.
 // - Complexity: Time: O(1) amortized per character, Space: O(1).
 
 
@@ -246,38 +270,42 @@ public:
 // ============================================================
 
 class HitCounter {
-    int times[300];
-    int hits[300];
+    int t[300];
+    int h[300];
 public:
     HitCounter() {
-        fill(times, times + 300, 0);
-        fill(hits, hits + 300, 0);
+        fill(t, t + 300, 0);
+        fill(h, h + 300, 0);
     }
 
-    void hit(int timestamp) {
-        int idx = timestamp % 300;
-        if (times[idx] != timestamp) {
-            times[idx] = timestamp;
-            hits[idx] = 1;
+    void hit(int ts) {
+        int idx = ts % 300;
+        if (t[idx] != ts) {
+            t[idx] = ts;
+            h[idx] = 1;
         } else {
-            hits[idx]++;
+            h[idx]++;
         }
     }
 
-    int getHits(int timestamp) {
-        int total = 0;
+    int getHits(int ts) {
+        int tot = 0;
         for (int i = 0; i < 300; i++) {
-            if (timestamp - times[i] < 300) {
-                total += hits[i];
+            if (ts - t[i] < 300) {
+                tot += h[i];
             }
         }
-        return total;
+        return tot;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Count number of hits received in past 5 minutes (300 seconds) (LeetCode 362).
 // - Approach: Circular Fixed-Size Buffer (300 Buckets).
-// - Intuition: Array of size 300 indexed by `timestamp % 300`. Reset count if timestamp is outdated.
+// - Intuition:
+//   * Storing individual hit timestamps in a queue can consume unbounded memory under heavy traffic bursts.
+//   * A circular buffer of size 300 aggregates hits occurring within the same second via index `ts % 300`.
+//   * When recording a hit, if `t[idx]` does not match `ts`, the slot holds stale data from 300+ seconds ago; overwrite `t[idx] = ts` and reset `h[idx] = 1`.
+//   * Summing active hits with `ts - t[i] < 300` across all 300 slots takes constant O(1) time and memory.
 // - Complexity: Time: O(1) for `hit`, O(1) for `getHits`, Space: O(1).
 
 
@@ -286,13 +314,13 @@ public:
 // ============================================================
 
 class Logger {
-    unordered_map<string, int> msgTimestamps;
+    unordered_map<string, int> mp;
 public:
     Logger() {}
 
-    bool shouldPrintMessage(int timestamp, string message) {
-        if (!msgTimestamps.count(message) || timestamp >= msgTimestamps[message]) {
-            msgTimestamps[message] = timestamp + 10;
+    bool shouldPrintMessage(int ts, string s) {
+        if (!mp.count(s) || ts >= mp[s]) {
+            mp[s] = ts + 10;
             return true;
         }
         return false;
@@ -301,7 +329,10 @@ public:
 // Interview Explanation:
 // - Problem Statement: Print message only if not printed in last 10 seconds (LeetCode 359).
 // - Approach: Hash Map with Next Available Timestamp.
-// - Intuition: Store earliest timestamp at which message is eligible to print again.
+// - Intuition:
+//   * Map each unique string message to the earliest timestamp at which it is eligible to be printed again.
+//   * If message s is absent or `ts >= mp[s]`, allow printing and update threshold to `ts + 10`.
+//   * Otherwise, the message is throttled; return false without modifying the threshold.
 // - Complexity: Time: O(1) per message, Space: O(M).
 
 
@@ -310,64 +341,64 @@ public:
 // ============================================================
 
 class FrontMiddleBackQueue {
-    deque<int> left, right;
+    deque<int> l, r;
 
     void balance() {
-        if (left.size() > right.size() + 1) {
-            right.push_front(left.back());
-            left.pop_back();
-        } else if (left.size() < right.size()) {
-            left.push_back(right.front());
-            right.pop_front();
+        if (l.size() > r.size() + 1) {
+            r.push_front(l.back());
+            l.pop_back();
+        } else if (l.size() < r.size()) {
+            l.push_back(r.front());
+            r.pop_front();
         }
     }
 public:
     FrontMiddleBackQueue() {}
 
     void pushFront(int val) {
-        left.push_front(val);
+        l.push_front(val);
         balance();
     }
 
     void pushMiddle(int val) {
-        if (left.size() > right.size()) {
-            right.push_front(left.back());
-            left.pop_back();
+        if (l.size() > r.size()) {
+            r.push_front(l.back());
+            l.pop_back();
         }
-        left.push_back(val);
+        l.push_back(val);
         balance();
     }
 
     void pushBack(int val) {
-        right.push_back(val);
+        r.push_back(val);
         balance();
     }
 
     int popFront() {
-        if (left.empty()) return -1;
-        int val = left.front();
-        left.pop_front();
+        if (l.empty()) return -1;
+        int val = l.front();
+        l.pop_front();
         balance();
         return val;
     }
 
     int popMiddle() {
-        if (left.empty()) return -1;
-        int val = left.back();
-        left.pop_back();
+        if (l.empty()) return -1;
+        int val = l.back();
+        l.pop_back();
         balance();
         return val;
     }
 
     int popBack() {
-        if (left.empty()) return -1;
+        if (l.empty()) return -1;
         int val;
-        if (right.empty()) {
-            val = left.back();
-            left.pop_back();
+        if (r.empty()) {
+            val = l.back();
+            l.pop_back();
         } else {
-            val = right.back();
-            right.pop_back();
+            val = r.back();
+            r.pop_back();
         }
         balance();
         return val;
@@ -375,8 +406,12 @@ public:
 };
 // Interview Explanation:
 // - Problem Statement: Design a queue supporting push/pop at front, middle, and back in O(1) (LeetCode 1670).
-// - Approach: Two Balanced Deques (`left` and `right`).
-// - Intuition: Middle element is always `left.back()`. Maintain balance invariant across both deques.
+// - Approach: Two Balanced Deques (`l` and `r`).
+// - Intuition:
+//   * A single array or linked list cannot support O(1) middle insertions and deletions.
+//   * Splitting elements into two halves `l` and `r` keeps the middle boundary accessible at `l.back()` or `r.front()`.
+//   * Maintain invariant: `l.size() == r.size()` or `l.size() == r.size() + 1`.
+//   * Rebalancing transfers a single element across the boundary in O(1) whenever size disparity exceeds 1.
 // - Complexity: Time: O(1) for all operations, Space: O(N).
 
 
@@ -386,71 +421,75 @@ public:
 
 class MKAverage {
     int m, k;
-    queue<int> stream;
-    multiset<int> left, mid, right;
-    long long midSum;
+    queue<int> q;
+    multiset<int> l, m_st, r_st;
+    ll sum;
 
-    void add(int num) {
-        left.insert(num);
-        if ((int)left.size() > k) {
-            auto it = prev(left.end());
-            mid.insert(*it);
-            midSum += *it;
-            left.erase(it);
+    void add(int x) {
+        l.insert(x);
+        if ((int)l.size() > k) {
+            auto it = prev(l.end());
+            m_st.insert(*it);
+            sum += *it;
+            l.erase(it);
         }
-        if ((int)mid.size() > m - 2 * k) {
-            auto it = prev(mid.end());
-            midSum -= *it;
-            right.insert(*it);
-            mid.erase(it);
+        if ((int)m_st.size() > m - 2 * k) {
+            auto it = prev(m_st.end());
+            sum -= *it;
+            r_st.insert(*it);
+            m_st.erase(it);
         }
     }
 
-    void remove(int num) {
-        if (num <= *prev(left.end())) {
-            left.erase(left.find(num));
-            auto it = mid.begin();
-            left.insert(*it);
-            midSum -= *it;
-            mid.erase(it);
-            auto it2 = right.begin();
-            mid.insert(*it2);
-            midSum += *it2;
-            right.erase(it2);
-        } else if (num <= *prev(mid.end())) {
-            mid.erase(mid.find(num));
-            midSum -= num;
-            auto it = right.begin();
-            mid.insert(*it);
-            midSum += *it;
-            right.erase(it);
+    void remove(int x) {
+        if (x <= *prev(l.end())) {
+            l.erase(l.find(x));
+            auto it = m_st.begin();
+            l.insert(*it);
+            sum -= *it;
+            m_st.erase(it);
+            auto it2 = r_st.begin();
+            m_st.insert(*it2);
+            sum += *it2;
+            r_st.erase(it2);
+        } else if (x <= *prev(m_st.end())) {
+            m_st.erase(m_st.find(x));
+            sum -= x;
+            auto it = r_st.begin();
+            m_st.insert(*it);
+            sum += *it;
+            r_st.erase(it);
         } else {
-            right.erase(right.find(num));
+            r_st.erase(r_st.find(x));
         }
     }
 public:
-    MKAverage(int m, int k) : m(m), k(k), midSum(0) {}
+    MKAverage(int m, int k) : m(m), k(k), sum(0) {}
 
-    void addElement(int num) {
-        stream.push(num);
-        if ((int)stream.size() <= m) {
-            add(num);
+    void addElement(int x) {
+        q.push(x);
+        if ((int)q.size() <= m) {
+            add(x);
         } else {
-            add(num);
-            remove(stream.front());
-            stream.pop();
+            add(x);
+            remove(q.front());
+            q.pop();
         }
     }
 
     int calculateMKAverage() {
-        if ((int)stream.size() < m) return -1;
-        return midSum / (m - 2 * k);
+        if ((int)q.size() < m) return -1;
+        return sum / (m - 2 * k);
     }
 };
 // Interview Explanation:
 // - Problem Statement: Calculate average of smallest m elements after removing k smallest and k largest (LeetCode 1825).
-// - Approach: Three Multisets (`left`, `mid`, `right`) + Sliding Queue of size m.
-// - Intuition: Maintain running sum of middle multiset `midSum`; cascade elements across set boundaries.
+// - Approach: Three Balanced Multisets (`l`, `m_st`, `r_st`) + Sliding FIFO Queue.
+// - Intuition:
+//   * The last m elements are partitioned into three contiguous sorted partitions: `l` (size k), `m_st` (size m - 2k), and `r_st` (size k).
+//   * A running scalar `sum` maintains the exact sum of elements in `m_st`.
+//   * Adding/removing an element shifts boundary elements between adjacent multisets to maintain fixed target sizes.
+//   * Calculating MK average runs in O(1) via integer division `sum / (m - 2 * k)`.
 // - Complexity: Time: O(log M) per `addElement`, O(1) for `calculateMKAverage`, Space: O(M).
 
 
@@ -459,38 +498,42 @@ public:
 // ============================================================
 
 class SnapshotArray {
-    vector<vector<pair<int, int>>> history;
-    int snapCount;
+    vector<vector<pair<int, int>>> hist;
+    int snapId;
 public:
-    SnapshotArray(int length) : history(length), snapCount(0) {
-        for (int i = 0; i < length; i++) {
-            history[i].push_back({0, 0});
+    SnapshotArray(int len) : hist(len), snapId(0) {
+        for (int i = 0; i < len; i++) {
+            hist[i].push_back({0, 0});
         }
     }
 
-    void set(int index, int val) {
-        if (history[index].back().first == snapCount) {
-            history[index].back().second = val;
+    void set(int idx, int val) {
+        if (hist[idx].back().first == snapId) {
+            hist[idx].back().second = val;
         } else {
-            history[index].push_back({snapCount, val});
+            hist[idx].push_back({snapId, val});
         }
     }
 
     int snap() {
-        return snapCount++;
+        return snapId++;
     }
 
-    int get(int index, int snap_id) {
-        auto& hist = history[index];
-        auto it = upper_bound(hist.begin(), hist.end(), make_pair(snap_id, INT_MAX));
+    int get(int idx, int id) {
+        auto& h = hist[idx];
+        auto it = upper_bound(h.begin(), h.end(), make_pair(id, INT_MAX));
         return prev(it)->second;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Array supporting set, snap, and historical snapshot queries (LeetCode 1146).
 // - Approach: History Vectors + Binary Search (`upper_bound`).
-// - Intuition: Record `{snap_id, val}` only when mutated; binary search returns most recent record <= snap_id.
-// - Complexity: Time: O(1) set/snap, O(log S) get, Space: O(N + U).
+// - Intuition:
+//   * Storing a complete copy of the array on each snap consumes O(N * S) memory and causes TLE.
+//   * Instead, store change history per index: a list of `{snap_id, val}` pairs.
+//   * Mutating a value appends `{snap_id, val}` or updates the trailing entry if snap_id matches current epoch.
+//   * Querying snapshot id uses binary search (`upper_bound`) to find the latest version recorded at or before id.
+// - Complexity: Time: O(1) set/snap, O(log S) get, Space: O(N + Total Mutates).
 
 
 // ============================================================
@@ -498,38 +541,42 @@ public:
 // ============================================================
 
 class StockPrice {
-    unordered_map<int, int> timestampPriceMap;
-    multiset<int> prices;
-    int latestTimestamp;
+    unordered_map<int, int> mp;
+    multiset<int> st;
+    int maxT;
 public:
-    StockPrice() : latestTimestamp(0) {}
+    StockPrice() : maxT(0) {}
 
-    void update(int timestamp, int price) {
-        latestTimestamp = max(latestTimestamp, timestamp);
-        if (timestampPriceMap.count(timestamp)) {
-            int oldPrice = timestampPriceMap[timestamp];
-            prices.erase(prices.find(oldPrice));
+    void update(int ts, int price) {
+        maxT = max(maxT, ts);
+        if (mp.count(ts)) {
+            int old = mp[ts];
+            st.erase(st.find(old));
         }
-        timestampPriceMap[timestamp] = price;
-        prices.insert(price);
+        mp[ts] = price;
+        st.insert(price);
     }
 
     int current() {
-        return timestampPriceMap[latestTimestamp];
+        return mp[maxT];
     }
 
     int maximum() {
-        return *prices.rbegin();
+        return *st.rbegin();
     }
 
     int minimum() {
-        return *prices.begin();
+        return *st.begin();
     }
 };
 // Interview Explanation:
 // - Problem Statement: Process stock prices with corrections; query current, max, and min prices (LeetCode 2034).
 // - Approach: Hash Map + Balanced Multiset.
-// - Intuition: Map tracks `{timestamp -> price}`; multiset keeps prices sorted for O(1) min/max queries.
+// - Intuition:
+//   * A hash map tracks current mappings `{timestamp -> price}`.
+//   * Updates can modify previously entered timestamps (out of order price corrections).
+//   * When a timestamp is revised, erase one instance of its old price from multiset and insert the new price.
+//   * Track `maxT` for O(1) current price lookup; multiset endpoints yield O(1) maximum (`*st.rbegin()`) and minimum (`*st.begin()`).
 // - Complexity: Time: O(log N) for `update`, O(1) for `current`, `max`, `min`, Space: O(N).
 
 
@@ -538,27 +585,31 @@ public:
 // ============================================================
 
 class SeatManager {
-    priority_queue<int, vector<int>, greater<int>> freeSeats;
+    priority_queue<int, vector<int>, greater<int>> pq;
 public:
     SeatManager(int n) {
-        for (int i = 1; i <= n; i++) freeSeats.push(i);
+        for (int i = 1; i <= n; i++) pq.push(i);
     }
 
     int reserve() {
-        int seat = freeSeats.top();
-        freeSeats.pop();
-        return seat;
+        int s = pq.top();
+        pq.pop();
+        return s;
     }
 
-    void unreserve(int seatNumber) {
-        freeSeats.push(seatNumber);
+    void unreserve(int s) {
+        pq.push(s);
     }
 };
 // Interview Explanation:
 // - Problem Statement: Manage reservations for n seats, always assigning lowest-numbered free seat (LeetCode 1845).
 // - Approach: Min-Heap of Available Seat IDs.
-// - Intuition: Min-heap guarantees O(log N) retrieval of lowest available seat number.
-// - Complexity: Time: O(log N) per op, Space: O(N).
+// - Intuition:
+//   * Seats must always be assigned in strictly ascending numerical order.
+//   * A min-heap (`std::greater<int>`) maintains free seat numbers.
+//   * `reserve()` pops the minimum seat number in O(log N).
+//   * `unreserve(s)` re-inserts seat s into the min-heap in O(log N).
+// - Complexity: Time: O(log N) per operation, Space: O(N).
 
 
 // ============================================================
@@ -566,35 +617,39 @@ public:
 // ============================================================
 
 class UndergroundSystem {
-    unordered_map<int, pair<string, int>> checkInMap;
-    unordered_map<string, pair<long long, int>> routeStats;
+    unordered_map<int, pair<string, int>> inMp;
+    unordered_map<string, pair<ll, int>> statMp;
 public:
     UndergroundSystem() {}
 
-    void checkIn(int id, string stationName, int t) {
-        checkInMap[id] = {stationName, t};
+    void checkIn(int id, string sName, int t) {
+        inMp[id] = {sName, t};
     }
 
-    void checkOut(int id, string stationName, int t) {
-        auto [startStation, startTime] = checkInMap[id];
-        checkInMap.erase(id);
+    void checkOut(int id, string sName, int t) {
+        auto [sStation, sTime] = inMp[id];
+        inMp.erase(id);
 
-        string route = startStation + ">" + stationName;
-        routeStats[route].first += (t - startTime);
-        routeStats[route].second++;
+        string route = sStation + ">" + sName;
+        statMp[route].first += (t - sTime);
+        statMp[route].second++;
     }
 
-    double getAverageTime(string startStation, string endStation) {
-        string route = startStation + ">" + endStation;
-        auto [totalTime, count] = routeStats[route];
-        return (double)totalTime / count;
+    double getAverageTime(string sStation, string eStation) {
+        string route = sStation + ">" + eStation;
+        auto [totTime, cnt] = statMp[route];
+        return (double)totTime / cnt;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Track customer travel times between underground stations and compute averages (LeetCode 1396).
-// - Approach: Dual Hash Maps (`checkInMap` and `routeStats`).
-// - Intuition: Record check-in times; upon check-out, accumulate duration and trip counts per route in O(1).
-// - Complexity: Time: O(1) for all ops, Space: O(Passengers + Routes).
+// - Approach: Dual Hash Maps (`inMp` and `statMp`).
+// - Intuition:
+//   * Passengers travel concurrently: store active check-ins in `inMp` mapping `id -> {station, time}`.
+//   * On checkout, retrieve check-in details, erase passenger record, and form composite route key `startStation>endStation`.
+//   * Accumulate total transit duration and passenger trip count in `statMp[route]`.
+//   * Query average time runs in strict O(1) by dividing total accumulated time by trip count.
+// - Complexity: Time: O(1) for all ops, Space: O(Passengers + Stations^2).
 
 
 // ============================================================
@@ -602,22 +657,26 @@ public:
 // ============================================================
 
 class RecentCounter {
-    queue<int> calls;
+    queue<int> q;
 public:
     RecentCounter() {}
 
     int ping(int t) {
-        calls.push(t);
-        while (!calls.empty() && calls.front() < t - 3000) {
-            calls.pop();
+        q.push(t);
+        while (!q.empty() && q.front() < t - 3000) {
+            q.pop();
         }
-        return calls.size();
+        return q.size();
     }
 };
 // Interview Explanation:
 // - Problem Statement: Count number of recent requests within time frame [t - 3000, t] (LeetCode 933).
 // - Approach: Sliding Window FIFO Queue.
-// - Intuition: Push incoming timestamp `t`; pop expired timestamps `< t - 3000`.
+// - Intuition:
+//   * Input timestamps arrive in strictly increasing chronological order.
+//   * Push timestamp t to the back of the queue.
+//   * Expired calls with timestamp `< t - 3000` will never fall into future sliding windows and can be safely discarded.
+//   * Pop front elements until `q.front() >= t - 3000`. Size of queue represents calls within the past 3000ms.
 // - Complexity: Time: O(1) amortized per `ping`, Space: O(W).
 
 
@@ -626,36 +685,40 @@ public:
 // ============================================================
 
 class Leaderboard {
-    unordered_map<int, int> scores;
+    unordered_map<int, int> mp;
 public:
     Leaderboard() {}
 
-    void addScore(int playerId, int score) {
-        scores[playerId] += score;
+    void addScore(int id, int s) {
+        mp[id] += s;
     }
 
     int top(int K) {
-        priority_queue<int, vector<int>, greater<int>> minHeap;
-        for (auto& [id, score] : scores) {
-            minHeap.push(score);
-            if ((int)minHeap.size() > K) minHeap.pop();
+        priority_queue<int, vi, greater<int>> pq;
+        for (auto& [id, s] : mp) {
+            pq.push(s);
+            if ((int)pq.size() > K) pq.pop();
         }
-        int total = 0;
-        while (!minHeap.empty()) {
-            total += minHeap.top();
-            minHeap.pop();
+        int tot = 0;
+        while (!pq.empty()) {
+            tot += pq.top();
+            pq.pop();
         }
-        return total;
+        return tot;
     }
 
-    void reset(int playerId) {
-        scores.erase(playerId);
+    void reset(int id) {
+        mp.erase(id);
     }
 };
 // Interview Explanation:
 // - Problem Statement: Leaderboard supporting score additions, top K scores sum, and score resets (LeetCode 1244).
 // - Approach: Hash Map + Min-Heap Top-K Extraction.
-// - Intuition: `scores` tracks player totals; `top(K)` maintains min-heap of size K in O(N log K).
+// - Intuition:
+//   * A hash map stores total aggregated scores per player id.
+//   * `addScore` and `reset` execute in O(1) average time.
+//   * For `top(K)`, maintain a min-heap bounded by size K while iterating over all player scores.
+//   * Popping the smallest when size exceeds K leaves the K largest scores in heap, taking O(N log K) time and O(K) extra space.
 // - Complexity: Time: O(1) add/reset, O(N log K) top, Space: O(Players).
 
 
@@ -665,26 +728,30 @@ public:
 
 class BoundedBlockingQueue {
     queue<int> q;
-    int capacity;
+    int cap;
     mutex mtx;
-    condition_variable cv_not_full;
-    condition_variable cv_not_empty;
+    condition_variable cvFull;
+    condition_variable cvEmpty;
 public:
-    BoundedBlockingQueue(int capacity) : capacity(capacity) {}
+    BoundedBlockingQueue(int cap) : cap(cap) {}
 
-    void enqueue(int element) {
+    void enqueue(int x) {
         unique_lock<mutex> lock(mtx);
-        cv_not_full.wait(lock, [this]() { return (int)q.size() < capacity; });
-        q.push(element);
-        cv_not_empty.notify_one();
+        while ((int)q.size() >= cap) {
+            cvFull.wait(lock);
+        }
+        q.push(x);
+        cvEmpty.notify_one();
     }
 
     int dequeue() {
         unique_lock<mutex> lock(mtx);
-        cv_not_empty.wait(lock, [this]() { return !q.empty(); });
+        while (q.empty()) {
+            cvEmpty.wait(lock);
+        }
         int val = q.front();
         q.pop();
-        cv_not_full.notify_one();
+        cvFull.notify_one();
         return val;
     }
 
@@ -695,8 +762,12 @@ public:
 };
 // Interview Explanation:
 // - Problem Statement: Design thread-safe bounded blocking queue (LeetCode 1188).
-// - Approach: Mutex + Two Condition Variables (`cv_not_full`, `cv_not_empty`).
-// - Intuition: Threads block on condition variables until space/element is available, then signal consumers/producers.
+// - Approach: Mutex + Dual Condition Variables (`cvFull`, `cvEmpty`).
+// - Intuition:
+//   * Producer threads calling `enqueue` must block when queue reaches maximum capacity.
+//   * Consumer threads calling `dequeue` must block when queue is empty.
+//   * Condition variables suspend calling threads without CPU busy-waiting (spinning).
+//   * `enqueue` signals `cvEmpty` to wake up blocked consumers; `dequeue` signals `cvFull` to wake up waiting producers.
 // - Complexity: Time: O(1) per operation, Space: O(Capacity).
 
 
@@ -705,34 +776,38 @@ public:
 // ============================================================
 
 class MajorityChecker {
-    vector<int> arr;
-    unordered_map<int, vector<int>> pos;
+    vi a;
+    unordered_map<int, vi> pos;
 public:
-    MajorityChecker(vector<int>& arr) : arr(arr) {
-        for (int i = 0; i < (int)arr.size(); i++) {
-            pos[arr[i]].push_back(i);
+    MajorityChecker(vi& a) : a(a) {
+        for (int i = 0; i < (int)a.size(); i++) {
+            pos[a[i]].push_back(i);
         }
     }
 
-    int query(int left, int right, int threshold) {
-        int len = right - left + 1;
-        for (int iter = 0; iter < 20; iter++) {
-            int randIdx = left + rand() % len;
-            int candidate = arr[randIdx];
-            auto& indices = pos[candidate];
+    int query(int l, int r, int th) {
+        int len = r - l + 1;
+        for (int it = 0; it < 20; it++) {
+            int randIdx = l + rand() % len;
+            int cand = a[randIdx];
+            auto& idxs = pos[cand];
 
-            int count = upper_bound(indices.begin(), indices.end(), right) -
-                        lower_bound(indices.begin(), indices.end(), left);
+            int cnt = upper_bound(idxs.begin(), idxs.end(), r) -
+                      lower_bound(idxs.begin(), idxs.end(), l);
 
-            if (count >= threshold) return candidate;
+            if (cnt >= th) return cand;
         }
         return -1;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Query if any element in subarray occurs >= threshold times (LeetCode 1154).
-// - Approach: Randomized Sampling + Binary Search Frequency Counting.
-// - Intuition: 20 Monte Carlo samples give < 10^-6 failure rate; verify candidate frequency via binary search.
+// - Approach: Randomized Monte Carlo Sampling + Binary Search Frequency Verification.
+// - Intuition:
+//   * If a majority element exists, it constitutes at least half the subarray elements.
+//   * Picking a random element from subarray has >= 50% probability of selecting the majority candidate.
+//   * Repeating 20 random trials reduces error probability of missing an existing majority element to (1/2)^20 < 10^-6.
+//   * Verify each candidate's exact count in [l, r] in O(log N) using `upper_bound - lower_bound` on precomputed occurrence indices.
 // - Complexity: Time: O(20 * log N) per query, Space: O(N).
 
 
@@ -741,34 +816,37 @@ public:
 // ============================================================
 
 class AuthenticationManager {
-    int timeToLive;
-    unordered_map<string, int> tokens;
+    int ttl;
+    unordered_map<string, int> mp;
 public:
-    AuthenticationManager(int timeToLive) : timeToLive(timeToLive) {}
+    AuthenticationManager(int ttl) : ttl(ttl) {}
 
-    void generate(string tokenId, int currentTime) {
-        tokens[tokenId] = currentTime + timeToLive;
+    void generate(string id, int t) {
+        mp[id] = t + ttl;
     }
 
-    void renew(string tokenId, int currentTime) {
-        if (tokens.count(tokenId) && tokens[tokenId] > currentTime) {
-            tokens[tokenId] = currentTime + timeToLive;
+    void renew(string id, int t) {
+        if (mp.count(id) && mp[id] > t) {
+            mp[id] = t + ttl;
         }
     }
 
-    int countUnexpiredTokens(int currentTime) {
-        int count = 0;
-        for (auto& [id, expiry] : tokens) {
-            if (expiry > currentTime) count++;
+    int countUnexpiredTokens(int t) {
+        int ans = 0;
+        for (auto& [id, exp] : mp) {
+            if (exp > t) ans++;
         }
-        return count;
+        return ans;
     }
 };
 // Interview Explanation:
 // - Problem Statement: Authentication manager supporting token generation, renewal, and active counting (LeetCode 1797).
 // - Approach: Hash Map of Token Expiry Timestamps.
-// - Intuition: Store expiry timestamp `currentTime + timeToLive`; verify `expiry > currentTime` on renewal.
-// - Complexity: Time: O(1) generate/renew, O(N) count, Space: O(Tokens).
+// - Intuition:
+//   * Store each token's absolute expiration timestamp `currentTime + timeToLive`.
+//   * `renew` checks if token exists and is strictly unexpired (`expiry > currentTime`); if valid, push expiration forward.
+//   * `countUnexpiredTokens` iterates over map and tallies tokens whose expiration exceeds current query timestamp.
+// - Complexity: Time: O(1) generate/renew, O(Tokens) count, Space: O(Tokens).
 
 
 // ============================================================
@@ -777,55 +855,59 @@ public:
 
 class OnlineCacheEngine {
     int cap;
-    list<pair<string, string>> lruList;
-    unordered_map<string, pair<list<pair<string, string>>::iterator, int>> cache;
-    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> expiryMinHeap;
+    list<pair<string, string>> dll;
+    unordered_map<string, pair<list<pair<string, string>>::iterator, int>> mp;
+    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> pq;
 
-    void purgeExpired(int currentTime) {
-        while (!expiryMinHeap.empty() && expiryMinHeap.top().first <= currentTime) {
-            string key = expiryMinHeap.top().second;
-            expiryMinHeap.pop();
-            if (cache.count(key) && cache[key].second <= currentTime) {
-                lruList.erase(cache[key].first);
-                cache.erase(key);
+    void purge(int t) {
+        while (!pq.empty() && pq.top().first <= t) {
+            string k = pq.top().second;
+            pq.pop();
+            if (mp.count(k) && mp[k].second <= t) {
+                dll.erase(mp[k].first);
+                mp.erase(k);
             }
         }
     }
 public:
-    OnlineCacheEngine(int capacity) : cap(capacity) {}
+    OnlineCacheEngine(int cap) : cap(cap) {}
 
-    string get(string key, int currentTime) {
-        purgeExpired(currentTime);
-        if (!cache.count(key)) return "";
-        auto it = cache[key].first;
+    string get(string k, int t) {
+        purge(t);
+        if (!mp.count(k)) return "";
+        auto it = mp[k].first;
         string val = it->second;
-        lruList.splice(lruList.begin(), lruList, it);
+        dll.splice(dll.begin(), dll, it);
         return val;
     }
 
-    void put(string key, string value, int ttl, int currentTime) {
-        purgeExpired(currentTime);
-        int expiry = currentTime + ttl;
+    void put(string k, string v, int ttl, int t) {
+        purge(t);
+        int exp = t + ttl;
 
-        if (cache.count(key)) {
-            auto it = cache[key].first;
-            it->second = value;
-            lruList.splice(lruList.begin(), lruList, it);
-            cache[key].second = expiry;
+        if (mp.count(k)) {
+            auto it = mp[k].first;
+            it->second = v;
+            dll.splice(dll.begin(), dll, it);
+            mp[k].second = exp;
         } else {
-            if ((int)cache.size() == cap) {
-                string evictKey = lruList.back().first;
-                lruList.pop_back();
-                cache.erase(evictKey);
+            if ((int)mp.size() == cap) {
+                string evict = dll.back().first;
+                dll.pop_back();
+                mp.erase(evict);
             }
-            lruList.push_front({key, value});
-            cache[key] = {lruList.begin(), expiry};
+            dll.push_front({k, v});
+            mp[k] = {dll.begin(), exp};
         }
-        expiryMinHeap.push({expiry, key});
+        pq.push({exp, k});
     }
 };
 // Interview Explanation:
 // - Problem Statement: Design online cache supporting get, put, LRU eviction, and TTL expiration.
 // - Approach: Doubly Linked List (LRU Recency) + Hash Map + Expiration Min-Heap.
-// - Intuition: DLL maintains access recency; min-heap prioritizes earliest expiring keys for lazy TTL purging.
+// - Intuition:
+//   * Dual eviction policies: capacity overflow evicts Least Recently Used (LRU), while time expiration evicts stale TTL keys.
+//   * A doubly linked list keeps recency order; `splice` moves accessed items to head in O(1).
+//   * A min-heap indexed by `{expiration_timestamp, key}` detects expired keys lazily at start of every operation.
+//   * If capacity limit is reached upon inserting a new key, remove tail node from DLL and erase from map.
 // - Complexity: Time: O(1) amortized for `get` and `put`, Space: O(Capacity).

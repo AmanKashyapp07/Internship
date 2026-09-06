@@ -61,13 +61,13 @@ const ll MOD = 1e9 + 7;
  | 20 | Decode String (LC 394)                      | Count Stack + String Context Stack| O(N)     | O(N)     |
  | 21 | Min Stack (LC 155)                          | 2*val - minVal Math / Aux Stack   | O(1) all | O(1)/O(N)|
  | 22 | Array Stack & Queue Implementation          | Fixed Buffer + Pointer Tracking   | O(1) all | O(Cap)   |
- | 23 | Stack via Queue & Queue via Stack (LC 225)  | 2 Stacks / 1 Queue Cost Inversion | O(1) / O(N| O(N)    |
+ | 23 | Stack via Queue & Queue via Stack (LC 225)  | 2 Stacks / 1 Queue Cost Inversion | O(1)/O(N)| O(N)     |
  | 24 | Recursive Stack Sorting                     | Two-Level Recursive Insertion Sort| O(N^2)   | O(N)     |
  | 25 | LFU Cache (LC 460)                          | Hash Map + Freq-to-List + minFreq | O(1) all | O(Cap)   |
  | 26 | The Celebrity Problem (LC 277)              | Two-Pointer Candidate Elimination | O(N)     | O(1)     |
  | 27 | Max of Mins Every Window Size               | Monotonic Stack (PSE/NSE) + Suffix| O(N)     | O(N)     |
- | 28 | Count Bracket Reversals for Balance (GFG)   | Counter Balance Math ((o+1)/2+(c+1)/2)| O(N)  | O(1)     |
- | 29 | LRU Cache (LC 146)                          | Hash Map + Doubly Linked List     | O(1) get/put| O(Cap) |
+ | 28 | Count Bracket Reversals for Balance (GFG)   | Counter Balance Math              | O(N)     | O(1)     |
+ | 29 | LRU Cache (LC 146)                          | Hash Map + Doubly Linked List     | O(1) all | O(Cap)   |
  ====================================================================================================
 */
 
@@ -136,6 +136,7 @@ vi nextGreaterElementsCircular(const vi &nums) {
 // - Intuition: Iterating twice modulo $N$ simulates circular wrap-around while only pushing indices during the first pass ($i < N$).
 // - Complexity: Time: O(N) two linear passes, Space: O(N) stack space.
 
+
 // =========================================================
 // 3. NEXT SMALLER ELEMENT (NSE)
 // =========================================================
@@ -159,6 +160,90 @@ vi nextSmallerElement(const vi &nums) {
 // - Intuition: Pop larger elements when an incoming smaller element is seen; popped elements get current index as their NSE.
 // - Complexity: Time: O(N), Space: O(N).
 
+vi lexicographicalMinSubsequence(vector<int> nums, int k) {
+    stack<int> st;
+    int remove = nums.size() - k;
+
+    for (int x : nums) {
+        while (!st.empty() && st.top() > x && remove > 0) {
+            st.pop();
+            remove--;
+        }
+
+        st.push(x);
+    }
+
+    // Remove remaining elements from the end if necessary
+    while (remove > 0) {
+        st.pop();
+        remove--;
+    }
+
+    vector<int> res;
+    while (!st.empty()) {
+        res.push_back(st.top());
+        st.pop();
+    }
+
+    reverse(res.begin(), res.end());
+    return res;
+}
+
+vi lexicographicalMaxSubsequence(vector<int> nums, int k) {
+    stack<int> st;
+    int remove = nums.size() - k;
+
+    for (int x : nums) {
+        while (!st.empty() && st.top() < x && remove > 0) {
+            st.pop();
+            remove--;
+        }
+
+        st.push(x);
+    }
+
+    // Remove remaining elements from the end if necessary
+    while (remove > 0) {
+        st.pop();
+        remove--;
+    }
+
+    vector<int> res;
+    while (!st.empty()) {
+        res.push_back(st.top());
+        st.pop();
+    }
+
+    reverse(res.begin(), res.end());
+    return res;
+}
+
+vi maxMerge(vi &nums1, vi &nums2) {
+    int n1 = nums1.size(), n2 = nums2.size();
+    vi merged;
+    int i = 0, j = 0;
+    while (i < n1 || j < n2) {
+        if (lexicographical_compare(nums1.begin() + i, nums1.end(), nums2.begin() + j, nums2.end())) {
+            merged.push_back(nums2[j++]);
+        } else {
+            merged.push_back(nums1[i++]);
+        }
+    }
+    return merged;
+}
+
+vi maxNumber(vi& nums1, vi& nums2, int k) {
+    int n1 = nums1.size(), n2 = nums2.size();
+    vi best;
+    for (int i = max(0, k - n2); i <= min(k, n1); i++) {
+        vi subseq1 = lexicographicalMaxSubsequence(nums1, i);
+        vi subseq2 = lexicographicalMaxSubsequence(nums2, k - i);
+        vi candidate = maxMerge(subseq1, subseq2);
+        if (candidate > best) best = candidate;
+    }
+    reverse(best.begin(), best.end());
+    return best;
+}
 // =========================================================
 // 4. PREVIOUS GREATER (PGE) & PREVIOUS SMALLER (PSE)
 // =========================================================
@@ -931,7 +1016,8 @@ public:
 // 26. THE CELEBRITY PROBLEM (LEETCODE 277 / GFG)
 // =========================================================
 
-int findCelebrity(int n, function<bool(int, int)> knows) {
+template <typename KnowsFunc>
+int findCelebrity(int n, const KnowsFunc& knows) {
     int candidate = 0;
     for (int i = 1; i < n; i++) {
         if (knows(candidate, i)) {

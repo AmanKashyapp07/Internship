@@ -766,11 +766,13 @@ vector<vi> insertInterval(vector<vi> &intervals, vi newInterval) {
 
 
 // 3. Non-overlapping Intervals / Minimum Removals (LeetCode 435)
+bool compareIntervalEnd(const vi &a, const vi &b) {
+    return a[1] < b[1]; // Sort by finish time
+}
+
 int eraseOverlapIntervals(vector<vi> &intervals) {
     if (intervals.empty()) return 0;
-    sort(intervals.begin(), intervals.end(), [](const vi &a, const vi &b) {
-        return a[1] < b[1]; // Sort by finish time
-    });
+    sort(intervals.begin(), intervals.end(), compareIntervalEnd);
     int count = 0, prevEnd = intervals[0][1];
     for (size_t i = 1; i < intervals.size(); i++) {
         if (intervals[i][0] < prevEnd) {
@@ -849,7 +851,22 @@ ll smallestImpossibleSubsetSum(vi coins) {
         target += c;
     }
     return target;
-}
+} // finding the smallest sum that cannot be formed with the given coin denominations. The greedy approach ensures that if we can form all sums up to `target - 1`, then adding a coin greater than `target` will create a gap at `target`.
+
+int minPatches(vi &nums, int n) {
+    long long miss = 1; // miss denote the smallest sum that cannot be formed, initially 1
+    int added = 0, i = 0;
+    while (miss <= n) { // run loop until miss exceeds n
+        if (i < nums.size() && nums[i] <= miss) { // if current number is within the range of miss, we can use it to extend the range
+            miss += nums[i++];
+        } else { // if not , we need to patch the array with `miss` itself to extend the range, because we need to form all sums up to `miss - 1`, and adding `miss` allows us to form sums up to `2 * miss - 1`.
+            miss += miss; 
+            added++;
+        }
+    }
+    return added;
+} // finding the minimum number of patches required to ensure that all numbers in the range [1, n] can be formed using the given array of positive integers. The greedy approach adds the smallest missing number to extend the reachable range.
+// logic - At each step, we try to extend the range of numbers we can form. If the current number is within the range, we include it. Otherwise, we add the smallest missing number to the range.
 
 // 3. Candy Distribution (LeetCode 135)
 int candy(const vi &ratings) {
@@ -1327,10 +1344,12 @@ struct Job {
     int id, dead, profit;
 };
 
+bool compareJobProfit(const Job& a, const Job& b) {
+    return a.profit > b.profit;
+}
+
 pair<int, int> jobSequencing(vector<Job>& jobs) {
-    sort(jobs.begin(), jobs.end(), [](const Job& a, const Job& b) {
-        return a.profit > b.profit;
-    });
+    sort(jobs.begin(), jobs.end(), compareJobProfit);
 
     int maxDeadline = 0;
     for (const auto& j : jobs) maxDeadline = max(maxDeadline, j.dead);
@@ -1361,10 +1380,12 @@ struct Item {
     int value, weight;
 };
 
+bool compareItemRatio(const Item& a, const Item& b) {
+    return (double)a.value / a.weight > (double)b.value / b.weight;
+}
+
 double fractionalKnapsack(int W, vector<Item>& items) {
-    sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
-        return (double)a.value / a.weight > (double)b.value / b.weight;
-    });
+    sort(items.begin(), items.end(), compareItemRatio);
 
     double totalVal = 0.0;
     int currentWeight = 0;
@@ -1489,23 +1510,24 @@ int collectingNumbers(int n, const vi& a) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // 59. Collecting Numbers II (CSES 2217)
+bool isBadCollectingPair(int x, int n, const vi& pos) {
+    if (x < 1 || x >= n) return false;
+    return pos[x] > pos[x + 1];
+}
+
 vi collectingNumbersII(int n, vi a, const vector<pii>& swaps) {
     vi pos(n + 1);
     for (int i = 1; i <= n; i++) pos[a[i]] = i;
-    auto bad = [&](int x) {
-        if (x < 1 || x >= n) return false;
-        return pos[x] > pos[x + 1];
-    };
     int rounds = 1;
     for (int x = 1; x < n; x++) if (pos[x] > pos[x + 1]) rounds++;
     vi results;
     for (auto& [p, q] : swaps) {
         int u = a[p], v = a[q];
         set<int> affected = {u - 1, u, v - 1, v};
-        for (int x : affected) rounds -= bad(x);
+        for (int x : affected) rounds -= isBadCollectingPair(x, n, pos);
         swap(a[p], a[q]);
         swap(pos[u], pos[v]);
-        for (int x : affected) rounds += bad(x);
+        for (int x : affected) rounds += isBadCollectingPair(x, n, pos);
         results.push_back(rounds);
     }
     return results;
@@ -1658,10 +1680,12 @@ ll maximumSubarraySumII(const vi& a, int A, int B) {
 // - Complexity: Time: O(N), Space: O(N).
 
 // 66. Movie Festival II (CSES 1632)
+bool compareMovieFestival(const pii& a, const pii& b) {
+    return a.second < b.second || (a.second == b.second && a.first < b.first);
+}
+
 int movieFestivalII(int k, vector<pii> movies) {
-    sort(movies.begin(), movies.end(), [](const pii& a, const pii& b) {
-        return a.second < b.second || (a.second == b.second && a.first < b.first);
-    });
+    sort(movies.begin(), movies.end(), compareMovieFestival);
     multiset<int> freeTimes;
     for (int i = 0; i < k; i++) freeTimes.insert(0);
     int count = 0;
@@ -1683,14 +1707,17 @@ int movieFestivalII(int k, vector<pii> movies) {
 // - Complexity: Time: O(N log N + N log K), Space: O(N + K).
 
 // 67. Nested Ranges Check (CSES 2168)
+struct NestedRangeCheck { int l, r, idx; };
+
+bool compareNestedRangeCheck(const NestedRangeCheck& a, const NestedRangeCheck& b) {
+    if (a.l == b.l) return a.r > b.r;
+    return a.l < b.l;
+}
+
 pair<vi, vi> nestedRangesCheck(int n, const vector<pii>& rawRanges) {
-    struct Range { int l, r, idx; };
-    vector<Range> ranges(n);
+    vector<NestedRangeCheck> ranges(n);
     for (int i = 0; i < n; i++) ranges[i] = {rawRanges[i].first, rawRanges[i].second, i};
-    sort(ranges.begin(), ranges.end(), [](const Range& a, const Range& b) {
-        if (a.l == b.l) return a.r > b.r;
-        return a.l < b.l;
-    });
+    sort(ranges.begin(), ranges.end(), compareNestedRangeCheck);
     vi contains(n, 0), contained(n, 0);
     int maxRight = ranges[0].r;
     for (int i = 1; i < n; i++) {
@@ -1711,6 +1738,13 @@ pair<vi, vi> nestedRangesCheck(int n, const vector<pii>& rawRanges) {
 // - Complexity: Time: O(N log N), Space: O(N).
 
 // 68. Nested Ranges Count (CSES 2169)
+struct NestedRangeCountItem { int l, r, idx; };
+
+bool compareNestedRangeCountItem(const NestedRangeCountItem &a, const NestedRangeCountItem &b) {
+    if (a.l == b.l) return a.r > b.r;
+    return a.l < b.l;
+}
+
 pair<vi, vi> nestedRangesCount(int n, const vector<pii>& rawRanges) {
     struct Fenwick {
         int n; vi bit;
@@ -1718,8 +1752,7 @@ pair<vi, vi> nestedRangesCount(int n, const vector<pii>& rawRanges) {
         void add(int i, int v) { for (i++; i <= n; i += i & -i) bit[i] += v; }
         int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += bit[i]; return s; }
     };
-    struct Range { int l, r, idx; };
-    vector<Range> ranges(n);
+    vector<NestedRangeCountItem> ranges(n);
     vi vals;
     for (int i = 0; i < n; i++) {
         ranges[i] = {rawRanges[i].first, rawRanges[i].second, i};
@@ -1727,13 +1760,11 @@ pair<vi, vi> nestedRangesCount(int n, const vector<pii>& rawRanges) {
     }
     sort(vals.begin(), vals.end());
     vals.erase(unique(vals.begin(), vals.end()), vals.end());
-    auto getRank = [&](int x) { return lower_bound(vals.begin(), vals.end(), x) - vals.begin(); };
-    for (auto &x : ranges) x.r = getRank(x.r);
+    for (auto &x : ranges) {
+        x.r = lower_bound(vals.begin(), vals.end(), x.r) - vals.begin();
+    }
 
-    sort(ranges.begin(), ranges.end(), [](const Range &a, const Range &b) {
-        if (a.l == b.l) return a.r > b.r;
-        return a.l < b.l;
-    });
+    sort(ranges.begin(), ranges.end(), compareNestedRangeCountItem);
 
     vi contains(n, 0), contained(n, 0);
     Fenwick bit1(vals.size());
@@ -1853,6 +1884,25 @@ vi trafficLights(int x, const vi& positions) {
 // - Intuition: Adding light at p splits segment [l, r] into [l, p] and [p, r]. Erase (r - l) and insert (p - l) and (r - p) in O(log N).
 // - Complexity: Time: O(N log N), Space: O(N).
 
+int compress(vector<char>& chars) {
+    int i = 0, j = 0;
+    while (i < chars.size()) {
+        char c = chars[i];
+        int count = 0;
+        while (i < chars.size() && chars[i] == c) {
+            i++;
+            count++;
+        }
+        chars[j++] = c;
+        if (count > 1) {
+            string s = to_string(count);
+            for (char ch : s) {
+                chars[j++] = ch;
+            }
+        }
+    }
+    return j;
+}
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);

@@ -54,7 +54,7 @@ const ll MOD = 1e9 + 7;
  | 13 | Max Subarray Sum of Length <= K (CSES II)   | Monotonic Deque on Prefix Sums    | O(N)     | O(N)     |
  | 14 | Lexicographical Rank of a Permutation       | Factorial Positional Weighting    | O(N^2)   | O(N)     |
  | 15 | LCM of Array Elements Modulo MOD            | Prime Factorization + Max Powers  | O(N sqrt)| O(U)     |
- | 16 | Permutation Rounds (LCM of Cycles — CSES)   | Disjoint Cycle Decomposition + LCM| O(N+sqrt)| O(N)     |
+ | 16 | Permutation Rounds (LCM of Cycles — CSES)   | Disjoint Cycle Decomposition + LCM| O(N)     | O(N)     |
  | 17 | Min Move-to-Anywhere Operations (N - LIS)   | Longest Increasing Subseq (N-LIS) | O(N logN)| O(N)     |
  | 18 | Min Move-to-Front Operations (N...1)        | Greedy Backwards Suffix Matching  | O(N)     | O(1)     |
  | 19 | Min Subarrays with Sum <= K                 | Greedy Running Sum Partitioning   | O(N)     | O(1)     |
@@ -68,27 +68,31 @@ const ll MOD = 1e9 + 7;
 // 1. MINIMUM SUBSET SUM DIFFERENCE
 // ============================================================
 
-int minSubsetSumDifference(vector<int>& nums) {
-    int total = accumulate(nums.begin(), nums.end(), 0);
-    int target = total / 2;
-    vector<bool> dp(target + 1, false);
+int minSubsetSumDifference(vi& a) {
+    int tot = accumulate(a.begin(), a.end(), 0);
+    int t = tot / 2;
+    vector<bool> dp(t + 1, false);
     dp[0] = true;
 
-    for (int num : nums) {
-        for (int j = target; j >= num; j--) {
-            dp[j] = dp[j] || dp[j - num];
+    for (int x : a) {
+        for (int j = t; j >= x; j--) { // starting from t down to x to avoid reusing the same element
+            dp[j] = dp[j] || dp[j - x];
         }
     }
 
-    for (int s = target; s >= 0; s--) {
-        if (dp[s]) return total - 2 * s;
+    for (int s = t; s >= 0; s--) {
+        if (dp[s]) return tot - 2 * s;
     }
     return 0;
 }
 // Interview Explanation:
 // - Problem Statement: Partition array into two subsets such that the absolute difference of their sums is minimized.
 // - Approach: 0/1 Knapsack Boolean DP targeting Total / 2.
-// - Intuition: Finding the closest reachable sum to `total / 2` minimizes `total - 2 * sum`.
+// - Intuition:
+//   * Let subset sums be S1 and S2 with S1 + S2 = Total. Difference is |S1 - S2| = Total - 2 * S1 (assuming S1 <= S2).
+//   * Minimizing the difference is mathematically equivalent to maximizing S1 such that S1 <= Total / 2.
+//   * Standard 0/1 knapsack evaluates boolean reachability of every sum up to Total / 2 in reverse order to prevent re-using elements.
+//   * The largest reachable sum s closest to Total / 2 yields the minimal possible discrepancy Total - 2 * s.
 // - Complexity: Time: O(N * Total), Space: O(Total).
 
 
@@ -96,58 +100,73 @@ int minSubsetSumDifference(vector<int>& nums) {
 // 2. COUNT OF LONGEST INCREASING SUBSEQUENCES — LeetCode 673
 // ============================================================
 
-int findNumberOfLIS(vector<int>& nums) {
-    int n = nums.size();
+int findNumberOfLIS(vi& a) {
+    int n = a.size();
     if (n == 0) return 0;
-    vector<int> len(n, 1), count(n, 1);
-    int maxLen = 1;
+    vi len(n, 1), cnt(n, 1);
+    int mx = 1;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < i; j++) {
-            if (nums[j] < nums[i]) {
+            if (a[j] < a[i]) {
                 if (len[j] + 1 > len[i]) {
                     len[i] = len[j] + 1;
-                    count[i] = count[j];
+                    cnt[i] = cnt[j];
                 } else if (len[j] + 1 == len[i]) {
-                    count[i] += count[j];
+                    cnt[i] += cnt[j];
                 }
             }
         }
-        maxLen = max(maxLen, len[i]);
+        mx = max(mx, len[i]);
     }
 
-    int totalLIS = 0;
+    int ans = 0;
     for (int i = 0; i < n; i++) {
-        if (len[i] == maxLen) totalLIS += count[i];
+        if (len[i] == mx) ans += cnt[i];
     }
-    return totalLIS;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find number of longest increasing subsequences in an array (LeetCode 673).
-// - Approach: Dual 1D DP arrays (`len[i]` and `count[i]`).
-// - Intuition: When a strictly longer LIS ends at i, reset count[i]; if an equal length LIS is found, accumulate counts.
+// - Approach: Dual 1D DP arrays (len[i] and cnt[i]).
+// - Intuition:
+//   * Tracking LIS length alone is insufficient; we must simultaneously track how many distinct paths achieve that maximal length ending at each index.
+//   * For each pair (j, i) with j < i and a[j] < a[i]:
+//     - If len[j] + 1 > len[i], a strictly longer sequence ending at i is found, resetting cnt[i] = cnt[j].
+//     - If len[j] + 1 == len[i], an alternative path of equal maximal length is discovered, accumulating cnt[i] += cnt[j].
+//   * Global answer is the sum of cnt[i] across all indices i where len[i] matches the global maximum mx.
 // - Complexity: Time: O(N^2), Space: O(N).
 
 
 // ============================================================
 // 3. SHORTEST COMMON SUPERSEQUENCE (SCS) LENGTH
 // ============================================================
-
-int scsLength(string s1, string s2) {
-    int m = s1.size(), n = s2.size();
-    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
-    for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
-            if (s1[i - 1] == s2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
-            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+// SCS means the shortest string that has both s and t as subsequences. The length of SCS can be derived from the lengths of the two strings and their longest common subsequence (LCS).
+// formula = len(s) + len(t) - len(LCS(s, t))
+int scsLength(string s, string t) {
+    int m = s.size(), n = t.size();
+    vvi dp(m + 1, vi(n + 1, 0)); // dp[i][j] = length of LCS of s[0..i-1] and t[0..j-1]
+    int i=n, j=m;
+    while(i>0 && j>0){
+        if(s[i-1]==t[j-1]){
+            dp[i][j] = 1 + dp[i-1][j-1];
+            i--; j--;
+        }else{
+            dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+            if(dp[i-1][j]>dp[i][j-1]) i--;
+            else j--;
         }
     }
     return m + n - dp[m][n];
 }
 // Interview Explanation:
 // - Problem Statement: Find length of shortest common supersequence of two strings.
-// - Approach: Mathematical reduction to LCS: `len(S1) + len(S2) - LCS(S1, S2)`.
-// - Intuition: Common characters are merged once; remainder are included sequentially.
+// - Approach: Mathematical reduction to Longest Common Subsequence (LCS).
+// - Intuition:
+//   * Any common supersequence must contain all characters of s and all characters of t while preserving their order.
+//   * Overlapping characters that appear in both strings in the same order need only be written once.
+//   * The maximum number of characters that can be shared without conflict is precisely the LCS(s, t).
+//   * By Inclusion-Exclusion on character multiset positions: Length(SCS) = len(s) + len(t) - LCS(s, t).
 // - Complexity: Time: O(N * M), Space: O(N * M).
 
 
@@ -155,35 +174,45 @@ int scsLength(string s1, string s2) {
 // 4. RECONSTRUCT SHORTEST COMMON SUPERSEQUENCE — LeetCode 1092
 // ============================================================
 
-string shortestCommonSupersequence(string str1, string str2) {
-    int m = str1.size(), n = str2.size();
-    vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
-    for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
-            if (str1[i - 1] == str2[j - 1]) dp[i][j] = 1 + dp[i - 1][j - 1];
-            else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+string shortestCommonSupersequence(string s, string t) {
+    int m = s.size(), n = t.size();
+    vvi dp(m + 1, vi(n + 1, 0));
+    int i = m, j = n;
+    while(i > 0 && j > 0) {
+        if (s[i - 1] == t[j - 1]) {
+            dp[i][j] = 1 + dp[i - 1][j - 1];
+            i--; j--;
+        } else {
+            dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            if (dp[i - 1][j] > dp[i][j - 1]) i--;
+            else j--;
         }
     }
     int i = m, j = n;
-    string res = "";
+    string ans = "";
     while (i > 0 && j > 0) {
-        if (str1[i - 1] == str2[j - 1]) {
-            res += str1[i - 1]; i--; j--;
+        if (s[i - 1] == t[j - 1]) {
+            ans += s[i - 1]; i--; j--;
         } else if (dp[i - 1][j] > dp[i][j - 1]) {
-            res += str1[i - 1]; i--;
+            ans += s[i - 1]; i--;
         } else {
-            res += str2[j - 1]; j--;
+            ans += t[j - 1]; j--;
         }
     }
-    while (i > 0) res += str1[--i];
-    while (j > 0) res += str2[--j];
-    reverse(res.begin(), res.end());
-    return res;
+    while (i > 0) ans += s[--i]; // append remaining characters from s if any
+    while (j > 0) ans += t[--j]; // append remaining characters from t if any
+    reverse(ans.begin(), ans.end());
+    return ans;
 }
 // Interview Explanation:
-// - Problem Statement: Construct the shortest string that has both str1 and str2 as subsequences (LeetCode 1092).
+// - Problem Statement: Construct the shortest string that has both s and t as subsequences (LeetCode 1092).
 // - Approach: 2D LCS Table Backtracking.
-// - Intuition: Walk backwards through LCS table, taking matching characters once and non-matching characters from the dominating path.
+// - Intuition:
+//   * Compute standard 2D LCS table dp[m+1][n+1].
+//   * Backtrack from (m, n) toward (0, 0):
+//     - If s[i-1] == t[j-1], this character belongs to the LCS; append it once and move diagonally (i--, j--).
+//     - Otherwise, follow the optimal path: if dp[i-1][j] > dp[i][j-1], take s[i-1] and move up; else take t[j-1] and move left.
+//   * Append remaining characters from whichever string has unconsumed prefix, then reverse the collected string.
 // - Complexity: Time: O(N * M), Space: O(N * M).
 
 
@@ -193,54 +222,57 @@ string shortestCommonSupersequence(string str1, string str2) {
 
 string minWindowSubsequence(string s, string t) {
     int m = s.size(), n = t.size();
-    int minLen = INT_MAX, startIdx = -1;
-    int sIdx = 0, tIdx = 0;
+    int minL = INT_MAX, st = -1;
+    int i = 0, j = 0;
 
-    while (sIdx < m) {
-        if (s[sIdx] == t[tIdx]) {
-            tIdx++;
-            if (tIdx == n) {
-                // Reverse match to find the tightest left boundary
-                int end = sIdx;
-                tIdx--;
-                while (tIdx >= 0) {
-                    if (s[sIdx] == t[tIdx]) tIdx--;
-                    sIdx--;
+    while (i < m) {
+        if (s[i] == t[j]) {
+            j++;
+            if (j == n) {
+                int r = i;
+                j--;
+                while (j >= 0) {
+                    if (s[i] == t[j]) j--;
+                    i--;
                 }
-                sIdx++;
-                tIdx = 0;
-                if (end - sIdx + 1 < minLen) {
-                    minLen = end - sIdx + 1;
-                    startIdx = sIdx;
+                i++;
+                j = 0;
+                if (r - i + 1 < minL) {
+                    minL = r - i + 1;
+                    st = i;
                 }
             }
         }
-        sIdx++;
+        i++;
     }
-    return startIdx == -1 ? "" : s.substr(startIdx, minLen);
+    return st == -1 ? "" : s.substr(st, minL);
 }
 // Interview Explanation:
-// - Problem Statement: Find shortest contiguous substring of S containing T as a subsequence (LeetCode 727).
-// - Approach: Two-Pointer Forward Search + Backwards Window Shrink.
-// - Intuition: Find candidate end position moving right, then backtrack left to find the tightest starting index.
-// - Complexity: Time: O(M * N), Space: O(1).
+// - Problem Statement: Find shortest contiguous substring of s containing t as a subsequence (LeetCode 727).
+// - Approach: Forward Scan Match + Backward Greedy Contraction.
+// - Intuition:
+//   * Scanning s forward, when t[n-1] is matched at index r, we have identified a candidate valid window ending at r.
+//   * To minimize the window length, backtrack right-to-left from r to locate the latest possible starting index that still covers all characters of t in reverse.
+//   * This contraction establishes the tightest valid window ending at r.
+//   * Reset t's pointer to 0 and resume the forward scan from the compacted start index + 1 to discover shorter subsequent windows.
+// - Complexity: Time: O(N * M), Space: O(1).
 
 
 // ============================================================
 // 6. MATRIX CHAIN MULTIPLICATION
 // ============================================================
 
-int matrixChainMultiplication(const vector<int>& p) {
-    int n = p.size() - 1;
-    vector<vector<int>> dp(n, vector<int>(n, 0));
+int matrixChainMultiplication(const vi& a) {
+    int n = a.size() - 1;
+    vvi dp(n, vi(n, 0));
 
     for (int len = 2; len <= n; len++) {
         for (int i = 0; i <= n - len; i++) {
             int j = i + len - 1;
             dp[i][j] = INT_MAX;
-            for (int k = i; k < j; k++) {
-                int cost = dp[i][k] + dp[k + 1][j] + p[i] * p[k + 1] * p[j + 1];
-                dp[i][j] = min(dp[i][j], cost);
+            for (int k = i; k < j; k++) { // why till j-1 , because we are splitting the chain into two parts, and k is the last matrix of the first part, so it should be less than j
+                int c = dp[i][k] + dp[k + 1][j] + a[i] * a[k + 1] * a[j + 1];
+                dp[i][j] = min(dp[i][j], c);
             }
         }
     }
@@ -249,7 +281,11 @@ int matrixChainMultiplication(const vector<int>& p) {
 // Interview Explanation:
 // - Problem Statement: Find optimal parenthesization of matrix chain to minimize scalar multiplications.
 // - Approach: Interval DP iterating over chain lengths.
-// - Intuition: Split chain into two sub-chains at index k; `dp[i][j] = min(dp[i][k] + dp[k+1][j] + cost)`.
+// - Intuition:
+//   * Multiplying matrices of dimensions (r x k) and (k x c) costs r * k * c scalar multiplications.
+//   * For chain from matrix i to j, consider partitioning into two subchains (i..k) and (k+1..j) at split point k.
+//   * Total cost is dp[i][k] + dp[k+1][j] + cost of combining the two resulting matrices (a[i] * a[k+1] * a[j+1]).
+//   * Solving smaller chain lengths len = 2..n first guarantees optimal subproblems are ready when evaluating larger intervals.
 // - Complexity: Time: O(N^3), Space: O(N^2).
 
 
@@ -257,28 +293,32 @@ int matrixChainMultiplication(const vector<int>& p) {
 // 7. BOUNDED KNAPSACK (BINARY POWER SPLITTING)
 // ============================================================
 
-int boundedKnapsack(int W, const vector<int>& weights, const vector<int>& values, const vector<int>& counts) {
-    vector<int> dp(W + 1, 0);
-    int n = weights.size();
+int boundedKnapsack(int W, const vi& wt, const vi& val, const vi& cnt) {
+    vi dp(W + 1, 0);
+    int n = wt.size();
 
     for (int i = 0; i < n; i++) {
-        int count = counts[i];
-        for (int k = 1; count > 0; k <<= 1) {
-            int take = min(k, count);
-            int itemW = take * weights[i];
-            int itemV = take * values[i];
+        int c = cnt[i];
+        for (int k = 1; c > 0; k <<= 1) {
+            int take = min(k, c);
+            int itemW = take * wt[i];
+            int itemV = take * val[i];
             for (int w = W; w >= itemW; w--) {
                 dp[w] = max(dp[w], dp[w - itemW] + itemV);
             }
-            count -= take;
+            c -= take;
         }
     }
     return dp[W];
 }
 // Interview Explanation:
-// - Problem Statement: 0/1 Knapsack with bounded item counts.
+// - Problem Statement: 0/1 Knapsack with bounded item counts cnt[i].
 // - Approach: Binary Decomposition (1, 2, 4, ..., remainder) + 0/1 Knapsack.
-// - Intuition: Reduces O(count) transitions to O(log count) items.
+// - Intuition:
+//   * Naively unpacking each count into individual items yields O(W * sum(cnt)) time, which is too slow.
+//   * Any integer C can be uniquely partitioned into powers of two: {1, 2, 4, ..., 2^p, R}.
+//   * Any subset of items from 1 to C can be represented as a subset combination of these binary bundled items.
+//   * Bundling reduces the number of items per type from C to O(log C), allowing standard 1D reverse 0/1 knapsack DP.
 // - Complexity: Time: O(W * sum(log K)), Space: O(W).
 
 
@@ -286,18 +326,17 @@ int boundedKnapsack(int W, const vector<int>& weights, const vector<int>& values
 // 8. LCS LENGTH OF 2 PERMUTATIONS (REDUCTION TO LIS)
 // ============================================================
 
-int lcsOfPermutations(const vector<int>& A, const vector<int>& B) {
-    int n = A.size();
-    unordered_map<int, int> posA;
-    for (int i = 0; i < n; i++) posA[A[i]] = i;
+int lcsOfPermutations(const vi& a, const vi& b) {
+    int n = a.size();
+    unordered_map<int, int> pos;
+    for (int i = 0; i < n; i++) pos[a[i]] = i;
 
-    vector<int> mapped;
-    for (int x : B) {
-        if (posA.count(x)) mapped.push_back(posA[x]);
+    vi mapped;
+    for (int x : b) {
+        if (pos.count(x)) mapped.push_back(pos[x]);
     }
 
-    // LIS on mapped indices in O(N log N)
-    vector<int> lis;
+    vi lis;
     for (int x : mapped) {
         auto it = lower_bound(lis.begin(), lis.end(), x);
         if (it == lis.end()) lis.push_back(x);
@@ -307,8 +346,12 @@ int lcsOfPermutations(const vector<int>& A, const vector<int>& B) {
 }
 // Interview Explanation:
 // - Problem Statement: Find LCS of two permutations of numbers 1..N in O(N log N) time.
-// - Approach: Map elements of B to their index in A, then compute LIS.
-// - Intuition: A common subsequence corresponds to indices in A appearing in increasing order in B.
+// - Approach: Permutation Index Mapping + Patience Sorting LIS.
+// - Intuition:
+//   * Standard LCS takes O(N^2), but permutations contain unique elements.
+//   * Record the index of each element in a into hash map pos. Replace each element in b with its index in a.
+//   * A common subsequence corresponds to indices in a that appear in strictly increasing order in b.
+//   * The problem reduces directly to finding the Longest Increasing Subsequence (LIS) on the transformed array via binary search (patience sorting) in O(N log N).
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
@@ -316,56 +359,107 @@ int lcsOfPermutations(const vector<int>& A, const vector<int>& B) {
 // 9. LONGEST COMMON INCREASING SUBSEQUENCE (LCIS)
 // ============================================================
 
-int LCIS(vector<int>& a, vector<int>& b) {
+int LCIS(vi& a, vi& b) {
     int n = a.size(), m = b.size();
-    vector<int> dp(m, 0);
-
-    for (int i = 0; i < n; i++) {
-        int currentOptimal = 0;
-        for (int j = 0; j < m; j++) {
-            if (a[i] == b[j]) {
-                dp[j] = max(dp[j], currentOptimal + 1);
-            } else if (a[i] > b[j]) {
-                currentOptimal = max(currentOptimal, dp[j]);
+    vi dp(m, 0); // dp[j] = length of LCIS ending at b[j]
+    int i=0;
+    while(i<n){
+        int cur = 0;
+        int j=0;
+        while(j<m){
+            if(a[i]==b[j]){
+                dp[j] = cur + 1;
+            }else if(a[i]>b[j]){
+                cur = max(cur, dp[j]);
             }
+            j++;
         }
+        i++;
     }
     return *max_element(dp.begin(), dp.end());
 }
 // Interview Explanation:
 // - Problem Statement: Find the longest common subsequence of two arrays that is also strictly increasing.
 // - Approach: 1D Dynamic Programming with running optimal prefix tracker.
-// - Intuition: For each a[i], track the maximum LCIS length for values < a[i], then update dp[j] on match.
+// - Intuition:
+//   * Let dp[j] be the length of the LCIS ending at b[j].
+//   * When processing a[i], as j increases, we track cur = max(dp[k]) for all k < j where b[k] < a[i].
+//   * If a[i] == b[j], we can append b[j] to the best previously seen increasing subsequence, updating dp[j] = cur + 1.
+//   * If a[i] > b[j], b[j] is a valid candidate predecessor for a subsequent match, so update cur = max(cur, dp[j]).
 // - Complexity: Time: O(N * M), Space: O(M).
 
 
 // ============================================================
 // 10. MIN MOVES TO GATHER K CONSECUTIVE ONES — LeetCode 1703
 // ============================================================
-
 int minMoves(vector<int>& nums, int k) {
-    vector<int> p;
-    for (int i = 0; i < (int)nums.size(); i++) {
-        if (nums[i] == 1) p.push_back(i - p.size()); // Shifted indices
-    }
-    int m = p.size();
-    vector<long long> prefix(m + 1, 0);
-    for (int i = 0; i < m; i++) prefix[i + 1] = prefix[i] + p[i];
+        // Store positions of all 1's.
+        vector<long long> pos;
+        for (int i = 0; i < nums.size(); i++) {
+            if (nums[i] == 1)
+                pos.push_back(i);
+        }
 
-    long long minCost = LLONG_MAX;
-    for (int i = 0; i <= m - k; i++) {
-        int mid = i + k / 2;
-        long long median = p[mid];
-        long long leftCost = median * (mid - i) - (prefix[mid] - prefix[i]);
-        long long rightCost = (prefix[i + k] - prefix[mid + 1]) - median * (i + k - 1 - mid);
-        minCost = min(minCost, leftCost + rightCost);
-    }
-    return minCost;
+        int m = pos.size();
+
+        // adjusted[i] = pos[i] - i
+        //
+        // If the target consecutive block starts at x, then
+        // desired positions are:
+        //      x, x+1, x+2, ...
+        //
+        // Cost:
+        //      |pos[i] - (x+i)|
+        //
+        // Rearranging:
+        //      |(pos[i]-i) - x|
+        //
+        // Thus, after subtracting the index, every element wants
+        // to move to the SAME value x, whose optimum is the median.
+        vector<long long> adjusted(m);
+        for (int i = 0; i < m; i++)
+            adjusted[i] = pos[i] - i;
+
+        // Prefix sums of adjusted[] for O(1) range sum queries.
+        vector<long long> prefix(m + 1, 0);
+        for (int i = 0; i < m; i++)
+            prefix[i + 1] = prefix[i] + adjusted[i];
+
+        long long ans = LLONG_MAX;
+
+        // Try every consecutive group of k ones.
+        for (int left = 0; left + k <= m; left++) {
+            int right = left + k - 1;
+            int mid = (left + right) / 2;
+
+            long long median = adjusted[mid];
+
+            // Cost to move all elements on the left of median.
+            // Σ (median - adjusted[i])
+            long long leftCost =
+                median * (mid - left) -
+                (prefix[mid] - prefix[left]);
+
+            // Cost to move all elements on the right of median.
+            //
+            // Σ (adjusted[i] - median)
+            long long rightCost =
+                (prefix[right + 1] - prefix[mid + 1]) -
+                median * (right - mid);
+
+            ans = min(ans, leftCost + rightCost);
+        }
+
+        return (int)ans;
 }
 // Interview Explanation:
 // - Problem Statement: Minimum moves to gather any k ones together consecutively (LeetCode 1703).
 // - Approach: Index Shift Transformation + Median Cost using Prefix Sums.
-// - Intuition: Transforming index `p[j] = orig[j] - j` converts the problem to gathering elements to a single median point.
+// - Intuition:
+//   * Gathering k ones at consecutive indices [x, x+1, ..., x+k-1] means original indices pos[j] move to x + j.
+//   * Substituting p[j] = pos[j] - j simplifies condition: all p[j] must be gathered to the same value x.
+//   * Minimizing sum of absolute distances |p[j] - x| for a window of size k is minimized when x is the median of p[i..i+k-1].
+//   * Sliding window prefix sums evaluate left and right deviations from the median in O(1) per window.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -374,24 +468,28 @@ int minMoves(vector<int>& nums, int k) {
 // ============================================================
 
 struct NumMatrix {
-    vector<vector<int>> pref;
-    NumMatrix(vector<vector<int>>& matrix) {
-        int r = matrix.size(), c = matrix[0].size();
-        pref.assign(r + 1, vector<int>(c + 1, 0));
+    vvi pref;
+    NumMatrix(vvi& m) {
+        int r = m.size(), c = m[0].size();
+        pref.assign(r + 1, vi(c + 1, 0)); // pref[i][j] = sum of rectangle [0..i-1, 0..j-1]
         for (int i = 0; i < r; i++) {
             for (int j = 0; j < c; j++) {
-                pref[i + 1][j + 1] = matrix[i][j] + pref[i][j + 1] + pref[i + 1][j] - pref[i][j];
+                pref[i + 1][j + 1] = m[i][j] + pref[i][j + 1] + pref[i + 1][j] - pref[i][j];
             }
         }
     }
-    int sumRegion(int row1, int col1, int row2, int col2) {
-        return pref[row2 + 1][col2 + 1] - pref[row1][col2 + 1] - pref[row2 + 1][col1] + pref[row1][col1];
-    }
+    int sumRegion(int r1, int c1, int r2, int c2) {
+        return pref[r2 + 1][c2 + 1] - pref[r1][c2 + 1] - pref[r2 + 1][c1] + pref[r1][c1];
+    } // sum of rectangle [r1..r2, c1..c2] where r1 <= r2 and c1 <= c2 and are 0-indexed
 };
 // Interview Explanation:
-// - Problem Statement: Query sum of submatrix [row1, col1] to [row2, col2] in O(1) time.
+// - Problem Statement: Query sum of submatrix [r1, c1] to [r2, c2] in O(1) time.
 // - Approach: 2D Inclusion-Exclusion Prefix Sum Table.
-// - Intuition: Build 2D cumulative prefix matrix in O(R * C); query subgrid in O(1).
+// - Intuition:
+//   * Precompute 2D cumulative prefix matrix where pref[i+1][j+1] stores sum of rectangle [0..i, 0..j].
+//   * Build recurrence: pref[i+1][j+1] = m[i][j] + pref[i][j+1] + pref[i+1][j] - pref[i][j].
+//   * Query recurrence: pref[r2+1][c2+1] - pref[r1][c2+1] - pref[r2+1][c1] + pref[r1][c1].
+//   * Subtracts top and left outside regions while adding back the double-subtracted top-left intersection.
 // - Complexity: Time: Build O(R * C), Query O(1); Space: O(R * C).
 
 
@@ -399,23 +497,27 @@ struct NumMatrix {
 // 12. MAKE ARRAY NON-DECREASING (SLOPE TRICK)
 // ============================================================
 
-long long minOperationsNonDecreasing(vector<int>& nums) {
+long long minOperationsNonDecreasing(vi& a) {
     long long ans = 0;
-    priority_queue<int> maxHeap;
-    for (int x : nums) {
-        if (!maxHeap.empty() && maxHeap.top() > x) {
-            ans += maxHeap.top() - x;
-            maxHeap.pop();
-            maxHeap.push(x);
+    priority_queue<int> pq;
+    for (int x : a) {
+        if (!pq.empty() && pq.top() > x) {
+            ans += pq.top() - x;
+            pq.pop();
+            pq.push(x);
         }
-        maxHeap.push(x);
+        pq.push(x);
     }
     return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Minimum operations (+1/-1) to make array non-decreasing.
 // - Approach: Slope Trick with Max-Heap.
-// - Intuition: Represents derivative of convex cost function; inflection points tracked by max-heap.
+// - Intuition:
+//   * Let f_i(v) be the minimum cost to make prefix non-decreasing ending with value <= v. f_i is a convex piecewise-linear function.
+//   * Adding |x - v| shifts the slope by +1. The inflection points where slope transitions represent optimal choices.
+//   * A max-heap tracks inflection points to the left of the minimum.
+//   * If current element x is strictly smaller than pq.top(), the cost increases by pq.top() - x, and pq.top() is adjusted down to x.
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
@@ -423,26 +525,30 @@ long long minOperationsNonDecreasing(vector<int>& nums) {
 // 13. MAX SUBARRAY SUM OF LENGTH <= K (CSES II)
 // ============================================================
 
-ll maxSubarraySumAtMostK(int n, int k, const vl& arr) {
+ll maxSubarraySumAtMostK(int n, int k, const vl& a) {
     vl pref(n + 1, 0);
-    for (int i = 0; i < n; i++) pref[i + 1] = pref[i] + arr[i];
-
+    for (int i = 0; i < n; i++) pref[i + 1] = pref[i] + a[i];
     deque<int> dq;
     dq.push_back(0);
-    ll maxSum = -1e18;
-
-    for (int i = 1; i <= n; i++) {
-        while (!dq.empty() && dq.front() < i - k) dq.pop_front();
-        if (!dq.empty()) maxSum = max(maxSum, pref[i] - pref[dq.front()]);
-        while (!dq.empty() && pref[dq.back()] >= pref[i]) dq.pop_back();
-        dq.push_back(i);
+    ll ans = LLONG_MIN;
+    for (int r = 1; r <= n; r++) {
+        int l = r - k;
+        while (!dq.empty() && dq.front() < l) dq.pop_front();
+        if (!dq.empty()) ans = max(ans, pref[r] - pref[dq.front()]);
+        while (!dq.empty() && pref[dq.back()] >= pref[r])dq.pop_back();
+        dq.push_back(r);
     }
-    return maxSum;
+
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find maximum subarray sum with length at most K (CSES Max Subarray Sum II).
 // - Approach: Monotonic Deque on Prefix Sums.
-// - Intuition: Maximize `pref[i] - pref[j]` for `i - k <= j < i` by maintaining minimum `pref[j]` in a sliding window.
+// - Intuition:
+//   * Any subarray sum ending at index i has sum pref[i] - pref[j] where i - k <= j < i.
+//   * To maximize pref[i] - pref[j], we need the minimum pref[j] in the sliding window [i - k, i - 1].
+//   * A monotonic deque maintains candidate indices j in increasing order of their pref[j] values.
+//   * Pop stale indices j < i - k from front, read optimal pref[dq.front()], and maintain monotonicity by popping larger back values before inserting i.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -450,25 +556,29 @@ ll maxSubarraySumAtMostK(int n, int k, const vl& arr) {
 // 14. LEXICOGRAPHICAL RANK OF A PERMUTATION
 // ============================================================
 
-ll permutationRank(const vi& perm) {
-    int n = perm.size();
+ll permutationRank(const vi& a) {
+    int n = a.size();
     vl fact(n + 1, 1);
     for (int i = 1; i <= n; i++) fact[i] = (fact[i - 1] * i) % MOD;
 
-    ll rank = 1;
+    ll ans = 1;
     for (int i = 0; i < n; i++) {
-        int count = 0;
+        int cnt = 0;
         for (int j = i + 1; j < n; j++) {
-            if (perm[j] < perm[i]) count++;
+            if (a[j] < a[i]) cnt++;
         }
-        rank = (rank + count * fact[n - 1 - i]) % MOD;
+        ans = (ans + cnt * fact[n - 1 - i]) % MOD;
     }
-    return rank;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find 1-based lexicographical rank of a permutation among all permutations of length N.
 // - Approach: Factorial Number System (Lehmer code conversion).
-// - Intuition: At position i, each smaller remaining element contributes `fact[N - 1 - i]` permutations.
+// - Intuition:
+//   * For position i, any remaining available element strictly smaller than a[i] could be placed at index i to create a lexicographically smaller permutation.
+//   * If cnt elements after index i are smaller than a[i], each such choice prefixes (n - 1 - i)! full permutations that appear before the current one.
+//   * Multiply cnt by fact[n - 1 - i] and accumulate modulo MOD.
+//   * Add 1 at the end to convert from 0-based count of strictly preceding permutations to 1-based rank.
 // - Complexity: Time: O(N^2), Space: O(N).
 
 
@@ -476,29 +586,33 @@ ll permutationRank(const vi& perm) {
 // 15. LCM OF ARRAY ELEMENTS MODULO MOD
 // ============================================================
 
-ll arrayLCMMod(const vi& nums) {
-    map<int, int> maxPrimePower;
-    for (int x : nums) {
-        int temp = x;
-        for (int p = 2; p * p <= temp; p++) {
-            if (temp % p == 0) {
-                int count = 0;
-                while (temp % p == 0) { count++; temp /= p; }
-                maxPrimePower[p] = max(maxPrimePower[p], count);
+ll arrayLCMMod(const vi& a) {
+    map<int, int> mxP;
+    for (int x : a) {
+        int tmp = x;
+        for (int p = 2; p * p <= tmp; p++) {
+            if (tmp % p == 0) {
+                int cnt = 0;
+                while (tmp % p == 0) { cnt++; tmp /= p; }
+                mxP[p] = max(mxP[p], cnt);
             }
         }
-        if (temp > 1) maxPrimePower[temp] = max(maxPrimePower[temp], 1);
+        if (tmp > 1) mxP[tmp] = max(mxP[tmp], 1);
     }
-    ll lcm = 1;
-    for (auto& [p, power] : maxPrimePower) {
-        for (int i = 0; i < power; i++) lcm = (lcm * p) % MOD;
+    ll ans = 1;
+    for (auto& [p, pw] : mxP) {
+        for (int i = 0; i < pw; i++) ans = (ans * p) % MOD;
     }
-    return lcm;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Compute LCM of all array elements modulo (1e9 + 7).
 // - Approach: Prime factorization and max-exponent tracking.
-// - Intuition: LCM is product of all primes raised to their maximum power across all numbers.
+// - Intuition:
+//   * Computing pairwise LCM via (a * b) / gcd(a, b) fails under modulo because division is not compatible with intermediate modulo operations.
+//   * The true mathematical definition of LCM(a_1, ..., a_n) is the product of p^{max_k(v_p(a_k))} across all primes p.
+//   * Factorize each number in O(sqrt(A)), tracking the maximum exponent observed for each prime factor globally.
+//   * Multiply each prime p to its maximum exponent modulo (1e9 + 7).
 // - Complexity: Time: O(N * sqrt(max_A)), Space: O(Unique Primes).
 
 
@@ -506,36 +620,40 @@ ll arrayLCMMod(const vi& nums) {
 // 16. PERMUTATION ROUNDS (LCM OF CYCLES — CSES 3398)
 // ============================================================
 
-ll permutationRounds(const vi& perm) {
-    int n = perm.size();
+ll permutationRounds(const vi& a) {
+    int n = a.size();
     vector<bool> vis(n, false);
-    map<int, int> primeMaxPower;
+    map<int, int> mxP;
 
     for (int i = 0; i < n; i++) {
         if (!vis[i]) {
             int len = 0, cur = i;
-            while (!vis[cur]) { vis[cur] = true; cur = perm[cur] - 1; len++; }
-            int temp = len;
-            for (int p = 2; p * p <= temp; p++) {
-                if (temp % p == 0) {
-                    int count = 0;
-                    while (temp % p == 0) { count++; temp /= p; }
-                    primeMaxPower[p] = max(primeMaxPower[p], count);
+            while (!vis[cur]) { vis[cur] = true; cur = a[cur] - 1; len++; }
+            int tmp = len;
+            for (int p = 2; p * p <= tmp; p++) {
+                if (tmp % p == 0) {
+                    int cnt = 0;
+                    while (tmp % p == 0) { cnt++; tmp /= p; }
+                    mxP[p] = max(mxP[p], cnt);
                 }
             }
-            if (temp > 1) primeMaxPower[temp] = max(primeMaxPower[temp], 1);
+            if (tmp > 1) mxP[tmp] = max(mxP[tmp], 1);
         }
     }
     ll ans = 1;
-    for (auto& [p, power] : primeMaxPower) {
-        for (int i = 0; i < power; i++) ans = (ans * p) % MOD;
+    for (auto& [p, pw] : mxP) {
+        for (int i = 0; i < pw; i++) ans = (ans * p) % MOD;
     }
     return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Find number of rounds until permutation returns to identity (CSES 3398).
-// - Approach: Permutation cycle decomposition + modular LCM.
-// - Intuition: Overall cycle period is LCM of individual disjoint cycle lengths.
+// - Approach: Disjoint cycle decomposition + modular LCM.
+// - Intuition:
+//   * Every permutation decomposes uniquely into a set of disjoint cyclic orbits.
+//   * All elements in a cycle of length L return to their start positions in exactly L steps (and every multiple of L).
+//   * Therefore, the entire permutation returns to its identity state after a number of rounds equal to the LCM of all cycle lengths.
+//   * Prime factorize each cycle length and track global maximum prime powers to compute LCM modulo 1e9+7.
 // - Complexity: Time: O(N), Space: O(N).
 
 
@@ -543,19 +661,23 @@ ll permutationRounds(const vi& perm) {
 // 17. MIN MOVE-TO-ANYWHERE OPERATIONS (N - LIS)
 // ============================================================
 
-int minMoveToAnywhereToSort(const vi& nums) {
+int minMoveToAnywhereToSort(const vi& a) {
     vi lis;
-    for (int x : nums) {
+    for (int x : a) {
         auto it = lower_bound(lis.begin(), lis.end(), x);
         if (it == lis.end()) lis.push_back(x);
         else *it = x;
     }
-    return nums.size() - lis.size();
+    return a.size() - lis.size();
 }
 // Interview Explanation:
 // - Problem Statement: Find minimum operations to sort array if any element can be moved to any position.
-// - Approach: Compute Longest Increasing Subsequence (LIS); answer is `N - LIS.size()`.
-// - Intuition: Elements in LIS stay in place; all remaining elements are inserted around them.
+// - Approach: Compute Longest Increasing Subsequence (LIS); answer is N - LIS.size().
+// - Intuition:
+//   * Any elements that are already in strictly increasing relative order can remain fixed in place.
+//   * All other elements must be moved at least once to fit into their correct sorted slots.
+//   * To minimize moved elements, we must maximize the number of stationary elements.
+//   * Stationary elements form an increasing subsequence, so the optimal choice is the Longest Increasing Subsequence (LIS).
 // - Complexity: Time: O(N log N), Space: O(N).
 
 
@@ -563,18 +685,22 @@ int minMoveToAnywhereToSort(const vi& nums) {
 // 18. MIN MOVE-TO-FRONT OPERATIONS (N...1)
 // ============================================================
 
-int minMoveToFrontToSort(const vi& perm) {
-    int n = perm.size();
-    int expected = n;
+int minMoveToFrontToSort(const vi& a) {
+    int n = a.size();
+    int exp = n;
     for (int i = n - 1; i >= 0; i--) {
-        if (perm[i] == expected) expected--;
+        if (a[i] == exp) exp--;
     }
-    return expected;
+    return exp;
 }
 // Interview Explanation:
 // - Problem Statement: Minimum operations to sort permutation [1...N] if elements can only be moved to the front.
 // - Approach: Greedy backwards suffix match: search for N, N-1, N-2... from right to left.
-// - Intuition: The longest suffix of elements already in relative order 1..k can remain; others must be moved.
+// - Intuition:
+//   * Moving an element to front places it before all currently sorted elements.
+//   * If we move elements in descending order (e.g., 3, then 2, then 1), any element moved can be properly positioned.
+//   * Any suffix of numbers that are already in correct descending relative order (N, N-1, ...) right-to-left never need to be moved.
+//   * All other elements must be picked and moved to the front.
 // - Complexity: Time: O(N), Space: O(1).
 
 
@@ -582,46 +708,74 @@ int minMoveToFrontToSort(const vi& perm) {
 // 19. MIN SUBARRAYS WITH SUM <= K
 // ============================================================
 
-int minSubarraysSumAtMostK(const vi& nums, ll k) {
-    int count = 1;
-    ll curSum = 0;
-    for (int x : nums) {
-        if (curSum + x <= k) {
-            curSum += x;
+int minSubarraysSumAtMostK(const vi& a, ll k) {
+    int ans = 1;
+    ll sum = 0;
+    for (int x : a) {
+        if (sum + x <= k) {
+            sum += x;
         } else {
-            count++;
-            curSum = x;
+            ans++;
+            sum = x;
         }
     }
-    return count;
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Greedy partition of non-negative array into minimum contiguous subarrays each with sum <= k.
 // - Approach: Greedy linear accumulation.
-// - Intuition: Greedily extend each subarray until adding next element exceeds limit k.
+// - Intuition:
+//   * Since all array elements are non-negative, extending the current subarray is always optimal until the sum exceeds k.
+//   * Stopping early would only force subsequent subarrays to start earlier, never reducing total count.
+//   * When adding x exceeds k, close the current subarray, increment count, and start a new subarray with x.
 // - Complexity: Time: O(N), Space: O(1).
 
 
 // ============================================================
 // 20. HOUSE ROBBER IV — LeetCode 2560
 // ============================================================
+bool canRob(vector<int>& nums, int k, int capability) {
+        int robbed = 0;
+        int n = nums.size();
 
-int minCapability(vector<int>& nums, int k) {
-    int lo = *min_element(nums.begin(), nums.end()), hi = *max_element(nums.begin(), nums.end());
-    while (lo < hi) {
-        int mid = lo + (hi - lo) / 2, count = 0, n = nums.size();
-        for (int i = 0; i < n; i++) {
-            if (nums[i] <= mid) { count++; i++; }
+        for (int i = 0; i < n; ) {
+            // If current house can be robbed under this capability,
+            // greedily rob it and skip the adjacent house.
+            if (nums[i] <= capability) {
+                robbed++;
+                i += 2;
+            } else {
+                i++;
+            }
         }
-        if (count >= k) hi = mid;
-        else lo = mid + 1;
+
+        return robbed >= k; // if we can rob at least k houses, return true.
     }
-    return lo;
-}
+
+    int minCapability(vector<int>& nums, int k) {
+        int left = *min_element(nums.begin(), nums.end());
+        int right = *max_element(nums.begin(), nums.end());
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+
+            if (canRob(nums, k, mid)) {
+                right = mid;      // Try a smaller capability.
+            } else {
+                left = mid + 1;   // Capability too small.
+            }
+        }
+
+        return left;
+    }
 // Interview Explanation:
 // - Problem Statement: Find minimum capability to rob at least k non-adjacent houses (LeetCode 2560).
 // - Approach: Binary Search on Answer + Greedy Non-Adjacent Count.
-// - Intuition: The predicate "can we steal >= k non-adjacent houses each <= mid" is monotonic.
+// - Intuition:
+//   * Capability is the maximum money stolen from any single house. Lower capability is harder to achieve.
+//   * The predicate "can we rob >= k non-adjacent houses with individual values <= mid" is monotonic with respect to mid.
+//   * Verification runs greedily: rob house i if a[i] <= mid, then skip house i + 1 (i++), which maximizes houses robbed.
+//   * Binary search narrows the capability range [min(a), max(a)] in O(log(range)) iterations.
 // - Complexity: Time: O(N log(max - min)), Space: O(1).
 
 
@@ -629,24 +783,28 @@ int minCapability(vector<int>& nums, int k) {
 // 21. BOUNDED COIN CHANGE (LIMITED SUPPLY)
 // ============================================================
 
-int coinChangeBounded(vector<int>& coins, vector<int>& limits, int amount) {
-    vector<int> dp(amount + 1, 1e9);
+int coinChangeBounded(vi& c, vi& lim, int t) {
+    vi dp(t + 1, 1e9);
     dp[0] = 0;
-    for (int i = 0; i < (int)coins.size(); i++) {
-        int c = coins[i], lim = limits[i];
-        for (int k = 1; lim > 0; k <<= 1) {
-            int take = min(k, lim);
-            int weight = take * c, cost = take;
-            for (int x = amount; x >= weight; x--) dp[x] = min(dp[x], dp[x - weight] + cost);
-            lim -= take;
+    for (int i = 0; i < (int)c.size(); i++) {
+        int val = c[i], cnt = lim[i];
+        for (int k = 1; cnt > 0; k <<= 1) {
+            int take = min(k, cnt);
+            int wt = take * val, cost = take;
+            for (int x = t; x >= wt; x--) dp[x] = min(dp[x], dp[x - wt] + cost);
+            cnt -= take;
         }
     }
-    return dp[amount] >= 1e9 ? -1 : dp[amount];
+    return dp[t] >= 1e9 ? -1 : dp[t];
 }
 // Interview Explanation:
-// - Problem Statement: Find minimum coins to make amount where coin[i] has limited count limits[i].
+// - Problem Statement: Find minimum coins to make amount where coin[i] has limited count lim[i].
 // - Approach: Binary Power Splitting + 0/1 Knapsack Backwards DP.
-// - Intuition: Split item counts into powers of 2 to reduce transitions from O(limit) to O(log limit).
+// - Intuition:
+//   * An unbounded supply allows forward 1D DP, but limited supply would require 2D state or deque optimization.
+//   * Decomposing each limit into binary bundles {1, 2, 4, ...} transforms the problem into standard 0/1 knapsack.
+//   * Bundle of size take has coin weight = take * val and cost = take coins.
+//   * Iterating x backwards from amount down to weight avoids multiple usage of the same bundle.
 // - Complexity: Time: O(amount * sum(log limit)), Space: O(amount).
 
 
@@ -654,24 +812,28 @@ int coinChangeBounded(vector<int>& coins, vector<int>& limits, int amount) {
 // 22. COIN CHANGE PATH RECONSTRUCTION (PRINT COINS)
 // ============================================================
 
-vector<int> reconstructCoins(vector<int>& coins, int amount) {
-    vector<int> dp(amount + 1, 1e9), parent(amount + 1, -1);
+vi reconstructCoins(vi& c, int t) {
+    vi dp(t + 1, 1e9), par(t + 1, -1);
     dp[0] = 0;
-    for (int c : coins) {
-        for (int x = c; x <= amount; x++) {
-            if (dp[x - c] + 1 < dp[x]) {
-                dp[x] = dp[x - c] + 1;
-                parent[x] = c;
+    for (int coin : c) {
+        for (int x = coin; x <= t; x++) { 
+            if (dp[x - coin] + 1 < dp[x]) {
+                dp[x] = dp[x - coin] + 1;
+                par[x] = coin;
             }
         }
     }
-    if (dp[amount] >= 1e9) return {};
-    vector<int> res;
-    for (int curr = amount; curr > 0; curr -= parent[curr]) res.push_back(parent[curr]);
-    return res;
+    if (dp[t] >= 1e9) return {};
+    vi ans;
+    for (int cur = t; cur > 0; cur -= par[cur]) ans.push_back(par[cur]);
+    return ans;
 }
 // Interview Explanation:
 // - Problem Statement: Reconstruct and return the exact coin denominations used to make amount with fewest coins.
 // - Approach: DP Predecessor Tracking + Backtracking Path Recovery.
-// - Intuition: `parent[x]` stores the last coin denomination used to achieve optimal state dp[x].
+// - Intuition:
+//   * Standard coin change computes minimum coins to reach amount t using unbounded knapsack.
+//   * Maintain par[x] recording the denomination of the coin that yielded the optimal transition into state x.
+//   * If dp[t] is unreachable (>= 1e9), return empty vector.
+//   * Otherwise, trace backwards from t: repeatedly append par[cur] and subtract it from cur until cur reaches 0.
 // - Complexity: Time: O(N * amount), Space: O(amount).

@@ -103,6 +103,8 @@ const ll MOD = 1e9 + 7;
  | 62 | Counting Towers (CSES 2413)                 | 2-State Block DP (Split vs Merge) | O(N)     | O(N)     |
  | 63 | Counting Tilings (CSES 2181)                | Broken Profile / Bitmask DP       | O(M 2^{2N})| O(M 2^N)|
  | 64 | Mountain Range (CSES 3150)                  | 2-State Alternating Sequence DP   | O(N)     | O(1)     |
+ | 65 | Longest Uncommon Subsequence I (LC 521)     | Direct String Equality Check      | O(min(A,B))| O(1)     |
+ | 66 | Longest Uncommon Subsequence II (LC 522)    | Pairwise Subsequence Verification | O(N^2 * L)| O(1)     |
  ====================================================================================================
 */
 
@@ -176,22 +178,21 @@ public:
     // - Complexity: Time: O(N), Space: O(N).
 
     // House Robber II (LeetCode 213)
+    int robLinearRange(const vector<int>& nums, int l, int r) {
+        vector<int> dp(r - l + 2, 0);
+        dp[1] = nums[l];
+        for (int i = l + 1; i <= r; i++) {
+            int idx = i - l + 1;
+            dp[idx] = max(dp[idx - 1], dp[idx - 2] + nums[i]);
+        }
+        return dp.back();
+    }
+
     int robCircular(vector<int>& nums) {
         int n = nums.size();
         if (n == 0) return 0;
         if (n == 1) return nums[0];
-
-        auto robRange = [&](int l, int r) {
-            vector<int> dp(r - l + 2, 0);
-            dp[1] = nums[l];
-            for (int i = l + 1; i <= r; i++) {
-                int idx = i - l + 1;
-                dp[idx] = max(dp[idx - 1], dp[idx - 2] + nums[i]);
-            }
-            return dp.back();
-        };
-
-        return max(robRange(0, n - 2), robRange(1, n - 1));
+        return max(robLinearRange(nums, 0, n - 2), robLinearRange(nums, 1, n - 1));
     }
     // Interview Explanation:
     // - Problem Statement: Find maximum money robbed when houses are arranged in a circle (LeetCode 213).
@@ -509,10 +510,12 @@ public:
     // - Complexity: Time: O(N \log N), Space: O(N).
 
     // Longest String Chain (LeetCode 1048)
+    static bool compareStrChainLength(const string& a, const string& b) {
+        return a.size() < b.size();
+    }
+
     int longestStrChain(vector<string>& words) {
-        sort(words.begin(), words.end(), [](const string& a, const string& b) {
-            return a.size() < b.size();
-        });
+        sort(words.begin(), words.end(), compareStrChainLength);
         unordered_map<string, int> dp;
         int ans = 0;
         for (const string& word : words) {
@@ -1052,26 +1055,26 @@ public:
     // - Complexity: Time: O(N^2), Space: O(N).
 
     // Can I Win (LeetCode 464 - Minimax with Bitmask Memoization)
+    bool dfsCanIWin(int mask, int total, int maxChoosableInteger, int desiredTotal, unordered_map<int, bool>& memo) {
+        if (memo.count(mask)) return memo[mask];
+        for (int i = 1; i <= maxChoosableInteger; i++) {
+            int bit = 1 << i;
+            if (!(mask & bit)) {
+                if (total + i >= desiredTotal || !dfsCanIWin(mask | bit, total + i, maxChoosableInteger, desiredTotal, memo)) {
+                    return memo[mask] = true;
+                }
+            }
+        }
+        return memo[mask] = false;
+    }
+
     bool canIWin(int maxChoosableInteger, int desiredTotal) {
         int totalSum = (maxChoosableInteger * (maxChoosableInteger + 1)) / 2;
         if (totalSum < desiredTotal) return false;
         if (desiredTotal <= 0) return true;
 
         unordered_map<int, bool> memo;
-        function<bool(int, int)> dfs = [&](int mask, int total) -> bool {
-            if (memo.count(mask)) return memo[mask];
-            for (int i = 1; i <= maxChoosableInteger; i++) {
-                int bit = 1 << i;
-                if (!(mask & bit)) {
-                    if (total + i >= desiredTotal || !dfs(mask | bit, total + i)) {
-                        return memo[mask] = true;
-                    }
-                }
-            }
-            return memo[mask] = false;
-        };
-
-        return dfs(0, 0);
+        return dfsCanIWin(0, 0, maxChoosableInteger, desiredTotal, memo);
     }
     // Interview Explanation:
     // - Problem Statement: Determine if first player can force a win reaching desiredTotal picking unique numbers 1..maxChoosableInteger (LeetCode 464).
@@ -1353,20 +1356,21 @@ public:
     // 51. REMOVING DIGITS (CSES 1637)
     // =========================================================
 
+    int solveRemovingDigits(int x, vi& dp) {
+        if (x == 0) return 0;
+        if (dp[x] != -1) return dp[x];
+        int ans = INT_MAX, tmp = x;
+        while (tmp > 0) {
+            int d = tmp % 10;
+            tmp /= 10;
+            if (d != 0) ans = min(ans, 1 + solveRemovingDigits(x - d, dp));
+        }
+        return dp[x] = ans;
+    }
+
     int minStepsRemovingDigits(int n) {
         vi dp(n + 1, -1);
-        function<int(int)> solve = [&](int x) -> int {
-            if (x == 0) return 0;
-            if (dp[x] != -1) return dp[x];
-            int ans = INT_MAX, tmp = x;
-            while (tmp > 0) {
-                int d = tmp % 10;
-                tmp /= 10;
-                if (d != 0) ans = min(ans, 1 + solve(x - d));
-            }
-            return dp[x] = ans;
-        };
-        return solve(n);
+        return solveRemovingDigits(n, dp);
     }
     // Interview Explanation:
     // - Problem Statement: Find minimum steps to reduce n to 0 by subtracting one of its digits (CSES 1637).
@@ -1411,39 +1415,38 @@ public:
     // 53. COUNTING NUMBERS - NO ADJACENT EQUAL DIGITS (CSES 2220)
     // =========================================================
 
+    long long solveNoAdjEqual(int pos, int prev, bool started, bool tight, const string& num, long long memo[20][11][2][2]) {
+        if (pos == (int)num.size()) return 1;
+        if (memo[pos][prev][started][tight] != -1) return memo[pos][prev][started][tight];
+
+        int lim = tight ? num[pos] - '0' : 9;
+        long long ans = 0;
+        if (!started) ans += solveNoAdjEqual(pos + 1, 10, false, tight && !lim, num, memo);
+
+        for (int d = started ? 0 : 1; d <= lim; d++) {
+            if (!started || d != prev) {
+                ans += solveNoAdjEqual(pos + 1, d, true, tight && (d == lim), num, memo);
+            }
+        }
+        return memo[pos][prev][started][tight] = ans;
+    }
+
+    long long countNoAdjUpTo(long long x) {
+        if (x < 0) return 0;
+        string num = to_string(x);
+        long long memo[20][11][2][2];
+        memset(memo, -1, sizeof(memo));
+        return solveNoAdjEqual(0, 10, false, true, num, memo);
+    }
+
+    bool isNoAdjValid(long long x) {
+        string s = to_string(x);
+        for (size_t i = 1; i < s.size(); i++) if (s[i] == s[i - 1]) return false;
+        return true;
+    }
+
     long long countNumbersNoAdjacentEqual(long long a, long long b) {
-        auto countUpTo = [](long long x) -> long long {
-            if (x < 0) return 0;
-            string num = to_string(x);
-            long long memo[20][11][2][2];
-            memset(memo, -1, sizeof(memo));
-
-            function<long long(int, int, bool, bool)> solve = [&](int pos, int prev, bool started, bool tight) -> long long {
-                if (pos == (int)num.size()) return 1;
-                if (memo[pos][prev][started][tight] != -1) return memo[pos][prev][started][tight];
-
-                int lim = tight ? num[pos] - '0' : 9;
-                long long ans = 0;
-                if (!started) ans += solve(pos + 1, 10, false, tight && !lim);
-
-                for (int d = started ? 0 : 1; d <= lim; d++) {
-                    if (!started || d != prev) {
-                        ans += solve(pos + 1, d, true, tight && (d == lim));
-                    }
-                }
-                return memo[pos][prev][started][tight] = ans;
-            };
-
-            return solve(0, 10, false, true);
-        };
-
-        auto isValid = [](long long x) -> bool {
-            string s = to_string(x);
-            for (size_t i = 1; i < s.size(); i++) if (s[i] == s[i - 1]) return false;
-            return true;
-        };
-
-        return countUpTo(b) - countUpTo(a) + isValid(a);
+        return countNoAdjUpTo(b) - countNoAdjUpTo(a) + isNoAdjValid(a);
     }
     // Interview Explanation:
     // - Problem Statement: Count integers in range [a, b] where no two adjacent digits are equal (CSES 2220).
@@ -1478,23 +1481,24 @@ public:
     // 55. ELEVATOR RIDES (CSES 1653)
     // =========================================================
 
+    pair<int, int> solveElevator(int mask, int n, int maxWeight, const vi& w, vector<pair<int, int>>& dp) {
+        if (!mask) return {1, 0};
+        if (dp[mask].first != -1) return dp[mask];
+
+        pair<int, int> best = {n + 1, 0};
+        for (int i = 0; i < n; i++) {
+            if (!(mask & (1 << i))) continue;
+            auto prev = solveElevator(mask ^ (1 << i), n, maxWeight, w, dp);
+            best = min(best, prev.second + w[i] <= maxWeight
+                ? pair<int, int>(prev.first, prev.second + w[i])
+                : pair<int, int>(prev.first + 1, w[i]));
+        }
+        return dp[mask] = best;
+    }
+
     int minElevatorRides(int n, int maxWeight, const vi& w) {
         vector<pair<int, int>> dp(1 << n, {-1, -1});
-        function<pair<int, int>(int)> solve = [&](int mask) -> pair<int, int> {
-            if (!mask) return {1, 0};
-            if (dp[mask].first != -1) return dp[mask];
-
-            pair<int, int> best = {n + 1, 0};
-            for (int i = 0; i < n; i++) {
-                if (!(mask & (1 << i))) continue;
-                auto prev = solve(mask ^ (1 << i));
-                best = min(best, prev.second + w[i] <= maxWeight
-                    ? pair<int, int>(prev.first, prev.second + w[i])
-                    : pair<int, int>(prev.first + 1, w[i]));
-            }
-            return dp[mask] = best;
-        };
-        return solve((1 << n) - 1).first;
+        return solveElevator((1 << n) - 1, n, maxWeight, w, dp).first;
     }
     // Interview Explanation:
     // - Problem Statement: Find minimum elevator rides to transport n people under weight limit (CSES 1653).
@@ -1696,29 +1700,29 @@ public:
     // 63. COUNTING TILINGS (CSES 2181)
     // =========================================================
 
+    void generateTilings(int col, int row, int mask, int next_mask, int n, vvl& dp) {
+        if (row == n) {
+            dp[col + 1][next_mask] = (dp[col + 1][next_mask] + dp[col][mask]) % MOD;
+            return;
+        }
+        if ((mask & (1 << row)) != 0) {
+            generateTilings(col, row + 1, mask, next_mask, n, dp);
+        } else {
+            generateTilings(col, row + 1, mask, next_mask | (1 << row), n, dp);
+            if (row + 1 < n && !(mask & (1 << (row + 1)))) {
+                generateTilings(col, row + 2, mask, next_mask, n, dp);
+            }
+        }
+    }
+
     int countingTilings(int n, int m) {
         vvl dp(m + 1, vl(1 << n, 0));
         dp[0][0] = 1;
 
-        function<void(int, int, int, int, int)> generate = [&](int col, int row, int mask, int next_mask, int idx) {
-            if (row == n) {
-                dp[col + 1][next_mask] = (dp[col + 1][next_mask] + dp[col][mask]) % MOD;
-                return;
-            }
-            if ((mask & (1 << row)) != 0) {
-                generate(col, row + 1, mask, next_mask, idx);
-            } else {
-                generate(col, row + 1, mask, next_mask | (1 << row), idx);
-                if (row + 1 < n && !(mask & (1 << (row + 1)))) {
-                    generate(col, row + 2, mask, next_mask, idx);
-                }
-            }
-        };
-
         for (int col = 0; col < m; col++) {
             for (int mask = 0; mask < (1 << n); mask++) {
                 if (dp[col][mask] > 0) {
-                    generate(col, 0, mask, 0, mask);
+                    generateTilings(col, 0, mask, 0, n, dp);
                 }
             }
         }
@@ -1751,6 +1755,56 @@ public:
     // - Complexity: Time: O(N), Space: O(1).
 
 };
+
+// ============================================================
+// 65. LONGEST UNCOMMON SUBSEQUENCE I (LEETCODE 521)
+// ============================================================
+
+int findLUSlength(string a, string b) {
+    if (a == b) return -1;
+    return max(a.size(), b.size());
+}
+// Interview Explanation:
+// - Problem Statement: Find length of longest uncommon subsequence between two strings (LeetCode 521).
+// - Approach: Direct String Equality Comparison.
+// - Intuition: If strings are identical, every subsequence is common (-1). Otherwise, the longer string cannot be a subsequence of the shorter string, so answer is max(len(a), len(b)).
+// - Complexity: Time: O(min(len(a), len(b))), Space: O(1).
+
+
+// ============================================================
+// 66. LONGEST UNCOMMON SUBSEQUENCE II (LEETCODE 522)
+// ============================================================
+
+bool isSubsequenceLUS(const string& s, const string& t) {
+    int i = 0, j = 0;
+    while (i < (int)s.size() && j < (int)t.size()) {
+        if (s[i] == t[j]) i++;
+        j++;
+    }
+    return i == (int)s.size();
+}
+
+int findLUSLength(vector<string>& strs) {
+    int n = strs.size();
+    int ans = -1;
+    for (int i = 0; i < n; i++) {
+        bool isUncommon = true;
+        for (int j = 0; j < n; j++) {
+            if (i != j && isSubsequenceLUS(strs[i], strs[j])) {
+                isUncommon = false;
+                break;
+            }
+        }
+        if (isUncommon) ans = max(ans, (int)strs[i].size());
+    }
+    return ans;
+}
+// Interview Explanation:
+// - Problem Statement: Find length of longest uncommon subsequence among an array of strings (LeetCode 522).
+// - Approach: All-Pairs Subsequence Verification.
+// - Intuition: A string is uncommon if it is not a subsequence of any other string in the list; check all pairs.
+// - Complexity: Time: O(N^2 * L), Space: O(1).
+
 
 int main() {
     ios::sync_with_stdio(false);

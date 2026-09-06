@@ -1,6 +1,6 @@
 # DSA Modules — Problem Summary & Complexity Reference
 
-A comprehensive, unified reference catalog of **474 essential Data Structures & Algorithms problems and algorithms** across all **13 topic files** in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
+A comprehensive, unified reference catalog of **477 essential Data Structures & Algorithms problems and algorithms** across all **13 topic files** in `DSA-Code/Modules/`. Every entry includes standard problem names, algorithmic patterns, optimal time complexities, and auxiliary space complexities.
 
 ---
 
@@ -10,7 +10,7 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 | :-: | :--- | :--- | :-: |
 | **1** | [`alphabet_trie.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/alphabet_trie.cpp) | Alphabet Trie & Multi-Branching Strings | **15** |
 | **2** | [`binary_trie.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/binary_trie.cpp) | Bitwise Binary Trie & XOR Optimizations | **15** |
-| **3** | [`dp.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/dp.cpp) | Dynamic Programming & State Optimizations | **64** |
+| **3** | [`dp.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/dp.cpp) | Dynamic Programming & State Optimizations | **66** |
 | **4** | [`graph.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/graph.cpp) | Graph Algorithms, Traversals & Shortest Paths | **55** |
 | **5** | [`greedy.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/greedy.cpp) | Greedy Strategy, Intervals & Scheduling | **39** |
 | **6** | [`heap.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/heap.cpp) | Heaps, Priority Queues & Top-K Streams | **23** |
@@ -19,9 +19,9 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 | **9** | [`sliding.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/sliding.cpp) | Sliding Window & Two-Pointer Invariants | **18** |
 | **10** | [`sorting.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/sorting.cpp) | Sorting, Binary Search & Coordinate Sweeps | **73** |
 | **11** | [`stack.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/stack.cpp) | Monotonic Stack, Deque & Expression Parsing | **29** |
-| **12** | [`string.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/string.cpp) | String Matching, Rolling Hash & KMP/Z/Manacher | **31** |
+| **12** | [`string.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/string.cpp) | String Matching, Rolling Hash & KMP/Z/Manacher | **32** |
 | **13** | [`tree.cpp`](file:///Users/amankashyap/Documents/internship/DSA-Code/Modules/tree.cpp) | Binary Trees, BST & Advanced Tree Traversals | **50** |
-| **Total** | **13 Module Files** | **Unified Core DSA Library** | **474 Problems** |
+| **Total** | **13 Module Files** | **Unified Core DSA Library** | **477 Problems** |
 
 ---
 
@@ -71,7 +71,7 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 
 ---
 
-### 3. Dynamic Programming (`dp.cpp`) — 64 Problems
+### 3. Dynamic Programming (`dp.cpp`) — 66 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -139,6 +139,8 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 | **62** | Counting Towers (CSES 2413) | 2-State Block DP (Split vs Merge) | `O(N)` | `O(N)` |
 | **63** | Counting Tilings (CSES 2181) | Broken Profile / Bitmask DP | `O(M * 2^{2N})` | `O(M * 2^N)` |
 | **64** | Mountain Range (CSES 3150) | 2-State Alternating Sequence DP | `O(N)` | `O(1)` |
+| **65** | Longest Uncommon Subsequence I (LC 521) | Direct String Equality Check | `O(min(A, B))` | `O(1)` |
+| **66** | Longest Uncommon Subsequence II (LC 522) | Pairwise Subsequence Verification | `O(N^2 * L)` | `O(1)` |
 
 ---
 
@@ -497,7 +499,7 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 
 ---
 
-### 12. String Algorithms (`string.cpp`) — 31 Problems
+### 12. String Algorithms (`string.cpp`) — 32 Problems
 
 | # | Problem Name | Pattern / Technique | Time Complexity | Space Complexity |
 | :-: | :--- | :--- | :--- | :--- |
@@ -532,6 +534,7 @@ A comprehensive, unified reference catalog of **474 essential Data Structures & 
 | **29** | Distinct Subsequences II (CSES 1149 / LC 940) | 1D DP + Last Occurrence Deduplication | `O(N)` | `O(N + Σ)` |
 | **30** | Dynamic Palindrome Queries (CSES 2420) | Dual Fenwick Trees + Rolling Hash | `O((N + Q) log N)` | `O(N)` |
 | **31** | String Functions: KMP Pi & Z-Array (CSES 2107) | Dual Prefix-Function & LCP Arrays | `O(N)` | `O(N)` |
+| **32** | Valid Palindrome II (LC 680) | 2-Pointer Greedy Mismatch Check | `O(N)` | `O(1)` |
 
 ---
 
