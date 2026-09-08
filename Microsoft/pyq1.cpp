@@ -100,10 +100,12 @@ class Solution1 {
 public:
     int equalSubstring(const string& s, const string& t, int maxCost) {
         int l = 0, cost = 0, maxLen = 0;
-        for (int r = 0; r < (int)s.size(); ++r) {
-            cost += abs(s[r] - t[r]);
-            while (cost > maxCost) {
-                cost -= abs(s[l] - t[l]);
+        vector<int>result;
+        for(int i=0;i<s.size();i++) result.push_back(abs(s[i]-t[i]));
+        for(int r=0; r<s.size(); r++) {
+            cost += result[r];
+            while(cost > maxCost) {
+                cost -= result[l];
                 l++;
             }
             maxLen = max(maxLen, r - l + 1);
@@ -144,7 +146,7 @@ public:
         long long pairs = 0;
         for (const string& s : words) {
             int mask = 0;
-            for (char c : s) mask ^= (1 << (c - 'a'));
+            for (char c : s) mask = mask ^ (1 << (c - 'a')); // Toggle bit for character
             pairs += maskFreq[mask];
             for (int bit = 0; bit < 26; ++bit) {
                 pairs += maskFreq[mask ^ (1 << bit)];
@@ -246,20 +248,24 @@ public:
   Sort ascending and assign each element to the earliest unpicked integer in its valid interval
   `[x - 1, x + 1]` to greedily maximize distinct counts.
 */
-class Solution4 {
+class Solution {
 public:
-    int maxDistinctElements(vector<int>& nums) {
+    int maxDistinctElements(vector<int>& nums, int K) {
         sort(nums.begin(), nums.end());
-        long long prev = -2e18; // Initialize to a value smaller than any possible candidate
-        int distinctCount = 0;
+
+        long long prev = LLONG_MIN / 2;
+        int ans = 0;
+
         for (int x : nums) {
-            long long cand = max((long long)x - 1, prev + 1); // can be max of x-1 or prev+1
-            if (cand <= (long long)x + 1) { // check if candidate is within the valid range
-                distinctCount++;
-                prev = cand;
+            long long candidate = max(1LL * x - K, prev + 1);
+
+            if (candidate <= 1LL * x + K) {
+                ans++;
+                prev = candidate;
             }
         }
-        return distinctCount;
+
+        return ans;
     }
 };
 
@@ -330,8 +336,9 @@ class Solution6 {
 public:
     vector<int> rateLimiter(const vector<string>& users, const vector<int>& times, int T, int K) {
         unordered_map<string, queue<int>> userHistory; // userId -> queue of accepted timestamps
+        int n = users.size();
         vector<int> results;
-        results.reserve(users.size());
+        results.reserve(n); // Reserve space to avoid reallocations
         for (size_t i = 0; i < users.size(); ++i) {
             queue<int>& q = userHistory[users[i]];
             while (!q.empty() && q.front() < times[i] - T) {
@@ -431,20 +438,17 @@ public:
   against complementary pair remainders in O(D) per step.
 */
 class Solution8 {
-public:
-    long long countTriplets(const vector<int>& nums, int d) {
-        vector<long long> cnt(d, 0), pairCnt(d, 0);
-        long long triplets = 0;
+  public:
+    long long countTriplets(const vector<int> &nums, int d) {
+        vector<long long> cnt(d), pairs(d);
+        long long ans = 0;
         for (int x : nums) {
-            int r = ((x % d) + d) % d; // we wanted (A+B+C)%D==0, so we need (A+B)%D == -C%D == (D-C%D)%D
-            // x%d + d is due to negative numbers, we want to ensure r is in [0, d-1]
-            triplets += pairCnt[(d - r) % d];
-            for (int rem = 0; rem < d; ++rem) {
-                pairCnt[(rem + r) % d] += cnt[rem]; // Update pair counts for new remainder sums
-            }
-            cnt[r]++; // Update single remainder count
+            int r = ((x % d) + d) % d;
+            ans += pairs[(d - r) % d];
+            for (int i = 0; i < d; i++) pairs[(i + r) % d] += cnt[i];
+            cnt[r]++;
         }
-        return triplets;
+        return ans;
     }
 };
 
@@ -508,28 +512,36 @@ public:
   Try all valid window positions for the mandatory target substring; greedily fill all remaining
   wildcards with 'a' and return the lexicographical minimum.
 */
-class Solution10 {
-public:
-    string smallestString(const string& word, const string& sub) {
+class Solution {
+  public:
+    string smallestString(string word, string sub) {
         int n = word.size(), m = sub.size();
-        string best = "";
-        for (int i = 0; i + m <= n; ++i) {
+        string ans;
+
+        for (int i = 0; i + m <= n; i++) {
             string cur = word;
-            bool match = true;
-            int j=0;
-            while(j < m) {
+            bool ok = true;
+
+            for (int j = 0; j < m; j++) {
                 if (cur[i + j] != '?' && cur[i + j] != sub[j]) {
-                    match = false;
+                    ok = false;
                     break;
                 }
                 cur[i + j] = sub[j];
-                j++;
             }
-            if (!match) continue;
-            for (char& c : cur) if(c=='?') c = 'a';
-            cur = min(cur, best.empty() ? cur : best);
+
+            if (!ok)
+                continue;
+
+            for (char &c : cur)
+                if (c == '?')
+                    c = 'a';
+
+            if (ans.empty() || cur < ans)
+                ans = cur;
         }
-        return best.empty() ? "-1" : best;
+
+        return ans.empty() ? "-1" : ans;
     }
 };
 
@@ -613,44 +625,79 @@ public:
         return total;
     }
 };
-
 // ====================================================================================================
-// 13. FIND EARLIEST K-MINUTE SLOT WHEN EVERYONE IS FREE [LC 1229 / MS OA]
+// 13. FIND EARLIEST K-MINUTE SLOT WHEN EVERYONE IS FREE
 // ====================================================================================================
 /*
   PROBLEM STATEMENT:
-  Given busy intervals `[start, end]` of multiple participants and meeting length `K`, find
-  the earliest start time `T` such that everyone is free during `[T, T + K]`.
+  Given the busy schedules of N participants, where each participant has a list
+  of busy intervals [start, end], and an integer K representing the meeting
+  duration, find the earliest time T >= 0 such that every participant is free
+  throughout the entire interval [T, T + K].
+
+  Return the earliest possible start time T.
+
+  Assume:
+  - All intervals represent busy time.
+  - Time is unbounded above.
+  - K > 0.
+
+  EXAMPLE:
+  Person 1: [1,3], [6,8]
+  Person 2: [2,5], [9,10]
+  Person 3: [4,7]
+
+  K = 2
+
+  Combined busy intervals:
+  [1,3], [2,5], [4,7], [6,8], [9,10]
+
+  After merging:
+  [1,8], [9,10]
+
+  The free intervals are:
+  [0,1], [8,9], [10,infinity)
+
+  The earliest interval of length 2 starts at 10.
 
   PATTERN TO REMEMBER:
-  Interval Merging + Complementary Free Gap Search
+  Merge Intervals + Find First Free Gap
 
-  CORE INTUITION & STEPS:
-  - Sort and merge all busy intervals.
-  - Inspect gaps between consecutive merged busy intervals starting from time 0.
-  - The first gap with length >= K yields the earliest free start time.
+  CORE INTUITION:
+  - A meeting can happen only when nobody is busy.
+  - Therefore, combine all busy intervals from every participant.
+  - Sort and merge overlapping busy intervals.
+  - Find the first free gap having length at least K.
 
   COMPLEXITY:
-  - Time:  O(M log M) where M is total interval count
-  - Space: O(M) for merged intervals
-
-  CONCLUSION / TAKEAWAY:
-  Union all busy schedules via standard interval merge; scan the gaps between busy blocks
-  to locate the first interval with span >= K.
+  - Time:  O(M log M), where M is the total number of busy intervals.
+  - Space: O(M).
 */
+
 class Solution13 {
 public:
-    int earliestFreeSlot(vector<pair<int,int>>& intervals, int k) {
+    int earliestFreeSlot(vector<vector<pair<int,int>>>& schedules, int k) {
+        vector<pair<int,int>> intervals;
+
+        for (auto& person : schedules)
+            for (auto& interval : person)
+                intervals.push_back(interval);
+
         sort(intervals.begin(), intervals.end());
-        
+
         int freeStart = 0;
-        for (const auto& [s, e] : intervals) {
-            if (s - freeStart >= k) return freeStart;
-            freeStart = max(freeStart, e);
+
+        for (auto [start, end] : intervals) {
+            if (start - freeStart >= k)
+                return freeStart;
+
+            freeStart = max(freeStart, end);
         }
+
         return freeStart;
     }
 };
+
 
 // ====================================================================================================
 // 14. PRICE QUERY CONVERSION COST [LC 2602]
@@ -726,16 +773,14 @@ class Solution15 {
 public:
     int minimumStress(int n, const vector<vector<pair<int, int>>>& graph, int src, int dst) {
         vector<int> dist(n, INT_MAX);
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+        using T = pair<int, int>; // {stress, vertex}
+        priority_queue<T, vector<T>, greater<>> pq;
         dist[src] = 0;
         pq.push({0, src});
-
         while (!pq.empty()) {
-            auto [stress, u] = pq.top();
-            pq.pop();
+            auto [stress, u] = pq.top(); pq.pop();
             if (u == dst) return stress;
             if (stress > dist[u]) continue;
-
             for (const auto& [v, w] : graph[u]) {
                 int nextStress = max(stress, w); // in normal dijkstra, we do newWeight = dist[u] + w, here we do max
                 if (nextStress < dist[v]) {
@@ -870,9 +915,9 @@ public:
         for (auto& [w, a] : tasks) {
             if (cur < w) {
                 req += w - cur;
-                cur = w;
+                cur = w; // Top up to meet worst-case requirement
             }
-            cur -= a;
+            cur -= a; // Consume resources after task completion
         }
         return req;
     }

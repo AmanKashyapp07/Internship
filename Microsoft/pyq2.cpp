@@ -82,6 +82,10 @@ struct ListNode {
  | 36 | Delete Odd-Valued Nodes from Linked List    | Sentinel Pointer Traversal        | O(N)     | O(1)     |
  | 37 | Shortest Substring Deletion for Distinct    | Prefix & Suffix Distinct Sets     | O(N)     | O(Σ)     |
  | 38 | Message Duplicate Detection Rate Limiter    | Hash Map Timestamp Cache (LC 359) | O(N)     | O(U)     |
+ | 39 | Maximize XOR by Reordering One Binary String| Greedy Most Significant Bit XOR   | O(N)     | O(N)     |
+ | 40 | Evaluate Signed Integer Arithmetic Expr     | Recursive Descent Parser (AST)    | O(N)     | O(N)     |
+ | 41 | Validate Org Hierarchy & Report Depth       | Kahn's Topological Sort + BFS Level| O(N)     | O(N)     |
+ | 42 | Most Visited Sectors of a Circular Track    | Circular Difference Array (Sweep) | O(N + M) | O(N)     |
  ====================================================================================================
 */
 
@@ -110,6 +114,23 @@ struct ListNode {
 */
 class Solution1 {
 public:
+    int longestPalindromeSubseqq(string s) {
+        int n = s.size();
+        vector<vector<int>> dp(n, vector<int>(n));
+
+        for (int i = n - 1; i >= 0; --i) {
+            dp[i][i] = 1;
+            for (int j = i + 1; j < n; ++j) {
+                if (s[i] == s[j])
+                    dp[i][j] = 2 + dp[i + 1][j - 1]; // if characters match, add 2 for the new palindromic subsequence formed by s[i] and s[j]
+                else
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]); // if characters don't match, take the maximum of dropping either endpoint
+            }
+        }
+
+        return dp[0][n - 1];
+    }
+
     int longestPalindromeSubseq(const string& s) {
         int n = s.size();
         if (n == 0) return 0;
@@ -406,50 +427,111 @@ public:
         return ops;
     }
 };
-
 // ====================================================================================================
-// 8. COUNT PALINDROMIC SUBSEQUENCES [LC 730 / Modulo DP]
+// 8A. COUNT ALL PALINDROMIC SUBSEQUENCES
+// Different index selections count separately.
+//
+// dp[i][j] = number of palindromic subsequences in s[i..j]
+//
+// Time:  O(N²)
+// Space: O(N²)
 // ====================================================================================================
-/*
-  PROBLEM STATEMENT:
-  Given string `s`, count all non-empty palindromic subsequences modulo 10^9 + 7.
 
-  PATTERN TO REMEMBER:
-  Inclusion-Exclusion Interval DP
-
-  CORE INTUITION & STEPS:
-  - Let dp[i][j] = number of palindromic subsequences in s[i..j].
-  - Base: dp[i][i] = 1.
-  - If s[i] == s[j]: dp[i][j] = (dp[i+1][j] + dp[i][j-1] + 1) % MOD.
-  - If s[i] != s[j]: dp[i][j] = (dp[i+1][j] + dp[i][j-1] - dp[i+1][j-1] + MOD) % MOD.
-
-  COMPLEXITY:
-  - Time:  O(N²)
-  - Space: O(N²)
-
-  CONCLUSION / TAKEAWAY:
-  Subsequence counting uses inclusion-exclusion: add one-character contractions, subtract duplicate middle overlap,
-  and add +1 when outer characters match.
-*/
-class Solution8 {
+class Solution8A {
 public:
-    long long countPalindromicSubsequences(const string& s) {
+    long long countPalindromicSubsequences(string s) {
         const long long MOD = 1e9 + 7;
         int n = s.size();
-        if (n == 0) return 0;
-        vector<vector<long long>> dp(n, vector<long long>(n, 0));
-        // dp[i][j] = number of palindromic subsequences in substring s[i..j]
-        for (int i = 0; i < n; i++) dp[i][i] = 1;
-        for (int len = 2; len <= n; len++) {
-            for (int i = 0; i <= n - len; i++) {
-                int j = i + len - 1;
-                if (s[i] == s[j]) {
-                    dp[i][j] = (dp[i + 1][j] + dp[i][j - 1] + 1) % MOD; // if characters match, add 1 for the new palindromic subsequence formed by s[i] and s[j]
-                } else {
-                    dp[i][j] = (dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1] + MOD) % MOD; // if characters don't match, subtract the double-counted middle subsequences
-                }
+        if (!n) return 0;
+
+        vector<vector<long long>> dp(n, vector<long long>(n));
+
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i][i] = 1;
+
+            for (int j = i + 1; j < n; j++) {
+                if (s[i] == s[j])
+                    dp[i][j] = dp[i + 1][j] + dp[i][j - 1] + 1;
+                else
+                    dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1];
+
+                dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;
             }
         }
+
+        return dp[0][n - 1];
+    }
+};
+
+class Solution8C {
+public:
+    long long countPalindromicSubsequences(string s) {
+        const long long MOD = 1e9 + 7;
+        int n = s.size();
+        vector<long long> dp(n, 1);
+
+        for (int i = n - 2; i >= 0; i--) {
+            long long diag = 0; // old dp[j-1] = dp[i+1][j-1]
+            for (int j = i + 1; j < n; j++) {
+                long long down = dp[j]; // dp[i+1][j]
+                dp[j] = s[i] == s[j] ? dp[j] + dp[j - 1] + 1 : dp[j] + dp[j - 1] - diag;
+                dp[j] = (dp[j] % MOD + MOD) % MOD;
+                diag = down;
+            }
+        }
+
+        return dp[n - 1];
+    }
+};
+// ====================================================================================================
+// 8B. COUNT DISTINCT PALINDROMIC SUBSEQUENCES [LC 730]
+//
+// dp[i][j] = number of DISTINCT palindromic subsequences in s[i..j]
+//
+// Time:  O(N²)
+// Space: O(N²)
+// ====================================================================================================
+
+class Solution8B {
+public:
+    int countPalindromicSubsequences(string s) {
+        const int MOD = 1e9 + 7;
+        int n = s.size();
+        if (!n) return 0;
+
+        vector<int> next(n, n), prev(n, -1), last(256, -1);
+
+        for (int i = 0; i < n; i++)
+            prev[i] = last[s[i]],
+            last[s[i]] = i;
+
+        fill(last.begin(), last.end(), n);
+
+        for (int i = n - 1; i >= 0; i--)
+            next[i] = last[s[i]],
+            last[s[i]] = i;
+
+        vector<vector<long long>> dp(n, vector<long long>(n));
+
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i][i] = 1;
+
+            for (int j = i + 1; j < n; j++) {
+                if (s[i] != s[j]) {
+                    dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1];
+                } else {
+                    int l = next[i], r = prev[j];
+                    long long mid = dp[i + 1][j - 1];
+
+                    if (l > r) dp[i][j] = 2 * mid + 2;
+                    else if (l == r) dp[i][j] = 2 * mid + 1;
+                    else dp[i][j] = 2 * mid - dp[l + 1][r - 1];
+                }
+
+                dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;
+            }
+        }
+
         return dp[0][n - 1];
     }
 };
@@ -1719,6 +1801,282 @@ public:
                 lastDelivered[msg] = timestamps[i];
             }
         }
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 39. MAXIMIZE THE XOR OF TWO BINARY STRINGS BY REORDERING ONE [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given two binary strings `s` and `t` of the same length, reorder the characters of `t` such that
+  the bitwise XOR of `s` and the reordered `t` is maximized. Return the resulting maximum XOR string.
+
+  PATTERN TO REMEMBER:
+  Greedy Most Significant Bit XOR Maximization
+
+  CORE INTUITION & STEPS:
+  - Higher-order bits contribute exponentially more than lower-order bits (2^k > sum_{j=0}^{k-1} 2^j).
+  - Therefore, we must greedily make the leftmost bits of the XOR result '1' whenever possible.
+  - Count available '1's and '0's in string `t`.
+  - For each bit `c` in `s` from left to right:
+    * If `c == '0'`: to get a '1' in XOR, we need a '1' from `t`. If `ones > 0`, pick '1' (ans += '1', ones--);
+      otherwise we are forced to pick '0' (ans += '0', zeros--).
+    * If `c == '1'`: to get a '1' in XOR, we need a '0' from `t`. If `zeros > 0`, pick '0' (ans += '1', zeros--);
+      otherwise we are forced to pick '1' (ans += '0', ones--).
+  - Return the resulting string `ans`.
+
+  COMPLEXITY:
+  - Time:  O(N) single linear pass over the strings
+  - Space: O(N) for output string
+
+  CONCLUSION / TAKEAWAY:
+  Greedily prioritize setting most significant XOR bits to '1' using complementary bits from the character counts.
+*/
+class Solution39 {
+public:
+    string maximizeXor(const string& s, const string& t) {
+        int n = t.size();
+        int m = s.size();
+        int ones = count(t.begin(), t.end(), '1');
+        int zeros = n - ones;
+
+        string ans;
+        for (char c : s) {
+            if (c == '0') {
+                if (ones > 0) {
+                    ans.push_back('1');
+                    ones--;
+                } else {
+                    ans.push_back('0');
+                    zeros--;
+                }
+            } else {
+                if (zeros > 0) {
+                    ans.push_back('1');
+                    zeros--;
+                } else {
+                    ans.push_back('0');
+                    ones--;
+                }
+            }
+        }
+
+        return ans;
+    }
+};
+
+// ====================================================================================================
+// 40. EVALUATE A SIGNED INTEGER ARITHMETIC EXPRESSION [MS OA]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given an arithmetic expression string containing non-negative integers, operators ('+', '-', '*', '/'),
+  parentheses ('(', ')'), unary signs (+, -), and whitespace, evaluate and return its integer result.
+
+  PATTERN TO REMEMBER:
+  Recursive Descent Parsing (Grammar Hierarchy: Expr -> Term -> Factor)
+
+  CORE INTUITION & STEPS:
+  - Standard grammar handling operator precedence and associativity:
+    * expr   := term (('+' | '-') term)*
+    * term   := factor (('*' | '/') factor)*
+    * factor := ('+' | '-') factor | '(' expr ')' | number
+  - Maintain a pointer index `i` through the string `s`.
+  - `factor()` parses unary signs recursively, sub-expressions enclosed in '(', ')', or multi-digit numbers.
+  - `term()` evaluates higher-precedence multiplicative operators ('*', '/').
+  - `expr()` evaluates lower-precedence additive operators ('+', '-').
+  - `skip()` cleanly bypasses whitespace characters between tokens.
+
+  COMPLEXITY:
+  - Time:  O(N) single pass over the expression tokens
+  - Space: O(N) recursion stack in the worst case (nested parentheses or unary chains)
+
+  CONCLUSION / TAKEAWAY:
+  Recursive descent parsing cleanly decouples operator precedence, parenthesization, and unary signs without complex stack state machines.
+*/
+class Solution40 {
+    stack<long long> values;
+    stack<char> ops;
+
+    int precedence(char op) {
+        return (op == '+' || op == '-') ? 1 : 2;
+    }
+
+    void applyOp() {
+        long long b = values.top(); values.pop();
+        long long a = values.top(); values.pop();
+        char op = ops.top(); ops.pop();
+        switch (op) {
+            case '+': values.push(a + b); break;
+            case '-': values.push(a - b); break;
+            case '*': values.push(a * b); break;
+            case '/': values.push(a / b); break;
+        }
+    }
+
+public:
+    long long evaluateExpression(const string& expression) {
+        // clear state in case of reuse across calls
+        while (!values.empty()) values.pop();
+        while (!ops.empty()) ops.pop();
+
+        int n = expression.size();
+        bool expectOperand = true; // tracks unary context
+
+        for (int i = 0; i < n; i++) {
+            char c = expression[i];
+            if (c == ' ') continue;
+
+            if (isdigit(c)) {
+                long long x = 0;
+                while (i < n && isdigit(expression[i])) x = x * 10 + (expression[i++] - '0');
+                i--;
+                values.push(x);
+                expectOperand = false;
+            } else if (c == '(') {
+                ops.push(c);
+                expectOperand = true;
+            } else if (c == ')') {
+                while (ops.top() != '(') applyOp();
+                ops.pop(); // remove '('
+                expectOperand = false;
+            } else { // operator
+                if (expectOperand && (c == '+' || c == '-')) {
+                    values.push(0); // unary sign trick
+                }
+                while (!ops.empty() && ops.top() != '(' &&
+                       precedence(ops.top()) >= precedence(c)) {
+                    applyOp();
+                }
+                ops.push(c);
+                expectOperand = true;
+            }
+        }
+
+        while (!ops.empty()) applyOp();
+        return values.top();
+    }
+};
+
+class Solution41 {
+public:
+    vector<int> analyzeHierarchy(const vector<int>& manager) {
+        int n = manager.size();
+        if (n == 0) return {1, -1};
+
+        vector<int> indegree(n, 0);
+        int root = -1, rootCount = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (manager[i] == -1) {
+                root = i;
+                rootCount++;
+            } else if (manager[i] >= 0 && manager[i] < n) {
+                indegree[manager[i]]++;
+            } else {
+                return {1, -1};
+            }
+        }
+
+        if (rootCount != 1) return {1, -1};
+
+        queue<int> q;
+        for (int i = 0; i < n; i++)
+            if (indegree[i] == 0) q.push(i);
+
+        int removed = 0;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            removed++;
+            if (manager[u] != -1 && --indegree[manager[u]] == 0)
+                q.push(manager[u]);
+        }
+
+        if (removed < n) return {1, -1};
+
+        vector<vector<int>> children(n);
+        for (int i = 0; i < n; i++)
+            if (manager[i] != -1) children[manager[i]].push_back(i);
+
+        q.push(root);
+        int depth = -1;
+        while (!q.empty()) {
+            depth++;
+            for (int sz = q.size(); sz > 0; sz--) {
+                int u = q.front(); q.pop();
+                for (int v : children[u]) q.push(v);
+            }
+        }
+
+        return {0, depth};
+    }
+};
+
+// ====================================================================================================
+// 42. MOST VISITED SECTORS OF A CIRCULAR TRACK [MS OA / LC 1560 Variant]
+// ====================================================================================================
+/*
+  PROBLEM STATEMENT:
+  Given a circular track divided into named `sectors`, and a list of sector checkpoints visited in order `rounds`:
+  A runner moves around the track in a fixed circular direction from rounds[i-1] to rounds[i].
+  Find the sector(s) visited the maximum number of times. Return the most visited sectors in their original track order.
+
+  PATTERN TO REMEMBER:
+  Circular Difference Array (Prefix Sum Sweep)
+
+  CORE INTUITION & STEPS:
+  - Mapping sector names to indices [0..n-1] turns the circular track into an index interval.
+  - Instead of point-by-point circular simulation (which could be O(Track * Rounds)), use a difference array `diff` of size n+1.
+  - Start position: increment `diff[pos[rounds[0]]]++`.
+  - For each leg from index `a` to `b`:
+    * If `a < b`: simple interval update on [a + 1, b].
+    * If `a > b`: circular wrap-around split into two intervals: [a + 1, n - 1] and [0, b].
+  - Running prefix sum computes the total visits per sector in O(N).
+  - Collect all sectors attaining the maximum visit count.
+
+  COMPLEXITY:
+  - Time:  O(N + M) where N = sectors.size(), M = rounds.size()
+  - Space: O(N) for index map, difference array, and visit counts
+
+  CONCLUSION / TAKEAWAY:
+  Convert circular boundary transitions into at most two linear interval updates using a difference array to avoid full step simulation.
+*/
+class Solution42 {
+public:
+    vector<string> mostVisitedSectors(const vector<string>& sectors, const vector<string>& rounds) {
+        int n = sectors.size();
+        if (n == 0 || rounds.empty()) return {};
+
+        unordered_map<string, int> pos;
+        for (int i = 0; i < n; i++) pos[sectors[i]] = i;
+
+        vector<long long> diff(n + 1, 0);
+        diff[pos[rounds[0]]]++;
+
+        for (size_t i = 1; i < rounds.size(); i++) {
+            int a = pos[rounds[i - 1]], b = pos[rounds[i]];
+            if (a < b) {
+                diff[a + 1]++; diff[b + 1]--;
+            } else if (a > b) {
+                diff[a + 1]++; diff[n]--;
+                diff[0]++; diff[b + 1]--;
+            }
+        }
+
+        long long cur = 0, mx = 0;
+        vector<long long> visits(n);
+        for (int i = 0; i < n; i++) {
+            cur += diff[i];
+            visits[i] = cur;
+            mx = max(mx, cur);
+        }
+
+        vector<string> ans;
+        for (int i = 0; i < n; i++)
+            if (visits[i] == mx) ans.push_back(sectors[i]);
+
         return ans;
     }
 };

@@ -1,50 +1,15 @@
-#if __has_include(<bits/stdc++.h>)
 #include <bits/stdc++.h>
-#else
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <cmath>
-#include <queue>
-#include <stack>
-#include <deque>
-#include <map>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <numeric>
-#include <climits>
-#include <cassert>
-#include <utility>
-#include <sstream>
-#include <bitset>
-#include <functional>
-#include <list>
-#endif
 using namespace std;
 
-using ll = long long;
-using pii = pair<int, int>;
-using vi = vector<int>;
-using vl = vector<ll>;
-using vvi = vector<vector<int>>;
-using vvl = vector<vector<ll>>;
-
-[[maybe_unused]] const ll MOD = 1e9 + 7;
-
-// Definition for singly-linked list node
+// Standard singly linked list node
 struct ListNode {
     int val;
-    ListNode *next;
-    ListNode() : val(0), next(nullptr) {}
-    ListNode(int x) : val(x), next(nullptr) {}
-    ListNode(int x, ListNode *next) : val(x), next(next) {}
+    ListNode* next;
+    ListNode(int x = 0, ListNode* n = nullptr) : val(x), next(n) {}
 };
 
-// Definition for a multi-purpose Node (Random, Doubly, Tree, Circular)
-class Node {
-public:
+// Generic node with multi-directional pointers (doubly, random, child, tree)
+struct Node {
     int val;
     Node* prev;
     Node* next;
@@ -52,11 +17,10 @@ public:
     Node* random;
     Node* left;
     Node* right;
-    Node() : val(0), prev(nullptr), next(nullptr), child(nullptr), random(nullptr), left(nullptr), right(nullptr) {}
-    Node(int _val) : val(_val), prev(nullptr), next(nullptr), child(nullptr), random(nullptr), left(nullptr), right(nullptr) {}
-    Node(int _val, Node* _next) : val(_val), prev(nullptr), next(_next), child(nullptr), random(nullptr), left(nullptr), right(nullptr) {}
-    Node(int _val, Node* _prev, Node* _next) : val(_val), prev(_prev), next(_next), child(nullptr), random(nullptr), left(nullptr), right(nullptr) {}
-    Node(int _val, Node* _prev, Node* _next, Node* _child) : val(_val), prev(_prev), next(_next), child(_child), random(nullptr), left(nullptr), right(nullptr) {}
+
+    Node(int v = 0)
+        : val(v), prev(nullptr), next(nullptr), child(nullptr),
+          random(nullptr), left(nullptr), right(nullptr) {}
 };
 
 /*
@@ -89,96 +53,155 @@ public:
  ====================================================================================================
 */
 
-// =========================================================
-// 1. REVERSE LINKED LIST II (LC 92)
-// =========================================================
+// ====================================================================================================
+//                               COMMON REUSABLE HELPER FUNCTIONS
+// ====================================================================================================
 
-class Solution1 {
-public:
+// 1. Reverse an entire singly linked list (Used in: Solution 9, Solution 10)
+ListNode* reverseList(ListNode* head) {
+    ListNode* prev = nullptr;
+    ListNode* curr = head;
+
+    while (curr != nullptr) {
+        ListNode* next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    return prev;
+}
+
+// 2. Find the middle node of a linked list (first mid for even length, ideal for bisecting) (Used in: Solution 4, 9, 10)
+ListNode* getMid(ListNode* head) {
+    ListNode* slow = head;
+    ListNode* fast = head;
+
+    while (fast->next != nullptr && fast->next->next != nullptr) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    return slow;
+}
+
+// 3. Merge two sorted linked lists into one sorted list (Used in: Solution 4 Sort List)
+ListNode* mergeTwoLists(ListNode* a, ListNode* b) {
+    ListNode dummy(0);
+    ListNode* tail = &dummy;
+
+    while (a != nullptr && b != nullptr) {
+        if (a->val <= b->val) {
+            tail->next = a;
+            a = a->next;
+        } else {
+            tail->next = b;
+            b = b->next;
+        }
+        tail = tail->next;
+    }
+
+    tail->next = (a != nullptr) ? a : b;
+
+    return dummy.next;
+}
+
+// 4. Calculate the length of a linked list (Used in: Solution 19)
+int getLength(ListNode* head) {
+    int len = 0;
+    while (head != nullptr) {
+        len++;
+        head = head->next;
+    }
+    return len;
+}
+
+// ====================================================================================================
+//                                      HIGH-YIELD PROBLEMS
+// ====================================================================================================
+
+// 1. Reverse Linked List II
+// Reverse nodes from position `left` to `right` (1-indexed) in a single pass, in-place.
+struct Solution1 {
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        if (!head || left == right) return head;
+        ListNode dummy(0, head); // Dummy node to simplify edge cases at head
+        ListNode* prev = &dummy; // Pointer to node before the reversal segment
 
-        ListNode dummy(0, head);
-        ListNode* prev = &dummy;
-        for (int i = 1; i < left; ++i) {
+        // Move `prev` to the node immediately before `left`
+        for (int i = 1; i < left; i++) {
             prev = prev->next;
         }
 
+        // Start of the segment to reverse
         ListNode* curr = prev->next;
-        for (int i = 0; i < right - left; ++i) {
-            ListNode* temp = curr->next;
-            curr->next = temp->next;
-            temp->next = prev->next;
-            prev->next = temp;
+
+        // Move each next node to the front of the reversed portion
+        for (int i = 0; i < right - left; i++) {
+            ListNode* nodeToMove = curr->next;
+
+            curr->next = nodeToMove->next; // Remove nodeToMove from its current position
+            nodeToMove->next = prev->next; // Insert it at the front of the reversed part
+            prev->next = nodeToMove;       // Connect prev to the new front
         }
-        return dummy.next;
+
+        return dummy.next; // Return the new head (could be unchanged if left > 1)
     }
 };
-// Interview Explanation:
-// - Problem Statement: Reverse nodes from position `left` to `right` in a single pass.
-// - Approach: Locate the node preceding `left`. Repeatedly extract `curr->next` and splice it directly after `prev`.
-// - Intuition: Head-insertion inside the window reverses the subsegment in-place without rebuilding.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 2. REVERSE NODES IN K-GROUP (LC 25)
-// =========================================================
-
-class Solution2 {
-public:
+// 2. Reverse Nodes in k-Group
+// Reverse nodes in chunks of size k; leftover nodes (< k) at the end stay unreversed.
+struct Solution2 {
     ListNode* reverseKGroup(ListNode* head, int k) {
         ListNode dummy(0, head);
         ListNode* groupPrev = &dummy;
 
         while (true) {
+            // Find the k-th node
             ListNode* kth = groupPrev;
-            for (int i = 0; i < k && kth; ++i) {
-                kth = kth->next;
+            int count = 0;
+
+            while (count < k && kth) {
+                kth = kth->next; // Move to the k-th node
+                count++;
             }
+
+            // Less than k nodes remain
             if (!kth) break;
 
             ListNode* groupNext = kth->next;
+
+            // Reverse current group
             ListNode* prev = groupNext;
             ListNode* curr = groupPrev->next;
 
             while (curr != groupNext) {
-                ListNode* temp = curr->next;
+                ListNode* next = curr->next;
                 curr->next = prev;
                 prev = curr;
-                curr = temp;
+                curr = next;
             }
 
-            ListNode* temp = groupPrev->next;
+            // Connect reversed group
+            ListNode* oldGroupStart = groupPrev->next;
             groupPrev->next = kth;
-            groupPrev = temp;
+            groupPrev = oldGroupStart;
         }
 
         return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Reverse nodes of a linked list in chunks of size `k`. Remaining nodes at end stay unreversed.
-// - Approach: Find the $k$-th node of the current group. If fewer than $k$ nodes remain, terminate. Otherwise reverse group in-place and reconnect boundaries.
-// - Intuition: Local pointer reversal per $k$-window anchored by `groupPrev` and `groupNext`.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 3. MERGE K SORTED LISTS (LC 23)
-// =========================================================
-
-class Solution3 {
-    struct Compare {
-        bool operator()(const ListNode* a, const ListNode* b) const {
-            return a->val > b->val;
-        }
-    };
-
-public:
+// 3. Merge k Sorted Lists
+// Merge k sorted linked lists into one sorted list.
+struct Solution3 {
     ListNode* mergeKLists(vector<ListNode*>& lists) {
-        priority_queue<ListNode*, vector<ListNode*>, Compare> pq;
-        for (ListNode* node : lists) {
+        auto cmp = [](ListNode* a, ListNode* b) {
+            return a->val > b->val;
+        };
+
+        priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp); // Min-heap based on node values
+
+        for (auto node : lists) {
             if (node) pq.push(node);
         }
 
@@ -186,110 +209,76 @@ public:
         ListNode* tail = &dummy;
 
         while (!pq.empty()) {
-            ListNode* smallest = pq.top();
+            ListNode* node = pq.top();
             pq.pop();
-            tail->next = smallest;
-            tail = tail->next;
-            if (smallest->next) {
-                pq.push(smallest->next);
+
+            tail->next = node; // Append the smallest node to the merged list
+            tail = tail->next; // Move tail forward
+
+            if (node->next) {
+                pq.push(node->next);
             }
         }
+
         return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Merge `k` sorted linked lists into one consolidated sorted list.
-// - Approach: Min-heap priority queue storing current heads of all non-empty lists.
-// - Intuition: Heap size is at most $k$. Popping the minimum takes $O(\log k)$, and pushing its successor maintains sorted ordering.
-// - Complexity: Time: O(N log k), Space: O(k) for the priority queue (where N is total nodes).
 
-
-// =========================================================
-// 4. SORT LIST (LC 148)
-// =========================================================
-
-class Solution4 {
-    ListNode* merge(ListNode* l1, ListNode* l2) {
-        ListNode dummy(0);
-        ListNode* tail = &dummy;
-        while (l1 && l2) {
-            if (l1->val <= l2->val) {
-                tail->next = l1;
-                l1 = l1->next;
-            } else {
-                tail->next = l2;
-                l2 = l2->next;
-            }
-            tail = tail->next;
-        }
-        tail->next = l1 ? l1 : l2;
-        return dummy.next;
-    }
-
-public:
+// 4. Sort List
+// Sort a linked list in O(N log N) time, O(log N) space using Merge Sort.
+struct Solution4 {
     ListNode* sortList(ListNode* head) {
         if (!head || !head->next) return head;
 
-        ListNode* prev = nullptr;
-        ListNode* slow = head;
-        ListNode* fast = head;
-        while (fast && fast->next) {
-            prev = slow;
-            slow = slow->next;
-            fast = fast->next->next;
-        }
-        prev->next = nullptr; // Sever list into two halves
+        // Split the list at midpoint using the getMid helper
+        ListNode* mid = getMid(head);
+        ListNode* rightHead = mid->next;
+        mid->next = nullptr;
 
+        // Recursively sort both halves and merge using the mergeTwoLists helper
         ListNode* left = sortList(head);
-        ListNode* right = sortList(slow);
-        return merge(left, right);
+        ListNode* right = sortList(rightHead);
+
+        return mergeTwoLists(left, right);
     }
 };
-// Interview Explanation:
-// - Problem Statement: Sort a linked list in O(N log N) time and O(log N) stack space.
-// - Approach: Divide and conquer merge sort. Find middle using fast/slow pointers, sever list, recurse on both halves, and merge.
-// - Intuition: Linked lists support O(1) in-place merging, avoiding auxiliary array allocation.
-// - Complexity: Time: O(N log N), Space: O(log N) recursion stack space.
 
+// 5. Linked List Cycle
+// Determine whether the list contains a cycle.
+struct Solution5 {
+    bool hasCycle(ListNode* head) {
+        ListNode* slow = head; // Moves 1 step
+        ListNode* fast = head; // Moves 2 steps
 
-// =========================================================
-// 5. LINKED LIST CYCLE (LC 141)
-// =========================================================
-
-class Solution5 {
-public:
-    bool hasCycle(ListNode *head) {
-        ListNode* slow = head;
-        ListNode* fast = head;
+        // Fast pointer moves two steps, slow pointer moves one step
         while (fast && fast->next) {
             slow = slow->next;
             fast = fast->next->next;
-            if (slow == fast) return true;
-        }
-        return false;
-    }
-};
-// Interview Explanation:
-// - Problem Statement: Determine if a linked list contains a cycle.
-// - Approach: Floyd's cycle-finding algorithm (Tortoise and Hare).
-// - Intuition: Fast pointer moves at speed 2, slow at speed 1. If a cycle exists, relative speed is 1, so fast must catch slow.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 6. LINKED LIST CYCLE II (FIND CYCLE START) (LC 142)
-// =========================================================
-
-class Solution6 {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        ListNode* slow = head;
-        ListNode* fast = head;
-
-        while (fast && fast->next) {
-            slow = slow->next;
-            fast = fast->next->next;
+            // If pointers meet, there is a cycle
             if (slow == fast) {
+                return true;
+            }
+        }
+
+        return false; // Fast reached nullptr, so no cycle
+    }
+};
+
+// 6. Linked List Cycle II
+// Return the node where the cycle begins, or nullptr if there is none.
+struct Solution6 {
+    ListNode* detectCycle(ListNode* head) {
+        ListNode* slow = head;
+        ListNode* fast = head;
+
+        // Phase 1: Determine if a cycle exists
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+
+            if (slow == fast) {
+                // Phase 2: Find the entrance of the cycle
                 ListNode* ptr = head;
                 while (ptr != slow) {
                     ptr = ptr->next;
@@ -298,33 +287,25 @@ public:
                 return ptr;
             }
         }
-        return nullptr;
+
+        return nullptr; // No cycle found
     }
 };
-// Interview Explanation:
-// - Problem Statement: Return the node where cycle begins. If no cycle exists, return nullptr.
-// - Approach: Detect cycle using Floyd's algorithm. When slow meets fast, reset one pointer to head and advance both by 1 step.
-// - Intuition: Distance from head to cycle entrance equals distance from meeting point to cycle entrance modulo cycle length.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 7. FIND THE DUPLICATE NUMBER (LC 287)
-// =========================================================
-
-class Solution7 {
-public:
+// 7. Find the Duplicate Number
+// Array of n+1 ints in [1,n]; find the duplicate without modifying array, O(1) extra space.
+struct Solution7 {
     int findDuplicate(vector<int>& nums) {
         int slow = nums[0];
         int fast = nums[0];
 
-        // Phase 1: Cycle detection
+        // Phase 1: Detect intersection using Floyd's Tortoise and Hare
         do {
             slow = nums[slow];
             fast = nums[nums[fast]];
         } while (slow != fast);
 
-        // Phase 2: Find cycle entrance
+        // Phase 2: Find the entrance to the cycle (the duplicate number)
         slow = nums[0];
         while (slow != fast) {
             slow = nums[slow];
@@ -334,181 +315,119 @@ public:
         return slow;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Given array with $n + 1$ integers in range $[1, n]$, find duplicate without modifying array and in $O(1)$ extra space.
-// - Approach: Interpret array as linked list where index $i$ points to $nums[i]$. Use Floyd's cycle detection.
-// - Intuition: Duplicate number causes multiple indices to point to same target, forming the cycle entrance node.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 8. REMOVE NTH NODE FROM END OF LIST (LC 19)
-// =========================================================
-
-class Solution8 {
-public:
+// 8. Remove Nth Node From End of List
+// Remove the n-th node from the end and return the head.
+struct Solution8 {
     ListNode* removeNthFromEnd(ListNode* head, int n) {
         ListNode dummy(0, head);
         ListNode* fast = &dummy;
         ListNode* slow = &dummy;
 
-        for (int i = 0; i < n; ++i) {
+        // Advance fast pointer by n steps to establish the n-node gap
+        for (int i = 0; i < n; i++) {
             fast = fast->next;
         }
 
+        // Move both pointers until fast is at the last node
         while (fast->next) {
             slow = slow->next;
             fast = fast->next;
         }
 
-        ListNode* toDelete = slow->next;
+        // Delete the n-th node from the end
         slow->next = slow->next->next;
-        delete toDelete;
+
         return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Remove $n$-th node from end of list and return its head.
-// - Approach: Two pointers with gap of $n$. Advance `fast` $n$ steps ahead of `slow`, then advance both together.
-// - Intuition: When `fast` reaches the last node, `slow` sits right before the node to be removed.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 9. REORDER LIST (LC 143)
-// =========================================================
-
-class Solution9 {
-public:
+// 9. Reorder List
+// Reorder list into L0 -> Ln -> L1 -> Ln-1 -> ... in-place.
+struct Solution9 {
     void reorderList(ListNode* head) {
         if (!head || !head->next) return;
 
-        // 1. Find middle
-        ListNode* slow = head;
-        ListNode* fast = head;
-        while (fast->next && fast->next->next) {
-            slow = slow->next;
-            fast = fast->next->next;
-        }
+        // Step 1: Find middle and reverse the second half using helpers
+        ListNode* mid = getMid(head);
+        ListNode* second = reverseList(mid->next);
+        mid->next = nullptr;
 
-        // 2. Reverse second half
-        ListNode* prev = nullptr;
-        ListNode* curr = slow->next;
-        slow->next = nullptr;
-        while (curr) {
-            ListNode* nextNode = curr->next;
-            curr->next = prev;
-            prev = curr;
-            curr = nextNode;
-        }
-
-        // 3. Interleave two halves
+        // Step 2: Interleave the first half and the reversed second half
         ListNode* first = head;
-        ListNode* second = prev;
         while (second) {
-            ListNode* t1 = first->next;
-            ListNode* t2 = second->next;
+            ListNode* next1 = first->next;
+            ListNode* next2 = second->next;
+
             first->next = second;
-            second->next = t1;
-            first = t1;
-            second = t2;
+            second->next = next1;
+
+            first = next1;
+            second = next2;
         }
     }
 };
-// Interview Explanation:
-// - Problem Statement: Reorder list into $L_0 \to L_n \to L_1 \to L_{n-1} \dots$ in-place.
-// - Approach: 1) Find middle node; 2) Reverse second half; 3) Interleave two halves alternately.
-// - Intuition: Break complex reordering into 3 fundamental pointer manipulation building blocks.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 10. PALINDROME LINKED LIST (LC 234)
-// =========================================================
-
-class Solution10 {
-public:
+// 10. Palindrome Linked List
+// Determine whether a singly linked list is a palindrome.
+struct Solution10 {
     bool isPalindrome(ListNode* head) {
         if (!head || !head->next) return true;
 
-        ListNode* slow = head;
-        ListNode* fast = head;
-        while (fast->next && fast->next->next) {
-            slow = slow->next;
-            fast = fast->next->next;
-        }
+        // Step 1: Find mid and reverse the second half using helpers
+        ListNode* mid = getMid(head);
+        ListNode* second = reverseList(mid->next);
+        ListNode* first = head;
 
-        // Reverse second half
-        ListNode* prev = nullptr;
-        ListNode* curr = slow->next;
-        while (curr) {
-            ListNode* nextNode = curr->next;
-            curr->next = prev;
-            prev = curr;
-            curr = nextNode;
-        }
-
-        // Compare first half and reversed second half
-        ListNode* p1 = head;
-        ListNode* p2 = prev;
-        bool match = true;
-        while (p2) {
-            if (p1->val != p2->val) {
-                match = false;
-                break;
+        // Step 2: Compare values between first half and reversed second half
+        while (second) {
+            if (first->val != second->val) {
+                return false;
             }
-            p1 = p1->next;
-            p2 = p2->next;
+            first = first->next;
+            second = second->next;
         }
-        return match;
+
+        return true;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Determine whether a singly linked list is a palindrome.
-// - Approach: Find midpoint, reverse second half in-place, and compare element-by-element with first half.
-// - Intuition: Reversal enables bidirectional matching without requiring $O(N)$ extra memory.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 11. ODD EVEN LINKED LIST (LC 328)
-// =========================================================
-
-class Solution11 {
-public:
+// 11. Odd Even Linked List
+// Group all odd-indexed nodes together followed by even-indexed nodes, O(1) space.
+struct Solution11 {
     ListNode* oddEvenList(ListNode* head) {
-        if (!head || !head->next) return head;
+        if (!head || !head->next) {
+            return head;
+        }
 
         ListNode* odd = head;
         ListNode* even = head->next;
-        ListNode* evenHead = even;
+        ListNode* evenHead = even; // Keep reference to start of even sublist
 
+        // Unlink even and odd nodes into two parallel sublists
         while (even && even->next) {
             odd->next = even->next;
             odd = odd->next;
+
             even->next = odd->next;
             even = even->next;
         }
+
+        // Attach even sublist after odd sublist
         odd->next = evenHead;
         return head;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Group odd-indexed nodes together followed by even-indexed nodes in O(1) space.
-// - Approach: Maintain two pointers `odd` and `even`, alternating forward jumps, then link `odd` tail to `evenHead`.
-// - Intuition: In-place pointer skipping cleanly divides nodes by parity in a single linear pass.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 12. ROTATE LIST (LC 61)
-// =========================================================
-
-class Solution12 {
-public:
+// 12. Rotate List
+// Rotate the list to the right by k places.
+struct Solution12 {
     ListNode* rotateRight(ListNode* head, int k) {
-        if (!head || !head->next || k == 0) return head;
+        if (!head || !head->next || k == 0) {
+            return head;
+        }
 
+        // Step 1: Compute the length of the list and locate the tail node
         int len = 1;
         ListNode* tail = head;
         while (tail->next) {
@@ -516,40 +435,39 @@ public:
             len++;
         }
 
+        // Normalize k
         k %= len;
-        if (k == 0) return head;
+        if (k == 0) {
+            return head;
+        }
 
-        tail->next = head; // Form circular ring
+        // Step 2: Form a ring by connecting the tail to head
+        tail->next = head;
 
+        // Step 3: Find the new tail at position (len - k - 1)
         ListNode* newTail = head;
-        for (int i = 0; i < len - k - 1; ++i) {
+        for (int i = 0; i < len - k - 1; i++) {
             newTail = newTail->next;
         }
 
+        // Step 4: Break the ring to establish the new head
         ListNode* newHead = newTail->next;
-        newTail->next = nullptr; // Sever ring
+        newTail->next = nullptr;
+
         return newHead;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Rotate the list to the right by $k$ places.
-// - Approach: Calculate length, close the list into a circular ring, traverse $(len - k \% len - 1)$ steps to new tail, and break ring.
-// - Intuition: Right-rotation by $k$ shifts new head to index $(len - k \pmod{len})$.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 13. PARTITION LIST (LC 86)
-// =========================================================
-
-class Solution13 {
-public:
+// 13. Partition List
+// Partition so nodes < x precede nodes >= x, preserving relative order.
+struct Solution13 {
     ListNode* partition(ListNode* head, int x) {
         ListNode lessDummy(0);
-        ListNode* less = &lessDummy;
         ListNode greaterDummy(0);
+        ListNode* less = &lessDummy;
         ListNode* greater = &greaterDummy;
 
+        // Partition nodes into less and greater/equal lists
         while (head) {
             if (head->val < x) {
                 less->next = head;
@@ -560,106 +478,94 @@ public:
             }
             head = head->next;
         }
+
+        // Terminate the greater list and link the two lists together
         greater->next = nullptr;
         less->next = greaterDummy.next;
+
         return lessDummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Partition list so nodes $< x$ precede nodes $\ge x$ while preserving relative original order.
-// - Approach: Two separate dummy heads (`less` and `greater`). Append each node to appropriate chain, then concatenate.
-// - Intuition: Stable two-way partitioning using two accumulator linked lists.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 14. REMOVE DUPLICATES FROM SORTED LIST II (LC 82)
-// =========================================================
-
-class Solution14 {
-public:
+// 14. Remove Duplicates from Sorted List II
+// Delete all nodes that have duplicate values, leaving only distinct numbers.
+struct Solution14 {
     ListNode* deleteDuplicates(ListNode* head) {
         ListNode dummy(0, head);
-        ListNode* prev = &dummy;
+        ListNode* prev = &dummy; // Preceding node of distinct sublist
 
         while (head) {
+            // Check if current node begins a run of duplicates
             if (head->next && head->val == head->next->val) {
+                // Skip all subsequent nodes with the same value
                 while (head->next && head->val == head->next->val) {
                     head = head->next;
                 }
+                // Bypass all duplicate nodes
                 prev->next = head->next;
             } else {
+                // Node is unique; move prev pointer forward
                 prev = prev->next;
             }
             head = head->next;
         }
+
         return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Delete all nodes that have duplicate numbers, leaving only distinct numbers from original list.
-// - Approach: Dummy node with `prev`. When duplicate run detected, fast-forward `head` to run end and link `prev->next = head->next`.
-// - Intuition: Whole duplicate cluster is dropped without moving `prev` forward until a unique node is found.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 15. ADD TWO NUMBERS (LC 2)
-// =========================================================
-
-class Solution15 {
-public:
+// 15. Add Two Numbers
+// Add two numbers represented by linked lists, digits stored in reverse order.
+struct Solution15 {
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
         ListNode dummy(0);
         ListNode* tail = &dummy;
         int carry = 0;
 
-        while (l1 || l2 || carry) {
+        // Traverse both lists and propagate carry
+        while (l1 != nullptr || l2 != nullptr || carry != 0) {
             int sum = carry;
-            if (l1) {
+
+            if (l1 != nullptr) {
                 sum += l1->val;
                 l1 = l1->next;
             }
-            if (l2) {
+            if (l2 != nullptr) {
                 sum += l2->val;
                 l2 = l2->next;
             }
+
             carry = sum / 10;
             tail->next = new ListNode(sum % 10);
             tail = tail->next;
         }
+
         return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Add two numbers represented by linked lists in reverse order.
-// - Approach: Dummy head accumulator. Sum digits along with carry, append new node `sum % 10`, propagate `carry = sum / 10`.
-// - Intuition: Standard schoolbook addition traversing least-to-most significant digits.
-// - Complexity: Time: O(max(N, M)), Space: O(max(N, M)) for output list.
 
-
-// =========================================================
-// 16. ADD TWO NUMBERS II (LC 445)
-// =========================================================
-
-class Solution16 {
-public:
+// 16. Add Two Numbers II
+// Same as above but digits stored most-significant-first; inputs must not be modified.
+struct Solution16 {
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        stack<int> s1, s2;
-        while (l1) {
-            s1.push(l1->val);
-            l1 = l1->next;
+        stack<int> s1;
+        stack<int> s2;
+
+        // Push digits into stacks to process least-significant digits first
+        for (ListNode* p = l1; p != nullptr; p = p->next) {
+            s1.push(p->val);
         }
-        while (l2) {
-            s2.push(l2->val);
-            l2 = l2->next;
+        for (ListNode* p = l2; p != nullptr; p = p->next) {
+            s2.push(p->val);
         }
 
         ListNode* head = nullptr;
         int carry = 0;
 
-        while (!s1.empty() || !s2.empty() || carry) {
+        // Pop digits, compute sum, and prepend nodes to form the result list
+        while (!s1.empty() || !s2.empty() || carry != 0) {
             int sum = carry;
+
             if (!s1.empty()) {
                 sum += s1.top();
                 s1.pop();
@@ -668,126 +574,101 @@ public:
                 sum += s2.top();
                 s2.pop();
             }
+
             carry = sum / 10;
-            ListNode* node = new ListNode(sum % 10);
-            node->next = head;
-            head = node;
+
+            // Prepend new node with the digit
+            ListNode* newNode = new ListNode(sum % 10, head);
+            head = newNode;
         }
+
         return head;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Add two numbers represented by linked lists where digits are stored most-significant-first, without modifying inputs.
-// - Approach: Push values onto two stacks, pop to add from least significant digits, prepend new nodes to head.
-// - Intuition: Stacks reverse digit order non-destructively without modifying inputs.
-// - Complexity: Time: O(N + M), Space: O(N + M) auxiliary stack space.
 
+// 17. Intersection of Two Linked Lists
+// Find the node at which two singly linked lists intersect.
+struct Solution17 {
+    ListNode* getIntersectionNode(ListNode* headA, ListNode* headB) {
+        if (!headA || !headB) {
+            return nullptr;
+        }
 
-// =========================================================
-// 17. INTERSECTION OF TWO LINKED LISTS (LC 160)
-// =========================================================
-
-class Solution17 {
-public:
-    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
-        if (!headA || !headB) return nullptr;
         ListNode* pA = headA;
         ListNode* pB = headB;
 
+        // Traversing both lists equalizes total distance traveled: (lenA + lenB)
+        // If they intersect, they meet at the intersection node; otherwise at nullptr
         while (pA != pB) {
-            pA = pA ? pA->next : headB;
-            pB = pB ? pB->next : headA;
+            pA = (pA == nullptr) ? headB : pA->next;
+            pB = (pB == nullptr) ? headA : pB->next;
         }
+
         return pA;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Find node where two singly linked lists intersect.
-// - Approach: Two pointers traverse their respective lists. When reaching end, redirect to opposite list head.
-// - Intuition: Path equalization: $(lenA + lenB) = (lenB + lenA)$. Both pointers arrive at intersection or nullptr simultaneously.
-// - Complexity: Time: O(N + M), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 18. COPY LIST WITH RANDOM POINTER (LC 138)
-// =========================================================
-
-class Solution18 {
-public:
+// 18. Copy List with Random Pointer
+// Deep-copy a list with next and random pointers, O(1) auxiliary space.
+struct Solution18 {
     Node* copyRandomList(Node* head) {
-        if (!head) return nullptr;
+        if (!head) {
+            return nullptr;
+        }
 
-        // Step 1: Interleave cloned nodes
-        Node* curr = head;
-        while (curr) {
+        // Step 1: Create clone nodes and interleave them directly after original nodes
+        for (Node* curr = head; curr != nullptr; curr = curr->next->next) {
             Node* clone = new Node(curr->val);
             clone->next = curr->next;
             curr->next = clone;
-            curr = clone->next;
         }
 
         // Step 2: Assign cloned random pointers
-        curr = head;
-        while (curr) {
+        for (Node* curr = head; curr != nullptr; curr = curr->next->next) {
             if (curr->random) {
                 curr->next->random = curr->random->next;
             }
-            curr = curr->next->next;
         }
 
-        // Step 3: Separate original and cloned lists
-        Node* dummy = new Node(0);
-        Node* cloneTail = dummy;
-        curr = head;
+        // Step 3: Separate cloned list from original list
+        Node dummy(0);
+        Node* cloneTail = &dummy;
 
-        while (curr) {
-            Node* clone = curr->next;
-            curr->next = clone->next;
-            cloneTail->next = clone;
-            cloneTail = clone;
-            curr = curr->next;
+        for (Node* curr = head; curr != nullptr; curr = curr->next) {
+            Node* cloneNode = curr->next;
+            cloneTail->next = cloneNode;
+            cloneTail = cloneTail->next;
+
+            // Restore original list pointer
+            curr->next = cloneNode->next;
         }
 
-        Node* newHead = dummy->next;
-        delete dummy;
-        return newHead;
+        return dummy.next;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Deep copy a linked list with next and random pointers in O(1) auxiliary space.
-// - Approach: 3-pass weave algorithm: 1) Insert copy nodes right after original nodes; 2) Set `copy->random = orig->random->next`; 3) Unweave lists.
-// - Intuition: Interleaving original and copy avoids $O(N)$ hash map memory.
-// - Complexity: Time: O(N), Space: O(1) auxiliary space.
 
-
-// =========================================================
-// 19. SPLIT LINKED LIST IN PARTS (LC 725)
-// =========================================================
-
-class Solution19 {
-public:
+// 19. Split Linked List in Parts
+// Split list into k consecutive parts of balanced size (difference <= 1, earlier parts larger).
+struct Solution19 {
     vector<ListNode*> splitListToParts(ListNode* head, int k) {
-        int len = 0;
-        ListNode* curr = head;
-        while (curr) {
-            len++;
-            curr = curr->next;
-        }
-
-        int partSize = len / k;
+        int len = getLength(head);
+        int baseSize = len / k;
         int remainder = len % k;
 
         vector<ListNode*> result(k, nullptr);
-        curr = head;
+        ListNode* curr = head;
 
-        for (int i = 0; i < k && curr; ++i) {
+        // Step 2: Split the list into k chunks
+        for (int i = 0; i < k && curr != nullptr; i++) {
             result[i] = curr;
-            int currentChunkSize = partSize + (i < remainder ? 1 : 0);
+            int partSize = baseSize + (i < remainder ? 1 : 0);
 
-            for (int j = 1; j < currentChunkSize; ++j) {
+            // Move to the end of the current chunk
+            for (int j = 1; j < partSize; j++) {
                 curr = curr->next;
             }
 
+            // Sever connection to the next part
             ListNode* nextPart = curr->next;
             curr->next = nullptr;
             curr = nextPart;
@@ -796,78 +677,61 @@ public:
         return result;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Split linked list into $k$ consecutive parts of balanced sizes (difference $\le 1$, earlier parts larger).
-// - Approach: Compute length $N$. Each bucket receives base size $N / k$, and first $N \% k$ buckets receive 1 extra node. Sever links after each chunk.
-// - Intuition: Partitioning remainder evenly across initial parts distributes extra nodes with difference at most 1.
-// - Complexity: Time: O(N + K), Space: O(K) for result array.
 
-
-// =========================================================
-// 20. NEXT GREATER NODE IN LINKED LIST (LC 1019)
-// =========================================================
-
-class Solution20 {
-public:
+// 20. Next Greater Node In Linked List
+// For each node, find the value of the next strictly greater node (0 if none).
+struct Solution20 {
     vector<int> nextLargerNodes(ListNode* head) {
-        vector<int> vals;
-        while (head) {
-            vals.push_back(head->val);
-            head = head->next;
+        // Convert linked list to vector for random index access
+        vector<int> values;
+        for (ListNode* curr = head; curr != nullptr; curr = curr->next) {
+            values.push_back(curr->val);
         }
 
-        int n = vals.size();
-        vector<int> result(n, 0);
-        stack<int> st;
+        vector<int> answer(values.size(), 0);
+        stack<int> monoStack; // Monotonically decreasing stack of indices
 
-        for (int i = 0; i < n; ++i) {
-            while (!st.empty() && vals[st.top()] < vals[i]) {
-                result[st.top()] = vals[i];
-                st.pop();
+        // Process elements and resolve next greater values
+        for (int i = 0; i < (int)values.size(); i++) {
+            while (!monoStack.empty() && values[monoStack.top()] < values[i]) {
+                answer[monoStack.top()] = values[i];
+                monoStack.pop();
             }
-            st.push(i);
+            monoStack.push(i);
         }
 
-        return result;
+        return answer;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Find value of next strictly greater node for each node in linked list. Return 0 if none.
-// - Approach: Transfer list values into an array, then utilize a monotonic decreasing index stack.
-// - Intuition: Monotonic stack efficiently resolves next greater element in one pass by popping smaller preceding values.
-// - Complexity: Time: O(N), Space: O(N) auxiliary space.
 
-
-// =========================================================
-// 21. MERGE IN BETWEEN LINKED LISTS (LC 1669)
-// =========================================================
-
-class Solution21 {
-public:
+// 21. Merge In Between Linked Lists
+// Remove nodes from index a to b in list1 and splice list2 in their place.
+struct Solution21 {
     ListNode* mergeInBetween(ListNode* list1, int a, int b, ListNode* list2) {
+        // Step 1: Traverse to node at index (a - 1)
         ListNode* prevA = list1;
-        for (int i = 0; i < a - 1; ++i) {
+        for (int i = 0; i < a - 1; i++) {
             prevA = prevA->next;
         }
 
+        // Step 2: Traverse to node at index (b + 1)
         ListNode* afterB = prevA;
-        for (int i = 0; i < b - a + 2; ++i) {
+        for (int i = 0; i < b - a + 2; i++) {
             afterB = afterB->next;
         }
 
+        // Step 3: Splice list2 after prevA
         prevA->next = list2;
 
+        // Step 4: Traverse to the tail of list2
         ListNode* tail2 = list2;
         while (tail2->next) {
             tail2 = tail2->next;
         }
 
+        // Step 5: Connect tail of list2 to afterB
         tail2->next = afterB;
+
         return list1;
     }
 };
-// Interview Explanation:
-// - Problem Statement: Remove nodes from index $a$ to $b$ in `list1`, and splice `list2` in their place.
-// - Approach: Advance pointer to index $a - 1$ and index $b + 1$. Wire $(a - 1)$ to `list2` head, and `list2` tail to $(b + 1)$.
-// - Intuition: Constant number of pointer reconnections once boundary positions are reached.
-// - Complexity: Time: O(N + M), Space: O(1) auxiliary space.
