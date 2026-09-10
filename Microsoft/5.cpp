@@ -87,8 +87,8 @@ ListNode* getMid(ListNode* head) {
 
 // 3. Merge two sorted linked lists into one sorted list (Used in: Solution 4 Sort List)
 ListNode* mergeTwoLists(ListNode* a, ListNode* b) {
-    ListNode dummy(0);
-    ListNode* tail = &dummy;
+    ListNode* dummy = new ListNode(0);
+    ListNode* tail = dummy;
 
     while (a != nullptr && b != nullptr) {
         if (a->val <= b->val) {
@@ -103,7 +103,7 @@ ListNode* mergeTwoLists(ListNode* a, ListNode* b) {
 
     tail->next = (a != nullptr) ? a : b;
 
-    return dummy.next;
+    return dummy->next;
 }
 
 // 4. Calculate the length of a linked list (Used in: Solution 19)
@@ -124,8 +124,8 @@ int getLength(ListNode* head) {
 // Reverse nodes from position `left` to `right` (1-indexed) in a single pass, in-place.
 struct Solution1 {
     ListNode* reverseBetween(ListNode* head, int left, int right) {
-        ListNode dummy(0, head); // Dummy node to simplify edge cases at head
-        ListNode* prev = &dummy; // Pointer to node before the reversal segment
+        ListNode* dummy = new ListNode(0, head); // Dummy node to simplify edge cases at head
+        ListNode* prev = dummy; // Pointer to node before the reversal segment
 
         // Move `prev` to the node immediately before `left`
         for (int i = 1; i < left; i++) {
@@ -137,14 +137,14 @@ struct Solution1 {
 
         // Move each next node to the front of the reversed portion
         for (int i = 0; i < right - left; i++) {
-            ListNode* nodeToMove = curr->next;
+            ListNode *nodeToMove = curr->next;
 
             curr->next = nodeToMove->next; // Remove nodeToMove from its current position
             nodeToMove->next = prev->next; // Insert it at the front of the reversed part
             prev->next = nodeToMove;       // Connect prev to the new front
         }
 
-        return dummy.next; // Return the new head (could be unchanged if left > 1)
+        return dummy->next; // Return the new head (could be unchanged if left > 1)
     }
 };
 
@@ -152,8 +152,8 @@ struct Solution1 {
 // Reverse nodes in chunks of size k; leftover nodes (< k) at the end stay unreversed.
 struct Solution2 {
     ListNode* reverseKGroup(ListNode* head, int k) {
-        ListNode dummy(0, head);
-        ListNode* groupPrev = &dummy;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* groupPrev = dummy;
 
         while (true) {
             // Find the k-th node
@@ -187,7 +187,7 @@ struct Solution2 {
             groupPrev = oldGroupStart;
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -205,8 +205,8 @@ struct Solution3 {
             if (node) pq.push(node);
         }
 
-        ListNode dummy(0);
-        ListNode* tail = &dummy;
+        ListNode* dummy = new ListNode(0);
+        ListNode* tail = dummy;
 
         while (!pq.empty()) {
             ListNode* node = pq.top();
@@ -220,7 +220,7 @@ struct Solution3 {
             }
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -228,7 +228,7 @@ struct Solution3 {
 // Sort a linked list in O(N log N) time, O(log N) space using Merge Sort.
 struct Solution4 {
     ListNode* sortList(ListNode* head) {
-        if (!head || !head->next) return head;
+        if (!head || !head->next) return head; // If the list is empty or has one node, it's already sorted
 
         // Split the list at midpoint using the getMid helper
         ListNode* mid = getMid(head);
@@ -320,9 +320,9 @@ struct Solution7 {
 // Remove the n-th node from the end and return the head.
 struct Solution8 {
     ListNode* removeNthFromEnd(ListNode* head, int n) {
-        ListNode dummy(0, head);
-        ListNode* fast = &dummy;
-        ListNode* slow = &dummy;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* fast = dummy;
+        ListNode* slow = dummy;
 
         // Advance fast pointer by n steps to establish the n-node gap
         for (int i = 0; i < n; i++) {
@@ -338,7 +338,7 @@ struct Solution8 {
         // Delete the n-th node from the end
         slow->next = slow->next->next;
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -356,14 +356,14 @@ struct Solution9 {
         // Step 2: Interleave the first half and the reversed second half
         ListNode* first = head;
         while (second) {
-            ListNode* next1 = first->next;
-            ListNode* next2 = second->next;
+            ListNode* next1 = first->next; // Store next node of first half
+            ListNode* next2 = second->next; // Store next node of second half
 
-            first->next = second;
-            second->next = next1;
+            first->next = second; // Link first node to the current node of second half
+            second->next = next1; // Link current node of second half to the next node of first half
 
-            first = next1;
-            second = next2;
+            first = next1; // Move to the next node in the first half
+            second = next2; // Move to the next node in the second half
         }
     }
 };
@@ -390,7 +390,7 @@ struct Solution10 {
 
         return true;
     }
-};
+}; // TC O(N), SC O(1) 
 
 // 11. Odd Even Linked List
 // Group all odd-indexed nodes together followed by even-indexed nodes, O(1) space.
@@ -406,11 +406,11 @@ struct Solution11 {
 
         // Unlink even and odd nodes into two parallel sublists
         while (even && even->next) {
-            odd->next = even->next;
-            odd = odd->next;
+            odd->next = even->next; // Link current odd node to the next odd node
+            odd = odd->next; // Move odd pointer forward
 
-            even->next = odd->next;
-            even = even->next;
+            even->next = odd->next; // Link current even node to the next even node
+            even = even->next; // Move even pointer forward
         }
 
         // Attach even sublist after odd sublist
@@ -462,28 +462,28 @@ struct Solution12 {
 // Partition so nodes < x precede nodes >= x, preserving relative order.
 struct Solution13 {
     ListNode* partition(ListNode* head, int x) {
-        ListNode lessDummy(0);
-        ListNode greaterDummy(0);
-        ListNode* less = &lessDummy;
-        ListNode* greater = &greaterDummy;
+        ListNode* lessDummy = new ListNode(0);
+        ListNode* greaterDummy = new ListNode(0);
+        ListNode* less = lessDummy;
+        ListNode* greater = greaterDummy;
 
         // Partition nodes into less and greater/equal lists
         while (head) {
-            if (head->val < x) {
-                less->next = head;
-                less = less->next;
+            if (head->val < x) { 
+                less->next = head; // Append to less list
+                less = less->next; // Move less pointer forward
             } else {
-                greater->next = head;
-                greater = greater->next;
+                greater->next = head; // Append to greater/equal list
+                greater = greater->next; // Move greater pointer forward
             }
-            head = head->next;
+            head = head->next; // Advance to the next node in the original list
         }
 
         // Terminate the greater list and link the two lists together
-        greater->next = nullptr;
-        less->next = greaterDummy.next;
+        greater->next = nullptr; // Terminate the greater list to avoid cycles
+        less->next = greaterDummy->next; // Link the end of less list to the start of greater list
 
-        return lessDummy.next;
+        return lessDummy->next;
     }
 };
 
@@ -491,8 +491,8 @@ struct Solution13 {
 // Delete all nodes that have duplicate values, leaving only distinct numbers.
 struct Solution14 {
     ListNode* deleteDuplicates(ListNode* head) {
-        ListNode dummy(0, head);
-        ListNode* prev = &dummy; // Preceding node of distinct sublist
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* prev = dummy; // Preceding node of distinct sublist
 
         while (head) {
             // Check if current node begins a run of duplicates
@@ -510,7 +510,7 @@ struct Solution14 {
             head = head->next;
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -518,8 +518,8 @@ struct Solution14 {
 // Add two numbers represented by linked lists, digits stored in reverse order.
 struct Solution15 {
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        ListNode dummy(0);
-        ListNode* tail = &dummy;
+        ListNode* dummy = new ListNode(0);
+        ListNode* tail = dummy;
         int carry = 0;
 
         // Traverse both lists and propagate carry
@@ -540,7 +540,7 @@ struct Solution15 {
             tail = tail->next;
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -631,8 +631,8 @@ struct Solution18 {
         }
 
         // Step 3: Separate cloned list from original list
-        Node dummy(0);
-        Node* cloneTail = &dummy;
+        Node* dummy = new Node(0);
+        Node* cloneTail = dummy;
 
         for (Node* curr = head; curr != nullptr; curr = curr->next) {
             Node* cloneNode = curr->next;
@@ -643,7 +643,7 @@ struct Solution18 {
             curr->next = cloneNode->next;
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 

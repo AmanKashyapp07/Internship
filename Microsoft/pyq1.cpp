@@ -340,7 +340,7 @@ public:
         vector<int> results;
         results.reserve(n); // Reserve space to avoid reallocations
         for (size_t i = 0; i < users.size(); ++i) {
-            queue<int>& q = userHistory[users[i]];
+            auto& q = userHistory[users[i]];
             while (!q.empty() && q.front() < times[i] - T) {
                 q.pop();
             } // Evict timestamps outside the sliding window
@@ -688,10 +688,10 @@ public:
         int freeStart = 0;
 
         for (auto [start, end] : intervals) {
-            if (start - freeStart >= k)
+            if (start - freeStart >= k) // Found a free interval of length >= k
                 return freeStart;
 
-            freeStart = max(freeStart, end);
+            freeStart = max(freeStart, end); // Update the next free start time to the end of the current busy interval
         }
 
         return freeStart;
@@ -909,14 +909,14 @@ public:
 
         sort(tasks.begin(), tasks.end(), [](const pair<int,int>& a, const pair<int,int>& b) {
             return (a.first - a.second) > (b.first - b.second);
-        });
+        }); // sorting by large diff first, so to have more leftover resources for next tasks
 
-        long long cur = 0, req = 0;
+        long long cur = 0, req = 0; // cur = current resources, req = total required starting resources
         for (auto& [w, a] : tasks) {
             if (cur < w) {
                 req += w - cur;
                 cur = w; // Top up to meet worst-case requirement
-            }
+            } 
             cur -= a; // Consume resources after task completion
         }
         return req;
@@ -1092,7 +1092,7 @@ public:
     int knapsack(const vector<int>& weight, const vector<int>& value, int capacity) {
         vector<int> dp(capacity + 1, 0);
         for (size_t i = 0; i < weight.size(); ++i) {
-            for (int w = capacity; w >= weight[i]; --w) {
+            for (int w = capacity; w >= weight[i]; --w) { // reverse to avoid reuse of the same item
                 dp[w] = max(dp[w], dp[w - weight[i]] + value[i]);
             }
         }
@@ -1183,18 +1183,19 @@ public:
 
         vector<int> order(n);
         int l = 0, r = n - 1;
-        bool placeLeft = true;
+        bool placeLeft = true; 
 
         for (int i = n - 1; i >= 0; --i) {
-            if (placeLeft) order[l++] = i;
-            else order[r--] = i;
+            if (placeLeft) order[l++] = i; // place at left end
+            else order[r--] = i; // place at right end
             placeLeft = !placeLeft;
         }
-
+        // order[i] now contains the index in `b` where s[i] will land after all operations
+        // for eg - if order = [3, 2, 1, 0], then s[0] goes to b[3], s[1] goes to b[2], s[2] goes to b[1], s[3] goes to b[0]
         string s(n, '0');
         for (int i = 0; i < n; ++i) {
             s[order[i]] = b[i];
-        }
+        } // reconstruct the input string s from the final string b
         return {b, s};
     }
 };
@@ -1229,12 +1230,21 @@ public:
     int maximumAssignments(vector<int>& req, vector<int>& res) {
         sort(req.begin(), req.end());
         sort(res.begin(), res.end());
-        int i = 0, j = 0;
-        while (i < (int)req.size() && j < (int)res.size()) {
-            if (res[j] >= req[i]) i++;
-            j++;
+        int i=0;
+        int j=0;
+        int n = req.size();
+        int m = res.size();
+        int count = 0;
+        while (i < n && j < m) {
+            if (res[j] >= req[i]) { // resource can satisfy requirement
+                count++; // increment satisfied task count
+                i++; // move to next requirement
+                j++; // move to next resource
+            } else { // resource too small, try next larger resource
+                j++; // moving to next resource
+            }
         }
-        return i;
+        return count;
     }
 };
 
@@ -1269,37 +1279,36 @@ public:
 
 long long countTriplets(vector<int>& A, long long target) {
     int n = A.size();
-    long long count = 0;
+    long long ans = 0;
 
-    // Case 1: (i, i+1) are adjacent
-    unordered_map<long long, int> suffix;
+    // Case 1: i, i+1 are adjacent
+    unordered_map<long long, int> freq;
 
-    for (int k = 2; k < n; k++)
-        suffix[A[k]]++;
+    for (int i = 2; i < n; i++)
+        freq[A[i]]++;
 
     for (int i = 0; i < n - 2; i++) {
-        long long product = 1LL * A[i] * A[i + 1];
+        long long p = 1LL * A[i] * A[i + 1];
 
-        if (target % product == 0)
-            count += suffix[target / product];
+        if (p != 0 && target % p == 0)
+            ans += freq[target / p];
 
-        suffix[A[i + 2]]--; // Remove A[i+2] from suffix as we move the window forward
+        freq[A[i + 2]]--;
     }
 
-    // Case 2: (j, j+1) are adjacent
-    // and i is NOT adjacent to j
-    unordered_map<long long, int> prefix;
+    // Case 2: j, j+1 are adjacent, i <= j-2
+    freq.clear();
 
     for (int j = 1; j < n - 1; j++) {
-        long long product = 1LL * A[j] * A[j + 1];
+        long long p = 1LL * A[j] * A[j + 1];
 
-        if (target % product == 0)
-            count += prefix[target / product];
+        if (p != 0 && target % p == 0)
+            ans += freq[target / p];
 
-        prefix[A[j - 1]]++; // Add A[j-1] to prefix as we move the window forward
+        freq[A[j - 1]]++;
     }
 
-    return count;
+    return ans;
 }
 
 // ====================================================================================================
@@ -1331,15 +1340,15 @@ public:
     string rollString(string s, const vector<int>& roll) {
         int n = s.size();
         vector<int> diff(n + 1, 0);
-        for (int k : roll) {
-            int len = min(k, n);
-            diff[0]++;
-            diff[len]--;
+        for (int k : roll) { // for each roll operation
+            int len = min(k, n); // only affect up to the length of the string
+            diff[0]++; // increment start of range
+            diff[len]--; // decrement end of range
         }
         int add = 0;
         for (int i = 0; i < n; i++) {
-            add = (add + diff[i]) % 26;
-            s[i] = 'a' + (s[i] - 'a' + add) % 26;
+            add = (add + diff[i]) % 26; // accumulate net shift
+            s[i] = 'a' + (s[i] - 'a' + add) % 26; // apply shift to character
         }
         return s;
     }
@@ -1372,59 +1381,43 @@ public:
   `dp[j] = prev[j-1] + 1` when characters match.
 */
 
-class Solution28 {
-  public:
-    string X, Y;
-    vector<vector<int>> memo;
-    int ans = 0;
+class Solution {
+    string x, y;
+    vector<vector<int>> dp;
 
-    // f(i, j) = length of the longest substring of Y ending exactly at Y[j-1]
-    //           that is also a subsequence of X[0..i-1]
     int solve(int i, int j) {
-        if (i == 0 || j == 0)
-            return 0;
-        if (memo[i][j] != -1)
-            return memo[i][j];
+        if (i == 0 || j == 0) return 0; // base case: empty string
+        if (dp[i][j] != -1) return dp[i][j];
+        int ans = solve(i - 1, j);  // skip x[i-1]
+        if (x[i - 1] == y[j - 1]) ans = max(ans, solve(i - 1, j - 1) + 1);
 
-        int res = solve(i - 1, j); // skip X[i-1], carry forward best so far
-
-        if (X[i - 1] == Y[j - 1]) {
-            res = max(res, solve(i - 1, j - 1) + 1); // extend contiguous match in Y
-        }
-
-        ans = max(ans, res);
-        return memo[i][j] = res;
+        return dp[i][j] = ans;
     }
 
-    int longestSubsequence(const string &x, const string &y) {
-        X = x;
-        Y = y;
-        int n = x.size(), m = y.size();
-        memo.assign(n + 1, vector<int>(m + 1, -1));
+public:
+    int longestSubsequence(string X, string Y) {
+        x = X, y = Y;
+        dp.assign(x.size() + 1, vector<int>(y.size() + 1, -1));
 
-        for (int i = 1; i <= n; ++i)
-            for (int j = 1; j <= m; ++j)
-                solve(i, j);
+        int ans = 0;
+        for (int i = 1; i <= x.size(); i++)
+            for (int j = 1; j <= y.size(); j++)
+                ans = max(ans, solve(i, j));
 
         return ans;
     }
 };
 
-class Solution299 {
+class Solution {
 public:
-    int longestSubsequence(const string& x, const string& y) {
+    int longestSubsequence(string x, string y) {
         int n = x.size(), m = y.size();
-        vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1));
         int ans = 0;
-
-        for (int i = 1; i <= n; ++i) {
-            for (int j = 1; j <= m; ++j) {
-                dp[i][j] = dp[i - 1][j]; // skip x[i-1]
-
-                if (x[i - 1] == y[j - 1]) {
-                    dp[i][j] = max(dp[i][j], dp[i - 1][j - 1] + 1); // extend contiguous match in y
-                }
-
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                dp[i][j] = dp[i - 1][j];  // skip x[i-1]
+                if (x[i - 1] == y[j - 1]) dp[i][j] = max(dp[i][j], dp[i - 1][j - 1] + 1);
                 ans = max(ans, dp[i][j]);
             }
         }
@@ -1432,7 +1425,6 @@ public:
         return ans;
     }
 };
-
 
 // ====================================================================================================
 // 29. CLOSEST NUMBERS [MS OA]

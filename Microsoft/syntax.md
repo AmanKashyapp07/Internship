@@ -32,6 +32,8 @@ Paste at the top of your solution if testing standalone or running competitive I
 #include <tuple>
 #include <array>
 #include <functional>
+#include <sstream>
+#include <cctype>
 #endif
 using namespace std;
 
@@ -142,6 +144,20 @@ Whenever characters are strictly lowercase `'a'`–`'z'`, use a fixed array inst
 ```cpp
 int freq[26] = {0};
 for (char c : s) freq[c - 'a']++;
+```
+
+### Custom Hash for `pair`/`tuple` Keys (unordered_map doesn't support them natively)
+```cpp
+struct pair_hash {
+    size_t operator()(const pair<int, int>& p) const {
+        return hash<long long>()(((long long)p.first << 32) ^ p.second);
+    }
+};
+unordered_map<pair<int, int>, int, pair_hash> memo;
+
+// Simpler alternative: encode pair as a single long long key
+unordered_map<long long, int> memo2;
+long long key = (long long)r * 100000 + c;             // Safe if c < 100000
 ```
 
 ---
@@ -282,6 +298,38 @@ stoi("12345");                                         // String to int
 stoll("123456789012");                                 // String to long long
 
 reverse(s.begin(), s.end());                           // In-place string reversal
+
+// Character classification & case conversion (ALL take/return int, watch signedness with signed char!)
+isalpha(c); isdigit(c); isalnum(c); isspace(c); isupper(c); islower(c);
+char lower = tolower(c); char upper = toupper(c);
+
+// Splitting a string by delimiter using stringstream (very common OA parsing need)
+string csv = "10,20,,30";
+vector<string> tokens;
+stringstream ss(csv);
+string token;
+while (getline(ss, token, ',')) {
+    tokens.push_back(token);                           // NOTE: keeps empty tokens ("" for "20,,30")
+}
+
+// Splitting by whitespace (skips consecutive spaces automatically)
+stringstream ss2("the quick  brown fox");
+vector<string> words;
+string w;
+while (ss2 >> w) words.push_back(w);
+
+// Building a string efficiently
+ostringstream oss;
+oss << "value=" << 42 << ",";
+string result = oss.str();
+
+// Palindrome / anagram check helpers
+bool isAnagram(string a, string b) {
+    if (a.size() != b.size()) return false;
+    sort(a.begin(), a.end());
+    sort(b.begin(), b.end());
+    return a == b;
+}
 ```
 
 ---
@@ -386,6 +434,16 @@ for (int right = 0; right < n; ++right) {
 }
 ```
 
+### Fixed-Size Window (Exactly K elements)
+```cpp
+int windowSum = 0;
+for (int i = 0; i < (int)nums.size(); ++i) {
+    windowSum += nums[i];
+    if (i >= k) windowSum -= nums[i - k];               // Slide: remove element leaving the window
+    if (i >= k - 1) ans = max(ans, windowSum);           // Window is full, record result
+}
+```
+
 ### Exact $K$ Condition via AtMost Reduction
 To find subarrays with **exactly $K$** distinct elements:
 $$\text{Exact}(K) = \text{AtMost}(K) - \text{AtMost}(K - 1)$$
@@ -404,6 +462,18 @@ int atMost(vector<int>& nums, int k) {
     return count;
 }
 int exactK = atMost(nums, k) - atMost(nums, k - 1);
+```
+
+### Kadane's Algorithm (Maximum Subarray Sum)
+```cpp
+int maxSubArray(vector<int>& nums) {
+    int currMax = nums[0], globalMax = nums[0];
+    for (int i = 1; i < (int)nums.size(); ++i) {
+        currMax = max(nums[i], currMax + nums[i]);
+        globalMax = max(globalMax, currMax);
+    }
+    return globalMax;
+}
 ```
 
 ---
@@ -502,6 +572,36 @@ for (int x : nums) {
 return (int)tails.size();
 ```
 
+### Top-Down Memoization Template (Recursion + Cache)
+The fastest way to convert a brute-force recursive solution into DP under time pressure:
+```cpp
+unordered_map<int, long long> memo;                    // Key by encoded state
+
+long long solve(int state /*, other params */) {
+    if (/* base case */) return /* base value */;
+    if (memo.count(state)) return memo[state];          // Cache hit
+
+    long long result = /* combine solve(subproblem1), solve(subproblem2), ... */ 0;
+
+    return memo[state] = result;                         // Cache & return
+}
+```
+
+### 2D Grid DP (Unique Paths / Min Path Sum) — Space-Optimized to 1D
+```cpp
+vector<int> dp(n, 0);
+dp[0] = grid[0][0];
+for (int c = 1; c < n; ++c) dp[c] = dp[c - 1] + grid[0][c];
+
+for (int r = 1; r < m; ++r) {
+    dp[0] += grid[r][0];
+    for (int c = 1; c < n; ++c) {
+        dp[c] = min(dp[c], dp[c - 1]) + grid[r][c];      // dp[c] currently holds row r-1's value
+    }
+}
+return dp[n - 1];
+```
+
 ---
 
 ## 14. Graph & Grid Traversal Skeletons
@@ -530,6 +630,83 @@ while (!q.empty()) {
         }
     }
     steps++;
+}
+```
+
+### Recursive DFS on Grid (Number of Islands / Flood Fill)
+```cpp
+void dfs(vector<vector<int>>& grid, int r, int c, int m, int n) {
+    if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != 1) return;
+    grid[r][c] = 0;                                     // Mark visited in-place
+    dfs(grid, r + 1, c, m, n);
+    dfs(grid, r - 1, c, m, n);
+    dfs(grid, r, c + 1, m, n);
+    dfs(grid, r, c - 1, m, n);
+}
+```
+
+### General Graph BFS / DFS (Adjacency List, Not Grid)
+```cpp
+vector<vector<int>> adj(n);                             // adj[u] = list of neighbors of u
+vector<bool> visited(n, false);
+
+// BFS
+void bfs(int start) {
+    queue<int> q;
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}
+
+// DFS (recursive)
+void dfs(int u) {
+    visited[u] = true;
+    for (int v : adj[u]) {
+        if (!visited[v]) dfs(v);
+    }
+}
+
+// DFS (iterative, avoids stack overflow on deep graphs)
+void dfsIterative(int start) {
+    stack<int> st;
+    st.push(start);
+    while (!st.empty()) {
+        int u = st.top(); st.pop();
+        if (visited[u]) continue;
+        visited[u] = true;
+        for (int v : adj[u]) if (!visited[v]) st.push(v);
+    }
+}
+```
+
+### Dijkstra's Algorithm (Weighted Shortest Path, Non-Negative Weights)
+```cpp
+vector<long long> dijkstra(int n, int src, vector<vector<pair<int,int>>>& adj) {
+    // adj[u] = list of {neighbor, weight}
+    vector<long long> dist(n, LLONG_MAX);
+    dist[src] = 0;
+    priority_queue<pair<long long,int>, vector<pair<long long,int>>, greater<>> pq;
+    pq.push({0, src});                                  // {distance, node} — MIN-heap by distance
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;                       // Stale entry, skip (lazy deletion)
+        for (auto& [v, w] : adj[u]) {
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    return dist;
 }
 ```
 
@@ -619,7 +796,294 @@ return slow; // Entrance to cycle
 
 ---
 
-## 16. Bit Manipulation & Builtin Hacks
+## 16. Binary Tree Traversal Templates
+
+```cpp
+struct TreeNode {
+    int val;
+    TreeNode *left, *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+// Recursive DFS traversals
+void preorder(TreeNode* root, vector<int>& out) {       // Root -> Left -> Right
+    if (!root) return;
+    out.push_back(root->val);
+    preorder(root->left, out);
+    preorder(root->right, out);
+}
+void inorder(TreeNode* root, vector<int>& out) {         // Left -> Root -> Right (sorted for BST)
+    if (!root) return;
+    inorder(root->left, out);
+    out.push_back(root->val);
+    inorder(root->right, out);
+}
+void postorder(TreeNode* root, vector<int>& out) {       // Left -> Right -> Root
+    if (!root) return;
+    postorder(root->left, out);
+    postorder(root->right, out);
+    out.push_back(root->val);
+}
+
+// Iterative Inorder (using explicit stack — common follow-up ask)
+vector<int> inorderIterative(TreeNode* root) {
+    vector<int> out;
+    stack<TreeNode*> st;
+    TreeNode* curr = root;
+    while (curr || !st.empty()) {
+        while (curr) { st.push(curr); curr = curr->left; }
+        curr = st.top(); st.pop();
+        out.push_back(curr->val);
+        curr = curr->right;
+    }
+    return out;
+}
+
+// Level Order / BFS (returns levels separately — common for "zigzag" / "right side view")
+vector<vector<int>> levelOrder(TreeNode* root) {
+    vector<vector<int>> res;
+    if (!root) return res;
+    queue<TreeNode*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int sz = q.size();
+        vector<int> level;
+        for (int i = 0; i < sz; ++i) {
+            TreeNode* node = q.front(); q.pop();
+            level.push_back(node->val);
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+        res.push_back(level);
+    }
+    return res;
+}
+
+// Max Depth / Height (canonical recursive pattern reused everywhere)
+int maxDepth(TreeNode* root) {
+    if (!root) return 0;
+    return 1 + max(maxDepth(root->left), maxDepth(root->right));
+}
+```
+
+---
+
+## 17. Backtracking Templates (Subsets / Permutations / Combinations)
+
+```cpp
+// 1. Subsets (Power Set) — include/exclude decision at each index
+void subsets(vector<int>& nums, int idx, vector<int>& curr, vector<vector<int>>& res) {
+    if (idx == (int)nums.size()) {
+        res.push_back(curr);
+        return;
+    }
+    subsets(nums, idx + 1, curr, res);                  // Exclude nums[idx]
+    curr.push_back(nums[idx]);
+    subsets(nums, idx + 1, curr, res);                  // Include nums[idx]
+    curr.pop_back();                                     // Backtrack
+}
+
+// 2. Permutations — swap-based in-place generation, avoids extra "used" array
+void permute(vector<int>& nums, int start, vector<vector<int>>& res) {
+    if (start == (int)nums.size()) {
+        res.push_back(nums);
+        return;
+    }
+    for (int i = start; i < (int)nums.size(); ++i) {
+        swap(nums[start], nums[i]);
+        permute(nums, start + 1, res);
+        swap(nums[start], nums[i]);                      // Backtrack (undo swap)
+    }
+}
+
+// 3. Combinations / Combination Sum — pruning with sorted input + start index
+void combinationSum(vector<int>& candidates, int target, int start,
+                     vector<int>& curr, vector<vector<int>>& res) {
+    if (target == 0) { res.push_back(curr); return; }
+    for (int i = start; i < (int)candidates.size(); ++i) {
+        if (candidates[i] > target) break;               // Requires candidates sorted ascending — prune
+        curr.push_back(candidates[i]);
+        combinationSum(candidates, target - candidates[i], i, curr, res); // 'i' allows reuse; use i+1 to forbid reuse
+        curr.pop_back();                                  // Backtrack
+    }
+}
+
+// 4. Skipping duplicates in sorted input (Subsets II / Permutations II)
+// Sort first, then at each level: if (i > start && nums[i] == nums[i-1]) continue;
+```
+
+Use `std::next_permutation` when you only need permutations in lexicographic order, not the backtracking tree itself:
+```cpp
+sort(nums.begin(), nums.end());
+do {
+    // process current permutation of nums
+} while (next_permutation(nums.begin(), nums.end()));
+```
+
+---
+
+## 18. Trie (Prefix Tree) — Word Search / Autocomplete
+
+```cpp
+struct TrieNode {
+    TrieNode* children[26] = {nullptr};
+    bool isEnd = false;
+};
+
+class Trie {
+public:
+    TrieNode* root = new TrieNode();
+
+    void insert(const string& word) {
+        TrieNode* node = root;
+        for (char c : word) {
+            int i = c - 'a';
+            if (!node->children[i]) node->children[i] = new TrieNode();
+            node = node->children[i];
+        }
+        node->isEnd = true;
+    }
+
+    bool search(const string& word) {
+        TrieNode* node = find(word);
+        return node && node->isEnd;
+    }
+
+    bool startsWith(const string& prefix) {
+        return find(prefix) != nullptr;
+    }
+
+private:
+    TrieNode* find(const string& s) {
+        TrieNode* node = root;
+        for (char c : s) {
+            int i = c - 'a';
+            if (!node->children[i]) return nullptr;
+            node = node->children[i];
+        }
+        return node;
+    }
+};
+```
+
+---
+
+## 19. Fenwick Tree (Binary Indexed Tree) — Prefix Sum with Point Updates
+
+Use when you need repeated range-sum queries **and** point updates in $O(\log N)$ (plain prefix-sum arrays only handle the static case in $O(1)$ query but $O(N)$ update):
+```cpp
+struct Fenwick {
+    vector<long long> tree;
+    int n;
+    Fenwick(int n) : n(n), tree(n + 1, 0) {}
+
+    void update(int i, long long delta) {                // 1-indexed! i in [1, n]
+        for (; i <= n; i += i & (-i)) tree[i] += delta;
+    }
+
+    long long query(int i) {                              // Prefix sum [1, i]
+        long long sum = 0;
+        for (; i > 0; i -= i & (-i)) sum += tree[i];
+        return sum;
+    }
+
+    long long rangeQuery(int l, int r) {                   // Sum [l, r], 1-indexed inclusive
+        return query(r) - query(l - 1);
+    }
+};
+```
+
+---
+
+## 20. 2D Prefix Sum (Range Sum Queries on a Matrix)
+
+```cpp
+// prefix[i][j] = sum of all elements in the rectangle (0,0) to (i-1,j-1)
+vector<vector<long long>> prefix(m + 1, vector<long long>(n + 1, 0));
+for (int i = 0; i < m; ++i)
+    for (int j = 0; j < n; ++j)
+        prefix[i + 1][j + 1] = prefix[i][j + 1] + prefix[i + 1][j] - prefix[i][j] + grid[i][j];
+
+// Sum of rectangle [r1, c1] to [r2, c2] inclusive, 0-indexed:
+auto rangeSum = [&](int r1, int c1, int r2, int c2) {
+    return prefix[r2 + 1][c2 + 1] - prefix[r1][c2 + 1] - prefix[r2 + 1][c1] + prefix[r1][c1];
+};
+```
+
+---
+
+## 21. Interval Merging Pattern
+
+```cpp
+vector<vector<int>> merge(vector<vector<int>>& intervals) {
+    if (intervals.empty()) return {};
+    sort(intervals.begin(), intervals.end());            // Sort by start time
+    vector<vector<int>> res = {intervals[0]};
+
+    for (int i = 1; i < (int)intervals.size(); ++i) {
+        if (intervals[i][0] <= res.back()[1]) {            // Overlaps with last merged interval
+            res.back()[1] = max(res.back()[1], intervals[i][1]);
+        } else {
+            res.push_back(intervals[i]);
+        }
+    }
+    return res;
+}
+```
+
+---
+
+## 22. Matrix Manipulation
+
+```cpp
+// Rotate N x N matrix 90 degrees clockwise, in-place
+void rotate(vector<vector<int>>& m) {
+    int n = m.size();
+    // Transpose
+    for (int i = 0; i < n; ++i)
+        for (int j = i + 1; j < n; ++j)
+            swap(m[i][j], m[j][i]);
+    // Reverse each row
+    for (auto& row : m) reverse(row.begin(), row.end());
+}
+
+// Spiral traversal of an M x N matrix
+vector<int> spiralOrder(vector<vector<int>>& m) {
+    vector<int> res;
+    int top = 0, bottom = m.size() - 1, left = 0, right = m[0].size() - 1;
+    while (top <= bottom && left <= right) {
+        for (int c = left; c <= right; ++c) res.push_back(m[top][c]);
+        top++;
+        for (int r = top; r <= bottom; ++r) res.push_back(m[r][right]);
+        right--;
+        if (top <= bottom) { for (int c = right; c >= left; --c) res.push_back(m[bottom][c]); bottom--; }
+        if (left <= right) { for (int r = bottom; r >= top; --r) res.push_back(m[r][left]); left++; }
+    }
+    return res;
+}
+```
+
+---
+
+## 23. Useful STL Algorithms (Frequently Forgotten Under Pressure)
+
+```cpp
+accumulate(v.begin(), v.end(), 0LL);                    // Sum (0LL seed avoids overflow on large sums)
+count(v.begin(), v.end(), x);                            // Count occurrences of x
+count_if(v.begin(), v.end(), [](int x){ return x > 0; }); // Count matching predicate
+*max_element(v.begin(), v.end());                        // Max value (dereference the iterator!)
+*min_element(v.begin(), v.end());                        // Min value
+unique(v.begin(), v.end());                              // Removes consecutive dupes — sort first, then:
+v.erase(unique(v.begin(), v.end()), v.end());             // ...then erase the leftover tail (idiom)
+swap(a, b);                                               // O(1) swap, works on containers too
+__gcd(a, b);                                              // GCD (also: std::gcd(a,b) in <numeric>, C++17)
+lcm(a, b);                                                // C++17 <numeric>: LCM
+all_of(v.begin(), v.end(), pred); any_of(...); none_of(...); // Predicate-based checks over a range
+```
+
+---
+
+## 24. Bit Manipulation & Builtin Hacks
 
 ```cpp
 // Builtin Functions (Extremely fast, compiler intrinsics)
@@ -645,7 +1109,7 @@ for (int mask = 0; mask < (1 << n); ++mask) {
 
 ---
 
-## 17. Math & Number Theory Quick Snippets
+## 25. Math & Number Theory Quick Snippets
 
 ### Fast Modular Exponentiation ($O(\log N)$)
 ```cpp
@@ -679,9 +1143,15 @@ long long subMod(long long a, long long b) { return (a - b + MOD) % MOD; }
 long long mulMod(long long a, long long b) { return (1LL * a * b) % MOD; }
 ```
 
+### GCD / LCM (Euclidean Algorithm, in case `<numeric>` versions aren't allowed)
+```cpp
+long long gcdFn(long long a, long long b) { return b == 0 ? a : gcdFn(b, a % b); }
+long long lcmFn(long long a, long long b) { return a / gcdFn(a, b) * b; }   // Divide first to reduce overflow risk
+```
+
 ---
 
-## 18. High-Stakes OA Trap Checklist
+## 26. High-Stakes OA Trap Checklist
 
 1. **Integer Overflow During Multiplication**:
    ```cpp
@@ -729,3 +1199,26 @@ long long mulMod(long long a, long long b) { return (1LL * a * b) % MOD; }
    - Never call `v.erase()` or `map.erase()` inside a range-based `for (auto &x : c)` loop without proper iterator advancement.
 7. **Graph 1-Indexed vs 0-Indexed**:
    - Always verify if graph vertices are labeled $0 \dots n-1$ or $1 \dots n$. Size DSU/Adjacency lists to $n + 1$ when unsure.
+8. **`char` Signedness in `isalpha`/`tolower`/etc.**:
+   ```cpp
+   // UB risk: char can be signed; passing a negative value (from extended ASCII) to isalpha() is undefined
+   char c = s[i];
+   if (isalpha((unsigned char)c)) { ... }               // CORRECT: cast to unsigned char first
+   ```
+9. **Recursion Depth on Large Inputs**:
+   - Recursive DFS on a linked list/tree/graph with $10^5$+ nodes can stack-overflow. Prefer the iterative BFS/DFS templates (Sections 14 & 16) when input size is large and depth is unbounded.
+10. **Off-by-One in `substr`**:
+    ```cpp
+    // s.substr(start, length) — length is a COUNT, not an end index!
+    s.substr(2, 3);                                      // 3 chars starting at index 2, NOT s[2..3]
+    ```
+11. **Comparing Floating Point Directly**:
+    ```cpp
+    // WRONG: exact equality on doubles is fragile due to precision
+    if (a == b) { ... }
+
+    // CORRECT: compare within an epsilon
+    if (fabs(a - b) < 1e-9) { ... }
+    ```
+12. **Forgetting `const &` on Large Object Parameters**:
+    - Passing `vector<vector<int>>` or `string` by value into a recursive/backtracking function copies it on every call — pass by reference (`&`) unless you specifically need a mutable local copy.

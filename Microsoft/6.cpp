@@ -68,8 +68,8 @@ struct Solution1 {
 // Merge two sorted linked lists into one sorted list.
 struct Solution2 {
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
-        ListNode dummy(0);
-        ListNode* tail = &dummy;
+        ListNode* dummy = new ListNode(0);
+        ListNode* tail = dummy;
 
         while (list1 != nullptr && list2 != nullptr) {
             if (list1->val <= list2->val) {
@@ -85,7 +85,7 @@ struct Solution2 {
         // Attach remaining elements
         tail->next = (list1 != nullptr) ? list1 : list2;
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -110,8 +110,8 @@ struct Solution3 {
 // Swap every two adjacent nodes and return the head, without modifying values.
 struct Solution4 {
     ListNode* swapPairs(ListNode* head) {
-        ListNode dummy(0, head);
-        ListNode* prev = &dummy;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* prev = dummy;
 
         // Ensure there are at least two nodes to swap
         while (prev->next != nullptr && prev->next->next != nullptr) {
@@ -127,7 +127,7 @@ struct Solution4 {
             prev = first;
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 
@@ -155,8 +155,8 @@ struct Solution5 {
 // Remove all nodes whose value equals val.
 struct Solution6 {
     ListNode* removeElements(ListNode* head, int val) {
-        ListNode dummy(0, head);
-        ListNode* curr = &dummy;
+        ListNode* dummy = new ListNode(0, head);
+        ListNode* curr = dummy;
 
         while (curr->next != nullptr) {
             if (curr->next->val == val) {
@@ -167,7 +167,7 @@ struct Solution6 {
             }
         }
 
-        return dummy.next;
+        return dummy->next;
     }
 };
 

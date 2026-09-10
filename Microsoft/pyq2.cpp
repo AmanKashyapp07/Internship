@@ -113,42 +113,22 @@ struct ListNode {
   Match outer endpoints: if equal, add 2 and peel inwards; if different, take max of dropping either endpoint.
 */
 class Solution1 {
-public:
-    int longestPalindromeSubseqq(string s) {
+  public:
+    int longestPalindromeSubseq(string s) {
         int n = s.size();
         vector<vector<int>> dp(n, vector<int>(n));
-
-        for (int i = n - 1; i >= 0; --i) {
-            dp[i][i] = 1;
-            for (int j = i + 1; j < n; ++j) {
+        for(int i=0;i<n;i++) dp[i][i] = 1; // single character is a palindrome of length 1
+        for (int len = 2; len <= n; ++len) {
+            for (int i = 0; i + len - 1 < n; ++i) {
+                int j = i + len - 1;
                 if (s[i] == s[j])
-                    dp[i][j] = 2 + dp[i + 1][j - 1]; // if characters match, add 2 for the new palindromic subsequence formed by s[i] and s[j]
+                    dp[i][j] = 2 + (len == 2 ? 0 : dp[i + 1][j - 1]);
                 else
-                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]); // if characters don't match, take the maximum of dropping either endpoint
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1]);
             }
         }
 
         return dp[0][n - 1];
-    }
-
-    int longestPalindromeSubseq(const string& s) {
-        int n = s.size();
-        if (n == 0) return 0;
-        vector<int> dp(n, 1), prev(n, 0);
-        for (int i = n - 1; i >= 0; --i) {
-            dp[i] = 1;
-            for (int j = i + 1; j < n; ++j) {
-                int temp = dp[j];
-                if (s[i] == s[j]) {
-                    dp[j] = 2 + prev[j - 1];
-                } else {
-                    dp[j] = max(prev[j], dp[j - 1]);
-                }
-                prev[j] = temp;
-            }
-            prev[i] = dp[i];
-        }
-        return dp[n - 1];
     }
 };
 
@@ -273,12 +253,12 @@ public:
         int n = s.size();
         vector<char> mn(n + 1, '{');
         for (int i = n - 1; i >= 0; --i) {
-            mn[i] = min(s[i], mn[i + 1]);
+            mn[i] = min(s[i], mn[i + 1]); // for each index, store the minimum character in the suffix starting at i
         }
         string st, ans;
         for (int i = 0; i < n; ++i) {
             st += s[i];
-            while (!st.empty() && st.back() <= mn[i + 1]) {
+            while (!st.empty() && st.back() <= mn[i + 1]) { // while the top of the stack is less than or equal to the minimum character in the remaining suffix, it means we can pop it to the output, because it is lexicographically smaller than any character that will come later
                 ans += st.back();
                 st.pop_back();
             }
@@ -322,16 +302,16 @@ public:
         for (long long x : a) {
             bool alive = true;
             while (alive && x < 0 && !st.empty() && st.back() > 0) {
-                if (st.back() < -x) {
+                if (st.back() < -x) { // asteroid in stack is smaller, it explodes
                     st.pop_back();
-                } else if (st.back() == -x) {
+                } else if (st.back() == -x) { // both asteroids are equal, both explode
                     st.pop_back();
                     alive = false;
-                } else {
+                } else { // asteroid in stack is larger, current asteroid explodes
                     alive = false;
                 }
             }
-            if (alive) st.push_back(x);
+            if (alive) st.push_back(x); // if current asteroid survived all collisions, add it to the stack
         }
         return st;
     }
@@ -363,21 +343,20 @@ public:
   `[L+1, R-1]`; resolve all boundaries via monotonic stack.
 */
 class Solution6 {
-public:
-    long long sumOfRegionLengths(const vector<int>& heights) {
+  public:
+    long long sumOfRegionLengths(const vector<int> &heights) {
         int n = heights.size();
         long long total = 0;
         stack<int> st;
         for (int i = 0; i <= n; ++i) {
-            int curr = (i == n ? INT_MAX : heights[i]);
-            while (!st.empty() && heights[st.top()] < curr) {
-                int mid = st.top();
-                st.pop();
+            while (!st.empty() && (i == n || heights[st.top()] < heights[i])) { // < because we want strictly greater, not equal or less
+                int mid = st.top(); st.pop();
                 int left = st.empty() ? -1 : st.top();
                 int right = i;
-                total += (right - left - 1);
+                total += right - left - 1;
             }
-            if (i < n) st.push(i);
+            if (i < n)
+                st.push(i);
         }
         return total;
     }
@@ -417,8 +396,7 @@ public:
         double target = totalSum / 2.0;
         long long ops = 0;
         while (reduced < target) {
-            double top = pq.top();
-            pq.pop();
+            double top = pq.top(); pq.pop();
             double half = top / 2.0;
             reduced += half;
             pq.push(half);
@@ -437,52 +415,32 @@ public:
 // Space: O(N²)
 // ====================================================================================================
 
-class Solution8A {
-public:
-    long long countPalindromicSubsequences(string s) {
-        const long long MOD = 1e9 + 7;
-        int n = s.size();
-        if (!n) return 0;
+long long countPalindromicSubsequences(string s) {
+    const long long MOD = 1e9 + 7;
+    int n = s.size();
+    if (!n) return 0;
 
-        vector<vector<long long>> dp(n, vector<long long>(n));
+    vector<vector<long long>> dp(n, vector<long long>(n)); // dp[i][j] = number of palindromic subsequences in s[i..j]
 
-        for (int i = n - 1; i >= 0; i--) {
-            dp[i][i] = 1;
+    for (int i = 0; i < n; i++)
+        dp[i][i] = 1;
 
-            for (int j = i + 1; j < n; j++) {
-                if (s[i] == s[j])
-                    dp[i][j] = dp[i + 1][j] + dp[i][j - 1] + 1;
-                else
-                    dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1];
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i + len - 1 < n; i++) {
+            int j = i + len - 1;
 
-                dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;
-            }
+            if (s[i] == s[j])
+                dp[i][j] = dp[i + 1][j] + dp[i][j - 1] + 1; // if both match, add 1 for the new palindromic subsequence formed by s[i] and s[j]=
+            else
+                dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1]; // if they don't match, we take the union of the two ranges and subtract the intersection
+
+            dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;
         }
-
-        return dp[0][n - 1];
     }
-};
 
-class Solution8C {
-public:
-    long long countPalindromicSubsequences(string s) {
-        const long long MOD = 1e9 + 7;
-        int n = s.size();
-        vector<long long> dp(n, 1);
+    return dp[0][n - 1];
+}
 
-        for (int i = n - 2; i >= 0; i--) {
-            long long diag = 0; // old dp[j-1] = dp[i+1][j-1]
-            for (int j = i + 1; j < n; j++) {
-                long long down = dp[j]; // dp[i+1][j]
-                dp[j] = s[i] == s[j] ? dp[j] + dp[j - 1] + 1 : dp[j] + dp[j - 1] - diag;
-                dp[j] = (dp[j] % MOD + MOD) % MOD;
-                diag = down;
-            }
-        }
-
-        return dp[n - 1];
-    }
-};
 // ====================================================================================================
 // 8B. COUNT DISTINCT PALINDROMIC SUBSEQUENCES [LC 730]
 //
@@ -493,41 +451,43 @@ public:
 // ====================================================================================================
 
 class Solution8B {
-public:
+  public:
     int countPalindromicSubsequences(string s) {
         const int MOD = 1e9 + 7;
         int n = s.size();
         if (!n) return 0;
 
-        vector<int> next(n, n), prev(n, -1), last(256, -1);
+        vector<int> next(n, n), prev(n, -1), last(256, -1); // next[i] = next occurrence of s[i] after i, prev[i] = previous occurrence of s[i] before i, last[i] = last occurrence of character i
 
-        for (int i = 0; i < n; i++)
-            prev[i] = last[s[i]],
-            last[s[i]] = i;
+        for (int i = 0; i < n; i++) {
+            prev[i] = last[s[i]]; // store the last occurrence of s[i] before index i
+            last[s[i]] = i; // update the last occurrence of s[i] to be index i
+        }
 
-        fill(last.begin(), last.end(), n);
-
-        for (int i = n - 1; i >= 0; i--)
-            next[i] = last[s[i]],
-            last[s[i]] = i;
-
-        vector<vector<long long>> dp(n, vector<long long>(n));
+        fill(last.begin(), last.end(), n); // initialize last to n
 
         for (int i = n - 1; i >= 0; i--) {
-            dp[i][i] = 1;
+            next[i] = last[s[i]]; // store the next occurrence of s[i] after index i
+            last[s[i]] = i; // update the last occurrence of s[i] to be index i
+        }
 
-            for (int j = i + 1; j < n; j++) {
+        vector<vector<long long>> dp(n, vector<long long>(n)); // dp[i][j] = number of distinct palindromic subsequences in s[i..j]
+
+        for (int i = 0; i < n; i++) dp[i][i] = 1;
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
                 if (s[i] != s[j]) {
                     dp[i][j] = dp[i + 1][j] + dp[i][j - 1] - dp[i + 1][j - 1];
                 } else {
-                    int l = next[i], r = prev[j];
-                    long long mid = dp[i + 1][j - 1];
+                    int l = next[i], r = prev[j]; // l = next occurrence of s[i] after i, r = previous occurrence of s[j] before j
+                    long long mid = dp[i + 1][j - 1]; // number of distinct palindromic subsequences in s[i+1..j-1]
 
-                    if (l > r) dp[i][j] = 2 * mid + 2;
+                    if (l > r) dp[i][j] = 2 * mid + 2; 
                     else if (l == r) dp[i][j] = 2 * mid + 1;
                     else dp[i][j] = 2 * mid - dp[l + 1][r - 1];
                 }
-
                 dp[i][j] = (dp[i][j] % MOD + MOD) % MOD;
             }
         }
@@ -870,7 +830,7 @@ public:
   Prefix Balance & Minimum Deficit Check
 
   CORE INTUITION & STEPS:
-  - Valid sequence requires total balance == 0 and all prefix balances >= 0.
+  - Valid sequence requires total balance == 0 and all prefix balances >= 0 (count of '(' minus count of ')' at each prefix).
   - Swapping a ')' at index i with a '(' at index j (i < j) adds exactly +2 to prefix balances in between.
   - Therefore, at most one swap can remedy a prefix balance deficit of at most -2.
   - Condition: balance == 0 && min(prefix_balance) >= -2.
@@ -923,13 +883,13 @@ class Solution18 {
         int last = pos[0];
 
         for (int i = 1; i < pos.size(); i++) {
-            if (pos[i] - last >= dist) {
+            if (pos[i] - last >= dist) { // if the current basket is far enough from the last placed ball, we can place another ball here
                 balls++;
                 last = pos[i];
             }
         }
 
-        return balls >= m;
+        return balls >= m; // return true if we can place at least m balls with the given minimum distance
     }
 
 public:
@@ -943,6 +903,7 @@ public:
         while (low <= high) {
             int mid = low + (high - low) / 2;
 
+            // Check if it's possible to place m balls with minimum distance mid
             if (canPlace(pos, m, mid)) {
                 ans = mid;
                 low = mid + 1;   // Try bigger distance
@@ -1029,9 +990,9 @@ public:
             ll running = 0;
             for (const auto& [coord, w] : pts) {
                 running += w;
-                if (2 * running >= totalWeight) return coord;
+                if (2 * running >= totalWeight) return coord; // this is weight median
             }
-            return pts.back().first;
+            return pts.back().first; // in case all weights are zero, return last coordinate
         };
         return {getMedian(xs), getMedian(ys)};
     }
@@ -1199,7 +1160,8 @@ public:
             }
         }
         if (lastOne == -1) return 0;
-        long long zerosBeforeLast = (lastOne + 1) - ones;
+        int total = lastOne + 1;
+        long long zerosBeforeLast = total - ones;
         return ones + min(k, zerosBeforeLast);
     }
 };
@@ -1321,21 +1283,22 @@ public:
         unordered_map<string, int> expiry;
         vector<int> counts;
         for (const string& q : queries) {
-            stringstream ss(q);
+            stringstream ss(q); // stringstream to parse the query
             string type, token;
             int time;
             ss >> type;
             if (type == "generate") {
                 ss >> token >> time;
-                expiry[token] = time + time_to_live;
+                expiry[token] = time + time_to_live; // update expiry time for the generated token
             } else if (type == "renew") {
                 ss >> token >> time;
-                if (expiry.count(token) && expiry[token] > time) {
+                if (expiry.count(token) && expiry[token] > time) { // only renew if token exists and is unexpired
                     expiry[token] = time + time_to_live;
                 }
             } else if (type == "count") {
                 ss >> time;
                 int active = 0;
+                // Count the number of active tokens at the current time
                 for (const auto& [_, exp] : expiry) {
                     if (exp > time) active++;
                 }
@@ -1374,10 +1337,11 @@ public:
         vector<long long> dp(n);
         deque<int> dq;
         dp[0] = cost[0];
-        dq.push_back(0);
+        dq.push_back(0); // initialize deque with index 0
         for (int i = 1; i < n; ++i) {
             while (!dq.empty() && dq.front() < i - k) dq.pop_front(); // evict all indices outside the window
-            dp[i] = dp[dq.front()] + cost[i]; // minimum cost to reach i is cost[i] + min cost to reach any of the last k indices
+            int index = dq.front(); // index of the minimum dp value in the last k indices
+            dp[i] = cost[i] + dp[index]; // compute dp[i] using the minimum dp in the window
             while (!dq.empty() && dp[dq.back()] >= dp[i]) dq.pop_back(); // maintain monotonicity: remove indices with higher or equal dp value
             dq.push_back(i); // add current index to deque for future minimum queries
         }
@@ -1494,7 +1458,7 @@ public:
         vector<int> finalCost = prices;
         stack<int> st;
         for (int i = 0; i < n; ++i) {
-            while (!st.empty() && prices[i] <= prices[st.top()]) {
+            while (!st.empty() && prices[i] <= prices[st.top()]) { // there exist a previous item that can be discounted by prices[i]
                 finalCost[st.top()] -= prices[i];
                 st.pop();
             }
@@ -1540,26 +1504,48 @@ public:
     int getPalindromesCount(const string& s) {
         const long long MOD = 1e9 + 7;
         int n = s.size();
+        if (n < 5) return 0;
+
+ 
+        vector<vector<vector<long long>>> pref(n, vector<vector<long long>>(2, vector<long long>(2, 0)));
+        // pref[i][j][k] = count of subsequence "jk" in s[0...i-1]
+        vector<vector<vector<long long>>> suff(n, vector<vector<long long>>(2, vector<long long>(2, 0)));
+        // suff[i][j][k] = count of subsequence "jk" in s[i+1...n-1]
+
+        // Pass 1: Build Prefix Subsequence Counts
+        vector<long long> cnt(2, 0);
+        for (int i = 0; i < n; ++i) {
+            if (i > 0) pref[i] = pref[i - 1]; // carry forward previous counts
+            int cur = s[i] - '0';
+            for (int prev = 0; prev < 2; ++prev) {
+                pref[i][prev][cur] += cnt[prev]; // "prev" followed by "cur" forms "prev cur"
+            }
+            cnt[cur]++;
+        }
+
+        // Pass 2: Build Suffix Subsequence Counts
+        cnt.assign(2, 0);
+        for (int i = n - 1; i >= 0; --i) {
+            if (i < n - 1) suff[i] = suff[i + 1]; // carry forward previous counts
+            int cur = s[i] - '0';
+            for (int nxt = 0; nxt < 2; ++nxt) {
+                suff[i][cur][nxt] += cnt[nxt]; // "cur" followed by "nxt" forms "cur nxt"
+            }
+            cnt[cur]++;
+        }
+
+        // Pass 3: Fix middle character 'c' at index i (1 <= i <= n-2)
         long long total = 0;
-        for (int a = 0; a < 2; ++a) { // a = 0 or 1
-            for (int b = 0; b < 2; ++b) { // b = 0 or 1
-                long long leftA = 0, leftAB = 0;
-                long long rightB = 0, rightBA = 0;
-                for (int i = n - 1; i >= 0; --i) {
-                    int x = s[i] - '0';
-                    if (x == a) rightBA += rightB;
-                    if (x == b) rightB++;
-                }
-                for (int i = 0; i < n; ++i) {
-                    int x = s[i] - '0';
-                    if (x == b) rightB--;
-                    if (x == a) rightBA -= rightB;
-                    total = (total + leftAB * rightBA) % MOD;
-                    if (x == a) leftA++;
-                    if (x == b) leftAB += leftA;
+        for (int i = 2; i < n - 2; ++i) {
+            for(int j=0; j<2; ++j) {
+                for(int k=0; k<2; ++k) {
+                    long long leftCount = pref[i - 1][j][k]; // count of "jk" in prefix
+                    long long rightCount = suff[i + 1][k][j]; // count of "kj" in suffix
+                    total = (total + (leftCount * rightCount) % MOD) % MOD;
                 }
             }
         }
+
         return total;
     }
 };
@@ -1741,22 +1727,27 @@ public:
 class Solution37 {
 public:
     int findShortestSubstring(const string& s) {
-        int n = s.size(), r = n, ans = n;
+        int n = s.size(), r = n, ans = INT_MAX;
         unordered_set<char> suf, pre;
 
-        while (r > 0 && !suf.count(s[r - 1])) {
-            suf.insert(s[--r]);
-        }
-        ans = r; // delete prefix s[0...r-1]
+        // Largest distinct suffix
+        int j = n - 1;
+        while (j >= 0 && !suf.count(s[j]))
+            suf.insert(s[j--]);
 
-        for (int l = 0; l < n; ++l) {
-            if (pre.count(s[l])) break;
-            pre.insert(s[l]);
-            while (r < n && suf.count(s[l])) {
-                suf.erase(s[r]);
+        r = j + 1; // r is pointer to the first character of the suffix which is distinct
+        ans = r; // initial answer is the length of the suffix
+
+        for (int i = 0; i < n; i++) {
+            if (pre.count(s[i])) break;
+            pre.insert(s[i]);
+
+            while (r < n && pre.count(s[r])){
                 r++;
+                suf.erase(s[r - 1]); // remove from suffix as we move r forward
             }
-            ans = min(ans, r - l - 1);
+
+            ans = min(ans, r - i - 1); // update answer with the length of the substring to delete
         }
 
         return ans;
@@ -1896,121 +1887,117 @@ public:
   CONCLUSION / TAKEAWAY:
   Recursive descent parsing cleanly decouples operator precedence, parenthesization, and unary signs without complex stack state machines.
 */
-class Solution40 {
-    stack<long long> values;
-    stack<char> ops;
+class Solution40Recursive {
+    int i = 0;
 
-    int precedence(char op) {
-        return (op == '+' || op == '-') ? 1 : 2;
+    void skipWhitespace(const string& s) {
+        while (i < s.size() && s[i] == ' ') i++;
     }
 
-    void applyOp() {
-        long long b = values.top(); values.pop();
-        long long a = values.top(); values.pop();
-        char op = ops.top(); ops.pop();
-        switch (op) {
-            case '+': values.push(a + b); break;
-            case '-': values.push(a - b); break;
-            case '*': values.push(a * b); break;
-            case '/': values.push(a / b); break;
+    // Handles numbers, unary operators (+/-), and parenthesized sub-expressions
+    long long factor(const string& s) {
+        skipWhitespace(s);
+        if (s[i] == '+' || s[i] == '-') {
+            char op = s[i++];
+            return (op == '+') ? factor(s) : -factor(s);
         }
+        if (s[i] == '(') {
+            i++; // skip '('
+            long long val = expr(s);
+            i++; // skip ')'
+            return val;
+        }
+        long long num = 0;
+        while (i < s.size() && isdigit(s[i])) {
+            num = num * 10 + (s[i++] - '0');
+        }
+        return num;
+    }
+
+    // Handles multiplication and division (higher precedence)
+    long long term(const string& s) {
+        long long left = factor(s);
+        while (true) {
+            skipWhitespace(s);
+            if (i < s.size() && (s[i] == '*' || s[i] == '/')) {
+                char op = s[i++];
+                long long right = factor(s);
+                left = (op == '*') ? (left * right) : (left / right);
+            } else {
+                break;
+            }
+        }
+        return left;
+    }
+
+    // Handles addition and subtraction (lower precedence)
+    long long expr(const string& s) {
+        long long left = term(s);
+        while (true) {
+            skipWhitespace(s);
+            if (i < s.size() && (s[i] == '+' || s[i] == '-')) {
+                char op = s[i++];
+                long long right = term(s);
+                left = (op == '+') ? (left + right) : (left - right);
+            } else {
+                break;
+            }
+        }
+        return left;
     }
 
 public:
-    long long evaluateExpression(const string& expression) {
-        // clear state in case of reuse across calls
-        while (!values.empty()) values.pop();
-        while (!ops.empty()) ops.pop();
-
-        int n = expression.size();
-        bool expectOperand = true; // tracks unary context
-
-        for (int i = 0; i < n; i++) {
-            char c = expression[i];
-            if (c == ' ') continue;
-
-            if (isdigit(c)) {
-                long long x = 0;
-                while (i < n && isdigit(expression[i])) x = x * 10 + (expression[i++] - '0');
-                i--;
-                values.push(x);
-                expectOperand = false;
-            } else if (c == '(') {
-                ops.push(c);
-                expectOperand = true;
-            } else if (c == ')') {
-                while (ops.top() != '(') applyOp();
-                ops.pop(); // remove '('
-                expectOperand = false;
-            } else { // operator
-                if (expectOperand && (c == '+' || c == '-')) {
-                    values.push(0); // unary sign trick
-                }
-                while (!ops.empty() && ops.top() != '(' &&
-                       precedence(ops.top()) >= precedence(c)) {
-                    applyOp();
-                }
-                ops.push(c);
-                expectOperand = true;
-            }
-        }
-
-        while (!ops.empty()) applyOp();
-        return values.top();
+    long long evaluateExpression(const string& s) {
+        i = 0;
+        return expr(s);
     }
 };
 
 class Solution41 {
+    vector<int> state, depth;
+
+    int dfs(int u, const vector<int>& manager) {
+        if (state[u] == 1) return -1;  // cycle
+        if (state[u] == 2) return depth[u];
+
+        state[u] = 1;
+
+        if (manager[u] == -1)
+            depth[u] = 0;
+        else {
+            int d = dfs(manager[u], manager);
+            if (d == -1) return -1;
+            depth[u] = d + 1;
+        }
+
+        state[u] = 2;
+        return depth[u];
+    }
+
 public:
     vector<int> analyzeHierarchy(const vector<int>& manager) {
-        int n = manager.size();
-        if (n == 0) return {1, -1};
+        int n = manager.size(), root = -1, roots = 0;
 
-        vector<int> indegree(n, 0);
-        int root = -1, rootCount = 0;
+        state.assign(n, 0);
+        depth.assign(n, 0);
 
         for (int i = 0; i < n; i++) {
-            if (manager[i] == -1) {
-                root = i;
-                rootCount++;
-            } else if (manager[i] >= 0 && manager[i] < n) {
-                indegree[manager[i]]++;
-            } else {
+            if (manager[i] == -1)
+                root = i, roots++;
+            else if (manager[i] < 0 || manager[i] >= n)
                 return {1, -1};
-            }
         }
 
-        if (rootCount != 1) return {1, -1};
+        if (roots != 1) return {1, -1};
 
-        queue<int> q;
-        for (int i = 0; i < n; i++)
-            if (indegree[i] == 0) q.push(i);
-
-        int removed = 0;
-        while (!q.empty()) {
-            int u = q.front(); q.pop();
-            removed++;
-            if (manager[u] != -1 && --indegree[manager[u]] == 0)
-                q.push(manager[u]);
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            int d = dfs(i, manager);
+            if (d == -1) return {1, -1};
+            ans = max(ans, d);
         }
 
-        if (removed < n) return {1, -1};
-
-        vector<vector<int>> children(n);
-        for (int i = 0; i < n; i++)
-            if (manager[i] != -1) children[manager[i]].push_back(i);
-
-        q.push(root);
-        int depth = -1;
-        while (!q.empty()) {
-            depth++;
-            for (int sz = q.size(); sz > 0; sz--) {
-                int u = q.front(); q.pop();
-                for (int v : children[u]) q.push(v);
-            }
-        }
-
-        return {0, depth};
+        return {0, ans};
     }
 };
 
@@ -2045,37 +2032,42 @@ public:
 */
 class Solution42 {
 public:
-    vector<string> mostVisitedSectors(const vector<string>& sectors, const vector<string>& rounds) {
+    vector<string> mostVisitedSectors(const vector<string>& sectors,
+                                       const vector<string>& rounds) {
         int n = sectors.size();
-        if (n == 0 || rounds.empty()) return {};
+        if (!n || rounds.empty()) return {};
 
         unordered_map<string, int> pos;
         for (int i = 0; i < n; i++) pos[sectors[i]] = i;
 
-        vector<long long> diff(n + 1, 0);
+        vector<int> diff(n + 1), cnt(n);
         diff[pos[rounds[0]]]++;
 
-        for (size_t i = 1; i < rounds.size(); i++) {
+        for (int i = 1; i < rounds.size(); i++) {
             int a = pos[rounds[i - 1]], b = pos[rounds[i]];
+
             if (a < b) {
-                diff[a + 1]++; diff[b + 1]--;
+                diff[a + 1]++;
+                diff[b + 1]--;
             } else if (a > b) {
-                diff[a + 1]++; diff[n]--;
-                diff[0]++; diff[b + 1]--;
+                diff[a + 1]++;
+                diff[n]--;
+                diff[0]++;
+                diff[b + 1]--;
             }
         }
 
-        long long cur = 0, mx = 0;
-        vector<long long> visits(n);
+        int cur = 0, mx = 0;
         for (int i = 0; i < n; i++) {
             cur += diff[i];
-            visits[i] = cur;
+            cnt[i] = cur;
             mx = max(mx, cur);
         }
 
         vector<string> ans;
         for (int i = 0; i < n; i++)
-            if (visits[i] == mx) ans.push_back(sectors[i]);
+            if (cnt[i] == mx)
+                ans.push_back(sectors[i]);
 
         return ans;
     }

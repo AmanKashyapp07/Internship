@@ -1,5 +1,5 @@
 # The Microsoft Interview 1-Day Revision Guide
-### Top 20 Core DSA Patterns to Recognize Cold
+### Top 27 Core DSA Patterns to Recognize Cold
 
 This is a recognition guide, not a study guide. The night before, you are not learning these patterns for the first time — you are refreshing the trigger words that tell you which one applies. Skim the index below first. Only open the full entry for a pattern if the invariant doesn't come back to you immediately.
 
@@ -38,10 +38,17 @@ This is a recognition guide, not a study guide. The night before, you are not le
 | 18 | Daily temperatures, next greater element, histogram | Monotonic Stack | Decreasing stack -> next greater; increasing -> boundaries |
 | 19 | Merge intervals, meeting rooms, insert interval | Interval Sweep | Sort by start to merge, by end to schedule maximally |
 | 20 | Coin change, word break, decode ways, LIS | 1D Dynamic Programming | `dp[i]` depends only on strictly earlier subproblems |
+| 21 | Connected components, redundant connection, accounts merge | Union-Find (DSU) | Union by root; component count drops by 1 per successful merge |
+| 22 | Kth largest/smallest, top K frequent elements | Heap-Based Top-K | Maintain a heap of size K; evict the worst when it overflows |
+| 23 | Generate all subsets, permutations, or combinations | Backtracking (Choose / Explore / Un-choose) | Mutate state, recurse, then undo the mutation on return |
+| 24 | Edit distance, longest common subsequence, distinct subsequences | 2D Grid Dynamic Programming | `dp[i][j]` compares prefixes of length i and j from each string |
+| 25 | Prefix search, autocomplete, word search II | Trie (Prefix Tree) | Each node branches per character; `isEnd` marks a complete word |
+| 26 | Shortest path with weighted edges (non-negative) | Dijkstra's Algorithm | Greedily relax via a min-heap; lazily skip stale, outdated entries |
+| 27 | Sliding window maximum, next larger element in a window | Monotonic Deque | Front of deque is always the current window's max index |
 
 ---
 
-## The 20 Patterns in Detail
+## The 27 Patterns in Detail
 
 ---
 
@@ -174,14 +181,17 @@ while (low <= high) {
 **When to use:** Detect a cycle, find the cycle start, find the linked list middle.
 **Core invariant:** Fast moves twice as fast as slow. If a cycle of length C exists, the relative distance shrinks by 1 each step.
 ```cpp
-ListNode *slow = head, *fast = head;
-while (fast && fast->next) {
-    slow = slow->next; fast = fast->next->next;
-    if (slow == fast) {
-        slow = head;
-        while (slow != fast) { slow = slow->next; fast = fast->next; }
-        return slow; // Cycle start
+ListNode* detectCycleStart(ListNode* head) {
+    ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next; fast = fast->next->next;
+        if (slow == fast) {
+            slow = head;
+            while (slow != fast) { slow = slow->next; fast = fast->next; }
+            return slow; // Cycle start
+        }
     }
+    return nullptr; // FIX: no cycle exists — fast reached the end, must return explicitly
 }
 ```
 **Archetypes:** Linked List Cycle I & II, Middle of Linked List, Reorder List.
@@ -249,6 +259,7 @@ double findMedian() {
 }
 ```
 **Archetypes:** Find Median from Data Stream.
+**Don't confuse with:** Pattern 22 (Heap-Based Top-K) — this pattern balances two heaps to find a *midpoint*; Top-K uses a *single* heap of fixed size K.
 
 ---
 
@@ -411,6 +422,7 @@ for (int i = 0; i <= n; ++i) {
 }
 ```
 **Archetypes:** Daily Temperatures, Largest Rectangle in Histogram, Trapping Rain Water.
+**Don't confuse with:** Pattern 27 (Monotonic Deque) — a stack only ever pops from one end and answers "next greater," while a deque pops from both ends to track a moving window's max.
 
 ---
 
@@ -452,6 +464,156 @@ for (int i = 1; i <= n; ++i) {
 
 ---
 
+### 21. Union-Find (Disjoint Set Union with Path Compression)
+**When to use:** Number of connected components, redundant connection, accounts merge, checking if a graph stays acyclic as edges are added one at a time.
+**Core invariant:** Two elements are in the same group iff they share the same root after path compression; every successful `union` reduces the component count by exactly 1.
+```cpp
+struct DSU {
+    vector<int> parent, rank_;
+    int components;
+    DSU(int n) : parent(n), rank_(n, 0), components(n) { iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : (parent[i] = find(parent[i])); }
+    bool unite(int u, int v) {
+        int ru = find(u), rv = find(v);
+        if (ru == rv) return false;                     // Already connected -> would form a cycle
+        if (rank_[ru] < rank_[rv]) swap(ru, rv);          // Union by rank keeps trees shallow
+        parent[rv] = ru;
+        if (rank_[ru] == rank_[rv]) rank_[ru]++;
+        components--;
+        return true;
+    }
+};
+```
+**Archetypes:** Number of Provinces, Redundant Connection, Accounts Merge, Number of Connected Components in an Undirected Graph.
+**Say out loud:** "Since I only care about grouping, not path length, Union-Find gives me near-O(1) merge and lookup instead of a full graph traversal for every query."
+
+---
+
+### 22. Heap-Based Top-K Elements
+**When to use:** Kth largest element in a stream/array, top K frequent elements, K closest points to origin.
+**Core invariant:** Maintain a heap of size exactly K; for "K largest," use a **min-heap** so the smallest of the K survivors sits on top and gets evicted first when a bigger element arrives.
+```cpp
+priority_queue<int, vector<int>, greater<int>> minHeap; // Holds the K largest seen so far
+for (int x : nums) {
+    minHeap.push(x);
+    if (minHeap.size() > k) minHeap.pop();               // Evict the current smallest of the K
+}
+int kthLargest = minHeap.top();
+```
+**Archetypes:** Kth Largest Element in an Array/Stream, Top K Frequent Elements (heap of `{freq, val}` pairs), K Closest Points to Origin.
+**Trap:** It's counterintuitive — finding the K *largest* uses a **min**-heap (so the smallest of the survivors is the one you can cheaply evict), not a max-heap.
+**Alternative:** Quickselect (Hoare partition) solves the single-answer "Kth largest" case in average O(N) instead of O(N log K), but is harder to get exactly right under pressure — default to the heap unless explicitly asked for O(N).
+
+---
+
+### 23. Backtracking (Choose / Explore / Un-choose)
+**When to use:** Generate all subsets, permutations, or combinations; word search with path reconstruction; N-Queens/Sudoku-style constraint placement.
+**Core invariant:** At every branch, mutate shared state, recurse into the next decision, then **undo the exact mutation** before returning — the call stack itself tracks the partial solution so no extra "path so far" copies are needed.
+```cpp
+void backtrack(vector<int>& nums, int start, vector<int>& curr, vector<vector<int>>& res) {
+    res.push_back(curr);                                  // Record every partial state (for subsets)
+    for (int i = start; i < (int)nums.size(); ++i) {
+        curr.push_back(nums[i]);                            // Choose
+        backtrack(nums, i + 1, curr, res);                  // Explore
+        curr.pop_back();                                    // Un-choose
+    }
+}
+```
+**Archetypes:** Subsets, Permutations, Combination Sum, Word Search, N-Queens, Palindrome Partitioning.
+**Trap:** Forgetting the "un-choose" step (`pop_back`, resetting a visited flag) silently corrupts every subsequent branch — it won't crash, it'll just give the wrong answer.
+**Say out loud:** "I'll explore this as a decision tree — at each node I choose an option, recurse, then backtrack by undoing that exact choice before trying the next sibling."
+
+---
+
+### 24. 2D Grid Dynamic Programming (Two-String Alignment)
+**When to use:** Edit distance, longest common subsequence, distinct subsequences — anywhere you're comparing prefixes of two sequences against each other.
+**Core invariant:** `dp[i][j]` represents the answer using the first `i` characters of string A and the first `j` characters of string B; transitions compare `A[i-1]` vs `B[j-1]` and pull from `dp[i-1][j]`, `dp[i][j-1]`, or `dp[i-1][j-1]`.
+```cpp
+// Longest Common Subsequence
+vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+for (int i = 1; i <= m; ++i) {
+    for (int j = 1; j <= n; ++j) {
+        if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+        else dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+    }
+}
+return dp[m][n];
+```
+**Archetypes:** Longest Common Subsequence, Edit Distance, Distinct Subsequences, Interleaving String.
+**Trap:** Off-by-one is brutal here — row/column 0 represents the *empty prefix*, so the actual characters are always `a[i-1]` / `b[j-1]`, never `a[i]` / `b[j]`.
+
+---
+
+### 25. Trie (Prefix Tree)
+**When to use:** Prefix search/autocomplete, word search II (multiple words on a grid), longest word built from other words.
+**Core invariant:** Each node branches per character (commonly a 26-element array for lowercase input); a boolean `isEnd` flag marks where a complete word terminates, distinguishing a full word from a mere prefix.
+```cpp
+struct TrieNode {
+    TrieNode* children[26] = {nullptr};
+    bool isEnd = false;
+};
+void insert(TrieNode* root, const string& word) {
+    TrieNode* node = root;
+    for (char c : word) {
+        int i = c - 'a';
+        if (!node->children[i]) node->children[i] = new TrieNode();
+        node = node->children[i];
+    }
+    node->isEnd = true;
+}
+```
+**Archetypes:** Implement Trie, Word Search II, Design Add and Search Words Data Structure, Longest Word in Dictionary.
+**Say out loud:** "Since many queries share common prefixes, a trie lets me reuse that shared work instead of re-scanning the whole word list per query."
+
+---
+
+### 26. Dijkstra's Algorithm (Weighted Shortest Path)
+**When to use:** Shortest path with non-negative weighted edges — plain BFS only works when every edge costs the same.
+**Core invariant:** Greedily pop the currently-closest unvisited node from a min-heap and relax its neighbors; a popped entry whose recorded distance is worse than the best known distance is stale and safely skipped (lazy deletion, avoids a separate "visited" set).
+```cpp
+vector<long long> dijkstra(int n, int src, vector<vector<pair<int,int>>>& adj) {
+    vector<long long> dist(n, LLONG_MAX);
+    dist[src] = 0;
+    priority_queue<pair<long long,int>, vector<pair<long long,int>>, greater<>> pq;
+    pq.push({0, src});
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;                        // Stale entry, a better path was already found
+        for (auto& [v, w] : adj[u]) {
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    return dist;
+}
+```
+**Archetypes:** Network Delay Time, Cheapest Flights Within K Stops (with modification), Path With Minimum Effort.
+**Trap:** Dijkstra breaks down with negative edge weights — that needs Bellman-Ford instead, which is rarely required in an OA setting but worth naming if asked.
+
+---
+
+### 27. Monotonic Deque (Sliding Window Maximum)
+**When to use:** Maximum (or minimum) in every window of size K as it slides across an array.
+**Core invariant:** The deque holds indices in strictly decreasing order of value; the front is always the current window's max, and any index that falls outside the window on the left is evicted from the front first.
+```cpp
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    deque<int> dq; // Indices, strictly decreasing values
+    vector<int> res;
+    for (int i = 0; i < (int)nums.size(); ++i) {
+        while (!dq.empty() && dq.front() <= i - k) dq.pop_front();     // Evict out-of-window
+        while (!dq.empty() && nums[dq.back()] <= nums[i]) dq.pop_back(); // Maintain decreasing order
+        dq.push_back(i);
+        if (i >= k - 1) res.push_back(nums[dq.front()]);
+    }
+    return res;
+}
+```
+**Archetypes:** Sliding Window Maximum, Shortest Subarray with Sum at Least K (with prefix sums), Constrained Subsequence Sum.
+
+---
+
 ## Edge Case Checklist (Mention Before You Say "I'm Done")
 
 1. **Empty or null input** — `head == nullptr`, `root == nullptr`, `s.empty()`, `nums.empty()`.
@@ -464,6 +626,8 @@ for (int i = 1; i <= n; ++i) {
 8. **Disconnected graphs** — multiple components or isolated 0-degree vertices.
 9. **Even vs. odd dimensions** — middle-element handling in linked lists and palindromes.
 10. **String delimiters** — leading/trailing spaces and repeated consecutive delimiters in parsers.
+11. **K larger than the input size** — top-K, sliding-window-K, and k-group reversal problems all need a guard for `k >= n`.
+12. **Self-loops and duplicate edges** — Union-Find and graph traversal problems where an edge connects a node to itself or repeats an existing edge.
 
 ---
 
@@ -476,7 +640,7 @@ Say these out loud tomorrow morning without looking. If any one is shaky, that's
 3. Shorter side is the bottleneck → converging two pointers.
 4. One half of a rotated array is always sorted → binary search still applies.
 5. A monotonic true/false condition over a range → binary search the answer, not the array.
-6. Fast pointer at 2x speed meeting slow → cycle detected.
+6. Fast pointer at 2x speed meeting slow → cycle detected; no meeting means return null explicitly.
 7. LRU → doubly linked list + hash map, dummy head/tail, no null checks.
 8. Median of a stream → two heaps, balance size within 1.
 9. Turning path in a tree → post-order gains, discard negative branches.
@@ -488,3 +652,10 @@ Say these out loud tomorrow morning without looking. If any one is shaky, that's
 15. Next greater / histogram area → monotonic stack.
 16. Scheduling intervals → sort by end; merging intervals → sort by start.
 17. DP state depends only on strictly smaller subproblems — define `dp[i]` before coding, out loud.
+18. Grouping/connectivity without needing path details → Union-Find, not a full traversal.
+19. "Kth largest" → min-heap of size K, not a max-heap (this trips people up under pressure).
+20. Generate all X → backtracking; every "choose" needs a matching "un-choose" before the next sibling call.
+21. Comparing two strings/sequences against each other → 2D DP table, indices are prefix lengths (offset by one from the characters).
+22. Shared prefixes across many words → trie, not repeated string scanning.
+23. Shortest path with weighted edges → Dijkstra's with a min-heap and lazy-skip stale pops.
+24. Max/min of every window as it slides → monotonic deque, front is the current answer.
