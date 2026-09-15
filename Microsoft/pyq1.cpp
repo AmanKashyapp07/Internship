@@ -1280,31 +1280,22 @@ public:
 long long countTriplets(vector<int>& A, long long target) {
     int n = A.size();
     long long ans = 0;
-
     // Case 1: i, i+1 are adjacent
     unordered_map<long long, int> freq;
-
-    for (int i = 2; i < n; i++)
-        freq[A[i]]++;
+    for (int i = 2; i < n; i++) freq[A[i]]++;
 
     for (int i = 0; i < n - 2; i++) {
         long long p = 1LL * A[i] * A[i + 1];
-
-        if (p != 0 && target % p == 0)
-            ans += freq[target / p];
-
+        if (p != 0 && target % p == 0) ans += freq[target / p];
         freq[A[i + 2]]--;
     }
 
     // Case 2: j, j+1 are adjacent, i <= j-2
     freq.clear();
 
-    for (int j = 1; j < n - 1; j++) {
+    for (int j = 1; j < n - 1; j++) { // why not j=0? because we need at least two elements before j to have i <= j-2
         long long p = 1LL * A[j] * A[j + 1];
-
-        if (p != 0 && target % p == 0)
-            ans += freq[target / p];
-
+        if (p != 0 && target % p == 0) ans += freq[target / p];
         freq[A[j - 1]]++;
     }
 

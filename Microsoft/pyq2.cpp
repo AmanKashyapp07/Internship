@@ -387,7 +387,7 @@ class Solution6 {
 class Solution7 {
 public:
     long long minOperations(const vector<long long>& nums) {
-        priority_queue<double> pq;
+        priority_queue<double> pq; // by default max-heap
         double totalSum = 0, reduced = 0;
         for (long long x : nums) {
             totalSum += x;
@@ -762,7 +762,7 @@ class Solution {
         ans = INT_MAX;
         int mx = 0;
 
-        for (int j = i; j <= n - d; j++) {
+        for (int j = i; j <= n - d; j++) { // why till n - d? because we need at least d-1 tasks for the remaining days, remaining days will be d-1, so we need at least d-1 tasks for the remaining days, so j can go up to n - d
             mx = max(mx, a[j]);
             ans = min(ans, mx + solve(j + 1, d - 1));
         }
