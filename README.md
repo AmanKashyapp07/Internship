@@ -2,17 +2,17 @@
 
 |         Company        |                 Reason / Stage                |
 | :--------------------: | :-------------------------------------------: |
-|       **Google**       |    Random Function (Didn’t got Shortlisted)   |
+|       **Google**       |    Random Function (Not shortlisted)   |
 | **Flipkart On-Campus** |               Bad OA Performance              |
-|    **Flipkart GRID**   |    Random Function (Didn’t got Shortlisted)   |
+|    **Flipkart GRID**   |    Random Function (Not shortlisted)   |
 |       **De Shaw**      |               Bad OA Performance              |
 |       **Goldman**      |               Bad OA Performance              |
-|      **Sprinklr**      |    Random Function (Didn’t got Shortlisted)   |
+|      **Sprinklr**      |    Random Function (Not shortlisted)   |
 |      **Arcesium**      |             DSA Question (Round 3)            |
 |       **Zomato**       |               Bad OA Performance              |
 |       **MotorQ**       |               LLD (Coding Round)              |
-|     **Salesforce**     |  0 Question Criteria (Didn’t got Shortlisted) |
-|      **Microsoft**     | Top 30 CGPA Criteria (Didn’t got Shortlisted) |
+|     **Salesforce**     |  0 Question Criteria (Not shortlisted) |
+|      **Microsoft**     | Top 30 CGPA Criteria (Not shortlisted) |
 
 ---
 
